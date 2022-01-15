@@ -1,0 +1,49 @@
+import {bindTexture} from "../../utils/utils";
+
+export default class Framebuffer {
+    frameBufferObject
+    frameBufferTexture
+    renderBufferObject
+
+    constructor(gpu, width, height) {
+        this.gpu = gpu
+        this.width = width
+        this.height = height
+        this._initializeMesh()
+    }
+
+    _initializeMesh() {
+        this.vertexBuffer = this.gpu.createBuffer()
+        this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
+        this.gpu.bufferData(
+            this.gpu.ARRAY_BUFFER,
+            new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0]),
+            this.gpu.STATIC_DRAW
+        )
+    }
+
+    startMapping() {
+        this.gpu.viewport(0, 0, this.width, this.height);
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.frameBufferObject);
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
+    }
+
+    stopMapping() {
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
+        this.gpu?.viewport(0, 0, this.gpu?.canvas.width, this.gpu?.canvas.height);
+        this.gpu?.clear(this.gpu?.DEPTH_BUFFER_BIT)
+    }
+
+    onBeforeDraw(shader){}
+    draw(shader) {
+        this.gpu.enableVertexAttribArray(shader.positionLocation)
+        this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
+        this.gpu.vertexAttribPointer(shader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
+        
+        bindTexture(0, this.frameBufferTexture, shader.textureULocation, this.gpu)
+
+        this.onBeforeDraw(shader)
+        this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 6);
+        this.gpu.bindTexture(this.gpu.TEXTURE_2D, null);
+    }
+}

@@ -1,0 +1,99 @@
+function isArrayBufferV(value) {
+    return value && value.buffer instanceof ArrayBuffer && value.byteLength !== undefined;
+}
+
+export function createVAO(gpu) {
+    const vao = gpu.createVertexArray()
+    gpu.bindVertexArray(vao)
+    return vao
+}
+
+
+export function createVBO(gpu, type, data) {
+    if (data.length === 0)
+        return null;
+
+    if (!isArrayBufferV(data)) {
+        return null;
+    }
+    let buffer = gpu.createBuffer();
+    gpu.bindBuffer(type, buffer);
+    gpu.bufferData(type, data, gpu.STATIC_DRAW);
+
+    return buffer;
+}
+
+
+export function createRBO(gpu, width, height, typeStorage=gpu.DEPTH24_STENCIL8, type=gpu.DEPTH_STENCIL_ATTACHMENT) {
+    let rbo = gpu.createRenderbuffer();
+    gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
+    gpu.renderbufferStorage(gpu.RENDERBUFFER, typeStorage, width, height)
+    gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, type, gpu.RENDERBUFFER, rbo)
+
+    if (gpu.checkFramebufferStatus(gpu.FRAMEBUFFER) !== gpu.FRAMEBUFFER_COMPLETE)
+        return null
+
+    return rbo;
+}
+
+export function createFBO(gpu, attachmentPoint, texture) {
+    let fbo = gpu.createFramebuffer();
+    gpu.bindFramebuffer(gpu.FRAMEBUFFER, fbo);
+    gpu.framebufferTexture2D(
+        gpu.FRAMEBUFFER,
+        attachmentPoint,
+        gpu.TEXTURE_2D, texture, 0);
+
+    if (gpu.checkFramebufferStatus(gpu.FRAMEBUFFER) !== gpu.FRAMEBUFFER_COMPLETE)
+        return null
+    gpu.bindFramebuffer(gpu.FRAMEBUFFER, null);
+
+    return fbo;
+}
+
+export function createTexture(gpu, width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT) {
+    let texture = gpu.createTexture();
+
+    gpu.bindTexture(gpu.TEXTURE_2D, texture);
+    gpu.texImage2D(gpu.TEXTURE_2D, 0, internalFormat, width, height, border, format, type, data);
+    gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, magFilter);
+    gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, minFilter);
+    if (wrapS !== undefined)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, wrapS);
+    if (wrapT !== undefined)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, wrapT);
+
+        gpu.bindTexture(gpu.TEXTURE_2D, null);
+
+    return texture;
+}
+
+export function bindTexture(index, texture, location, gpu) {
+    gpu.activeTexture(gpu.TEXTURE0 + index)
+    gpu.bindTexture(gpu.TEXTURE_2D, texture)
+    gpu.uniform1i(location, index)
+}
+
+
+export function enableBasics(gpu) {
+    const ext = gpu.getExtension("EXT_color_buffer_float");
+
+
+    gpu.enable(gpu?.BLEND);
+    gpu?.blendFunc(gpu?.SRC_ALPHA, gpu?.ONE_MINUS_SRC_ALPHA);
+
+    gpu?.enable(gpu?.CULL_FACE);
+    gpu?.cullFace(gpu?.BACK);
+
+    gpu?.enable(gpu?.DEPTH_TEST);
+    gpu?.depthFunc(gpu?.LESS);
+
+
+    gpu?.enable(gpu?.STENCIL_TEST)
+    gpu?.stencilOp(gpu?.KEEP, gpu?.KEEP, gpu?.REPLACE)
+
+    gpu?.frontFace(gpu?.CCW);
+
+
+    gpu?.viewport(0, 0, gpu?.canvas.width, gpu?.canvas.height);
+}
