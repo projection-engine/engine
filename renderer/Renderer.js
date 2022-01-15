@@ -93,6 +93,7 @@ export default class Renderer {
                         lights: lights,
                         shader: shaders.mesh,
                         mesh,
+                        shadowMapResolution: shadowMap.width,
                         directionalLight: skybox.lightSource,
                         cameraPosition: this.camera.position,
                         viewMatrix: this.camera.viewMatrix,

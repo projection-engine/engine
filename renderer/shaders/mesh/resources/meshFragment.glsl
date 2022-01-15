@@ -14,6 +14,7 @@ in vec3 normalVec;
 // UNIFORMS
 uniform samplerCube skybox;
 uniform sampler2D shadowMap;
+uniform float shadowMapResolution;
 uniform vec3 cameraVec;
 struct PBR {
     sampler2D albedo;
@@ -23,13 +24,11 @@ struct PBR {
     sampler2D height;
     sampler2D ao;
 };
-
 uniform PBR pbrMaterial;
 uniform vec3 lightPosition[4];
 uniform vec3 lightColor[4];
 uniform vec3 lightAttenuationFactors[4];
 uniform int lightQuantity;
-uniform vec3 texelSize;
 
 
 // OUTPUT
@@ -37,25 +36,61 @@ out vec4 finalColor;
 
 
 // SHADOW-MAP / SOFT-SHADOWS
-float calculateShadows (vec4 shadowMapPosition){
-    vec3 pos = (shadowMapPosition.xyz / shadowMapPosition.w)* 0.5 + 0.5;
-    float depth = texture(shadowMap, pos.xy).r;
-    if (pos.z > 1.0){
-        pos.z = 1.0;
-    }
-    float bias = 1.0/1024.0;
+float sampleShadowMap (vec2 coord, float compare){
 
-    return (depth + bias) < pos.z ? 0.0 : 1.0;
+    return step(compare, texture(shadowMap, coord.xy).r);
 }
-float sampleShadowMap (vec4 shadowMapPosition){
-    vec3 pos = (shadowMapPosition.xyz / shadowMapPosition.w)* 0.5 + 0.5;
+float sampleShadowMapLinear (vec2 coord, float compare){
+
+
+    vec2 shadowTexelSize = vec2(1.0/shadowMapResolution, 1.0/shadowMapResolution);
+
+    vec2 pixelPos = coord.xy/shadowTexelSize + vec2(0.5);
+    vec2 fracPart = fract(pixelPos);
+    vec2 startTexel = (pixelPos - fracPart) * shadowTexelSize;
+
+    float bottomLeftTexel = sampleShadowMap(startTexel, compare);
+    float bottomRightTexel = sampleShadowMap(startTexel + vec2(shadowTexelSize.x, 0.0), compare);
+    float topLeftTexel = sampleShadowMap(startTexel + vec2(0.0, shadowTexelSize.y), compare);
+    float topRightTexel = sampleShadowMap(startTexel + vec2(shadowTexelSize.x, shadowTexelSize.y), compare);
+
+
+    float mixOne = mix(bottomLeftTexel, topLeftTexel, fracPart.y);
+    float mixTwo = mix(bottomRightTexel, topRightTexel, fracPart.y);
+
+    return mix(mixOne, mixTwo, fracPart.x);
+}
+
+float sampleSoftShadows(vec2 coord, float compare){
+    const float SAMPLES = 3.0;
+    const float SAMPLES_START = (SAMPLES -1.0)/2.0;
+    const float SAMPLES_SQUARED = SAMPLES * SAMPLES;
+
+    vec2 shadowTexelSize = vec2(1.0/shadowMapResolution, 1.0/shadowMapResolution);
+    float response = 0.0;
+
+    for (float y= -SAMPLES_START; y <= SAMPLES_START; y+=1.0){
+        for (float x= -SAMPLES_START; x <= SAMPLES_START; x+=1.0){
+            vec2 coordsOffset = vec2(x, y)*shadowTexelSize;
+            response += sampleShadowMapLinear(coord + coordsOffset, compare);
+        }
+    }
+    return response/SAMPLES_SQUARED;
+}
+
+float calculateShadows (){
+    vec3 pos = (fragPosLightSpace.xyz / fragPosLightSpace.w)* 0.5 + 0.5;
     float depth = texture(shadowMap, pos.xy).r;
     if (pos.z > 1.0){
         pos.z = 1.0;
     }
-    float bias = 1.0/1024.0;
+    float bias = 0.0;
+    float compare = pos.z - bias;
+    float response = sampleSoftShadows(pos.xy, compare);
 
-    return (depth + bias) < pos.z ? 0.0 : 1.0;
+
+    return response;
+
 }
 
 
@@ -87,7 +122,6 @@ vec3 fresnelSchlick (float cosTheta, vec3 F0){
 float getDisplacement (vec2 UVs, sampler2D height){
     return texture(height, UVs).r;
 }
-
 
 
 // MAIN
@@ -123,8 +157,8 @@ void main()
     float weight = afterDepth/(afterDepth-beforeDepth);
     UVs = prevTexCoord * weight + UVs * (1.0 - weight);
 
-//    if(UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0|| UVs.y < 0.0)
-//        discard;
+    //    if(UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0|| UVs.y < 0.0)
+    //        discard;
 
     // SAMPLES
     float ambientOcclusionMap = texture(pbrMaterial.ao, UVs).r;
@@ -165,11 +199,11 @@ void main()
     }
 
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusionMap;
-    float shadows = calculateShadows(fragPosLightSpace);
-    vec3 color = ambient * shadows + Lo;
+    float shadows = calculateShadows();
+    vec3 color = (ambient  + Lo)* shadows;
 
     color = color / (color + vec3(1.0));
-//    color = pow(color, vec3(1.0/2.2));
+    //    color = pow(color, vec3(1.0/2.2));
 
     finalColor =  vec4(color, 1.0);
 }

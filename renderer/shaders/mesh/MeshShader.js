@@ -26,6 +26,7 @@ export default class MeshShader extends Shader {
 
         this.cameraVecULocation = gpu.getUniformLocation(this.program, 'cameraVec')
         this.shadowMapULocation = gpu.getUniformLocation(this.program, 'shadowMap')
+        this.shadowMapResolutionULocation = gpu.getUniformLocation(this.program, 'shadowMapResolution')
         this.lightQuantityULocation = gpu.getUniformLocation(this.program, 'lightQuantity')
 
         this.skyboxULocation = gpu.getUniformLocation(this.program, 'skybox')
@@ -38,13 +39,13 @@ export default class MeshShader extends Shader {
     }
 
     bindUniforms({
-                     skyboxTexture,
+                     skyboxTexture, shadowMapResolution,
                      directionalLight, shadowMapTexture,
                      material, cameraVec, normalMatrix, lights
                  }) {
         this.gpu.uniform3fv(this.cameraVecULocation, cameraVec)
         this.gpu.uniformMatrix3fv(this.normalMatrixULocation, false, normalMatrix)
-
+        this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
 
 
 

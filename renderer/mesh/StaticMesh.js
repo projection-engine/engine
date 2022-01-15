@@ -24,7 +24,8 @@ export default class StaticMesh extends Transformation {
              viewMatrix,
              projectionMatrix,
              lights,
-             skyboxTexture
+             skyboxTexture,
+             shadowMapResolution
          }) {
 
 
@@ -50,6 +51,7 @@ export default class StaticMesh extends Transformation {
                     skyboxTexture,
                     directionalLight,
                     shadowMapTexture,
+                    shadowMapResolution,
                     material: material,
                     cameraVec: cameraPosition,
                     normalMatrix: this.normalMatrix,
