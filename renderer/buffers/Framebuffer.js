@@ -34,7 +34,7 @@ export default class Framebuffer {
         this.gpu?.clear(this.gpu?.DEPTH_BUFFER_BIT)
     }
 
-    onBeforeDraw(shader){}
+    onBeforeDraw(){}
     draw(shader) {
         this.gpu.enableVertexAttribArray(shader.positionLocation)
         this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)

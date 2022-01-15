@@ -7,7 +7,7 @@ export default function coreParser(fileData) {
             return getBufferData(b.uri)
         })
         let parsedAccessors = []
-        parsedAccessors = parsed.accessors.map((a, i) => {
+        parsedAccessors = parsed.accessors.map(a => {
             let items = 0
             switch (a.type) {
                 case 'SCALAR':
