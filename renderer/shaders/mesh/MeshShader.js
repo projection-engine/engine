@@ -29,7 +29,8 @@ export default class MeshShader extends Shader {
         this.shadowMapResolutionULocation = gpu.getUniformLocation(this.program, 'shadowMapResolution')
         this.lightQuantityULocation = gpu.getUniformLocation(this.program, 'lightQuantity')
 
-        this.skyboxULocation = gpu.getUniformLocation(this.program, 'skybox')
+        this.irradianceMapULocation = gpu.getUniformLocation(this.program, 'irradianceMap')
+        this.cubeMapULocation = gpu.getUniformLocation(this.program, 'cubeMap')
 
         // DIRECTIONAL LIGHT
         this.directionLightULocation = gpu.getUniformLocation(this.program, 'dirLight.direction')
@@ -41,7 +42,8 @@ export default class MeshShader extends Shader {
     bindUniforms({
                      skyboxTexture, shadowMapResolution,
                      directionalLight, shadowMapTexture,
-                     material, cameraVec, normalMatrix, lights
+                     material, cameraVec, normalMatrix, lights,
+                     irradianceMap
                  }) {
         this.gpu.uniform3fv(this.cameraVecULocation, cameraVec)
         this.gpu.uniformMatrix3fv(this.normalMatrixULocation, false, normalMatrix)
@@ -80,7 +82,7 @@ export default class MeshShader extends Shader {
         bindTexture(6, material.ao.texture, this.materialAOULocation, this.gpu)
 
         this.gpu.activeTexture(this.gpu.TEXTURE0 + 7)
-        this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, skyboxTexture)
-        this.gpu.uniform1i(this.skyboxULocation, 7)
+        this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, irradianceMap)
+        this.gpu.uniform1i(this.irradianceMapULocation, 7)
     }
 }

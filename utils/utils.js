@@ -1,3 +1,5 @@
+import {vec3} from "gl-matrix";
+
 function isArrayBufferV(value) {
     return value && value.buffer instanceof ArrayBuffer && value.byteLength !== undefined;
 }
@@ -51,19 +53,20 @@ export function createFBO(gpu, attachmentPoint, texture) {
     return fbo;
 }
 
-export function createTexture(gpu, width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT) {
+export function createTexture(gpu, width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip) {
     let texture = gpu.createTexture();
 
     gpu.bindTexture(gpu.TEXTURE_2D, texture);
     gpu.texImage2D(gpu.TEXTURE_2D, 0, internalFormat, width, height, border, format, type, data);
     gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, magFilter);
     gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, minFilter);
+
     if (wrapS !== undefined)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, wrapS);
     if (wrapT !== undefined)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, wrapT);
-
-        gpu.bindTexture(gpu.TEXTURE_2D, null);
+    if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, false);
+    gpu.bindTexture(gpu.TEXTURE_2D, null);
 
     return texture;
 }
@@ -77,7 +80,8 @@ export function bindTexture(index, texture, location, gpu) {
 
 export function enableBasics(gpu) {
     const ext = gpu.getExtension("EXT_color_buffer_float");
-
+    const floatA = gpu.getExtension('OES_texture_float');
+    const floatB = gpu.getExtension('OES_texture_float_linear');
 
     gpu.enable(gpu?.BLEND);
     gpu?.blendFunc(gpu?.SRC_ALPHA, gpu?.ONE_MINUS_SRC_ALPHA);
@@ -96,4 +100,27 @@ export function enableBasics(gpu) {
 
 
     gpu?.viewport(0, 0, gpu?.canvas.width, gpu?.canvas.height);
+}
+
+export function lookAt(yaw, pitch, position) {
+    const cosPitch = Math.cos(pitch);
+    const sinPitch = Math.sin(pitch);
+    const cosYaw = Math.cos(yaw);
+    const sinYaw = Math.sin(yaw);
+
+    let xAxis = [cosYaw, 0, -sinYaw],
+        yAxis = [sinYaw * sinPitch, cosPitch, cosYaw * sinPitch],
+        zAxis = [sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw]
+    let p1, p2, p3
+
+    p1 = vec3.dot(position, xAxis)
+    p2 = vec3.dot(position, yAxis)
+    p3 = vec3.dot(position, zAxis)
+
+    return [
+        xAxis[0], yAxis[0], zAxis[0], 0,
+        xAxis[1], yAxis[1], zAxis[1], 0,
+        xAxis[2], yAxis[2], zAxis[2], 0,
+        -p1, -p2, -p3, 1
+    ]
 }

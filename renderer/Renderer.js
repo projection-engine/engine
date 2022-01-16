@@ -1,20 +1,34 @@
 import Camera from "./misc/Camera";
 
 import cameraEvents from "./misc/CameraEvents";
+import ScreenSpace from "./buffers/ScreenSpace";
+import ShadowMap from "./buffers/ShadowMap";
+import PostProcessing from "./buffers/PostProcessing";
+import Skybox from "./lights/Skybox";
 
 export default class Renderer {
     currentFrame = 0
     fps = 0
     times = []
     canRender = true
+    screenSpace
+    shadowMap
+    postProcessing
 
-    constructor(id, type) {
+    constructor(id, type, gpu) {
+
+        // this.screenSpace = new ScreenSpace(gpu)
+        this.shadowMap = new ShadowMap(2048, gpu)
+        this.postProcessing = new PostProcessing(gpu)
+
         this.performanceTarget = document.getElementById(id + '-frames')
-        this.camera = new Camera(`${id}-canvas`,[0, 10, 30], 1.57, 1, 2000, 1, type)
+        this.camera = new Camera(`${id}-canvas`, [0, 10, 30], 1.57, 1, 2000, 1, type)
         this.cameraEvents = cameraEvents(this.camera)
     }
 
     start(renderingProps) {
+        // const renderingProps = {...r, skybox:  this.skybox}
+
         if (this.fps === 0 && this.performanceTarget) {
             const innerFPS = parseInt(this.performanceTarget.innerText)
             if (!isNaN(innerFPS))
@@ -30,20 +44,20 @@ export default class Renderer {
         const callback = () => {
             let start = performance.now()
             this.shadowMapRenderPass(renderingProps)
-            // renderingProps.gBuffer.startMapping()
-            // this.meshRenderPass(renderingProps)
-            // renderingProps.gBuffer.stopMapping()
 
-            renderingProps.postProcessing.startMapping()
-
-            this.skyboxRenderPass(renderingProps)
+            this.postProcessing.startMapping()
+            if (renderingProps.skybox)
+                this.skyboxRenderPass(renderingProps)
             this.miscRenderPass(renderingProps)
-            this.meshRenderPass({...renderingProps, skyboxTexture: renderingProps.skybox.texture})
+            this.meshRenderPass({
+                ...renderingProps,
+                skyboxTexture: renderingProps.skybox.texture,
+                prevFrame: this.postProcessing.frameBufferTexture
+            })
 
-            renderingProps.postProcessing.stopMapping()
+            this.postProcessing.stopMapping()
             renderingProps.shaders.postProcessing.use()
-            renderingProps.postProcessing.draw(renderingProps.shaders.postProcessing)
-
+            this.postProcessing.draw(renderingProps.shaders.postProcessing)
 
             while (this.times.length > 0 && this.times[0] <= start - 1000) {
                 this.times.shift();
@@ -66,18 +80,12 @@ export default class Renderer {
         cancelAnimationFrame(this.currentFrame)
     }
 
-    depthMapRenderPass({
-                           shaders, shadowMap
-                       }) {
-        shaders.depthMap.use()
-        shadowMap.draw(shaders.depthMap)
-    }
-
     meshRenderPass({
                        instances, meshes,
                        gpu, materials,
                        skybox, skyboxTexture,
-                       shaders, shadowMap, lights
+
+                       shaders, lights
                    }) {
         shaders.mesh.use()
         gpu.stencilMask(0xff)
@@ -89,26 +97,27 @@ export default class Renderer {
             if (mesh.visible)
                 instances[m].draw(
                     {
+                        irradianceMap: skybox.irradianceMap,
                         skyboxTexture,
                         lights: lights,
                         shader: shaders.mesh,
                         mesh,
-                        shadowMapResolution: shadowMap.width,
+                        shadowMapResolution: this.shadowMap.width,
                         directionalLight: skybox.lightSource,
                         cameraPosition: this.camera.position,
                         viewMatrix: this.camera.viewMatrix,
                         projectionMatrix: this.camera.projectionMatrix,
                         material: materials[instances[m].materialIndex],
-                        shadowMapTexture: shadowMap.frameBufferTexture
+                        shadowMapTexture: this.shadowMap.frameBufferTexture
                     }
                 )
         }
     }
 
-    shadowMapRenderPass({instances, meshes, gpu, skybox, shaders, shadowMap}) {
+    shadowMapRenderPass({instances, meshes, gpu, skybox, shaders}) {
         shaders.shadowMap.use()
         gpu.clearDepth(1);
-        shadowMap.startMapping()
+        this.shadowMap.startMapping()
         for (let m = 0; m < instances.length; m++) {
             const mesh = meshes[instances[m].meshIndex]
             if (mesh.visible)
@@ -123,11 +132,10 @@ export default class Renderer {
                     }
                 )
         }
-        shadowMap.stopMapping()
+        this.shadowMap.stopMapping()
     }
 
     skyboxRenderPass({
-
                          gpu,
                          skybox,
                          shaders,
@@ -200,8 +208,6 @@ export default class Renderer {
                 }
             )
         }
-
-
     }
 
 }

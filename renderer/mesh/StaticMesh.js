@@ -25,7 +25,8 @@ export default class StaticMesh extends Transformation {
              projectionMatrix,
              lights,
              skyboxTexture,
-             shadowMapResolution
+             shadowMapResolution,
+             irradianceMap
          }) {
 
 
@@ -48,6 +49,7 @@ export default class StaticMesh extends Transformation {
                 )
             else
                 shader.bindUniforms({
+                    irradianceMap,
                     skyboxTexture,
                     directionalLight,
                     shadowMapTexture,

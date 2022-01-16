@@ -13,7 +13,7 @@ export default function useObjects(gpu) {
     const [hierarchy, dispatchHierarchy] = useReducer(hierarchyReducer, []);
 
     // SCENE
-    const [skybox, setSkybox] = useState({})
+    const [skybox, setSkybox] = useState(null)
     const [lights, setLights] = useState([])
 
     // MESHES / INSTANCES
@@ -24,13 +24,6 @@ export default function useObjects(gpu) {
 
     useEffect(() => {
         if (gpu !== undefined && gpu !== null) {
-            const newSkybox = new Skybox([
-                './skybox/right.jpg', './skybox/left.jpg',
-                './skybox/top.jpg', './skybox/bottom.jpg',
-                './skybox/front.jpg', './skybox/back.jpg',
-            ], gpu)
-
-
 
             // FOLDERS
             const root = new Folder('Editor')
@@ -69,7 +62,7 @@ export default function useObjects(gpu) {
                 payload: new Actor('Point Light B', undefined, 1, sceneFolder.id, TYPES.POINT_LIGHT)
             })
 
-            setSkybox(newSkybox)
+            setSkybox(new Skybox(gpu, './skybox2.png'))
             setReady(true)
         }
     }, [gpu])

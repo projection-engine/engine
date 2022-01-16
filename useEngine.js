@@ -1,6 +1,4 @@
 import {useEffect, useState} from "react";
-import ShadowMap from "./renderer/buffers/ShadowMap";
-import DepthMapShader from "./renderer/shaders/framebuffer/DepthMapShader";
 import ShadowMapShader from "./renderer/shaders/framebuffer/ShadowMapShader";
 import SkyBoxShader from "./renderer/shaders/skybox/SkyBoxShader";
 import MeshShader from "./renderer/shaders/mesh/MeshShader";
@@ -24,9 +22,8 @@ export default function useEngine(id, cameraType) {
     const [selectedElement, setSelectedElement] = useState(null)
 
     // BUFFERS
-    const [shadowMap, setShadowMap] = useState({})
-    const [gBuffer, setGBuffer] = useState({})
-    const [postProcessing, setPostProcessing] = useState({})
+
+
     const [grid, setGrid] = useState({})
 
     let mainRenderer
@@ -43,17 +40,12 @@ export default function useEngine(id, cameraType) {
     useEffect(() => {
         const newGPU = document.getElementById(id + '-canvas').getContext('webgl2')
 
-
-        setShadowMap(new ShadowMap(2048, newGPU))
-        setPostProcessing(new PostProcessing(newGPU))
-
         setShaders({
             shadowMap: new ShadowMapShader(newGPU),
             skybox: new SkyBoxShader(newGPU),
             mesh: new MeshShader(newGPU),
             outline: new OutlineShader(newGPU),
             grid: new GridShader(newGPU),
-            depthMap: new DepthMapShader(newGPU),
             postProcessing: new PostProcessingShader(newGPU),
             lightShader: new LightShader(newGPU)
         })
@@ -66,18 +58,16 @@ export default function useEngine(id, cameraType) {
 
 
     useEffect(() => {
-        if (!mainRenderer)
-            mainRenderer = new Renderer(id, cameraType)
+        if (!mainRenderer && gpu !== undefined)
+            mainRenderer = new Renderer(id, cameraType, gpu)
         if (ready && gpu && mainRenderer && keepExecution)
             mainRenderer?.start({
                 meshes,
                 gpu, materials,
                 skybox,
                 selectedElement,
-                shaders, shadowMap, grid,
+                shaders, grid,
                 instances,
-                postProcessing,
-                gBuffer,
                 lights
             })
         return () => {
@@ -90,9 +80,7 @@ export default function useEngine(id, cameraType) {
         gpu,
         lights,
         keepExecution,
-        ready,
-        shadowMap,
-        postProcessing
+        ready
     ])
 
     return {
@@ -104,7 +92,6 @@ export default function useEngine(id, cameraType) {
         keepExecution, setKeepExecution,
         skybox, setSkybox,
         selectedElement, setSelectedElement,
-        setPostProcessing,
         hierarchy, dispatchHierarchy,
         setInstances, instances
     }

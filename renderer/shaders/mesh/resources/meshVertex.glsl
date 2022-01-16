@@ -47,9 +47,9 @@ void main(){
     // NORMALS
     vec3 bitangent = normalize(cross(normalVec, tangentVec));
     toTangentSpace = mat3(
-        tangentVec.x, bitangent.x, normalVec.x,
-        tangentVec.y, bitangent.y, normalVec.y,
-        tangentVec.z, bitangent.z, normalVec.z
+    tangentVec.x, bitangent.x, normalVec.x,
+    tangentVec.y, bitangent.y, normalVec.y,
+    tangentVec.z, bitangent.z, normalVec.z
     );
     toTangentSpace = transpose(toTangentSpace);
 

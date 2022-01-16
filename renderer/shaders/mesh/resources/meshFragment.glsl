@@ -12,7 +12,9 @@ in mat3 toTangentSpace;
 in vec3 normalVec;
 
 // UNIFORMS
-uniform samplerCube skybox;
+uniform samplerCube irradianceMap;
+uniform samplerCube cubeMap;
+
 uniform sampler2D shadowMap;
 uniform float shadowMapResolution;
 uniform vec3 cameraVec;
@@ -118,7 +120,9 @@ float geometrySmith (vec3 N, vec3 V, vec3 L, float roughness){
 vec3 fresnelSchlick (float cosTheta, vec3 F0){
     return F0 + (1.0 - F0) * pow (1.0 - cosTheta, 5.0);
 }
-
+vec3 fresnelSchlickRoughness (float cosTheta, vec3 F0, float roughness){
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow (1.0 - cosTheta, 5.0);
+}
 float getDisplacement (vec2 UVs, sampler2D height){
     return texture(height, UVs).r;
 }
@@ -129,9 +133,10 @@ void main()
 {
 
     vec3 V = normalize(cameraVec - vPosition);
-    vec3 reflectedCoord = reflect(V, normalVec);
-    reflectedCoord.y = -reflectedCoord.y;
-    vec4 skyboxContribution = vec4(texture(skybox, reflectedCoord).rgb, 1.0);
+
+    //    vec3 reflectedCoord = reflect(V, normalVec);
+    //    reflectedCoord.y = -reflectedCoord.y;
+    //    vec4 irradianceMapContribution = vec4(texture(irradianceMap, reflectedCoord).rgb, 1.0);
 
     // PARALLAX MAPPING QUALITY
     vec2 UVs = texCoord;
@@ -144,8 +149,6 @@ void main()
     vec2 S = V.xy  * hScale;
     vec2 deltaUVs = S/numberLayers;
     float currentDepthMapValue = 1.0 -  getDisplacement(UVs, pbrMaterial.height);
-
-
     while (currentLayerDepth < currentDepthMapValue){
         UVs -= deltaUVs;
         currentDepthMapValue = 1.0 -   getDisplacement(UVs, pbrMaterial.height);
@@ -167,13 +170,13 @@ void main()
     float metallicMap= texture(pbrMaterial.metallic, UVs).r;
     vec3 normalMap= normalize(toTangentSpace * ((texture(pbrMaterial.normal, UVs).xyz * 2.0)- 1.0));
     vec3 N = normalMap;
+    float NdotV    = max(dot(N, V), 0.000001);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallicMap);
 
     // POINT LIGHTS
     vec3 Lo = vec3(0.0);
-
     for (int i = 0; i < lightQuantity; ++i){
         vec3 L = normalize(lightPosition[i] - vPosition);
         vec3 H = normalize(V + L);
@@ -198,12 +201,20 @@ void main()
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
-    vec3 ambient = vec3(0.03) * albedo * ambientOcclusionMap;
-    float shadows = calculateShadows();
-    vec3 color = (ambient  + Lo)* shadows;
+    // DIFFUSE IBL
+    vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughnessMap);
+    vec3 kD = (1.0 - F) * (1.0 - metallicMap);
+    vec3 diffuse = texture(irradianceMap, N).rgb * albedo * kD;
 
+//    const float MAX_REFLECTION = 4.0;
+//    vec3 prefilteredColor = textureLod(pre)
+
+    vec3 ambient = diffuse * ambientOcclusionMap;
+
+    // SHADOW MAP + TONEMAPPING
+    float shadows = calculateShadows();
+    vec3 color = (ambient  + Lo) * shadows;
     color = color / (color + vec3(1.0));
-    //    color = pow(color, vec3(1.0/2.2));
 
     finalColor =  vec4(color, 1.0);
 }

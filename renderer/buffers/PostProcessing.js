@@ -1,4 +1,4 @@
-import {createRBO, createTexture} from "../../utils/utils";
+import {bindTexture, createRBO, createTexture} from "../../utils/utils";
 import Framebuffer from "./Framebuffer";
 
 export default class PostProcessing extends Framebuffer{
@@ -15,7 +15,7 @@ export default class PostProcessing extends Framebuffer{
             this.gpu,
             this.width,
             this.height,
-            this.gpu.RGBA32F,
+            this.gpu.RGBA16F,
             0,
             this.gpu.RGBA,
             this.gpu.FLOAT,
@@ -45,6 +45,7 @@ export default class PostProcessing extends Framebuffer{
 
     onBeforeDraw(shader) {
         super.onBeforeDraw();
+
         const gama = 2.2
         const exposure = 2
 
