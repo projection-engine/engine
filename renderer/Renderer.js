@@ -1,10 +1,11 @@
-import Camera from "./misc/Camera";
+import Camera from "./utils/entities/Camera";
 
-import cameraEvents from "./misc/CameraEvents";
-import ScreenSpace from "./buffers/ScreenSpace";
-import ShadowMap from "./buffers/ShadowMap";
-import PostProcessing from "./buffers/PostProcessing";
-import Skybox from "./lights/Skybox";
+import cameraEvents from "./utils/components/cameraEvents";
+import ScreenSpace from "./postprocessing/entities/ScreenSpace";
+import ShadowMap from "./lights/components/ShadowMap";
+import PostProcessing from "./postprocessing/entities/PostProcessing";
+import Skybox from "./lights/entities/Skybox";
+import GBuffer from "./postprocessing/entities/GBuffer";
 
 export default class Renderer {
     currentFrame = 0
@@ -14,9 +15,10 @@ export default class Renderer {
     screenSpace
     shadowMap
     postProcessing
+    gBuffer
 
     constructor(id, type, gpu) {
-
+        this.gBuffer = new GBuffer(gpu)
         // this.screenSpace = new ScreenSpace(gpu)
         this.shadowMap = new ShadowMap(2048, gpu)
         this.postProcessing = new PostProcessing(gpu)
@@ -43,21 +45,10 @@ export default class Renderer {
 
         const callback = () => {
             let start = performance.now()
+
             this.shadowMapRenderPass(renderingProps)
-
-            this.postProcessing.startMapping()
-            if (renderingProps.skybox)
-                this.skyboxRenderPass(renderingProps)
-            this.miscRenderPass(renderingProps)
-            this.meshRenderPass({
-                ...renderingProps,
-                skyboxTexture: renderingProps.skybox.texture,
-                prevFrame: this.postProcessing.frameBufferTexture
-            })
-
-            this.postProcessing.stopMapping()
-            renderingProps.shaders.postProcessing.use()
-            this.postProcessing.draw(renderingProps.shaders.postProcessing)
+            this.gBufferRenderPass(renderingProps)
+            this.postProcessingRenderPass(renderingProps)
 
             while (this.times.length > 0 && this.times[0] <= start - 1000) {
                 this.times.shift();
@@ -72,21 +63,82 @@ export default class Renderer {
         }
         this.currentFrame = requestAnimationFrame(callback);
     }
-
-
     stop() {
         this.canRender = false
         this.cameraEvents.stopTracking()
         cancelAnimationFrame(this.currentFrame)
     }
 
-    meshRenderPass({
-                       instances, meshes,
-                       gpu, materials,
-                       skybox, skyboxTexture,
+    gBufferRenderPass(renderingProps){
 
-                       shaders, lights
-                   }) {
+        this.gBuffer.startMapping() // Start rendering to textures
+        this._meshRenderPass({
+            ...renderingProps,
+            skyboxTexture: renderingProps.skybox.texture,
+            prevFrame: this.postProcessing.frameBufferTexture
+        })
+        this.gBuffer.stopMapping()
+
+    }
+
+    postProcessingRenderPass(renderingProps){
+        this.postProcessing.startMapping()
+
+        if (renderingProps.skybox){
+            const ntVm = this.camera.getNotTranslatedViewMatrix()
+
+            renderingProps.gpu.depthMask(false)
+            renderingProps.shaders.skybox.use()
+            renderingProps.skybox.draw(
+                renderingProps.shaders.skybox,
+                this.camera.projectionMatrix,
+                ntVm
+            )
+            renderingProps.gpu.depthMask(true)
+        }
+
+
+        // G-BUFFER DRAW
+        renderingProps.shaders.deferredShader.use()
+        renderingProps.shaders.deferredShader.bindUniforms({
+            irradianceMap: renderingProps.skybox.irradianceMap,
+            skyboxTexture: renderingProps.skyboxTexture,
+            lights: renderingProps.lights,
+            shadowMapResolution: this.shadowMap.width,
+            directionalLight: renderingProps.skybox.lightSource,
+            shadowMapTexture: this.shadowMap.frameBufferTexture,
+
+            gNormalTexture: this.gBuffer.gNormalTexture,
+            gPositionTexture: this.gBuffer.gPositionTexture,
+            gAlbedo: this.gBuffer.gAlbedo,
+            gBehaviorTexture: this.gBuffer.gBehaviorTexture,
+            gDepthTexture: this.gBuffer.gDepthTexture,
+            cameraVec: this.camera.position
+        })
+
+        this.gBuffer.draw(renderingProps.shaders.deferredShader)
+
+
+        // CLONE DEPTH BUFFER
+        renderingProps.gpu.bindFramebuffer(renderingProps.gpu.READ_FRAMEBUFFER, this.gBuffer.gBuffer)
+        renderingProps.gpu.bindFramebuffer(renderingProps.gpu.DRAW_FRAMEBUFFER, this.postProcessing.frameBufferObject)
+        renderingProps.gpu.blitFramebuffer(
+            0, 0,
+            this.gBuffer.width, this.gBuffer.height,
+            0, 0,
+            this.postProcessing.width,this.postProcessing.height,
+            renderingProps.gpu.DEPTH_BUFFER_BIT, renderingProps.gpu.NEAREST)
+        renderingProps.gpu.bindFramebuffer(renderingProps.gpu.FRAMEBUFFER, this.postProcessing.frameBufferObject)
+
+        this.miscRenderPass(renderingProps)
+
+
+        this.postProcessing.stopMapping()
+        renderingProps.shaders.postProcessing.use()
+        this.postProcessing.draw(renderingProps.shaders.postProcessing)
+
+    }
+    _meshRenderPass({instances, meshes, gpu, materials, shaders}) {
         shaders.mesh.use()
         gpu.stencilMask(0xff)
         gpu.stencilFunc(gpu.ALWAYS, 1, 0xff)
@@ -97,18 +149,13 @@ export default class Renderer {
             if (mesh.visible)
                 instances[m].draw(
                     {
-                        irradianceMap: skybox.irradianceMap,
-                        skyboxTexture,
-                        lights: lights,
                         shader: shaders.mesh,
                         mesh,
-                        shadowMapResolution: this.shadowMap.width,
-                        directionalLight: skybox.lightSource,
                         cameraPosition: this.camera.position,
                         viewMatrix: this.camera.viewMatrix,
                         projectionMatrix: this.camera.projectionMatrix,
                         material: materials[instances[m].materialIndex],
-                        shadowMapTexture: this.shadowMap.frameBufferTexture
+
                     }
                 )
         }
@@ -135,30 +182,9 @@ export default class Renderer {
         this.shadowMap.stopMapping()
     }
 
-    skyboxRenderPass({
-                         gpu,
-                         skybox,
-                         shaders,
-                     }) {
-
-
-        const ntVm = this.camera.getNotTranslatedViewMatrix()
-        gpu.depthMask(false)
-        shaders.skybox.use()
-        skybox.draw(
-            shaders.skybox,
-            this.camera.projectionMatrix,
-            ntVm
-        )
-        gpu.depthMask(true)
-
-
-    }
-
     miscRenderPass({
                        instances,
                        meshes,
-
                        gpu,
                        materials,
                        skybox,
@@ -171,7 +197,6 @@ export default class Renderer {
         //GRID
         shaders.grid.use()
         grid.draw(shaders.grid, this.camera.viewMatrix, this.camera.projectionMatrix)
-
 
         // LIGHTS
         shaders.lightShader.use()

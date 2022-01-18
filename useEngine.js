@@ -1,18 +1,19 @@
 import {useEffect, useState} from "react";
-import ShadowMapShader from "./renderer/shaders/framebuffer/ShadowMapShader";
-import SkyBoxShader from "./renderer/shaders/skybox/SkyBoxShader";
-import MeshShader from "./renderer/shaders/mesh/MeshShader";
-import OutlineShader from "./renderer/shaders/mesh/OutlineShader";
-import GridShader from "./renderer/shaders/grid/GridShader";
-import PostProcessing from "./renderer/buffers/PostProcessing";
+import ShadowMapShader from "./renderer/lights/shaders/light/ShadowMapShader";
+import SkyBoxShader from "./renderer/lights/shaders/skybox/SkyBoxShader";
+import MeshShader from "./renderer/mesh/shaders/MeshShader";
+import OutlineShader from "./renderer/mesh/shaders/OutlineShader";
+import GridShader from "./renderer/utils/shaders/GridShader";
+import PostProcessing from "./renderer/postprocessing/entities/PostProcessing";
 
 import useObjects from "./useObjects";
 
-import Grid from "./renderer/misc/Grid";
+import Grid from "./renderer/utils/entities/Grid";
 import {enableBasics} from "./utils/utils";
 import Renderer from "./renderer/Renderer";
-import LightShader from "./renderer/shaders/light/LightShader";
-import PostProcessingShader from "./renderer/shaders/framebuffer/PostProcessingShader";
+import LightShader from "./renderer/lights/shaders/light/LightShader";
+import PostProcessingShader from "./renderer/postprocessing/shaders/postprocessing/PostProcessingShader";
+import DeferredShader from "./renderer/postprocessing/shaders/deferred/DeferredShader";
 
 export default function useEngine(id, cameraType) {
 
@@ -38,9 +39,10 @@ export default function useEngine(id, cameraType) {
 
 
     useEffect(() => {
-        const newGPU = document.getElementById(id + '-canvas').getContext('webgl2')
+        const newGPU = document.getElementById(id + '-canvas').getContext('webgl2', {antialias: false})
 
         setShaders({
+            deferredShader: new DeferredShader(newGPU),
             shadowMap: new ShadowMapShader(newGPU),
             skybox: new SkyBoxShader(newGPU),
             mesh: new MeshShader(newGPU),

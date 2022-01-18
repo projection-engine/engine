@@ -1,12 +1,12 @@
 import {useEffect, useReducer, useState} from "react";
-import Skybox from "./renderer/lights/Skybox";
+import Skybox from "./renderer/lights/entities/Skybox";
 
 import hierarchyReducer, {ACTIONS} from "../components/scene/hierarchy/hierarchyReducer";
 import Folder from "../components/scene/hierarchy/Folder";
 import Actor from '../components/scene/hierarchy/Actor'
 import {TYPES} from "../components/scene/hierarchy/TYPES";
-import PointLight from "./renderer/lights/PointLight";
-import PBR from "./renderer/material/PBR";
+import PointLight from "./renderer/lights/components/PointLight";
+import PBR from "./renderer/mesh/components/PBR";
 
 export default function useObjects(gpu) {
     const [ready, setReady] = useState(false)

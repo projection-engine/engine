@@ -1,4 +1,4 @@
-import Mesh from "../renderer/mesh/Mesh";
+import Mesh from "../renderer/mesh/components/Mesh";
 import {vec2, vec3} from "gl-matrix";
 
 export default function loadObj(data, gpu, id, flipYUV = false, rawData) {
