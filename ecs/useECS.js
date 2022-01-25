@@ -63,7 +63,7 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
 
         if (initialized) {
             renderer.current?.stop()
-            renderer.current?.updateParams(renderingProps, entities)
+            renderer.current?.updateParams(renderingProps, entities, renderingProps.materials, renderingProps.meshes)
             renderer.current?.start(entities, systems)
         }
         return () => {
@@ -75,9 +75,8 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
             renderer.current = new Engine(id, cameraType, gpu)
 
             initiateSystems()
-            renderer.current?.updateParams(renderingProps, entities)
+            renderer.current?.updateParams(renderingProps, entities, renderingProps.materials, renderingProps.meshes)
         }
-
     }, [renderingProps, ready, entities, systems, gpu, id])
     return {
         ready,

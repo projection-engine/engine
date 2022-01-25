@@ -34,7 +34,8 @@ export default class ShadowMapSystem extends System {
 
             const l = directionalLights[light].components.DirectionalLightComponent
             for (let m = 0; m < filteredMeshes.length; m++) {
-                const mesh = this._find(meshes, e => e.id === filteredMeshes[m].components.MeshComponent.meshID)[0]
+                const meshIndex = filteredEntities.meshSources[filteredMeshes[m].components.MeshComponent.meshID]
+                const mesh = meshes[meshIndex]
                 if (mesh !== undefined) {
                     const t = filteredMeshes[m].components.TransformComponent
                     this._drawMesh(mesh, l.lightView, l.lightProjection, t.transformationMatrix, currentShadowMap)

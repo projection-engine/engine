@@ -27,7 +27,8 @@ export default class PickSystem extends System {
             this.shader.use()
             this.picker.start()
             for (let m = 0; m < filtered.length; m++) {
-                const mesh = this._find(meshes, e => e.id === filtered[m].components.MeshComponent.meshID)
+                const meshIndex = filteredEntities.meshSources[filtered[m].components.MeshComponent.meshID]
+                const mesh = meshes[meshIndex]
                 if (mesh !== undefined) {
                     const t = filtered[m].components.TransformComponent
                     this._drawMesh(mesh, camera.viewMatrix,   this.picker.getProjection(currentCoords, camera), t.transformationMatrix)

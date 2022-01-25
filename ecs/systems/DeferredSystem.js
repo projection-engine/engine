@@ -2,14 +2,14 @@ import System from "../basic/System";
 import TransformComponent from "../components/TransformComponent";
 
 import GBuffer from "../../renderer/elements/GBuffer";
-import MaterialComponent from "../components/MaterialComponent";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
+import Material from "../../renderer/elements/Material";
 
 export default class DeferredSystem extends System {
 
     constructor(gpu) {
         super(['TransformComponent']);
-        this.fallbackMaterial = new MaterialComponent(gpu)
+        this.fallbackMaterial = new Material(gpu)
         this.gBuffer = new GBuffer(gpu)
         this.shader = new MeshShader(gpu)
     }
@@ -20,6 +20,7 @@ export default class DeferredSystem extends System {
             meshes,
             camera,
             selectedElement,
+            materials
         } = params
         const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
         const filtered = this._hasComponent(filteredMeshes)
@@ -30,10 +31,13 @@ export default class DeferredSystem extends System {
         this.gBuffer.startMapping()
 
         for (let m = 0; m < filtered.length; m++) {
-            const mesh = this._find(meshes, e => e.id === filtered[m].components.MeshComponent.meshID && filtered[m].components.MeshComponent.active)[0]
+            const meshIndex = filteredEntities.meshSources[filtered[m].components.MeshComponent.meshID]
+            const mesh = meshes[meshIndex]
+            const meshInstance = filtered[m]
             if (mesh !== undefined) {
-                const t = filtered[m].components.TransformComponent
-                const mat = filtered[m].components.MaterialComponent
+                const t = meshInstance.components.TransformComponent
+                const mat =meshInstance.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[meshInstance.components.MaterialComponent.materialID]] : undefined
+
                 this._drawMesh(
                     mesh,
                     camera.position,
@@ -41,8 +45,8 @@ export default class DeferredSystem extends System {
                     camera.projectionMatrix,
                     t.transformationMatrix,
                     mat ? mat : this.fallbackMaterial,
-                    filtered[m].components.MeshComponent.normalMatrix,
-                    selectedElement === filtered[m].id
+                    meshInstance.components.MeshComponent.normalMatrix,
+                    selectedElement === meshInstance.id
                 )
             }
         }

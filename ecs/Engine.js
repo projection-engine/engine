@@ -38,37 +38,42 @@ export default class Engine {
 
     }
 
-    updateParams(params, entities) {
-
+    updateParams(params, entities,materials,meshes) {
+        console.log(materials,meshes)
         let r = {
             pointLights: {},
             spotLights: {},
             meshes: {},
             skyboxes: {},
             grid: {},
-            directionalLights: {}
+            directionalLights: {},
+            materials: {},
+            meshSources: {}
         }
 
         for (let i = 0; i < entities.length; i++) {
             const current = entities[i]
-            if (current.components.PointLightComponent) {
+            if (current.components.PointLightComponent)
                 r.pointLights[current.id] = i
-            }
-            if (current.components.SpotLightComponent) {
+            if (current.components.SpotLightComponent)
                 r.spotLights[current.id] = i
-            }
             if (current.components.DirectionalLightComponent)
                 r.directionalLights[current.id] = i
 
-            if (current.components.MeshComponent) {
-                r.meshes[current.id] = i
-            }
-            if (current.components.SkyboxComponent) {
+            if (current.components.SkyboxComponent)
                 r.skyboxes[current.id] = i
-            }
             if (current.components.GridComponent)
                 r.grid[current.id] = i
+            if (current.components.MeshComponent)
+                r.meshes[current.id] = i
+        }
+        for(let i = 0; i< materials.length; i++){
+            r.materials[materials[i].id] = i
+        }
 
+        for(let i = 0; i< meshes.length; i++){
+
+            r.meshSources[meshes[i].id] = i
         }
 
         this.types = r
