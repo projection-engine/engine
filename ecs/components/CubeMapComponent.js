@@ -1,10 +1,5 @@
 import Component from "../basic/Component";
 import {mat4} from "gl-matrix";
-import CubeMap from "../utils/CubeMap";
-import DeferredSystem from "../systems/DeferredSystem";
-import GBuffer from "../../renderer/elements/GBuffer";
-import DeferredShader from "../../renderer/shaders/deferred/DeferredShader";
-import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 
 export default class CubeMapComponent extends Component{
 

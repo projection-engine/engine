@@ -1,5 +1,5 @@
 import Component from "../basic/Component";
-import {mat4, vec4} from "gl-matrix";
+import {mat4} from "gl-matrix";
 
 export default class TransformComponent extends Component {
     _rotation = [0, 0, 0]

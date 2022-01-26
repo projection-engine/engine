@@ -31,7 +31,6 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
         dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new PostProcessingSystem(gpu)})
 
         if (!initialized) {
-
             setInitialized(true)
             const gridEntity = new Entity(undefined, 'Grid')
             dispatchEntities({type: ENTITY_ACTIONS.ADD, payload: gridEntity})
@@ -41,7 +40,6 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
                     data: new GridComponent(gpu)
                 }
             })
-
             setReady(true)
         }
     }
@@ -54,7 +52,7 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
 
     }
     useEffect(() => {
-        if( id) {
+        if(id) {
             resizeObserver = new ResizeObserver(resizeCallback)
             resizeObserver.observe(document.getElementById(id + '-canvas'))
         }
