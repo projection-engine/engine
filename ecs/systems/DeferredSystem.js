@@ -36,9 +36,12 @@ export default class DeferredSystem extends System {
             const meshInstance = filtered[m]
             if (mesh !== undefined) {
                 const t = meshInstance.components.TransformComponent
-                const mat =meshInstance.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[meshInstance.components.MaterialComponent.materialID]] : undefined
+                const mat = meshInstance.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[meshInstance.components.MaterialComponent.materialID]] : undefined
 
-                this._drawMesh(
+                DeferredSystem.drawMesh(
+                    this.shader,
+                    this.gBuffer.gpu,
+
                     mesh,
                     camera.position,
                     camera.viewMatrix,
@@ -54,31 +57,36 @@ export default class DeferredSystem extends System {
 
     }
 
-    _drawMesh(mesh, camPosition, viewMatrix, projectionMatrix, transformationMatrix, material, normalMatrix, selected) {
+    static drawMesh(
+        shader, gpu,
+        mesh, camPosition,
+        viewMatrix, projectionMatrix,
+        transformationMatrix, material,
+        normalMatrix, selected) {
 
-        this.gBuffer.gpu.bindVertexArray(mesh.VAO)
-        this.gBuffer.gpu.bindBuffer(this.gBuffer.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
+        gpu.bindVertexArray(mesh.VAO)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
 
         mesh.vertexVBO.enable()
         mesh.normalVBO.enable()
         mesh.uvVBO.enable()
         mesh.tangentVBO.enable()
 
-        this.shader.bindUniforms({
+        shader.bindUniforms({
             material: material,
             cameraVec: camPosition,
             normalMatrix: normalMatrix,
             selected
         })
 
-        this.gBuffer.gpu.uniformMatrix4fv(this.shader.transformMatrixULocation, false, transformationMatrix)
-        this.gBuffer.gpu.uniformMatrix4fv(this.shader.viewMatrixULocation, false, viewMatrix)
-        this.gBuffer.gpu.uniformMatrix4fv(this.shader.projectionMatrixULocation, false, projectionMatrix)
-        this.gBuffer.gpu.drawElements(this.gBuffer.gpu.TRIANGLES, mesh.verticesQuantity, this.gBuffer.gpu.UNSIGNED_INT, 0)
+        gpu.uniformMatrix4fv(shader.transformMatrixULocation, false, transformationMatrix)
+        gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, viewMatrix)
+        gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, projectionMatrix)
+        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 
 
-        this.gBuffer.gpu.bindVertexArray(null)
-        this.gBuffer.gpu.bindBuffer(this.gBuffer.gpu.ELEMENT_ARRAY_BUFFER, null)
+        gpu.bindVertexArray(null)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
         mesh.vertexVBO.disable()
         mesh.uvVBO.disable()
         mesh.normalVBO.disable()

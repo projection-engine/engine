@@ -40,10 +40,10 @@ out vec4 finalColor;
 
 
 // SHADOW-MAP / SOFT-SHADOWS
-float sampleShadowMap (vec2 coord, float compare,  in sampler2D shadowSampler){
+float sampleShadowMap (vec2 coord, float compare, in sampler2D shadowSampler){
     return step(compare, texture(shadowSampler, coord.xy).r);
 }
-float sampleShadowMapLinear (vec2 coord, float compare,  in sampler2D shadowSampler){
+float sampleShadowMapLinear (vec2 coord, float compare, in sampler2D shadowSampler){
 
 
     vec2 shadowTexelSize = vec2(1.0/shadowMapResolution, 1.0/shadowMapResolution);
@@ -63,7 +63,7 @@ float sampleShadowMapLinear (vec2 coord, float compare,  in sampler2D shadowSamp
 
     return mix(mixOne, mixTwo, fracPart.x);
 }
-float sampleSoftShadows(vec2 coord, float compare,  in sampler2D shadowSampler){
+float sampleSoftShadows(vec2 coord, float compare, in sampler2D shadowSampler){
     const float SAMPLES = 3.0;
     const float SAMPLES_START = (SAMPLES -1.0)/2.0;
     const float SAMPLES_SQUARED = SAMPLES * SAMPLES;
@@ -188,7 +188,7 @@ void main() {
     }
 
     // DIRECTIONAL LIGHT
-    float shadows = 0.0;
+    float shadows = dirLightsQuantity > 0?  0.0 : 1.0;
 
     for (int i = 0; i < dirLightsQuantity; i++){
         vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
@@ -229,10 +229,13 @@ void main() {
     vec3 kD = (1.0 - F) * (1.0 - metallic);
     vec3 diffuse = texture(irradianceMap, N).rgb * albedo * kD;
 
-    //    const float MAX_REFLECTION = 4.0;
-    //    vec3 prefilteredColor = textureLod(pre)
+//    const float MAX_REFLECTION = 4.0;
+//    vec3 prefilteredColor = textureLod(prefilterMap, reflect(-V, N), roughness * MAX_REFLECTION_LOD).rgb;
+//    vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
+//    vec3 specular = prefilteredColor * (F * brdf.r + brdf.g);
 
-    vec3 ambient = diffuse * ao;
+
+    vec3 ambient = diffuse * ao; // (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
     vec3 color = (ambient  + Lo) * shadows;

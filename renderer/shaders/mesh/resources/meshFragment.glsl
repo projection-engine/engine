@@ -4,9 +4,6 @@ precision highp float;
 // IN
 in vec4 vPosition;
 in highp vec2 texCoord;
-
-
-
 in mat3 toTangentSpace;
 in vec3 normalVec;
 

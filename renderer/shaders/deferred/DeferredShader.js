@@ -50,7 +50,6 @@ export default class DeferredShader extends Shader {
         this.gpu.uniform3fv(this.cameraVecULocation, cameraVec)
 
 
-
         // DIRECTIONAL LIGHTS
         let textureOffset = directionalLights.length > 4 ? 4 : directionalLights.length
 
@@ -83,18 +82,18 @@ export default class DeferredShader extends Shader {
 
         // POINT LIGHTS
         this.gpu.uniform1i(this.lightQuantityULocation, (lights.length > 4 ? 4 : lights.length))
+
         for (let i = 0; i < (lights.length > 4 ? 4 : lights.length); i++) {
             const l = lights[i].components.PointLightComponent
 
             const location = this.gpu.getUniformLocation(this.program, `lightPosition[${i}]`)
             const locationColor = this.gpu.getUniformLocation(this.program, `lightColor[${i}]`)
-           const locationAttenuation = this.gpu.getUniformLocation(this.program, `lightAttenuationFactors[${i}]`)
+            const locationAttenuation = this.gpu.getUniformLocation(this.program, `lightAttenuationFactors[${i}]`)
 
             this.gpu.uniform3fv(location, l.position)
             this.gpu.uniform3fv(locationColor, l.color)
             this.gpu.uniform3fv(locationAttenuation, l.attenuation)
         }
-
 
 
         // G-BUFFER TEXTURES

@@ -18,22 +18,30 @@ export default class PickSystem extends System {
             currentCoords,
             clicked,
             camera,
+            setClicked
         } = params
 
         if(clicked && typeof currentCoords === "object"){
+            setClicked(false)
             const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
             const filtered = this._hasComponent(filteredMeshes)
 
             this.shader.use()
             this.picker.start()
+
+            const pickerProjection =  this.picker.getProjection(currentCoords, camera)
+
             for (let m = 0; m < filtered.length; m++) {
-                const meshIndex = filteredEntities.meshSources[filtered[m].components.MeshComponent.meshID]
+                const currentInstance = filtered[m]
+                const meshIndex = filteredEntities.meshSources[currentInstance.components.MeshComponent.meshID]
                 const mesh = meshes[meshIndex]
+
                 if (mesh !== undefined) {
-                    const t = filtered[m].components.TransformComponent
-                    this._drawMesh(mesh, camera.viewMatrix,   this.picker.getProjection(currentCoords, camera), t.transformationMatrix)
+                    const t = currentInstance.components.TransformComponent
+                    this._drawMesh(mesh, currentInstance, camera.viewMatrix, pickerProjection, t.transformationMatrix)
                 }
             }
+
             let data = new Uint8Array(4);
             this.picker.gpu.readPixels(
                 0,
@@ -42,19 +50,22 @@ export default class PickSystem extends System {
                 1,
                 this.picker.gpu.RGBA,
                 this.picker.gpu.UNSIGNED_BYTE,
-                data);
+                data
+            );
 
             const index = data[0] + data[1] + data[2];
+
             if (index > 0)
-                setSelectedElement(index - 1)
+                setSelectedElement(filtered.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id)
             else
                 setSelectedElement(undefined)
             this.picker.stopMapping();
-            params.clicked = false
+
         }
 
     }
     _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformationMatrix) {
+
         this.shader.bindUniforms({pickerID: instance.components.PickComponent.pickID})
 
         this.picker.gpu.bindVertexArray(mesh.VAO)

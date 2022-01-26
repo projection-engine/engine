@@ -15,6 +15,7 @@ export default class PickerShader extends Shader {
     }
 
     bindUniforms({pickerID}) {
+
         this.gpu.uniform4fv(this.pickerULocation, [...pickerID, 1])
     }
 }

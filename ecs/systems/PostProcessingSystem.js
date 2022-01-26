@@ -5,9 +5,7 @@ import DeferredShader from "../../renderer/shaders/deferred/DeferredShader";
 import DeferredSystem from "./DeferredSystem";
 import SkyBoxShader from "../../renderer/shaders/skybox/SkyBoxShader";
 import GridShader from "../../renderer/shaders/grid/GridShader";
-import BillboardShader from "../../renderer/shaders/billboard/BillboardShader";
 import ShadowMapSystem from "./ShadowMapSystem";
-import {bindTexture} from "../../utils/utils";
 import Texture from "../../renderer/elements/Texture";
 import BillboardRenderer from "../utils/BillboardRenderer";
 
@@ -18,9 +16,10 @@ export default class PostProcessingSystem extends System {
         this.gpu = gpu
         this.billboardRenderer = new BillboardRenderer(gpu)
         this.pointLightTexture = new Texture('./icons/point_light.png', false, gpu)
-        this.directionalLightTexture= new Texture('./icons/directional_light.png', false, gpu)
-        // TODO
-        this.spotLightTexture =  new Texture('./icons/point_light.png', false, gpu)
+        this.directionalLightTexture = new Texture('./icons/directional_light.png', false, gpu)
+
+        this.spotLightTexture = new Texture('./icons/spot_light.png', false, gpu)
+        this.cubemapTexture = new Texture('./icons/cubemap.png', false, gpu)
 
 
         this.postProcessing = new PostProcessing(gpu)
@@ -40,7 +39,7 @@ export default class PostProcessingSystem extends System {
             currentCoords,
             clicked,
             camera,
-            shadowMapResolution=2048
+            shadowMapResolution = 2048
         } = params
 
         const grid = this._find(entities, e => e.components.GridComponent?.active)[0]
@@ -48,10 +47,10 @@ export default class PostProcessingSystem extends System {
         const deferredSystem = systems.find(s => s instanceof DeferredSystem)
         const shadowMapSystem = systems.find(s => s instanceof ShadowMapSystem)
 
-        const lights = this._find(entities, e => filteredEntities.pointLights[e.id] !== undefined)
+        const pointLights = this._find(entities, e => filteredEntities.pointLights[e.id] !== undefined)
         const directionalLights = this._find(entities, e => filteredEntities.directionalLights[e.id] !== undefined)
         const spotLights = this._find(entities, e => filteredEntities.spotLights[e.id] !== undefined)
-
+        const cubeMaps =  this._find(entities, e => filteredEntities.cubeMaps[e.id] !== undefined)
         const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
 
         this.postProcessing.startMapping()
@@ -73,7 +72,7 @@ export default class PostProcessingSystem extends System {
         this.deferredShader.bindUniforms({
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
             skyboxTexture: skyboxElement?.components.SkyboxComponent.cubeMap,
-            lights: lights,
+            lights: pointLights,
             shadowMapResolution: shadowMapResolution,
 
             // DIRECTIONAL LIGHTS
@@ -100,7 +99,7 @@ export default class PostProcessingSystem extends System {
             this.gpu.DEPTH_BUFFER_BIT, this.gpu.NEAREST)
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.postProcessing.frameBufferObject)
 
-        this._miscRenderPass(skyboxElement, grid, camera, [...lights, ...directionalLights, ...spotLights])
+        this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps])
 
 
         this.postProcessing.stopMapping()
@@ -108,32 +107,30 @@ export default class PostProcessingSystem extends System {
         this.postProcessing.draw(this.shader)
     }
 
-    _map(lights){
-        let point = [],directional = [],spot = []
+    _map(billboards) {
+        let point = [], directional = [], spot = [], cubemaps = []
 
 
-        for(let i =0; i<lights.length; i++){
-            if(lights[i].components.PointLightComponent) {
-
-                point.push(Array.from(lights[i].components.PointLightComponent.transformationMatrix))
-            }
-            else if(lights[i].components.DirectionalLightComponent) {
-
-                directional.push(Array.from(lights[i].components.DirectionalLightComponent?.transformationMatrix))
-            }
-            else if(lights[i].components.SpotLightComponent) {
-
-                spot.push(Array.from(lights[i].components.SpotLightComponent.transformationMatrix))
-            }
+        for (let i = 0; i < billboards.length; i++) {
+            if (billboards[i].components.PointLightComponent)
+                point.push(Array.from(billboards[i].components.PointLightComponent.transformationMatrix))
+            else if (billboards[i].components.DirectionalLightComponent)
+                directional.push(Array.from(billboards[i].components.DirectionalLightComponent?.transformationMatrix))
+            else if (billboards[i].components.SpotLightComponent)
+                spot.push(Array.from(billboards[i].components.SpotLightComponent.transformationMatrix))
+            else if (billboards[i].components.CubeMapComponent)
+                cubemaps.push(Array.from(billboards[i].components.CubeMapComponent.transformationMatrix))
         }
 
         return {
             pointLights: point,
             directionalLights: directional,
             spotLights: spot,
+            cubemaps: cubemaps
         }
     }
-    _miscRenderPass(skybox, grid, camera, lights) {
+
+    _miscRenderPass(skybox, grid, camera, billboards) {
         //GRID
         if (grid) {
             this.gridShader.use()
@@ -151,12 +148,13 @@ export default class PostProcessingSystem extends System {
             this.gpu.drawArrays(this.gpu.LINES, 0, grid.components.GridComponent.length)
         }
 
-        if (lights.length > 0) {
-            const mapped = this._map(lights)
+        if (billboards.length > 0) {
+            const mapped = this._map(billboards)
+
             this.billboardRenderer.draw(mapped.pointLights, this.pointLightTexture.texture, camera)
             this.billboardRenderer.draw(mapped.directionalLights, this.directionalLightTexture.texture, camera)
             this.billboardRenderer.draw(mapped.spotLights, this.spotLightTexture.texture, camera)
-
+            this.billboardRenderer.draw(mapped.cubemaps, this.cubemapTexture.texture, camera)
         }
 
     }

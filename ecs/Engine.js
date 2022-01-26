@@ -38,8 +38,8 @@ export default class Engine {
 
     }
 
-    updateParams(params, entities,materials,meshes) {
-        console.log(materials,meshes)
+    updateParams(params, entities, materials, meshes) {
+        console.log(materials, meshes)
         let r = {
             pointLights: {},
             spotLights: {},
@@ -48,7 +48,8 @@ export default class Engine {
             grid: {},
             directionalLights: {},
             materials: {},
-            meshSources: {}
+            meshSources: {},
+            cubeMaps: {}
         }
 
         for (let i = 0; i < entities.length; i++) {
@@ -66,12 +67,14 @@ export default class Engine {
                 r.grid[current.id] = i
             if (current.components.MeshComponent)
                 r.meshes[current.id] = i
+            if (current.components.CubeMapComponent)
+                r.cubeMaps[current.id] = i
         }
-        for(let i = 0; i< materials.length; i++){
+        for (let i = 0; i < materials.length; i++) {
             r.materials[materials[i].id] = i
         }
 
-        for(let i = 0; i< meshes.length; i++){
+        for (let i = 0; i < meshes.length; i++) {
 
             r.meshSources[meshes[i].id] = i
         }
@@ -80,16 +83,15 @@ export default class Engine {
 
         this.params = {
             ...params,
-            currentCoord: this.data.currentCoord,
-            clicked: this.data.clicked,
+
+
             camera: this.camera,
         }
 
 
-
         this.cameraEvents.stopTracking()
         this.camera.aspectRatio = this.gpu.canvas.width / this.gpu.canvas.height
-        this.camera.updateProjectionMatrix()
+
 
     }
 
@@ -103,10 +105,17 @@ export default class Engine {
 
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
 
-            systems.forEach((s,i) => {
+            systems.forEach((s, i) => {
                 s.execute(
                     entities,
-                    this.params,
+                    {
+                        ...this.params,
+                        clicked:  this.data.clicked,
+                        setClicked:  e => {
+                            this.data.clicked = e
+                        },
+                        currentCoords: this.data.currentCoord
+                    },
                     systems,
                     this.types
                 )

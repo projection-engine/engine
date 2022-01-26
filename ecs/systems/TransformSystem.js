@@ -17,8 +17,6 @@ export default class TransformSystem extends System {
         for (let i = 0; i < filtered.length; i++) {
             const current = filtered[i]
             if (current !== undefined && current.components.TransformComponent.changed) {
-
-                const dependents = this._find(filtered, e => e.linkedTo === current.id)
                 let newTransform = mat4.create()
                 // TRANSFORM
                 newTransform[12] = current.components.TransformComponent.translation[0]
@@ -57,18 +55,28 @@ export default class TransformSystem extends System {
                     scalingMatrix
                 )
                 current.components.TransformComponent.transformationMatrix = newTransform
-                for (let j = 0; j < dependents.length; j++) {
-                    mat4.multiply(
-                        dependents[j].components.TransformComponent.transformationMatrix,
-                        current.components.TransformComponent.transformationMatrix,
-                        dependents[j].components.TransformComponent.transformationMatrix
-                    )
+                let notScaledParentTransform = [...newTransform]
 
-                    if (dependents[j].components.MeshComponent !== undefined)
-                        dependents[j].components.MeshComponent.normalMatrix = this._updateNormalMatrix(dependents[j].components.TransformComponent.transformationMatrix)
+                notScaledParentTransform[0] /= current.components.TransformComponent.scaling[0]
+                notScaledParentTransform[5] /= current.components.TransformComponent.scaling[1]
+                notScaledParentTransform[10] /= current.components.TransformComponent.scaling[2]
 
-                    dependents[j].components.TransformComponent.changed = false
 
+                for (let j = 0; j < filtered.length; j++) {
+                    if (filtered[j].linkedTo === current.id) {
+
+                        mat4.multiply(
+                            filtered[j].components.TransformComponent.transformationMatrix,
+                            notScaledParentTransform,
+                            filtered[j].components.TransformComponent.transformationMatrix
+
+                        )
+
+                        if (filtered[j].components.MeshComponent !== undefined)
+                            filtered[j].components.MeshComponent.normalMatrix = this._updateNormalMatrix(filtered[j].components.TransformComponent.transformationMatrix)
+
+                        // filtered[j].components.TransformComponent.changed = false
+                    }
                 }
                 current.components.TransformComponent.changed = false
                 if (current.components.MeshComponent !== undefined)
