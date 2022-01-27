@@ -27,8 +27,6 @@ export default class PostProcessingSystem extends System {
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)
         this.deferredShader = new DeferredShader(gpu)
-
-
     }
 
     execute(entities, params, systems, filteredEntities) {

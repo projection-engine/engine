@@ -84,19 +84,10 @@ export default function cameraEvents(camera, onClick) {
             case 'mousedown': {
                 startMouseDown = performance.now()
 
-                event.currentTarget.style.cursor = 'none'
-                event.currentTarget.parentNode.style.outline = '#0095ff 1px solid'
-
                 isFocused = true
                 break
             }
             case 'mouseup': {
-
-                const target = document.getElementById(camera.canvasID)
-                if (target !== null) {
-                    target.style.cursor = 'default'
-                    target.parentNode.style.outline = 'var(--fabric-border-primary) 1px solid'
-                }
                 isFocused = false
 
                 lastMousePosition = {x: undefined, y: undefined}
