@@ -144,8 +144,9 @@ export default function cameraEvents(camera, canvasID, onClick) {
                     default:
                         break
                 }
-            } else {
+            } else if (event.code === conf.keybindings.forwards|| event.code===conf.keybindings.backwards) {
                 const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+
                 let way = -1
                 if (event.code === conf.keybindings.backwards) {
                     way = 1

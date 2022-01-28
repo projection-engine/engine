@@ -17,6 +17,11 @@ export default class TransformSystem extends System {
         for (let i = 0; i < filtered.length; i++) {
             const current = filtered[i]
             if (current !== undefined && current.components.TransformComponent.changed) {
+                let parent
+                if (current.linkedTo)
+                    parent = this._find(entities, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
+
+
                 let newTransform = mat4.create()
                 // TRANSFORM
                 newTransform[12] = current.components.TransformComponent.translation[0]
@@ -48,35 +53,41 @@ export default class TransformSystem extends System {
                 scalingMatrix[0] = current.components.TransformComponent.scaling[0]
                 scalingMatrix[5] = current.components.TransformComponent.scaling[1]
                 scalingMatrix[10] = current.components.TransformComponent.scaling[2]
-
+                if (current.components.SphereCollider) {
+                    switch (current.components.SphereCollider.axis) {
+                        case 'x':
+                            if (current.components.TransformComponent.scaling[0] > 1)
+                                current.components.SphereCollider.radius *= current.components.TransformComponent.scaling[0]
+                            break
+                        case 'y':
+                            if (current.components.TransformComponent.scaling[1] > 1)
+                                current.components.SphereCollider.radius *= current.components.TransformComponent.scaling[1]
+                            break
+                        case 'z':
+                            if (current.components.TransformComponent.scaling[2] > 1)
+                                current.components.SphereCollider.radius *= current.components.TransformComponent.scaling[2]
+                            break
+                    }
+                }
                 mat4.multiply(
                     newTransform,
                     newTransform,
                     scalingMatrix
                 )
-                current.components.TransformComponent.transformationMatrix = newTransform
-                let notScaledParentTransform = [...newTransform]
 
-                notScaledParentTransform[0] /= current.components.TransformComponent.scaling[0]
-                notScaledParentTransform[5] /= current.components.TransformComponent.scaling[1]
-                notScaledParentTransform[10] /= current.components.TransformComponent.scaling[2]
-
+                if (parent)
+                    mat4.multiply(
+                        current.components.TransformComponent.transformationMatrix,
+                        parent,
+                        newTransform
+                    )
+                else {
+                    current.components.TransformComponent.transformationMatrix = newTransform
+                }
 
                 for (let j = 0; j < filtered.length; j++) {
-                    if (filtered[j].linkedTo === current.id) {
-
-                        mat4.multiply(
-                            filtered[j].components.TransformComponent.transformationMatrix,
-                            notScaledParentTransform,
-                            filtered[j].components.TransformComponent.transformationMatrix
-
-                        )
-
-                        if (filtered[j].components.MeshComponent !== undefined)
-                            filtered[j].components.MeshComponent.normalMatrix = this._updateNormalMatrix(filtered[j].components.TransformComponent.transformationMatrix)
-
-                        // filtered[j].components.TransformComponent.changed = false
-                    }
+                    if (filtered[j].linkedTo === current.id)
+                        filtered[j].components.TransformComponent.changed = true
                 }
                 current.components.TransformComponent.changed = false
                 if (current.components.MeshComponent !== undefined)

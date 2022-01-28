@@ -5,6 +5,7 @@ import FreeCamera from "./camera/FreeCamera";
 
 export default class Engine {
     types = {}
+    cameraType = 'spherical'
     data = {
         fpsTarget: undefined,
         currentCoord: {x: 0, y: 0},
@@ -22,7 +23,7 @@ export default class Engine {
     }
 
 
-    constructor(id,  gpu, fpsTarget) {
+    constructor(id, gpu, fpsTarget) {
         this.data.canvasRef = document.getElementById(id + '-canvas')
         this.data.fpsTarget = fpsTarget
         this.gpu = gpu
@@ -32,9 +33,14 @@ export default class Engine {
 
         this.camera = new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
 
+        this._canvasID = `${id}-canvas`
+        this._resetCameraEvents()
+    }
+
+    _resetCameraEvents() {
         this.cameraEvents = cameraEvents(
             this.camera,
-            `${id}-canvas`,
+            this._canvasID,
             (x, y) => {
                 this.data.clicked = true
                 this.data.currentCoord = {x, y}
@@ -43,12 +49,20 @@ export default class Engine {
 
     changeCamera() {
         this.cameraEvents.stopTracking()
-        if (this.camera instanceof SphericalCamera)
-            this.camera = new FreeCamera([0, 10, 30], 1.57, 1, 2000, 1)
-        else
-            this.camera = new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
+
+        if (this.camera instanceof SphericalCamera) {
+
+            this.camera = this.backupSpherical ? this.backupSpherical : new FreeCamera([0, 10, 30], 1.57, 1, 2000, 1)
+            this.backupSpherical = this.camera
+        } else {
+            this.camera = this.backupFree ? this.backupFree : new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
+            this.backupFree = this.camera
+        }
+        this._resetCameraEvents()
 
         this.cameraEvents.startTracking()
+
+
     }
 
     updateParams(params, entities, materials, meshes) {
@@ -61,7 +75,10 @@ export default class Engine {
             directionalLights: {},
             materials: {},
             meshSources: {},
-            cubeMaps: {}
+            cubeMaps: {},
+
+            staticPhysicsMeshes: {},
+            dynamicPhysicsMeshes: {}
         }
 
         for (let i = 0; i < entities.length; i++) {
@@ -77,10 +94,16 @@ export default class Engine {
                 r.skyboxes[current.id] = i
             if (current.components.GridComponent)
                 r.grid[current.id] = i
-            if (current.components.MeshComponent)
+            if (current.components.MeshComponent) {
                 r.meshes[current.id] = i
+                if (!current.components.PhysicsComponent && current.components.SphereCollider)
+                    r.staticPhysicsMeshes[current.id] = i
+                else if (current.components.PhysicsComponent && current.components.SphereCollider)
+                    r.dynamicPhysicsMeshes[current.id] = i
+            }
             if (current.components.CubeMapComponent)
                 r.cubeMaps[current.id] = i
+
         }
         for (let i = 0; i < materials.length; i++) {
             r.materials[materials[i].id] = i
@@ -91,14 +114,14 @@ export default class Engine {
             r.meshSources[meshes[i].id] = i
         }
 
+
         this.types = r
-
-        this.params = {
-            ...params,
-
-
-            camera: this.camera,
+        if (params.cameraType !== this.cameraType) {
+            this.cameraType = params.cameraType
+            this.changeCamera()
         }
+
+        this.params = params
 
 
         this.cameraEvents.stopTracking()
@@ -108,7 +131,7 @@ export default class Engine {
     start(entities, systems) {
         this.data.canRender = true
         this.cameraEvents.startTracking()
-
+        let startedOn = performance.now()
         const callback = () => {
             let start = performance.now()
 
@@ -125,7 +148,9 @@ export default class Engine {
                         setClicked: e => {
                             this.data.clicked = e
                         },
-                        currentCoords: this.data.currentCoord
+                        currentCoords: this.data.currentCoord,
+                        camera: this.camera,
+                        elapsed: performance.now() - startedOn
                     },
                     systems,
                     this.types

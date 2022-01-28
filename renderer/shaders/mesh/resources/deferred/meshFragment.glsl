@@ -20,7 +20,6 @@ struct PBR {
     sampler2D ao;
 };
 uniform PBR pbrMaterial;
-uniform float selected;
 
 // OUTPUTS
 layout (location = 0) out vec4 gPosition;
@@ -69,21 +68,14 @@ void main(){
     //    if(UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0|| UVs.y < 0.0)
     //        discard;
 
-    if(selected == 1.0){
-        gAlbedo = vec4(1.0, 1.0, 0.0, 1.0);
 
-        gBehaviour.r = 0.0;
-        gBehaviour.g = 1.0;
-        gBehaviour.b = 0.0;
-    }
-    else {
-        gAlbedo.rgb = texture(pbrMaterial.albedo, UVs).rgb;
-        gAlbedo.a = 1.0;
+    gAlbedo.rgb = texture(pbrMaterial.albedo, UVs).rgb;
+    gAlbedo.a = 1.0;
 
-        gBehaviour.r = texture(pbrMaterial.ao, UVs).r;
-        gBehaviour.g = texture(pbrMaterial.roughness, UVs).r;
-        gBehaviour.b = texture(pbrMaterial.metallic, UVs).r;
-    }
+    gBehaviour.r = texture(pbrMaterial.ao, UVs).r;
+    gBehaviour.g = texture(pbrMaterial.roughness, UVs).r;
+    gBehaviour.b = texture(pbrMaterial.metallic, UVs).r;
+
 
     gNormal = vec4(normalize(toTangentSpace * ((texture(pbrMaterial.normal, UVs).xyz * 2.0)- 1.0)), 1.0);
 

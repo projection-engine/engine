@@ -7,6 +7,8 @@ export default class Mesh {
     verticesQuantity = 0
     trianglesQuantity = 0
 
+    maxBoundingBox = []
+    minBoundingBox = []
     VAO
     vertexVBO
     indexVBO
@@ -22,11 +24,15 @@ export default class Mesh {
                     tangents = [],
                     id = randomID(),
                     gpu,
-
+                    maxBoundingBox,
+                    minBoundingBox
                 }) {
 
         this.id = id
         this.gpu = gpu
+
+        this.maxBoundingBox = maxBoundingBox
+this.minBoundingBox = minBoundingBox
 
         this.trianglesQuantity = indices.length / 3
         this.verticesQuantity = indices.length

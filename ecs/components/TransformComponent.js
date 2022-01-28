@@ -53,7 +53,7 @@ export default class TransformComponent extends Component {
     set transformationMatrix(data) {
         this._transformationMatrix = data
 
-        this._position = this._translation
+        this._position = [...this._translation, 1]
         this.changed = false
     }
 }

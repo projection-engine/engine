@@ -31,25 +31,24 @@ export default class DeferredSystem extends System {
         this.gBuffer.startMapping()
 
         for (let m = 0; m < filtered.length; m++) {
-            const meshIndex = filteredEntities.meshSources[filtered[m].components.MeshComponent.meshID]
+            const current = filtered[m]
+            const meshIndex = filteredEntities.meshSources[current.components.MeshComponent.meshID]
             const mesh = meshes[meshIndex]
-            const meshInstance = filtered[m]
-            if (mesh !== undefined) {
-                const t = meshInstance.components.TransformComponent
-                const mat = meshInstance.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[meshInstance.components.MaterialComponent.materialID]] : undefined
+
+            if (mesh !== undefined && selectedElement !== current.id) {
+                const t = current.components.TransformComponent
+                const mat = current.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[current.components.MaterialComponent.materialID]] : undefined
 
                 DeferredSystem.drawMesh(
                     this.shader,
                     this.gBuffer.gpu,
-
                     mesh,
                     camera.position,
                     camera.viewMatrix,
                     camera.projectionMatrix,
                     t.transformationMatrix,
                     mat ? mat : this.fallbackMaterial,
-                    meshInstance.components.MeshComponent.normalMatrix,
-                    selectedElement === meshInstance.id
+                    current.components.MeshComponent.normalMatrix
                 )
             }
         }
@@ -58,11 +57,15 @@ export default class DeferredSystem extends System {
     }
 
     static drawMesh(
-        shader, gpu,
-        mesh, camPosition,
-        viewMatrix, projectionMatrix,
-        transformationMatrix, material,
-        normalMatrix, selected) {
+        shader,
+        gpu,
+        mesh,
+        camPosition,
+        viewMatrix,
+        projectionMatrix,
+        transformationMatrix,
+        material,
+        normalMatrix) {
 
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
@@ -75,13 +78,13 @@ export default class DeferredSystem extends System {
         shader.bindUniforms({
             material: material,
             cameraVec: camPosition,
-            normalMatrix: normalMatrix,
-            selected
+            normalMatrix: normalMatrix
         })
 
         gpu.uniformMatrix4fv(shader.transformMatrixULocation, false, transformationMatrix)
         gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, viewMatrix)
         gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, projectionMatrix)
+
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 
 

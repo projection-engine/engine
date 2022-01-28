@@ -8,6 +8,7 @@ import GridShader from "../../renderer/shaders/grid/GridShader";
 import ShadowMapSystem from "./ShadowMapSystem";
 import Texture from "../../renderer/elements/Texture";
 import BillboardRenderer from "../utils/BillboardRenderer";
+import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 
 export default class PostProcessingSystem extends System {
 
@@ -27,12 +28,15 @@ export default class PostProcessingSystem extends System {
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)
         this.deferredShader = new DeferredShader(gpu)
+
+        this.meshShader = new MeshShader(gpu, true)
     }
 
     execute(entities, params, systems, filteredEntities) {
         super.execute()
         const {
             meshes,
+            selectedElement,
             setSelectedElement,
             currentCoords,
             clicked,
@@ -97,8 +101,14 @@ export default class PostProcessingSystem extends System {
             this.gpu.DEPTH_BUFFER_BIT, this.gpu.NEAREST)
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.postProcessing.frameBufferObject)
 
-        this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps])
 
+
+        this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps])
+        if(selectedElement ){
+            const el = entities[filteredEntities.meshes[selectedElement]]
+            if(el)
+                this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el)
+        }
 
         this.postProcessing.stopMapping()
         this.shader.use()
@@ -154,6 +164,28 @@ export default class PostProcessingSystem extends System {
             this.billboardRenderer.draw(mapped.spotLights, this.spotLightTexture.texture, camera)
             this.billboardRenderer.draw(mapped.cubemaps, this.cubemapTexture.texture, camera)
         }
+    }
 
+    _drawSelected(mesh, camera, element){
+        this.meshShader.use()
+        // shader,
+        //     gpu,
+        //     mesh,
+        //     camPosition,
+        //     viewMatrix,
+        //     projectionMatrix,
+        //     transformationMatrix,
+        //     material,
+        //     normalMatrix
+        DeferredSystem.drawMesh(
+            this.meshShader,
+            this.gpu,
+            mesh,
+            camera.position,
+            camera.viewMatrix,
+            camera.projectionMatrix,
+            element.components.TransformComponent.transformationMatrix,
+            {},
+            element.components.MeshComponent.normalMatrix)
     }
 }
