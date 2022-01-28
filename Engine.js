@@ -1,6 +1,7 @@
-import TranslationGizmo from "../gizmo/TranslationGizmo";
-import cameraEvents from "../renderer/elements/cameraEvents";
-import Camera from "../renderer/elements/Camera";
+import TranslationGizmo from "./gizmo/TranslationGizmo";
+import cameraEvents from "./camera/cameraEvents";
+import SphericalCamera from "./camera/SphericalCamera";
+import FreeCamera from "./camera/FreeCamera";
 
 export default class Engine {
     types = {}
@@ -21,25 +22,36 @@ export default class Engine {
     }
 
 
-    constructor(id, type, gpu, fpsTarget) {
+    constructor(id,  gpu, fpsTarget) {
         this.data.canvasRef = document.getElementById(id + '-canvas')
         this.data.fpsTarget = fpsTarget
         this.gpu = gpu
-
-
         this.utils.translationGizmo = new TranslationGizmo(this.gpu)
-
         this.data.performanceRef = document.getElementById(id + '-frames')
-        this.camera = new Camera(`${id}-canvas`, [0, 10, 30], 1.57, 1, 2000, 1, type)
-        this.cameraEvents = cameraEvents(this.camera, (x, y) => {
-            this.data.clicked = true
-            this.data.currentCoord = {x, y}
-        })
 
+
+        this.camera = new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
+
+        this.cameraEvents = cameraEvents(
+            this.camera,
+            `${id}-canvas`,
+            (x, y) => {
+                this.data.clicked = true
+                this.data.currentCoord = {x, y}
+            })
+    }
+
+    changeCamera() {
+        this.cameraEvents.stopTracking()
+        if (this.camera instanceof SphericalCamera)
+            this.camera = new FreeCamera([0, 10, 30], 1.57, 1, 2000, 1)
+        else
+            this.camera = new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
+
+        this.cameraEvents.startTracking()
     }
 
     updateParams(params, entities, materials, meshes) {
-        console.log(materials, meshes)
         let r = {
             pointLights: {},
             spotLights: {},
@@ -91,8 +103,6 @@ export default class Engine {
 
         this.cameraEvents.stopTracking()
         this.camera.aspectRatio = this.gpu.canvas.width / this.gpu.canvas.height
-
-
     }
 
     start(entities, systems) {
@@ -101,6 +111,7 @@ export default class Engine {
 
         const callback = () => {
             let start = performance.now()
+
             this.camera.updatePlacement()
 
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
@@ -110,8 +121,8 @@ export default class Engine {
                     entities,
                     {
                         ...this.params,
-                        clicked:  this.data.clicked,
-                        setClicked:  e => {
+                        clicked: this.data.clicked,
+                        setClicked: e => {
                             this.data.clicked = e
                         },
                         currentCoords: this.data.currentCoord

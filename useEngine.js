@@ -1,8 +1,8 @@
 import {useEffect, useState} from "react";
 import {enableBasics} from "./utils/utils";
-import useECS from "./ecs/useECS";
+import useECS from "./useECS";
 
-export default function useEngine(id, cameraType) {
+export default function useEngine(id) {
     const [keepExecution, setKeepExecution] = useState(true)
     const [gpu, setGpu] = useState()
     const [selectedElement, setSelectedElement] = useState(null)
@@ -24,15 +24,17 @@ export default function useEngine(id, cameraType) {
     const {
         entities, dispatchEntities,
         systems, dispatchSystems,
-        ready
+        ready,
+        currentCamera, setCurrentCamera
     } = useECS({
         meshes,
         selectedElement,
         setSelectedElement,
         materials
-    }, id, cameraType, gpu)
+    }, id,  gpu)
 
     return {
+        currentCamera, setCurrentCamera,
         ready,
         entities, dispatchEntities,
         systems, dispatchSystems,

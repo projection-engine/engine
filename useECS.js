@@ -1,20 +1,22 @@
 import {useEffect, useReducer, useRef, useState} from "react";
-import entityReducer, {ENTITY_ACTIONS} from "./utils/entityReducer";
-import systemReducer, {SYSTEM_ACTIONS} from "./utils/systemReducer";
+import entityReducer, {ENTITY_ACTIONS} from "./ecs/utils/entityReducer";
+import systemReducer, {SYSTEM_ACTIONS} from "./ecs/utils/systemReducer";
 import Engine from "./Engine";
-import DeferredSystem from "./systems/DeferredSystem";
-import PickSystem from "./systems/PickSystem";
-import ShadowMapSystem from "./systems/ShadowMapSystem";
-import TransformSystem from "./systems/TransformSystem";
-import PostProcessingSystem from "./systems/PostProcessingSystem";
-import GridComponent from "./components/GridComponent";
-import Entity from "./basic/Entity";
-import FolderComponent from "./components/FolderComponent";
+import DeferredSystem from "./ecs/systems/DeferredSystem";
+import PickSystem from "./ecs/systems/PickSystem";
+import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
+import TransformSystem from "./ecs/systems/TransformSystem";
+import PostProcessingSystem from "./ecs/systems/PostProcessingSystem";
+import GridComponent from "./ecs/components/GridComponent";
+import Entity from "./ecs/basic/Entity";
+import FolderComponent from "./ecs/components/FolderComponent";
 
-export default function useECS(renderingProps, id, cameraType, gpu) {
+export default function useECS(renderingProps, id, gpu) {
     const [entities, dispatchEntities] = useReducer(entityReducer, [])
     const [systems, dispatchSystems] = useReducer(systemReducer, [])
     const [ready, setReady] = useState(false)
+    const [currentCamera, setCurrentCamera] = useState('Spherical')
+
     const renderer = useRef()
     let resizeObserver
 
@@ -71,7 +73,7 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
     }, [renderingProps, entities, initialized])
     useEffect(() => {
         if (gpu && !initialized &&  id) {
-            renderer.current = new Engine(id, cameraType, gpu)
+            renderer.current = new Engine(id, gpu)
 
             initiateSystems()
             renderer.current?.updateParams(renderingProps, entities, renderingProps.materials, renderingProps.meshes)
@@ -80,6 +82,10 @@ export default function useECS(renderingProps, id, cameraType, gpu) {
     return {
         ready,
         entities, dispatchEntities,
-        systems, dispatchSystems
+        systems, dispatchSystems,
+        currentCamera, setCurrentCamera: () => {
+            renderer.current?.changeCamera()
+            setCurrentCamera(renderer.current?.camera.constructor.name)
+        }
     }
 }
