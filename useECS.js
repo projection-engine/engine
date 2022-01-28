@@ -9,7 +9,6 @@ import TransformSystem from "./ecs/systems/TransformSystem";
 import PostProcessingSystem from "./ecs/systems/PostProcessingSystem";
 import GridComponent from "./ecs/components/GridComponent";
 import Entity from "./ecs/basic/Entity";
-import FolderComponent from "./ecs/components/FolderComponent";
 
 export default function useECS(renderingProps, id, gpu) {
     const [entities, dispatchEntities] = useReducer(entityReducer, [])

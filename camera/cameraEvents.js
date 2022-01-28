@@ -6,7 +6,6 @@ import SphericalCamera from "./SphericalCamera";
 export default function cameraEvents(camera, canvasID, onClick) {
     let target = document.getElementById(canvasID)
     let isFocused = false
-    let lastMousePosition = {x: 0, y: 0}
     let startMouseDown
     const maxAngle = camera instanceof SphericalCamera ? 1.57 : .75
 
@@ -29,6 +28,7 @@ export default function cameraEvents(camera, canvasID, onClick) {
         else
             camera.direction.down = active
     }
+    let requested = false
 
     function handleInput(event) {
         switch (event.type) {
@@ -60,12 +60,10 @@ export default function cameraEvents(camera, canvasID, onClick) {
             case 'mousemove': {
 
                 if (isFocused) {
-                    if (!lastMousePosition.x)
-                        lastMousePosition.x = event.clientX
-
-                    if (!lastMousePosition.y)
-                        lastMousePosition.y = event.clientY
-
+                    if (!requested) {
+                        requested = true
+                        target.requestPointerLock()
+                    }
                     // 360
                     if (camera instanceof FreeCamera) {
                         if (camera.yaw >= 6.28)
@@ -76,34 +74,35 @@ export default function cameraEvents(camera, canvasID, onClick) {
 
 
                     // MAX ~45deg
-                    if (event.clientY - lastMousePosition.y < 0 && camera.pitch < maxAngle)
-                        camera.pitch += (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.clientY - lastMousePosition.y)
+                    if (event.movementY < 0 && camera.pitch < maxAngle)
+                        camera.pitch += (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
 
                     // MIN ~-45deg
-                    else if (event.clientY - lastMousePosition.y > 0 && camera.pitch > -maxAngle)
-                        camera.pitch -= (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.clientY - lastMousePosition.y)
+                    else if (event.movementY > 0 && camera.pitch > -maxAngle)
+                        camera.pitch -= (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
 
 
-                    if (event.clientX - lastMousePosition.x < 0)
-                        camera.yaw += (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.clientX - lastMousePosition.x)
-                    else if (event.clientX - lastMousePosition.x > 0)
-                        camera.yaw -= (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.clientX - lastMousePosition.x)
+                    if (event.movementX < 0)
+                        camera.yaw += (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
+                    else if (event.movementX > 0)
+                        camera.yaw -= (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
+                    if (camera instanceof FreeCamera)
+                        camera.updateViewMatrix()
 
-                    camera.updateViewMatrix()
-                    lastMousePosition = {x: event.clientX, y: event.clientY}
                 }
                 break
             }
             case 'mousedown': {
+
                 startMouseDown = performance.now()
 
                 isFocused = true
                 break
             }
             case 'mouseup': {
+                requested = false
                 isFocused = false
-
-                lastMousePosition = {x: undefined, y: undefined}
+                document.exitPointerLock()
                 break
             }
             default:
