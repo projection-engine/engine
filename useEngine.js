@@ -30,7 +30,7 @@ export default function useEngine(id, canExecutePhysicsAnimation) {
         systems, dispatchSystems,
         ready
     } = useECS({
-        resolutionMultiplier, setResolutionMultiplier,
+        resolutionMultiplier,
         canExecutePhysicsAnimation,
         meshes,
         selectedElement,

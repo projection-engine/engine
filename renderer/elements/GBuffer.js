@@ -8,33 +8,8 @@ export default class GBuffer extends Framebuffer {
     gAlbedo
     gBehaviorTexture // METALLIC - ROUGHNESS - AO
 
-    constructor(gpu) {
-        super(gpu, gpu.canvas.width, gpu.canvas.height)
-        //
-        // this.prevFrameBuffer = this.gpu.createFramebuffer()
-        // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.prevFrameBuffer)
-        // this.previousFrame = createTexture(
-        //     this.gpu,
-        //     this.width,
-        //     this.height,
-        //     this.gpu.RGBA16F,
-        //     0,
-        //     this.gpu.RGBA,
-        //     this.gpu.FLOAT,
-        //     null,
-        //     this.gpu.NEAREST,
-        //     this.gpu.NEAREST,
-        //     this.gpu.CLAMP_TO_EDGE,
-        //     this.gpu.CLAMP_TO_EDGE
-        // )
-        // this.gpu.framebufferTexture2D(
-        //     this.gpu.FRAMEBUFFER,
-        //     this.gpu.COLOR_ATTACHMENT0,
-        //     this.gpu.TEXTURE_2D,
-        //     this.previousFrame,
-        //     0)
-        // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
-
+    constructor(gpu, resolutionMultiplier) {
+        super(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
 
         this.gBuffer = this.gpu.createFramebuffer()
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.gBuffer)
@@ -69,7 +44,7 @@ export default class GBuffer extends Framebuffer {
         this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA16F, this.width, this.height);
         this.gpu.framebufferTexture2D(this.gpu.FRAMEBUFFER, this.gpu.COLOR_ATTACHMENT2, this.gpu.TEXTURE_2D, this.gAlbedo, 0);
 
-        // // AO (r) - Roughness (g) - Height (b)
+        // AO (r) - Roughness (g) - Height (b)
         this.gBehaviorTexture = this.gpu.createTexture()
         this.gpu.bindTexture(this.gpu.TEXTURE_2D, this.gBehaviorTexture);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MAG_FILTER, this.gpu.NEAREST);

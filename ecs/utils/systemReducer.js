@@ -16,7 +16,7 @@ export default function systemReducer(state, action) {
             return stateClone
         }
         case SYSTEM_ACTIONS.REMOVE: {
-            const index = state.indexOf(action.payload)
+            const index = state.findIndex(s => s instanceof action.payload)
             if (index > -1)
                 stateClone.splice(index, 1)
             return stateClone

@@ -7,10 +7,10 @@ import Material from "../../renderer/elements/Material";
 
 export default class DeferredSystem extends System {
 
-    constructor(gpu) {
+    constructor(gpu, resolutionMultiplier) {
         super(['TransformComponent']);
         this.fallbackMaterial = new Material(gpu)
-        this.gBuffer = new GBuffer(gpu)
+        this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
     }
 

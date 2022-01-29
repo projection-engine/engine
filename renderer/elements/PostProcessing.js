@@ -1,14 +1,14 @@
 import {createRBO, createTexture} from "../../utils/utils";
 import Framebuffer from "./Framebuffer";
 
-export default class PostProcessing extends Framebuffer{
+export default class PostProcessing extends Framebuffer {
     frameBufferObject
     frameBufferTexture
     renderBufferObject
 
-    constructor(gpu) {
+    constructor(gpu, resolutionMultiplier) {
 
-        super(gpu, gpu.canvas.width,gpu.canvas.height);
+        super(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier);
         this.frameBufferObject = this.gpu.createFramebuffer()
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.frameBufferObject)
         this.frameBufferTexture = createTexture(
@@ -51,10 +51,10 @@ export default class PostProcessing extends Framebuffer{
         const gama = 2.2
         const exposure = 2
 
-        const inverseFilterTextureSize = [1/this.gpu.canvas.width, 1/this.gpu.canvas.height, 0]
+        const inverseFilterTextureSize = [1 / this.gpu.canvas.width, 1 / this.gpu.canvas.height, 0]
         const FXAASpanMax = 8
-        const FXAAReduceMin = 1/128
-        const FXAAReduceMul = 1/8
+        const FXAAReduceMin = 1 / 128
+        const FXAAReduceMul = 1 / 8
 
         this.gpu.uniform1f(shader.FXAASpanMaxULocation, FXAASpanMax);
         this.gpu.uniform1f(shader.FXAAReduceMinULocation, FXAAReduceMin);

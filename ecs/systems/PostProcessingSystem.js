@@ -12,7 +12,7 @@ import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 
 export default class PostProcessingSystem extends System {
 
-    constructor(gpu) {
+    constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
         this.billboardRenderer = new BillboardRenderer(gpu)
@@ -23,7 +23,7 @@ export default class PostProcessingSystem extends System {
         this.cubemapTexture = new Texture('./icons/cubemap.png', false, gpu)
 
 
-        this.postProcessing = new PostProcessing(gpu)
+        this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)
         this.shader = new PostProcessingShader(gpu)
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)

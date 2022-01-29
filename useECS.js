@@ -1,4 +1,4 @@
-import {useEffect, useReducer, useRef, useState} from "react";
+import {useEffect, useMemo, useReducer, useRef, useState} from "react";
 import entityReducer, {ENTITY_ACTIONS} from "./ecs/utils/entityReducer";
 import systemReducer, {SYSTEM_ACTIONS} from "./ecs/utils/systemReducer";
 import Engine from "./Engine";
@@ -20,6 +20,17 @@ export default function useECS(renderingProps, id, gpu) {
     let resizeObserver
 
     const [initialized, setInitialized] = useState(false)
+
+    useEffect(() => {
+        if(initialized){
+            dispatchSystems({type: SYSTEM_ACTIONS.REMOVE, payload: DeferredSystem})
+            dispatchSystems({type: SYSTEM_ACTIONS.REMOVE, payload: PostProcessingSystem})
+
+            dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new DeferredSystem(gpu, renderingProps.resolutionMultiplier)})
+            dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new PostProcessingSystem(gpu, renderingProps.resolutionMultiplier)})
+        }
+    }, [renderingProps.resolutionMultiplier])
+
     const initiateSystems = () => {
         dispatchSystems({type: SYSTEM_ACTIONS.CLEAN})
 
@@ -29,8 +40,8 @@ export default function useECS(renderingProps, id, gpu) {
         dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new ShadowMapSystem(gpu)})
         dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new PickSystem(gpu)})
 
-        dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new DeferredSystem(gpu)})
-        dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new PostProcessingSystem(gpu)})
+        dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new DeferredSystem(gpu, renderingProps.resolutionMultiplier)})
+        dispatchSystems({type: SYSTEM_ACTIONS.ADD, payload: new PostProcessingSystem(gpu, renderingProps.resolutionMultiplier)})
 
         if (!initialized) {
             setInitialized(true)
@@ -45,20 +56,24 @@ export default function useECS(renderingProps, id, gpu) {
             setReady(true)
         }
     }
+
+
     const resizeCallback = () => {
         if (gpu && initialized) {
             renderer.current?.stop()
-            initiateSystems()
-            // renderer.current?.start(entities, systems)
+            renderer.current.camera.aspectRatio = gpu.canvas.width / gpu.canvas.height
+            renderer.current?.start(entities, systems)
+
         }
 
     }
     useEffect(() => {
-        if(id) {
+
+        if (id) {
             resizeObserver = new ResizeObserver(resizeCallback)
             resizeObserver.observe(document.getElementById(id + '-canvas'))
         }
-    }, [gpu, initialized,  id])
+    }, [gpu, initialized, id, entities, systems])
     useEffect(() => {
 
         if (initialized) {
@@ -71,7 +86,7 @@ export default function useECS(renderingProps, id, gpu) {
         }
     }, [renderingProps, entities, initialized])
     useEffect(() => {
-        if (gpu && !initialized &&  id) {
+        if (gpu && !initialized && id) {
             renderer.current = new Engine(id, gpu)
 
             initiateSystems()

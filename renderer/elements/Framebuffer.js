@@ -32,8 +32,9 @@ export default class Framebuffer {
 
         if(unbind)
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
+
         if (clear) {
-            this.gpu?.viewport(0, 0, this.gpu?.canvas.width, this.gpu?.canvas.height);
+            this.gpu?.viewport(0, 0, this.gpu.drawingBufferWidth, this.gpu.drawingBufferHeight);
             this.gpu?.clear(this.gpu?.DEPTH_BUFFER_BIT)
         }
     }

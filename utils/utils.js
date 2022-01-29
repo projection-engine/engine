@@ -11,7 +11,7 @@ export function createVAO(gpu) {
 }
 
 
-export function createVBO(gpu, type, data, renderingType=gpu.STATIC_DRAW) {
+export function createVBO(gpu, type, data, renderingType = gpu.STATIC_DRAW) {
     if (data.length === 0)
         return null;
 
@@ -26,7 +26,7 @@ export function createVBO(gpu, type, data, renderingType=gpu.STATIC_DRAW) {
 }
 
 
-export function createRBO(gpu, width, height, typeStorage=gpu.DEPTH24_STENCIL8, type=gpu.DEPTH_STENCIL_ATTACHMENT) {
+export function createRBO(gpu, width, height, typeStorage = gpu.DEPTH24_STENCIL8, type = gpu.DEPTH_STENCIL_ATTACHMENT) {
     let rbo = gpu.createRenderbuffer();
     gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
     gpu.renderbufferStorage(gpu.RENDERBUFFER, typeStorage, width, height)
@@ -53,7 +53,7 @@ export function createFBO(gpu, attachmentPoint, texture) {
     return fbo;
 }
 
-export function createTexture(gpu, width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind=true) {
+export function createTexture(gpu, width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind = true) {
     let texture = gpu.createTexture();
 
     gpu.bindTexture(gpu.TEXTURE_2D, texture);
@@ -66,8 +66,8 @@ export function createTexture(gpu, width, height, internalFormat, border, format
     if (wrapT !== undefined)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, wrapT);
     if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, false);
-    if(autoUnbind)
-    gpu.bindTexture(gpu.TEXTURE_2D, null);
+    if (autoUnbind)
+        gpu.bindTexture(gpu.TEXTURE_2D, null);
 
     return texture;
 }
@@ -101,8 +101,7 @@ export function enableBasics(gpu) {
 
     gpu?.frontFace(gpu?.CCW);
 
-
-    gpu?.viewport(0, 0, gpu?.canvas.width, gpu?.canvas.height);
+    gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight);
 }
 
 export function lookAt(yaw, pitch, position) {
