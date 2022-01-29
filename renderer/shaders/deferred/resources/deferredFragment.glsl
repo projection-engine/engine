@@ -15,7 +15,8 @@ uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
 uniform int lightQuantity;
 
 uniform samplerCube irradianceMap;
-uniform samplerCube cubeMap;
+uniform samplerCube prefilteredMapSampler;
+
 uniform float shadowMapResolution;
 
 uniform sampler2D positionSampler;
@@ -32,6 +33,8 @@ uniform sampler2D shadowMapTexture0;
 uniform sampler2D shadowMapTexture1;
 uniform sampler2D shadowMapTexture2;
 uniform sampler2D shadowMapTexture3;
+
+uniform sampler2D brdfSampler;
 
 uniform DirectionalLight directionalLights[MAX_LIGHTS];
 
@@ -188,7 +191,7 @@ void main() {
     }
 
     // DIRECTIONAL LIGHT
-    float shadows = dirLightsQuantity > 0?  0.0 : 1.0;
+    float shadows = dirLightsQuantity > 0?  0.2 : 1.0;
 
     for (int i = 0; i < dirLightsQuantity; i++){
         vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
@@ -227,15 +230,15 @@ void main() {
     // DIFFUSE IBL
     vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
-    vec3 diffuse = texture(irradianceMap, N).rgb * albedo * kD;
+    vec3 diffuse = texture(irradianceMap, -N).rgb * albedo * kD;
 
-//    const float MAX_REFLECTION = 4.0;
-//    vec3 prefilteredColor = textureLod(prefilterMap, reflect(-V, N), roughness * MAX_REFLECTION_LOD).rgb;
-//    vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
-//    vec3 specular = prefilteredColor * (F * brdf.r + brdf.g);
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, N), roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf = texture(brdfSampler, vec2(NdotV, roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.r + brdf.g);
 
 
-    vec3 ambient = diffuse * ao; // (diffuse + specular) * ao;
+    vec3 ambient = (diffuse + specular) * ao; // (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
     vec3 color = (ambient  + Lo) * shadows;

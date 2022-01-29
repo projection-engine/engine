@@ -3,6 +3,8 @@ import cameraEvents from "./camera/cameraEvents";
 import SphericalCamera from "./camera/SphericalCamera";
 import FreeCamera from "./camera/FreeCamera";
 
+import {createTexture} from "./utils/utils";
+
 export default class Engine {
     types = {}
     cameraType = 'spherical'
@@ -30,6 +32,25 @@ export default class Engine {
         this.utils.translationGizmo = new TranslationGizmo(this.gpu)
         this.data.performanceRef = document.getElementById(id + '-frames')
 
+        const brdf = new Image()
+        brdf.src = './brdf_lut.jpg'
+
+        brdf.onload =() => {
+            this.BRDF = createTexture(
+                gpu,
+                512,
+                512,
+                gpu.RGBA16F,
+                0,
+                gpu.RGBA,
+                gpu.FLOAT,
+                brdf,
+                gpu.LINEAR,
+                gpu.LINEAR,
+                gpu.CLAMP_TO_EDGE,
+                gpu.CLAMP_TO_EDGE
+            )
+        }
 
         this.camera = new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
 
@@ -150,7 +171,8 @@ export default class Engine {
                         },
                         currentCoords: this.data.currentCoord,
                         camera: this.camera,
-                        elapsed: performance.now() - startedOn
+                        elapsed: performance.now() - startedOn,
+                        BRDF: this.BRDF
                     },
                     systems,
                     this.types

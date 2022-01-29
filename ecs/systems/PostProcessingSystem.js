@@ -7,7 +7,7 @@ import SkyBoxShader from "../../renderer/shaders/skybox/SkyBoxShader";
 import GridShader from "../../renderer/shaders/grid/GridShader";
 import ShadowMapSystem from "./ShadowMapSystem";
 import Texture from "../../renderer/elements/Texture";
-import BillboardRenderer from "../utils/BillboardRenderer";
+import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 
 export default class PostProcessingSystem extends System {
@@ -41,7 +41,8 @@ export default class PostProcessingSystem extends System {
             currentCoords,
             clicked,
             camera,
-            shadowMapResolution = 2048
+            shadowMapResolution = 2048,
+            BRDF
         } = params
 
         const grid = this._find(entities, e => e.components.GridComponent?.active)[0]
@@ -73,7 +74,6 @@ export default class PostProcessingSystem extends System {
         this.deferredShader.use()
         this.deferredShader.bindUniforms({
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
-            skyboxTexture: skyboxElement?.components.SkyboxComponent.cubeMap,
             lights: pointLights,
             shadowMapResolution: shadowMapResolution,
 
@@ -86,7 +86,9 @@ export default class PostProcessingSystem extends System {
             gAlbedo: deferredSystem.gBuffer.gAlbedo,
             gBehaviorTexture: deferredSystem.gBuffer.gBehaviorTexture,
             gDepthTexture: deferredSystem.gBuffer.gDepthTexture,
-            cameraVec: camera.position
+            cameraVec: camera.position,
+            BRDF,
+            closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered
         })
 
         deferredSystem.gBuffer.draw(this.deferredShader)

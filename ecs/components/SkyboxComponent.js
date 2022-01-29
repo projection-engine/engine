@@ -1,9 +1,9 @@
-import CubeMapShader from "../../renderer/shaders/skybox/CubeMapShader";
+import CubeMapShader from "../../renderer/shaders/cubemap/CubeMapShader";
 import {createTexture, createVBO} from "../../utils/utils";
 import skyBoxCube from "../../assets/meshes/cube";
 import Component from "../basic/Component";
 import HDRImage from 'hdrpng/hdrpng'
-import CubeMap from "../utils/CubeMap";
+import CubeMap from "../../renderer/elements/CubeMap";
 
 export default class SkyboxComponent extends Component {
     _hdrTexture
@@ -32,28 +32,31 @@ export default class SkyboxComponent extends Component {
 
         this.type = type
         this._imageID = imageID
-        const baseShader = new CubeMapShader(this.gpu)
-        const irradianceShader = new CubeMapShader(this.gpu, true)
+        const baseShader = new CubeMapShader(this.gpu, 0)
+        const irradianceShader = new CubeMapShader(this.gpu, 1)
 
         this._initializeTexture(blob, () => {
             this._cubeMap = new CubeMap(baseShader, this.gpu, 512, (c) => {
                 this.gpu.activeTexture(this.gpu.TEXTURE0)
 
                 this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
-                this.gpu.uniform1i(c.shader.equirectangularMapULocation, 0)
-            })
+                this.gpu.uniform1i(c.equirectangularMapULocation, 0)
+            }, [0,0,0], true)
 
             this._irradianceMap = new CubeMap(irradianceShader, this.gpu, 32, (c) => {
                 this.gpu.activeTexture(this.gpu.TEXTURE0)
                 this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
-                this.gpu.uniform1i(c.shader.equirectangularMapULocation, 0)
-            })
+                this.gpu.uniform1i(c.equirectangularMapULocation, 0)
+            }, [0,0,0], false)
 
             this._initialized = true
         })
     }
 
 
+    get cubeMapPrefiltered() {
+        return this._cubeMap?.prefiltered
+    }
     get cubeMap() {
         return this._cubeMap?.texture
     }

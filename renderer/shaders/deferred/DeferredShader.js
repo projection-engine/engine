@@ -8,46 +8,37 @@ export default class DeferredShader extends Shader {
         super(vertex, fragment, gpu);
 
         this.positionLocation = gpu.getAttribLocation(this.program, 'position')
-        this.lightViewMatrixULocation = gpu.getUniformLocation(this.program, 'lightViewMatrix')
-        this.lightProjectionMatrixULocation = gpu.getUniformLocation(this.program, 'lightProjectionMatrix')
 
         this.gPositionULocation = gpu.getUniformLocation(this.program, 'positionSampler')
         this.gNormalULocation = gpu.getUniformLocation(this.program, 'normalSampler')
         this.gAlbedoULocation = gpu.getUniformLocation(this.program, 'albedoSampler')
         this.gBehaviourULocation = gpu.getUniformLocation(this.program, 'behaviourSampler')
-        // this.previousFrameULocation = gpu.getUniformLocation(this.program, 'prevFrameSampler')
-
 
         this.lightQuantityULocation = gpu.getUniformLocation(this.program, 'lightQuantity')
 
         this.irradianceMapULocation = gpu.getUniformLocation(this.program, 'irradianceMap')
-        this.cubeMapULocation = gpu.getUniformLocation(this.program, 'cubeMap')
+        this.prefilteredMapUlocation = gpu.getUniformLocation(this.program, 'prefilteredMapSampler')
+        this.brdfULocation = gpu.getUniformLocation(this.program, 'brdfSampler')
+
         this.cameraVecULocation = gpu.getUniformLocation(this.program, 'cameraVec')
-
-
-        // DIRECTIONAL LIGHT
-        this.directionLightULocation = gpu.getUniformLocation(this.program, 'dirLight.direction')
-        this.specularLightULocation = gpu.getUniformLocation(this.program, 'dirLight.specular')
-        this.ambientLightULocation = gpu.getUniformLocation(this.program, 'dirLight.ambient')
-
         this.directionalLightQuantity = gpu.getUniformLocation(this.program, 'dirLightQuantity')
-        // directionalLightsPOV
-        // directionalLights
-        this.shadowMapULocation = gpu.getUniformLocation(this.program, 'shadowMap')
+
         this.shadowMapResolutionULocation = gpu.getUniformLocation(this.program, 'shadowMapResolution')
 
     }
 
     bindUniforms({
                      directionalLights, shadowMaps, irradianceMap,
-                     skyboxTexture, shadowMapResolution, lights,
+                      shadowMapResolution, lights,
                      gNormalTexture, gPositionTexture, gAlbedo,
-                     gBehaviorTexture, cameraVec
+                     gBehaviorTexture, cameraVec,
+                     BRDF,closestCubeMap
                  }) {
 
 
         this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
         this.gpu.uniform3fv(this.cameraVecULocation, cameraVec)
+
 
 
         // DIRECTIONAL LIGHTS
@@ -108,9 +99,11 @@ export default class DeferredShader extends Shader {
         this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, irradianceMap)
         this.gpu.uniform1i(this.irradianceMapULocation, 4 + textureOffset)
 
-        this.gpu.activeTexture(this.gpu.TEXTURE0 + 5 + textureOffset)
-        this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, skyboxTexture)
-        this.gpu.uniform1i(this.cubeMapULocation, 5 + textureOffset)
+        bindTexture(5 + textureOffset, BRDF, this.brdfULocation, this.gpu)
+
+        this.gpu.activeTexture(this.gpu.TEXTURE0 + 6 + textureOffset)
+        this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, closestCubeMap)
+        this.gpu.uniform1i(this.prefilteredMapUlocation, 6 + textureOffset)
     }
 
 }
