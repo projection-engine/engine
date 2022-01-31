@@ -1,6 +1,6 @@
 import BillboardShader from "../shaders/billboard/BillboardShader";
 import {bindTexture, createVAO} from "../../utils/utils";
-import VBO from "../../utils/VBO";
+import VBO from "../VBO";
 
 export default class BillboardRenderer {
     constructor(gpu) {

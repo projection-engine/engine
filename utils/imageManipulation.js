@@ -1,7 +1,3 @@
-export default function generateDefaultTexture() {
-    return colorToImage('#e0e0e0')
-}
-
 export function colorToImage(color) {
     let c = document.createElement("canvas");
     c.width=1024

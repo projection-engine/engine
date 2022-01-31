@@ -1,4 +1,4 @@
-import {createVBO} from "./utils";
+import {createVBO} from "../utils/utils";
 
 export default class VBO {
     constructor(gpu, index, data, type, size, dataType, normalized=false, renderingType) {
@@ -10,7 +10,6 @@ export default class VBO {
         this.index =index
         this.type = type
         this.size = size
-        this.dataType = dataType
         this.normalized = normalized
 
     }

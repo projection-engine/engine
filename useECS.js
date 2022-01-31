@@ -10,6 +10,7 @@ import PostProcessingSystem from "./ecs/systems/PostProcessingSystem";
 import GridComponent from "./ecs/components/GridComponent";
 import Entity from "./ecs/basic/Entity";
 import PhysicsSystem from "./ecs/systems/PhysicsSystem";
+import parseEngineEntities from "./utils/parseEngineEntities";
 
 export default function useECS(renderingProps, id, gpu) {
     const [entities, dispatchEntities] = useReducer(entityReducer, [])
@@ -78,7 +79,8 @@ export default function useECS(renderingProps, id, gpu) {
 
         if (initialized) {
             renderer.current?.stop()
-            renderer.current?.updateParams(renderingProps, entities, renderingProps.materials, renderingProps.meshes)
+            parseEngineEntities(renderingProps, entities, renderingProps.materials, renderingProps.meshes, renderer.current)
+            // renderer.current?.updateParams(renderingProps, entities, renderingProps.materials, renderingProps.meshes)
             renderer.current?.start(entities, systems)
         }
         return () => {
@@ -90,7 +92,7 @@ export default function useECS(renderingProps, id, gpu) {
             renderer.current = new Engine(id, gpu)
 
             initiateSystems()
-            renderer.current?.updateParams(renderingProps, entities, renderingProps.materials, renderingProps.meshes)
+            parseEngineEntities(renderingProps, entities, renderingProps.materials, renderingProps.meshes, renderer.current)
         }
     }, [renderingProps, ready, entities, systems, gpu, id])
     return {
