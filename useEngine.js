@@ -3,12 +3,14 @@ import {enableBasics} from "./utils/utils";
 import useECS from "./useECS";
 
 export default function useEngine(id, canExecutePhysicsAnimation) {
-    const [keepExecution, setKeepExecution] = useState(true)
+
     const [gpu, setGpu] = useState()
     const [selectedElement, setSelectedElement] = useState(null)
     const [meshes, setMeshes] = useState([])
     const [materials, setMaterials] = useState([])
 
+
+    // SETTINGS
     const [cameraType, setCameraType] = useState('spherical')
     const [resolutionMultiplier, setResolutionMultiplier] = useState(1)
 
@@ -48,7 +50,6 @@ export default function useEngine(id, canExecutePhysicsAnimation) {
         systems, dispatchSystems,
         meshes, setMeshes,
         gpu, materials, setMaterials,
-        keepExecution, setKeepExecution,
         selectedElement, setSelectedElement
     }
 }

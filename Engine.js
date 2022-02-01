@@ -5,6 +5,7 @@ import FreeCamera from "./camera/FreeCamera";
 
 import {createTexture} from "./utils/utils";
 import RenderLoop from "./renderer/RenderLoop";
+import PhysicsSystem from "./ecs/systems/PhysicsSystem";
 
 export default class Engine extends RenderLoop{
     types = {}
@@ -22,6 +23,7 @@ export default class Engine extends RenderLoop{
         postProcessing: undefined,
         translationGizmo: undefined,
     }
+    _systems = []
 
 
     constructor(id, gpu, fpsTarget) {
@@ -56,6 +58,23 @@ export default class Engine extends RenderLoop{
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }
+    set systems(data){
+        this.stop()
+        if(this.systems.length > data.length )
+            this._systems.map(s => {
+                const found = data.find(sis => sis.constructor.name === s.constructor.name)
+                if(found)
+                    return found
+                else
+                    return s
+            })
+        else
+            this._systems = data
+
+    }
+    get systems(){
+        return this._systems
+    }
 
     _resetCameraEvents() {
         this.cameraEvents = cameraEvents(
@@ -83,14 +102,14 @@ export default class Engine extends RenderLoop{
         this.cameraEvents.startTracking()
     }
 
-    start(entities, systems) {
+    start(entities) {
         this.keep = true
         this.cameraEvents.startTracking()
 
         super.start((timestamp) => {
             this.camera.updatePlacement()
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-            systems.forEach((s, i) => {
+            this._systems.forEach((s, i) => {
                 s.execute(
                     entities,
                     {
@@ -104,7 +123,7 @@ export default class Engine extends RenderLoop{
                         elapsed: timestamp,
                         BRDF: this.BRDF
                     },
-                    systems,
+                    this._systems,
                     this.types
                 )
             })

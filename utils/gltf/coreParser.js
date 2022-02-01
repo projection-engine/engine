@@ -65,7 +65,7 @@ export default function coreParser(fileData) {
             nodes: []
         }
     }
-
+    
 }
 
 function getPrimitives(mesh, accessors, materials = []) {
