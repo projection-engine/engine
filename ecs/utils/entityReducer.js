@@ -1,4 +1,4 @@
-import cloneClass from "../../../utils/cloneClass";
+import cloneClass from "../../../utils/misc/cloneClass";
 import Entity from "../basic/Entity";
 import Component from "../basic/Component";
 import PickComponent from "../components/PickComponent";

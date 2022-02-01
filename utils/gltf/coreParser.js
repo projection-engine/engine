@@ -6,6 +6,7 @@ export default function coreParser(fileData) {
         const parsedBuffers = parsed.buffers.map(b => {
             return getBufferData(b.uri)
         })
+
         let parsedAccessors = []
         parsedAccessors = parsed.accessors.map(a => {
             let items = 0
@@ -45,9 +46,11 @@ export default function coreParser(fileData) {
         })
 
         const mainScene = parsed.scenes[0]
+
         let sceneNodes = parsed.nodes.filter((n, index) => {
             return mainScene.nodes.includes(index) && n.mesh !== undefined
         }).map(nodeParser)
+        console.log( parsed.nodes)
 
         let meshes = parsed.meshes.filter((_, index) => {
             return sceneNodes.find(n => n.meshIndex === index) !== undefined

@@ -5,7 +5,6 @@ import FreeCamera from "./camera/FreeCamera";
 
 import {createTexture} from "./utils/utils";
 import RenderLoop from "./renderer/RenderLoop";
-import PhysicsSystem from "./ecs/systems/PhysicsSystem";
 
 export default class Engine extends RenderLoop{
     types = {}
