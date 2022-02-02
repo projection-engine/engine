@@ -36,17 +36,16 @@ export default function useECS(renderingProps, id, gpu) {
             renderer.current?.stop()
             renderer.current.camera.aspectRatio = gpu.canvas.width / gpu.canvas.height
             renderer.current?.start(entities)
-
         }
-
     }
-    useEffect(() => {
 
+    useEffect(() => {
         if (id) {
             resizeObserver = new ResizeObserver(resizeCallback)
             resizeObserver.observe(document.getElementById(id + '-canvas'))
         }
     }, [gpu, initialized, id, entities])
+
     useEffect(() => {
 
         if (initialized) {

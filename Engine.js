@@ -96,6 +96,7 @@ export default class Engine extends RenderLoop{
             this.camera = this.backupFree ? this.backupFree : new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
             this.backupFree = this.camera
         }
+        this.camera.aspectRatio =  this.gpu.canvas.width / this.gpu.canvas.height
         this._resetCameraEvents()
 
         this.cameraEvents.startTracking()
