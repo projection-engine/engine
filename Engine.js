@@ -106,6 +106,9 @@ export default class Engine extends RenderLoop{
         this.keep = true
         this.cameraEvents.startTracking()
 
+        this.gpu?.clear(this.gpu.DEPTH_BUFFER_BIT | this.gpu.COLOR_BUFFER_BIT)
+        this.gpu?.cullFace(this.gpu.BACK)
+
         super.start((timestamp) => {
             this.camera.updatePlacement()
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)

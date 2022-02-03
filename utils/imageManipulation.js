@@ -27,7 +27,7 @@ export function toDataURL(src, callback) {
     img.src = src;
 
     if (img.complete || img.complete === undefined) {
-        img.src = "data:image_preview/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+        img.src = "data:selector/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
         img.src = src;
     }
 }

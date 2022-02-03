@@ -1,6 +1,6 @@
 import Component from "../basic/Component";
 
-export default class SphereCollider extends Component {
+export default class ColliderComponent extends Component {
     _radius = 10
 
     constructor(id, mesh) {

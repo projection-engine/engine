@@ -58,7 +58,7 @@ export default class PhysicsSystem extends System {
 }
 
 function intersectBoundingSphere(current, target) {
-    let radiusDistance = current.SphereCollider.radius + target.SphereCollider.radius,
+    let radiusDistance = current.ColliderComponent.radius + target.ColliderComponent.radius,
         centerDistance = [0, 0, 0, 1]
     vec4.subtract(centerDistance, target.TransformComponent.position, current.TransformComponent.position)
     centerDistance = vec4.length(centerDistance)

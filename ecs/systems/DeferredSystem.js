@@ -22,6 +22,8 @@ export default class DeferredSystem extends System {
             selectedElement,
             materials
         } = params
+
+
         const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
         const filtered = this._hasComponent(filteredMeshes)
 

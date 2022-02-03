@@ -86,7 +86,7 @@ float calculateShadows (vec4 fragPosLightSpace, vec2 faceOffset){
     if (pos.z > 1.0){
         pos.z = 1.0;
     }
-    float bias = 0.0;
+    float bias = 0.0001;
     float compare = pos.z - bias;
 
     response = sampleSoftShadows(vec2(pos.x/shadowMapsQuantity + faceOffset.x/shadowMapsQuantity, pos.y/shadowMapsQuantity + faceOffset.y/shadowMapsQuantity), compare);

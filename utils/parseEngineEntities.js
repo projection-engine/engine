@@ -49,7 +49,7 @@ export default function parseEngineEntities(params, entities, materials, meshes,
 
 
     instance.types = r
-    if (params.cameraType !== instance.cameraType) {
+    if (params.cameraType && params.cameraType !== instance.cameraType) {
         instance.cameraType = params.cameraType
         instance.changeCamera()
     }
