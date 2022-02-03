@@ -7,6 +7,7 @@ export default class ShadowMap extends Framebuffer {
 
     constructor(size, gpu) {
         super(gpu, size, size)
+
         this.frameBufferTexture = createTexture(
             this.gpu,
             size,
@@ -19,7 +20,8 @@ export default class ShadowMap extends Framebuffer {
             this.gpu.NEAREST,
             this.gpu.NEAREST,
             this.gpu.CLAMP_TO_EDGE,
-            this.gpu.CLAMP_TO_EDGE
+            this.gpu.CLAMP_TO_EDGE,
+            true
         )
         this.frameBufferObject = createFBO(
             this.gpu,
@@ -27,10 +29,12 @@ export default class ShadowMap extends Framebuffer {
             this.frameBufferTexture
         )
     }
-    startMapping(){
-        super.startMapping();
-        this.gpu.cullFace(this.gpu.FRONT)
+    startMapping(face, res){
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.frameBufferObject);
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
     }
+
+
     stopMapping() {
         super.stopMapping();
         this.gpu.cullFace(this.gpu.BACK)

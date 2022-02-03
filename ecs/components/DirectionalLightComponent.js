@@ -10,15 +10,19 @@ export default class DirectionalLightComponent extends Component {
     lightView = Array.from(mat4.create())
     lightProjection = Array.from(mat4.create())
     _size = 35
-
+    _atlasFace = [0,0]
 
     constructor(id) {
         super(id, 'DirectionalLightComponent');
         this._update()
 
     }
-
-
+    set atlasFace(data){
+        this._atlasFace = data
+    }
+    get atlasFace(){
+        return this._atlasFace
+    }
     get zNear() {
         return this._zNear
     }

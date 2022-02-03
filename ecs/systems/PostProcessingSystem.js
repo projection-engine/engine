@@ -9,12 +9,19 @@ import ShadowMapSystem from "./ShadowMapSystem";
 import Texture from "../../renderer/elements/Texture";
 import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
+import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebugShader";
+import {bindTexture} from "../../utils/utils";
+import Quad from "../../renderer/Quad";
 
 export default class PostProcessingSystem extends System {
 
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
+
+
+        this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
+        this.quad = new Quad(gpu)
         this.billboardRenderer = new BillboardRenderer(gpu)
         this.pointLightTexture = new Texture('./icons/point_light.png', false, gpu)
         this.directionalLightTexture = new Texture('./icons/directional_light.png', false, gpu)
@@ -41,7 +48,7 @@ export default class PostProcessingSystem extends System {
             currentCoords,
             clicked,
             camera,
-            shadowMapResolution = 2048,
+
             BRDF
         } = params
 
@@ -53,7 +60,7 @@ export default class PostProcessingSystem extends System {
         const pointLights = this._find(entities, e => filteredEntities.pointLights[e.id] !== undefined)
         const directionalLights = this._find(entities, e => filteredEntities.directionalLights[e.id] !== undefined)
         const spotLights = this._find(entities, e => filteredEntities.spotLights[e.id] !== undefined)
-        const cubeMaps =  this._find(entities, e => filteredEntities.cubeMaps[e.id] !== undefined)
+        const cubeMaps = this._find(entities, e => filteredEntities.cubeMaps[e.id] !== undefined)
         const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
 
         this.postProcessing.startMapping()
@@ -75,11 +82,13 @@ export default class PostProcessingSystem extends System {
         this.deferredShader.bindUniforms({
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
             lights: pointLights,
-            shadowMapResolution: shadowMapResolution,
+            shadowMapResolution: shadowMapSystem.maxResolution,
 
             // DIRECTIONAL LIGHTS
             directionalLights: directionalLights.map(d => d.components.DirectionalLightComponent),
-            shadowMaps: shadowMapSystem.shadowMaps.map(s => s.frameBufferTexture),
+            shadowMap: shadowMapSystem.shadowMapAtlas.frameBufferTexture,
+
+            shadowMapsQuantity: shadowMapSystem.maxResolution/shadowMapSystem.resolutionPerTexture,
 
             gNormalTexture: deferredSystem.gBuffer.gNormalTexture,
             gPositionTexture: deferredSystem.gBuffer.gPositionTexture,
@@ -115,6 +124,18 @@ export default class PostProcessingSystem extends System {
         this.postProcessing.stopMapping()
         this.shader.use()
         this.postProcessing.draw(this.shader)
+
+        // this.shadowMapDebugShader.use()
+        //
+        // bindTexture(
+        //     0,
+        //     shadowMapSystem.shadowMapAtlas.frameBufferTexture,
+        //     this.shadowMapDebugShader.shadowMapULocation,
+        //     this.gpu)
+        //
+        //
+        // this.quad.draw(this.shadowMapDebugShader.positionLocation)
+
     }
 
     _map(billboards) {
@@ -168,7 +189,7 @@ export default class PostProcessingSystem extends System {
         }
     }
 
-    _drawSelected(mesh, camera, element){
+    _drawSelected(mesh, camera, element) {
         this.meshShader.use()
         // shader,
         //     gpu,

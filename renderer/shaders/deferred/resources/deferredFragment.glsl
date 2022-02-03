@@ -1,6 +1,8 @@
 #version 300 es
 precision highp float;
-#define MAX_LIGHTS 4
+
+
+#define MAX_LIGHTS 2
 
 in vec2 texCoord;
 flat in int dirLightsQuantity;
@@ -27,13 +29,10 @@ uniform sampler2D behaviourSampler;
 struct DirectionalLight {
     vec3 direction;
     vec3 ambient;
-
+    vec2 atlasFace;
 };
-uniform sampler2D shadowMapTexture0;
-uniform sampler2D shadowMapTexture1;
-uniform sampler2D shadowMapTexture2;
-uniform sampler2D shadowMapTexture3;
-
+uniform sampler2D shadowMapTexture;
+uniform float shadowMapsQuantity;
 uniform sampler2D brdfSampler;
 
 uniform DirectionalLight directionalLights[MAX_LIGHTS];
@@ -43,22 +42,20 @@ out vec4 finalColor;
 
 
 // SHADOW-MAP / SOFT-SHADOWS
-float sampleShadowMap (vec2 coord, float compare, in sampler2D shadowSampler){
-    return step(compare, texture(shadowSampler, coord.xy).r);
+float sampleShadowMap (vec2 coord, float compare){
+    return step(compare, texture(shadowMapTexture, coord.xy).r);
 }
-float sampleShadowMapLinear (vec2 coord, float compare, in sampler2D shadowSampler){
-
-
+float sampleShadowMapLinear (vec2 coord, float compare){
     vec2 shadowTexelSize = vec2(1.0/shadowMapResolution, 1.0/shadowMapResolution);
 
     vec2 pixelPos = coord.xy/shadowTexelSize + vec2(0.5);
     vec2 fracPart = fract(pixelPos);
     vec2 startTexel = (pixelPos - fracPart) * shadowTexelSize;
 
-    float bottomLeftTexel = sampleShadowMap(startTexel, compare, shadowSampler);
-    float bottomRightTexel = sampleShadowMap(startTexel + vec2(shadowTexelSize.x, 0.0), compare, shadowSampler);
-    float topLeftTexel = sampleShadowMap(startTexel + vec2(0.0, shadowTexelSize.y), compare, shadowSampler);
-    float topRightTexel = sampleShadowMap(startTexel + vec2(shadowTexelSize.x, shadowTexelSize.y), compare, shadowSampler);
+    float bottomLeftTexel = sampleShadowMap(startTexel, compare);
+    float bottomRightTexel = sampleShadowMap(startTexel + vec2(shadowTexelSize.x, 0.0), compare);
+    float topLeftTexel = sampleShadowMap(startTexel + vec2(0.0, shadowTexelSize.y), compare);
+    float topRightTexel = sampleShadowMap(startTexel + vec2(shadowTexelSize.x, shadowTexelSize.y), compare);
 
 
     float mixOne = mix(bottomLeftTexel, topLeftTexel, fracPart.y);
@@ -66,7 +63,7 @@ float sampleShadowMapLinear (vec2 coord, float compare, in sampler2D shadowSampl
 
     return mix(mixOne, mixTwo, fracPart.x);
 }
-float sampleSoftShadows(vec2 coord, float compare, in sampler2D shadowSampler){
+float sampleSoftShadows(vec2 coord, float compare){
     const float SAMPLES = 3.0;
     const float SAMPLES_START = (SAMPLES -1.0)/2.0;
     const float SAMPLES_SQUARED = SAMPLES * SAMPLES;
@@ -77,12 +74,13 @@ float sampleSoftShadows(vec2 coord, float compare, in sampler2D shadowSampler){
     for (float y= -SAMPLES_START; y <= SAMPLES_START; y+=1.0){
         for (float x= -SAMPLES_START; x <= SAMPLES_START; x+=1.0){
             vec2 coordsOffset = vec2(x, y)*shadowTexelSize;
-            response += sampleShadowMapLinear(coord + coordsOffset, compare, shadowSampler);
+            response += sampleShadowMapLinear(coord + coordsOffset, compare);
         }
     }
     return response/SAMPLES_SQUARED;
 }
-float calculateShadows (vec4 fragPosLightSpace, in sampler2D shadowSampler){
+float calculateShadows (vec4 fragPosLightSpace, vec2 faceOffset){
+    float response = 1.0;
     vec3 pos = (fragPosLightSpace.xyz / fragPosLightSpace.w)* 0.5 + 0.5;
 
     if (pos.z > 1.0){
@@ -90,7 +88,8 @@ float calculateShadows (vec4 fragPosLightSpace, in sampler2D shadowSampler){
     }
     float bias = 0.0;
     float compare = pos.z - bias;
-    float response = sampleSoftShadows(pos.xy, compare, shadowSampler);
+
+    response = sampleSoftShadows(vec2(pos.x/shadowMapsQuantity + faceOffset.x/shadowMapsQuantity, pos.y/shadowMapsQuantity + faceOffset.y/shadowMapsQuantity), compare);
 
     return response;
 }
@@ -208,22 +207,7 @@ void main() {
         N,
         albedo
         );
-
-        switch (i) {
-            case 0:
-            shadows += calculateShadows(fragPosLightSpace, shadowMapTexture0)/float(dirLightsQuantity + 1);
-            break;
-            case 1:
-            shadows += calculateShadows(fragPosLightSpace, shadowMapTexture1)/float(dirLightsQuantity + 1);
-            break;
-            case 2:
-            shadows += calculateShadows(fragPosLightSpace, shadowMapTexture2)/float(dirLightsQuantity + 1);
-            break;
-            case 3:
-            shadows += calculateShadows(fragPosLightSpace, shadowMapTexture3)/float(dirLightsQuantity + 1);
-            break;
-        }
-
+        shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace)/float(dirLightsQuantity + 1);
     }
 
 
@@ -238,15 +222,12 @@ void main() {
     vec3 specular = prefilteredColor * (F * brdf.r + brdf.g);
 
 
-    vec3 ambient = (diffuse + specular) * ao; // (diffuse + specular) * ao;
+    vec3 ambient = (diffuse + specular) * ao;// (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
     vec3 color = (ambient  + Lo) * shadows;
     color = color / (color + vec3(1.0));
 
-    //    vec4 prevFrame = texture(prevFrameSampler, texCoord);
-    //    if(prevFrame.rgb == color.rgb || (prevFrame.r == 0.0 && prevFrame.g == 0.0 && prevFrame.b == 0.0))
+
     finalColor = vec4(color, 1.0);
-    //    else
-    //        finalColor = vec4(prevFrame.rgb, 1.0);
 }

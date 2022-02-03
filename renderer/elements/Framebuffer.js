@@ -1,11 +1,13 @@
 import {bindTexture} from "../../utils/utils";
+import Quad from "../Quad";
 
-export default class Framebuffer {
+export default class Framebuffer extends Quad{
     frameBufferObject
     frameBufferTexture
     renderBufferObject
 
     constructor(gpu, width, height) {
+        super(gpu);
         this.gpu = gpu
         this.width = width
         this.height = height

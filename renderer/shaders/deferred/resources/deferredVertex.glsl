@@ -1,5 +1,5 @@
 #version 300 es
-#define MAX_LIGHTS 4
+#define MAX_LIGHTS 2
 
 in vec3 position;
 

@@ -24,12 +24,14 @@ export default class DeferredShader extends Shader {
         this.directionalLightQuantity = gpu.getUniformLocation(this.program, 'dirLightQuantity')
 
         this.shadowMapResolutionULocation = gpu.getUniformLocation(this.program, 'shadowMapResolution')
+        this.shadowMapAtlasULocation = this.gpu.getUniformLocation(this.program, `shadowMapTexture`)
+        this.shadowMapsQuantityULocation = this.gpu.getUniformLocation(this.program, `shadowMapsQuantity`)
 
     }
 
     bindUniforms({
-                     directionalLights, shadowMaps, irradianceMap,
-                      shadowMapResolution, lights,
+                     directionalLights, shadowMap, irradianceMap,
+                      shadowMapResolution, lights, shadowMapsQuantity,
                      gNormalTexture, gPositionTexture, gAlbedo,
                      gBehaviorTexture, cameraVec,
                      BRDF,closestCubeMap
@@ -38,21 +40,24 @@ export default class DeferredShader extends Shader {
 
         this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
         this.gpu.uniform3fv(this.cameraVecULocation, cameraVec)
-
+        this.gpu.uniform1f(this.shadowMapsQuantityULocation, shadowMapsQuantity)
 
 
         // DIRECTIONAL LIGHTS
-        let textureOffset = directionalLights.length > 4 ? 4 : directionalLights.length
 
-        this.gpu.uniform1i(this.directionalLightQuantity, textureOffset)
-        for (let i = 0; i < textureOffset; i++) {
+        let maxTextures = directionalLights.length > 2 ? 2 : directionalLights.length
+        bindTexture(0, shadowMap, this.shadowMapAtlasULocation, this.gpu)
+
+        this.gpu.uniform1i(this.directionalLightQuantity, maxTextures)
+        for (let i = 0; i < maxTextures; i++) {
             const current = {
                 direction: directionalLights[i].direction,
                 ambient: directionalLights[i].color,
-                shadowMap: shadowMaps[i],
+                face: directionalLights[i].atlasFace,
                 lightViewMatrix: directionalLights[i].lightView,
                 lightProjectionMatrix: directionalLights[i].lightProjection
             }
+
 
             const lightViewMatrix = this.gpu.getUniformLocation(this.program, `directionalLightsPOV[${i}].lightViewMatrix`)
             const lightProjectionMatrix = this.gpu.getUniformLocation(this.program, `directionalLightsPOV[${i}].lightProjectionMatrix`)
@@ -61,13 +66,12 @@ export default class DeferredShader extends Shader {
 
             const direction = this.gpu.getUniformLocation(this.program, `directionalLights[${i}].direction`)
             const ambient = this.gpu.getUniformLocation(this.program, `directionalLights[${i}].ambient`)
-            const shadowMap = this.gpu.getUniformLocation(this.program, `shadowMapTexture${i}`)
 
+            const atlasFace = this.gpu.getUniformLocation(this.program, `directionalLights[${i}].atlasFace`)
+
+            this.gpu.uniform2fv(atlasFace, current.face)
             this.gpu.uniform3fv(direction, current.direction)
             this.gpu.uniform3fv(ambient, current.ambient)
-
-
-            bindTexture(i, current.shadowMap, shadowMap, this.gpu)
         }
 
 
@@ -88,22 +92,22 @@ export default class DeferredShader extends Shader {
 
 
         // G-BUFFER TEXTURES
-        bindTexture(0 + textureOffset, gPositionTexture, this.gPositionULocation, this.gpu)
-        bindTexture(1 + textureOffset, gNormalTexture, this.gNormalULocation, this.gpu)
-        bindTexture(2 + textureOffset, gAlbedo, this.gAlbedoULocation, this.gpu)
-        bindTexture(3 + textureOffset, gBehaviorTexture, this.gBehaviourULocation, this.gpu)
+        bindTexture(1, gPositionTexture, this.gPositionULocation, this.gpu)
+        bindTexture(2, gNormalTexture, this.gNormalULocation, this.gpu)
+        bindTexture(3, gAlbedo, this.gAlbedoULocation, this.gpu)
+        bindTexture(4, gBehaviorTexture, this.gBehaviourULocation, this.gpu)
 
 
         // SKYBOX + IRRADIANCE
-        this.gpu.activeTexture(this.gpu.TEXTURE0 + 4 + textureOffset)
+        this.gpu.activeTexture(this.gpu.TEXTURE0 + 5)
         this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, irradianceMap)
-        this.gpu.uniform1i(this.irradianceMapULocation, 4 + textureOffset)
+        this.gpu.uniform1i(this.irradianceMapULocation, 5)
 
-        bindTexture(5 + textureOffset, BRDF, this.brdfULocation, this.gpu)
+        bindTexture(6, BRDF, this.brdfULocation, this.gpu)
 
-        this.gpu.activeTexture(this.gpu.TEXTURE0 + 6 + textureOffset)
+        this.gpu.activeTexture(this.gpu.TEXTURE0 + 7)
         this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, closestCubeMap)
-        this.gpu.uniform1i(this.prefilteredMapUlocation, 6 + textureOffset)
+        this.gpu.uniform1i(this.prefilteredMapUlocation, 7)
     }
 
 }
