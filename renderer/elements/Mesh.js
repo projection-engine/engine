@@ -1,6 +1,7 @@
 import {createVAO, createVBO} from "../../utils/utils";
 import VBO from "../VBO";
-import randomID from "../../../utils/misc/randomID";
+import randomID from "../../../../views/editor/utils/misc/randomID";
+
 
 export default class Mesh {
     visible = true

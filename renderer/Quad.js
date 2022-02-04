@@ -1,5 +1,3 @@
-import {bindTexture} from "../utils/utils";
-
 export default class Quad{
     constructor(gpu) {
         this.gpu = gpu

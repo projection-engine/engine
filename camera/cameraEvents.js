@@ -1,4 +1,4 @@
-import conf from "../../config.json";
+import conf from "../config.json";
 import {linearAlgebraMath, Vector} from "pj-math";
 import FreeCamera from "./FreeCamera";
 import SphericalCamera from "./SphericalCamera";

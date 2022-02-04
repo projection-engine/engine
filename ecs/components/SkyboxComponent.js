@@ -1,6 +1,6 @@
 import CubeMapShader from "../../renderer/shaders/cubemap/CubeMapShader";
 import {createTexture, createVBO} from "../../utils/utils";
-import skyBoxCube from "../../assets/meshes/cube";
+import skyBoxCube from "../../assets/cube";
 import Component from "../basic/Component";
 import HDRImage from 'hdrpng/hdrpng'
 import CubeMap from "../../renderer/elements/CubeMap";

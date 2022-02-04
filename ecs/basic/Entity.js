@@ -1,4 +1,4 @@
-import randomID from "../../../utils/misc/randomID";
+import randomID from "../../../../views/editor/utils/misc/randomID";
 
 export default class Entity {
     id

@@ -1,6 +1,6 @@
 import {linearAlgebraMath, Vector} from 'pj-math'
 import {lookAt} from "../utils/utils";
-import conf from "../../config.json";
+import conf from "../config.json";
 import Camera from "./Camera";
 
 export default class FreeCamera extends Camera {

@@ -1,0 +1,25 @@
+{
+  "keybindings": {
+    "forwards": "KeyW",
+    "backwards": "KeyS",
+    "left": "KeyA",
+    "right": "KeyD",
+    "up": "ArrowUp",
+    "down": "ArrowDown"
+  },
+  "sensitivity": {
+    "up": 1,
+    "down": 1,
+    "left": 1,
+    "right": 1,
+    "forwards": 2,
+    "backwards": 2,
+    "yaw": 0.01,
+    "pitch": 0.01
+  },
+  "fieldOfView": "auto",
+  "aspectRation": "auto",
+  "wireframeColor": "#0095ff",
+  "vertexColor": "#ff5555",
+  "vertexRadius": 3
+}

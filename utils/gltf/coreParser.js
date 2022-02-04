@@ -1,6 +1,7 @@
 import nodeParser from "./nodeParser";
-import FileBlob from "../../../utils/classes/FileBlob";
-import {WebWorker} from "../../../utils/classes/Worker";
+import FileBlob from "../../../../views/editor/utils/classes/FileBlob";
+import {WebWorker} from "../../../../views/editor/utils/classes/Worker";
+
 
 export default function coreParser(file, files) {
     return new Promise(rootResolve => {
@@ -34,7 +35,7 @@ export default function coreParser(file, files) {
                 })
 
                 Promise.all(bufferPromises).then(parsedBuffers => {
-                    console.log(parsedBuffers)
+
                     let accessorPromises = parsed.accessors.map(a => {
                         let items = 0
                         switch (a.type) {

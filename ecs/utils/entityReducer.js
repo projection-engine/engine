@@ -1,8 +1,8 @@
-import cloneClass from "../../../utils/misc/cloneClass";
 import Entity from "../basic/Entity";
 import Component from "../basic/Component";
 import PickComponent from "../components/PickComponent";
 import generateNextID from "../../utils/generateNextID";
+import cloneClass from "../../../../views/editor/utils/misc/cloneClass";
 
 export const ENTITY_ACTIONS = {
     ADD: '0-A',

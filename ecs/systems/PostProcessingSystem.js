@@ -10,7 +10,6 @@ import Texture from "../../renderer/elements/Texture";
 import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebugShader";
-import {bindTexture} from "../../utils/utils";
 import Quad from "../../renderer/Quad";
 
 export default class PostProcessingSystem extends System {
