@@ -1,11 +1,14 @@
 import Shader from "../../Shader";
 import vertex from 'raw-loader!./resources/deferredVertex.glsl'
 import fragment from 'raw-loader!./resources/deferredFragment.glsl'
+import noShadowsFragment from 'raw-loader!./resources/deferredNoShadowsFragment.glsl'
 import {bindTexture} from "../../../utils/utils";
 
 export default class DeferredShader extends Shader {
-    constructor(gpu) {
-        super(vertex, fragment, gpu);
+    constructor(gpu, noShadows) {
+
+        super(vertex, noShadows ? noShadowsFragment : fragment, gpu);
+        this._noShadows = noShadows
 
         this.positionLocation = gpu.getAttribLocation(this.program, 'position')
 
@@ -23,6 +26,8 @@ export default class DeferredShader extends Shader {
         this.cameraVecULocation = gpu.getUniformLocation(this.program, 'cameraVec')
         this.directionalLightQuantity = gpu.getUniformLocation(this.program, 'dirLightQuantity')
 
+
+        // SHADOWS
         this.shadowMapResolutionULocation = gpu.getUniformLocation(this.program, 'shadowMapResolution')
         this.shadowMapAtlasULocation = this.gpu.getUniformLocation(this.program, `shadowMapTexture`)
         this.shadowMapsQuantityULocation = this.gpu.getUniformLocation(this.program, `shadowMapsQuantity`)
@@ -31,22 +36,17 @@ export default class DeferredShader extends Shader {
 
     bindUniforms({
                      directionalLights, shadowMap, irradianceMap,
-                      shadowMapResolution, lights, shadowMapsQuantity,
+                     shadowMapResolution, lights, shadowMapsQuantity,
                      gNormalTexture, gPositionTexture, gAlbedo,
                      gBehaviorTexture, cameraVec,
-                     BRDF,closestCubeMap
+                     BRDF, closestCubeMap
                  }) {
 
-
-        this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
         this.gpu.uniform3fv(this.cameraVecULocation, cameraVec)
-        this.gpu.uniform1f(this.shadowMapsQuantityULocation, shadowMapsQuantity)
-
-
         // DIRECTIONAL LIGHTS
 
         let maxTextures = directionalLights.length > 2 ? 2 : directionalLights.length
-        bindTexture(0, shadowMap, this.shadowMapAtlasULocation, this.gpu)
+
 
         this.gpu.uniform1i(this.directionalLightQuantity, maxTextures)
         for (let i = 0; i < maxTextures; i++) {
@@ -92,22 +92,29 @@ export default class DeferredShader extends Shader {
 
 
         // G-BUFFER TEXTURES
-        bindTexture(1, gPositionTexture, this.gPositionULocation, this.gpu)
-        bindTexture(2, gNormalTexture, this.gNormalULocation, this.gpu)
-        bindTexture(3, gAlbedo, this.gAlbedoULocation, this.gpu)
-        bindTexture(4, gBehaviorTexture, this.gBehaviourULocation, this.gpu)
+        bindTexture(0, gPositionTexture, this.gPositionULocation, this.gpu)
+        bindTexture(1, gNormalTexture, this.gNormalULocation, this.gpu)
+        bindTexture(2, gAlbedo, this.gAlbedoULocation, this.gpu)
+        bindTexture(3, gBehaviorTexture, this.gBehaviourULocation, this.gpu)
 
 
         // SKYBOX + IRRADIANCE
-        this.gpu.activeTexture(this.gpu.TEXTURE0 + 5)
+        this.gpu.activeTexture(this.gpu.TEXTURE0 + 4)
         this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, irradianceMap)
-        this.gpu.uniform1i(this.irradianceMapULocation, 5)
+        this.gpu.uniform1i(this.irradianceMapULocation, 4)
 
-        bindTexture(6, BRDF, this.brdfULocation, this.gpu)
+        bindTexture(5, BRDF, this.brdfULocation, this.gpu)
 
-        this.gpu.activeTexture(this.gpu.TEXTURE0 + 7)
+        this.gpu.activeTexture(this.gpu.TEXTURE0 + 6)
         this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, closestCubeMap)
-        this.gpu.uniform1i(this.prefilteredMapUlocation, 7)
+        this.gpu.uniform1i(this.prefilteredMapUlocation, 6)
+
+
+        if (!this._noShadows) {
+            this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
+            this.gpu.uniform1f(this.shadowMapsQuantityULocation, shadowMapsQuantity)
+            bindTexture(7, shadowMap, this.shadowMapAtlasULocation, this.gpu)
+        }
     }
 
 }

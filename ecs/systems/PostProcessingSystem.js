@@ -18,7 +18,6 @@ export default class PostProcessingSystem extends System {
         super([]);
         this.gpu = gpu
 
-
         this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
         this.quad = new Quad(gpu)
         this.billboardRenderer = new BillboardRenderer(gpu)
@@ -34,7 +33,7 @@ export default class PostProcessingSystem extends System {
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)
         this.deferredShader = new DeferredShader(gpu)
-
+        this.deferredNoShadowsShader =  new DeferredShader(gpu, true)
         this.meshShader = new MeshShader(gpu, true)
     }
 
@@ -43,11 +42,7 @@ export default class PostProcessingSystem extends System {
         const {
             meshes,
             selectedElement,
-            setSelectedElement,
-            currentCoords,
-            clicked,
             camera,
-
             BRDF
         } = params
 
@@ -77,17 +72,17 @@ export default class PostProcessingSystem extends System {
             this.gpu.depthMask(true)
         }
 
-        this.deferredShader.use()
-        this.deferredShader.bindUniforms({
+        const deferred = shadowMapSystem ? this.deferredShader : this.deferredNoShadowsShader
+
+        deferred.use()
+        deferred.bindUniforms({
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
             lights: pointLights,
-            shadowMapResolution: shadowMapSystem.maxResolution,
-
-            // DIRECTIONAL LIGHTS
             directionalLights: directionalLights.map(d => d.components.DirectionalLightComponent),
-            shadowMap: shadowMapSystem.shadowMapAtlas.frameBufferTexture,
 
-            shadowMapsQuantity: shadowMapSystem.maxResolution/shadowMapSystem.resolutionPerTexture,
+            shadowMap: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
+            shadowMapResolution: shadowMapSystem?.maxResolution,
+            shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution/shadowMapSystem.resolutionPerTexture) : undefined,
 
             gNormalTexture: deferredSystem.gBuffer.gNormalTexture,
             gPositionTexture: deferredSystem.gBuffer.gPositionTexture,
@@ -99,7 +94,7 @@ export default class PostProcessingSystem extends System {
             closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered
         })
 
-        deferredSystem.gBuffer.draw(this.deferredShader)
+        deferredSystem.gBuffer.draw(deferred)
 
         this.gpu.bindFramebuffer(this.gpu.READ_FRAMEBUFFER, deferredSystem.gBuffer.gBuffer)
         this.gpu.bindFramebuffer(this.gpu.DRAW_FRAMEBUFFER, this.postProcessing.frameBufferObject)
