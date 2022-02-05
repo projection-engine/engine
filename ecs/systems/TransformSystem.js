@@ -28,6 +28,7 @@ export default class TransformSystem extends System {
                 newTransform[13] = current.components.TransformComponent.translation[1]
                 newTransform[14] = current.components.TransformComponent.translation[2]
 
+
                 // ROTATE
                 mat4.rotate(
                     newTransform,

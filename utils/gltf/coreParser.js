@@ -1,6 +1,6 @@
 import nodeParser from "./nodeParser";
-import FileBlob from "../../../../views/editor/utils/classes/FileBlob";
-import {WebWorker} from "../../../../views/editor/utils/classes/Worker";
+import FileBlob from "../../../workers/FileBlob";
+import {WebWorker} from "../../../workers/WebWorker";
 
 
 export default function coreParser(file, files) {

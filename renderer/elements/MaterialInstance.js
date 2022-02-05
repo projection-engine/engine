@@ -1,16 +1,16 @@
 import Texture from "../../renderer/elements/Texture";
-import {colorToImage} from "../../utils/imageManipulation";
+import ImageProcessor from "../../../workers/ImageProcessor";
 
 export default class MaterialInstance {
     constructor(
         gpu,
         id,
-        albedo = colorToImage('rgba(127, 127, 127, 1)'),
-        metallic = colorToImage('rgba(0, 0, 0, 1)'),
-        roughness = colorToImage('rgba(255, 255, 255, 1)'),
-        normal = colorToImage('rgba(127, 127, 255, 1)'),
-        height = colorToImage('rgba(255, 255, 255, 1)'),
-        ao = colorToImage('rgba(255, 255, 255, 1)'),
+        albedo = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
+        metallic = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
+        roughness = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
+        normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
+        height = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
+        ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         autoInit = true
     ) {
         this.id = id
