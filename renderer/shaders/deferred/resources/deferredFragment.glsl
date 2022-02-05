@@ -214,7 +214,7 @@ void main() {
     // DIFFUSE IBL
     vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
-    vec3 diffuse = texture(irradianceMap, -N).rgb * albedo * kD;
+    vec3 diffuse = texture(irradianceMap, vec3(N.x, -N.y, N.z)).rgb * albedo * kD;
 
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, N), roughness * MAX_REFLECTION_LOD).rgb;

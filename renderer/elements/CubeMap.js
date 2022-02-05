@@ -74,7 +74,6 @@ export default class CubeMap {
         let perspective = mat4.create()
         mat4.perspective(perspective, 1.57, 1, .1, 10)
 
-
         this.gpu.viewport(0, 0, res, res)
 
         let texture = CubeMap.initializeTexture(this.gpu, res, true);
@@ -166,12 +165,9 @@ export default class CubeMap {
     static drawCubeMap(gpu, res, shader, perspective, vertexBuffer, onBeforeDraw, texture, mipLevel, position,) {
         let FBOs = [], RBOs = []
 
-        for (let i = 0; i < 6; i++) {
-            // Create framebuffer
-
+        for (let i = 0; i < 7; i++) {
             FBOs[i] = gpu.createFramebuffer();
             gpu.bindFramebuffer(gpu.FRAMEBUFFER, FBOs[i]);
-            // Create and attach depth buffer
 
             RBOs[i] = gpu.createRenderbuffer();
             gpu.bindRenderbuffer(gpu.RENDERBUFFER, RBOs[i]);

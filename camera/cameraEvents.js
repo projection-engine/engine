@@ -7,8 +7,7 @@ export default function cameraEvents(camera, canvasID, onClick) {
     let target = document.getElementById(canvasID)
     let isFocused = false
     let startMouseDown
-    const maxAngle = camera instanceof SphericalCamera ? 1.57 : .75
-
+    const maxAngle = camera instanceof FreeCamera ? 1.57 : 1.4
     const updateZ = (forward, active) => {
 
         if (forward)
@@ -32,7 +31,7 @@ export default function cameraEvents(camera, canvasID, onClick) {
 
     function handleInput(event) {
         switch (event.type) {
-            case 'mousewheel': {
+            case 'wheel': {
                 const forward = event.deltaY < 0
                 const distance = (forward ? 1 : -1) * (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
                 if (camera instanceof FreeCamera) {
@@ -72,7 +71,6 @@ export default function cameraEvents(camera, canvasID, onClick) {
                             camera.yaw = 0
                     }
 
-
                     // MAX ~45deg
                     if (event.movementY < 0 && camera.pitch < maxAngle)
                         camera.pitch += (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
@@ -82,9 +80,9 @@ export default function cameraEvents(camera, canvasID, onClick) {
                         camera.pitch -= (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
 
 
-                    if (event.movementX < 0)
+                    if ((event.movementX < 0 && camera instanceof FreeCamera) || (event.movementX > 0 && camera instanceof SphericalCamera))
                         camera.yaw += (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
-                    else if (event.movementX > 0)
+                    else if ((event.movementX > 0 && camera instanceof FreeCamera) || (event.movementX < 0 && camera instanceof SphericalCamera))
                         camera.yaw -= (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
                     if (camera instanceof FreeCamera)
                         camera.updateViewMatrix()
@@ -144,7 +142,7 @@ export default function cameraEvents(camera, canvasID, onClick) {
                     default:
                         break
                 }
-            } else if (event.code === conf.keybindings.forwards|| event.code===conf.keybindings.backwards) {
+            } else if (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards) {
                 const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
 
                 let way = -1
@@ -175,7 +173,7 @@ export default function cameraEvents(camera, canvasID, onClick) {
         target?.addEventListener('mousedown', handleInput)
         document.addEventListener('mouseup', handleInput)
         document.addEventListener('mousemove', handleInput)
-        target?.addEventListener('mousewheel', handleInput, {passive: true})
+        target?.addEventListener('wheel', handleInput, {passive: true})
     }
 
     function stopTracking() {
@@ -187,7 +185,7 @@ export default function cameraEvents(camera, canvasID, onClick) {
         target?.removeEventListener('mousedown', handleInput)
         document.removeEventListener('mouseup', handleInput)
         document.removeEventListener('mousemove', handleInput)
-        target?.removeEventListener('mousewheel', handleInput, {passive: true})
+        target?.removeEventListener('wheel', handleInput)
     }
 
     return {

@@ -14,8 +14,7 @@ export default class Camera{
         fov,
         zNear,
         zFar,
-        aspectRatio = 1,
-        type
+        aspectRatio = 1
     ) {
 
 

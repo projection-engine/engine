@@ -42,12 +42,14 @@ export default class SkyboxComponent extends Component {
                 this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
                 this.gpu.uniform1i(c.equirectangularMapULocation, 0)
             }, [0,0,0], true)
-
-            this._irradianceMap = new CubeMap(irradianceShader, this.gpu, 32, (c) => {
+            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+            this._irradianceMap = new CubeMap(
+                irradianceShader,
+                this.gpu, 32, (c) => {
                 this.gpu.activeTexture(this.gpu.TEXTURE0)
                 this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
                 this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-            }, [0,0,0], false)
+            }, [0,0,0], false, true)
 
             this._initialized = true
         })
@@ -122,7 +124,7 @@ export default class SkyboxComponent extends Component {
             this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this._vertexBuffer)
 
             this.gpu.activeTexture(this.gpu.TEXTURE0)
-            this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
+            this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this.cubeMap)
             this.gpu.uniform1i(shader.textureULocation, 0)
 
             this.gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, staticViewMatrix)

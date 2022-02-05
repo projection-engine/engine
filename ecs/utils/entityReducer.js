@@ -84,7 +84,6 @@ export default function entityReducer(state, action) {
                     key,
                     data,
                 } = action.payload
-
                 entity.components[key] = data
 
                 stateCopy[entityIndex] = entity

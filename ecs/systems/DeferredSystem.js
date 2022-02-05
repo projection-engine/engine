@@ -3,13 +3,13 @@ import TransformComponent from "../components/TransformComponent";
 
 import GBuffer from "../../renderer/elements/GBuffer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
-import Material from "../../renderer/elements/Material";
+import MaterialInstance from "../../renderer/elements/MaterialInstance";
 
 export default class DeferredSystem extends System {
 
     constructor(gpu, resolutionMultiplier) {
         super(['TransformComponent']);
-        this.fallbackMaterial = new Material(gpu)
+        this.fallbackMaterial = new MaterialInstance(gpu)
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
     }
