@@ -11,7 +11,8 @@ export default class TransformComponent extends Component {
     _position = [0, 0, 0, 1]
 
     constructor(id) {
-        super(id, TransformComponent.constructor.name);
+        const name = TransformComponent.constructor.name
+        super(id, name);
     }
 
     get position() {
