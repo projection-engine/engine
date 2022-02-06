@@ -115,6 +115,7 @@ export default class SkyboxComponent extends Component {
 
 
     draw(shader, projectionMatrix, staticViewMatrix) {
+
         if (this._initialized) {
             shader.use()
 

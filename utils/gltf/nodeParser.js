@@ -1,12 +1,27 @@
-export default function nodeParser(node) {
+export default function nodeParser(node, allNodes, isChild) {
+    let res = []
+    let children = node.children && node.children.length > 0 ? allNodes
+            .map((n, index) => {
+                if (node.children.includes(index))
+                    return {...allNodes[index], index}
+                else
+                    return undefined
+            }).filter(e => e !== undefined)
+        :
+        []
+    children = children
+        .map(child => {
+            return nodeParser(child, allNodes, true)
+        })
+        .flat()
     let parsedNode = {
         name: node.name,
         meshIndex: node.mesh,
         scaling: [1, 1, 1],
         rotation: [0, 0, 0],
-        translation: [0, 0, 0]
+        translation: [0, 0, 0],
+        children: []
     }
-
 
     if (node.matrix) {
         parsedNode = {
@@ -46,7 +61,10 @@ export default function nodeParser(node) {
 
     }
 
-    return parsedNode
+    res.push(...children)
+    if (node.mesh !== undefined)
+        res.push(parsedNode)
+    return res
 }
 
 

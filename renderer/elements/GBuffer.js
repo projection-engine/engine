@@ -10,6 +10,7 @@ export default class GBuffer extends Framebuffer {
 
     constructor(gpu, resolutionMultiplier) {
         super(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        console.log(window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
 
         this.gBuffer = this.gpu.createFramebuffer()
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.gBuffer)

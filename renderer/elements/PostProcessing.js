@@ -9,6 +9,7 @@ export default class PostProcessing extends Framebuffer {
     constructor(gpu, resolutionMultiplier) {
 
         super(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier);
+
         this.frameBufferObject = this.gpu.createFramebuffer()
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.frameBufferObject)
         this.frameBufferTexture = createTexture(
@@ -46,6 +47,7 @@ export default class PostProcessing extends Framebuffer {
     }
 
     onBeforeDraw(shader) {
+
         super.onBeforeDraw();
 
         const gama = 2.2

@@ -1,15 +1,11 @@
 import Shader from "../../Shader";
 import vertex from 'raw-loader!./resources/deferredVertex.glsl'
 import fragment from 'raw-loader!./resources/deferredFragment.glsl'
-import noShadowsFragment from 'raw-loader!./resources/deferredNoShadowsFragment.glsl'
 import {bindTexture} from "../../../utils/utils";
 
 export default class DeferredShader extends Shader {
-    constructor(gpu, noShadows) {
-
-        super(vertex, noShadows ? noShadowsFragment : fragment, gpu);
-        this._noShadows = noShadows
-
+    constructor(gpu) {
+        super(vertex, fragment, gpu);
         this.positionLocation = gpu.getAttribLocation(this.program, 'position')
 
         this.gPositionULocation = gpu.getUniformLocation(this.program, 'positionSampler')
@@ -109,12 +105,9 @@ export default class DeferredShader extends Shader {
         this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, closestCubeMap)
         this.gpu.uniform1i(this.prefilteredMapUlocation, 6)
 
-
-        if (!this._noShadows) {
-            this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
-            this.gpu.uniform1f(this.shadowMapsQuantityULocation, shadowMapsQuantity)
-            bindTexture(7, shadowMap, this.shadowMapAtlasULocation, this.gpu)
-        }
+        this.gpu.uniform1f(this.shadowMapResolutionULocation, shadowMapResolution)
+        this.gpu.uniform1f(this.shadowMapsQuantityULocation, shadowMapsQuantity)
+        bindTexture(7, shadowMap, this.shadowMapAtlasULocation, this.gpu)
     }
 
 }

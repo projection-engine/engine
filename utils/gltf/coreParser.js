@@ -8,7 +8,8 @@ export default function coreParser(file, files) {
         FileBlob
             .loadAsString(file)
             .then(blob => {
-                const parsed = JSON.parse(blob)
+
+                let parsed = JSON.parse(blob)
                 const bufferPromises = parsed.buffers.map(b => {
                     if (b.uri.includes('base64'))
                         return new Promise(resolve => {
@@ -20,7 +21,7 @@ export default function coreParser(file, files) {
                         })
 
                         if (found)
-                            return  new Promise(resolve => {
+                            return new Promise(resolve => {
 
                                 FileBlob.loadAsString(found, true)
                                     .then(r => {
@@ -35,6 +36,7 @@ export default function coreParser(file, files) {
                 })
 
                 Promise.all(bufferPromises).then(parsedBuffers => {
+                    parsed.buffers = null
 
                     let accessorPromises = parsed.accessors.map(a => {
                         let items = 0
@@ -78,18 +80,23 @@ export default function coreParser(file, files) {
 
                     Promise.all(accessorPromises).then(parsedAccessors => {
                         const mainScene = parsed.scenes[0]
+                        let sceneNodes = parsed.nodes
+                            .map((n, index) => {
+                                if (mainScene.nodes.includes(index))
+                                    return {...parsed.nodes[index], index}
+                                else
+                                    return undefined
+                            }).filter(e => e !== undefined)
 
-                        let sceneNodes = parsed.nodes.filter((n, index) => {
-                            return mainScene.nodes.includes(index) && n.mesh !== undefined
-                        }).map(nodeParser)
-
+                        sceneNodes = sceneNodes.map(n => nodeParser(n, parsed.nodes)).flat()
+                        parsed = {materials: parsed.materials, meshes: parsed.meshes}
 
                         let meshes = parsed.meshes.filter((_, index) => {
                             return sceneNodes.find(n => n.meshIndex === index) !== undefined
                         }).map(m => {
                             return getPrimitives(m, parsedAccessors, parsed.materials)[0]
                         })
-
+                        parsedAccessors = null
                         rootResolve({
                             meshes: meshes,
                             nodes: sceneNodes
@@ -106,11 +113,9 @@ function getPrimitives(mesh, accessors, materials = []) {
     primitives.forEach(primitive => {
         primitive.attributes = Object.keys(primitive.attributes).map(name => ({
             name,
-            ...accessors[primitive.attributes[name]]
+            index: primitive.attributes[name]
         }))
 
-
-        primitive.indices = {...accessors[primitive.indices]};
         if (typeof primitive.material !== "undefined") {
             primitive.material = materials[primitive.material];
         }
@@ -123,11 +128,11 @@ function getPrimitives(mesh, accessors, materials = []) {
 
 
         return {
-            indices: p.indices.data,
-            vertices: vert ? vert.data : [],
-            tangents: tang ? tang.data : [],
-            normals: norm ? norm.data : [],
-            uvs: uv ? uv.data : []
+            indices: accessors[p.indices]?.data,
+            vertices: vert ? accessors[vert.index]?.data : [],
+            tangents: tang ? accessors[tang.index]?.data : [],
+            normals: norm ? accessors[norm.index]?.data : [],
+            uvs: uv ? accessors[uv.index]?.data : []
         }
     })
 }

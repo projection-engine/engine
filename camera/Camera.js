@@ -1,4 +1,5 @@
 import {linearAlgebraMath} from "pj-math";
+import {mat4} from "gl-matrix";
 
 export default class Camera{
     _position = [0, 0, 0]
@@ -6,8 +7,8 @@ export default class Camera{
     _pitch = 0
     viewMatrix = linearAlgebraMath.generateMatrix(4, 4, 0)
     direction = {}
-
-
+    _fov = Math.PI/2
+    _projectionMatrix = mat4.create()
     constructor(
 
         origin = [0, 0, 0],
@@ -18,20 +19,27 @@ export default class Camera{
     ) {
 
 
-        this.fov = fov
-        this.aspectRatio = aspectRatio
+        this._fov = fov
+        this._aspectRatio = aspectRatio
         this._position = origin
 
-        this.zNear = zNear
+        this._zNear = zNear
         this.zFar = zFar
 
         this.updateViewMatrix()
     }
 
-
+    set fov(data){
+        this._fov = data
+        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
+    }
+    get fov (){
+        return this._fov
+    }
     set aspectRatio(data) {
         this._aspectRatio = data
-        this._projectionMatrix = new Float32Array(linearAlgebraMath.projectionMatrix(this.fov, this._aspectRatio, this.zScale, this.zOffset).flat())
+        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
+
     }
 
     get aspectRatio() {
@@ -48,22 +56,16 @@ export default class Camera{
 
     set zNear(data) {
         this._zNear = data
-        this.zScale = this._zFar / (this._zFar - this._zNear)
-        this.zOffset = ((-this._zFar * this._zNear) / (this._zFar - this._zNear))
-
-        this._projectionMatrix = new Float32Array(linearAlgebraMath.projectionMatrix(this.fov, this._aspectRatio, this.zScale, this.zOffset).flat())
+        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
     }
 
     set zFar(data) {
         this._zFar = data
-        this.zScale = this._zFar / (this._zFar - this._zNear)
-        this.zOffset = ((-this._zFar * this._zNear) / (this._zFar - this._zNear))
-
-        this._projectionMatrix = new Float32Array(linearAlgebraMath.projectionMatrix(this.fov, this._aspectRatio, this.zScale, this.zOffset).flat())
+        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
     }
 
     get projectionMatrix() {
-        return this._projectionMatrix
+        return Array.from(this._projectionMatrix)
     }
 
     get position() {
@@ -71,12 +73,11 @@ export default class Camera{
     }
 
     getNotTranslatedViewMatrix() {
+
         let m = [...this.viewMatrix].flat()
         m[12] = m[13] = m[14] = 0
         return m
     }
-
-
 
 
     updateViewMatrix() {}

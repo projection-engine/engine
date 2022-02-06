@@ -22,6 +22,7 @@ export default class PickSystem extends System {
         } = params
 
         if(clicked && typeof currentCoords === "object"){
+
             setClicked(false)
             const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
             const filtered = this._hasComponent(filteredMeshes)

@@ -9,11 +9,7 @@ struct DirectionalLightPOV {
 };
 uniform DirectionalLightPOV directionalLightsPOV[MAX_LIGHTS];
 uniform int dirLightQuantity;
-
-
 out vec2 texCoord;
-out mat4 lightSpaceMatrix;
-out float hasDirLight;
 out mat4 dirLightPOV[MAX_LIGHTS];
 flat out int dirLightsQuantity;
 

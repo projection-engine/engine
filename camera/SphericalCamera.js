@@ -14,11 +14,6 @@ export default class SphericalCamera extends Camera {
         this.yaw = .5
 
     }
-
-    get projectionMatrix() {
-        return this._projectionMatrix
-    }
-
     get position() {
         return this._position
     }

@@ -11,6 +11,10 @@ import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebugShader";
 import Quad from "../../renderer/Quad";
+import {linearAlgebraMath} from "pj-math";
+import {SHADING_MODELS} from "../../../../views/editor/hook/useSettings";
+import FlatDeferredShader from "../../renderer/shaders/deferred/FlatDeferredShader";
+
 
 export default class PostProcessingSystem extends System {
 
@@ -33,8 +37,21 @@ export default class PostProcessingSystem extends System {
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)
         this.deferredShader = new DeferredShader(gpu)
-        this.deferredNoShadowsShader =  new DeferredShader(gpu, true)
+        this.flatDeferredShader = new FlatDeferredShader(gpu)
         this.meshShader = new MeshShader(gpu, true)
+    }
+
+    _getDeferredShader(shadingModel) {
+        switch (shadingModel) {
+            case SHADING_MODELS.FLAT:
+                return this.flatDeferredShader
+            case SHADING_MODELS.DETAIL:
+                return this.deferredShader
+            case SHADING_MODELS.WIREFRAME:
+                return this.deferredShader
+            default:
+                return this.deferredShader
+        }
     }
 
     execute(entities, params, systems, filteredEntities) {
@@ -43,7 +60,8 @@ export default class PostProcessingSystem extends System {
             meshes,
             selectedElement,
             camera,
-            BRDF
+            BRDF,
+            shadingModel
         } = params
 
         const grid = this._find(entities, e => e.components.GridComponent?.active)[0]
@@ -64,6 +82,7 @@ export default class PostProcessingSystem extends System {
 
             this.gpu.depthMask(false)
             this.skyboxShader.use()
+
             skyboxElement.components.SkyboxComponent.draw(
                 this.skyboxShader,
                 camera.projectionMatrix,
@@ -72,7 +91,7 @@ export default class PostProcessingSystem extends System {
             this.gpu.depthMask(true)
         }
 
-        const deferred = shadowMapSystem ? this.deferredShader : this.deferredNoShadowsShader
+        const deferred = this._getDeferredShader(shadingModel)
 
         deferred.use()
         deferred.bindUniforms({
@@ -82,8 +101,7 @@ export default class PostProcessingSystem extends System {
 
             shadowMap: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
             shadowMapResolution: shadowMapSystem?.maxResolution,
-            shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution/shadowMapSystem.resolutionPerTexture) : undefined,
-
+            shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,
             gNormalTexture: deferredSystem.gBuffer.gNormalTexture,
             gPositionTexture: deferredSystem.gBuffer.gPositionTexture,
             gAlbedo: deferredSystem.gBuffer.gAlbedo,
@@ -107,11 +125,10 @@ export default class PostProcessingSystem extends System {
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.postProcessing.frameBufferObject)
 
 
-
         this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps])
-        if(selectedElement ){
+        if (selectedElement) {
             const el = entities[filteredEntities.meshes[selectedElement]]
-            if(el)
+            if (el)
                 this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el)
         }
 

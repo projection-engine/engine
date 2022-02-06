@@ -12,6 +12,7 @@ export default class DeferredSystem extends System {
         this.fallbackMaterial = new MaterialInstance(gpu)
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
+
     }
 
     execute(entities, params, systems, filteredEntities) {

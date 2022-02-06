@@ -23,12 +23,12 @@ export default class Engine extends RenderLoop{
         translationGizmo: undefined,
     }
     _systems = []
+    _fov = Math.PI/2
 
-
-    constructor(id, gpu, fpsTarget) {
+    constructor(id, gpu) {
         super(id);
         this.data.canvasRef = document.getElementById(id + '-canvas')
-        this.data.fpsTarget = fpsTarget
+
         this.gpu = gpu
         this.utils.translationGizmo = new TranslationGizmo(this.gpu)
 
@@ -52,21 +52,30 @@ export default class Engine extends RenderLoop{
             )
         }
 
-        this.camera = new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
+        this.camera = new SphericalCamera([0, 10, 30], 1.57,.1, 1000, 1)
 
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }
+
+    set fov(data){
+        this._fov = data
+        this.camera.fov = data
+    }
+
     set systems(data){
         this.stop()
-        if(this.systems.length > data.length )
+        if(this.systems.length > data.length) {
+
             this._systems.map(s => {
                 const found = data.find(sis => sis.constructor.name === s.constructor.name)
-                if(found)
+
+                if (found)
                     return found
                 else
                     return s
             })
+        }
         else
             this._systems = data
 
@@ -90,10 +99,10 @@ export default class Engine extends RenderLoop{
 
         if (this.camera instanceof SphericalCamera) {
 
-            this.camera = this.backupSpherical ? this.backupSpherical : new FreeCamera([0, 10, 30], 1.57, 1, 2000, 1)
+            this.camera = this.backupSpherical ? this.backupSpherical : new FreeCamera([0, 10, 30], 1.57, .1, 1000, 1)
             this.backupSpherical = this.camera
         } else {
-            this.camera = this.backupFree ? this.backupFree : new SphericalCamera([0, 10, 30], 1.57, 1, 2000, 1)
+            this.camera = this.backupFree ? this.backupFree : new SphericalCamera([0, 10, 30], 1.57, .1, 1000, 1)
             this.backupFree = this.camera
         }
         this.camera.aspectRatio =  this.gpu.canvas.width / this.gpu.canvas.height
