@@ -1,7 +1,6 @@
 import Shader from "../../Shader";
 
-import vertex from 'raw-loader!./resources/skyboxVertex.glsl'
-import fragment from 'raw-loader!./resources/skyboxFragment.glsl'
+import {vertex,fragment} from './resources/skybox.glsl'
 
 
 export default class SkyBoxShader extends Shader{

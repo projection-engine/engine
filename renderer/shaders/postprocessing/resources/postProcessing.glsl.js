@@ -1,4 +1,15 @@
-#version 300 es
+export const vertex = `#version 300 es
+
+in vec3 position;
+out vec2 vTexcoord;
+
+void main() {
+    vTexcoord = (position.xy) * 0.5 + 0.5;
+    gl_Position = vec4(position, 1.0);
+}    
+`
+
+export const fragment = `#version 300 es
 precision highp float;
 
 in vec2 vTexcoord;
@@ -64,3 +75,7 @@ void main() {
     // GAMMA
     finalColor = vec4(fragment, 1.0);
 }
+
+`
+
+export const noAAFragment = ``

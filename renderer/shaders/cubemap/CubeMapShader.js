@@ -1,9 +1,7 @@
 import Shader from "../../Shader";
 
-import vertex from 'raw-loader!./resources/cubeMapVertex.glsl'
-import fragment from 'raw-loader!./resources/cubeMapFragment.glsl'
-import irradianceFragment from 'raw-loader!./resources/irradianceFragment.glsl'
-import prefilteredFragment from 'raw-loader!./resources/prefilteredFragment.glsl'
+import {vertex, fragment, irradiance, prefiltered} from './resources/cubeMap.glsl'
+
 
 export default class CubeMapShader extends Shader {
     constructor(gpu, type) {
@@ -23,9 +21,9 @@ function getFragment(type) {
         case 0:
             return fragment
         case 1:
-            return irradianceFragment
+            return irradiance
         case 2:
-            return prefilteredFragment
+            return prefiltered
         default:
             return
     }

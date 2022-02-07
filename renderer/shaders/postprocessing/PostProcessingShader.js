@@ -1,6 +1,6 @@
 import Shader from "../../Shader";
-import vertex from 'raw-loader!./resources/postProcessingVertex.glsl'
-import fragment from 'raw-loader!./resources/postProcessingFragment.glsl'
+
+import {fragment, vertex} from './resources/postProcessing.glsl'
 
 export default class PostProcessingShader extends Shader {
     constructor(gpu) {

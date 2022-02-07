@@ -10,8 +10,9 @@ export default class SphericalCamera extends Camera {
 
         this.centerLookAt = [0, 0, 0]
 
-        this.pitch = .5
-        this.yaw = .5
+        this._pitch = .5
+        this._yaw = .5
+        this.updateViewMatrix()
 
     }
     get position() {
@@ -47,11 +48,11 @@ export default class SphericalCamera extends Camera {
         this._radius = data
         this.updateViewMatrix()
     }
-
-    set centerLookAt(data) {
-        this.centerLookAt = data
-        this.updateViewMatrix()
-    }
+    //
+    // set centerLookAt(data) {
+    //     this.centerLookAt = data
+    //     this.updateViewMatrix()
+    // }
 
 
     get radius() {
@@ -64,7 +65,7 @@ export default class SphericalCamera extends Camera {
         this.position[1] = this.radius * Math.sin(this._pitch)
         this.position[2] = this.radius * Math.cos(this._pitch) * Math.sin(this._yaw)
 
-        mat4.lookAt(this.viewMatrix, this.position, this.centerLookAt ? this.centerLookAt : [0, 0, 0], [0, 1, 0])
+        mat4.lookAt(this.viewMatrix, this.position, [0, 0, 0], [0, 1, 0])
     }
 }
 

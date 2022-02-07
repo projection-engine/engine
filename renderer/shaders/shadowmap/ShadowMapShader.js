@@ -1,7 +1,6 @@
 import Shader from "../../Shader";
 
-import vertex from 'raw-loader!../shadowmap/resources/shadowVertex.glsl'
-import fragment from 'raw-loader!../shadowmap/resources/shadowFragment.glsl'
+import {vertex,fragment} from './resources/shadow.glsl'
 
 export default class ShadowMapShader extends Shader{
     constructor(gpu) {

@@ -1,7 +1,7 @@
-import vertex from 'raw-loader!./resources/deferred/meshVertex.glsl'
-import fragment from 'raw-loader!./resources/deferred/meshFragment.glsl'
-import selectedVertex from 'raw-loader!./resources/selected/meshSelectedVertex.glsl'
-import selectedFragment from 'raw-loader!./resources/selected/meshSelectedFragment.glsl'
+
+import {fragment, vertex} from './resources/deferred/meshDeferred.glsl'
+import * as selected from './resources/selected/meshSelected.glsl'
+
 
 import {bindTexture} from "../../../utils/utils";
 import Shader from "../../Shader";
@@ -9,7 +9,7 @@ import Shader from "../../Shader";
 export default class MeshShader extends Shader {
     constructor(gpu, asSelected) {
 
-        super(asSelected ? selectedVertex : vertex, asSelected ? selectedFragment :fragment, gpu);
+        super(asSelected ? selected.vertex : vertex, asSelected ? selected.fragment :fragment, gpu);
         this.asSelected = asSelected
         this.viewMatrixULocation = gpu.getUniformLocation(this.program, 'viewMatrix')
         this.transformMatrixULocation = gpu.getUniformLocation(this.program, 'transformMatrix')

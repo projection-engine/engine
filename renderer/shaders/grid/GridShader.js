@@ -1,6 +1,6 @@
 import Shader from "../../Shader";
-import vertex from 'raw-loader!./resources/gridVertex.glsl'
-import fragment from 'raw-loader!./resources/gridFragment.glsl'
+
+import {fragment, vertex} from './resources/grid.glsl'
 
 
 export default class GridShader extends Shader{

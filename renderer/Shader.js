@@ -2,6 +2,7 @@ export default class Shader {
     available = false
 
     constructor(vertex, fragment, gpu) {
+        // console.trace(vertex, fragment)
         this.program = gpu.createProgram()
         this._compileShader(gpu, vertex, gpu?.VERTEX_SHADER)
         this._compileShader(gpu, fragment, gpu?.FRAGMENT_SHADER)
@@ -9,11 +10,12 @@ export default class Shader {
     }
 
     _compileShader(gpu, shaderCode, shaderType) {
+        console.trace(shaderCode)
         const shader = gpu.createShader(shaderType)
         gpu.shaderSource(shader, shaderCode)
         gpu.compileShader(shader)
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS);
-        console.log('Shader compiled successfully: ' + compiled);
+
 
         if (!compiled) {
             console.log('Shader compiler log: ' + compiled);

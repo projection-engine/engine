@@ -1,11 +1,12 @@
 import Shader from "../../Shader";
 
-import vertex from 'raw-loader!./resources/billboardVertex.glsl'
-import fragment from 'raw-loader!./resources/billboardFragment.glsl'
+import {fragment, vertex} from './resources/billboard.glsl'
 
 
 export default class BillboardShader extends Shader{
+
     constructor(gpu) {
+        console.trace(fragment, vertex)
         super(vertex, fragment, gpu);
         this.positionLocation = gpu.getAttribLocation(this.program, 'position')
 

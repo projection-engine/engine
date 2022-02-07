@@ -153,7 +153,10 @@ function unpackBufferViewData(
         elementBytesLength,
         typedGetter,
         bufferView
-    }, () => {
+    },
+
+    `
+    () => {
         self.addEventListener('message', event => {
             const {
                 buffers,
@@ -174,7 +177,8 @@ function unpackBufferViewData(
                 return dv[typedGetter](loopOffset, true);
             }))
         })
-    })
+    }
+    `)
 }
 
 
