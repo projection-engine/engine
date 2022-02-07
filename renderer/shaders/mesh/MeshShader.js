@@ -1,4 +1,3 @@
-
 import {fragment, vertex} from './resources/deferred/meshDeferred.glsl'
 import * as selected from './resources/selected/meshSelected.glsl'
 

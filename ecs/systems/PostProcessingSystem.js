@@ -11,7 +11,6 @@ import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebugShader";
 import Quad from "../../renderer/Quad";
-import {linearAlgebraMath} from "pj-math";
 import {SHADING_MODELS} from "../../../../views/editor/hook/useSettings";
 import FlatDeferredShader from "../../renderer/shaders/deferred/FlatDeferredShader";
 

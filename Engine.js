@@ -5,7 +5,8 @@ import FreeCamera from "./camera/FreeCamera";
 
 import {createTexture} from "./utils/utils";
 import RenderLoop from "./renderer/RenderLoop";
-import brdfImg  from '../../static/brdf_lut.jpg'
+import brdfImg from '../../static/brdf_lut.jpg'
+
 export default class Engine extends RenderLoop{
     types = {}
     cameraType = 'spherical'
@@ -147,4 +148,64 @@ export default class Engine extends RenderLoop{
         this.cameraEvents.stopTracking()
         cancelAnimationFrame(this._currentFrame)
     }
+
+    prepareData(params, entities, materials, meshes) {
+        let r = {
+            pointLights: {},
+            spotLights: {},
+            meshes: {},
+            skyboxes: {},
+            grid: {},
+            directionalLights: {},
+            materials: {},
+            meshSources: {},
+            cubeMaps: {},
+
+            staticPhysicsMeshes: {},
+            dynamicPhysicsMeshes: {}
+        }
+
+        for (let i = 0; i < entities.length; i++) {
+            const current = entities[i]
+            if (current.components.PointLightComponent)
+                r.pointLights[current.id] = i
+            if (current.components.SpotLightComponent)
+                r.spotLights[current.id] = i
+            if (current.components.DirectionalLightComponent)
+                r.directionalLights[current.id] = i
+
+            if (current.components.SkyboxComponent)
+                r.skyboxes[current.id] = i
+            if (current.components.GridComponent)
+                r.grid[current.id] = i
+            if (current.components.MeshComponent) {
+                r.meshes[current.id] = i
+                if (!current.components.PhysicsComponent && current.components.SphereCollider)
+                    r.staticPhysicsMeshes[current.id] = i
+                else if (current.components.PhysicsComponent && current.components.SphereCollider)
+                    r.dynamicPhysicsMeshes[current.id] = i
+            }
+            if (current.components.CubeMapComponent)
+                r.cubeMaps[current.id] = i
+
+        }
+        for (let i = 0; i < materials.length; i++) {
+            r.materials[materials[i].id] = i
+        }
+
+        for (let i = 0; i < meshes.length; i++) {
+
+            r.meshSources[meshes[i].id] = i
+        }
+
+
+        this.types = r
+        if (params.cameraType && params.cameraType !== this.cameraType) {
+            this.cameraType = params.cameraType
+            this.changeCamera()
+        }
+        this.params = params
+        this.cameraEvents.stopTracking()
+    }
+
 }

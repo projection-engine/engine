@@ -1,5 +1,5 @@
 import Shader from "../../Shader";
-import {vertex, fragment} from './resources/picker.glsl'
+import {fragment, vertex} from './resources/picker.glsl'
 
 export default class PickerShader extends Shader {
     constructor(gpu) {

@@ -1,5 +1,5 @@
 import Shader from "../../Shader";
-import {vertex, fragment} from './resources/deferred.glsl'
+import {fragment, vertex} from './resources/deferred.glsl'
 import {bindTexture} from "../../../utils/utils";
 
 export default class DeferredShader extends Shader {

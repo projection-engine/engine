@@ -1,6 +1,7 @@
 import Shader from "../../Shader";
 
-import {debugVertex,debugFragment} from './resources/shadow.glsl'
+import {debugFragment, debugVertex} from './resources/shadow.glsl'
+
 export default class ShadowMapDebugShader extends Shader{
     constructor(gpu) {
         super(debugVertex, debugFragment, gpu);

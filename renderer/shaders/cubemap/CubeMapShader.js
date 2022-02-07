@@ -1,6 +1,6 @@
 import Shader from "../../Shader";
 
-import {vertex, fragment, irradiance, prefiltered} from './resources/cubeMap.glsl'
+import {fragment, irradiance, prefiltered, vertex} from './resources/cubeMap.glsl'
 
 
 export default class CubeMapShader extends Shader {
