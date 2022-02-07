@@ -73,8 +73,10 @@ void main(){
 }
 `
 
-export const prefiltered = `7#version 300 es
+export const prefiltered = `#version 300 es
+
 precision highp float;
+
 out vec4 FragColor;
 in vec3 vPosition;
 

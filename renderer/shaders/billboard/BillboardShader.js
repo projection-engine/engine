@@ -6,7 +6,7 @@ import {fragment, vertex} from './resources/billboard.glsl'
 export default class BillboardShader extends Shader{
 
     constructor(gpu) {
-        console.trace(fragment, vertex)
+
         super(vertex, fragment, gpu);
         this.positionLocation = gpu.getAttribLocation(this.program, 'position')
 

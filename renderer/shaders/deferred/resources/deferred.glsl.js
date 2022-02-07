@@ -1,5 +1,4 @@
-export const vertex = `
-#version 300 es
+export const vertex = `#version 300 es
 #define MAX_LIGHTS 2
 
 in vec3 position;
@@ -29,8 +28,7 @@ void main() {
 
 `
 
-export const fragment = `
-#version 300 es
+export const fragment = `#version 300 es
 precision highp float;
 
 

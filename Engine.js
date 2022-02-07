@@ -5,7 +5,7 @@ import FreeCamera from "./camera/FreeCamera";
 
 import {createTexture} from "./utils/utils";
 import RenderLoop from "./renderer/RenderLoop";
-
+import brdfImg  from '../../static/brdf_lut.jpg'
 export default class Engine extends RenderLoop{
     types = {}
     cameraType = 'spherical'
@@ -33,7 +33,7 @@ export default class Engine extends RenderLoop{
         this.utils.translationGizmo = new TranslationGizmo(this.gpu)
 
         const brdf = new Image()
-        brdf.src = './brdf_lut.jpg'
+        brdf.src = brdfImg
 
         brdf.onload =() => {
             this.BRDF = createTexture(

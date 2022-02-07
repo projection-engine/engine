@@ -1,4 +1,4 @@
-export const vertex = `#version 300 es
+export const fragment = `#version 300 es
 precision highp float;
 
 // IN
@@ -19,7 +19,7 @@ void main(){
 }
 `
 
-export const fragment = `#version 300 es
+export const vertex = `#version 300 es
 
 // IN
 layout (location = 1) in vec3 position;
