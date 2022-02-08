@@ -28,9 +28,8 @@ export default class SkyboxComponent extends Component {
         return this._imageID
     }
 
-    set hdrTexture({blob, imageID, type}) {
+    set hdrTexture({blob, imageID}) {
 
-        this.type = type
         this._imageID = imageID
         const baseShader = new CubeMapShader(this.gpu, 0)
         const irradianceShader = new CubeMapShader(this.gpu, 1)
@@ -68,28 +67,28 @@ export default class SkyboxComponent extends Component {
     }
 
     _initializeTexture(hdrSrc, callback) {
-        if (this.type === 'hdr') {
-            const img = new HDRImage()
-            img.src = hdrSrc
-            img.onload = () => {
-                this._hdrTexture = createTexture(
-                    this.gpu,
-                    img.width,
-                    img.height,
-                    this.gpu.RGB16F,
-                    0,
-                    this.gpu.RGB,
-                    this.gpu.FLOAT,
-                    img,
-                    this.gpu.LINEAR,
-                    this.gpu.LINEAR,
-                    this.gpu.CLAMP_TO_EDGE,
-                    this.gpu.CLAMP_TO_EDGE
-                )
-
-                callback()
-            }
-        } else {
+        // if (this.type === 'hdr') {
+        //     const img = new HDRImage()
+        //     img.src = hdrSrc
+        //     img.onload = () => {
+        //         this._hdrTexture = createTexture(
+        //             this.gpu,
+        //             img.width,
+        //             img.height,
+        //             this.gpu.RGB16F,
+        //             0,
+        //             this.gpu.RGB,
+        //             this.gpu.FLOAT,
+        //             img,
+        //             this.gpu.LINEAR,
+        //             this.gpu.LINEAR,
+        //             this.gpu.CLAMP_TO_EDGE,
+        //             this.gpu.CLAMP_TO_EDGE
+        //         )
+        //
+        //         callback()
+        //     }
+        // } else {
             const img = new Image()
             img.src = hdrSrc
             img.onload = () => {
@@ -109,7 +108,7 @@ export default class SkyboxComponent extends Component {
                 )
 
                 callback()
-            }
+            // }
         }
     }
 

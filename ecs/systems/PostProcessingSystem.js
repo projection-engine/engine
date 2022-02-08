@@ -13,7 +13,10 @@ import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebu
 import Quad from "../../renderer/Quad";
 import {SHADING_MODELS} from "../../../../views/editor/hook/useSettings";
 import FlatDeferredShader from "../../renderer/shaders/deferred/FlatDeferredShader";
-
+import pointLightIcon from '../../../../static/icons/point_light.png'
+import directionalLightIcon from '../../../../static/icons/directional_light.png'
+import spotLightIcon from '../../../../static/icons/spot_light.png'
+import cubemapIcon from '../../../../static/icons/cubemap.png'
 
 export default class PostProcessingSystem extends System {
 
@@ -24,11 +27,11 @@ export default class PostProcessingSystem extends System {
         this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
         this.quad = new Quad(gpu)
         this.billboardRenderer = new BillboardRenderer(gpu)
-        this.pointLightTexture = new Texture('./icons/point_light.png', false, gpu)
-        this.directionalLightTexture = new Texture('./icons/directional_light.png', false, gpu)
+        this.pointLightTexture = new Texture(pointLightIcon, false, gpu)
+        this.directionalLightTexture = new Texture(directionalLightIcon, false, gpu)
 
-        this.spotLightTexture = new Texture('./icons/spot_light.png', false, gpu)
-        this.cubemapTexture = new Texture('./icons/cubemap.png', false, gpu)
+        this.spotLightTexture = new Texture(spotLightIcon, false, gpu)
+        this.cubemapTexture = new Texture(cubemapIcon, false, gpu)
 
 
         this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)
