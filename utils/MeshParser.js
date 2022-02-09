@@ -1,7 +1,7 @@
 import {vec2, vec3} from "gl-matrix";
 import groupInto from "./groupInto";
 import FileBlob from "../../workers/FileBlob";
-import {getBufferData, getPrimitives, unpackBufferViewData} from "./glTFUtils";
+import {getBufferData, getPrimitives, nodeParser, unpackBufferViewData} from "./glTFUtils";
 
 const fs = window.require('fs')
 
@@ -160,7 +160,7 @@ export default class MeshParser {
                         getBufferData(b.uri).then(res => resolve(res))
                     })
                 else {
-                    const found =  fs.readFileSync(appPath + '/' + b.uri, 'base64')
+                    const found = fs.readFileSync(appPath + '/' + b.uri, 'base64')
 
                     if (found)
                         return new Promise(resolve => {
@@ -244,21 +244,30 @@ export default class MeshParser {
                         const [min, max] = MeshParser.computeBoundingBox(meshes[m.meshIndex]?.vertices)
 
                         files.push(
-                            JSON.stringify({
-                                ...m,
-                                indices: meshes[m.meshIndex].indices,
-                                vertices: meshes[m.meshIndex].vertices,
-                                tangents: meshes[m.meshIndex].tangents,
-                                normals: meshes[m.meshIndex].normals,
-                                uvs: meshes[m.meshIndex].uvs,
+                            {
+                                name: m.name,
+                                data: {
+                                    ...m,
+                                    indices: meshes[m.meshIndex].indices,
+                                    vertices: meshes[m.meshIndex].vertices,
+                                    tangents: meshes[m.meshIndex].tangents,
+                                    normals: meshes[m.meshIndex].normals,
+                                    uvs: meshes[m.meshIndex].uvs,
 
-                                maxBoundingBox: max,
-                                minBoundingBox: min
-                            })
-                        )})
+                                    maxBoundingBox: max,
+                                    minBoundingBox: min
+                                }
+                            }
+                        )
+                    })
+
                     rootResolve(files)
-                }).catch(() => rootResolve())
-            }).catch(() => rootResolve())
+                }).catch((error) => {
+                    rootResolve(null)
+                })
+            }).catch((error) => {
+                rootResolve(null)
+            })
         })
 
     }

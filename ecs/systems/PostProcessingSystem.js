@@ -11,12 +11,13 @@ import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebugShader";
 import Quad from "../../renderer/Quad";
-import {SHADING_MODELS} from "../../../../views/editor/hook/useSettings";
+
 import FlatDeferredShader from "../../renderer/shaders/deferred/FlatDeferredShader";
 import pointLightIcon from '../../../../static/icons/point_light.png'
 import directionalLightIcon from '../../../../static/icons/directional_light.png'
 import spotLightIcon from '../../../../static/icons/spot_light.png'
-import cubemapIcon from '../../../../static/icons/cubemap.png'
+import cubeMapIcon from '../../../../static/icons/cubemap.png'
+import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 
 export default class PostProcessingSystem extends System {
 
@@ -31,7 +32,7 @@ export default class PostProcessingSystem extends System {
         this.directionalLightTexture = new Texture(directionalLightIcon, false, gpu)
 
         this.spotLightTexture = new Texture(spotLightIcon, false, gpu)
-        this.cubemapTexture = new Texture(cubemapIcon, false, gpu)
+        this.cubemapTexture = new Texture(cubeMapIcon, false, gpu)
 
 
         this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)

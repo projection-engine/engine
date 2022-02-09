@@ -1,6 +1,7 @@
 import {createVAO, createVBO} from "../../utils/utils";
 import VBO from "../VBO";
-import randomID from "../../../../views/editor/utils/misc/randomID";
+import randomID from "../../../../pages/project/utils/misc/randomID";
+
 
 
 export default class Mesh {
