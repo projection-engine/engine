@@ -27,7 +27,9 @@ export default class SkyboxComponent extends Component {
     get imageID() {
         return this._imageID
     }
-
+    set imageID(data) {
+        this._imageID = data
+    }
     set hdrTexture({blob, imageID}) {
 
         this._imageID = imageID

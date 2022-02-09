@@ -63,11 +63,6 @@ export default function entityReducer(state, action) {
             case ENTITY_ACTIONS.ADD_COMPONENT: {
 
                 if (action.payload.data instanceof Component) {
-                    // if (action.payload instanceof SkyboxComponent) {
-                    //     const exists = stateCopy.filter(s => s.components.SkyboxComponent && s.components.SkyboxComponent.active)
-                    //     exists.forEach(s => s.components.SkyboxComponent.active = false)
-                    //     entity.addComponent(action.payload)
-                    //     entity.addComponent(new DirectionalLightComponent())
                     if (action.payload instanceof PickComponent) {
                         const existing = state.filter(s => s.components.MeshComponent !== undefined)
                         action.payload.data.pickID = generateNextID(existing.length)
@@ -91,13 +86,6 @@ export default function entityReducer(state, action) {
                 return stateCopy
             }
             case ENTITY_ACTIONS.REMOVE_COMPONENT: {
-                // if(action.payload instanceof SkyboxComponent) {
-                //     entity.removeComponent(DirectionalLightComponent.constructor.name)
-                // }
-                // if(action.payload instanceof MeshComponent) {
-                //     entity.removeComponent(PickComponent.constructor.name)
-                //     entity.removeComponent(TransformComponent.constructor.name)
-                // }
                 entity.removeComponent(action.payload.constructor.name)
                 stateCopy[entityIndex] = entity
                 return stateCopy
