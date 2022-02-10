@@ -20,7 +20,7 @@ export default class Shader {
         if (!compiled) {
             console.log('Shader compiler log: ' + compiled);
             console.log(gpu.getShaderInfoLog(shader))
-            console.trace(shaderCode)
+
             this.available = false
         } else {
             gpu.attachShader(this.program, shader)

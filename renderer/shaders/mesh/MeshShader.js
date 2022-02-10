@@ -7,7 +7,7 @@ import Shader from "../../Shader";
 
 export default class MeshShader extends Shader {
     constructor(gpu, asSelected) {
-        console.log(selected)
+
         super(asSelected ? selected.vertex : vertex, asSelected ? selected.fragment :fragment, gpu);
         this.asSelected = asSelected
         this.viewMatrixULocation = gpu.getUniformLocation(this.program, 'viewMatrix')

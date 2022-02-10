@@ -255,7 +255,7 @@ export default class MeshParser {
                                     uvs: meshes[m.meshIndex].uvs,
 
                                     maxBoundingBox: max,
-                                    minBoundingBox: min
+                                    minBoundingBox: min,
                                 }
                             }
                         )
