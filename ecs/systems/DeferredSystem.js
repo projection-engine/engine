@@ -4,6 +4,8 @@ import TransformComponent from "../components/TransformComponent";
 import GBuffer from "../../renderer/elements/GBuffer";
 import MeshShader from "../../renderer/shaders/mesh/MeshShader";
 import MaterialInstance from "../../renderer/elements/MaterialInstance";
+import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
+import WireframeShader from "../../renderer/shaders/mesh/WireframeShader";
 
 export default class DeferredSystem extends System {
 
@@ -12,7 +14,19 @@ export default class DeferredSystem extends System {
         this.fallbackMaterial = new MaterialInstance(gpu)
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
-
+        this.wireframeShader = new WireframeShader(gpu)
+    }
+    _getDeferredShader(shadingModel) {
+        switch (shadingModel) {
+            case SHADING_MODELS.FLAT:
+                return this.shader
+            case SHADING_MODELS.DETAIL:
+                return this.shader
+            case SHADING_MODELS.WIREFRAME:
+                return this.wireframeShader
+            default:
+                return this.shader
+        }
     }
 
     execute(entities, params, systems, filteredEntities) {
@@ -21,15 +35,16 @@ export default class DeferredSystem extends System {
             meshes,
             camera,
             selectedElement,
-            materials
+            materials,
+            shadingModel
         } = params
 
 
         const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
         const filtered = this._hasComponent(filteredMeshes)
+        const shaderToUse = this._getDeferredShader(shadingModel)
 
-
-        this.shader.use()
+        shaderToUse.use()
         this.gBuffer.gpu.clearDepth(1);
         this.gBuffer.startMapping()
 
@@ -43,7 +58,7 @@ export default class DeferredSystem extends System {
                 const mat = current.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[current.components.MaterialComponent.materialID]] : undefined
 
                 DeferredSystem.drawMesh(
-                    this.shader,
+                    shaderToUse,
                     this.gBuffer.gpu,
                     mesh,
                     camera.position,
@@ -51,7 +66,8 @@ export default class DeferredSystem extends System {
                     camera.projectionMatrix,
                     t.transformationMatrix,
                     mat ? mat : this.fallbackMaterial,
-                    current.components.MeshComponent.normalMatrix
+                    current.components.MeshComponent.normalMatrix,
+                    shadingModel === SHADING_MODELS.WIREFRAME
                 )
             }
         }
@@ -68,35 +84,38 @@ export default class DeferredSystem extends System {
         projectionMatrix,
         transformationMatrix,
         material,
-        normalMatrix) {
+        normalMatrix,
+        asWireframe) {
 
-        gpu.bindVertexArray(mesh.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
+            gpu.bindVertexArray(mesh.VAO)
+            gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
 
-        mesh.vertexVBO.enable()
-        mesh.normalVBO.enable()
-        mesh.uvVBO.enable()
-        mesh.tangentVBO.enable()
-
-        shader.bindUniforms({
-            material: material,
-            cameraVec: camPosition,
-            normalMatrix: normalMatrix
-        })
-
-        gpu.uniformMatrix4fv(shader.transformMatrixULocation, false, transformationMatrix)
-        gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, viewMatrix)
-        gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, projectionMatrix)
-
-        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+            mesh.vertexVBO.enable()
+            mesh.normalVBO.enable()
+            mesh.uvVBO.enable()
+            mesh.tangentVBO.enable()
 
 
-        gpu.bindVertexArray(null)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
-        mesh.vertexVBO.disable()
-        mesh.uvVBO.disable()
-        mesh.normalVBO.disable()
-        mesh.tangentVBO.disable()
+            shader
+                .bindUniforms({
+                    material: material,
+                    cameraVec: camPosition,
+                    normalMatrix: normalMatrix
+                })
+
+            gpu.uniformMatrix4fv(shader.transformMatrixULocation, false, transformationMatrix)
+            gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, viewMatrix)
+            gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, projectionMatrix)
+
+            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+
+            gpu.bindVertexArray(null)
+            gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
+            mesh.vertexVBO.disable()
+            mesh.uvVBO.disable()
+            mesh.normalVBO.disable()
+            mesh.tangentVBO.disable()
+
 
     }
 }

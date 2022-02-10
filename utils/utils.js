@@ -85,6 +85,7 @@ export function enableBasics(gpu) {
     const floatB = gpu.getExtension('OES_texture_float_linear');
 
 
+
     gpu.enable(gpu?.BLEND);
     gpu?.blendFunc(gpu?.SRC_ALPHA, gpu?.ONE_MINUS_SRC_ALPHA);
 

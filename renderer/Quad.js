@@ -5,7 +5,12 @@ export default class Quad{
         this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
         this.gpu.bufferData(
             this.gpu.ARRAY_BUFFER,
-            new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0]),
+            new Float32Array([-1, -1, 0,
+                1, -1, 0,
+                1, 1, 0,
+                1, 1, 0,
+                -1, 1, 0,
+                -1, -1, 0]),
             this.gpu.STATIC_DRAW
         )
     }

@@ -51,7 +51,7 @@ export default class PostProcessingSystem extends System {
             case SHADING_MODELS.DETAIL:
                 return this.deferredShader
             case SHADING_MODELS.WIREFRAME:
-                return this.deferredShader
+                return this.flatDeferredShader
             default:
                 return this.deferredShader
         }

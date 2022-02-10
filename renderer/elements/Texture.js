@@ -1,7 +1,14 @@
 export default class Texture {
     loaded = false
 
-    constructor(src, yFlip, gpu, format =gpu.SRGB8_ALPHA8, type =gpu.RGBA) {
+    constructor(src, yFlip, gpu, format = gpu.SRGB8_ALPHA8, type = gpu.RGBA, autoInit = true) {
+        if (autoInit) {
+            this._initialize(src, yFlip, gpu, format, type)
+        }
+    }
+
+    _initialize(src, yFlip, gpu, format = gpu.SRGB8_ALPHA8, type = gpu.RGBA) {
+
         const anisotropicEXT = gpu.getExtension('EXT_texture_filter_anisotropic')
 
         const img = new Image()
@@ -21,7 +28,7 @@ export default class Texture {
             gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.LINEAR);
             gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.LINEAR_MIPMAP_LINEAR);
 
-            if(anisotropicEXT){
+            if (anisotropicEXT) {
                 const anisotropicAmountMin = 8
                 const anisotropicAmount = Math.min(anisotropicAmountMin, gpu.getParameter(anisotropicEXT.MAX_TEXTURE_MAX_ANISOTROPY_EXT))
                 gpu.texParameterf(gpu.TEXTURE_2D, anisotropicEXT.TEXTURE_MAX_ANISOTROPY_EXT, anisotropicAmount);

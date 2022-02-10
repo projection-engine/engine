@@ -131,3 +131,45 @@ void main(){
 
 }
 `
+
+
+
+export const wireframeVertex = `#version 300 es
+
+// IN
+layout (location = 5) in vec3 position;
+
+
+// UNIFORM
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 projectionMatrix;
+
+out vec4 vPosition;
+void main(){
+    vPosition =  transformMatrix *   vec4(position, 1.0);
+    
+    gl_Position = projectionMatrix * viewMatrix * vPosition;
+}
+`
+
+export const wireframeFragment = `#version 300 es
+precision highp float;
+ in vec4 vPosition;
+ 
+// OUTPUTS
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gAlbedo;
+layout (location = 3) out vec4 gBehaviour;
+
+
+ 
+
+void main(){
+    gPosition = vPosition;
+    gNormal = vec4(0.0);
+    gAlbedo = vec4(1.0, 0.0, 0.0, 1.0);
+    gBehaviour = vec4(0.0);
+}
+`
