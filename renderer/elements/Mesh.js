@@ -29,6 +29,18 @@ export default class Mesh {
                     minBoundingBox,
                     wireframeBuffer
                 }) {
+        console.log(
+            {
+                vertices,
+                indices,
+                normals,
+                uvs,
+                tangents,
+                gpu,
+                maxBoundingBox,
+                minBoundingBox,
+            }
+        )
 
         this.id = id
         this.gpu = gpu
