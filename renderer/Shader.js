@@ -2,7 +2,7 @@ export default class Shader {
     available = false
 
     constructor(vertex, fragment, gpu) {
-        // console.trace(vertex, fragment)
+
         this.program = gpu.createProgram()
         this._compileShader(gpu, vertex, gpu?.VERTEX_SHADER)
         this._compileShader(gpu, fragment, gpu?.FRAGMENT_SHADER)

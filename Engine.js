@@ -113,7 +113,7 @@ export default class Engine extends RenderLoop{
     }
 
     start(entities) {
-        this.keep = true
+
         this.cameraEvents.startTracking()
 
         this.gpu?.clear(this.gpu.DEPTH_BUFFER_BIT | this.gpu.COLOR_BUFFER_BIT)
@@ -144,7 +144,6 @@ export default class Engine extends RenderLoop{
     }
 
     stop() {
-        this.keep = false
         this.cameraEvents.stopTracking()
         cancelAnimationFrame(this._currentFrame)
     }

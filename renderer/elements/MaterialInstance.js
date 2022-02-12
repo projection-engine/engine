@@ -10,17 +10,20 @@ export default class MaterialInstance {
         roughness = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
         normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
         height = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
-        ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
-        autoInit = true
+        ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)')
     ) {
         this.id = id
-
-            this.albedo = new Texture(albedo, false, gpu, undefined, undefined, autoInit)
-            this.metallic = new Texture(metallic, false, gpu, gpu.RGB, gpu.RGB, autoInit)
-            this.roughness = new Texture(roughness, false, gpu, gpu.RGB, gpu.RGB, autoInit)
-            this.normal = new Texture(normal, false, gpu, gpu.RGB, gpu.RGB, autoInit)
-            this.height = new Texture(height, false, gpu, gpu.RGB, gpu.RGB, autoInit)
-            this.ao = new Texture(ao, false, gpu, gpu.RGB, gpu.RGB, autoInit)
-
+        if (albedo)
+            this.albedo = typeof albedo === "object" ? albedo : new Texture(albedo, false, gpu, ...[, ,], true)
+        if (metallic)
+            this.metallic =  typeof metallic === "object" ? metallic :new Texture(metallic, false, gpu, gpu.RGB, gpu.RGB, true)
+        if (roughness)
+            this.roughness = typeof roughness === "object" ? roughness : new Texture(roughness, false, gpu, gpu.RGB, gpu.RGB, true)
+        if (normal)
+            this.normal =  typeof normal === "object" ? normal :new Texture(normal, false, gpu, gpu.RGB, gpu.RGB, true)
+        if (height)
+            this.height =  typeof height === "object" ? height :new Texture(height, false, gpu, gpu.RGB, gpu.RGB, true)
+        if (ao)
+            this.ao = typeof ao === "object" ? ao : new Texture(ao, false, gpu, gpu.RGB, gpu.RGB, true)
     }
 }

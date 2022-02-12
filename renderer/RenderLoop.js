@@ -2,7 +2,7 @@ export default class RenderLoop {
     _currentFrame = 0
     _framesRendered = 0
     _times = []
-    keep = true
+
     _performanceRef
 
     constructor(id) {
@@ -30,8 +30,7 @@ export default class RenderLoop {
         if (this._performanceRef)
             this._performanceRef.innerText = `${this._framesRendered}`
 
-        if (this.keep)
-            this._currentFrame = requestAnimationFrame(() => this._loop(callback));
+        this._currentFrame = requestAnimationFrame(() => this._loop(callback));
     }
 
     start(callback) {
