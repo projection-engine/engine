@@ -34,12 +34,11 @@ export default class SphericalCamera extends Camera {
     set yaw(data) {
         this._yaw = data
 
-        this.updateViewMatrix()
     }
 
     set pitch(data) {
         this._pitch = data
-        this.updateViewMatrix()
+
     }
 
     set radius(data) {
@@ -54,12 +53,17 @@ export default class SphericalCamera extends Camera {
 
     updateViewMatrix() {
         super.updateViewMatrix()
+        if(this._pitch > 1.5)
+            this._pitch = 1.5
+        if(this._pitch < -1.5)
+            this._pitch = -1.5
+
         this.position[0] = this.radius * Math.cos(this._pitch) * Math.cos(this._yaw)
         this.position[1] = this.radius * Math.sin(this._pitch)
         this.position[2] = this.radius * Math.cos(this._pitch) * Math.sin(this._yaw)
 
-
         mat4.lookAt(this.viewMatrix, this.position, [0, 0, 0], [0, 1, 0])
+
     }
 }
 

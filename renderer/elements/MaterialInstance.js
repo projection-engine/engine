@@ -6,12 +6,13 @@ export default class MaterialInstance {
         gpu,
         id,
         albedo = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
-        metallic = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
-        roughness = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
+        metallic = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
+        roughness = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
         height = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)')
     ) {
+
         this.id = id
         if (albedo)
             this.albedo = typeof albedo === "object" ? albedo : new Texture(albedo, false, gpu, ...[, ,], true)

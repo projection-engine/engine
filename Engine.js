@@ -41,7 +41,7 @@ export default class Engine extends RenderLoop{
                 gpu,
                 512,
                 512,
-                gpu.RGBA16F,
+                gpu.RGBA32F,
                 0,
                 gpu.RGBA,
                 gpu.FLOAT,

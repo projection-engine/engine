@@ -69,23 +69,29 @@ export default function cameraEvents(camera, canvasID, onClick) {
                             camera.yaw = 0
                         if (camera.yaw <= -6.28)
                             camera.yaw = 0
+                        // MAX ~45deg
+                        if (event.movementY < 0 && camera.pitch < maxAngle)
+                            camera.pitch += (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
+
+                        // MIN ~-45deg
+                        else if (event.movementY > 0 && camera.pitch > -maxAngle)
+                            camera.pitch -= (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
+                    } else {
+                        if (event.movementY < 0)
+                            camera.pitch += (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
+
+                        // MIN ~-45deg
+                        else if (event.movementY > 0)
+                            camera.pitch -= (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
                     }
-
-                    // MAX ~45deg
-                    if (event.movementY < 0 && camera.pitch < maxAngle)
-                        camera.pitch += (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
-
-                    // MIN ~-45deg
-                    else if (event.movementY > 0 && camera.pitch > -maxAngle)
-                        camera.pitch -= (conf.sensitivity.pitch ? conf.sensitivity.pitch : .005) * Math.abs(event.movementY)
 
 
                     if ((event.movementX < 0 && camera instanceof FreeCamera) || (event.movementX > 0 && camera instanceof SphericalCamera))
                         camera.yaw += (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
                     else if ((event.movementX > 0 && camera instanceof FreeCamera) || (event.movementX < 0 && camera instanceof SphericalCamera))
                         camera.yaw -= (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
-                    if (camera instanceof FreeCamera)
-                        camera.updateViewMatrix()
+
+                    camera.updateViewMatrix()
 
                 }
                 break

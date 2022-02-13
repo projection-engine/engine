@@ -21,7 +21,7 @@ export default class GBuffer extends Framebuffer {
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MIN_FILTER, this.gpu.NEAREST);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_S, this.gpu.CLAMP_TO_EDGE);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_T, this.gpu.CLAMP_TO_EDGE);
-        this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA32F, this.width, this.height);
+        this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA16F, this.width, this.height);
         this.gpu.framebufferTexture2D(this.gpu.FRAMEBUFFER, this.gpu.COLOR_ATTACHMENT0, this.gpu.TEXTURE_2D, this.gPositionTexture, 0);
 
         // NORMAL
@@ -31,7 +31,7 @@ export default class GBuffer extends Framebuffer {
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MIN_FILTER, this.gpu.NEAREST);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_S, this.gpu.CLAMP_TO_EDGE);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_T, this.gpu.CLAMP_TO_EDGE);
-        this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA32F, this.width, this.height);
+        this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA16F, this.width, this.height);
         this.gpu.framebufferTexture2D(this.gpu.FRAMEBUFFER, this.gpu.COLOR_ATTACHMENT1, this.gpu.TEXTURE_2D, this.gNormalTexture, 0);
 
         // ALBEDO (rgb)
@@ -41,10 +41,10 @@ export default class GBuffer extends Framebuffer {
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MIN_FILTER, this.gpu.NEAREST);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_S, this.gpu.CLAMP_TO_EDGE);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_T, this.gpu.CLAMP_TO_EDGE);
-        this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA32F, this.width, this.height);
+        this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, this.gpu.RGBA16F, this.width, this.height);
         this.gpu.framebufferTexture2D(this.gpu.FRAMEBUFFER, this.gpu.COLOR_ATTACHMENT2, this.gpu.TEXTURE_2D, this.gAlbedo, 0);
 
-        // AO (r) - Roughness (g) - Height (b)
+        // AO (r) - Roughness (g) - Metallic (b)
         this.gBehaviorTexture = this.gpu.createTexture()
         this.gpu.bindTexture(this.gpu.TEXTURE_2D, this.gBehaviorTexture);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MAG_FILTER, this.gpu.NEAREST);

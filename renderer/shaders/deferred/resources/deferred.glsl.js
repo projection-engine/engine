@@ -26,9 +26,11 @@ void main() {
     gl_Position = vec4(position, 1);
 }    
 
+
 `
 
 export const fragment = `#version 300 es
+
 precision highp float;
 
 
@@ -261,5 +263,4 @@ void main() {
 
     finalColor = vec4(color, 1.0);
 }
-
 `

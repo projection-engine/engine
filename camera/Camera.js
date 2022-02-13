@@ -31,14 +31,14 @@ export default class Camera{
 
     set fov(data){
         this._fov = data
-        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
+        this.updateProjection()
     }
     get fov (){
         return this._fov
     }
     set aspectRatio(data) {
         this._aspectRatio = data
-        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
+        this.updateProjection()
 
     }
 
@@ -56,12 +56,12 @@ export default class Camera{
 
     set zNear(data) {
         this._zNear = data
-        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
+        this.updateProjection()
     }
 
     set zFar(data) {
         this._zFar = data
-        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
+        this.updateProjection()
     }
 
     get projectionMatrix() {
@@ -70,6 +70,11 @@ export default class Camera{
 
     get position() {
         return this._position
+    }
+
+    updateProjection(){
+        // mat4.ortho(this._projectionMatrix, -50, 50, -50, 50, this._zNear, this._zFar);
+        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
     }
 
     getNotTranslatedViewMatrix() {
