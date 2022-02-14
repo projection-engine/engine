@@ -1,8 +1,4 @@
-import {wireframeVertex, wireframeFragment} from './resources/deferred/meshDeferred.glsl'
-import * as selected from './resources/selected/meshSelected.glsl'
-
-
-import {bindTexture} from "../../../utils/utils";
+import {wireframeFragment, wireframeVertex} from './resources/deferred/meshDeferred.glsl'
 import Shader from "../../Shader";
 
 export default class WireframeShader extends Shader {
