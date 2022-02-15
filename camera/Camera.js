@@ -9,6 +9,9 @@ export default class Camera{
     direction = {}
     _fov = Math.PI/2
     _projectionMatrix = mat4.create()
+    _viewProjection = mat4.create()
+    _viewMatrix = mat4.create()
+
     constructor(
 
         origin = [0, 0, 0],
@@ -53,7 +56,23 @@ export default class Camera{
     get zFar() {
         return this._zFar
     }
+    get yaw() {
+        return this._yaw
+    }
 
+    get pitch() {
+        return this._pitch
+    }
+
+    set yaw(data) {
+        this._yaw = data
+
+    }
+
+    set pitch(data) {
+        this._pitch = data
+
+    }
     set zNear(data) {
         this._zNear = data
         this.updateProjection()
@@ -63,13 +82,22 @@ export default class Camera{
         this._zFar = data
         this.updateProjection()
     }
-
     get projectionMatrix() {
         return Array.from(this._projectionMatrix)
     }
-
     get position() {
         return this._position
+    }
+    get viewProjection(){
+        return this._viewProjection
+    }
+
+
+    set viewMatrix(data){
+        this._viewMatrix = data
+    }
+    get viewMatrix(){
+        return this._viewMatrix
     }
 
     updateProjection(){
@@ -78,8 +106,7 @@ export default class Camera{
     }
 
     getNotTranslatedViewMatrix() {
-
-        let m = [...this.viewMatrix].flat()
+        let m = [...this._viewMatrix].flat()
         m[12] = m[13] = m[14] = 0
         return m
     }

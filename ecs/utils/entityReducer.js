@@ -1,7 +1,7 @@
 import Entity from "../basic/Entity";
 import Component from "../basic/Component";
 import PickComponent from "../components/PickComponent";
-import generateNextID from "../../utils/generateNextID";
+import generateNextID from "../../../workers/generateNextID";
 import cloneClass from "../../../../pages/project/utils/misc/cloneClass";
 
 
