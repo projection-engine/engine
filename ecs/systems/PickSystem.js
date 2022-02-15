@@ -1,6 +1,6 @@
 import System from "../basic/System";
 import MousePicker from "../../renderer/elements/MousePicker";
-import PickerShader from "../../renderer/shaders/picker/PickerShader";
+import PickerShader from "../../renderer/shaders/classes/PickerShader";
 import PickComponent from "../components/PickComponent";
 
 export default class PickSystem extends System {

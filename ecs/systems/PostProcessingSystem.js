@@ -1,23 +1,23 @@
 import System from "../basic/System";
-import PostProcessingShader from "../../renderer/shaders/postprocessing/PostProcessingShader";
+import PostProcessingShader from "../../renderer/shaders/classes/PostProcessingShader";
 import PostProcessing from "../../renderer/elements/PostProcessing";
-import DeferredShader from "../../renderer/shaders/deferred/DeferredShader";
+import DeferredShader from "../../renderer/shaders/classes/DeferredShader";
 import DeferredSystem from "./DeferredSystem";
-import SkyBoxShader from "../../renderer/shaders/skybox/SkyBoxShader";
-import GridShader from "../../renderer/shaders/grid/GridShader";
+import SkyBoxShader from "../../renderer/shaders/classes/SkyBoxShader";
+import GridShader from "../../renderer/shaders/classes/GridShader";
 import ShadowMapSystem from "./ShadowMapSystem";
 import Texture from "../../renderer/elements/Texture";
 import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
-import MeshShader from "../../renderer/shaders/mesh/MeshShader";
-import ShadowMapDebugShader from "../../renderer/shaders/shadowmap/ShadowMapDebugShader";
-import Quad from "../../renderer/Quad";
+import MeshShader from "../../renderer/shaders/classes/MeshShader";
 
-import FlatDeferredShader from "../../renderer/shaders/deferred/FlatDeferredShader";
+import FlatDeferredShader from "../../renderer/shaders/classes/FlatDeferredShader";
 import pointLightIcon from '../../../../static/icons/point_light.png'
 import directionalLightIcon from '../../../../static/icons/directional_light.png'
 import spotLightIcon from '../../../../static/icons/spot_light.png'
 import cubeMapIcon from '../../../../static/icons/cubemap.png'
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
+import {copyTexture} from "../../utils/utils";
+import ScreenSpace from "../../renderer/elements/ScreenSpace";
 
 export default class PostProcessingSystem extends System {
 
@@ -25,8 +25,10 @@ export default class PostProcessingSystem extends System {
         super([]);
         this.gpu = gpu
 
-        this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
-        this.quad = new Quad(gpu)
+        // this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
+        // this.quad = new Quad(gpu)
+
+        this.screenSpace = new ScreenSpace(gpu, resolutionMultiplier)
         this.billboardRenderer = new BillboardRenderer(gpu)
         this.pointLightTexture = new Texture(pointLightIcon, false, gpu)
         this.directionalLightTexture = new Texture(directionalLightIcon, false, gpu)
@@ -78,6 +80,9 @@ export default class PostProcessingSystem extends System {
         const cubeMaps = this._find(entities, e => filteredEntities.cubeMaps[e.id] !== undefined)
         const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
 
+
+        copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
+
         this.postProcessing.startMapping()
 
         if (skyboxElement) {
@@ -112,28 +117,24 @@ export default class PostProcessingSystem extends System {
             gDepthTexture: deferredSystem.gBuffer.gDepthTexture,
             cameraVec: camera.position,
             BRDF,
-            closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered
+            closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered,
+
+            previousFrame: this.screenSpace.frameBufferTexture
         })
 
         deferredSystem.gBuffer.draw(deferred)
 
-        this.gpu.bindFramebuffer(this.gpu.READ_FRAMEBUFFER, deferredSystem.gBuffer.gBuffer)
-        this.gpu.bindFramebuffer(this.gpu.DRAW_FRAMEBUFFER, this.postProcessing.frameBufferObject)
-        this.gpu.blitFramebuffer(
-            0, 0,
-            deferredSystem.gBuffer.width, deferredSystem.gBuffer.height,
-            0, 0,
-            this.postProcessing.width, this.postProcessing.height,
-            this.gpu.DEPTH_BUFFER_BIT, this.gpu.NEAREST)
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.postProcessing.frameBufferObject)
-
+        copyTexture(this.postProcessing.frameBufferObject, deferredSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
         this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps])
+        this.gpu.disable(this.gpu.DEPTH_TEST)
         if (selectedElement) {
             const el = entities[filteredEntities.meshes[selectedElement]]
             if (el)
                 this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el)
         }
+
+        this.gpu.enable(this.gpu.DEPTH_TEST)
 
         this.postProcessing.stopMapping()
         this.shader.use()

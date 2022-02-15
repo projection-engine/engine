@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import {createVBO, lookAt} from "../../utils/utils";
 import skyBoxCube from "../../assets/cube";
-import CubeMapShader from "../shaders/cubemap/CubeMapShader";
+import CubeMapShader from "../shaders/classes/CubeMapShader";
 
 export default class CubeMap {
     texture

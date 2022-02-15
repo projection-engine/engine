@@ -1,7 +1,7 @@
 import {linearAlgebraMath} from "pj-math";
 import {mat4} from "gl-matrix";
 
-export default class Camera{
+export default class Camera {
     _position = [0, 0, 0]
     _yaw = 0
     _pitch = 0
@@ -23,31 +23,17 @@ export default class Camera{
 
 
         this._fov = fov
-        this._aspectRatio = aspectRatio
+
         this._position = origin
 
         this._zNear = zNear
-        this.zFar = zFar
+        this._zFar = zFar
 
-        this.updateViewMatrix()
-    }
-
-    set fov(data){
-        this._fov = data
-        this.updateProjection()
-    }
-    get fov (){
-        return this._fov
-    }
-    set aspectRatio(data) {
-        this._aspectRatio = data
-        this.updateProjection()
-
+        this.aspectRatio = aspectRatio
     }
 
-    get aspectRatio() {
-        return this._aspectRatio
-    }
+
+
 
     get zNear() {
         return this._zNear
@@ -75,12 +61,12 @@ export default class Camera{
     }
     set zNear(data) {
         this._zNear = data
-        this.updateProjection()
+
     }
 
     set zFar(data) {
         this._zFar = data
-        this.updateProjection()
+
     }
     get projectionMatrix() {
         return Array.from(this._projectionMatrix)
@@ -88,10 +74,6 @@ export default class Camera{
     get position() {
         return this._position
     }
-    get viewProjection(){
-        return this._viewProjection
-    }
-
 
     set viewMatrix(data){
         this._viewMatrix = data
@@ -100,10 +82,6 @@ export default class Camera{
         return this._viewMatrix
     }
 
-    updateProjection(){
-        // mat4.ortho(this._projectionMatrix, -50, 50, -50, 50, this._zNear, this._zFar);
-        mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
-    }
 
     getNotTranslatedViewMatrix() {
         let m = [...this._viewMatrix].flat()

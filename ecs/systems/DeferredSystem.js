@@ -2,10 +2,10 @@ import System from "../basic/System";
 import TransformComponent from "../components/TransformComponent";
 
 import GBuffer from "../../renderer/elements/GBuffer";
-import MeshShader from "../../renderer/shaders/mesh/MeshShader";
+import MeshShader from "../../renderer/shaders/classes/MeshShader";
 import MaterialInstance from "../../renderer/elements/MaterialInstance";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
-import WireframeShader from "../../renderer/shaders/mesh/WireframeShader";
+import WireframeShader from "../../renderer/shaders/classes/WireframeShader";
 
 export default class DeferredSystem extends System {
 

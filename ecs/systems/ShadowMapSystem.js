@@ -1,6 +1,6 @@
 import System from "../basic/System";
 import ShadowMap from "../../renderer/elements/ShadowMap";
-import ShadowMapShader from "../../renderer/shaders/shadowmap/ShadowMapShader";
+import ShadowMapShader from "../../renderer/shaders/classes/ShadowMapShader";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 
 export default class ShadowMapSystem extends System {

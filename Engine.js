@@ -1,7 +1,7 @@
 import TranslationGizmo from "./gizmo/TranslationGizmo";
-import cameraEvents from "./camera/cameraEvents";
-import SphericalCamera from "./camera/SphericalCamera";
-import FreeCamera from "./camera/FreeCamera";
+import perspectiveCameraEvents from "./camera/prespective/perspectiveCameraEvents";
+import SphericalCamera from "./camera/prespective/SphericalCamera";
+import FreeCamera from "./camera/prespective/FreeCamera";
 
 import {createTexture} from "./utils/utils";
 import RenderLoop from "./renderer/RenderLoop";
@@ -86,7 +86,7 @@ export default class Engine extends RenderLoop{
     }
 
     _resetCameraEvents() {
-        this.cameraEvents = cameraEvents(
+        this.cameraEvents = perspectiveCameraEvents(
             this.camera,
             this._canvasID,
             (x, y) => {

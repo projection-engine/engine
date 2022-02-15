@@ -1,4 +1,4 @@
-import CubeMapShader from "../../renderer/shaders/cubemap/CubeMapShader";
+import CubeMapShader from "../../renderer/shaders/classes/CubeMapShader";
 import {createTexture, createVBO} from "../../utils/utils";
 import skyBoxCube from "../../assets/cube";
 import Component from "../basic/Component";
