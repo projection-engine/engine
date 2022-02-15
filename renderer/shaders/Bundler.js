@@ -27,8 +27,7 @@ export default class Bundler {
                 response = response.replaceAll(METHODS[key], SHADOWS[key])
             else
                 response = response.replaceAll(METHODS[key], PBR[key])
-            if(shaderCode.includes('@'))
-                console.log(response)
+
         })
 
         return response

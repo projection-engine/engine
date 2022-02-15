@@ -28,6 +28,9 @@ export default class FreeCamera extends Camera {
             zFar,
             aspectRatio,
             type);
+
+        this.updateProjection()
+        this.updateViewMatrix()
     }
 
     // FOV - ASPECT - PROJECTION

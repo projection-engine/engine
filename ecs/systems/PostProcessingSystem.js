@@ -185,13 +185,11 @@ export default class PostProcessingSystem extends System {
             this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, grid.components.GridComponent.vertexBuffer)
             this.gpu.vertexAttribPointer(this.gridShader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
 
-            this.gpu.uniform4fv(this.gridShader.colorULocation, grid.components.GridComponent.color)
 
-            this.gpu.uniformMatrix4fv(this.gridShader.transformationMatrixULocation, false, grid.components.GridComponent.scalingMatrix)
             this.gpu.uniformMatrix4fv(this.gridShader.viewMatrixULocation, false, camera.viewMatrix)
             this.gpu.uniformMatrix4fv(this.gridShader.projectionMatrixULocation, false, camera.projectionMatrix)
 
-            this.gpu.drawArrays(this.gpu.LINES, 0, grid.components.GridComponent.length)
+            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, grid.components.GridComponent.length)
         }
 
         if (billboards.length > 0) {
