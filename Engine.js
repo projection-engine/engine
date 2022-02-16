@@ -6,10 +6,13 @@ import FreeCamera from "./camera/prespective/FreeCamera";
 import {createTexture} from "./utils/utils";
 import RenderLoop from "./renderer/RenderLoop";
 import brdfImg from '../../static/brdf_lut.jpg'
+import OrthographicCamera, {DIRECTIONS} from "./camera/ortho/OrthographicCamera";
+import CAMERA_TYPES from "./utils/CAMERA_TYPES";
+import OrthographicCameraEvents from "./camera/ortho/OrthographicCameraEvents";
 
-export default class Engine extends RenderLoop{
+export default class Engine extends RenderLoop {
     types = {}
-    cameraType = 'spherical'
+    cameraType = CAMERA_TYPES.SPHERICAL
     data = {
         fpsTarget: undefined,
         currentCoord: {x: 0, y: 0},
@@ -24,7 +27,47 @@ export default class Engine extends RenderLoop{
         translationGizmo: undefined,
     }
     _systems = []
-    _fov = Math.PI/2
+    _fov = Math.PI / 2
+
+    sphericalCamera = new SphericalCamera([0, 10, 30], 1.57, .1, 1000, 1)
+    freeCamera = new FreeCamera([0, 10, 30], 1.57, .1, 1000, 1)
+
+    topCamera = new OrthographicCamera(
+        .1,
+        1000,
+        1,
+        DIRECTIONS.TOP
+    )
+    bottomCamera = new OrthographicCamera(
+        .1,
+        1000,
+        1,
+        DIRECTIONS.BOTTOM
+    )
+    leftCamera = new OrthographicCamera(
+        .1,
+        1000,
+        1,
+        DIRECTIONS.LEFT
+    )
+    rightCamera = new OrthographicCamera(
+        .1,
+        1000,
+        1,
+        DIRECTIONS.RIGHT
+    )
+    frontCamera = new OrthographicCamera(
+        .1,
+        1000,
+        1,
+        DIRECTIONS.FRONT
+    )
+    backCamera = new OrthographicCamera(
+        .1,
+        1000,
+        1,
+        DIRECTIONS.BACK
+    )
 
     constructor(id, gpu) {
         super(id);
@@ -36,7 +79,7 @@ export default class Engine extends RenderLoop{
         const brdf = new Image()
         brdf.src = brdfImg
 
-        brdf.onload =() => {
+        brdf.onload = () => {
             this.BRDF = createTexture(
                 gpu,
                 512,
@@ -53,20 +96,20 @@ export default class Engine extends RenderLoop{
             )
         }
 
-        this.camera = new SphericalCamera([0, 10, 30], 1.57,.1, 1000, 1)
+        this.camera = this.sphericalCamera
 
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }
 
-    set fov(data){
+    set fov(data) {
         this._fov = data
         this.camera.fov = data
     }
 
-    set systems(data){
+    set systems(data) {
         this.stop()
-        if(this.systems.length > data.length) {
+        if (this.systems.length > data.length) {
 
             this._systems.map(s => {
                 const found = data.find(sis => sis.constructor.name === s.constructor.name)
@@ -76,37 +119,64 @@ export default class Engine extends RenderLoop{
                 else
                     return s
             })
-        }
-        else
+        } else
             this._systems = data
 
     }
-    get systems(){
+
+    get systems() {
         return this._systems
     }
 
     _resetCameraEvents() {
-        this.cameraEvents = perspectiveCameraEvents(
+        if(this.cameraType === CAMERA_TYPES.SPHERICAL || this.cameraType === CAMERA_TYPES.FREE)
+        this.cameraEvents = new perspectiveCameraEvents(
             this.camera,
             this._canvasID,
             (x, y) => {
                 this.data.clicked = true
                 this.data.currentCoord = {x, y}
-            })
+           })
+        else
+            this.cameraEvents = new OrthographicCameraEvents(
+                this.camera,
+                this._canvasID,
+                (x, y) => {
+                    this.data.clicked = true
+                    this.data.currentCoord = {x, y}
+                })
     }
 
     changeCamera() {
         this.cameraEvents.stopTracking()
 
-        if (this.camera instanceof SphericalCamera) {
-
-            this.camera = this.backupSpherical ? this.backupSpherical : new FreeCamera([0, 10, 30], 1.57, .1, 1000, 1)
-            this.backupSpherical = this.camera
-        } else {
-            this.camera = this.backupFree ? this.backupFree : new SphericalCamera([0, 10, 30], 1.57, .1, 1000, 1)
-            this.backupFree = this.camera
+        switch (this.cameraType){
+            case CAMERA_TYPES.BOTTOM:
+                this.camera = this.bottomCamera
+                break
+            case CAMERA_TYPES.TOP:
+                this.camera = this.topCamera
+                break
+            case CAMERA_TYPES.FRONT:
+                this.camera = this.frontCamera
+                break
+            case CAMERA_TYPES.BACK:
+                this.camera = this.backCamera
+                break
+            case CAMERA_TYPES.LEFT:
+                this.camera = this.leftCamera
+                break
+            case CAMERA_TYPES.RIGHT:
+                this.camera = this.rightCamera
+                break
+            case CAMERA_TYPES.FREE:
+                this.camera = this.freeCamera
+                break
+            default:
+                this.camera = this.sphericalCamera
+                break
         }
-        this.camera.aspectRatio =  this.gpu.canvas.width / this.gpu.canvas.height
+        this.camera.aspectRatio = this.gpu.canvas.width / this.gpu.canvas.height
         this._resetCameraEvents()
 
         this.cameraEvents.startTracking()

@@ -1,131 +1,172 @@
-import {linearAlgebraMath, Vector} from 'pj-math'
 import {lookAt} from "../../utils/utils";
-import conf from "../../config.json";
 import Camera from "../Camera";
 import {mat4} from "gl-matrix";
 
+export const DIRECTIONS = {
+    TOP: 0,
+    BOTTOM: 1,
+    LEFT: 2,
+    RIGHT: 3,
+    FRONT: 4,
+    BACK: 5
+}
 export default class OrthographicCamera extends Camera {
     direction = {
         forward: false,
         backward: false,
         left: false,
         right: false,
-        up: false, down: false
+        up: false,
+        down: false
     }
+    _size = 100
 
     constructor(
-        origin,
-        fov,
         zNear,
         zFar,
         aspectRatio,
-        type
+        direction
     ) {
+        let placement
+        switch (direction) {
+            case DIRECTIONS.TOP:
+                placement = [0, 1000, 0]
+                break
+            case DIRECTIONS.BOTTOM:
+                placement = [0, -1000, 0]
+                break
+            case DIRECTIONS.LEFT:
+                placement = [-1000, 0, 0]
+                break
+            case DIRECTIONS.RIGHT:
+                placement = [1000, 0, 0]
+                break
+            case DIRECTIONS.FRONT:
+                placement = [0, 0, 1000]
+                break
+            case DIRECTIONS.BACK:
+                placement = [0, 0, -1000]
+                break
+        }
         super(
-            origin,
-            fov,
+            placement,
+            undefined,
             zNear,
             zFar,
             aspectRatio,
-            type);
+        );
+
+        this.direction = direction
     }
 
-    // FOV - ASPECT - PROJECTION
-    get fov (){
-        return this._fov
+    get size() {
+        return this._size
     }
-    set fov(data){
-        this._fov = data
+
+    set size(data) {
+
+        this._size = data
         this.updateProjection()
     }
+
     get aspectRatio() {
         return this._aspectRatio
     }
+
     set aspectRatio(data) {
+
         this._aspectRatio = data
         this.updateProjection()
     }
-    updateProjection(){
-        mat4.ortho(this._projectionMatrix, -50, 50, -50, 50, this._zNear, this._zFar);
+
+    updateProjection() {
+        mat4.ortho(this._projectionMatrix, -this._size, this._size, -this._size / this._aspectRatio, this._size / this._aspectRatio, this._zNear, this._zFar);
+    }
+
+    get direction() {
+        return this._direction
+    }
+
+    set direction(data) {
+        this._direction = data
+
+        switch (data) {
+            case DIRECTIONS.TOP:
+                this._yaw = 0
+                this._pitch = -1.57
+                break
+            case DIRECTIONS.BOTTOM:
+                this._yaw = 0
+                this._pitch = 1.57
+                break
+            case DIRECTIONS.LEFT:
+                this._yaw = -1.57
+                this._pitch = 0
+                break
+            case DIRECTIONS.RIGHT:
+                this._yaw = 1.57
+                this._pitch = 0
+                break
+            case DIRECTIONS.FRONT:
+                this._yaw = 0
+                this._pitch = 0
+                break
+            case DIRECTIONS.BACK:
+                this._yaw = Math.PI
+                this._pitch = 0
+                break
+        }
+        this.updateViewMatrix()
     }
 
     updateViewMatrix() {
         super.updateViewMatrix()
         this.viewMatrix = lookAt(this._yaw, this._pitch, this._position)
-    }
-    set yaw(data) {
-        this._yaw = data
-    }
 
-    set pitch(data) {
-        this._pitch = data
-    }
-    get yaw(){
-        return this._yaw
-    }
-    get pitch(){
-        return this._pitch
-    }
+        let c = [...this._position]
+        let yaw = 0, pitch = 1.57
+        const offset = .8
+        switch (this.direction) {
+            case DIRECTIONS.TOP:
+                yaw = this._yaw
+                pitch = this._pitch
+                break
+            case DIRECTIONS.BOTTOM:
+                yaw = this._yaw
+                pitch = this._pitch
+                break
+            case DIRECTIONS.LEFT:
+                c[0] = c[2]- offset
+                c[1] = this._position[0]
+                c[2] = this._position[1] + offset
 
-    updatePlacement() {
-        super.updatePlacement()
-        let changed = false
+                break
+            case DIRECTIONS.RIGHT:
+                c[0] = -c[2]+ offset
+                c[1] = this._position[0]
+                c[2] = -this._position[1]+ offset
 
-        if (this.direction.forward) {
-            changed = true
-            const z = conf.sensitivity.forwards ? conf.sensitivity.forwards : 1
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
-            newPosition = newPosition.matrix
+                pitch = -1.57
+                break
+            case DIRECTIONS.FRONT:
+                c[0] = this._position[0]
+                c[1] = c[2]
+                c[2] = -this._position[1] - offset/4
 
-            this._position[0] += newPosition[0]
-            this._position[1] += newPosition[1]
-            this._position[2] -= newPosition[2]
+                pitch = -1.57
+                break
+            case DIRECTIONS.BACK:
+                c[0] = -this._position[0]
+                c[1] = -c[2]
+                c[2] = -this._position[1] - offset/4
 
-        }
-        if (this.direction.backward) {
-            changed = true
-            const z = -(conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
-            newPosition = newPosition.matrix
+                pitch = -1.57
 
-            this._position[0] += newPosition[0]
-            this._position[1] += newPosition[1]
-            this._position[2] -= newPosition[2]
-        }
-        if (this.direction.left) {
-            changed = true
-            const x = conf.sensitivity.right ? conf.sensitivity.right : 1
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
-            newPosition = newPosition.matrix
-
-            this._position[0] -= newPosition[0]
-            this._position[1] += newPosition[1]
-            this._position[2] += newPosition[2]
-        }
-        if (this.direction.right) {
-            changed = true
-            const x = -(conf.sensitivity.right ? conf.sensitivity.right : 1)
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
-            newPosition = newPosition.matrix
-
-            this._position[0] -= newPosition[0]
-            this._position[1] += newPosition[1]
-            this._position[2] += newPosition[2]
-        }
-        if (this.direction.up) {
-            changed = true
-            const y = (conf.sensitivity.up ? conf.sensitivity.up : 1)
-            this._position[1] += y
-
-        }
-        if (this.direction.down) {
-            changed = true
-            const y = (conf.sensitivity.up ? conf.sensitivity.up : 1)
-            this._position[1] -= y
+                break
         }
 
-        if (changed)
-            this.updateViewMatrix()
+
+        this.viewMatrixGrid = lookAt(yaw, pitch, c)
     }
 }
 

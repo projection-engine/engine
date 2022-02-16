@@ -33,7 +33,7 @@ export const fragment = `#version 300 es
 precision mediump float;
 
 const float far = 100.0;
-const float near = .01;
+const float near = .01; 
 
 in vec3 nearPoint;
 in vec3 farPoint;
@@ -41,7 +41,7 @@ in vec3 farPoint;
 in mat4 fragView;
 in mat4 fragProj;
 
-
+uniform int cameraType;
 out vec4 finalColor;
 
 
@@ -52,17 +52,21 @@ vec4 grid(vec3 fragPos3D, float scale, bool darker) {
     float line = min(grid.x, grid.y);
     float minimumz = min(derivative.y, 1.);
     float minimumx = min(derivative.x, 1.);
-    float baseColor = 0.03;
+    float baseColor = 0.07;
     vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(darker ?  line : line - .5, 1.0));
+    
+    float comparison = .3;
+    if(cameraType == 1)
+    comparison = 1.;
     // z axis
-    if(fragPos3D.x > -0.1 * minimumx && fragPos3D.x < 0.1 * minimumx){
+    if(fragPos3D.x > -comparison * minimumx && fragPos3D.x < comparison * minimumx){
         color.r = .0;
         color.g = .0;
         color.z = 1.0;
     }
     
     // x axis
-    if(fragPos3D.z > -0.1 * minimumz && fragPos3D.z < 0.1 * minimumz){
+    if(fragPos3D.z > -comparison * minimumz && fragPos3D.z < comparison * minimumz){
         color.r = 1.0;
         color.g = .0;
         color.z = .0;
@@ -86,8 +90,17 @@ void main() {
     gl_FragDepth = computeDepth(fragPos3D);
     
     float linearDepth = computeLinearDepth(fragPos3D);
-    float fading = max(0., (0.5 - linearDepth));
-    finalColor = (grid(fragPos3D* .2, 5., true) + grid(fragPos3D * .2, 1., false)) * float(t > 0.);
+    float fading = max(0.01, (0.5 - abs(linearDepth)));
+    
+    if(cameraType == 1){
+        fading = .3;
+        finalColor = (grid(fragPos3D * .5, 1., false)) * float(t > 0.);
+    }
+    else
+        finalColor = (grid(fragPos3D* .2, 5., true) + grid(fragPos3D * .2, 1., false)) * float(t > 0.);
+    
+  
+        
     finalColor.a *= fading;
 }
 `

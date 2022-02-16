@@ -18,6 +18,7 @@ import cubeMapIcon from '../../../../static/icons/cubemap.png'
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import {copyTexture} from "../../utils/utils";
 import ScreenSpace from "../../renderer/elements/ScreenSpace";
+import OrthographicCamera from "../../camera/ortho/OrthographicCamera";
 
 export default class PostProcessingSystem extends System {
 
@@ -41,6 +42,8 @@ export default class PostProcessingSystem extends System {
         this.shader = new PostProcessingShader(gpu)
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)
+
+
         this.deferredShader = new DeferredShader(gpu)
         this.flatDeferredShader = new FlatDeferredShader(gpu)
         this.meshShader = new MeshShader(gpu, true)
@@ -85,7 +88,7 @@ export default class PostProcessingSystem extends System {
 
         this.postProcessing.startMapping()
 
-        if (skyboxElement) {
+        if (skyboxElement && !(camera instanceof OrthographicCamera)) {
             const ntVm = camera.getNotTranslatedViewMatrix()
 
             this.gpu.depthMask(false)
@@ -179,15 +182,16 @@ export default class PostProcessingSystem extends System {
     _miscRenderPass(skybox, grid, camera, billboards) {
         //GRID
         if (grid) {
-            this.gridShader.use()
+            let shader = this.gridShader
+            shader.use()
 
-            this.gpu.enableVertexAttribArray(this.gridShader.positionLocation)
+            this.gpu.enableVertexAttribArray(shader.positionLocation)
             this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, grid.components.GridComponent.vertexBuffer)
-            this.gpu.vertexAttribPointer(this.gridShader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
+            this.gpu.vertexAttribPointer(shader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
 
-
-            this.gpu.uniformMatrix4fv(this.gridShader.viewMatrixULocation, false, camera.viewMatrix)
-            this.gpu.uniformMatrix4fv(this.gridShader.projectionMatrixULocation, false, camera.projectionMatrix)
+            this.gpu.uniform1i(shader.typeULocation, camera instanceof OrthographicCamera ? 1 : 0)
+            this.gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, camera instanceof OrthographicCamera ? camera.viewMatrixGrid : camera.viewMatrix)
+            this.gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, camera.projectionMatrix)
 
             this.gpu.drawArrays(this.gpu.TRIANGLES, 0, grid.components.GridComponent.length)
         }
