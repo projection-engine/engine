@@ -39,7 +39,10 @@ export default class PostProcessingSystem extends System {
 
 
         this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)
+
+
         this.shader = new PostProcessingShader(gpu)
+        this.noFxaaShader = new PostProcessingShader(gpu, true)
         this.skyboxShader = new SkyBoxShader(gpu)
         this.gridShader = new GridShader(gpu)
 
@@ -69,7 +72,10 @@ export default class PostProcessingSystem extends System {
             selectedElement,
             camera,
             BRDF,
-            shadingModel
+            shadingModel,
+            fxaa,
+            iconsVisibility,
+            gridVisibility
         } = params
 
         const grid = this._find(entities, e => e.components.GridComponent?.active)[0]
@@ -101,6 +107,9 @@ export default class PostProcessingSystem extends System {
             )
             this.gpu.depthMask(true)
         }
+        this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps],
+            iconsVisibility,
+            gridVisibility)
 
         const deferred = this._getDeferredShader(shadingModel)
 
@@ -129,19 +138,24 @@ export default class PostProcessingSystem extends System {
 
         copyTexture(this.postProcessing.frameBufferObject, deferredSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
-        this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps])
+
         this.gpu.disable(this.gpu.DEPTH_TEST)
+
         if (selectedElement) {
             const el = entities[filteredEntities.meshes[selectedElement]]
             if (el)
                 this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el)
         }
-
         this.gpu.enable(this.gpu.DEPTH_TEST)
 
         this.postProcessing.stopMapping()
-        this.shader.use()
-        this.postProcessing.draw(this.shader)
+        let shaderToApply = this.shader
+
+        if (!fxaa)
+            shaderToApply = this.noFxaaShader
+
+        shaderToApply.use()
+        this.postProcessing.draw(shaderToApply)
 
         // this.shadowMapDebugShader.use()
         //
@@ -179,24 +193,29 @@ export default class PostProcessingSystem extends System {
         }
     }
 
-    _miscRenderPass(skybox, grid, camera, billboards) {
+    _miscRenderPass(skybox, grid, camera, billboards,
+                    iconsVisibility,
+                    gridVisibility) {
         //GRID
-        if (grid) {
-            let shader = this.gridShader
-            shader.use()
+        if (grid && gridVisibility) {
+            if (camera instanceof OrthographicCamera)
+                this.gpu.disable(this.gpu.DEPTH_TEST)
+            this.gridShader.use()
 
-            this.gpu.enableVertexAttribArray(shader.positionLocation)
+            this.gpu.enableVertexAttribArray(this.gridShader.positionLocation)
             this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, grid.components.GridComponent.vertexBuffer)
-            this.gpu.vertexAttribPointer(shader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
+            this.gpu.vertexAttribPointer(this.gridShader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
 
-            this.gpu.uniform1i(shader.typeULocation, camera instanceof OrthographicCamera ? 1 : 0)
-            this.gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, camera instanceof OrthographicCamera ? camera.viewMatrixGrid : camera.viewMatrix)
-            this.gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, camera.projectionMatrix)
+            this.gpu.uniform1i(this.gridShader.typeULocation, camera instanceof OrthographicCamera ? 1 + camera.direction : 0)
+            this.gpu.uniformMatrix4fv(this.gridShader.viewMatrixULocation, false, camera instanceof OrthographicCamera ? camera.viewMatrixGrid : camera.viewMatrix)
+            this.gpu.uniformMatrix4fv(this.gridShader.projectionMatrixULocation, false, camera.projectionMatrix)
 
             this.gpu.drawArrays(this.gpu.TRIANGLES, 0, grid.components.GridComponent.length)
+            if (camera instanceof OrthographicCamera)
+                this.gpu.enable(this.gpu.DEPTH_TEST)
         }
 
-        if (billboards.length > 0) {
+        if (billboards.length > 0 && iconsVisibility) {
             const mapped = this._map(billboards)
 
             this.billboardRenderer.draw(mapped.pointLights, this.pointLightTexture.texture, camera)

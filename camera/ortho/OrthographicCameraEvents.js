@@ -25,16 +25,19 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
             case 'mousemove': {
 
                 if (isFocused) {
+                    console.log(camera.size, camera.aspectRatio)
+                    const offsetX = (camera.size * 2)/target.width,
+                            offsetY = (camera.size * 2)/target.height
                     if (camera.direction === DIRECTIONS.BOTTOM || camera.direction === DIRECTIONS.TOP) {
-                        camera.position[2] -= (event.clientY - lastPosition.y) * 6 / (camera.size + 1)
-                        camera.position[0] -= (event.clientX - lastPosition.x) * 6 / (camera.size + 1)
+                        camera.position[2] -= (camera.direction === DIRECTIONS.BOTTOM ? -1 : 1) *(event.clientY - lastPosition.y) * offsetY
+                        camera.position[0] -= (event.clientX - lastPosition.x) * offsetX
                     } else if (camera.direction === DIRECTIONS.LEFT || camera.direction === DIRECTIONS.RIGHT){
-                        camera.position[2] -= (camera.direction === DIRECTIONS.RIGHT ? -1 : 1) * (event.clientX - lastPosition.x) * 6 / (camera.size + 1)
-                        camera.position[1] += (event.clientY - lastPosition.y) * 6 / (camera.size + 1)
+                        camera.position[2] -= (camera.direction === DIRECTIONS.RIGHT ? -1 : 1) * (event.clientX - lastPosition.x) * offsetX
+                        camera.position[1] += (event.clientY - lastPosition.y) * offsetY
                     }
                     else {
-                        camera.position[0] -= (camera.direction === DIRECTIONS.BACK ? -1 : 1) * (event.clientX - lastPosition.x) * 6 / (camera.size + 1)
-                        camera.position[1] +=  (event.clientY - lastPosition.y) * 6 / (camera.size + 1)
+                        camera.position[0] -= (camera.direction === DIRECTIONS.BACK ? -1 : 1) * (event.clientX - lastPosition.x) * offsetX
+                        camera.position[1] +=  (event.clientY - lastPosition.y) * offsetY
                     }
                     cameraTarget.innerHTML = `
                     <div><b>X:</b> ${camera.position[0].toFixed(2)}</div>

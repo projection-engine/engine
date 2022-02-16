@@ -1,12 +1,13 @@
 import {createVBO} from "../../utils/utils";
 import Component from "../basic/Component";
+import randomID from "../../../../pages/project/utils/misc/randomID";
 
 
 export default class GridComponent extends Component {
     length = 0
 
-    constructor(gpu, division = 1, color, dimension = 50, id) {
-        super(id, GridComponent.constructor.name);
+    constructor(gpu) {
+        super(randomID(), GridComponent.constructor.name);
         this.gpu = gpu
 
         this.length = 6

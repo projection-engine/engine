@@ -78,4 +78,29 @@ void main() {
 
 `
 
-export const noAAFragment = ``
+export const noFxaaFragment = `#version 300 es
+precision highp float;
+
+in vec2 vTexcoord;
+
+uniform sampler2D uSampler;
+uniform float gamma;
+uniform float exposure;
+
+
+uniform vec3 inverseFilterTextureSize;
+//uniform float fxaaSpanMax;
+//uniform float fxaaReduceMin;
+//uniform float fxaaReduceMul;
+
+out vec4 finalColor;
+
+void main() {
+    vec3 fragment = texture(uSampler, vTexcoord).rgb;   
+    fragment = vec3(1.0) - exp(-fragment * exposure);
+    fragment = pow(fragment, vec3(1.0/gamma));
+
+    finalColor = vec4(fragment, 1.0);
+}
+
+`

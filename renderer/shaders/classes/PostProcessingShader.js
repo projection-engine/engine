@@ -1,10 +1,10 @@
 import Shader from "../Shader";
 
-import {fragment, vertex} from '../resources/postProcessing.glsl'
+import {fragment, noFxaaFragment, vertex} from '../resources/postProcessing.glsl'
 
 export default class PostProcessingShader extends Shader {
-    constructor(gpu) {
-        super(vertex, fragment, gpu);
+    constructor(gpu, noFxaa) {
+        super(vertex,noFxaa ? noFxaaFragment : fragment, gpu);
 
         this.positionLocation = gpu.getAttribLocation(this.program, 'position')
         this.textureULocation = gpu.getUniformLocation(this.program, 'uSampler')

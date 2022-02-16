@@ -89,7 +89,6 @@ export function enableBasics(gpu) {
     gpu.enable(gpu?.BLEND);
     gpu?.blendFunc(gpu?.SRC_ALPHA, gpu?.ONE_MINUS_SRC_ALPHA);
 
-
     gpu?.enable(gpu?.CULL_FACE);
     gpu?.cullFace(gpu?.BACK);
 

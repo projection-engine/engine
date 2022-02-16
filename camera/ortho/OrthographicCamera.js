@@ -19,7 +19,7 @@ export default class OrthographicCamera extends Camera {
         up: false,
         down: false
     }
-    _size = 100
+    _size = 35
 
     constructor(
         zNear,
@@ -125,7 +125,8 @@ export default class OrthographicCamera extends Camera {
 
         let c = [...this._position]
         let yaw = 0, pitch = 1.57
-        const offset = .8
+
+        const offset = 0
         switch (this.direction) {
             case DIRECTIONS.TOP:
                 yaw = this._yaw
