@@ -22,8 +22,7 @@ export default class OrthographicCamera extends Camera {
     _size = 35
 
     constructor(
-        zNear,
-        zFar,
+
         aspectRatio,
         direction
     ) {
@@ -51,8 +50,8 @@ export default class OrthographicCamera extends Camera {
         super(
             placement,
             undefined,
-            zNear,
-            zFar,
+            .1,
+            1000,
             aspectRatio,
         );
 
@@ -126,7 +125,8 @@ export default class OrthographicCamera extends Camera {
         let c = [...this._position]
         let yaw = 0, pitch = 1.57
 
-        const offset = 0
+        const offset =0.7942857142857143
+
         switch (this.direction) {
             case DIRECTIONS.TOP:
                 yaw = this._yaw
@@ -152,14 +152,14 @@ export default class OrthographicCamera extends Camera {
             case DIRECTIONS.FRONT:
                 c[0] = this._position[0]
                 c[1] = c[2]
-                c[2] = -this._position[1] - offset/4
+                c[2] = -this._position[1]+ offset
 
                 pitch = -1.57
                 break
             case DIRECTIONS.BACK:
                 c[0] = -this._position[0]
                 c[1] = -c[2]
-                c[2] = -this._position[1] - offset/4
+                c[2] = -this._position[1] + offset
 
                 pitch = -1.57
 

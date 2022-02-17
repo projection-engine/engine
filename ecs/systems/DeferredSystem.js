@@ -8,13 +8,18 @@ import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import WireframeShader from "../../renderer/shaders/classes/WireframeShader";
 
 export default class DeferredSystem extends System {
-
+    _ready = false
     constructor(gpu, resolutionMultiplier) {
         super(['TransformComponent']);
-        this.fallbackMaterial = new MaterialInstance(gpu)
+        this.gpu = gpu
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
         this.wireframeShader = new WireframeShader(gpu)
+    }
+    async initializeTextures(){
+        this.fallbackMaterial = new MaterialInstance(this.gpu)
+        await this.fallbackMaterial.initializeTextures()
+        this._ready = true
     }
     _getDeferredShader(shadingModel) {
         switch (shadingModel) {
@@ -28,50 +33,51 @@ export default class DeferredSystem extends System {
                 return this.shader
         }
     }
-
     execute(entities, params, systems, filteredEntities) {
-        super.execute()
-        const {
-            meshes,
-            camera,
-            selectedElement,
-            materials,
-            shadingModel
-        } = params
+        if(this._ready) {
+            super.execute()
+            const {
+                meshes,
+                camera,
+                selectedElement,
+                materials,
+                shadingModel
+            } = params
 
 
-        const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
-        const filtered = this._hasComponent(filteredMeshes)
-        const shaderToUse = this._getDeferredShader(shadingModel)
+            const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
+            const filtered = this._hasComponent(filteredMeshes)
+            const shaderToUse = this._getDeferredShader(shadingModel)
 
-        shaderToUse.use()
-        this.gBuffer.gpu.clearDepth(1);
-        this.gBuffer.startMapping()
+            shaderToUse.use()
+            this.gBuffer.gpu.clearDepth(1);
+            this.gBuffer.startMapping()
 
-        for (let m = 0; m < filtered.length; m++) {
-            const current = filtered[m]
-            const meshIndex = filteredEntities.meshSources[current.components.MeshComponent.meshID]
-            const mesh = meshes[meshIndex]
+            for (let m = 0; m < filtered.length; m++) {
+                const current = filtered[m]
+                const meshIndex = filteredEntities.meshSources[current.components.MeshComponent.meshID]
+                const mesh = meshes[meshIndex]
 
-            if (mesh !== undefined && selectedElement !== current.id) {
-                const t = current.components.TransformComponent
-                const mat = current.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[current.components.MaterialComponent.materialID]] : undefined
+                if (mesh !== undefined && selectedElement !== current.id) {
+                    const t = current.components.TransformComponent
+                    const mat = current.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[current.components.MaterialComponent.materialID]] : undefined
 
-                DeferredSystem.drawMesh(
-                    shaderToUse,
-                    this.gBuffer.gpu,
-                    mesh,
-                    camera.position,
-                    camera.viewMatrix,
-                    camera.projectionMatrix,
-                    t.transformationMatrix,
-                    mat ? mat : this.fallbackMaterial,
-                    current.components.MeshComponent.normalMatrix,
-                    shadingModel === SHADING_MODELS.WIREFRAME
-                )
+                    DeferredSystem.drawMesh(
+                        shaderToUse,
+                        this.gBuffer.gpu,
+                        mesh,
+                        camera.position,
+                        camera.viewMatrix,
+                        camera.projectionMatrix,
+                        t.transformationMatrix,
+                        mat ? mat : this.fallbackMaterial,
+                        current.components.MeshComponent.normalMatrix,
+                        shadingModel === SHADING_MODELS.WIREFRAME
+                    )
+                }
             }
+            this.gBuffer.stopMapping()
         }
-        this.gBuffer.stopMapping()
 
     }
 

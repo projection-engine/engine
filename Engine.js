@@ -33,38 +33,26 @@ export default class Engine extends RenderLoop {
     freeCamera = new FreeCamera([0, 10, 30], 1.57, .1, 1000, 1)
 
     topCamera = new OrthographicCamera(
-        .1,
-        1000,
         1,
         DIRECTIONS.TOP
     )
     bottomCamera = new OrthographicCamera(
-        .1,
-        1000,
         1,
         DIRECTIONS.BOTTOM
     )
     leftCamera = new OrthographicCamera(
-        .1,
-        1000,
         1,
         DIRECTIONS.LEFT
     )
     rightCamera = new OrthographicCamera(
-        .1,
-        1000,
         1,
         DIRECTIONS.RIGHT
     )
     frontCamera = new OrthographicCamera(
-        .1,
-        1000,
         1,
         DIRECTIONS.FRONT
     )
     backCamera = new OrthographicCamera(
-        .1,
-        1000,
         1,
         DIRECTIONS.BACK
     )
@@ -149,34 +137,37 @@ export default class Engine extends RenderLoop {
 
     changeCamera() {
         this.cameraEvents.stopTracking()
+        let cameraToApply
 
         switch (this.cameraType){
             case CAMERA_TYPES.BOTTOM:
-                this.camera = this.bottomCamera
+                cameraToApply = this.bottomCamera
                 break
             case CAMERA_TYPES.TOP:
-                this.camera = this.topCamera
+                cameraToApply = this.topCamera
                 break
             case CAMERA_TYPES.FRONT:
-                this.camera = this.frontCamera
+                cameraToApply = this.frontCamera
                 break
             case CAMERA_TYPES.BACK:
-                this.camera = this.backCamera
+                cameraToApply = this.backCamera
                 break
             case CAMERA_TYPES.LEFT:
-                this.camera = this.leftCamera
+                cameraToApply = this.leftCamera
                 break
             case CAMERA_TYPES.RIGHT:
-                this.camera = this.rightCamera
+                cameraToApply = this.rightCamera
                 break
             case CAMERA_TYPES.FREE:
-                this.camera = this.freeCamera
+                cameraToApply = this.freeCamera
                 break
             default:
-                this.camera = this.sphericalCamera
+                cameraToApply = this.sphericalCamera
                 break
         }
-        this.camera.aspectRatio = this.gpu.canvas.width / this.gpu.canvas.height
+        cameraToApply.aspectRatio = this.gpu.canvas.width / this.gpu.canvas.height
+
+        this.camera = cameraToApply
         this._resetCameraEvents()
 
         this.cameraEvents.startTracking()

@@ -1,10 +1,17 @@
 import Texture from "../../renderer/elements/Texture";
 import ImageProcessor from "../../../workers/ImageProcessor";
+import getImagePromise from "../../utils/getImagePromise";
 
 export default class MaterialInstance {
     constructor(
         gpu,
         id,
+    ) {
+        this.id = id
+        this.gpu = gpu
+    }
+
+    async initializeTextures(
         albedo = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
         metallic = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
         roughness = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
@@ -12,19 +19,19 @@ export default class MaterialInstance {
         height = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)')
     ) {
-
-        this.id = id
-        if (albedo)
-            this.albedo = typeof albedo === "object" ? albedo : new Texture(albedo, false, gpu, ...[, ,], true)
-        if (metallic)
-            this.metallic =  typeof metallic === "object" ? metallic :new Texture(metallic, false, gpu, gpu.RGB, gpu.RGB, true)
-        if (roughness)
-            this.roughness = typeof roughness === "object" ? roughness : new Texture(roughness, false, gpu, gpu.RGB, gpu.RGB, true)
-        if (normal)
-            this.normal =  typeof normal === "object" ? normal :new Texture(normal, false, gpu, gpu.RGB, gpu.RGB, true)
-        if (height)
-            this.height =  typeof height === "object" ? height :new Texture(height, false, gpu, gpu.RGB, gpu.RGB, true)
-        if (ao)
-            this.ao = typeof ao === "object" ? ao : new Texture(ao, false, gpu, gpu.RGB, gpu.RGB, true)
+        let imagesToLoad = [
+            await getImagePromise(albedo, 'albedo'),
+            await getImagePromise(metallic, 'metallic'),
+            await getImagePromise(roughness, 'roughness'),
+            await getImagePromise(normal, 'normal'),
+            await getImagePromise(height, 'height'),
+            await getImagePromise(ao, 'ao')
+        ]
+        this.albedo = new Texture(imagesToLoad[0].data, false, this.gpu, ...[, ,], true)
+        this.metallic = new Texture(imagesToLoad[1].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+        this.roughness = new Texture(imagesToLoad[2].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+        this.normal = new Texture(imagesToLoad[3].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+        this.height = new Texture(imagesToLoad[4].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+        this.ao = new Texture(imagesToLoad[5].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
     }
 }

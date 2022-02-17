@@ -1,5 +1,7 @@
 import Framebuffer from "./Framebuffer";
 import {mat4} from "gl-matrix";
+import OrthographicCamera from "../../camera/ortho/OrthographicCamera";
+import {ca} from "wait-on/exampleConfig";
 
 export default class MousePicker extends Framebuffer {
     constructor(gpu) {
@@ -38,11 +40,12 @@ export default class MousePicker extends Framebuffer {
     getProjection({x, y}, camera) {
 
         const aspect = camera.aspectRatio
+        console.log(camera.zNear)
+        let top = Math.tan(camera.fov / 2) * camera.zNear,
+            bottom = -top,
+            left = aspect * bottom,
+            right = aspect * top
 
-        const top = Math.tan(camera.fov/2) * camera.zNear;
-        const bottom = -top;
-        const left = aspect * bottom;
-        const right = aspect * top;
         const width = Math.abs(right - left);
         const height = Math.abs(top - bottom);
 
@@ -66,10 +69,10 @@ export default class MousePicker extends Framebuffer {
             camera.zNear,
             camera.zFar);
 
-        return m
+        return  m
     }
 
-    start( ) {
+    start() {
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.frameBufferObject);
 
         this.gpu.viewport(0, 0, 1, 1)

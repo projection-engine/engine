@@ -25,7 +25,7 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
             case 'mousemove': {
 
                 if (isFocused) {
-                    console.log(camera.size, camera.aspectRatio)
+
                     const offsetX = (camera.size * 2)/target.width,
                             offsetY = (camera.size * 2)/target.height
                     if (camera.direction === DIRECTIONS.BOTTOM || camera.direction === DIRECTIONS.TOP) {
@@ -53,11 +53,13 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
 
                 if (event.button === 2) {
                     lastPosition = {x: event.clientX, y: event.clientY}
-                    startMouseDown = performance.now()
                     isFocused = true
 
                     target.style.cursor = 'grabbing'
                 }
+                else
+                    startMouseDown = performance.now()
+
                 break
             }
             case 'mouseup': {
@@ -75,6 +77,7 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
 
     const handleClick = (event) => {
         let elapsedTime = performance.now() - startMouseDown;
+
         if (elapsedTime <= 250) {
 
             const target = document.getElementById(canvasID).getBoundingClientRect()
