@@ -2,6 +2,7 @@ import System from "../basic/System";
 import TransformComponent from "../components/TransformComponent";
 import {mat4} from "gl-matrix";
 import {linearAlgebraMath} from "pj-math";
+import Transformation from "../../utils/Transformation";
 
 export default class TransformSystem extends System {
 
@@ -20,71 +21,34 @@ export default class TransformSystem extends System {
                 let parent
                 if (current.linkedTo)
                     parent = this._find(entities, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
+                const component = current.components.TransformComponent
+                const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling)
 
-
-                let newTransform = mat4.create()
-                // TRANSFORM
-                newTransform[12] = current.components.TransformComponent.translation[0]
-                newTransform[13] = current.components.TransformComponent.translation[1]
-                newTransform[14] = current.components.TransformComponent.translation[2]
-
-
-                // ROTATE
-                mat4.rotate(
-                    newTransform,
-                    newTransform,
-                    current.components.TransformComponent.rotation[0],
-                    [1, 0, 0]
-                )
-                mat4.rotate(
-                    newTransform,
-                    newTransform,
-                    current.components.TransformComponent.rotation[1],
-                    [0, 1, 0]
-                )
-                mat4.rotate(
-                    newTransform,
-                    newTransform,
-                    current.components.TransformComponent.rotation[2],
-                    [0, 0, 1]
-                )
-
-                // SCALE
-                const scalingMatrix = mat4.create()
-                scalingMatrix[0] = current.components.TransformComponent.scaling[0]
-                scalingMatrix[5] = current.components.TransformComponent.scaling[1]
-                scalingMatrix[10] = current.components.TransformComponent.scaling[2]
                 if (current.components.SphereCollider) {
                     switch (current.components.SphereCollider.axis) {
                         case 'x':
                             if (current.components.TransformComponent.scaling[0] > 1)
-                                current.components.SphereCollider.radius *= current.components.TransformComponent.scaling[0]
+                                current.components.SphereCollider.radius *= component.scaling[0]
                             break
                         case 'y':
                             if (current.components.TransformComponent.scaling[1] > 1)
-                                current.components.SphereCollider.radius *= current.components.TransformComponent.scaling[1]
+                                current.components.SphereCollider.radius *= component.scaling[1]
                             break
                         case 'z':
                             if (current.components.TransformComponent.scaling[2] > 1)
-                                current.components.SphereCollider.radius *= current.components.TransformComponent.scaling[2]
+                                current.components.SphereCollider.radius *= component.scaling[2]
                             break
                     }
                 }
-                mat4.multiply(
-                    newTransform,
-                    newTransform,
-                    scalingMatrix
-                )
 
                 if (parent)
                     mat4.multiply(
                         current.components.TransformComponent.transformationMatrix,
                         parent,
-                        newTransform
+                        transformationMatrix
                     )
-                else {
-                    current.components.TransformComponent.transformationMatrix = newTransform
-                }
+                else
+                    current.components.TransformComponent.transformationMatrix = transformationMatrix
 
                 for (let j = 0; j < filtered.length; j++) {
                     if (filtered[j].linkedTo === current.id)

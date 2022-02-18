@@ -9,13 +9,15 @@ export default class PerformanceSystem extends System {
     _lowest
     _samplesCounted
     _visible = true
+    _entitiesLength = 0
+
     constructor(gpu) {
         super();
         this.gpu = gpu
-        this.debug = gpu.getExtension('webgl_debug_renderer_info');
-        this._vendor = gpu.getParameter(this.debug.UNMASKED_VENDOR_WEBGL)
-        this._renderer = gpu.getParameter(this.debug.UNMASKED_RENDERER_WEBGL)
-
+        // this.debug = gpu.getExtension('webgl_debug_renderer_info');
+        // this._vendor = gpu.getParameter(this.debug.UNMASKED_VENDOR_WEBGL)
+        // this._renderer = gpu.getParameter(this.debug.UNMASKED_RENDERER_WEBGL)
+        //
 
         const canvas = document.getElementById(this.gpu.canvas.id)
         const targetID = canvas.id.replace('-canvas', '-performance-metrics')
@@ -34,10 +36,17 @@ export default class PerformanceSystem extends System {
 
     }
 
-    execute(_, params) {
+    execute(entities, params) {
         super.execute();
         if (params.performanceMetrics) {
-            if(!this._visible) {
+            if (this._entitiesLength < entities.length) {
+
+                this._triangles = params.meshes.map(m => m.trianglesQuantity).reduce((p, a) => p + a, 0)
+                this._meshesQuantity = params.meshes.length
+                this._entitiesLength = entities.length
+            }
+
+            if (!this._visible) {
                 this._visible = true
                 this.renderTarget.style.display = 'block'
             }
@@ -75,11 +84,16 @@ export default class PerformanceSystem extends System {
                    <div>
                        RAM: <b>${totalMemUsage}</b> mb
                     </div>
+                    <div>
+                        Meshes:  <b>${this._meshesQuantity}</b>
+                    </div>
+                    <div>
+                        Triangles:  <b>${this._triangles}</b>
+                    </div>
                 </div>
             `
             this._previusStartTime = start
-        }
-        else if(this._visible) {
+        } else if (this._visible) {
             this._visible = false
             this.renderTarget.style.display = 'none'
         }

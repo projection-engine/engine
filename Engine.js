@@ -29,8 +29,8 @@ export default class Engine extends RenderLoop {
     _systems = []
     _fov = Math.PI / 2
 
-    sphericalCamera = new SphericalCamera([0, 10, 30], 1.57, .1, 1000, 1)
-    freeCamera = new FreeCamera([0, 10, 30], 1.57, .1, 1000, 1)
+    sphericalCamera = new SphericalCamera([0, 10, 30], 1.57, .1, 10000, 1)
+    freeCamera = new FreeCamera([0, 10, 30], 1.57, .1, 10000, 1)
 
     topCamera = new OrthographicCamera(
         1,

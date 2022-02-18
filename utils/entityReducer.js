@@ -21,6 +21,15 @@ export const ENTITY_ACTIONS = {
     CLEAR: 5
 }
 
+function deleteEntity(entity, entities) {
+    let copy = [...entities].filter(e => e.id !== entity.id)
+    for (let i = 0; i < copy.length; i++) {
+        if (copy[i].linkedTo === entity.id)
+            copy = deleteEntity(copy[i], copy)
+    }
+    return copy
+}
+
 export default function entityReducer(state, action) {
     let stateCopy = [...state]
     const entityIndex = state.findIndex(e => e.id === action.payload?.entityID)
@@ -46,17 +55,8 @@ export default function entityReducer(state, action) {
                 return stateCopy
             }
             case ENTITY_ACTIONS.REMOVE: {
-                let indicesRemovedBefore = 0
-                for (let i = 0; i < stateCopy.length; i++) {
-                    if (stateCopy[i].linkedTo === entity.id) {
-                        if (i < entityIndex)
-                            indicesRemovedBefore += 1
-                        stateCopy.splice(i, 1)
-                    }
-                }
 
-                stateCopy.splice(entityIndex - indicesRemovedBefore, 1)
-                return stateCopy
+                return deleteEntity(stateCopy[entityIndex], stateCopy)
             }
 
             // COMPONENT

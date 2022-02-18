@@ -102,10 +102,10 @@ const float PI = 3.14159265359;
 
 void main() {
 
-    ivec2 fragCoord = ivec2(gl_FragCoord.xy);
+    //ivec2 fragCoord = ivec2(gl_FragCoord.xy);
 
     // HACK DESGRAÇENTO ( caso fragPos seja tudo zero discarta fragment)
-    vec3 fragPosition = texelFetch(positionSampler, fragCoord, 0).xyz;
+    vec3 fragPosition = texture(positionSampler, texCoord).rgb;// texelFetch(positionSampler, fragCoord, 0).xyz;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
     discard;
 
