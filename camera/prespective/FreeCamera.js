@@ -12,7 +12,7 @@ export default class FreeCamera extends Camera {
         right: false,
         up: false, down: false
     }
-
+    onMove
     constructor(
         origin,
         fov,
@@ -128,8 +128,11 @@ export default class FreeCamera extends Camera {
             this._position[1] -= y
         }
 
-        if (changed)
+        if (changed) {
             this.updateViewMatrix()
+            if(this.onMove)
+                this.onMove()
+        }
     }
 }
 

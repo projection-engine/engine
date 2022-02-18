@@ -26,39 +26,54 @@ export default class SkyboxComponent extends Component {
     get imageID() {
         return this._imageID
     }
+
     set imageID(data) {
         this._imageID = data
     }
+
     set hdrTexture({blob, imageID}) {
 
         this._imageID = imageID
         const baseShader = new CubeMapShader(this.gpu, 0)
         const irradianceShader = new CubeMapShader(this.gpu, 1)
 
-        this._initializeTexture(blob, () => {
-            this._cubeMap = new CubeMap(baseShader, this.gpu, 512, (c) => {
-                this.gpu.activeTexture(this.gpu.TEXTURE0)
+        this._hdrTexture = createTexture(
+            this.gpu,
+            blob.width,
+            blob.height,
+            this.gpu.RGB16F,
+            0,
+            this.gpu.RGB,
+            this.gpu.FLOAT,
+            blob,
+            this.gpu.LINEAR,
+            this.gpu.LINEAR,
+            this.gpu.CLAMP_TO_EDGE,
+            this.gpu.CLAMP_TO_EDGE
+        )
 
-                this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
-                this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-            }, [0,0,0], true)
-            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-            this._irradianceMap = new CubeMap(
-                irradianceShader,
-                this.gpu, 32, (c) => {
+        this._cubeMap = new CubeMap(baseShader, this.gpu, 1024, (c) => {
+            this.gpu.activeTexture(this.gpu.TEXTURE0)
+
+            this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
+            this.gpu.uniform1i(c.equirectangularMapULocation, 0)
+        }, [0, 0, 0], true)
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+        this._irradianceMap = new CubeMap(
+            irradianceShader,
+            this.gpu, 32, (c) => {
                 this.gpu.activeTexture(this.gpu.TEXTURE0)
                 this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
                 this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-            }, [0,0,0], false, true)
-
-            this._initialized = true
-        })
+            }, [0, 0, 0], false, true)
+        this._initialized = true
     }
 
 
     get cubeMapPrefiltered() {
         return this._cubeMap?.prefiltered
     }
+
     get cubeMap() {
         return this._cubeMap?.texture
     }
@@ -66,53 +81,6 @@ export default class SkyboxComponent extends Component {
     get irradianceMap() {
         return this._irradianceMap?.texture
     }
-
-    _initializeTexture(hdrSrc, callback) {
-        // if (this.type === 'hdr') {
-        //     const img = new HDRImage()
-        //     img.src = hdrSrc
-        //     img.onload = () => {
-        //         this._hdrTexture = createTexture(
-        //             this.gpu,
-        //             img.width,
-        //             img.height,
-        //             this.gpu.RGB16F,
-        //             0,
-        //             this.gpu.RGB,
-        //             this.gpu.FLOAT,
-        //             img,
-        //             this.gpu.LINEAR,
-        //             this.gpu.LINEAR,
-        //             this.gpu.CLAMP_TO_EDGE,
-        //             this.gpu.CLAMP_TO_EDGE
-        //         )
-        //
-        //         callback()
-        //     }
-        // } else {
-            const img = new Image()
-            img.src = hdrSrc
-            img.onload = () => {
-                this._hdrTexture = createTexture(
-                    this.gpu,
-                    img.width,
-                    img.height,
-                    this.gpu.RGB16F,
-                    0,
-                    this.gpu.RGB,
-                    this.gpu.FLOAT,
-                    img,
-                    this.gpu.LINEAR,
-                    this.gpu.LINEAR,
-                    this.gpu.CLAMP_TO_EDGE,
-                    this.gpu.CLAMP_TO_EDGE
-                )
-
-                callback()
-            // }
-        }
-    }
-
 
     draw(shader, projectionMatrix, staticViewMatrix) {
 

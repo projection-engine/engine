@@ -84,8 +84,6 @@ export function enableBasics(gpu) {
     const floatA = gpu.getExtension('OES_texture_float');
     const floatB = gpu.getExtension('OES_texture_float_linear');
 
-
-
     gpu.enable(gpu?.BLEND);
     gpu?.blendFunc(gpu?.SRC_ALPHA, gpu?.ONE_MINUS_SRC_ALPHA);
 
@@ -127,7 +125,7 @@ export function lookAt(yaw, pitch, position) {
     ]
 }
 
-export function copyTexture(target, source, gpu, type=gpu.DEPTH_BUFFER_BIT){
+export function copyTexture(target, source, gpu, type = gpu.DEPTH_BUFFER_BIT) {
     gpu.bindFramebuffer(gpu.READ_FRAMEBUFFER, source)
     gpu.bindFramebuffer(gpu.DRAW_FRAMEBUFFER, target)
     gpu.blitFramebuffer(

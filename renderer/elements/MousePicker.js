@@ -40,7 +40,6 @@ export default class MousePicker extends Framebuffer {
     getProjection({x, y}, camera) {
 
         const aspect = camera.aspectRatio
-        console.log(camera.zNear)
         let top = Math.tan(camera.fov / 2) * camera.zNear,
             bottom = -top,
             left = aspect * bottom,

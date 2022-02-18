@@ -32,7 +32,7 @@ void main(){
 export const fragment = `#version 300 es
 precision mediump float;
 
-const float far = 1000.0;
+const float far = 100.0;
 const float near = .01; 
 
 in vec3 nearPoint;
@@ -85,7 +85,7 @@ void main() {
     gl_FragDepth = computeDepth(fragPos3D);
     
     float linearDepth = computeLinearDepth(fragPos3D);
-    float fading = max(0.01, (0.5 - abs(linearDepth)));
+    float fading = max(0., (0.5 - abs(linearDepth)));
     vec3 verticalAxisColor = vec3(.0, .0, 1.);
     vec3 horizontalAxisColor = vec3(1., .0, .0);
     

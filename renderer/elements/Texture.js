@@ -2,7 +2,6 @@ export default class Texture {
     loaded = false
 
     constructor(img, yFlip, gpu, format = gpu.SRGB8_ALPHA8, type = gpu.RGBA,  repeat = false) {
-        console.log(img)
         const anisotropicEXT = gpu.getExtension('EXT_texture_filter_anisotropic')
 
         let newTexture = gpu.createTexture()

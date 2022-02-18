@@ -4,10 +4,24 @@ import FreeCamera from "./FreeCamera";
 import SphericalCamera from "./SphericalCamera";
 
 export default function perspectiveCameraEvents(camera, canvasID, onClick) {
-    let target = document.getElementById(canvasID)
+    let target = document.getElementById(canvasID),
+        cameraTarget = document.getElementById(canvasID.replace('-canvas', '') + '-camera-position')
+
     let isFocused = false
     let startMouseDown
     const maxAngle = camera instanceof FreeCamera ? 1.57 : 1.4
+
+    const updateCamPosition = () => {
+        cameraTarget.innerHTML = `
+                    <div><b>X:</b> ${camera.position[0].toFixed(2)}</div>
+                    <div><b>Y:</b>  ${camera.position[1].toFixed(2)}</div>
+                    <div><b>Z:</b>  ${camera.position[2].toFixed(2)}</div>
+                    `
+    }
+
+    if (camera instanceof FreeCamera)
+        camera.onMove = updateCamPosition
+    updateCamPosition()
     const updateZ = (forward, active) => {
 
         if (forward)
@@ -49,8 +63,10 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                     }
 
                     camera.updateViewMatrix()
+                    updateCamPosition()
                 } else {
                     camera.radius -= distance
+                    updateCamPosition()
                 }
 
                 break
@@ -92,7 +108,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                         camera.yaw -= (conf.sensitivity.yaw ? conf.sensitivity.yaw : .005) * Math.abs(event.movementX)
 
                     camera.updateViewMatrix()
-
+                    updateCamPosition()
                 }
                 break
             }
