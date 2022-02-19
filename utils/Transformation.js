@@ -1,4 +1,4 @@
-import {mat4} from "gl-matrix";
+import {mat4, quat} from "gl-matrix";
 
 export default class Transformation {
     static transform(translation, rotate, scale) {
@@ -8,50 +8,26 @@ export default class Transformation {
         const res = mat4.create()
         mat4.multiply(res, t, r)
         mat4.multiply(res, res, s)
-        return res
+        return Array.from(res)
     }
 
     static translate(translation) {
         const translationMatrix = mat4.create()
-
-        translationMatrix[12] = translation[0]
-        translationMatrix[13] = translation[1]
-        translationMatrix[14] = translation[2]
-
+        mat4.translate(translationMatrix, translationMatrix, translation)
         return translationMatrix
     }
 
     static rotate(rotation) {
         const rotationMatrix = mat4.create()
-
-        mat4.rotate(
-            rotationMatrix,
-            rotationMatrix,
-            rotation[0],
-            [1, 0, 0]
-        )
-        mat4.rotate(
-            rotationMatrix,
-            rotationMatrix,
-            rotation[1],
-            [0, 1, 0]
-        )
-        mat4.rotate(
-            rotationMatrix,
-            rotationMatrix,
-            rotation[2],
-            [0, 0, 1]
-        )
-
+        const quaternion = quat.create()
+        quat.fromEuler(quaternion, rotation[0], rotation[1], rotation[2])
+        mat4.fromQuat(rotationMatrix, quaternion)
         return rotationMatrix
     }
 
     static scale(scaling) {
         const scalingMatrix = mat4.create()
-        scalingMatrix[0] = scaling[0]
-        scalingMatrix[5] = scaling[1]
-        scalingMatrix[10] = scaling[2]
-
+        mat4.scale(scalingMatrix, scalingMatrix, scaling)
 
         return scalingMatrix
     }

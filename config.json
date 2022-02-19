@@ -8,12 +8,12 @@
     "down": "ArrowDown"
   },
   "sensitivity": {
-    "up": 1,
-    "down": 1,
-    "left": 1,
-    "right": 1,
-    "forwards": 2,
-    "backwards": 2,
+    "up": 0.5,
+    "down": 0.5,
+    "left": 0.5,
+    "right": 0.5,
+    "forwards": 0.5,
+    "backwards": 0.5,
     "yaw": 0.01,
     "pitch": 0.01
   },

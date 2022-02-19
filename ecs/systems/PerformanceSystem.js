@@ -36,13 +36,15 @@ export default class PerformanceSystem extends System {
 
     }
 
-    execute(entities, params) {
+    execute(entities, params, _ , filteredEntities) {
         super.execute();
         if (params.performanceMetrics) {
-            if (this._entitiesLength < entities.length) {
 
-                this._triangles = params.meshes.map(m => m.trianglesQuantity).reduce((p, a) => p + a, 0)
-                this._meshesQuantity = params.meshes.length
+            if (this._entitiesLength !== entities.length) {
+                const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
+                    .map(e => params.meshes.find(m => m.id === e.components.MeshComponent.meshID))
+                this._triangles = filteredMeshes.map(m => m.trianglesQuantity).reduce((p, a) => p + a, 0)
+                this._meshesQuantity = filteredMeshes.length
                 this._entitiesLength = entities.length
             }
 
