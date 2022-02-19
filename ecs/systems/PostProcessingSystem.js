@@ -27,9 +27,6 @@ export default class PostProcessingSystem extends System {
         super([]);
         this.gpu = gpu
 
-        // this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
-        // this.quad = new Quad(gpu)
-
         this.screenSpace = new ScreenSpace(gpu, resolutionMultiplier)
         this.billboardRenderer = new BillboardRenderer(gpu)
         this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)
@@ -81,7 +78,7 @@ export default class PostProcessingSystem extends System {
             super.execute()
             const {
                 meshes,
-                selectedElement,
+                selected,
                 camera,
                 BRDF,
                 shadingModel,
@@ -119,9 +116,14 @@ export default class PostProcessingSystem extends System {
                 )
                 this.gpu.depthMask(true)
             }
-            this._miscRenderPass(skyboxElement, grid, camera, [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps],
+            this._miscRenderPass(
+                skyboxElement,
+                grid,
+                camera,
+                [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps],
                 iconsVisibility,
-                gridVisibility)
+                gridVisibility
+            )
 
             const deferred = this._getDeferredShader(shadingModel)
 
@@ -153,11 +155,12 @@ export default class PostProcessingSystem extends System {
 
             this.gpu.disable(this.gpu.DEPTH_TEST)
 
-            if (selectedElement) {
-                const el = entities[filteredEntities.meshes[selectedElement]]
-                if (el)
-                    this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el)
-            }
+            if(selected)
+                for(let i = 0; i < selected.length; i++){
+                    const el = entities[filteredEntities.meshes[selected[i]]]
+                    if (el)
+                        this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el, i)
+                }
             this.gpu.enable(this.gpu.DEPTH_TEST)
 
             this.postProcessing.stopMapping()
@@ -169,17 +172,6 @@ export default class PostProcessingSystem extends System {
             shaderToApply.use()
             this.postProcessing.draw(shaderToApply)
         }
-
-        // this.shadowMapDebugShader.use()
-        //
-        // bindTexture(
-        //     0,
-        //     shadowMapSystem.shadowMapAtlas.frameBufferTexture,
-        //     this.shadowMapDebugShader.shadowMapULocation,
-        //     this.gpu)
-        //
-        //
-        // this.quad.draw(this.shadowMapDebugShader.positionLocation)
 
     }
 
@@ -236,8 +228,10 @@ export default class PostProcessingSystem extends System {
         }
     }
 
-    _drawSelected(mesh, camera, element) {
+    _drawSelected(mesh, camera, element, index) {
         this.meshShader.use()
+        this.gpu.uniform1i(this.meshShader.indexULocation, index)
+
         // shader,
         //     gpu,
         //     mesh,

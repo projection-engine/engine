@@ -14,9 +14,11 @@ export default class PickSystem extends System {
         super.execute()
         const  {
             meshes,
-            setSelectedElement,
+            setSelected,
             currentCoords,
             clicked,
+
+
             camera,
             setClicked
         } = params
@@ -57,9 +59,9 @@ export default class PickSystem extends System {
             const index = data[0] + data[1] + data[2];
 
             if (index > 0)
-                setSelectedElement(filtered.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id)
+                setSelected([filtered.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
             else
-                setSelectedElement(undefined)
+                setSelected([])
             this.picker.stopMapping();
 
         }

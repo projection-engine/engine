@@ -25,7 +25,7 @@ export default class MeshShader extends Shader {
         this.materialAOULocation = gpu.getUniformLocation(this.program, 'pbrMaterial.ao')
 
         this.cameraVecULocation = gpu.getUniformLocation(this.program, 'cameraVec')
-
+        this.indexULocation = gpu.getUniformLocation(this.program, 'indexSelected')
 
     }
 
