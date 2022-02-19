@@ -43,7 +43,7 @@ export default class PerformanceSystem extends System {
             if (this._entitiesLength !== entities.length) {
                 const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
                     .map(e => params.meshes.find(m => m.id === e.components.MeshComponent.meshID))
-                this._triangles = filteredMeshes.map(m => m.trianglesQuantity).reduce((p, a) => p + a, 0)
+                this._triangles = filteredMeshes.filter(m => m !== undefined).map(m => m.trianglesQuantity).reduce((p, a) => p + a, 0)
                 this._meshesQuantity = filteredMeshes.length
                 this._entitiesLength = entities.length
             }

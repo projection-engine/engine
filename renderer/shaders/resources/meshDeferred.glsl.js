@@ -36,14 +36,7 @@ void main(){
         tangentVec.z, bitangent.z, normalVec.z
     );
     toTangentSpace = transpose(toTangentSpace);
-
-
-    // FRAGMENT IN
-
     texCoord = uvTexture;
-
-
-    // END
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 }
 `

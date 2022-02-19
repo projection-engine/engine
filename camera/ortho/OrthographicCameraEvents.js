@@ -25,7 +25,6 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
             case 'mousemove': {
 
                 if (isFocused) {
-
                     const offsetX = (camera.size * 2)/target.width,
                             offsetY = (camera.size * 2)/target.height
                     if (camera.direction === DIRECTIONS.BOTTOM || camera.direction === DIRECTIONS.TOP) {

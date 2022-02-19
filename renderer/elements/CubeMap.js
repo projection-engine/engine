@@ -18,7 +18,7 @@ export default class CubeMap {
         this.gpu = gpu
 
         this._generatePrefiltered = generatePrefiltered
-        this._mipLevels = 5
+        this._mipLevels = 6
         this.onBeforeDraw = onBeforeDraw
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
         this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
