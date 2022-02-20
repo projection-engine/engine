@@ -1,5 +1,5 @@
 import {mat4} from "gl-matrix";
-import randomID from "../../../pages/project/utils/misc/randomID";
+import randomID from "../../utils/misc/randomID";
 
 
 export default class Joint {

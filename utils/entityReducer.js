@@ -2,7 +2,7 @@ import Entity from "../ecs/basic/Entity";
 import Component from "../ecs/basic/Component";
 import PickComponent from "../ecs/components/PickComponent";
 import generateNextID from "../../utils/generateNextID";
-import cloneClass from "../../../pages/project/utils/misc/cloneClass";
+import cloneClass from "../../utils/misc/cloneClass";
 
 
 export const ENTITY_ACTIONS = {
@@ -18,6 +18,7 @@ export const ENTITY_ACTIONS = {
 
 
     DISPATCH_BLOCK: 4,
+    PUSH_BLOCK: 6,
     CLEAR: 5
 }
 
@@ -107,6 +108,13 @@ export default function entityReducer(state, action) {
                 const block = action.payload
                 if (Array.isArray(block))
                     return block
+                else
+                    return stateCopy
+            }
+            case ENTITY_ACTIONS.PUSH_BLOCK: {
+                const block = action.payload
+                if (Array.isArray(block))
+                    return [...stateCopy, ...block]
                 else
                     return stateCopy
             }

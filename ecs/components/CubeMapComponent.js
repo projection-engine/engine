@@ -34,7 +34,7 @@ export default class CubeMapComponent extends Component{
         //         const t = meshInstance.components.TransformComponent
         //         const mat =meshInstance.components.MaterialComponent?.materialID ? materials[filteredEntities.materials[meshInstance.components.MaterialComponent.materialID]] : undefined
         //
-        //         DeferredSystem.drawMesh(
+        //         MeshSystem.drawMesh(
         //             meshShader,
         //             gpu,
         //             mesh,

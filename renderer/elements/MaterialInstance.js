@@ -3,6 +3,7 @@ import ImageProcessor from "../../../workers/ImageProcessor";
 import getImagePromise from "../../utils/getImagePromise";
 
 export default class MaterialInstance {
+    _ready = false
     constructor(
         gpu,
         id,
@@ -33,5 +34,10 @@ export default class MaterialInstance {
         this.normal = new Texture(imagesToLoad[3].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
         this.height = new Texture(imagesToLoad[4].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
         this.ao = new Texture(imagesToLoad[5].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+
+        this._ready = true
+    }
+    get ready(){
+        return this._ready
     }
 }

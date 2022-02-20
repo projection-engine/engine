@@ -1,6 +1,6 @@
 import {createVAO, createVBO} from "../../utils/utils";
 import VBO from "../VBO";
-import randomID from "../../../../pages/project/utils/misc/randomID";
+import randomID from "../../../utils/misc/randomID";
 
 
 export default class Mesh {
@@ -27,13 +27,14 @@ export default class Mesh {
                     gpu,
                     maxBoundingBox,
                     minBoundingBox,
-                    wireframeBuffer
+                    wireframeBuffer,
+                    material
                 }) {
 
 
         this.id = id
         this.gpu = gpu
-
+        this.material = material
         this.maxBoundingBox = maxBoundingBox
         this.minBoundingBox = minBoundingBox
 
@@ -41,7 +42,6 @@ export default class Mesh {
         this.verticesQuantity = indices.length
 
         this.VAO = createVAO(gpu)
-
 
 
         this.indexVBO = createVBO(gpu, gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))

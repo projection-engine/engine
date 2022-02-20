@@ -1,255 +1,67 @@
 import System from "../basic/System";
 import PostProcessingShader from "../../renderer/shaders/classes/PostProcessingShader";
 import PostProcessing from "../../renderer/elements/PostProcessing";
-import DeferredShader from "../../renderer/shaders/classes/DeferredShader";
-import DeferredSystem from "./DeferredSystem";
-import SkyBoxShader from "../../renderer/shaders/classes/SkyBoxShader";
-import GridShader from "../../renderer/shaders/classes/GridShader";
-import ShadowMapSystem from "./ShadowMapSystem";
-import Texture from "../../renderer/elements/Texture";
-import BillboardRenderer from "../../renderer/elements/BillboardRenderer";
-import MeshShader from "../../renderer/shaders/classes/MeshShader";
-
-import FlatDeferredShader from "../../renderer/shaders/classes/FlatDeferredShader";
-import pointLightIcon from '../../../../static/icons/point_light.png'
-import directionalLightIcon from '../../../../static/icons/directional_light.png'
-import spotLightIcon from '../../../../static/icons/spot_light.png'
-import cubeMapIcon from '../../../../static/icons/cubemap.png'
-import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
+import MeshSystem from "./MeshSystem";
 import {copyTexture} from "../../utils/utils";
 import ScreenSpace from "../../renderer/elements/ScreenSpace";
-import OrthographicCamera from "../../camera/ortho/OrthographicCamera";
-import getImagePromise from "../../utils/getImagePromise";
+import DeferredSystem from "./subsystems/DeferredSystem";
+import GridSystem from "./subsystems/GridSystem";
+import BillboardSystem from "./subsystems/BillboardSystem";
+import SelectedSystem from "./subsystems/SelectedSystem";
+import SkyboxSystem from "./subsystems/SkyboxSystem";
 
 export default class PostProcessingSystem extends System {
-    _ready = false
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
 
         this.screenSpace = new ScreenSpace(gpu, resolutionMultiplier)
-        this.billboardRenderer = new BillboardRenderer(gpu)
         this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)
 
 
         this.shader = new PostProcessingShader(gpu)
         this.noFxaaShader = new PostProcessingShader(gpu, true)
-        this.skyboxShader = new SkyBoxShader(gpu)
-        this.gridShader = new GridShader(gpu)
 
 
-        this.deferredShader = new DeferredShader(gpu)
-        this.flatDeferredShader = new FlatDeferredShader(gpu)
-        this.meshShader = new MeshShader(gpu, true)
-    }
-
-    async initializeTextures() {
-
-        const p = await getImagePromise(pointLightIcon, 'point'),
-            dir = await getImagePromise(directionalLightIcon, 'direc'),
-            spot = await getImagePromise(spotLightIcon, 'spot'),
-            cube = await getImagePromise(cubeMapIcon, 'cubemap')
-
-
-        this.pointLightTexture = new Texture(p.data, false, this.gpu)
-        this.directionalLightTexture = new Texture(dir.data, false, this.gpu)
-
-        this.spotLightTexture = new Texture(spot.data, false, this.gpu)
-        this.cubemapTexture = new Texture(cube.data, false, this.gpu)
-
-        this._ready = true
-    }
-
-    _getDeferredShader(shadingModel) {
-        switch (shadingModel) {
-            case SHADING_MODELS.FLAT:
-                return this.flatDeferredShader
-            case SHADING_MODELS.DETAIL:
-                return this.deferredShader
-            case SHADING_MODELS.WIREFRAME:
-                return this.flatDeferredShader
-            default:
-                return this.deferredShader
-        }
+        this.skyboxSystem = new SkyboxSystem(gpu)
+        this.deferredSystem = new DeferredSystem(gpu)
+        this.gridSystem = new GridSystem(gpu)
+        this.billboardSystem = new BillboardSystem(gpu)
+        this.billboardSystem.initializeTextures().catch()
+        this.selectedSystem = new SelectedSystem(gpu)
     }
 
     execute(entities, params, systems, filteredEntities) {
-        if(this._ready) {
-            super.execute()
-            const {
-                meshes,
-                selected,
-                camera,
-                BRDF,
-                shadingModel,
-                fxaa,
-                iconsVisibility,
-                gridVisibility
-            } = params
+        super.execute()
+        const {
+            camera,
+            fxaa
+        } = params
+        const meshSystem = systems.find(s => s instanceof MeshSystem)
+        const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
 
-            const grid = this._find(entities, e => e.components.GridComponent?.active)[0]
+        // SSR
+        copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
 
-            const deferredSystem = systems.find(s => s instanceof DeferredSystem)
-            const shadowMapSystem = systems.find(s => s instanceof ShadowMapSystem)
+        this.postProcessing.startMapping()
 
-            const pointLights = this._find(entities, e => filteredEntities.pointLights[e.id] !== undefined)
-            const directionalLights = this._find(entities, e => filteredEntities.directionalLights[e.id] !== undefined)
-            const spotLights = this._find(entities, e => filteredEntities.spotLights[e.id] !== undefined)
-            const cubeMaps = this._find(entities, e => filteredEntities.cubeMaps[e.id] !== undefined)
-            const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
+        this.skyboxSystem.execute(entities, params)
+        this.gridSystem.execute(undefined, params)
+        this.billboardSystem.execute(entities, params, undefined, filteredEntities)
 
+        this.deferredSystem.execute(entities, params, systems, filteredEntities, meshSystem)
+        copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
-            copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
+        this.selectedSystem.execute(entities, params, filteredEntities)
+        this.postProcessing.stopMapping()
 
-            this.postProcessing.startMapping()
+        let shaderToApply = this.shader
 
-            if (skyboxElement && !(camera instanceof OrthographicCamera)) {
-                const ntVm = camera.getNotTranslatedViewMatrix()
+        if (!fxaa)
+            shaderToApply = this.noFxaaShader
 
-                this.gpu.depthMask(false)
-                this.skyboxShader.use()
+        shaderToApply.use()
 
-                skyboxElement.components.SkyboxComponent.draw(
-                    this.skyboxShader,
-                    camera.projectionMatrix,
-                    ntVm
-                )
-                this.gpu.depthMask(true)
-            }
-            this._miscRenderPass(
-                skyboxElement,
-                grid,
-                camera,
-                [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps],
-                iconsVisibility,
-                gridVisibility
-            )
-
-            const deferred = this._getDeferredShader(shadingModel)
-
-            deferred.use()
-            deferred.bindUniforms({
-                irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
-                lights: pointLights,
-                directionalLights: directionalLights.map(d => d.components.DirectionalLightComponent),
-
-                shadowMap: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
-                shadowMapResolution: shadowMapSystem?.maxResolution,
-                shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,
-                gNormalTexture: deferredSystem.gBuffer.gNormalTexture,
-                gPositionTexture: deferredSystem.gBuffer.gPositionTexture,
-                gAlbedo: deferredSystem.gBuffer.gAlbedo,
-                gBehaviorTexture: deferredSystem.gBuffer.gBehaviorTexture,
-                gDepthTexture: deferredSystem.gBuffer.gDepthTexture,
-                cameraVec: camera.position,
-                BRDF,
-                closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered,
-
-                previousFrame: this.screenSpace.frameBufferTexture
-            })
-
-            deferredSystem.gBuffer.draw(deferred)
-
-            copyTexture(this.postProcessing.frameBufferObject, deferredSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-
-
-            this.gpu.disable(this.gpu.DEPTH_TEST)
-
-            if(selected)
-                for(let i = 0; i < selected.length; i++){
-                    const el = entities[filteredEntities.meshes[selected[i]]]
-                    if (el)
-                        this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el, i)
-                }
-            this.gpu.enable(this.gpu.DEPTH_TEST)
-
-            this.postProcessing.stopMapping()
-            let shaderToApply = this.shader
-
-            if (!fxaa)
-                shaderToApply = this.noFxaaShader
-
-            shaderToApply.use()
-            this.postProcessing.draw(shaderToApply)
-        }
-
-    }
-
-    _map(billboards) {
-        let point = [], directional = [], spot = [], cubemaps = []
-
-
-        for (let i = 0; i < billboards.length; i++) {
-            if (billboards[i].components.PointLightComponent)
-                point.push(Array.from(billboards[i].components.PointLightComponent.transformationMatrix))
-            else if (billboards[i].components.DirectionalLightComponent)
-                directional.push(Array.from(billboards[i].components.DirectionalLightComponent?.transformationMatrix))
-            else if (billboards[i].components.SpotLightComponent)
-                spot.push(Array.from(billboards[i].components.SpotLightComponent.transformationMatrix))
-            else if (billboards[i].components.CubeMapComponent)
-                cubemaps.push(Array.from(billboards[i].components.CubeMapComponent.transformationMatrix))
-        }
-
-        return {
-            pointLights: point,
-            directionalLights: directional,
-            spotLights: spot,
-            cubemaps: cubemaps
-        }
-    }
-
-    _miscRenderPass(skybox, grid, camera, billboards,
-                    iconsVisibility,
-                    gridVisibility) {
-        //GRID
-        if (grid && gridVisibility) {
-            this.gpu.disable(this.gpu.DEPTH_TEST)
-            this.gridShader.use()
-
-            this.gpu.enableVertexAttribArray(this.gridShader.positionLocation)
-            this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, grid.components.GridComponent.vertexBuffer)
-            this.gpu.vertexAttribPointer(this.gridShader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
-
-            this.gpu.uniform1i(this.gridShader.typeULocation, camera instanceof OrthographicCamera ? 1 + camera.direction : 0)
-            this.gpu.uniformMatrix4fv(this.gridShader.viewMatrixULocation, false, camera instanceof OrthographicCamera ? camera.viewMatrixGrid : camera.viewMatrix)
-            this.gpu.uniformMatrix4fv(this.gridShader.projectionMatrixULocation, false, camera.projectionMatrix)
-
-            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, grid.components.GridComponent.length)
-            this.gpu.enable(this.gpu.DEPTH_TEST)
-        }
-
-        if (billboards.length > 0 && iconsVisibility) {
-            const mapped = this._map(billboards)
-
-            this.billboardRenderer.draw(mapped.pointLights, this.pointLightTexture.texture, camera)
-            this.billboardRenderer.draw(mapped.directionalLights, this.directionalLightTexture.texture, camera)
-            this.billboardRenderer.draw(mapped.spotLights, this.spotLightTexture.texture, camera)
-            this.billboardRenderer.draw(mapped.cubemaps, this.cubemapTexture.texture, camera)
-        }
-    }
-
-    _drawSelected(mesh, camera, element, index) {
-        this.meshShader.use()
-        this.gpu.uniform1i(this.meshShader.indexULocation, index)
-
-        // shader,
-        //     gpu,
-        //     mesh,
-        //     camPosition,
-        //     viewMatrix,
-        //     projectionMatrix,
-        //     transformationMatrix,
-        //     material,
-        //     normalMatrix
-        DeferredSystem.drawMesh(
-            this.meshShader,
-            this.gpu,
-            mesh,
-            camera.position,
-            camera.viewMatrix,
-            camera.projectionMatrix,
-            element.components.TransformComponent.transformationMatrix,
-            {},
-            element.components.MeshComponent.normalMatrix)
+        this.postProcessing.draw(shaderToApply)
     }
 }

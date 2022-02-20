@@ -117,14 +117,14 @@ export default class Engine extends RenderLoop {
     }
 
     _resetCameraEvents() {
-        if(this.cameraType === CAMERA_TYPES.SPHERICAL || this.cameraType === CAMERA_TYPES.FREE)
-        this.cameraEvents = new perspectiveCameraEvents(
-            this.camera,
-            this._canvasID,
-            (x, y) => {
-                this.data.clicked = true
-                this.data.currentCoord = {x, y}
-           })
+        if (this.cameraType === CAMERA_TYPES.SPHERICAL || this.cameraType === CAMERA_TYPES.FREE)
+            this.cameraEvents = new perspectiveCameraEvents(
+                this.camera,
+                this._canvasID,
+                (x, y) => {
+                    this.data.clicked = true
+                    this.data.currentCoord = {x, y}
+                })
         else
             this.cameraEvents = new OrthographicCameraEvents(
                 this.camera,
@@ -135,11 +135,11 @@ export default class Engine extends RenderLoop {
                 })
     }
 
-    changeCamera() {
+    changeCamera(newType) {
         this.cameraEvents.stopTracking()
         let cameraToApply
 
-        switch (this.cameraType){
+        switch (newType) {
             case CAMERA_TYPES.BOTTOM:
                 cameraToApply = this.bottomCamera
                 break
@@ -234,7 +234,7 @@ export default class Engine extends RenderLoop {
 
             if (current.components.SkyboxComponent)
                 r.skyboxes[current.id] = i
-            if (current.components.GridComponent)
+            if (current.components.Grid)
                 r.grid[current.id] = i
             if (current.components.MeshComponent) {
                 r.meshes[current.id] = i
@@ -258,10 +258,11 @@ export default class Engine extends RenderLoop {
 
 
         this.types = r
-        if (params.cameraType && params.cameraType !== this.cameraType) {
-            this.cameraType = params.cameraType
-            this.changeCamera()
-        }
+
+        console.log(params.cameraType)
+        this.cameraType = params.cameraType
+        this.changeCamera(params.cameraType)
+
         this.params = params
         this.cameraEvents.stopTracking()
     }

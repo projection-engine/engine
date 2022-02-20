@@ -1,7 +1,5 @@
 import Framebuffer from "./Framebuffer";
 import {mat4} from "gl-matrix";
-import OrthographicCamera from "../../camera/ortho/OrthographicCamera";
-import {ca} from "wait-on/exampleConfig";
 
 export default class MousePicker extends Framebuffer {
     constructor(gpu) {

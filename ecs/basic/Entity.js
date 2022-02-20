@@ -1,4 +1,4 @@
-import randomID from "../../../../pages/project/utils/misc/randomID";
+import randomID from "../../../utils/misc/randomID";
 
 
 export default class Entity {
