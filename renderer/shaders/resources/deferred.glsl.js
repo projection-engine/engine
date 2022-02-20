@@ -104,8 +104,8 @@ void main() {
 
     ivec2 fragCoord = ivec2(gl_FragCoord.xy);
 
-    // HACK DESGRAÇENTO ( caso fragPos seja tudo zero discarta fragment)
-    vec3 fragPosition = texture(positionSampler, texCoord).rgb;// texelFetch(positionSampler, fragCoord, 0).xyz;
+    
+    vec3 fragPosition = texture(positionSampler, texCoord).rgb;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
     discard;
 
@@ -122,8 +122,30 @@ void main() {
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
-    // POINT LIGHTS
+
     vec3 Lo = vec3(0.0);
+    
+    // DIRECTIONAL LIGHT
+    float shadows = dirLightsQuantity > 0?  0.05 : 1.0;
+    for (int i = 0; i < dirLightsQuantity; i++){
+        vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
+        vec3 lightDir =  normalize(directionalLights[i].direction);
+
+        Lo += computeDirectionalLight(
+        V,
+        F0,
+        lightDir,
+        directionalLights[i].ambient,
+        fragPosition,
+        roughness,
+        metallic,
+        N,
+        albedo
+        );
+        shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/float(dirLightsQuantity + 1);
+    }
+    Lo = Lo* shadows; 
+    // POINT LIGHTS
     for (int i = 0; i < lightQuantity; ++i){
         vec3 L = normalize(lightPosition[i] - fragPosition);
         vec3 H = normalize(V + L);
@@ -147,27 +169,7 @@ void main() {
 
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
-
-    // DIRECTIONAL LIGHT
-    float shadows = dirLightsQuantity > 0?  0.0 : 1.0;
-
-    for (int i = 0; i < dirLightsQuantity; i++){
-        vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
-        vec3 lightDir =  normalize(directionalLights[i].direction);
-
-        Lo += computeDirectionalLight(
-        V,
-        F0,
-        lightDir,
-        directionalLights[i].ambient,
-        fragPosition,
-        roughness,
-        metallic,
-        N,
-        albedo
-        );
-        shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/float(dirLightsQuantity + 1);
-    }
+  
 
 
     // DIFFUSE IBL
@@ -184,7 +186,7 @@ void main() {
     vec3 ambient = (diffuse + specular) * ao;// (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
-    vec3 color = (ambient  + Lo * shadows) ;
+    vec3 color = (ambient  + Lo ) ;
     color = color / (color + vec3(1.0));
 
 

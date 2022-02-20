@@ -71,14 +71,12 @@ layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour;
 
 
-
-
-
 float getDisplacement (vec2 UVs, sampler2D height){
     return texture(height, UVs).r;
 }
 
 void main(){
+
     gPosition = vec4(1.0);
     gBehaviour = vec4(1.0);
     gAlbedo = vec4(1.0);
@@ -111,8 +109,12 @@ void main(){
     //    if(UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0|| UVs.y < 0.0)
     //        discard;
 
-
-    gAlbedo.rgb = texture(pbrMaterial.albedo, UVs).rgb;
+    vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);
+    if(albedoTexture.a <= 0.1)
+        discard;
+        
+    gAlbedo.rgb = albedoTexture.rgb;
+    
     gAlbedo.a = 1.0;
 
     gBehaviour.r = texture(pbrMaterial.ao, UVs).r;
