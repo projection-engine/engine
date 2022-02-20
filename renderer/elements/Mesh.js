@@ -42,6 +42,8 @@ export default class Mesh {
 
         this.VAO = createVAO(gpu)
 
+
+
         this.indexVBO = createVBO(gpu, gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
 
         this.vertexVBO = new VBO(gpu, 1, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
