@@ -10,7 +10,7 @@ export default class CullingSystem extends System {
 
     execute(entities, params, systems, filteredEntities) {
         super.execute()
-         // TODO
+         // TODO - REMOVE NOT VISIBLE - REMOVE FRUSTUM CULLED - REMOVE GPU OCCLUSION CULLED
         // const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
         // filteredMeshes.forEach(m => {
         //     if(!m.query)

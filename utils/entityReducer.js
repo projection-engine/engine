@@ -19,6 +19,7 @@ export const ENTITY_ACTIONS = {
 
     DISPATCH_BLOCK: 4,
     PUSH_BLOCK: 6,
+    REMOVE_BLOCK: 7,
     CLEAR: 5
 }
 
@@ -108,6 +109,17 @@ export default function entityReducer(state, action) {
                 const block = action.payload
                 if (Array.isArray(block))
                     return block
+                else
+                    return stateCopy
+            }
+            case ENTITY_ACTIONS.REMOVE_BLOCK: {
+                const block = action.payload
+                if (Array.isArray(block)) {
+                    block.forEach(e => {
+                        stateCopy.splice(stateCopy.findIndex(entity => entity.id === e), 1)
+                    })
+                    return stateCopy
+                }
                 else
                     return stateCopy
             }

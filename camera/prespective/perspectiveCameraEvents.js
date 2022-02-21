@@ -73,7 +73,6 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
             }
 
             case 'mousemove': {
-
                 if (isFocused) {
                     if (!requested) {
                         requested = true
@@ -120,9 +119,54 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                 break
             }
             case 'mouseup': {
+                document.exitPointerLock()
                 requested = false
                 isFocused = false
-                document.exitPointerLock()
+
+                break
+            }
+            case 'keyup':
+            case 'keydown': {
+                if (isFocused) {
+                    if (camera instanceof FreeCamera) {
+                        switch (event.code) {
+                            case conf.keybindings.forwards: {
+                                updateZ(true, event.type === 'keydown')
+                                break
+                            }
+                            case conf.keybindings.backwards: {
+                                updateZ(false, event.type === 'keydown')
+                                break
+                            }
+                            case conf.keybindings.up: {
+                                updateY(true, event.type === 'keydown')
+                                break
+                            }
+                            case conf.keybindings.down: {
+                                updateY(false, event.type === 'keydown')
+                                break
+                            }
+                            case conf.keybindings.left: {
+                                updateX(false, event.type === 'keydown')
+                                break
+                            }
+                            case conf.keybindings.right: {
+                                updateX(true, event.type === 'keydown')
+                                break
+                            }
+                            default:
+                                break
+                        }
+                    } else if (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards) {
+                        const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+
+                        let way = -1
+                        if (event.code === conf.keybindings.backwards) {
+                            way = 1
+                        }
+                        camera.radius += distance * way
+                    }
+                }
                 break
             }
             default:
@@ -131,51 +175,6 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
 
     }
 
-    const handleKey = (event) => {
-
-
-        if (isFocused || event.type === 'keyup') {
-            if (camera instanceof FreeCamera) {
-                switch (event.code) {
-                    case conf.keybindings.forwards: {
-                        updateZ(true, event.type === 'keydown')
-                        break
-                    }
-                    case conf.keybindings.backwards: {
-                        updateZ(false, event.type === 'keydown')
-                        break
-                    }
-                    case conf.keybindings.up: {
-                        updateY(true, event.type === 'keydown')
-                        break
-                    }
-                    case conf.keybindings.down: {
-                        updateY(false, event.type === 'keydown')
-                        break
-                    }
-                    case conf.keybindings.left: {
-                        updateX(false, event.type === 'keydown')
-                        break
-                    }
-                    case conf.keybindings.right: {
-                        updateX(true, event.type === 'keydown')
-                        break
-                    }
-                    default:
-                        break
-                }
-            } else if (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards) {
-                const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
-
-                let way = -1
-                if (event.code === conf.keybindings.backwards) {
-                    way = 1
-                }
-                camera.radius += distance * way
-            }
-
-        }
-    }
     const handleClick = (event) => {
         let elapsedTime = performance.now() - startMouseDown;
         if (elapsedTime <= 250) {
@@ -187,8 +186,8 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
 
     function startTracking() {
 
-        document.addEventListener('keydown', handleKey)
-        document.addEventListener('keyup', handleKey)
+        document.addEventListener('keydown', handleInput)
+        document.addEventListener('keyup', handleInput)
 
 
         target?.parentNode.addEventListener('click', handleClick)
@@ -199,8 +198,8 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     }
 
     function stopTracking() {
-        document.removeEventListener('keydown', handleKey)
-        document.removeEventListener('keyup', handleKey)
+        document.removeEventListener('keydown', handleInput)
+        document.removeEventListener('keyup', handleInput)
 
 
         target?.parentNode?.removeEventListener('click', handleClick)

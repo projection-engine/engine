@@ -177,13 +177,13 @@ export default class Engine extends RenderLoop {
         this.cameraEvents.startTracking()
         this.gpu?.cullFace(this.gpu.BACK)
 
-
+        const filteredEntities = entities.filter(e => e.active)
         super.start((timestamp) => {
             this.camera.updatePlacement()
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
             this._systems.forEach((s, i) => {
                 s.execute(
-                    entities,
+                    filteredEntities,
                     {
                         ...this.params,
                         clicked: this.data.clicked,
