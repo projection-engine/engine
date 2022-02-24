@@ -12,12 +12,8 @@ export default class GridSystem extends System {
         this.grid = new Grid(gpu)
     }
 
-    execute(_, params) {
+    execute(gridVisibility, camera) {
         super.execute()
-        const {
-            camera,
-            gridVisibility
-        } = params
 
         if(gridVisibility) {
             this.gpu.disable(this.gpu.DEPTH_TEST)

@@ -11,7 +11,7 @@ export default class MeshSystem extends System {
     _ready = false
 
     constructor(gpu, resolutionMultiplier) {
-        super(['TransformComponent']);
+        super([]);
         this.gpu = gpu
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
@@ -37,37 +37,44 @@ export default class MeshSystem extends System {
         }
     }
 
-    execute(entities, params, systems, filteredEntities) {
+    execute(options, systems, data) {
+        super.execute()
+        const  {
+            pointLights,
+            spotLights,
+            terrains,
+            meshes,
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
 
         if (this._ready) {
-            super.execute()
+
             const {
-                meshes,
                 camera,
-                selectedElement,
-                materials,
+                selected,
                 shadingModel,
                 injectMaterial
-            } = params
+            } = options
 
 
-            const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
-            const filtered = this._hasComponent(filteredMeshes)
             const shaderToUse = this._getDeferredShader(shadingModel)
 
             shaderToUse.use()
             this.gBuffer.gpu.clearDepth(1);
             this.gBuffer.startMapping()
 
-            for (let m = 0; m < filtered.length; m++) {
-                const current = filtered[m]
-                const meshIndex = filteredEntities.meshSources[current.components.MeshComponent.meshID]
-                const mesh = meshes[meshIndex]
+            for (let m = 0; m < meshes.length; m++) {
+                const current = meshes[m]
+                const mesh =  meshSources[current.components.MeshComponent.meshID]
 
-                if (mesh !== undefined && selectedElement !== current.id) {
+                if (mesh !== undefined && (!selected|| !selected.includes(current.id))) {
                     const t = current.components.TransformComponent
-                    let mat = injectMaterial ? injectMaterial : (mesh.material ? materials.find(m => m.id === mesh.material) : this.fallbackMaterial)
-                    if(!mat.ready)
+                    let mat = injectMaterial ? injectMaterial : (mesh.material ? materials[mesh.material] : this.fallbackMaterial)
+                    if(!mat || !mat.ready)
                         mat = this.fallbackMaterial
                     MeshSystem.drawMesh(
                         shaderToUse,

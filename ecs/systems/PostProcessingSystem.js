@@ -31,28 +31,44 @@ export default class PostProcessingSystem extends System {
         this.selectedSystem = new SelectedSystem(gpu)
     }
 
-    execute(entities, params, systems, filteredEntities) {
+    execute(options, systems, data) {
         super.execute()
+        const  {
+            pointLights,
+            spotLights,
+            terrains,
+            meshes,
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
         const {
+            selected,
             camera,
-            fxaa
-        } = params
+            fxaa,
+            iconsVisibility,
+            gridVisibility,
+            shadingModel
+        } = options
+
         const meshSystem = systems.find(s => s instanceof MeshSystem)
-        const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
+
 
         // SSR
         copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
 
         this.postProcessing.startMapping()
 
-        this.skyboxSystem.execute(entities, params)
-        this.gridSystem.execute(undefined, params)
-        this.billboardSystem.execute(entities, params, undefined, filteredEntities)
+        this.skyboxSystem.execute(skybox, camera)
+        this.gridSystem.execute(gridVisibility, camera)
+        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
 
-        this.deferredSystem.execute(entities, params, systems, filteredEntities, meshSystem)
+        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems)
         copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
-        this.selectedSystem.execute(entities, params, filteredEntities)
+        this.selectedSystem.execute(meshes, meshSources, selected, camera)
         this.postProcessing.stopMapping()
 
         let shaderToApply = this.shader

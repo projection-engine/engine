@@ -9,24 +9,21 @@ export default class SelectedSystem extends System {
         this.meshShader = new MeshShader(gpu, true)
     }
 
-    execute(entities, params,filteredEntities) {
+    execute(meshes, meshSources, selected, camera) {
         super.execute()
-        const {
-            meshes,
-            selected,
-            camera
-        } = params
-        if(selected) {
-            this.gpu.disable(this.gpu.DEPTH_TEST)
 
+        if (selected) {
+            this.gpu.disable(this.gpu.DEPTH_TEST)
             for (let i = 0; i < selected.length; i++) {
-                const el = entities[filteredEntities.meshes[selected[i]]]
+                const el = meshes.find(m => m.id === selected[i])
+
                 if (el)
-                    this._drawSelected(meshes[filteredEntities.meshSources[el.components.MeshComponent.meshID]], camera, el, i)
+                    this._drawSelected(meshSources[el.components.MeshComponent.meshID], camera, el, i)
             }
             this.gpu.enable(this.gpu.DEPTH_TEST)
         }
     }
+
     _drawSelected(mesh, camera, element, index) {
         this.meshShader.use()
         this.gpu.uniform1i(this.meshShader.indexULocation, index)

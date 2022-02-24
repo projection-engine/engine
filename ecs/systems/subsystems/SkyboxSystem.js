@@ -9,12 +9,10 @@ export default class SkyboxSystem extends System {
         this.skyboxShader = new SkyBoxShader(gpu)
     }
 
-    execute(entities, params) {
+    execute(skyboxElement, camera) {
         super.execute()
-        const {
-            camera
-        } = params
-        const skyboxElement = this._find(entities, e => e.components.SkyboxComponent && e.components.SkyboxComponent.active)[0]
+
+
 
         if (skyboxElement && !(camera instanceof OrthographicCamera)) {
             const ntVm = camera.getNotTranslatedViewMatrix()

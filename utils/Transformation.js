@@ -1,4 +1,5 @@
 import {mat4, quat} from "gl-matrix";
+import {ENTITY_ACTIONS} from "./entityReducer";
 
 export default class Transformation {
     static transform(translation, rotate, scale) {
@@ -30,5 +31,21 @@ export default class Transformation {
         mat4.scale(scalingMatrix, scalingMatrix, scaling)
 
         return scalingMatrix
+    }
+    static updateTransform (axis, data, key, engine, entityID) {
+        const component = selected.components.TransformComponent
+        const prev = component[key]
+        component[key] = [
+            axis === 'x' ? data : prev[0],
+            axis === 'y' ? data : prev[1],
+            axis === 'z' ? data : prev[2]
+        ]
+        engine.dispatchEntities({
+            type: ENTITY_ACTIONS.UPDATE_COMPONENT, payload: {
+                entityID,
+                key: 'TransformComponent',
+                data: component
+            }
+        })
     }
 }

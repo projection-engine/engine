@@ -9,6 +9,7 @@ import brdfImg from '../../static/brdf_lut.jpg'
 import OrthographicCamera, {DIRECTIONS} from "./camera/ortho/OrthographicCamera";
 import CAMERA_TYPES from "./utils/CAMERA_TYPES";
 import OrthographicCameraEvents from "./camera/ortho/OrthographicCameraEvents";
+import toObject from "./utils/toObject";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -63,26 +64,6 @@ export default class Engine extends RenderLoop {
 
         this.gpu = gpu
         this.utils.translationGizmo = new TranslationGizmo(this.gpu)
-
-        const brdf = new Image()
-        brdf.src = brdfImg
-
-        brdf.onload = () => {
-            this.BRDF = createTexture(
-                gpu,
-                512,
-                512,
-                gpu.RGBA32F,
-                0,
-                gpu.RGBA,
-                gpu.FLOAT,
-                brdf,
-                gpu.LINEAR,
-                gpu.LINEAR,
-                gpu.CLAMP_TO_EDGE,
-                gpu.CLAMP_TO_EDGE
-            )
-        }
 
         this.camera = this.sphericalCamera
 
@@ -173,19 +154,30 @@ export default class Engine extends RenderLoop {
         this.cameraEvents.startTracking()
     }
 
-    start(entities) {
+    start(entities, materials, meshes, params) {
         this.cameraEvents.startTracking()
         this.gpu?.cullFace(this.gpu.BACK)
 
         const filteredEntities = entities.filter(e => e.active)
+        const data = {
+            pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
+            spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
+            terrains: filteredEntities.filter(e => e.components.TerrainComponent),
+            meshes: filteredEntities.filter(e => e.components.MeshComponent),
+            skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0],
+            directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
+            materials: toObject(materials),
+            meshSources: toObject(meshes),
+            cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
+        }
         super.start((timestamp) => {
             this.camera.updatePlacement()
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
             this._systems.forEach((s, i) => {
                 s.execute(
-                    filteredEntities,
                     {
-                        ...this.params,
+                        ...params,
+                        entitiesLength: entities.length,
                         clicked: this.data.clicked,
                         setClicked: e => {
                             this.data.clicked = e
@@ -193,10 +185,9 @@ export default class Engine extends RenderLoop {
                         currentCoords: this.data.currentCoord,
                         camera: this.camera,
                         elapsed: timestamp,
-                        BRDF: this.BRDF
                     },
                     this._systems,
-                    this.types
+                    data
                 )
             })
         })
@@ -207,64 +198,9 @@ export default class Engine extends RenderLoop {
         cancelAnimationFrame(this._currentFrame)
     }
 
-    prepareData(params, entities, materials, meshes) {
-        let r = {
-            pointLights: {},
-            spotLights: {},
-            meshes: {},
-            skyboxes: {},
-            grid: {},
-            directionalLights: {},
-            materials: {},
-            meshSources: {},
-            cubeMaps: {},
-
-            staticPhysicsMeshes: {},
-            dynamicPhysicsMeshes: {}
-        }
-
-        for (let i = 0; i < entities.length; i++) {
-            const current = entities[i]
-            if (current.components.PointLightComponent)
-                r.pointLights[current.id] = i
-            if (current.components.SpotLightComponent)
-                r.spotLights[current.id] = i
-            if (current.components.DirectionalLightComponent)
-                r.directionalLights[current.id] = i
-
-            if (current.components.SkyboxComponent)
-                r.skyboxes[current.id] = i
-            if (current.components.Grid)
-                r.grid[current.id] = i
-            if (current.components.MeshComponent) {
-                r.meshes[current.id] = i
-                if (!current.components.PhysicsComponent && current.components.SphereCollider)
-                    r.staticPhysicsMeshes[current.id] = i
-                else if (current.components.PhysicsComponent && current.components.SphereCollider)
-                    r.dynamicPhysicsMeshes[current.id] = i
-            }
-            if (current.components.CubeMapComponent)
-                r.cubeMaps[current.id] = i
-
-        }
-        for (let i = 0; i < materials.length; i++) {
-            r.materials[materials[i].id] = i
-        }
-
-        for (let i = 0; i < meshes.length; i++) {
-
-            r.meshSources[meshes[i].id] = i
-        }
-
-
-        this.types = r
-
-        console.log(params.cameraType)
-        this.cameraType = params.cameraType
-        this.changeCamera(params.cameraType)
-
-        this.params = params
-        this.cameraEvents.stopTracking()
+    updateCamera(cameraType) {
+        this.cameraType = cameraType
+        this.changeCamera(cameraType)
     }
 
 }

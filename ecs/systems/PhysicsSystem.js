@@ -7,22 +7,34 @@ export default class PhysicsSystem extends System {
         super([]);
     }
 
-    execute(entities, params, systems, filteredEntities) {
+    execute(options, systems, data) {
         super.execute()
+        const  {
+            pointLights,
+            spotLights,
+            terrains,
+            meshes,
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
+
         const {
             canExecutePhysicsAnimation,
-            meshes,
             selectedElement,
             setSelectedElement,
             currentCoords,
             clicked,
             camera,
             elapsed
-        } = params
+        } = options
 
+        // TODO
         if (canExecutePhysicsAnimation) {
-            const staticMeshes = this._find(entities, e => filteredEntities.staticPhysicsMeshes[e.id] !== undefined)
-            const dynamicMeshes = this._find(entities, e => filteredEntities.dynamicPhysicsMeshes[e.id] !== undefined)
+            const staticMeshes =[] //this._find(entities, e => filteredEntities.staticPhysicsMeshes[e.id] !== undefined)
+            const dynamicMeshes =[]// this._find(entities, e => filteredEntities.dynamicPhysicsMeshes[e.id] !== undefined)
 
             for (let i = 0; i < dynamicMeshes.length; i++) {
                 const current = dynamicMeshes[i]

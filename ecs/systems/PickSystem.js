@@ -5,15 +5,26 @@ import PickComponent from "../components/PickComponent";
 
 export default class PickSystem extends System {
     constructor(gpu) {
-        super(['PickComponent']);
+        super([]);
         this.picker = new MousePicker(gpu)
         this.shader = new PickerShader(gpu)
     }
 
-    execute(entities, params, systems,filteredEntities) {
+    execute(options, systems, data) {
         super.execute()
         const  {
+            pointLights,
+            spotLights,
+            terrains,
             meshes,
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
+
+        const  {
             setSelected,
             currentCoords,
             clicked,
@@ -21,23 +32,20 @@ export default class PickSystem extends System {
 
             camera,
             setClicked
-        } = params
+        } = options
 
         if(clicked && typeof currentCoords === "object"){
 
             setClicked(false)
-            const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
-            const filtered = this._hasComponent(filteredMeshes)
 
             this.shader.use()
             this.picker.start()
 
             const pickerProjection =  this.picker.getProjection(currentCoords, camera)
 
-            for (let m = 0; m < filtered.length; m++) {
-                const currentInstance = filtered[m]
-                const meshIndex = filteredEntities.meshSources[currentInstance.components.MeshComponent.meshID]
-                const mesh = meshes[meshIndex]
+            for (let m = 0; m < meshes.length; m++) {
+                const currentInstance = meshes[m]
+                const mesh  = meshSources[currentInstance.components.MeshComponent.meshID]
 
                 if (mesh !== undefined) {
                     const t = currentInstance.components.TransformComponent
@@ -59,7 +67,7 @@ export default class PickSystem extends System {
             const index = data[0] + data[1] + data[2];
 
             if (index > 0)
-                setSelected([filtered.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
+                setSelected([meshes.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
             else
                 setSelected([])
             this.picker.stopMapping();

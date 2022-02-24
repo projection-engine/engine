@@ -36,16 +36,28 @@ export default class PerformanceSystem extends System {
 
     }
 
-    execute(entities, params, _ , filteredEntities) {
-        super.execute();
-        if (params.performanceMetrics) {
+    execute(options, systems, data) {
+        super.execute()
+        const  {
+            pointLights,
+            spotLights,
+            terrains,
+            meshes,
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
+        if (options.performanceMetrics) {
 
-            if (this._entitiesLength !== entities.length) {
-                const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
-                    .map(e => params.meshes.find(m => m.id === e.components.MeshComponent.meshID))
-                this._triangles = filteredMeshes.filter(m => m !== undefined).map(m => m.trianglesQuantity).reduce((p, a) => p + a, 0)
-                this._meshesQuantity = filteredMeshes.length
-                this._entitiesLength = entities.length
+            if (this._entitiesLength !== options.entitiesLength) {
+
+                this._triangles = Object.keys(meshSources).map(key => {
+                    return meshSources[key].trianglesQuantity
+                }).reduce((p, a) => p + a, 0)
+                this._meshesQuantity = Object.keys(meshSources).length
+                this._entitiesLength = options.entitiesLength
             }
 
             if (!this._visible) {

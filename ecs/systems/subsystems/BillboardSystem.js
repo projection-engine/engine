@@ -56,19 +56,9 @@ export default class BillboardSystem extends System {
         }
     }
 
-    execute(entities, params, _, filteredEntities) {
+    execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility) {
         super.execute()
         if (this._ready) {
-            const {
-                camera,
-                iconsVisibility,
-            } = params
-
-            const pointLights = this._find(entities, e => filteredEntities.pointLights[e.id] !== undefined)
-            const directionalLights = this._find(entities, e => filteredEntities.directionalLights[e.id] !== undefined)
-            const spotLights = this._find(entities, e => filteredEntities.spotLights[e.id] !== undefined)
-            const cubeMaps = this._find(entities, e => filteredEntities.cubeMaps[e.id] !== undefined)
-
             const billboards = [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps]
             if (iconsVisibility) {
                 const mapped = this._map(billboards)

@@ -14,17 +14,24 @@ export default class ShadowMapSystem extends System {
         this.shader = new ShadowMapShader(gpu)
     }
 
-    execute(entities, params, systems, filteredEntities) {
+    execute(options, systems, data) {
         super.execute()
-        const {
+        const  {
+            pointLights,
+            spotLights,
+            terrains,
             meshes,
-            shadingModel
-        } = params
-        if (shadingModel === SHADING_MODELS.DETAIL) {
-            const directionalLights = this._find(entities, e => filteredEntities.directionalLights[e.id] !== undefined)
-            const spotLights = this._find(entities, e => filteredEntities.spotLights[e.id] !== undefined)
-            const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined && e.components.MeshComponent.active && e.components.TransformComponent.active)
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
 
+        const {
+            shadingModel
+        } = options
+        if (shadingModel === SHADING_MODELS.DETAIL) {
             this.shader.use()
 
             let currentColumn = 0, currentRow = 0
@@ -61,11 +68,11 @@ export default class ShadowMapSystem extends System {
                     currentLight.atlasFace = [currentColumn, 0]
 
                     this.gpu.disable(this.gpu.SCISSOR_TEST);
-                    for (let m = 0; m < filteredMeshes.length; m++) {
-                        const meshIndex = filteredEntities.meshSources[filteredMeshes[m].components.MeshComponent.meshID]
-                        const mesh = meshes[meshIndex]
+                    for (let m = 0; m < meshes.length; m++) {
+                        const current = meshes[m]
+                        const mesh =  meshSources[current.components.MeshComponent.meshID]
                         if (mesh !== undefined) {
-                            const t = filteredMeshes[m].components.TransformComponent
+                            const t = current.components.TransformComponent
                             this._drawMesh(mesh, currentLight.lightView, currentLight.lightProjection, t.transformationMatrix)
                         }
                     }

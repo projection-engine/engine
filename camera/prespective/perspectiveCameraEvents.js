@@ -127,7 +127,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
             }
             case 'keyup':
             case 'keydown': {
-                if (isFocused) {
+                if (isFocused || event.type === 'keyup')  {
                     if (camera instanceof FreeCamera) {
                         switch (event.code) {
                             case conf.keybindings.forwards: {

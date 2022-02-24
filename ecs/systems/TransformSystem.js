@@ -7,20 +7,32 @@ import Transformation from "../../utils/Transformation";
 export default class TransformSystem extends System {
 
     constructor() {
-        super(['TransformComponent']);
+        super([]);
     }
 
-    execute(entities) {
+    execute(options, systems, data) {
+        super.execute()
+        const  {
+            pointLights,
+            spotLights,
+            terrains,
+            meshes,
+            skybox,
+            directionalLights,
+            materials,
+            meshSources,
+            cubeMaps
+        } = data
 
         super.execute()
-        const filtered = this._hasComponent(entities)
+        const filtered = [...meshes, ...terrains]
 
         for (let i = 0; i < filtered.length; i++) {
             const current = filtered[i]
             if (current !== undefined && current.components.TransformComponent.changed) {
                 let parent
                 if (current.linkedTo)
-                    parent = this._find(entities, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
+                    parent = this._find(filtered, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
                 const component = current.components.TransformComponent
                 const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling)
 
