@@ -12,31 +12,35 @@ uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
 
 uniform mat3 normalMatrix;
-
+uniform vec3 cameraVec;
 // OUT
 
 out vec4 vPosition;
 out vec2 texCoord;
 out mat3 toTangentSpace;
 out vec3 normalVec;
- 
-
+out vec3 viewPosition;
+out vec3 fragmentPosition;
+out vec3 cameraPos;
 void main(){
 
 
     vPosition =  transformMatrix *   vec4(position, 1.0);
-
-    normalVec =   normalMatrix * normal;
-    normalVec =   normalize(normalVec);
+    normalVec =   normalize(normalMatrix * normal);
 
     // NORMALS
-    vec3 bitangent = normalize(cross(normalVec, tangentVec));
+    vec3 tangent = normalize(tangentVec);
+    vec3 bitangent = normalize(cross(normalVec, tangent));
     toTangentSpace = mat3(
-        tangentVec.x, bitangent.x, normalVec.x,
-        tangentVec.y, bitangent.y, normalVec.y,
-        tangentVec.z, bitangent.z, normalVec.z
+        tangent.x, bitangent.x, normalVec.x,
+        tangent.y, bitangent.y, normalVec.y,
+        tangent.z, bitangent.z, normalVec.z
     );
+     viewPosition = toTangentSpace * cameraVec;
+    fragmentPosition = toTangentSpace * vPosition.xyz;
+    
     toTangentSpace = transpose(toTangentSpace);
+
     texCoord = uvTexture;
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 }
@@ -50,10 +54,12 @@ in vec4 vPosition;
 in highp vec2 texCoord;
 in mat3 toTangentSpace;
 in vec3 normalVec;
+ in vec3 viewPosition;
+in vec3 fragmentPosition;
 
 
 
-uniform vec3 cameraVec;
+
 struct PBR {
     sampler2D albedo;
     sampler2D metallic;
@@ -76,32 +82,46 @@ float getDisplacement (vec2 UVs, sampler2D height){
 }
 
 
-vec2 parallaxMapping (vec2 texCoord, vec3 viewDir)
+vec2 parallaxMapping (vec2 texCoords, vec3 viewDir)
 {
-    float numLayers = 32.0 - 31.0 * abs(dot(vec3(0.0, 0.0, 1.0), viewDir));
+    // number of depth layers
+    const float minLayers = 8.;
+    const float maxLayers = 32.;
+    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    // calculate the size of each layer
     float layerDepth = 1.0 / numLayers;
-
-    vec2 P = viewDir.xy / viewDir.z * .2;
-    vec2 deltaTexCoords = P / numLayers;
-    vec2 currentTexCoords = texCoord;
-
+    // depth of current layer
     float currentLayerDepth = 0.0;
+    // the amount to shift the texture coordinates per layer (from vector P)
+    vec2 P = viewDir.xy / viewDir.z * .1; 
+    vec2 deltaTexCoords = P / numLayers;
+  
+    // get initial values
+    vec2  currentTexCoords     = texCoords;
     float currentDepthMapValue = texture(pbrMaterial.height, currentTexCoords).r;
-    for (int i=0; i<32; ++ i)
+      
+    while(currentLayerDepth < currentDepthMapValue)
     {
-        if (currentLayerDepth >= currentDepthMapValue)
-            break;
+        // shift texture coordinates along direction of P
         currentTexCoords -= deltaTexCoords;
-        currentDepthMapValue = texture(pbrMaterial.height, currentTexCoords).r;
-        currentLayerDepth += layerDepth;
+        // get depthmap value at current texture coordinates
+        currentDepthMapValue = texture(pbrMaterial.height, currentTexCoords).r;  
+        // get depth of next layer
+        currentLayerDepth += layerDepth;  
     }
-
+    
+    // get texture coordinates before collision (reverse operations)
     vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
-    float afterDepth = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth = texture(pbrMaterial.height, prevTexCoords).r - currentLayerDepth + layerDepth;
 
+    // get depth after and before collision for linear interpolation
+    float afterDepth  = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(pbrMaterial.height, prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+    // interpolation of texture coordinates
     float weight = afterDepth / (afterDepth - beforeDepth);
-    return prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
 }
 
 void main(){
@@ -113,9 +133,12 @@ void main(){
 
     gPosition = vPosition;
 
-    vec3 view_dir = normalize(vPosition.xyz - cameraVec);
+ 
+
+    vec3 view_dir = normalize(viewPosition - fragmentPosition);
     
     vec2 UVs = parallaxMapping(texCoord, view_dir);
+   
     if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
         discard;
     vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);

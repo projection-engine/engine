@@ -17,7 +17,7 @@ export default class MaterialInstance {
         metallic = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
         roughness = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
-        height = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
+        height = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
         ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)')
     ) {
         let imagesToLoad = [
