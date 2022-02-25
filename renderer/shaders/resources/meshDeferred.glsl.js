@@ -19,6 +19,7 @@ out vec4 vPosition;
 out vec2 texCoord;
 out mat3 toTangentSpace;
 out vec3 normalVec;
+ 
 
 void main(){
 
@@ -50,7 +51,6 @@ in highp vec2 texCoord;
 in mat3 toTangentSpace;
 in vec3 normalVec;
 
-// UNIFORMS
 
 
 uniform vec3 cameraVec;
@@ -75,6 +75,35 @@ float getDisplacement (vec2 UVs, sampler2D height){
     return texture(height, UVs).r;
 }
 
+
+vec2 parallaxMapping (vec2 texCoord, vec3 viewDir)
+{
+    float numLayers = 32.0 - 31.0 * abs(dot(vec3(0.0, 0.0, 1.0), viewDir));
+    float layerDepth = 1.0 / numLayers;
+
+    vec2 P = viewDir.xy / viewDir.z * .2;
+    vec2 deltaTexCoords = P / numLayers;
+    vec2 currentTexCoords = texCoord;
+
+    float currentLayerDepth = 0.0;
+    float currentDepthMapValue = texture(pbrMaterial.height, currentTexCoords).r;
+    for (int i=0; i<32; ++ i)
+    {
+        if (currentLayerDepth >= currentDepthMapValue)
+            break;
+        currentTexCoords -= deltaTexCoords;
+        currentDepthMapValue = texture(pbrMaterial.height, currentTexCoords).r;
+        currentLayerDepth += layerDepth;
+    }
+
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+    float afterDepth = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(pbrMaterial.height, prevTexCoords).r - currentLayerDepth + layerDepth;
+
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    return prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+}
+
 void main(){
 
     gPosition = vec4(1.0);
@@ -84,31 +113,11 @@ void main(){
 
     gPosition = vPosition;
 
-    vec3 V = normalize(cameraVec - vPosition.xyz);
-    vec2 UVs = texCoord;
-    float hScale = 0.05;
-    const float minLayers = 8.0;
-    const float maxLayers = 64.0;
-    float numberLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), V)));
-    float layerDepth = 1.0/numberLayers;
-    float currentLayerDepth = 0.0;
-    vec2 S = V.xy  * hScale;
-    vec2 deltaUVs = S/numberLayers;
-    float currentDepthMapValue = 1.0 -  getDisplacement(UVs, pbrMaterial.height);
-    while (currentLayerDepth < currentDepthMapValue){
-        UVs -= deltaUVs;
-        currentDepthMapValue = 1.0 -   getDisplacement(UVs, pbrMaterial.height);
-        currentLayerDepth +=layerDepth;
-    }
-    vec2 prevTexCoord = UVs + deltaUVs;
-    float afterDepth = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth = 1.0 -   getDisplacement(UVs, pbrMaterial.height) - currentLayerDepth + layerDepth;
-    float weight = afterDepth/(afterDepth-beforeDepth);
-    UVs = prevTexCoord * weight + UVs * (1.0 - weight);
-
-    //    if(UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0|| UVs.y < 0.0)
-    //        discard;
-
+    vec3 view_dir = normalize(vPosition.xyz - cameraVec);
+    
+    vec2 UVs = parallaxMapping(texCoord, view_dir);
+    if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
+        discard;
     vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);
     if(albedoTexture.a <= 0.1)
         discard;
