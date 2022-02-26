@@ -1,11 +1,11 @@
 import System from "../../basic/System";
-import getImagePromise from "../../../utils/getImagePromise";
+import getImagePromise from "../../../utils/misc/getImagePromise";
 import pointLightIcon from "../../../../../static/icons/point_light.png";
 import directionalLightIcon from "../../../../../static/icons/directional_light.png";
 import spotLightIcon from "../../../../../static/icons/spot_light.png";
 import cubeMapIcon from "../../../../../static/icons/cubemap.png";
-import Texture from "../../../renderer/elements/Texture";
-import BillboardRenderer from "../../../renderer/elements/BillboardRenderer";
+import TextureInstance from "../../../elements/instances/TextureInstance";
+import BillboardsInstance from "../../../elements/instances/BillboardsInstance";
 
 export default class BillboardSystem extends System {
     _ready = false
@@ -13,7 +13,7 @@ export default class BillboardSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.billboardRenderer = new BillboardRenderer(gpu)
+        this.billboardRenderer = new BillboardsInstance(gpu)
     }
 
     async initializeTextures() {
@@ -24,11 +24,11 @@ export default class BillboardSystem extends System {
             cube = await getImagePromise(cubeMapIcon)
 
 
-        this.pointLightTexture = new Texture(p, false, this.gpu)
-        this.directionalLightTexture = new Texture(dir, false, this.gpu)
+        this.pointLightTexture = new TextureInstance(p, false, this.gpu)
+        this.directionalLightTexture = new TextureInstance(dir, false, this.gpu)
 
-        this.spotLightTexture = new Texture(spot, false, this.gpu)
-        this.cubemapTexture = new Texture(cube, false, this.gpu)
+        this.spotLightTexture = new TextureInstance(spot, false, this.gpu)
+        this.cubemapTexture = new TextureInstance(cube, false, this.gpu)
 
         this._ready = true
     }

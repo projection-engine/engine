@@ -51,7 +51,7 @@ export default class CubeMapComponent extends Component{
         // temporaryGBuffer.stopMapping()
         //
         //
-        // this.cubeMap = new CubeMap(_, gpu, this.resolution, (c) => {
+        // this.cubeMap = new CubeMapInstance(_, gpu, this.resolution, (c) => {
 
         // })
     }

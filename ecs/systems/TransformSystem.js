@@ -2,7 +2,7 @@ import System from "../basic/System";
 import TransformComponent from "../components/TransformComponent";
 import {mat4} from "gl-matrix";
 import {linearAlgebraMath} from "pj-math";
-import Transformation from "../../utils/Transformation";
+import Transformation from "../../utils/workers/Transformation";
 
 export default class TransformSystem extends System {
 

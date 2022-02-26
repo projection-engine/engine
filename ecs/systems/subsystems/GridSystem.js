@@ -1,7 +1,7 @@
 import System from "../../basic/System";
-import OrthographicCamera from "../../../camera/ortho/OrthographicCamera";
-import GridShader from "../../../renderer/shaders/classes/GridShader";
-import Grid from "../../../renderer/elements/Grid";
+import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
+import GridShader from "../../../shaders/classes/GridShader";
+import GridInstance from "../../../elements/instances/GridInstance";
 
 export default class GridSystem extends System {
     constructor(gpu) {
@@ -9,7 +9,7 @@ export default class GridSystem extends System {
         this.gpu = gpu
 
         this.gridShader = new GridShader(gpu)
-        this.grid = new Grid(gpu)
+        this.grid = new GridInstance(gpu)
     }
 
     execute(gridVisibility, camera) {

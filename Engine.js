@@ -1,15 +1,15 @@
-import TranslationGizmo from "./gizmo/TranslationGizmo";
-import perspectiveCameraEvents from "./camera/prespective/perspectiveCameraEvents";
-import SphericalCamera from "./camera/prespective/SphericalCamera";
-import FreeCamera from "./camera/prespective/FreeCamera";
 
-import {createTexture} from "./utils/utils";
-import RenderLoop from "./renderer/RenderLoop";
+import perspectiveCameraEvents from "./utils/camera/prespective/perspectiveCameraEvents";
+import SphericalCamera from "./utils/camera/prespective/SphericalCamera";
+import FreeCamera from "./utils/camera/prespective/FreeCamera";
+
+import {createTexture} from "./utils/misc/utils";
+import RenderLoop from "./utils/workers/RenderLoop";
 import brdfImg from '../../static/brdf_lut.jpg'
-import OrthographicCamera, {DIRECTIONS} from "./camera/ortho/OrthographicCamera";
-import CAMERA_TYPES from "./utils/CAMERA_TYPES";
-import OrthographicCameraEvents from "./camera/ortho/OrthographicCameraEvents";
-import toObject from "./utils/toObject";
+import OrthographicCamera, {DIRECTIONS} from "./utils/camera/ortho/OrthographicCamera";
+import CAMERA_TYPES from "./utils/misc/CAMERA_TYPES";
+import OrthographicCameraEvents from "./utils/camera/ortho/OrthographicCameraEvents";
+import toObject from "./utils/misc/toObject";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -23,10 +23,7 @@ export default class Engine extends RenderLoop {
         performanceRef: undefined,
         canvasRef: undefined
     }
-    utils = {
-        postProcessing: undefined,
-        translationGizmo: undefined,
-    }
+
     _systems = []
     _fov = Math.PI / 2
 
@@ -63,7 +60,7 @@ export default class Engine extends RenderLoop {
         this.data.canvasRef = document.getElementById(id + '-canvas')
 
         this.gpu = gpu
-        this.utils.translationGizmo = new TranslationGizmo(this.gpu)
+
 
         this.camera = this.sphericalCamera
 

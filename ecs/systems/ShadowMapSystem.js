@@ -1,6 +1,6 @@
 import System from "../basic/System";
-import ShadowMap from "../../renderer/elements/ShadowMap";
-import ShadowMapShader from "../../renderer/shaders/classes/ShadowMapShader";
+import ShadowMapFramebuffer from "../../elements/buffer/ShadowMapFramebuffer";
+import ShadowMapShader from "../../shaders/classes/ShadowMapShader";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 
 export default class ShadowMapSystem extends System {
@@ -10,7 +10,7 @@ export default class ShadowMapSystem extends System {
         this.gpu = gpu
         this.resolutionPerTexture = 1024
         this.maxResolution = 4092
-        this.shadowMapAtlas = new ShadowMap(this.maxResolution, gpu)
+        this.shadowMapAtlas = new ShadowMapFramebuffer(this.maxResolution, gpu)
         this.shader = new ShadowMapShader(gpu)
     }
 

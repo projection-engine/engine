@@ -1,8 +1,10 @@
-import CubeMapShader from "../../renderer/shaders/classes/CubeMapShader";
-import {createTexture, createVBO} from "../../utils/utils";
-import skyBoxCube from "../../assets/cube";
+import CubeMapShader from "../../shaders/classes/CubeMapShader";
+import {createTexture, createVBO} from "../../utils/misc/utils";
+import skyBoxCube from "../../assets/cube.json";
 import Component from "../basic/Component";
-import CubeMap from "../../renderer/elements/CubeMap";
+import CubeMapInstance from "../../elements/instances/CubeMapInstance";
+import cube from "../../assets/cube.json";
+import VBO from "../../utils/workers/VBO";
 
 export default class SkyboxComponent extends Component {
     _hdrTexture
@@ -19,7 +21,7 @@ export default class SkyboxComponent extends Component {
         this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
 
 
-        this._vertexBuffer = createVBO(this.gpu, this.gpu.ARRAY_BUFFER, new Float32Array(skyBoxCube))
+        this._vertexBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
 
     }
 
@@ -52,14 +54,14 @@ export default class SkyboxComponent extends Component {
             this.gpu.CLAMP_TO_EDGE
         )
 
-        this._cubeMap = new CubeMap(baseShader, this.gpu, 1024, (c) => {
+        this._cubeMap = new CubeMapInstance(baseShader, this.gpu, 1024, (c) => {
             this.gpu.activeTexture(this.gpu.TEXTURE0)
 
             this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
             this.gpu.uniform1i(c.equirectangularMapULocation, 0)
         }, [0, 0, 0], true)
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-        this._irradianceMap = new CubeMap(
+        this._irradianceMap = new CubeMapInstance(
             irradianceShader,
             this.gpu, 32, (c) => {
                 this.gpu.activeTexture(this.gpu.TEXTURE0)
@@ -87,11 +89,7 @@ export default class SkyboxComponent extends Component {
         if (this._initialized) {
             shader.use()
 
-            this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this._vertexBuffer)
-            this.gpu.enableVertexAttribArray(shader.positionLocation)
-            this.gpu.vertexAttribPointer(shader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
-            this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this._vertexBuffer)
-
+            this._vertexBuffer.enable()
             this.gpu.activeTexture(this.gpu.TEXTURE0)
             this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this.cubeMap)
             this.gpu.uniform1i(shader.textureULocation, 0)

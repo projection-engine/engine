@@ -1,10 +1,12 @@
 import System from "../basic/System";
-import AOBuffer from "../../renderer/elements/AOBuffer";
-import AOBlurBuffer from "../../renderer/elements/AOBlurBuffer";
-import AOShader from "../../renderer/shaders/classes/AOShader";
+import AOBuffer from "../../elements/buffer/AOBuffer";
+import AOBlurBuffer from "../../elements/buffer/AOBlurBuffer";
+import AOShader from "../../shaders/classes/AOShader";
 import MeshSystem from "./MeshSystem";
-import {bindTexture} from "../../utils/utils";
-import Texture from "../../renderer/elements/Texture";
+import {bindTexture} from "../../utils/misc/utils";
+import TextureInstance from "../../elements/instances/TextureInstance";
+import ImageProcessor from "../../../workers/ImageProcessor";
+import {vec3} from "gl-matrix";
 
 export default class AOSystem extends System {
     _ready = false
@@ -13,63 +15,85 @@ export default class AOSystem extends System {
         super([]);
         this.gpu = gpu
 
-        this.aoBuffer = new AOBuffer()
-        this.aoBlurBuffer = new AOBlurBuffer()
+        this.aoBuffer = new AOBuffer(gpu)
+        this.aoBlurBuffer = new AOBlurBuffer(gpu)
 
         this.baseShader = new AOShader(gpu)
         this.blurShader = new AOShader(gpu, true)
 
         this.samplePoints = generateSamplePoints()
 
-        this.noiseTexture = new Texture(
-            generateNoiseTexture(),
-            false,
-            this.gpu,
-            this.gpu.RGBA32F,
-            this.gpu.RGBA,
-            true,
-            true,
-            this.gpu.FLOAT,
-            )
+        this.noiseTexture = gpu.createTexture()
+        gpu.bindTexture(gpu.TEXTURE_2D, this.noiseTexture);
+
+        gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.CLAMP_TO_EDGE);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.CLAMP_TO_EDGE);
+        gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, gpu.drawingBufferWidth, gpu.drawingBufferHeight);
+        gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight, gpu.RG, gpu.FLOAT, generateNoise());
     }
 
     execute(options, systems, data) {
         super.execute()
-        const  {
+        const {
             camera
-        } = data
+        } = options
+
         const meshSystem = systems.find(s => s instanceof MeshSystem)
-        if(meshSystem){
-            const aoFBO = this.aoBuffer.frameBufferObject
-            const aoBlurFBO = this.aoBlurBuffer.frameBufferObject
+        if (meshSystem) {
+            const aoFBO = this.aoBuffer
+            const aoBlurFBO = this.aoBlurBuffer
 
             aoFBO.startMapping()
-                this.baseShader.use()
-                this.gpu.uniformMatrix4fv(this.baseShader.projectionULocation, false, camera.projectionMatrix)
-                bindTexture(0, meshSystem.gBuffer.gPositionTexture, this.baseShader.gPositionULocation, this.gpu)
-                bindTexture(1, meshSystem.gBuffer.gNormalTexture, this.baseShader.gNormalULocation, this.gpu)
-                bindTexture(2, this.noiseTexture.texture, this.baseShader.noiseULocation, this.gpu)
-                aoFBO.draw(this.baseShader, true)
+            this.baseShader.use()
+            this.gpu.uniformMatrix4fv(this.baseShader.projectionULocation, false, camera.projectionMatrix)
+            for (let s = 0; s < this.samplePoints.length; s++) {
+                const uLocation = this.gpu.getUniformLocation(this.baseShader.program, `samples[${s}]`)
+                this.gpu.uniform3fv(uLocation, this.samplePoints[s])
+            }
+            bindTexture(0, meshSystem.gBuffer.gPositionTexture, this.baseShader.gPositionULocation, this.gpu)
+            bindTexture(1, meshSystem.gBuffer.gNormalTexture, this.baseShader.gNormalULocation, this.gpu)
+            bindTexture(2, this.noiseTexture, this.baseShader.noiseULocation, this.gpu)
+            aoFBO.draw(this.baseShader, true)
             aoFBO.stopMapping()
 
             aoBlurFBO.startMapping()
-                this.blurShader.use()
-                bindTexture(0, aoFBO.frameBufferTexture, this.blurShader.aoULocation, this.gpu)
-                aoBlurFBO.draw(this.blurShader, true)
+            this.blurShader.use()
+            bindTexture(0, aoFBO.frameBufferTexture, this.blurShader.aoULocation, this.gpu)
+            aoBlurFBO.draw(this.blurShader, true)
             aoBlurFBO.stopMapping()
 
         }
     }
 }
+function generateNoise(){
+    let p = window.screen.width * window.screen.height
+    let noiseTextureData = new Float32Array(p * 2);
 
-function generateNoiseTexture(){
-
-}
-function generateSamplePoints(){
-    let samplePoints = []
-    for(let i =0; i< 64; i++){
-        Math.floor(Math.random() * (2))
+    for (let i = 0; i < p; ++i) {
+        let index = i * 2;
+        noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
+        noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
     }
+
+    return noiseTextureData
+}
+
+function generateSamplePoints() {
+    let samplePoints = []
+    for (let i = 0; i < 64; i++) {
+        let p = [
+            Math.floor(Math.random() * 2) - 1,
+            Math.floor(Math.random() * 2) - 1,
+            Math.floor(Math.random() * 2)
+        ]
+        vec3.normalize(p, p)
+        vec3.scale(p, p, Math.floor(Math.random() * 2))
+        samplePoints.push(p)
+    }
+
     return samplePoints
 
 }

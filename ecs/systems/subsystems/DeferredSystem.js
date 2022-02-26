@@ -1,14 +1,18 @@
 import System from "../../basic/System";
-import MeshShader from "../../../renderer/shaders/classes/MeshShader";
+import MeshShader from "../../../shaders/classes/MeshShader";
 import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
-import DeferredShader from "../../../renderer/shaders/classes/DeferredShader";
-import FlatDeferredShader from "../../../renderer/shaders/classes/FlatDeferredShader";
+import DeferredShader from "../../../shaders/classes/DeferredShader";
+import FlatDeferredShader from "../../../shaders/classes/FlatDeferredShader";
 import ShadowMapSystem from "../ShadowMapSystem";
 import brdfImg from "../../../../../static/brdf_lut.jpg";
-import {createTexture} from "../../../utils/utils";
+import {createTexture} from "../../../utils/misc/utils";
 import MeshSystem from "../MeshSystem";
+import AOSystem from "../AOSystem";
 
 export default class DeferredSystem extends System {
+    meshSystemIndex = -1
+    aoSystemIndex = -1
+    shadowMapSystemIndex = -1
 
     constructor(gpu) {
         super([]);
@@ -38,6 +42,7 @@ export default class DeferredSystem extends System {
             )
         }
     }
+
     _getDeferredShader(shadingModel) {
         switch (shadingModel) {
             case SHADING_MODELS.FLAT:
@@ -53,8 +58,18 @@ export default class DeferredSystem extends System {
 
     execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems) {
         super.execute()
-        const shadowMapSystem = systems.find(s => s instanceof ShadowMapSystem)
-        const deferredSystem = systems.find(s => s instanceof MeshSystem)
+
+        if (this.meshSystemIndex === -1 || !(systems[this.meshSystemIndex] instanceof MeshSystem))
+            this.meshSystemIndex = systems.findIndex(s => s instanceof MeshSystem)
+        if (this.aoSystemIndex === -1 || !(systems[this.aoSystemIndex] instanceof AOSystem))
+            this.aoSystemIndex = systems.findIndex(s => s instanceof AOSystem)
+        if (this.shadowMapSystemIndex === -1 || !(systems[this.shadowMapSystemIndex] instanceof ShadowMapSystem))
+            this.shadowMapSystemIndex = systems.findIndex(s => s instanceof ShadowMapSystem)
+
+        let shadowMapSystem = systems[this.shadowMapSystemIndex],
+            deferredSystem = systems[this.meshSystemIndex],
+            aoSystem = systems[this.aoSystemIndex]
+
         const deferred = this._getDeferredShader(shadingModel)
 
 
@@ -63,6 +78,7 @@ export default class DeferredSystem extends System {
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
             lights: pointLights,
             directionalLights: directionalLights.map(d => d.components.DirectionalLightComponent),
+
 
             shadowMap: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
             shadowMapResolution: shadowMapSystem?.maxResolution,
@@ -75,8 +91,8 @@ export default class DeferredSystem extends System {
             cameraVec: camera.position,
             BRDF: this.BRDF,
             closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered,
-
-         //   previousFrame: this.screenSpace.frameBufferTexture
+            ambientOcclusion:aoSystem ? aoSystem.aoBlurBuffer.frameBufferTexture : undefined
+            //   previousFrame: this.screenSpace.frameBufferTexture
         })
 
         deferredSystem.gBuffer.draw(deferred)

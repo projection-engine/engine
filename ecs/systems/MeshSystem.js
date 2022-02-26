@@ -1,11 +1,11 @@
 import System from "../basic/System";
 import TransformComponent from "../components/TransformComponent";
 
-import GBuffer from "../../renderer/elements/GBuffer";
-import MeshShader from "../../renderer/shaders/classes/MeshShader";
-import MaterialInstance from "../../renderer/elements/MaterialInstance";
+import GBuffer from "../../elements/buffer/GBuffer";
+import MeshShader from "../../shaders/classes/MeshShader";
+import MaterialInstance from "../../elements/instances/MaterialInstance";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
-import WireframeShader from "../../renderer/shaders/classes/WireframeShader";
+import WireframeShader from "../../shaders/classes/WireframeShader";
 
 export default class MeshSystem extends System {
     _ready = false

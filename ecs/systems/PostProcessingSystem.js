@@ -1,9 +1,9 @@
 import System from "../basic/System";
-import PostProcessingShader from "../../renderer/shaders/classes/PostProcessingShader";
-import PostProcessing from "../../renderer/elements/PostProcessing";
+import PostProcessingShader from "../../shaders/classes/PostProcessingShader";
+import PostProcessingFramebuffer from "../../elements/buffer/PostProcessingFramebuffer";
 import MeshSystem from "./MeshSystem";
-import {copyTexture} from "../../utils/utils";
-import ScreenSpace from "../../renderer/elements/ScreenSpace";
+import {copyTexture} from "../../utils/misc/utils";
+import ScreenSpaceBuffer from "../../elements/buffer/ScreenSpaceBuffer";
 import DeferredSystem from "./subsystems/DeferredSystem";
 import GridSystem from "./subsystems/GridSystem";
 import BillboardSystem from "./subsystems/BillboardSystem";
@@ -15,8 +15,8 @@ export default class PostProcessingSystem extends System {
         super([]);
         this.gpu = gpu
 
-        this.screenSpace = new ScreenSpace(gpu, resolutionMultiplier)
-        this.postProcessing = new PostProcessing(gpu, resolutionMultiplier)
+        this.screenSpace = new ScreenSpaceBuffer(gpu, resolutionMultiplier)
+        this.postProcessing = new PostProcessingFramebuffer(gpu, resolutionMultiplier)
 
 
         this.shader = new PostProcessingShader(gpu)
@@ -69,6 +69,8 @@ export default class PostProcessingSystem extends System {
         copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
+
+
         this.postProcessing.stopMapping()
 
         let shaderToApply = this.shader
@@ -77,7 +79,6 @@ export default class PostProcessingSystem extends System {
             shaderToApply = this.noFxaaShader
 
         shaderToApply.use()
-
         this.postProcessing.draw(shaderToApply)
     }
 }
