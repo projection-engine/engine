@@ -64,7 +64,7 @@ export default class MeshSystem extends System {
             const shaderToUse = this._getDeferredShader(shadingModel)
 
             shaderToUse.use()
-            this.gBuffer.gpu.clearDepth(1);
+            this.gpu.clearDepth(1);
             this.gBuffer.startMapping()
 
             for (let m = 0; m < meshes.length; m++) {
@@ -78,7 +78,7 @@ export default class MeshSystem extends System {
                         mat = this.fallbackMaterial
                     MeshSystem.drawMesh(
                         shaderToUse,
-                        this.gBuffer.gpu,
+                        this.gpu,
                         mesh,
                         camera.position,
                         camera.viewMatrix,

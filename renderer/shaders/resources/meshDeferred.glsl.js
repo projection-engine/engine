@@ -3,7 +3,7 @@ export const vertex = `#version 300 es
 layout (location = 1) in vec3 position;
 layout (location = 2) in vec3 normal;
 layout (location = 3) in vec2 uvTexture;
-layout (location = 4) in vec4 tangentVec;
+layout (location = 4) in vec3 tangentVec;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
@@ -16,8 +16,7 @@ out vec4 vPosition;
 out vec2 texCoord;
 out mat3 toTangentSpace;
 out vec3 normalVec;
- 
-out vec3 N;
+
 out vec3 viewPosition;
 out vec3 fragPosition;
 
@@ -26,15 +25,17 @@ void main(){
 
     vPosition =  transformMatrix *   vec4(position, 1.0);
     
-    vec3 T = normalize(vec3(transformMatrix * vec4(tangentVec.xyz, .0))); 
-    N =  normalize(vec3(transformMatrix * vec4(normal, .0))); 
-    vec3 B =  normalize(vec3(transformMatrix * vec4((cross(N, tangentVec.xyz)) * tangentVec.w, .0)));
+    vec3 T = normalize(vec3(transformMatrix * vec4(normalize(tangentVec), .0)));
+   vec3 N =  normalize(vec3(transformMatrix * vec4(normal, .0)));
+    vec3 biTangent = cross(N, tangentVec); 
+    vec3 B =  normalize(vec3(transformMatrix * vec4(biTangent, .0)));
+    B = dot(biTangent, B)  > 0. ? -B : B;
     
     toTangentSpace = mat3(T, B, N);
     
-    viewPosition = toTangentSpace *cameraVec;
+    viewPosition = toTangentSpace * cameraVec;
     fragPosition = toTangentSpace *  vPosition.xyz;
-//    
+
     texCoord = uvTexture;
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
@@ -50,8 +51,7 @@ in mat3 toTangentSpace;
 
 in vec3 viewPosition;
 in vec3 fragPosition;
-in vec3 N;
- 
+
 uniform int parallaxEnabled;
 uniform float heightScale;
 uniform float layers;
@@ -74,30 +74,39 @@ layout (location = 3) out vec4 gBehaviour;
 
 
 
-vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap)
+vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap, int type)
 {
-        float layer_depth = 1.0 / layers;
-        float currentLayerDepth = 0.0;
-        vec2 delta_uv = viewDir.xy * heightScale / (viewDir.z * layers);
-        vec2 cur_uv = texCoord;
-
-        float depth_from_tex = 1.-texture(heightMap, cur_uv).r;
-
-        for (int i = 0; i < 32; i++) {
-            currentLayerDepth += layer_depth;
-            cur_uv -= delta_uv;
-            depth_from_tex = 1.-texture(heightMap, cur_uv).r;
-            if (depth_from_tex < currentLayerDepth) {
-                break;
+    if(type == 1){
+            float layer_depth = 1.0 / layers;
+            float currentLayerDepth = 0.0;
+            vec2 delta_uv = viewDir.xy * heightScale / (viewDir.z * layers);
+            vec2 cur_uv = texCoord;
+    
+            float depth_from_tex = 1.-texture(heightMap, cur_uv).r;
+    
+            for (int i = 0; i < 32; i++) {
+                currentLayerDepth += layer_depth;
+                cur_uv -= delta_uv;
+                depth_from_tex = 1.-texture(heightMap, cur_uv).r;
+                if (depth_from_tex < currentLayerDepth) {
+                    break;
+                }
             }
-        }
-        vec2 prev_uv = cur_uv + delta_uv;
-        float next = depth_from_tex - currentLayerDepth;
-        float prev = texture(heightMap, prev_uv).r - currentLayerDepth
-                     + layer_depth;
-        float weight = next / (next - prev);
-        return mix(cur_uv, prev_uv, weight);
-
+            vec2 prev_uv = cur_uv + delta_uv;
+            float next = depth_from_tex - currentLayerDepth;
+            float prev = texture(heightMap, prev_uv).r - currentLayerDepth
+                         + layer_depth;
+            float weight = next / (next - prev);
+            vec2 UVs = mix(cur_uv, prev_uv, weight);
+            if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
+                discard;
+            return UVs;
+    }
+    else{
+//           float depth = texture(heightMap, texCoord).r;    
+//            vec2 p = viewDir.xy * (depth * heightScale) / viewDir.z;
+            return texCoord ;  
+    }
 }
 
 void main(){
@@ -108,10 +117,9 @@ void main(){
     gNormal = vec4(1.0);
     gPosition = vPosition;
     
-    vec2 UVs = parallaxEnabled == 1 ? parallaxMapping(texCoord,  normalize(fragPosition- viewPosition ), pbrMaterial.height) : texCoord;
+    vec2 UVs = parallaxMapping(texCoord,  normalize(fragPosition- viewPosition ), pbrMaterial.height, parallaxEnabled);
    
-    if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
-        discard;
+
     vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);
     if(albedoTexture.a <= 0.1)
         discard;

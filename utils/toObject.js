@@ -1,5 +1,5 @@
 export default function toObject(classes){
-    const keys = classes.map((m, i) => {
+    const keys = classes.filter(c => c !== undefined).map((m, i) => {
         return {id: m.id, index: i}
     })
     let res = {}

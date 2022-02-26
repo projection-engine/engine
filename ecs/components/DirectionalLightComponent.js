@@ -5,7 +5,7 @@ export default class DirectionalLightComponent extends Component {
     color = [1, 1, 1]
     _direction = [0, 0, 0]
     _zNear = -1
-    _zFar = 1000
+    _zFar = 10000
     _transformationMatrix = Array.from(mat4.create())
     lightView = Array.from(mat4.create())
     lightProjection = Array.from(mat4.create())

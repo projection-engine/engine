@@ -126,7 +126,7 @@ void main() {
     vec3 Lo = vec3(0.0);
     
     // DIRECTIONAL LIGHT
-    float shadows = dirLightsQuantity > 0?  0.05 : 1.0;
+    float shadows = dirLightsQuantity > 0?  0. : 1.0;
     for (int i = 0; i < dirLightsQuantity; i++){
         vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
         vec3 lightDir =  normalize(directionalLights[i].direction);

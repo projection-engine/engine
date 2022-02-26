@@ -24,8 +24,9 @@ export default class Framebuffer extends Quad{
         )
     }
 
-    startMapping(buffer=this.frameBufferObject) {
-        this.gpu.viewport(0, 0, this.width, this.height);
+    startMapping(buffer=this.frameBufferObject, autoSetViewport=true) {
+        if(autoSetViewport)
+            this.gpu.viewport(0, 0, this.width, this.height);
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, buffer);
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
     }

@@ -18,17 +18,17 @@ export default class BillboardSystem extends System {
 
     async initializeTextures() {
 
-        const p = await getImagePromise(pointLightIcon, 'point'),
-            dir = await getImagePromise(directionalLightIcon, 'direc'),
-            spot = await getImagePromise(spotLightIcon, 'spot'),
-            cube = await getImagePromise(cubeMapIcon, 'cubemap')
+        const p = await getImagePromise(pointLightIcon),
+            dir = await getImagePromise(directionalLightIcon),
+            spot = await getImagePromise(spotLightIcon),
+            cube = await getImagePromise(cubeMapIcon)
 
 
-        this.pointLightTexture = new Texture(p.data, false, this.gpu)
-        this.directionalLightTexture = new Texture(dir.data, false, this.gpu)
+        this.pointLightTexture = new Texture(p, false, this.gpu)
+        this.directionalLightTexture = new Texture(dir, false, this.gpu)
 
-        this.spotLightTexture = new Texture(spot.data, false, this.gpu)
-        this.cubemapTexture = new Texture(cube.data, false, this.gpu)
+        this.spotLightTexture = new Texture(spot, false, this.gpu)
+        this.cubemapTexture = new Texture(cube, false, this.gpu)
 
         this._ready = true
     }

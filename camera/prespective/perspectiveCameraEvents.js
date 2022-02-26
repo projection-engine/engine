@@ -119,9 +119,10 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                 break
             }
             case 'mouseup': {
-                document.exitPointerLock()
                 requested = false
                 isFocused = false
+                document.exitPointerLock()
+
 
                 break
             }
@@ -157,7 +158,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                             default:
                                 break
                         }
-                    } else if (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards) {
+                    } else if (isFocused && (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards)) {
                         const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
 
                         let way = -1
@@ -174,7 +175,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
         }
 
     }
-
+    console.log(isFocused)
     const handleClick = (event) => {
         let elapsedTime = performance.now() - startMouseDown;
         if (elapsedTime <= 250) {
