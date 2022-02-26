@@ -19,7 +19,7 @@ export default class MeshSystem extends System {
     }
 
     async initializeTextures() {
-        this.fallbackMaterial = new MaterialInstance(this.gpu)
+        this.fallbackMaterial = new MaterialInstance(this.gpu, undefined, 0)
         await this.fallbackMaterial.initializeTextures()
         this._ready = true
     }

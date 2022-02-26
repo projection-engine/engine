@@ -27,6 +27,11 @@ export default class MeshShader extends Shader {
         this.cameraVecULocation = gpu.getUniformLocation(this.program, 'cameraVec')
         this.indexULocation = gpu.getUniformLocation(this.program, 'indexSelected')
 
+        // PARALLAX
+        this.hsULocation = gpu.getUniformLocation(this.program, 'heightScale')
+        this.layersULocation = gpu.getUniformLocation(this.program, 'layers')
+        this.parallaxEnabledULocation = gpu.getUniformLocation(this.program, 'parallaxEnabled')
+
     }
 
     bindUniforms({material, cameraVec, normalMatrix}) {
@@ -35,6 +40,10 @@ export default class MeshShader extends Shader {
         this.gpu.uniformMatrix3fv(this.normalMatrixULocation, false, normalMatrix)
 
         if(!this.asSelected) {// TEXTURE PBR
+            this.gpu.uniform1i(this.parallaxEnabledULocation, material.parallaxEnabled)
+            this.gpu.uniform1f(this.hsULocation, material.parallaxHeightScale)
+            this.gpu.uniform1f(this.layersULocation, material.parallaxLayers)
+
             bindTexture(1, material.albedo.texture, this.materialAlbedoULocation, this.gpu)
             bindTexture(2, material.metallic.texture, this.materialMetallicULocation, this.gpu)
             bindTexture(3, material.roughness.texture, this.materialRoughnessULocation, this.gpu)
