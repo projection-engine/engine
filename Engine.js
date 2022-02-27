@@ -7,7 +7,7 @@ import {createTexture} from "./utils/misc/utils";
 import RenderLoop from "./utils/workers/RenderLoop";
 import brdfImg from '../../static/brdf_lut.jpg'
 import OrthographicCamera, {DIRECTIONS} from "./utils/camera/ortho/OrthographicCamera";
-import CAMERA_TYPES from "./utils/misc/CAMERA_TYPES";
+import CAMERA_TYPES from "./utils/camera/CAMERA_TYPES";
 import OrthographicCameraEvents from "./utils/camera/ortho/OrthographicCameraEvents";
 import toObject from "./utils/misc/toObject";
 
@@ -56,14 +56,10 @@ export default class Engine extends RenderLoop {
     )
 
     constructor(id, gpu) {
-        super(id);
+        super();
         this.data.canvasRef = document.getElementById(id + '-canvas')
-
         this.gpu = gpu
-
-
         this.camera = this.sphericalCamera
-
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }

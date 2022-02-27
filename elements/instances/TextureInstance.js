@@ -14,18 +14,21 @@ export default class TextureInstance {
         height,
         border = 0,
         ) {
+
+
         const anisotropicEXT = gpu.getExtension('EXT_texture_filter_anisotropic')
 
         let newTexture = gpu.createTexture()
         if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true);
 
         gpu.bindTexture(gpu.TEXTURE_2D, newTexture);
-        gpu.texImage2D(gpu.TEXTURE_2D,
+        gpu.texImage2D(
+            gpu.TEXTURE_2D,
             0,
             internalFormat,
 
-            width? width : 1024,
-            height ? height : 1024,
+            width? width : img.naturalWidth,
+            height ? height : img.naturalHeight,
             border,
 
             format,

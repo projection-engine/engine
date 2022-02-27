@@ -16,14 +16,13 @@ export default class Quad{
         )
     }
 
-    onBeforeDraw(shader) {}
 
-    draw(shader, positionLocation) {
+
+    draw(positionLocation) {
         this.gpu.enableVertexAttribArray(positionLocation)
         this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
         this.gpu.vertexAttribPointer(positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
 
-        this.onBeforeDraw(shader)
         this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 6);
         this.gpu.bindTexture(this.gpu.TEXTURE_2D, null);
     }

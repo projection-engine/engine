@@ -38,17 +38,20 @@ export function createRBO(gpu, width, height, typeStorage = gpu.DEPTH24_STENCIL8
     return rbo;
 }
 
-export function createFBO(gpu, attachmentPoint, texture) {
+export function createFBO(gpu, attachmentPoint, texture, autoUnbind=true) {
     let fbo = gpu.createFramebuffer();
     gpu.bindFramebuffer(gpu.FRAMEBUFFER, fbo);
     gpu.framebufferTexture2D(
         gpu.FRAMEBUFFER,
         attachmentPoint,
-        gpu.TEXTURE_2D, texture, 0);
+        gpu.TEXTURE_2D, texture,
+        0);
 
     if (gpu.checkFramebufferStatus(gpu.FRAMEBUFFER) !== gpu.FRAMEBUFFER_COMPLETE)
         return null
-    gpu.bindFramebuffer(gpu.FRAMEBUFFER, null);
+
+    if(autoUnbind)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null);
 
     return fbo;
 }
