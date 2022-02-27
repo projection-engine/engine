@@ -24,11 +24,11 @@ ready = false
         this.gpu = gpu
         this.quad = new Quad(gpu)
 
-        this.quantityIndirect =3
+        this.quantityIndirect = 1
         this.sRadius = 300
         this.samplesAmmount = 64
         this.samples = []
-        const seedE =seed('123123as')
+        const seedE =seed('myseed')
         for (let i = 0; i <  this.samplesAmmount; i++) {
             let xi1 = seedE()
             let xi2 = seedE()
@@ -81,8 +81,7 @@ ready = false
             const meshSystem = systems.find(s => s instanceof MeshSystem)
 
 
-            // MULTI LIGHT
-
+            // TODO - MULTI LIGHT
             const light = directionalLights[0].components.DirectionalLightComponent
             this.shader.use()
             this.shader.bindUniforms(

@@ -93,12 +93,12 @@ export default class PostProcessingSystem extends System {
 
         shaderToApply.use()
         this.postProcessing.draw(shaderToApply)
-        //
+
         // this.shadowMapDebugShader.use()
         //
         // bindTexture(
         //     0,
-        //     shadowMapSystem.shadowMapAtlas.frameBufferTexture,
+        //     shadowMapSystem.shadowMapAtlas.rsmFluxTexture,
         //     this.shadowMapDebugShader.shadowMapULocation,
         //     this.gpu)
         //

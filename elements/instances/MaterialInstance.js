@@ -3,7 +3,7 @@ import ImageProcessor from "../../../workers/ImageProcessor";
 
 export default class MaterialInstance {
     _ready = false
-
+    _initializing = false
     constructor(
         gpu,
         id,
@@ -26,33 +26,43 @@ export default class MaterialInstance {
         height = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
         ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)')
     ) {
-        let heightToApply = height
-        const asPOM = typeof height === "object"
-        if (asPOM) {
-            this.parallaxEnabled = 1
-            this.parallaxHeightScale = height.heightScale
-            this.parallaxLayers = height.layers
-            heightToApply = height.image
+
+        if(!this._initializing) {
+            this._initializing = true
+            let heightToApply = height
+            const asPOM = typeof height === "object"
+            if (asPOM) {
+                this.parallaxEnabled = 1
+                this.parallaxHeightScale = height.heightScale
+                this.parallaxLayers = height.layers
+                heightToApply = height.image
+            }
+
+
+            const sharedImg = new Image()
+
+
+            let texture = await base64ToBuffer(albedo, sharedImg)
+            this.albedo = new TextureInstance(texture.data, false, this.gpu, ...[, ,], true, false, undefined, texture.width, texture.height)
+
+            texture = await base64ToBuffer(metallic, sharedImg)
+            this.metallic = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+
+            texture = await base64ToBuffer(roughness, sharedImg)
+            this.roughness = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+
+            texture = await base64ToBuffer(normal, sharedImg)
+            this.normal = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+
+            texture = await base64ToBuffer(heightToApply, sharedImg)
+            this.height = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+
+            texture = await base64ToBuffer(ao, sharedImg)
+            this.ao = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+
+
+            this._ready = true
         }
-
-        const imagesToLoad = [
-            await base64ToBuffer(albedo),
-            await base64ToBuffer(metallic),
-            await base64ToBuffer(roughness),
-            await base64ToBuffer(normal),
-            await base64ToBuffer(heightToApply),
-            await base64ToBuffer(ao)
-        ]
-
-
-        this.albedo = new TextureInstance(imagesToLoad[0].data, false, this.gpu, ...[, ,], true, false, undefined, imagesToLoad[0].width,  imagesToLoad[0].height)
-        this.metallic = new TextureInstance(imagesToLoad[1].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, imagesToLoad[0].width,  imagesToLoad[0].height)
-        this.roughness = new TextureInstance(imagesToLoad[2].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, imagesToLoad[0].width,  imagesToLoad[0].height)
-        this.normal = new TextureInstance(imagesToLoad[3].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, imagesToLoad[0].width,  imagesToLoad[0].height)
-        this.height = new TextureInstance(imagesToLoad[4].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, imagesToLoad[0].width,  imagesToLoad[0].height)
-        this.ao = new TextureInstance(imagesToLoad[5].data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, imagesToLoad[0].width,  imagesToLoad[0].height)
-
-        this._ready = true
     }
 
     get ready() {
@@ -60,7 +70,7 @@ export default class MaterialInstance {
     }
 }
 
-async function base64ToBuffer(b64Data) {
+async function base64ToBuffer(b64Data, img) {
     // let base64Index = b64Data.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
     // let base64 = b64Data.substring(base64Index);
     // const byteCharacters = atob(base64);
@@ -82,8 +92,7 @@ async function base64ToBuffer(b64Data) {
     //
     // return await createImageBitmap(blob)
 
-    const p = new Promise(resolve =>{
-        const img = new Image()
+    const p = new Promise(resolve => {
         img.onload = () => {
             resolve({
                 data: img,
@@ -91,7 +100,7 @@ async function base64ToBuffer(b64Data) {
                 height: img.naturalHeight
             })
         }
-        img.src= b64Data
+        img.src = b64Data
     })
 
     return await p
