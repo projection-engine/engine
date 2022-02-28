@@ -1,9 +1,8 @@
 import CubeMapShader from "../../shaders/classes/CubeMapShader";
-import {createTexture, createVBO} from "../../utils/misc/utils";
-import skyBoxCube from "../../assets/cube.json";
+import {createTexture} from "../../utils/misc/utils";
+import cube from "../../assets/cube.json";
 import Component from "../basic/Component";
 import CubeMapInstance from "../../elements/instances/CubeMapInstance";
-import cube from "../../assets/cube.json";
 import VBO from "../../utils/workers/VBO";
 
 export default class SkyboxComponent extends Component {

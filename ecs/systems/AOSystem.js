@@ -2,11 +2,9 @@ import System from "../basic/System";
 import AOBuffer from "../../elements/buffer/AOBuffer";
 import AOBlurBuffer from "../../elements/buffer/AOBlurBuffer";
 import AOShader from "../../shaders/classes/AOShader";
-import MeshSystem from "./MeshSystem";
 import {bindTexture} from "../../utils/misc/utils";
-import TextureInstance from "../../elements/instances/TextureInstance";
-import ImageProcessor from "../../../workers/ImageProcessor";
 import {vec3} from "gl-matrix";
+import SYSTEMS from "../../utils/misc/SYSTEMS";
 
 export default class AOSystem extends System {
     _ready = false
@@ -41,7 +39,7 @@ export default class AOSystem extends System {
             camera
         } = options
 
-        const meshSystem = systems.find(s => s instanceof MeshSystem)
+        const meshSystem = systems[SYSTEMS.MESH]
         if (meshSystem) {
             const aoFBO = this.aoBuffer
             const aoBlurFBO = this.aoBlurBuffer

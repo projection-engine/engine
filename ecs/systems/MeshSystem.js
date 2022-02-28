@@ -1,5 +1,4 @@
 import System from "../basic/System";
-import TransformComponent from "../components/TransformComponent";
 
 import GBuffer from "../../elements/buffer/GBuffer";
 import MeshShader from "../../shaders/classes/MeshShader";

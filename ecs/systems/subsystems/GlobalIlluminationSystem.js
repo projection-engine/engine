@@ -1,18 +1,10 @@
 import System from "../../basic/System";
-import MeshShader from "../../../shaders/classes/MeshShader";
-import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
-import DeferredShader from "../../../shaders/classes/DeferredShader";
-import FlatDeferredShader from "../../../shaders/classes/FlatDeferredShader";
-import ShadowMapSystem from "../ShadowMapSystem";
-import brdfImg from "../../../../../static/brdf_lut.jpg";
-import {createTexture} from "../../../utils/misc/utils";
-import MeshSystem from "../MeshSystem";
-import AOSystem from "../AOSystem";
 import GIShader from "../../../shaders/classes/GIShader";
 import seed from "seed-random";
 import TextureInstance from "../../../elements/instances/TextureInstance";
 import ImageProcessor from "../../../../workers/ImageProcessor";
 import Quad from "../../../utils/workers/Quad";
+import SYSTEMS from "../../../utils/misc/SYSTEMS";
 
 export default class GlobalIlluminationSystem extends System {
 
@@ -55,7 +47,7 @@ ready = false
             textureData.push(0.0)
         }
 
-        const img = new Image()
+         const img = new Image()
         img.onload = () => {
             this.samplesTexture = new TextureInstance(
                 img,
@@ -76,11 +68,12 @@ ready = false
 
     execute(systems, directionalLights) {
         super.execute()
-        if(directionalLights.length > 0 && this.ready) {
-            const shadowMapSystem = systems.find(s => s instanceof ShadowMapSystem)
-            const meshSystem = systems.find(s => s instanceof MeshSystem)
 
+        const shadowMapSystem = systems[SYSTEMS.SHADOWS]
+        const meshSystem = systems[SYSTEMS.MESH]
 
+        if(directionalLights.length > 0 && this.ready && shadowMapSystem.needsGIUpdate) {
+            shadowMapSystem.needsGIUpdate = false
             // TODO - MULTI LIGHT
             const light = directionalLights[0].components.DirectionalLightComponent
             this.shader.use()
@@ -98,6 +91,7 @@ ready = false
                 light.lightProjection,
                 light.lightView
             )
+
 
             this.quad.draw(this.shader.positionLocation)
         }

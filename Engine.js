@@ -1,15 +1,21 @@
-
 import perspectiveCameraEvents from "./utils/camera/prespective/perspectiveCameraEvents";
 import SphericalCamera from "./utils/camera/prespective/SphericalCamera";
 import FreeCamera from "./utils/camera/prespective/FreeCamera";
-
-import {createTexture} from "./utils/misc/utils";
 import RenderLoop from "./utils/workers/RenderLoop";
-import brdfImg from '../../static/brdf_lut.jpg'
 import OrthographicCamera, {DIRECTIONS} from "./utils/camera/ortho/OrthographicCamera";
 import CAMERA_TYPES from "./utils/camera/CAMERA_TYPES";
 import OrthographicCameraEvents from "./utils/camera/ortho/OrthographicCameraEvents";
 import toObject from "./utils/misc/toObject";
+import AOSystem from "./ecs/systems/AOSystem";
+import CullingSystem from "./ecs/systems/CullingSystem";
+import MeshSystem from "./ecs/systems/MeshSystem";
+import PerformanceSystem from "./ecs/systems/PerformanceSystem";
+import PhysicsSystem from "./ecs/systems/PhysicsSystem";
+import PickSystem from "./ecs/systems/PickSystem";
+import PostProcessingSystem from "./ecs/systems/PostProcessingSystem";
+import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
+import TransformSystem from "./ecs/systems/TransformSystem";
+import SYSTEMS from "./utils/misc/SYSTEMS";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -24,7 +30,7 @@ export default class Engine extends RenderLoop {
         canvasRef: undefined
     }
 
-    _systems = []
+    _systems = {}
     _fov = Math.PI / 2
 
     sphericalCamera = new SphericalCamera([0, 10, 30], 1.57, .1, 10000, 1)
@@ -70,19 +76,27 @@ export default class Engine extends RenderLoop {
     }
 
     set systems(data) {
-        this.stop()
-        if (this.systems.length > data.length) {
 
-            this._systems.map(s => {
-                const found = data.find(sis => sis.constructor.name === s.constructor.name)
+        let newSystems = {}
+        if (Object.keys(this._systems).length > data.length) {
+
+            Object.keys(this._systems).forEach(s => {
+                const found = data.find(sis => getKey(sis) === s)
 
                 if (found)
-                    return found
+                    newSystems[s] = found
                 else
-                    return s
+                    newSystems[s] = this._systems[s]
             })
-        } else
-            this._systems = data
+        } else {
+            data.forEach(s => {
+                let key = getKey(s)
+                if (key)
+                    newSystems[key] = s
+            })
+        }
+
+        this._systems = newSystems
 
     }
 
@@ -148,45 +162,54 @@ export default class Engine extends RenderLoop {
     }
 
     start(entities, materials, meshes, params) {
-        this.cameraEvents.startTracking()
-        this.gpu?.cullFace(this.gpu.BACK)
+        if(!this._inExecution){
+            this._inExecution = true
+            this.cameraEvents.startTracking()
+            this.gpu?.cullFace(this.gpu.BACK)
 
-        const filteredEntities = entities.filter(e => e.active)
-        const data = {
-            pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
-            spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
-            terrains: filteredEntities.filter(e => e.components.TerrainComponent),
-            meshes: filteredEntities.filter(e => e.components.MeshComponent),
-            skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0],
-            directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
-            materials: toObject(materials),
-            meshSources: toObject(meshes),
-            cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
-        }
-        super.start((timestamp) => {
-            this.camera.updatePlacement()
-            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-            this._systems.forEach((s, i) => {
-                s.execute(
-                    {
-                        ...params,
-                        entitiesLength: entities.length,
-                        clicked: this.data.clicked,
-                        setClicked: e => {
-                            this.data.clicked = e
-                        },
-                        currentCoords: this.data.currentCoord,
-                        camera: this.camera,
-                        elapsed: timestamp,
-                    },
-                    this._systems,
-                    data
-                )
+            const filteredEntities = entities.filter(e => e.active)
+            const data = {
+                pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
+                spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
+                terrains: filteredEntities.filter(e => e.components.TerrainComponent),
+                meshes: filteredEntities.filter(e => e.components.MeshComponent),
+                skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0],
+                directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
+                materials: toObject(materials),
+                meshSources: toObject(meshes),
+                cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
+            }
+            const systems = Object.keys(this._systems).sort()
+
+            super.start((timestamp) => {
+
+                this.camera.updatePlacement()
+                this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+                for (let s = 0; s < systems.length; s++) {
+
+                    this._systems[systems[s]]
+                        .execute(
+                            {
+                                ...params,
+                                entitiesLength: entities.length,
+                                clicked: this.data.clicked,
+                                setClicked: e => {
+                                    this.data.clicked = e
+                                },
+                                currentCoords: this.data.currentCoord,
+                                camera: this.camera,
+                                elapsed: timestamp,
+                            },
+                            this._systems,
+                            data
+                        )
+                }
             })
-        })
+        }
     }
 
     stop() {
+        this._inExecution = false
         this.cameraEvents.stopTracking()
         cancelAnimationFrame(this._currentFrame)
     }
@@ -196,4 +219,38 @@ export default class Engine extends RenderLoop {
         this.changeCamera(cameraType)
     }
 
+}
+
+function getKey(s) {
+    switch (true) {
+        case s instanceof AOSystem:
+            return SYSTEMS.AO
+
+        case s instanceof CullingSystem:
+            return SYSTEMS.CULLING
+
+        case s instanceof MeshSystem:
+            return SYSTEMS.MESH
+
+        case s instanceof PerformanceSystem:
+            return SYSTEMS.PERF
+
+        case s instanceof PhysicsSystem:
+            return SYSTEMS.PHYSICS
+
+        case s instanceof PickSystem:
+            return SYSTEMS.PICK
+
+        case s instanceof PostProcessingSystem:
+            return SYSTEMS.POSTPROCESSING
+
+        case s instanceof ShadowMapSystem:
+            return SYSTEMS.SHADOWS
+
+        case s instanceof TransformSystem:
+            return SYSTEMS.TRANSFORMATION
+
+        default:
+            return undefined
+    }
 }

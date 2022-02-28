@@ -3,12 +3,10 @@ import ShadowMapFramebuffer from "../../elements/buffer/ShadowMapFramebuffer";
 import ShadowMapShader from "../../shaders/classes/ShadowMapShader";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import {bindTexture} from "../../utils/misc/utils";
-import MeshSystem from "./MeshSystem";
-import seed from 'seed-random'
-import ImageProcessor from "../../../workers/ImageProcessor";
-import TextureInstance from "../../elements/instances/TextureInstance";
-export default class ShadowMapSystem extends System {
+import SYSTEMS from "../../utils/misc/SYSTEMS";
 
+export default class ShadowMapSystem extends System {
+    _needsGIUpdate = true
     constructor(gpu) {
         super([]);
         this.gpu = gpu
@@ -16,11 +14,13 @@ export default class ShadowMapSystem extends System {
         this.maxResolution = 4092
         this.shadowMapAtlas = new ShadowMapFramebuffer(this.maxResolution, gpu)
         this.shader = new ShadowMapShader(gpu)
-
-
-
     }
-
+    set needsGIUpdate(_){
+        this._needsGIUpdate = false
+    }
+    get needsGIUpdate(){
+        return this._needsGIUpdate
+    }
     execute(options, systems, data) {
         super.execute()
         const  {
@@ -40,9 +40,15 @@ export default class ShadowMapSystem extends System {
             shadingModel,
             injectMaterial
         } = options
-        if (shadingModel === SHADING_MODELS.DETAIL ) {
+
+        let changed = true//(systems[SYSTEMS.TRANSFORMATION].changed && views !== this._lightsCache ) || this._lightsCache.length === 0
+
+
+        if (shadingModel === SHADING_MODELS.DETAIL && changed) {
+
+            this._needsGIUpdate = true
             this.shader.use()
-            const meshSystem = systems.find(s => s instanceof MeshSystem)
+            const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
             const maxLights = directionalLights.length + spotLights.length
 

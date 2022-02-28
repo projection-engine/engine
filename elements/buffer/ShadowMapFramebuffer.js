@@ -1,4 +1,4 @@
-import {createFBO, createRBO, createTexture} from "../../utils/misc/utils";
+import {createTexture} from "../../utils/misc/utils";
 import Framebuffer from "./Framebuffer";
 import FramebufferTextureInstance from "../instances/FramebufferTextureInstance";
 

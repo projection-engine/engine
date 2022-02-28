@@ -71,27 +71,6 @@ export default class MaterialInstance {
 }
 
 async function base64ToBuffer(b64Data, img) {
-    // let base64Index = b64Data.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
-    // let base64 = b64Data.substring(base64Index);
-    // const byteCharacters = atob(base64);
-    // const byteArrays = [];
-    //
-    // for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-    //     const slice = byteCharacters.slice(offset, offset + 512);
-    //
-    //     const byteNumbers = new Array(slice.length);
-    //     for (let i = 0; i < slice.length; i++) {
-    //         byteNumbers[i] = slice.charCodeAt(i);
-    //     }
-    //
-    //     const byteArray = new Uint8Array(byteNumbers);
-    //     byteArrays.push(byteArray);
-    // }
-    //
-    // const blob = new Blob(byteArrays, {type: 'image/png'});
-    //
-    // return await createImageBitmap(blob)
-
     const p = new Promise(resolve => {
         img.onload = () => {
             resolve({

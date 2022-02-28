@@ -1,8 +1,7 @@
 import System from "../basic/System";
 import PostProcessingShader from "../../shaders/classes/PostProcessingShader";
 import PostProcessingFramebuffer from "../../elements/buffer/PostProcessingFramebuffer";
-import MeshSystem from "./MeshSystem";
-import {bindTexture, copyTexture} from "../../utils/misc/utils";
+import {copyTexture} from "../../utils/misc/utils";
 import ScreenSpaceBuffer from "../../elements/buffer/ScreenSpaceBuffer";
 import DeferredSystem from "./subsystems/DeferredSystem";
 import GridSystem from "./subsystems/GridSystem";
@@ -11,8 +10,8 @@ import SelectedSystem from "./subsystems/SelectedSystem";
 import SkyboxSystem from "./subsystems/SkyboxSystem";
 import Quad from "../../utils/workers/Quad";
 import ShadowMapDebugShader from "../../shaders/classes/ShadowMapDebugShader";
-import ShadowMapSystem from "./ShadowMapSystem";
 import GlobalIlluminationSystem from "./subsystems/GlobalIlluminationSystem";
+import SYSTEMS from "../../utils/misc/SYSTEMS";
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
@@ -60,9 +59,9 @@ export default class PostProcessingSystem extends System {
             shadingModel
         } = options
         this.gpu.enable(this.gpu.BLEND);
-        const meshSystem = systems.find(s => s instanceof MeshSystem)
+        const meshSystem = systems[SYSTEMS.MESH]
 
-        // const shadowMapSystem = systems.find(s => s instanceof ShadowMapSystem)
+        const shadowMapSystem = systems[SYSTEMS.SHADOWS]
         // SSR
         copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
 
@@ -85,7 +84,7 @@ export default class PostProcessingSystem extends System {
 
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
         this.postProcessing.stopMapping()
-        //
+
         let shaderToApply = this.shader
 
         if (!fxaa)
@@ -98,7 +97,7 @@ export default class PostProcessingSystem extends System {
         //
         // bindTexture(
         //     0,
-        //     shadowMapSystem.shadowMapAtlas.rsmFluxTexture,
+        //     shadowMapSystem.shadowMapAtlas.rsmNormalTexture,
         //     this.shadowMapDebugShader.shadowMapULocation,
         //     this.gpu)
         //

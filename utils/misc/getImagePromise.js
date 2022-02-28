@@ -1,5 +1,3 @@
-import GLTFBuffer from "../../../gltf/workers/GLTFBuffer";
-
 export default function getImagePromise(src) {
     return new Promise(resolve => {
         const i = new Image()

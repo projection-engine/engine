@@ -3,16 +3,11 @@ import MeshShader from "../../../shaders/classes/MeshShader";
 import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
 import DeferredShader from "../../../shaders/classes/DeferredShader";
 import FlatDeferredShader from "../../../shaders/classes/FlatDeferredShader";
-import ShadowMapSystem from "../ShadowMapSystem";
 import brdfImg from "../../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../../utils/misc/utils";
-import MeshSystem from "../MeshSystem";
-import AOSystem from "../AOSystem";
+import SYSTEMS from "../../../utils/misc/SYSTEMS";
 
 export default class DeferredSystem extends System {
-    meshSystemIndex = -1
-    aoSystemIndex = -1
-    shadowMapSystemIndex = -1
 
     constructor(gpu) {
         super([]);
@@ -59,16 +54,9 @@ export default class DeferredSystem extends System {
     execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems) {
         super.execute()
 
-        if (this.meshSystemIndex === -1 || !(systems[this.meshSystemIndex] instanceof MeshSystem))
-            this.meshSystemIndex = systems.findIndex(s => s instanceof MeshSystem)
-        if (this.aoSystemIndex === -1 || !(systems[this.aoSystemIndex] instanceof AOSystem))
-            this.aoSystemIndex = systems.findIndex(s => s instanceof AOSystem)
-        if (this.shadowMapSystemIndex === -1 || !(systems[this.shadowMapSystemIndex] instanceof ShadowMapSystem))
-            this.shadowMapSystemIndex = systems.findIndex(s => s instanceof ShadowMapSystem)
-
-        let shadowMapSystem = systems[this.shadowMapSystemIndex],
-            deferredSystem = systems[this.meshSystemIndex],
-            aoSystem = systems[this.aoSystemIndex]
+        const shadowMapSystem = systems[SYSTEMS.SHADOWS],
+            deferredSystem = systems[SYSTEMS.MESH],
+            aoSystem = systems[SYSTEMS.AO]
 
         const deferred = this._getDeferredShader(shadingModel)
 
@@ -91,7 +79,7 @@ export default class DeferredSystem extends System {
             cameraVec: camera.position,
             BRDF: this.BRDF,
             closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered,
-            ambientOcclusion:aoSystem ? aoSystem.aoBlurBuffer.frameBufferTexture : undefined
+            ambientOcclusion: aoSystem ? aoSystem.aoBlurBuffer.frameBufferTexture : undefined
             //   previousFrame: this.screenSpace.frameBufferTexture
         })
 

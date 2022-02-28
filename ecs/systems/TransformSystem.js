@@ -1,15 +1,16 @@
 import System from "../basic/System";
-import TransformComponent from "../components/TransformComponent";
 import {mat4} from "gl-matrix";
 import {linearAlgebraMath} from "pj-math";
 import Transformation from "../../utils/workers/Transformation";
 
 export default class TransformSystem extends System {
-
+    _changed = false
     constructor() {
         super([]);
     }
-
+    get changed(){
+        return this._changed
+    }
     execute(options, systems, data) {
         super.execute()
         const  {
@@ -26,10 +27,11 @@ export default class TransformSystem extends System {
 
         super.execute()
         const filtered = [...meshes, ...terrains]
-
+        this._changed = false
         for (let i = 0; i < filtered.length; i++) {
             const current = filtered[i]
             if (current !== undefined && current.components.TransformComponent.changed) {
+                this._changed = true
                 let parent
                 if (current.linkedTo)
                     parent = this._find(filtered, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix

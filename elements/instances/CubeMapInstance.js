@@ -1,5 +1,5 @@
 import {mat4} from "gl-matrix";
-import {createVBO, lookAt} from "../../utils/misc/utils";
+import {lookAt} from "../../utils/misc/utils";
 import cube from "../../assets/cube.json";
 import CubeMapShader from "../../shaders/classes/CubeMapShader";
 import VBO from "../../utils/workers/VBO";

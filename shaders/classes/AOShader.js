@@ -1,6 +1,6 @@
 import Shader from "../../utils/workers/Shader";
 
-import {fragment, vertex, fragmentBlur} from '../resources/ambientOcclusion.glsl'
+import {fragment, fragmentBlur, vertex} from '../resources/ambientOcclusion.glsl'
 
 
 export default class AOShader extends Shader{

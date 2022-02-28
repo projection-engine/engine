@@ -33,7 +33,9 @@ export default class Transformation {
         return scalingMatrix
     }
     static updateTransform (axis, data, key, engine, entityID) {
-        const component = selected.components.TransformComponent
+        const entity  = engine.entities.find(e => e.id === entityID)
+
+        const component = entity.components.TransformComponent
         const prev = component[key]
         component[key] = [
             axis === 'x' ? data : prev[0],
