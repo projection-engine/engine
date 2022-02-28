@@ -14,7 +14,7 @@ export const fragment = `#version 300 es
 precision mediump float;
 
  
-#define TEXEL 1.0 / 4092.
+#define TEXEL 1.0 / 2048.
 
 in vec2 texCoord;
 

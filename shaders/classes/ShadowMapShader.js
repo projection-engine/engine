@@ -14,5 +14,7 @@ export default class ShadowMapShader extends Shader{
 
         this.albedoULocation =  gpu.getUniformLocation(this.program, 'albedoSampler')
         this.normalULocation =  gpu.getUniformLocation(this.program, 'normalSampler')
+        this.lightColorULocation =  gpu.getUniformLocation(this.program, 'lightColor')
+
     }
 }

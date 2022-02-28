@@ -52,7 +52,7 @@ export default class DeferredShader extends Shader {
         for (let i = 0; i < maxTextures; i++) {
             const current = {
                 direction: directionalLights[i].direction,
-                ambient: directionalLights[i].color,
+                ambient: directionalLights[i].fixedColor,
                 face: directionalLights[i].atlasFace,
                 lightViewMatrix: directionalLights[i].lightView,
                 lightProjectionMatrix: directionalLights[i].lightProjection
@@ -86,7 +86,7 @@ export default class DeferredShader extends Shader {
             const locationAttenuation = this.gpu.getUniformLocation(this.program, `lightAttenuationFactors[${i}]`)
 
             this.gpu.uniform3fv(location, l.position)
-            this.gpu.uniform3fv(locationColor, l.color)
+            this.gpu.uniform3fv(locationColor, l.fixedColor)
             this.gpu.uniform3fv(locationAttenuation, l.attenuation)
         }
 

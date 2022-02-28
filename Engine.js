@@ -165,6 +165,8 @@ export default class Engine extends RenderLoop {
         if(!this._inExecution){
             this._inExecution = true
             this.cameraEvents.startTracking()
+            this.gpu?.enable(this.gpu.CULL_FACE)
+            this.gpu?.enable(this.gpu.DEPTH_TEST)
             this.gpu?.cullFace(this.gpu.BACK)
 
             const filteredEntities = entities.filter(e => e.active)

@@ -39,7 +39,7 @@ export default class PostProcessingSystem extends System {
 
     execute(options, systems, data) {
         super.execute()
-        const  {
+        const {
             pointLights,
             spotLights,
             terrains,
@@ -56,12 +56,13 @@ export default class PostProcessingSystem extends System {
             fxaa,
             iconsVisibility,
             gridVisibility,
-            shadingModel
+            shadingModel,
+            noRSM
         } = options
         this.gpu.enable(this.gpu.BLEND);
         const meshSystem = systems[SYSTEMS.MESH]
 
-        const shadowMapSystem = systems[SYSTEMS.SHADOWS]
+        // const shadowMapSystem = systems[SYSTEMS.SHADOWS]
         // SSR
         copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
 
@@ -76,10 +77,12 @@ export default class PostProcessingSystem extends System {
         copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
 
-        this.gpu.disable(this.gpu.DEPTH_TEST);
-        this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
-        this.GISystem.execute(systems, directionalLights)
-        this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
+        if (!noRSM) {
+            this.gpu.disable(this.gpu.DEPTH_TEST);
+            this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
+            this.GISystem.execute(systems, directionalLights)
+            this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
+        }
 
 
         this.selectedSystem.execute(meshes, meshSources, selected, camera)

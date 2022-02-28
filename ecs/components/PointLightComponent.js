@@ -6,12 +6,26 @@ export default class PointLightComponent extends Component{
         super(id, PointLightComponent.constructor.name);
     }
 
-    color = [1, 1, 1]
+    _color = [1, 1, 1]
+    _fixedColor = this._color
     cutoffRadius = 10
     attenuation = [1, 0, 0]
 
     _transformationMatrix = Array.from(mat4.create())
     _position = [0, 0, 0]
+
+    get fixedColor(){
+        return this._fixedColor
+    }
+    get color(){
+        return this._color
+    }
+    set color(data){
+        this._color = data
+
+        this._fixedColor = data.map(i => i/255)
+    }
+
     get position () {
         return this._position
     }

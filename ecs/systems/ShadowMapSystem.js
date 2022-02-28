@@ -10,8 +10,8 @@ export default class ShadowMapSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.resolutionPerTexture = 4092
-        this.maxResolution = 4092
+        this.resolutionPerTexture = 2048
+        this.maxResolution = 2048
         this.shadowMapAtlas = new ShadowMapFramebuffer(this.maxResolution, gpu)
         this.shader = new ShadowMapShader(gpu)
     }
@@ -86,13 +86,13 @@ export default class ShadowMapSystem extends System {
                     for (let m = 0; m < meshes.length; m++) {
                         const current = meshes[m]
                         const mesh =  meshSources[current.components.MeshComponent.meshID]
-                        let mat = injectMaterial ? injectMaterial : (mesh.material ? materials[mesh.material] : this.fallbackMaterial)
-                        if(!mat || !mat.ready)
-                            mat = meshSystem.fallbackMaterial
-
                         if (mesh !== undefined) {
+                            let mat = injectMaterial ? injectMaterial : (mesh.material ? materials[mesh.material] : this.fallbackMaterial)
+                            if(!mat || !mat.ready)
+                                mat = meshSystem.fallbackMaterial
                             const t = current.components.TransformComponent
-                            this._drawMesh(mesh, currentLight.lightView, currentLight.lightProjection, t.transformationMatrix, current.components.MeshComponent.normalMatrix, mat.albedo.texture, mat.normal.texture)
+
+                            this._drawMesh(mesh, currentLight.lightView, currentLight.lightProjection, t.transformationMatrix, current.components.MeshComponent.normalMatrix, mat.albedo.texture, mat.normal.texture, currentLight.fixedColor)
                         }
                     }
 
@@ -109,7 +109,7 @@ export default class ShadowMapSystem extends System {
         }
     }
 
-    _drawMesh(mesh, viewMatrix, projectionMatrix, transformationMatrix, normalMatrix, albedo ,normal) {
+    _drawMesh(mesh, viewMatrix, projectionMatrix, transformationMatrix, normalMatrix, albedo ,normal, lightColor) {
 
         this.gpu.bindVertexArray(mesh.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
@@ -121,8 +121,11 @@ export default class ShadowMapSystem extends System {
         this.gpu.uniformMatrix4fv(this.shader.viewMatrixULocation, false, viewMatrix)
         this.gpu.uniformMatrix4fv(this.shader.projectionMatrixULocation, false, projectionMatrix)
         this.gpu.uniformMatrix3fv(this.shader.normalMatrixULocation, false, normalMatrix)
+        this.gpu.uniform3fv(this.shader.lightColorULocation,  lightColor)
+
         bindTexture(0, albedo, this.shader.albedoULocation, this.gpu)
         bindTexture(1, normal, this.shader.normalULocation, this.gpu)
+
 
         this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
 

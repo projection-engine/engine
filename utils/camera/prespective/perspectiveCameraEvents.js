@@ -175,7 +175,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
         }
 
     }
-    console.log(isFocused)
+
     const handleClick = (event) => {
         let elapsedTime = performance.now() - startMouseDown;
         if (elapsedTime <= 250) {

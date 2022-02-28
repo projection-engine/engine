@@ -49,6 +49,7 @@ in vec3 vWorldSpacePosition;
 in vec2 texCoord;
 in mat3 toTangentSpace;
 
+uniform vec3 lightColor;
 uniform sampler2D albedoSampler;
 uniform sampler2D normalSampler;
 
@@ -58,9 +59,10 @@ layout (location = 2) out vec4 rsmWorld;
 
 
 void main(void){
-  
+    vec3 diffuse = texture(albedoSampler, texCoord).rgb;
+      
     rsmNormal =  vec4(normalize(toTangentSpace * ((texture(normalSampler, texCoord).xyz * 2.0)- 1.0)), 1.0);
-    rsmFlux = vec4(vec3(texture(albedoSampler, texCoord)), 1.0);
+    rsmFlux = vec4((lightColor * diffuse), 1.0);
     rsmWorld = vec4(vec3(vWorldSpacePosition.xyz), 1.0);
 }
 `
