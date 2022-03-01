@@ -1,4 +1,4 @@
-import CubeMapShader from "../../shaders/classes/CubeMapShader";
+import CubeMapShader from "../../shaders/classes/misc/CubeMapShader";
 import {createTexture} from "../../utils/misc/utils";
 import cube from "../../assets/cube.json";
 import Component from "../basic/Component";

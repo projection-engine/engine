@@ -1,4 +1,4 @@
-import BillboardShader from "../../shaders/classes/BillboardShader";
+import BillboardShader from "../../shaders/classes/misc/BillboardShader";
 import {bindTexture, createVAO} from "../../utils/misc/utils";
 import VBO from "../../utils/workers/VBO";
 

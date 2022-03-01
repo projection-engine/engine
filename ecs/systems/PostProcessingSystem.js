@@ -1,16 +1,16 @@
 import System from "../basic/System";
-import PostProcessingShader from "../../shaders/classes/PostProcessingShader";
-import PostProcessingFramebuffer from "../../elements/buffer/PostProcessingFramebuffer";
-import {copyTexture} from "../../utils/misc/utils";
-import ScreenSpaceBuffer from "../../elements/buffer/ScreenSpaceBuffer";
+import PostProcessingShader from "../../shaders/classes/misc/PostProcessingShader";
+import PostProcessingFramebuffer from "../../elements/buffer/mics/PostProcessingFramebuffer";
+import {bindTexture, copyTexture} from "../../utils/misc/utils";
+import ScreenSpaceBuffer from "../../elements/buffer/mics/ScreenSpaceBuffer";
 import DeferredSystem from "./subsystems/DeferredSystem";
 import GridSystem from "./subsystems/GridSystem";
 import BillboardSystem from "./subsystems/BillboardSystem";
 import SelectedSystem from "./subsystems/SelectedSystem";
 import SkyboxSystem from "./subsystems/SkyboxSystem";
 import Quad from "../../utils/workers/Quad";
-import ShadowMapDebugShader from "../../shaders/classes/ShadowMapDebugShader";
-import GlobalIlluminationSystem from "./subsystems/GlobalIlluminationSystem";
+import ShadowMapDebugShader from "../../shaders/classes/shadows/ShadowMapDebugShader";
+import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
 
 export default class PostProcessingSystem extends System {
@@ -59,32 +59,35 @@ export default class PostProcessingSystem extends System {
             shadingModel,
             noRSM
         } = options
-        this.gpu.enable(this.gpu.BLEND);
         const meshSystem = systems[SYSTEMS.MESH]
 
-        // const shadowMapSystem = systems[SYSTEMS.SHADOWS]
         // SSR
-        copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
+        // copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
+
+        if (!noRSM)
+            this.GISystem.execute(systems, directionalLights)
 
         this.postProcessing.startMapping()
-
         this.skyboxSystem.execute(skybox, camera)
         this.gridSystem.execute(gridVisibility, camera)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
 
-        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems)
+        let giFBO, giGridSize
+        if (!noRSM) {
+            giGridSize = this.GISystem.size
+            giFBO = this.GISystem.accumulatedBuffer
+        }
+
+        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize)
+
 
         copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
 
-        if (!noRSM) {
-            this.gpu.disable(this.gpu.DEPTH_TEST);
-            this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
-            this.GISystem.execute(systems, directionalLights)
-            this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
-        }
 
-
+        this.gpu.enable(this.gpu.BLEND)
+        this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
+        this.gpu.disable(this.gpu.DEPTH_TEST)
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
         this.postProcessing.stopMapping()
 

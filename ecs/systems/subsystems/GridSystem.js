@@ -1,6 +1,6 @@
 import System from "../../basic/System";
 import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
-import GridShader from "../../../shaders/classes/GridShader";
+import GridShader from "../../../shaders/classes/misc/GridShader";
 import GridInstance from "../../../elements/instances/GridInstance";
 
 export default class GridSystem extends System {

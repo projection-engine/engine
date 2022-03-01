@@ -1,8 +1,8 @@
 import System from "../../basic/System";
-import MeshShader from "../../../shaders/classes/MeshShader";
+import MeshShader from "../../../shaders/classes/mesh/MeshShader";
 import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
-import DeferredShader from "../../../shaders/classes/DeferredShader";
-import FlatDeferredShader from "../../../shaders/classes/FlatDeferredShader";
+import DeferredShader from "../../../shaders/classes/mesh/DeferredShader";
+import FlatDeferredShader from "../../../shaders/classes/mesh/FlatDeferredShader";
 import brdfImg from "../../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../../utils/misc/utils";
 import SYSTEMS from "../../../utils/misc/SYSTEMS";
@@ -51,7 +51,7 @@ export default class DeferredSystem extends System {
         }
     }
 
-    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems) {
+    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize) {
         super.execute()
 
         const shadowMapSystem = systems[SYSTEMS.SHADOWS],
@@ -66,8 +66,9 @@ export default class DeferredSystem extends System {
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
             lights: pointLights,
             directionalLights: directionalLights.map(d => d.components.DirectionalLightComponent),
-
-
+            giFBO,
+            gridSize: giGridSize,
+            indirectAttenuation: 1.0, // TODO
             shadowMap: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
             shadowMapResolution: shadowMapSystem?.maxResolution,
             shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,

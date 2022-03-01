@@ -1,5 +1,5 @@
 import System from "../../basic/System";
-import MeshShader from "../../../shaders/classes/MeshShader";
+import MeshShader from "../../../shaders/classes/mesh/MeshShader";
 import MeshSystem from "../MeshSystem";
 
 export default class SelectedSystem extends System {

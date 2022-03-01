@@ -12,6 +12,7 @@ export default class VBO {
         this.size = size
         this.normalized = normalized
 
+        this.length = data.length
     }
     enable(){
         this.gpu.enableVertexAttribArray(this.index)

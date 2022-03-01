@@ -1,6 +1,6 @@
 import System from "../../basic/System";
 import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
-import SkyBoxShader from "../../../shaders/classes/SkyBoxShader";
+import SkyBoxShader from "../../../shaders/classes/misc/SkyBoxShader";
 
 export default class SkyboxSystem extends System {
     constructor(gpu) {

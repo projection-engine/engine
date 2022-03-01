@@ -1,6 +1,6 @@
 import System from "../basic/System";
-import MousePickerFramebuffer from "../../elements/buffer/MousePickerFramebuffer";
-import PickerShader from "../../shaders/classes/PickerShader";
+import MousePickerFramebuffer from "../../elements/buffer/mics/MousePickerFramebuffer";
+import PickerShader from "../../shaders/classes/misc/PickerShader";
 
 export default class PickSystem extends System {
     constructor(gpu) {
