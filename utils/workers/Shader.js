@@ -21,7 +21,7 @@ export default class Shader {
 
 
         if (!compiled) {
-            console.log('Shader compiler log: ' + compiled);
+            console.log(bundledCode);
             console.log(gpu.getShaderInfoLog(shader))
 
             this.available = false

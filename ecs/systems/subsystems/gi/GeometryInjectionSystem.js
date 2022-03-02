@@ -33,24 +33,25 @@ export default class GeometryInjectionSystem extends System {
         const lightDirection = skylight.direction;
 
         if (injectionFinished) {
-            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.framebuffer.frameBufferObject)
 
+            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.framebuffer.frameBufferObject)
             this.gpu.viewport(0,0, this._gridSize ** 2, this._gridSize)
             this.gpu.enable(this.gpu.DEPTH_TEST);
             this.gpu.depthFunc(this.gpu.LEQUAL);
             this.gpu.disable(this.gpu.BLEND);
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+
+            this.shader.use()
             this.gpu.bindVertexArray(this.pointArray)
             this.pointPositions.enable()
-            this.shader.use()
             this.shader.bindUniforms(
                 lightDirection, rsmFlux, rsmPositions, rsmNormals, this._size, this._gridSize
             )
-
-
             this.gpu.drawArrays(this.gpu.POINTS, 0, this.pointsLength/2)
-            this.gpu.bindVertexArray(null)
-            this.pointPositions.disable()
+            // this.gpu.bindVertexArray(null)
+
+            // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
+            // this.pointPositions.disable()
             this.geometryInjectionFinished = true;
 
         }

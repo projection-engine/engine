@@ -34,7 +34,6 @@ export const fragment = `#version 300 es
 
 precision highp float;
 
-
 #define MAX_LIGHTS 2
 #define CELLSIZE 2.25
 
@@ -63,11 +62,12 @@ uniform sampler2D normalSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D behaviourSampler;
 
-
 uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
 uniform sampler2D blueIndirectSampler;
+
 uniform float indirectLightAttenuation;
+
 uniform int gridSize;
 
 struct DirectionalLight {
@@ -81,14 +81,8 @@ uniform sampler2D previousFrameSampler;
 uniform float shadowMapsQuantity;
 uniform sampler2D brdfSampler;
 
-//uniform sampler2D aoSampler;
-//uniform int hasAO;
 uniform DirectionalLight directionalLights[MAX_LIGHTS];
-
-
-
 out vec4 finalColor;
-
 
 @import(sampleShadowMap)
 
@@ -139,14 +133,14 @@ vec4 sampleGI(in sampler2D t, vec3 gridCell) {
 
 vec3 computeGIIntensity(vec3 fragPosition, vec3 normal)
 {
-    vec4 sh_intensity = dirToSH(-normal);
+    vec4 sh_intensity = dirToSH(-normalize(normal));
     vec3 gridCell = getGridCellf(fragPosition, gridSize);
 
     vec4 red = sampleGI(redIndirectSampler, gridCell);
     vec4 green = sampleGI(greenIndirectSampler, gridCell);
     vec4 blue = sampleGI(blueIndirectSampler, gridCell);
 
- return vec3(dot(sh_intensity, red), dot(sh_intensity, green), dot(sh_intensity, blue));
+    return vec3(dot(sh_intensity, red), dot(sh_intensity, green), dot(sh_intensity, blue));
 }
 
 void main() {
@@ -243,10 +237,10 @@ void main() {
     vec3 ambient = (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
-    vec3 color = (ambient  + Lo ) ;
+    vec3 color = (ambient  + Lo +  GI * .1) ;
     color = color / (color + vec3(1.0));
 
     
-    finalColor = vec4(color + GI * indirectLightAttenuation, 1.0); 
+    finalColor = vec4(color , 1.0); 
 }
 `

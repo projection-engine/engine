@@ -7,6 +7,7 @@ import SYSTEMS from "../../utils/misc/SYSTEMS";
 
 export default class ShadowMapSystem extends System {
     _needsGIUpdate = true
+    counter = 0
     constructor(gpu) {
         super([]);
         this.gpu = gpu
@@ -15,12 +16,13 @@ export default class ShadowMapSystem extends System {
         this.shadowMapAtlas = new ShadowMapFramebuffer(this.maxResolution, gpu)
         this.shader = new ShadowMapShader(gpu)
     }
-    set needsGIUpdate(_){
-        this._needsGIUpdate = false
+    set needsGIUpdate(data){
+        this._needsGIUpdate = data
     }
     get needsGIUpdate(){
         return this._needsGIUpdate
     }
+
     execute(options, systems, data) {
         super.execute()
         const  {
@@ -46,7 +48,13 @@ export default class ShadowMapSystem extends System {
 
         if (shadingModel === SHADING_MODELS.DETAIL && changed) {
 
-            this._needsGIUpdate = true
+            if(this.counter >= 75) {
+                this.counter = 0
+                this.needsGIUpdate = true
+            }
+
+            this.counter++
+
             this.shader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0

@@ -17,6 +17,7 @@ export default class LightInjectionShader extends Shader{
     }
 
     bindUniforms(rsmFlux, rsmWorld, rsmNormal, rsmSize, gridSize){
+
         this.gpu.uniform1i(this.rsmSizeULocation, rsmSize)
         this.gpu.uniform1i(this.gridSizeULocation, gridSize)
 

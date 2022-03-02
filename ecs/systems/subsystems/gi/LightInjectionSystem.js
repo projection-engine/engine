@@ -13,8 +13,9 @@ export default class LightInjectionSystem extends System {
         this._gridSize = gridSize
 
         this.shader = new LightInjectionShader(gpu)
+        console.log(gridSize)
         this.framebuffer = new GIFramebuffer(gridSize, gpu)
-
+        this.framebuffer.name = 'Injection'
         const {pointArray, pointPositions, size} = GlobalIlluminationSystem.generatePointCloud(gpu, s)
         this.pointsLength = size
         this.pointArray = pointArray
@@ -38,6 +39,9 @@ export default class LightInjectionSystem extends System {
         this.gpu.enable(this.gpu.BLEND);
         this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
 
+
+        this.shader.use()
+
         this.gpu.bindVertexArray(this.pointArray)
         this.pointPositions.enable()
 
@@ -51,8 +55,9 @@ export default class LightInjectionSystem extends System {
 
 
         this.gpu.drawArrays(this.gpu.POINTS,  0,this.pointsLength/2)
-        this.gpu.bindVertexArray(null)
-        this.pointPositions.disable()
+        // this.gpu.bindVertexArray(null)
+        // this.pointPositions.disable()
+        // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
 
         this.injectionFinished = true;
     }

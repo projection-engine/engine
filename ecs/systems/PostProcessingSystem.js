@@ -64,7 +64,9 @@ export default class PostProcessingSystem extends System {
         // SSR
         // copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
 
-        if (!noRSM)
+
+
+        if (!noRSM && systems[SYSTEMS.SHADOWS].needsGIUpdate)
             this.GISystem.execute(systems, directionalLights)
 
         this.postProcessing.startMapping()

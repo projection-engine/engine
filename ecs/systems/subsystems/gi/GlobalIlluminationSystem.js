@@ -10,9 +10,10 @@ import VBO from "../../../../utils/workers/VBO";
 import LightInjectionSystem from "./LightInjectionSystem";
 import GeometryInjectionSystem from "./GeometryInjectionSystem";
 import LightPropagationSystem from "./LightPropagationSystem";
+import {func} from "prop-types";
+import LightPropagationVolumes from "./LPV";
 
 export default class GlobalIlluminationSystem extends System {
-
     constructor(gpu) {
         super([]);
 
@@ -23,14 +24,17 @@ export default class GlobalIlluminationSystem extends System {
         this.lightInjectionSystem = new LightInjectionSystem(gpu, 2048, this.samplesAmmount)
         this.geometryInjectionSystem = new GeometryInjectionSystem(gpu, 2048, this.samplesAmmount)
         this.lightPropagationSystem = new LightPropagationSystem(gpu, 2048, this.samplesAmmount)
+
+
+        this.lvp = new LightPropagationVolumes(gpu)
     }
 
-    get size (){
+    get size() {
         return this.samplesAmmount
     }
 
     get accumulatedBuffer() {
-        return this.lightPropagationSystem.alFBO
+        return this.lvp.accumulatedBuffer
     }
 
     execute(systems, directionalLights) {
@@ -38,62 +42,23 @@ export default class GlobalIlluminationSystem extends System {
 
         const shadowMapSystem = systems[SYSTEMS.SHADOWS]
 
-        if (directionalLights.length > 0 && shadowMapSystem.needsGIUpdate) {
+        if (directionalLights.length > 0) {
             const light = directionalLights[0].components.DirectionalLightComponent
-            shadowMapSystem.needsGIUpdate = false
 
-            this.gpu.disable(this.gpu.BLEND)
-            // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.lightInjectionSystem.framebuffer.frameBufferObject)
-            // this.gpu.viewport(0, 0, this.samplesAmmount ** 2, this,this.samplesAmmount)
-            // this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-            //
-            // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.lightPropagationSystem.alFBO.frameBufferObject)
-            // this.gpu.viewport(0, 0, this.samplesAmmount ** 2, this,this.samplesAmmount)
-            // this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-            //
-            // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER,null)
+            this.lvp.clearInjectionBuffer();
+            this.lvp.clearAccumulatedBuffer();
 
-            this.lightInjectionSystem.execute(shadowMapSystem.shadowMapAtlas);
-            this.geometryInjectionSystem.execute(shadowMapSystem.shadowMapAtlas, light, this.lightInjectionSystem.injectionFinished);
-            this.lightPropagationSystem.execute(
-                shadowMapSystem.shadowMapAtlas,
-                light,
-                this.samplesAmmount,
-                this.lightInjectionSystem.injectionFinished,
-                this.geometryInjectionSystem.geometryInjectionFinished,
-                this.lightInjectionSystem.framebuffer,
-                this.geometryInjectionSystem.framebuffer
-            )
+            this.lvp.lightInjection(shadowMapSystem.shadowMapAtlas);
+            this.lvp.geometryInjection(shadowMapSystem.shadowMapAtlas, light.direction);
+            this.lvp.lightPropagation(64);
+
 
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
+            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
             this.gpu.enable(this.gpu.DEPTH_TEST);
             this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
 
-            //
-            //
-            //
-            // this.gpu.disable(this.gpu.DEPTH_TEST);
-            // this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
-            //
-            //
-            // this.shader.use()
-            // this.shader.bindUniforms(
-            //     this.quantityIndirect,
-            //     this.sRadius,
-            //     this.samplesAmmount,
-            //     this.samplesTextureSize,
-            //     meshSystem.gBuffer.gNormalTexture,
-            //     meshSystem.gBuffer.gPositionTexture,
-            //     shadowMapSystem.shadowMapAtlas.rsmNormalTexture,
-            //     shadowMapSystem.shadowMapAtlas.rsmWorldPositionTexture,
-            //     shadowMapSystem.shadowMapAtlas.rsmFluxTexture,
-            //     this.samplesTexture.texture,
-            //     light.lightProjection,
-            //     light.lightView
-            // )
-            // this.quad.draw(this.shader.positionLocation)
-            //
-            // this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
+            shadowMapSystem.needsGIUpdate = false
         }
     }
 
@@ -109,7 +74,8 @@ export default class GlobalIlluminationSystem extends System {
         }
 
         const pointArray = createVAO(gpu)
-        const pointPositions = new VBO(gpu, 0, new Float32Array(positionData), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
+        const pointPositions = new VBO(gpu, 0, new Float32Array(positionData), gpu.ARRAY_BUFFER, 2, gpu.FLOAT, false, gpu.STATIC_DRAW, 8)
+
 
         return {pointArray, pointPositions, size: positionData.length};
     }

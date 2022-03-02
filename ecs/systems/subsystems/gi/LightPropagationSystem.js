@@ -19,8 +19,7 @@ export default class LightPropagationSystem extends System {
         this.lpFBO = new GIFramebuffer(gridSize, gpu)
         this.alFBO = new GIFramebuffer(gridSize, gpu)
 
-
-        const positionData = new Float32Array((gridSize ** 3) * 2);
+        const positionData = new Float32Array(gridSize *  gridSize *gridSize * 2);
         let positionIndex = 0;
         for (let x = 0; x < gridSize * gridSize; x++) {
             for (let y = 0; y < gridSize; y++) {
@@ -30,7 +29,7 @@ export default class LightPropagationSystem extends System {
         }
 
         this.pointArray = createVAO(gpu)
-        this.pointPositions = new VBO(gpu, 0,positionData, gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
+        this.pointPositions = new VBO(gpu, 0, positionData, gpu.ARRAY_BUFFER, 2, gpu.FLOAT, false, gpu.STATIC_DRAW, 8)
     }
 
 
@@ -47,6 +46,7 @@ export default class LightPropagationSystem extends System {
 
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, nextIterationLPV.frameBufferObject);
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
+            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
 
             this._lightPropagationIteration(i, readLPV, nextIterationLPV,  injectionFinished, geometryInjectionFinished, geometryInjectionFBO)
 
@@ -56,15 +56,14 @@ export default class LightPropagationSystem extends System {
     _lightPropagationIteration(iteration, readLPV, nextIterationLPV, injectionFinished, geometryInjectionFinished, geometryInjectionFBO) {
 
         if (injectionFinished && geometryInjectionFinished) {
-
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.alFBO.frameBufferObject);
-
             this.gpu.framebufferTexture2D(
                 this.gpu.FRAMEBUFFER,
                 this.gpu.COLOR_ATTACHMENT3,
                 this.gpu.TEXTURE_2D,
                 nextIterationLPV.redTexture,
                 0);
+
             this.gpu.framebufferTexture2D(
                 this.gpu.FRAMEBUFFER,
                 this.gpu.COLOR_ATTACHMENT4,
@@ -88,10 +87,6 @@ export default class LightPropagationSystem extends System {
             ])
 
 
-
-
-
-            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.alFBO.frameBufferObject)
 
             this.gpu.viewport(0,0, this._gridSize ** 2, this._gridSize)
             this.gpu.disable(this.gpu.DEPTH_TEST);
@@ -117,9 +112,11 @@ export default class LightPropagationSystem extends System {
             )
 
 
-            this.gpu.drawArrays(this.gpu.POINTS, 0, this.pointPositions.length/2)
-            this.gpu.bindVertexArray(null)
-            this.pointPositions.disable()
+
+            this.gpu.drawArrays(this.gpu.POINTS, 0, this.pointPositions.length)
+            // this.gpu.bindVertexArray(null)
+            // this.pointPositions.disable()
+            // this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
         }
     }
 }
