@@ -200,7 +200,7 @@ export default class Engine extends RenderLoop {
                                 },
                                 currentCoords: this.data.currentCoord,
                                 camera: this.camera,
-                                elapsed: timestamp,
+                                elapsed: timestamp
                             },
                             this._systems,
                             data

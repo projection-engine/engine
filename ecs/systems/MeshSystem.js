@@ -72,7 +72,9 @@ export default class MeshSystem extends System {
 
                 if (mesh !== undefined && (!selected|| !selected.includes(current.id))) {
                     const t = current.components.TransformComponent
-                    let mat = injectMaterial ? injectMaterial : (mesh.material ? materials[mesh.material] : this.fallbackMaterial)
+                    const currentMaterialID = current.components.MaterialComponent.materialID
+
+                    let mat = injectMaterial ? injectMaterial : (materials[currentMaterialID] ? materials[currentMaterialID] : this.fallbackMaterial)
                     if(!mat || !mat.ready)
                         mat = this.fallbackMaterial
                     MeshSystem.drawMesh(

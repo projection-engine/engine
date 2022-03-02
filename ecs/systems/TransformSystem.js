@@ -5,15 +5,18 @@ import Transformation from "../../utils/workers/Transformation";
 
 export default class TransformSystem extends System {
     _changed = false
+
     constructor() {
         super([]);
     }
-    get changed(){
+
+    get changed() {
         return this._changed
     }
+
     execute(options, systems, data) {
         super.execute()
-        const  {
+        const {
             pointLights,
             spotLights,
             terrains,
@@ -36,7 +39,7 @@ export default class TransformSystem extends System {
                 if (current.linkedTo)
                     parent = this._find(filtered, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
                 const component = current.components.TransformComponent
-                const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling)
+                const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling, options.rotationType)
 
                 if (current.components.SphereCollider) {
                     switch (current.components.SphereCollider.axis) {

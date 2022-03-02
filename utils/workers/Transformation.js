@@ -1,10 +1,11 @@
 import {mat4, quat} from "gl-matrix";
 import {ENTITY_ACTIONS} from "../../../utils/entityReducer";
+import ROTATION_TYPES from "../misc/ROTATION_TYPES";
 
 export default class Transformation {
-    static transform(translation, rotate, scale) {
+    static transform(translation, rotate, scale, rotationType) {
         const t = Transformation.translate(translation),
-            r = Transformation.rotate(rotate),
+            r = Transformation.rotate(rotate, rotationType),
             s = Transformation.scale(scale)
         const res = mat4.create()
         mat4.multiply(res, t, r)
@@ -18,11 +19,36 @@ export default class Transformation {
         return translationMatrix
     }
 
-    static rotate(rotation) {
+    static rotate(rotation, rotationType) {
         const rotationMatrix = mat4.create()
-        const quaternion = quat.create()
-        quat.fromEuler(quaternion, rotation[0], rotation[1], rotation[2])
-        mat4.fromQuat(rotationMatrix, quaternion)
+
+        if(rotationType === ROTATION_TYPES.RELATIVE) {
+            mat4.rotate(
+                rotationMatrix,
+                rotationMatrix,
+                rotation[0],
+                [1, 0, 0]
+            )
+            mat4.rotate(
+                rotationMatrix,
+                rotationMatrix,
+                rotation[1],
+                [0, 1, 0]
+            )
+            mat4.rotate(
+                rotationMatrix,
+                rotationMatrix,
+                rotation[2],
+                [0, 0, 1]
+            )
+        }
+        else{
+            const quaternion = quat.create()
+            quat.fromEuler(quaternion, rotation[0], rotation[1], rotation[2])
+            mat4.fromQuat(rotationMatrix, quaternion)
+        }
+
+
         return rotationMatrix
     }
 

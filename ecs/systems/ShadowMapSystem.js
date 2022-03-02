@@ -48,7 +48,7 @@ export default class ShadowMapSystem extends System {
 
         if (shadingModel === SHADING_MODELS.DETAIL && changed) {
 
-            if(this.counter >= 75) {
+            if(this.counter >= 75 * 2) {
                 this.counter = 0
                 this.needsGIUpdate = true
             }
@@ -63,7 +63,7 @@ export default class ShadowMapSystem extends System {
             this.gpu.clearDepth(1);
             this.shadowMapAtlas.startMapping()
 
-            // this.gpu.cullFace(this.gpu.FRONT)
+            this.gpu.cullFace(this.gpu.FRONT)
 
             for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
 
