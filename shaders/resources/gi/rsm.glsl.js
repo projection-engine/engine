@@ -5,7 +5,6 @@ layout (location = 2) in vec3 normal;
 layout (location = 3) in vec2 uvTexture;
 layout (location = 4) in vec3 tangentVec;
   
-uniform mat3 normalMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;

@@ -17,6 +17,7 @@ export default class DeferredSystem extends System {
         this.flatDeferredShader = new FlatDeferredShader(gpu)
         this.meshShader = new MeshShader(gpu, true)
 
+
         const brdf = new Image()
         brdf.src = brdfImg
 

@@ -24,7 +24,7 @@ layout (location = 1) in mat4 transformation;
 // UNIFORM
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraPosition;
+ 
 
 
 out vec2 texCoord;

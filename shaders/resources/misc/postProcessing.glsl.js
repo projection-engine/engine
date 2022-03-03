@@ -17,9 +17,9 @@ in vec2 vTexcoord;
 uniform sampler2D uSampler;
 uniform float gamma;
 uniform float exposure;
-
-
 uniform vec3 inverseFilterTextureSize;
+
+
 //uniform float fxaaSpanMax;
 //uniform float fxaaReduceMin;
 //uniform float fxaaReduceMul;
@@ -87,11 +87,6 @@ uniform sampler2D uSampler;
 uniform float gamma;
 uniform float exposure;
 
-
-uniform vec3 inverseFilterTextureSize;
-//uniform float fxaaSpanMax;
-//uniform float fxaaReduceMin;
-//uniform float fxaaReduceMul;
 
 out vec4 finalColor;
 

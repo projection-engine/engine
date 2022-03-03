@@ -175,7 +175,7 @@ void main() {
     if(noGI == 0){
         vec3 lvpIntensity = computeGIIntensity(fragPosition, N);
         vec3 lpvRadiance = vec3(max(0.0, lvpIntensity.r), max(0.0, lvpIntensity.g), max(0.0, lvpIntensity.b)) / PI;
-        GI = lpvRadiance * .1  + lpvRadiance * albedo * ao;
+        GI = (lpvRadiance * .1  + lpvRadiance * albedo * ao) * indirectLightAttenuation;
     }
 
     // DIRECTIONAL LIGHT

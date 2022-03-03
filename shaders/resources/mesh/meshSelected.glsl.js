@@ -5,8 +5,7 @@ precision highp float;
 in vec4 vPosition;
 in vec3 normalVec;
 uniform int indexSelected;
-uniform vec3 cameraVec;
-// OUTPUTS
+ 
 out vec4 fragColor;
 
 
