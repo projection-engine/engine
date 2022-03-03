@@ -184,12 +184,11 @@ export default class LightPropagationVolumes {
         let LPVS = [ this.injectionFramebuffer, this.propagationFramebuffer ];
         let lpvIndex;
 
-        console.log(_propagationIterations)
         for (let i = 0; i < _propagationIterations; i++) {
 
             lpvIndex = i & 1;
-            var readLPV = LPVS[lpvIndex];
-            var nextIterationLPV = LPVS[lpvIndex ^ 1];
+            const readLPV = LPVS[lpvIndex];
+            const nextIterationLPV = LPVS[lpvIndex ^ 1];
 
 
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, nextIterationLPV.frameBufferObject)
