@@ -36,6 +36,7 @@ export default class DeferredShader extends Shader {
         this.blueSamplerULocation = this.gpu.getUniformLocation(this.program, `blueIndirectSampler`)
         this.indirectLightAttenuationULocation = this.gpu.getUniformLocation(this.program, `indirectLightAttenuation`)
         this.gridSizeULocation = this.gpu.getUniformLocation(this.program, `gridSize`)
+        this.noGIULocation = this.gpu.getUniformLocation(this.program, `noGI`)
     }
 
     bindUniforms({
@@ -124,11 +125,15 @@ export default class DeferredShader extends Shader {
 
         if (giFBO) {
 
+            this.gpu.uniform1i(this.noGIULocation, 0)
             this.gpu.uniform1i(this.gridSizeULocation, gridSize)
             this.gpu.uniform1f(this.indirectLightAttenuationULocation, 1)
             bindTexture(8, giFBO.redTexture, this.redSamplerULocation, this.gpu)
             bindTexture(9, giFBO.greenTexture, this.greenSamplerULocation, this.gpu)
             bindTexture(10, giFBO.blueTexture, this.blueSamplerULocation, this.gpu)
+        }
+        else{
+            this.gpu.uniform1i(this.noGIULocation, 1)
         }
         // if(ambientOcclusion !== undefined){
         //     bindTexture(8, ambientOcclusion, this.ambientOcclusionULocation, this.gpu)

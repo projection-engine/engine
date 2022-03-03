@@ -2,7 +2,6 @@ import Shader from "../../../utils/workers/Shader";
 
 import {fragment, vertex} from '../../resources/gi/geometryInjection.glsl'
 import {bindTexture} from "../../../utils/misc/utils";
-import GlobalIlluminationSystem from "../../../ecs/systems/subsystems/gi/GlobalIlluminationSystem";
 
 
 export default class GeometryInjectionShader extends Shader{

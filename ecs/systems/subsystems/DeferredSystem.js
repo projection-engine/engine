@@ -51,7 +51,7 @@ export default class DeferredSystem extends System {
         }
     }
 
-    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize) {
+    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight) {
         super.execute()
 
         const shadowMapSystem = systems[SYSTEMS.SHADOWS],
@@ -59,13 +59,17 @@ export default class DeferredSystem extends System {
             aoSystem = systems[SYSTEMS.AO]
 
         const deferred = this._getDeferredShader(shadingModel)
+        let dirLights = directionalLights.map(d => d.components.DirectionalLightComponent)
+
+        if(skylight)
+            dirLights.push(skylight)
 
 
         deferred.use()
         deferred.bindUniforms({
             irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
             lights: pointLights,
-            directionalLights: directionalLights.map(d => d.components.DirectionalLightComponent),
+            directionalLights: dirLights,
             giFBO,
             gridSize: giGridSize,
             indirectAttenuation: 1.0, // TODO

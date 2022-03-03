@@ -169,7 +169,9 @@ export default class Engine extends RenderLoop {
             this.gpu?.enable(this.gpu.DEPTH_TEST)
             this.gpu?.cullFace(this.gpu.BACK)
 
+
             const filteredEntities = entities.filter(e => e.active)
+            console.log(filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent)
             const data = {
                 pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
                 spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
@@ -179,6 +181,7 @@ export default class Engine extends RenderLoop {
                 directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
                 materials: toObject(materials),
                 meshSources: toObject(meshes),
+                skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent,
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
             }
             const systems = Object.keys(this._systems).sort()
@@ -188,7 +191,6 @@ export default class Engine extends RenderLoop {
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
                 for (let s = 0; s < systems.length; s++) {
-
                     this._systems[systems[s]]
                         .execute(
                             {

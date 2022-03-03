@@ -26,15 +26,6 @@ export default class ShadowMapFramebuffer extends Framebuffer {
             this.gpu.CLAMP_TO_EDGE,
             true
         )
-        this.rsmNormalTexture = FramebufferTextureInstance.generate(gpu, this.width, this.height, gpu.COLOR_ATTACHMENT0)
-        this.rsmFluxTexture = FramebufferTextureInstance.generate(gpu, this.width, this.height, gpu.COLOR_ATTACHMENT1)
-        this.rsmWorldPositionTexture = FramebufferTextureInstance.generate(gpu, this.width, this.height, gpu.COLOR_ATTACHMENT2)
-
-        gpu.drawBuffers([
-            gpu.COLOR_ATTACHMENT0,
-            gpu.COLOR_ATTACHMENT1,
-            gpu.COLOR_ATTACHMENT2
-        ])
 
         gpu.framebufferTexture2D(
             gpu.FRAMEBUFFER,

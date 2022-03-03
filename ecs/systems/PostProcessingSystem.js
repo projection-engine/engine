@@ -48,7 +48,8 @@ export default class PostProcessingSystem extends System {
             directionalLights,
             materials,
             meshSources,
-            cubeMaps
+            cubeMaps,
+            skylight
         } = data
         const {
             selected,
@@ -57,17 +58,16 @@ export default class PostProcessingSystem extends System {
             iconsVisibility,
             gridVisibility,
             shadingModel,
-            noRSM
+            noRSM,
         } = options
         const meshSystem = systems[SYSTEMS.MESH]
 
         // SSR
         // copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
 
-
-
-        if (!noRSM && systems[SYSTEMS.SHADOWS].needsGIUpdate)
-            this.GISystem.execute(systems, directionalLights)
+        const shadowsSystem = systems[SYSTEMS.SHADOWS]
+        if (!noRSM && shadowsSystem.needsGIUpdate && skylight)
+            this.GISystem.execute(systems, skylight)
 
         this.postProcessing.startMapping()
         this.skyboxSystem.execute(skybox, camera)
@@ -75,17 +75,15 @@ export default class PostProcessingSystem extends System {
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
 
         let giFBO, giGridSize
-        if (!noRSM) {
+        if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
             giFBO = this.GISystem.accumulatedBuffer
         }
 
-        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize)
+        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
 
 
         copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-
-
 
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
@@ -105,7 +103,7 @@ export default class PostProcessingSystem extends System {
         //
         // bindTexture(
         //     0,
-        //     shadowMapSystem.shadowMapAtlas.rsmNormalTexture,
+        //     shadowsSystem.rsmFramebuffer.rsmFluxTexture,
         //     this.shadowMapDebugShader.shadowMapULocation,
         //     this.gpu)
         //

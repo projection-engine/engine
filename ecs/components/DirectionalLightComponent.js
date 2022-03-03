@@ -12,11 +12,20 @@ export default class DirectionalLightComponent extends Component {
     _size = 35
     _atlasFace = [0,0]
     _fixedColor = this._color
+    _changed = true
     constructor(id) {
         super(id, 'DirectionalLightComponent');
         this._update()
 
     }
+    get changed(){
+        return this._changed
+    }
+    set changed(_){
+        this._changed = false
+    }
+
+
     get fixedColor(){
         return this._fixedColor
     }
@@ -63,6 +72,7 @@ export default class DirectionalLightComponent extends Component {
         this._direction = data
         this._update()
 
+
         this._transformationMatrix[12] = data[0]
         this._transformationMatrix[13] = data[1]
         this._transformationMatrix[14] = data[2]
@@ -88,6 +98,8 @@ export default class DirectionalLightComponent extends Component {
 
         this.lightProjection = Array.from(mat4.create());
         mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar);
+
+        this._changed = true
     }
 
 }

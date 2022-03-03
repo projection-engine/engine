@@ -10,8 +10,6 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
 
-
-
 out vec3 vPosition;
 out vec3 vWorldSpacePosition;
 out mat3 toTangentSpace;
@@ -66,6 +64,9 @@ void main(void){
     rsmWorld = vec4(vec3(vWorldSpacePosition.xyz), 1.0);
 }
 `
+
+
+
 
 export const debugVertex = `#version 300 es
 

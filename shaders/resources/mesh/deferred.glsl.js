@@ -46,7 +46,7 @@ in mat4 dirLightPOV[MAX_LIGHTS];
 
 
 uniform vec3 cameraVec;
-
+uniform int noGI;
 uniform vec3 lightPosition[MAX_LIGHTS];
 uniform vec3 lightColor[MAX_LIGHTS];
 uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
@@ -169,17 +169,19 @@ void main() {
 
 
     vec3 Lo = vec3(0.0);
+        
+    vec3 GI = vec3(0.);
     
-    vec3 lvpIntensity = computeGIIntensity(fragPosition, N);
-    vec3 lpvRadiance = vec3(max(0.0, lvpIntensity.r), max(0.0, lvpIntensity.g), max(0.0, lvpIntensity.b)) / PI;
-    vec3 GI =  lpvRadiance; // * roughness
+    if(noGI == 0){
+        vec3 lvpIntensity = computeGIIntensity(fragPosition, N);
+        vec3 lpvRadiance = vec3(max(0.0, lvpIntensity.r), max(0.0, lvpIntensity.g), max(0.0, lvpIntensity.b)) / PI;
+        GI = lpvRadiance * .1  + lpvRadiance * albedo * ao;
+    }
 
     // DIRECTIONAL LIGHT
     float shadows = dirLightsQuantity > 0?  0. : 1.0;
     for (int i = 0; i < dirLightsQuantity; i++){
         vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
-//        fragPosLightSpace *= vec4(0.5, 0.5, 0.5, 1.0);
-//        fragPosLightSpace += vec4(0.5, 0.5, 0.5, 0.0);
         vec3 lightDir =  normalize(directionalLights[i].direction);
 
         Lo += computeDirectionalLight(
@@ -237,7 +239,7 @@ void main() {
     vec3 ambient = (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
-    vec3 color = (ambient  + Lo +  GI * .1) ;
+    vec3 color = (ambient  + Lo +  GI) ;
     color = color / (color + vec3(1.0));
 
     

@@ -166,20 +166,14 @@ export default class LightPropagationVolumes {
         }
     }
 
-    clearAccumulatedBuffer() {
+    clear() {
         this.gpu.disable(this.gpu.BLEND)
+        this.gpu.viewport(0, 0, this.framebufferSize ** 2, this.framebufferSize)
+
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.accumulatedBuffer.frameBufferObject)
-        this.gpu.viewport(0, 0, this.framebufferSize ** 2, this.framebufferSize)
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT )
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER,null)
 
-    }
-
-    clearInjectionBuffer() {
-
-        this.gpu.disable(this.gpu.BLEND)
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.injectionFramebuffer.frameBufferObject)
-        this.gpu.viewport(0, 0, this.framebufferSize ** 2, this.framebufferSize)
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT )
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER,null)
 
@@ -190,6 +184,7 @@ export default class LightPropagationVolumes {
         let LPVS = [ this.injectionFramebuffer, this.propagationFramebuffer ];
         let lpvIndex;
 
+        console.log(_propagationIterations)
         for (let i = 0; i < _propagationIterations; i++) {
 
             lpvIndex = i & 1;

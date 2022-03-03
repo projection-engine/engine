@@ -1,7 +1,6 @@
 import System from "../../../basic/System";
 import LightPropagationShader from "../../../../shaders/classes/gi/LightPropagationShader";
 import GIFramebuffer from "../../../../elements/buffer/gi/GIFramebuffer";
-import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
 import {createVAO} from "../../../../utils/misc/utils";
 import VBO from "../../../../utils/workers/VBO";
 
