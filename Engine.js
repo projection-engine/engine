@@ -171,7 +171,7 @@ export default class Engine extends RenderLoop {
 
 
             const filteredEntities = entities.filter(e => e.active)
-            console.log(filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent)
+
             const data = {
                 pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
                 spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),

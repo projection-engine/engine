@@ -8,7 +8,6 @@ layout (location = 4) in vec3 tangentVec;
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
-
 uniform vec3 cameraVec;
 
 

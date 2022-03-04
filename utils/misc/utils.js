@@ -76,6 +76,7 @@ export function createTexture(gpu, width, height, internalFormat, border, format
 }
 
 export function bindTexture(index, texture, location, gpu) {
+
     gpu.activeTexture(gpu.TEXTURE0 + index)
     gpu.bindTexture(gpu.TEXTURE_2D, texture)
     gpu.uniform1i(location, index)

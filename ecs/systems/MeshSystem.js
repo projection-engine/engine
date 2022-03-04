@@ -117,8 +117,6 @@ export default class MeshSystem extends System {
         mesh.tangentVBO.enable()
 
 
-
-
         shader
             .bindUniforms({
                 material: material,

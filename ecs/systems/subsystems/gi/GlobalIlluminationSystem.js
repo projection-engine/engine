@@ -1,22 +1,17 @@
 import System from "../../../basic/System";
 import RSMSamplerShader from "../../../../shaders/classes/gi/RSMSamplerShader";
 import SYSTEMS from "../../../../utils/misc/SYSTEMS";
-import LightPropagationVolumes from "./LPV";
+import PropagationSystem from "./PropagationSystem";
+import InjectionSystem from "./InjectionSystem";
 
 export default class GlobalIlluminationSystem extends System {
     constructor(gpu) {
         super([]);
-
         this.shader = new RSMSamplerShader(gpu)
         this.gpu = gpu
         this.samplesAmmount = 32
-
-        // this.lightInjectionSystem = new LightInjectionSystem(gpu, 2048, this.samplesAmmount)
-        // this.geometryInjectionSystem = new GeometryInjectionSystem(gpu, 2048, this.samplesAmmount)
-        // this.lightPropagationSystem = new LightPropagationSystem(gpu, 2048, this.samplesAmmount)
-
-
-        this.lvp = new LightPropagationVolumes(gpu)
+        this.injectionSystem = new InjectionSystem(gpu)
+        this.lightPropagationSystem = new PropagationSystem(gpu)
     }
 
     get size() {
@@ -24,7 +19,7 @@ export default class GlobalIlluminationSystem extends System {
     }
 
     get accumulatedBuffer() {
-        return this.lvp.accumulatedBuffer
+        return this.lightPropagationSystem.accumulatedBuffer
     }
 
     execute(systems, skylight) {
@@ -34,18 +29,78 @@ export default class GlobalIlluminationSystem extends System {
         shadowMapSystem.needsGIUpdate = false
 
 
-        this.lvp.clear();
-        this.lvp.lightInjection(shadowMapSystem.rsmFramebuffer);
-        this.lvp.geometryInjection(shadowMapSystem.rsmFramebuffer, skylight.direction);
-
-
-        this.lvp.lightPropagation(skylight.lvpSamples);
-
+        this._clear();
+        this.injectionSystem.execute(shadowMapSystem.rsmFramebuffer, skylight.direction)
+        this.lightPropagationSystem.execute(
+            {
+                iterations: skylight.lvpSamples,
+                skylight,
+                lightInjectionFBO: this.injectionSystem.injectionFramebuffer,
+                geometryInjectionFBO: this.injectionSystem.geometryInjectionFramebuffer
+            })
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
-
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
         this.gpu.enable(this.gpu.DEPTH_TEST);
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
+    }
+
+    _clear() {
+        this.gpu.disable(this.gpu.BLEND)
+        this.gpu.viewport(0, 0, this.framebufferSize ** 2, this.framebufferSize)
+
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.lightPropagationSystem.accumulatedBuffer.frameBufferObject)
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT)
+
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.injectionSystem.geometryInjectionFramebuffer.frameBufferObject)
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT)
+
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.injectionSystem.injectionFramebuffer.frameBufferObject)
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT)
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
 
     }
+
+    static createPointsData(positionData, gpu) {
+        const pointPositions = gpu.createBuffer();
+        gpu.bindBuffer(gpu.ARRAY_BUFFER, pointPositions);
+        gpu.bufferData(gpu.ARRAY_BUFFER, positionData, gpu.STATIC_DRAW);
+
+        const pointArray = gpu.createVertexArray()
+        gpu.bindVertexArray(pointArray);
+        gpu.bindBuffer(gpu.ARRAY_BUFFER, pointPositions);
+
+        gpu.vertexAttribPointer(
+            0,
+            2,
+            gpu.FLOAT,
+            false,
+            8,
+            0
+        );
+
+        gpu.enableVertexAttribArray(0);
+        gpu.bindVertexArray(null);
+        gpu.bindBuffer(gpu.ARRAY_BUFFER, null);
+
+        return {
+            dataLength: positionData.length,
+            pointArray,
+            pointPositions
+        }
+    }
+
+    static createInjectionPointCloud(size) {
+        const positionData = new Float32Array(size * size * 2);
+
+        let positionIndex = 0;
+        for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+                positionData[positionIndex++] = x;
+                positionData[positionIndex++] = y;
+            }
+        }
+
+        return positionData;
+    }
+
 }

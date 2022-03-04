@@ -60,10 +60,10 @@ vec2 getRenderingTexCoords(ivec3 gridCell)
 
 float calculateSurfelAreaLight(vec3 lightPos)
 {
-    float fov = 90.0f;
+    float fov = .4159;
     float aspect = float(u_rsm_size / u_rsm_size);
-    float tan_fov_x_half = tan(0.5 * fov * DEG_TO_RAD);
-    float tan_fov_y_half = tan(0.5 * fov * DEG_TO_RAD) * aspect;
+    float tan_fov_x_half = tan(fov);
+    float tan_fov_y_half = tan(fov) * aspect;
 
     return (4.0 * lightPos.z * lightPos.z * tan_fov_x_half * tan_fov_y_half) / float(u_rsm_size * u_rsm_size);
 }
