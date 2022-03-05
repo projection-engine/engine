@@ -17,8 +17,11 @@ const TYPES = {
 }
 export default class Shader {
     available = false
-    regex = /^uniform(\s+)(highp|mediump|lowp)?(\s*)(sampler2D|samplerCube|sampler3D|mat4|vec4|mat3|vec3|vec2|float|int|bool)((\s|[a-zA-Z]|_)*);$/gm
-    regexMatch = /^uniform(\s+)(highp|mediump|lowp)?(\s*)(sampler2D|samplerCube|sampler3D|mat4|vec4|mat3|vec3|vec2|float|int|bool)((\s|[a-zA-Z]|_)*);$/m
+    regex = /^uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/gm
+    structRegex = (type) => {
+        return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, 'gs')
+    }
+    regexMatch = /^uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/m
     constructor(vertex, fragment, gpu) {
 
         this.program = gpu.createProgram()
@@ -67,27 +70,47 @@ export default class Shader {
                 const match = u.match(this.regexMatch)
                 if (match) {
                     const type = match[4]
-                    const name = match[5].replace(' ', '')
+                    const name = match[6].replace(' ', '')
                     if (TYPES[type] !== undefined) {
                         uniformObjects.push({
                             type,
                             name,
                             uLocation: this.gpu.getUniformLocation(this.program, name)
                         })
+                    }else{
+                        let struct = code.match(this.structRegex(type))
+                        const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
+
+                        if(struct){
+                            struct = struct[0].split('\n').filter(e =>Object.keys(TYPES).some(v => e.includes(v)))
+                            uniformObjects.push(
+                                ...struct.map(s => {
+                                    const current = s.match(reg)
+                                    if(current) {
+                                        return {
+                                            type: current[2],
+                                            name: current[4],
+                                            parent: name,
+                                            uLocation: this.gpu.getUniformLocation(this.program, name + '.' +current[4])
+                                        }
+                                    }
+                                }).filter(e => e !== undefined)
+                            )
+                        }
                     }
                 }
             })
         }
-
-
         return uniformObjects
     }
 
     bindForUse(data) {
         let currentSamplerIndex = 0
-        console.log(data, this.uniforms)
+
         for (let v = 0; v < this.uniforms.length; v++) {
             const current = this.uniforms[v]
+            const dataAttribute = current.parent !== undefined ?data[current.parent][current.name] : data[current.name]
+
             switch (current.type){
                 case 'float':
                 case 'int':
@@ -97,20 +120,20 @@ export default class Shader {
                 case 'ivec2':
                 case 'ivec3':
                 case 'bool':
-                    this.gpu[TYPES[current.type]](current.uLocation, data[current.name])
+                    this.gpu[TYPES[current.type]](current.uLocation, dataAttribute)
                     break
                 case 'mat3':
                 case 'mat4':
-                    this.gpu[TYPES[current.type]](current.uLocation, false, data[current.name])
+                    this.gpu[TYPES[current.type]](current.uLocation, false, dataAttribute)
                     break
                 case 'samplerCube':
                     this.gpu.activeTexture(this.gpu.TEXTURE0 + currentSamplerIndex)
-                    this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, data[current.name])
+                    this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, dataAttribute)
                     this.gpu.uniform1i(current.uLocation, currentSamplerIndex)
                     currentSamplerIndex++
                     break
                 case 'sampler2D':
-                    bindTexture(currentSamplerIndex, data[current.name], current.uLocation, this.gpu)
+                    bindTexture(currentSamplerIndex, dataAttribute, current.uLocation, this.gpu)
                     currentSamplerIndex++
                     break
                 default:

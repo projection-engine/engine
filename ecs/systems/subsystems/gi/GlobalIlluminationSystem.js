@@ -31,9 +31,10 @@ export default class GlobalIlluminationSystem extends System {
 
         this._clear();
         this.injectionSystem.execute(shadowMapSystem.rsmFramebuffer, skylight.direction)
+
         this.lightPropagationSystem.execute(
             {
-                iterations: skylight.lvpSamples,
+                iterations: skylight.lpvSamples,
                 skylight,
                 lightInjectionFBO: this.injectionSystem.injectionFramebuffer,
                 geometryInjectionFBO: this.injectionSystem.geometryInjectionFramebuffer

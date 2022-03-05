@@ -1,12 +1,13 @@
 import System from "../basic/System";
 import MousePickerFramebuffer from "../../elements/buffer/mics/MousePickerFramebuffer";
-import PickerShader from "../../shaders/classes/misc/PickerShader";
+import * as shaderCode from "../../shaders/resources/misc/picker.glsl";
+import Shader from "../../utils/workers/Shader";
 
 export default class PickSystem extends System {
     constructor(gpu) {
         super([]);
         this.picker = new MousePickerFramebuffer(gpu)
-        this.shader = new PickerShader(gpu)
+        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
     }
 
     execute(options, systems, data) {
@@ -74,20 +75,20 @@ export default class PickSystem extends System {
         }
 
     }
-    _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformationMatrix) {
+    _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix) {
+        this.shader.bindForUse({
+            uID: [...instance.components.PickComponent.pickID, 1],
+            projectionMatrix,
+            transformMatrix,
+            viewMatrix
+        })
 
-        this.shader.bindUniforms({pickerID: instance.components.PickComponent.pickID})
 
         this.picker.gpu.bindVertexArray(mesh.VAO)
         this.picker.gpu.bindBuffer(this.picker.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
         mesh.vertexVBO.enable()
 
-        this.picker.gpu.uniformMatrix4fv(this.shader.transformMatrixULocation, false, transformationMatrix)
-        this.picker.gpu.uniformMatrix4fv(this.shader.viewMatrixULocation, false, viewMatrix)
-        this.picker.gpu.uniformMatrix4fv(this.shader.projectionMatrixULocation, false, projectionMatrix)
         this.picker.gpu.drawElements(this.picker.gpu.TRIANGLES, mesh.verticesQuantity, this.picker.gpu.UNSIGNED_INT, 0)
-
-        // EXIT
         this.picker.gpu.bindVertexArray(null)
         this.picker.gpu.bindBuffer(this.picker.gpu.ELEMENT_ARRAY_BUFFER, null)
         mesh.vertexVBO.disable()

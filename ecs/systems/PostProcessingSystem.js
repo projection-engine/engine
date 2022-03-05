@@ -1,5 +1,5 @@
 import System from "../basic/System";
-import PostProcessingShader from "../../shaders/classes/misc/PostProcessingShader";
+
 import PostProcessingFramebuffer from "../../elements/buffer/mics/PostProcessingFramebuffer";
 import {bindTexture, copyTexture} from "../../utils/misc/utils";
 import ScreenSpaceBuffer from "../../elements/buffer/mics/ScreenSpaceBuffer";
@@ -13,6 +13,9 @@ import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
 import * as debug from '../../shaders/resources/shadows/shadow.glsl'
+
+import * as shaderCode from '../../shaders/resources/misc/postProcessing.glsl'
+
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
@@ -22,10 +25,10 @@ export default class PostProcessingSystem extends System {
         this.postProcessing = new PostProcessingFramebuffer(gpu, resolutionMultiplier)
 
         this.shadowMapDebugShader = new Shader(debug.debugVertex, debug.debugFragment, gpu)
-        // this.quad = new Quad(gpu)
+        this.quad = new Quad(gpu)
 
-        this.shader = new PostProcessingShader(gpu)
-        this.noFxaaShader = new PostProcessingShader(gpu, true)
+        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
 
 
         this.GISystem = new GlobalIlluminationSystem(gpu)
@@ -60,13 +63,8 @@ export default class PostProcessingSystem extends System {
             shadingModel,
             noRSM,
         } = options
-        const meshSystem = systems[SYSTEMS.MESH]
 
-        // SSR
-        // copyTexture(this.screenSpace.frameBufferObject, this.postProcessing.frameBufferObject, this.gpu, this.gpu.COLOR_BUFFER_BIT)
-
-        const shadowsSystem = systems[SYSTEMS.SHADOWS]
-        if (!noRSM && shadowsSystem.needsGIUpdate && skylight)
+        if (!noRSM && systems[SYSTEMS.SHADOWS].needsGIUpdate && skylight)
             this.GISystem.execute(systems, skylight)
 
         this.postProcessing.startMapping()
@@ -82,12 +80,10 @@ export default class PostProcessingSystem extends System {
 
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
 
-
-        copyTexture(this.postProcessing.frameBufferObject, meshSystem.gBuffer.gBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
         this.gpu.disable(this.gpu.DEPTH_TEST)
+
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
         this.postProcessing.stopMapping()
 
@@ -97,18 +93,24 @@ export default class PostProcessingSystem extends System {
             shaderToApply = this.noFxaaShader
 
         shaderToApply.use()
-        this.postProcessing.draw(shaderToApply)
+        shaderToApply.bindForUse({
+            uSampler: this.postProcessing.frameBufferTexture,
+            gamma: 2.2,
+            exposure: 2,
+            FXAASpanMax: 8,
+            FXAAReduceMin: 1 / 128,
+            inverseFilterTextureSize: [1 / this.gpu.canvas.width, 1 / this.gpu.canvas.height, 0],
+            FXAAReduceMul: 1 / 8
+        })
+        this.postProcessing.draw()
 
+        //
+        // this.gpu.viewport(0, 0, this.postProcessing.width, this.postProcessing.height);
         // this.shadowMapDebugShader.use()
-        //
-        // bindTexture(
-        //     0,
-        //     systems[SYSTEMS.SHADOWS].rsmFramebuffer.rsmFluxTexture,
-        //     this.shadowMapDebugShader.shadowMapULocation,
-        //     this.gpu)
-        //
-        //
-        // this.quad.draw(this.shadowMapDebugShader.positionLocation)
+        // this.shadowMapDebugShader.bindForUse({
+        //     uSampler:systems[SYSTEMS.SHADOWS].rsmFramebuffer.rsmFluxTexture
+        // })
+        // this.quad.draw()
 
     }
 }

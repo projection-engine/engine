@@ -1,6 +1,5 @@
 import {PBR} from '../../shaders/resources/mesh/PBR'
 import {SHADOWS} from "../../shaders/resources/shadows/Shadows";
-import {LVP} from "../../shaders/resources/gi/LVP";
 
 export const METHODS = {
     distributionGGX: '@import(distributionGGX)',
@@ -14,9 +13,7 @@ export const METHODS = {
     sampleShadowMap: '@import(sampleShadowMap)',
     sampleShadowMapLinear: '@import(sampleShadowMapLinear)',
     sampleSoftShadows: '@import(sampleSoftShadows)',
-    calculateShadows: '@import(calculateShadows)',
-
-    lvpCommon:'@import(lvpCommon)'
+    calculateShadows: '@import(calculateShadows)'
 }
 
 
@@ -29,8 +26,6 @@ export default class Bundler {
                 response = response.replaceAll(METHODS[key], SHADOWS[key])
             if(PBR[key])
                 response = response.replaceAll(METHODS[key], PBR[key])
-            if(LVP[key])
-                response = response.replaceAll(METHODS[key], LVP[key])
         })
 
         return response

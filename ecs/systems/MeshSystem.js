@@ -1,9 +1,9 @@
 import System from "../basic/System";
-
 import GBuffer from "../../elements/buffer/mics/GBuffer";
-import MeshShader from "../../shaders/classes/mesh/MeshShader";
 import MaterialInstance from "../../elements/instances/MaterialInstance";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
+import * as shaderCode from '../../shaders/resources/mesh/meshDeferred.glsl'
+import Shader from "../../utils/workers/Shader";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -12,7 +12,7 @@ export default class MeshSystem extends System {
         super([]);
         this.gpu = gpu
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
-        this.shader = new MeshShader(gpu)
+        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
 
     }
 
@@ -22,21 +22,10 @@ export default class MeshSystem extends System {
         this._ready = true
     }
 
-    _getDeferredShader(shadingModel) {
-        switch (shadingModel) {
-            case SHADING_MODELS.FLAT:
-                return this.shader
-            case SHADING_MODELS.DETAIL:
-                return this.shader
-
-            default:
-                return this.shader
-        }
-    }
 
     execute(options, systems, data) {
         super.execute()
-        const  {
+        const {
             pointLights,
             spotLights,
             terrains,
@@ -58,25 +47,23 @@ export default class MeshSystem extends System {
             } = options
 
 
-            const shaderToUse = this._getDeferredShader(shadingModel)
-
-            shaderToUse.use()
+            this.shader.use()
             this.gpu.clearDepth(1);
             this.gBuffer.startMapping()
 
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
-                const mesh =  meshSources[current.components.MeshComponent.meshID]
+                const mesh = meshSources[current.components.MeshComponent.meshID]
 
-                if (mesh !== undefined && (!selected|| !selected.includes(current.id))) {
+                if (mesh !== undefined && (!selected || !selected.includes(current.id))) {
                     const t = current.components.TransformComponent
-                    const currentMaterialID = current.components.MaterialComponent.materialID
+                    const currentMaterial = materials[current.components.MaterialComponent.materialID]
 
-                    let mat = injectMaterial ? injectMaterial : (materials[currentMaterialID] ? materials[currentMaterialID] : this.fallbackMaterial)
-                    if(!mat || !mat.ready)
+                    let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components.MaterialComponent.overrideInjection? injectMaterial : this.fallbackMaterial
+                    if (!mat || !mat.ready)
                         mat = this.fallbackMaterial
                     MeshSystem.drawMesh(
-                        shaderToUse,
+                        this.shader,
                         this.gpu,
                         mesh,
                         camera.position,
@@ -101,10 +88,10 @@ export default class MeshSystem extends System {
         camPosition,
         viewMatrix,
         projectionMatrix,
-        transformationMatrix,
+        transformMatrix,
         material,
         normalMatrix,
-        asWireframe) {
+        indexSelected) {
 
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
@@ -113,18 +100,34 @@ export default class MeshSystem extends System {
         mesh.normalVBO.enable()
         mesh.uvVBO.enable()
         mesh.tangentVBO.enable()
+        let materialAttrs = {}
 
+        if (material) {
+            materialAttrs = {
+                pbrMaterial: {
+                    albedo: material.albedo.texture,
+                    metallic: material.metallic.texture,
+                    roughness: material.roughness.texture,
+                    normal: material.normal.texture,
+                    height: material.height.texture,
+                    ao: material.ao.texture
+                },
+                heightScale: material.parallaxHeightScale,
+                layers: material.parallaxLayers,
+                parallaxEnabled: material.parallaxEnabled,
+            }
+        }
 
-        shader
-            .bindUniforms({
-                material: material,
-                cameraVec: camPosition,
-                normalMatrix: normalMatrix
-            })
+        shader.bindForUse({
+            ...materialAttrs,
+            projectionMatrix,
+            transformMatrix,
+            viewMatrix,
+            cameraVec: camPosition,
 
-        gpu.uniformMatrix4fv(shader.transformMatrixULocation, false, transformationMatrix)
-        gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, viewMatrix)
-        gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, projectionMatrix)
+            normalMatrix,
+            indexSelected
+        })
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 

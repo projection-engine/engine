@@ -1,30 +1,29 @@
-export default class Quad{
-    constructor(gpu) {
+import {createVAO} from "../misc/utils";
+import VBO from "./VBO";
 
+export default class Quad {
+    constructor(gpu) {
         this.gpu = gpu
-        this.vertexBuffer = this.gpu.createBuffer()
-        this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
-        this.gpu.bufferData(
-            this.gpu.ARRAY_BUFFER,
+        this.vao = createVAO(gpu)
+        this.vbo = new VBO(
+            gpu,
+            0,
             new Float32Array([-1, -1, 0,
                 1, -1, 0,
                 1, 1, 0,
                 1, 1, 0,
                 -1, 1, 0,
                 -1, -1, 0]),
-            this.gpu.STATIC_DRAW
-        )
+            gpu.ARRAY_BUFFER,
+            3,
+            gpu.FLOAT)
     }
 
 
-
-    draw(positionLocation) {
-        this.gpu.enableVertexAttribArray(positionLocation)
-        this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
-        this.gpu.vertexAttribPointer(positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
-
+    draw() {
+        this.gpu.bindVertexArray(this.vao)
+        this.vbo.enable()
         this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 6);
-        this.gpu.bindTexture(this.gpu.TEXTURE_2D, null);
     }
 
 }

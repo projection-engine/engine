@@ -177,7 +177,7 @@ export default class Engine extends RenderLoop {
                 spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
                 terrains: filteredEntities.filter(e => e.components.TerrainComponent),
                 meshes: filteredEntities.filter(e => e.components.MeshComponent),
-                skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0],
+                skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0]?.components.SkyboxComponent,
                 directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
                 materials: toObject(materials),
                 meshSources: toObject(meshes),

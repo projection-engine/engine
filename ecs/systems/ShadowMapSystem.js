@@ -69,7 +69,6 @@ export default class ShadowMapSystem extends System {
         }
 
         if (shadingModel === SHADING_MODELS.DETAIL && changed) {
-            console.log('UPDATING SHADOWS')
             this.shadowMapShader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
@@ -77,7 +76,7 @@ export default class ShadowMapSystem extends System {
 
             this.gpu.clearDepth(1);
             this.shadowMapAtlas.startMapping()
-            this.gpu.cullFace(this.gpu.FRONT)
+            // this.gpu.cullFace(this.gpu.FRONT)
             for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
                 if (face < maxLights) {
                     this.gpu.viewport(
@@ -119,7 +118,7 @@ export default class ShadowMapSystem extends System {
                 this.needsGIUpdate = true
 
                 this.reflectiveShadowMapShader.use()
-                this.gpu.viewport(0, 0, 512, 512)
+
                 this.rsmFramebuffer.startMapping()
                 this._loopMeshes(meshes, injectMaterial, meshSources, meshSystem, skylight, materials, this.reflectiveShadowMapShader)
                 this.rsmFramebuffer.stopMapping()

@@ -127,7 +127,7 @@ export default class DeferredShader extends Shader {
 
             this.gpu.uniform1i(this.noGIULocation, 0)
             this.gpu.uniform1i(this.gridSizeULocation, gridSize)
-            this.gpu.uniform1f(this.indirectLightAttenuationULocation, 1)
+            this.gpu.uniform1f(this.indirectLightAttenuationULocation, indirectAttenuation)
             bindTexture(8, giFBO.redTexture, this.redSamplerULocation, this.gpu)
             bindTexture(9, giFBO.greenTexture, this.greenSamplerULocation, this.gpu)
             bindTexture(10, giFBO.blueTexture, this.blueSamplerULocation, this.gpu)

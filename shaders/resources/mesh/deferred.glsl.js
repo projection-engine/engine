@@ -1,7 +1,6 @@
 export const vertex = `#version 300 es
 #define MAX_LIGHTS 2
-
-in vec3 position;
+layout (location = 0) in vec3 position;
 
 struct DirectionalLightPOV {
     mat4 lightProjectionMatrix;
@@ -173,8 +172,8 @@ void main() {
     vec3 GI = vec3(0.);
     
     if(noGI == 0){
-        vec3 lvpIntensity = computeGIIntensity(fragPosition, N);
-        vec3 lpvRadiance = vec3(max(0.0, lvpIntensity.r), max(0.0, lvpIntensity.g), max(0.0, lvpIntensity.b)) / PI;
+        vec3 lpvIntensity = computeGIIntensity(fragPosition, N);
+        vec3 lpvRadiance = vec3(max(0.0, lpvIntensity.r), max(0.0, lpvIntensity.g), max(0.0, lpvIntensity.b)) / PI;
         GI = (lpvRadiance * .1  + lpvRadiance * albedo * ao) * indirectLightAttenuation;
     }
 

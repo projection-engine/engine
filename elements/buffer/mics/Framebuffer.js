@@ -37,18 +37,15 @@ export default class Framebuffer extends Quad{
     onBeforeDraw() {}
 
     draw(shader, autoBind=true) {
-        this.gpu.enableVertexAttribArray(shader.positionLocation)
-        this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, this.vertexBuffer)
-        this.gpu.vertexAttribPointer(shader.positionLocation, 3, this.gpu.FLOAT, false, 0, 0)
+        if(shader) {
+            if (autoBind)
+                bindTexture(0, this.frameBufferTexture, shader.textureULocation, this.gpu)
 
-
-        if(autoBind)
-            bindTexture(0, this.frameBufferTexture, shader.textureULocation, this.gpu)
-
-        this.onBeforeDraw(shader)
-        this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 6);
-
-        this.gpu.bindTexture(this.gpu.TEXTURE_2D, null);
-
+            this.onBeforeDraw(shader)
+            super.draw()
+            this.gpu.bindTexture(this.gpu.TEXTURE_2D, null);
+        }
+        else
+            super.draw()
     }
 }

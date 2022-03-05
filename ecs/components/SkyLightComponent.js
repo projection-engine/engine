@@ -3,25 +3,29 @@ import {mat4} from "gl-matrix";
 import DirectionalLightComponent from "./DirectionalLightComponent";
 
 export default class SkylightComponent extends DirectionalLightComponent {
-    _rsmResolution = 512
-    _lvpSamples = 32
+    rsmResolution = 512
+    samples = 32
+    indirectAttenuation = 1
 
     constructor(id) {
         super(id);
         this.name = 'SkylightComponent'
     }
+    get attenuation(){
+        return this.indirectAttenuation
 
-    get rsmResolution(){
-        return this._rsmResolution
     }
-    set rsmResolution(data){
-        this._rsmResolution = data
+    get lpvSamples(){
+        return this.samples
+
     }
-    get lvpSamples(){
-        return this._lvpSamples
+    set attenuation(data){
+        this.indirectAttenuation = data
+        this._changed = true
     }
-    set lvpSamples(data){
-        this._lvpSamples = data
+    set lpvSamples(data){
+        this.samples = data
+        this._changed = true
     }
 
 }

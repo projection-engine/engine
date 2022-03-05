@@ -5,9 +5,8 @@ export const vertex = `#version 300 es
 #define SH_cosLobe_C0 0.886226925
 #define SH_cosLobe_C1 1.02332671
 #define CELLSIZE 2.25
-#define PI 3.1415926
-#define DEG_TO_RAD PI / 180.0
-
+ 
+ 
 uniform int u_texture_size;
 uniform int u_rsm_size;
 uniform vec3 u_light_direction;
@@ -60,7 +59,7 @@ vec2 getRenderingTexCoords(ivec3 gridCell)
 
 float calculateSurfelAreaLight(vec3 lightPos)
 {
-    float fov = .4159;
+    float fov = 0.785398;
     float aspect = float(u_rsm_size / u_rsm_size);
     float tan_fov_x_half = tan(fov);
     float tan_fov_y_half = tan(fov) * aspect;

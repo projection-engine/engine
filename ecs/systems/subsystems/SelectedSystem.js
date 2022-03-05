@@ -1,42 +1,40 @@
 import System from "../../basic/System";
-import MeshShader from "../../../shaders/classes/mesh/MeshShader";
 import MeshSystem from "../MeshSystem";
+import Shader from "../../../utils/workers/Shader";
+import * as shaderCode from "../../../shaders/resources/mesh/meshSelected.glsl";
 
 export default class SelectedSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.meshShader = new MeshShader(gpu, true)
+        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
     }
 
     execute(meshes, meshSources, selected, camera) {
         super.execute()
 
         if (selected) {
+            this.shader.use()
             this.gpu.disable(this.gpu.DEPTH_TEST)
             for (let i = 0; i < selected.length; i++) {
                 const el = meshes.find(m => m.id === selected[i])
 
                 if (el)
-                    this._drawSelected(meshSources[el.components.MeshComponent.meshID], camera, el, i)
+                    MeshSystem.drawMesh(
+                        this.shader,
+                        this.gpu,
+                        meshSources[el.components.MeshComponent.meshID],
+                        camera.position,
+                        camera.viewMatrix,
+                        camera.projectionMatrix,
+                        el.components.TransformComponent.transformationMatrix,
+                        undefined,
+                        el.components.MeshComponent.normalMatrix,
+                        i)
+
+
             }
             this.gpu.enable(this.gpu.DEPTH_TEST)
         }
-    }
-
-    _drawSelected(mesh, camera, element, index) {
-        this.meshShader.use()
-        this.gpu.uniform1i(this.meshShader.indexULocation, index)
-
-        MeshSystem.drawMesh(
-            this.meshShader,
-            this.gpu,
-            mesh,
-            camera.position,
-            camera.viewMatrix,
-            camera.projectionMatrix,
-            element.components.TransformComponent.transformationMatrix,
-            {},
-            element.components.MeshComponent.normalMatrix)
     }
 }

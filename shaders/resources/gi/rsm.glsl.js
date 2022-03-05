@@ -8,8 +8,7 @@ layout (location = 4) in vec3 tangentVec;
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
-
-out vec3 vPosition;
+ 
 out vec3 vWorldSpacePosition;
 out mat3 toTangentSpace;
 out vec2 texCoord;
@@ -27,12 +26,7 @@ void main() {
     
     toTangentSpace = mat3(T, B, N);
     
-   
-    vPosition = p.xyz / p.w ;
-    
-    
     vWorldSpacePosition = worldSpacePos.xyz;
-    
     
     gl_Position = p;
 }
@@ -41,7 +35,7 @@ void main() {
 export const fragment = `#version 300 es
 precision mediump  float;
 
-in vec3 vPosition;
+ 
 in vec3 vWorldSpacePosition;
 in vec2 texCoord;
 in mat3 toTangentSpace;
@@ -56,11 +50,13 @@ layout (location = 2) out vec4 rsmWorld;
 
 
 void main(void){
- 
+    
       
     rsmNormal =  vec4(normalize(toTangentSpace * ((texture(normalSampler, texCoord).xyz * 2.0)- 1.0)), 1.0);
     rsmFlux = vec4((lightColor * texture(albedoSampler, texCoord).rgb), 1.0);
     rsmWorld = vec4(vec3(vWorldSpacePosition.xyz), 1.0);
+    
+ 
 }
 `
 

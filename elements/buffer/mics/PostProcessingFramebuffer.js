@@ -42,9 +42,6 @@ export default class PostProcessingFramebuffer extends Framebuffer {
         )
     }
 
-    stopMapping() {
-        super.stopMapping();
-    }
 
     onBeforeDraw(shader) {
 

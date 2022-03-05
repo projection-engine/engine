@@ -1,5 +1,5 @@
 import CubeMapShader from "../../shaders/classes/misc/CubeMapShader";
-import {createTexture} from "../../utils/misc/utils";
+import {createTexture, createVAO} from "../../utils/misc/utils";
 import cube from "../../assets/cube.json";
 import Component from "../basic/Component";
 import CubeMapInstance from "../../elements/instances/CubeMapInstance";
@@ -18,10 +18,6 @@ export default class SkyboxComponent extends Component {
         this.gpu = gpu
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
         this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
-
-
-        this._vertexBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
-
     }
 
     get imageID() {
@@ -70,7 +66,9 @@ export default class SkyboxComponent extends Component {
         this._initialized = true
     }
 
-
+    get ready(){
+        return this._initialized
+    }
     get cubeMapPrefiltered() {
         return this._cubeMap?.prefiltered
     }
@@ -83,20 +81,4 @@ export default class SkyboxComponent extends Component {
         return this._irradianceMap?.texture
     }
 
-    draw(shader, projectionMatrix, staticViewMatrix) {
-
-        if (this._initialized) {
-            shader.use()
-
-            this._vertexBuffer.enable()
-            this.gpu.activeTexture(this.gpu.TEXTURE0)
-            this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this.cubeMap)
-            this.gpu.uniform1i(shader.textureULocation, 0)
-
-            this.gpu.uniformMatrix4fv(shader.viewMatrixULocation, false, staticViewMatrix)
-            this.gpu.uniformMatrix4fv(shader.projectionMatrixULocation, false, projectionMatrix)
-            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
-            this.gpu.bindBuffer(this.gpu.ARRAY_BUFFER, null)
-        }
-    }
 }

@@ -1,5 +1,4 @@
 import System from "../../basic/System";
-import MeshShader from "../../../shaders/classes/mesh/MeshShader";
 import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
 import DeferredShader from "../../../shaders/classes/mesh/DeferredShader";
 import FlatDeferredShader from "../../../shaders/classes/mesh/FlatDeferredShader";
@@ -15,8 +14,6 @@ export default class DeferredSystem extends System {
         this.gpu = gpu
         this.deferredShader = new DeferredShader(gpu)
         this.flatDeferredShader = new FlatDeferredShader(gpu)
-        this.meshShader = new MeshShader(gpu, true)
-
 
         const brdf = new Image()
         brdf.src = brdfImg
@@ -65,15 +62,14 @@ export default class DeferredSystem extends System {
         if(skylight)
             dirLights.push(skylight)
 
-
         deferred.use()
         deferred.bindUniforms({
-            irradianceMap: skyboxElement?.components.SkyboxComponent.irradianceMap,
+            irradianceMap: skyboxElement?.irradianceMap,
             lights: pointLights,
             directionalLights: dirLights,
             giFBO,
             gridSize: giGridSize,
-            indirectAttenuation: 1.0, // TODO
+            indirectAttenuation: skylight?.attenuation,
             shadowMap: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
             shadowMapResolution: shadowMapSystem?.maxResolution,
             shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,
@@ -84,7 +80,7 @@ export default class DeferredSystem extends System {
             gDepthTexture: deferredSystem.gBuffer.gDepthTexture,
             cameraVec: camera.position,
             BRDF: this.BRDF,
-            closestCubeMap: skyboxElement?.components.SkyboxComponent.cubeMapPrefiltered,
+            closestCubeMap: skyboxElement?.cubeMapPrefiltered,
             ambientOcclusion: aoSystem ? aoSystem.aoBlurBuffer.frameBufferTexture : undefined
             //   previousFrame: this.screenSpace.frameBufferTexture
         })
