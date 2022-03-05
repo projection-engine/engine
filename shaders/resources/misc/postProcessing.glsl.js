@@ -70,7 +70,6 @@ void main() {
     fragment = vec3(1.0) - exp(-fragment * exposure);
     fragment = pow(fragment, vec3(1.0/gamma));
 
-//    float testLum = (lumaTL + lumaTR + lumaBR + lumaBL + lumaM) * 0.2;
     // GAMMA
     finalColor = vec4(fragment, 1.0);
 }

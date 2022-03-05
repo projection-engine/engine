@@ -10,8 +10,10 @@ export default class SkyboxComponent extends Component {
     _cubeMap
     _irradianceMap
     _initialized = false
-
-    _imageID = undefined;
+    _resolution = 512
+    gamma =1
+    exposure =1
+    imageID = undefined
 
     constructor(id, gpu) {
         super(id, 'SkyboxComponent');
@@ -20,20 +22,18 @@ export default class SkyboxComponent extends Component {
         this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
     }
 
-    get imageID() {
-        return this._imageID
+    get resolution(){
+        return this._resolution
     }
 
-    set imageID(data) {
-        this._imageID = data
+    set resolution(data){
+        console.log(data)
+        this._resolution = data
+        this._compile()
     }
 
     set hdrTexture({blob, imageID}) {
-
-        this._imageID = imageID
-        const baseShader = new CubeMapShader(this.gpu, 0)
-        const irradianceShader = new CubeMapShader(this.gpu, 1)
-
+        this.imageID = imageID
         this._hdrTexture = createTexture(
             this.gpu,
             blob.width,
@@ -48,22 +48,7 @@ export default class SkyboxComponent extends Component {
             this.gpu.CLAMP_TO_EDGE,
             this.gpu.CLAMP_TO_EDGE
         )
-
-        this._cubeMap = new CubeMapInstance(baseShader, this.gpu, 1024, (c) => {
-            this.gpu.activeTexture(this.gpu.TEXTURE0)
-
-            this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
-            this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-        }, [0, 0, 0], true)
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-        this._irradianceMap = new CubeMapInstance(
-            irradianceShader,
-            this.gpu, 32, (c) => {
-                this.gpu.activeTexture(this.gpu.TEXTURE0)
-                this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
-                this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-            }, [0, 0, 0], false, true)
-        this._initialized = true
+        this._compile()
     }
 
     get ready(){
@@ -81,4 +66,24 @@ export default class SkyboxComponent extends Component {
         return this._irradianceMap?.texture
     }
 
+    _compile( ){
+        this._initialized = false
+        const baseShader = new CubeMapShader(this.gpu, 0)
+        const irradianceShader = new CubeMapShader(this.gpu, 1)
+
+        this._cubeMap = new CubeMapInstance(baseShader, this.gpu, this._resolution, (c) => {
+            this.gpu.activeTexture(this.gpu.TEXTURE0)
+            this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
+            this.gpu.uniform1i(c.equirectangularMapULocation, 0)
+        }, [0, 0, 0], true)
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+        this._irradianceMap = new CubeMapInstance(
+            irradianceShader,
+            this.gpu, 32, (c) => {
+                this.gpu.activeTexture(this.gpu.TEXTURE0)
+                this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
+                this.gpu.uniform1i(c.equirectangularMapULocation, 0)
+            }, [0, 0, 0], false, true)
+        this._initialized = true
+    }
 }

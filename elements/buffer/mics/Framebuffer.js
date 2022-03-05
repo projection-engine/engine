@@ -30,7 +30,6 @@ export default class Framebuffer extends Quad{
 
         if (clear) {
             this.gpu?.viewport(0, 0, this.gpu.drawingBufferWidth, this.gpu.drawingBufferHeight);
-            this.gpu?.clear(this.gpu?.DEPTH_BUFFER_BIT)
         }
     }
 

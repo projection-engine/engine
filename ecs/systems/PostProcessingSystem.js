@@ -62,16 +62,23 @@ export default class PostProcessingSystem extends System {
             gridVisibility,
             shadingModel,
             noRSM,
+            gamma,
+            exposure
         } = options
 
         if (!noRSM && systems[SYSTEMS.SHADOWS].needsGIUpdate && skylight)
             this.GISystem.execute(systems, skylight)
 
+
+
+
+
+
         this.postProcessing.startMapping()
         this.skyboxSystem.execute(skybox, camera)
         this.gridSystem.execute(gridVisibility, camera)
-        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
 
+        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
@@ -95,14 +102,15 @@ export default class PostProcessingSystem extends System {
         shaderToApply.use()
         shaderToApply.bindForUse({
             uSampler: this.postProcessing.frameBufferTexture,
-            gamma: 2.2,
-            exposure: 2,
+            gamma: gamma ? gamma : 1,
+            exposure: exposure ? exposure : 2,
             FXAASpanMax: 8,
             FXAAReduceMin: 1 / 128,
             inverseFilterTextureSize: [1 / this.gpu.canvas.width, 1 / this.gpu.canvas.height, 0],
             FXAAReduceMul: 1 / 8
         })
         this.postProcessing.draw()
+
 
         //
         // this.gpu.viewport(0, 0, this.postProcessing.width, this.postProcessing.height);

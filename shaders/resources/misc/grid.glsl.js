@@ -52,7 +52,7 @@ vec4 grid(vec3 fragPos3D, float scale, bool lighter,  vec3 verticalAxisColor, ve
     float line = min(grid.x, grid.y);
     float minimumz = min(derivative.y, 1.);
     float minimumx = min(derivative.x, 1.);
-    float baseColor = 0.1;
+    float baseColor = 0.2;
     vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(lighter ?  line : line - .5, 1.0));
     
     float comparison = .3;
