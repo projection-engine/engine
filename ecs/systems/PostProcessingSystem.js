@@ -106,7 +106,7 @@ export default class PostProcessingSystem extends System {
             exposure: exposure ? exposure : 2,
             FXAASpanMax: 8,
             FXAAReduceMin: 1 / 128,
-            inverseFilterTextureSize: [1 / this.gpu.canvas.width, 1 / this.gpu.canvas.height, 0],
+            inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
             FXAAReduceMul: 1 / 8
         })
         this.postProcessing.draw()
