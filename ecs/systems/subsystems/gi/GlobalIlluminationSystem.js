@@ -1,5 +1,5 @@
 import System from "../../../basic/System";
-import RSMSamplerShader from "../../../../shaders/classes/gi/RSMSamplerShader";
+
 import SYSTEMS from "../../../../utils/misc/SYSTEMS";
 import PropagationSystem from "./PropagationSystem";
 import InjectionSystem from "./InjectionSystem";
@@ -7,7 +7,7 @@ import InjectionSystem from "./InjectionSystem";
 export default class GlobalIlluminationSystem extends System {
     constructor(gpu) {
         super([]);
-        this.shader = new RSMSamplerShader(gpu)
+
         this.gpu = gpu
         this.samplesAmmount = 32
         this.injectionSystem = new InjectionSystem(gpu)

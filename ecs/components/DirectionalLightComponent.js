@@ -93,10 +93,10 @@ export default class DirectionalLightComponent extends Component {
 
 
     _update() {
-        this.lightView = Array.from(mat4.create());
+        this.lightView = []
         mat4.lookAt(this.lightView, this._direction, [0, 0, 0], [0, 1, 0])
 
-        this.lightProjection = Array.from(mat4.create());
+        this.lightProjection = []
         mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar);
 
         this._changed = true

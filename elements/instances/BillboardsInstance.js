@@ -1,11 +1,14 @@
-import BillboardShader from "../../shaders/classes/misc/BillboardShader";
+
 import {bindTexture, createVAO} from "../../utils/misc/utils";
 import VBO from "../../utils/workers/VBO";
+import * as shaderCode from '../../shaders/resources/misc/billboard.glsl'
+import Shader from "../../utils/workers/Shader";
+
 
 export default class BillboardsInstance {
     constructor(gpu) {
         this.gpu = gpu
-        this.shader = new BillboardShader(gpu)
+        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.vao = createVAO(gpu)
         this.vertexVBO = new VBO(gpu, 0, new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0]), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false)
 
@@ -39,21 +42,17 @@ export default class BillboardsInstance {
     }
 
     draw(transformations, texture, camera) {
-
         this.shader.use()
-
         this.gpu.bindVertexArray(this.vao)
-
         this.vertexVBO.enable()
-
         this._prepareTransforms(new Float32Array(transformations.flat()))
 
-
-        this.gpu.uniform3fv(this.shader.cameraULocation, camera.position)
-        this.gpu.uniformMatrix4fv(this.shader.projectionMatrixULocation, false, camera.projectionMatrix)
-        this.gpu.uniformMatrix4fv(this.shader.viewMatrixULocation, false, camera.viewMatrix)
-
-        bindTexture(0, texture, this.shader.imageULocation, this.gpu)
+        this.shader.bindForUse({
+            cameraPosition: camera.position,
+            iconSampler: texture,
+            viewMatrix: camera.viewMatrix,
+            projectionMatrix: camera.projectionMatrix
+        })
 
         this.gpu.depthRange(0, 0.01)
         this.gpu.drawArraysInstanced(this.gpu.TRIANGLES, 0, 6, transformations.length)

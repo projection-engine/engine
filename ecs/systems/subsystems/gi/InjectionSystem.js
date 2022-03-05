@@ -4,7 +4,6 @@ import Shader from "../../../../utils/workers/Shader";
 import * as geometryShader from '../../../../shaders/resources/gi/geometryInjection.glsl'
 import GIFramebuffer from "../../../../elements/buffer/gi/GIFramebuffer";
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
-import LightInjectionShader from "../../../../shaders/classes/gi/LightInjectionShader";
 
 export default class InjectionSystem extends System {
     size = 512;
@@ -28,6 +27,7 @@ export default class InjectionSystem extends System {
         this.gpu.disable(this.gpu.DEPTH_TEST);
         this.gpu.enable(this.gpu.BLEND);
         this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
+        this.lightInjectionShader.use()
         this.lightInjectionShader.bindForUse({
             u_rsm_flux: rsmFBO.rsmFluxTexture,
             u_rsm_world_positions: rsmFBO.rsmWorldPositionTexture,
@@ -40,6 +40,7 @@ export default class InjectionSystem extends System {
 
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.geometryInjectionFramebuffer.frameBufferObject)
         this.gpu.viewport(0, 0, this.framebufferSize ** 2, this.framebufferSize)
+        this.geometryInjectionShader.use()
         this.geometryInjectionShader.bindForUse({
             u_rsm_flux: rsmFBO.rsmFluxTexture,
             u_rsm_world_positions: rsmFBO.rsmWorldPositionTexture,

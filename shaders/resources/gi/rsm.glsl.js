@@ -56,10 +56,10 @@ layout (location = 2) out vec4 rsmWorld;
 
 
 void main(void){
-    vec3 diffuse = texture(albedoSampler, texCoord).rgb;
+ 
       
     rsmNormal =  vec4(normalize(toTangentSpace * ((texture(normalSampler, texCoord).xyz * 2.0)- 1.0)), 1.0);
-    rsmFlux = vec4((lightColor * diffuse), 1.0);
+    rsmFlux = vec4((lightColor * texture(albedoSampler, texCoord).rgb), 1.0);
     rsmWorld = vec4(vec3(vWorldSpacePosition.xyz), 1.0);
 }
 `

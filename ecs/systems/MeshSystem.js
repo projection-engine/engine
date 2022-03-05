@@ -4,7 +4,6 @@ import GBuffer from "../../elements/buffer/mics/GBuffer";
 import MeshShader from "../../shaders/classes/mesh/MeshShader";
 import MaterialInstance from "../../elements/instances/MaterialInstance";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
-import WireframeShader from "../../shaders/classes/misc/WireframeShader";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -14,7 +13,7 @@ export default class MeshSystem extends System {
         this.gpu = gpu
         this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
         this.shader = new MeshShader(gpu)
-        this.wireframeShader = new WireframeShader(gpu)
+
     }
 
     async initializeTextures() {
@@ -29,8 +28,7 @@ export default class MeshSystem extends System {
                 return this.shader
             case SHADING_MODELS.DETAIL:
                 return this.shader
-            case SHADING_MODELS.WIREFRAME:
-                return this.wireframeShader
+
             default:
                 return this.shader
         }

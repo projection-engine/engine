@@ -9,20 +9,20 @@ import BillboardSystem from "./subsystems/BillboardSystem";
 import SelectedSystem from "./subsystems/SelectedSystem";
 import SkyboxSystem from "./subsystems/SkyboxSystem";
 import Quad from "../../utils/workers/Quad";
-import ShadowMapDebugShader from "../../shaders/classes/shadows/ShadowMapDebugShader";
 import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
-
+import Shader from "../../utils/workers/Shader";
+import * as debug from '../../shaders/resources/shadows/shadow.glsl'
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
 
-        this.screenSpace = new ScreenSpaceBuffer(gpu, resolutionMultiplier)
+        // this.screenSpace = new ScreenSpaceBuffer(gpu, resolutionMultiplier)
         this.postProcessing = new PostProcessingFramebuffer(gpu, resolutionMultiplier)
 
-        this.shadowMapDebugShader = new ShadowMapDebugShader(gpu)
-        this.quad = new Quad(gpu)
+        this.shadowMapDebugShader = new Shader(debug.debugVertex, debug.debugFragment, gpu)
+        // this.quad = new Quad(gpu)
 
         this.shader = new PostProcessingShader(gpu)
         this.noFxaaShader = new PostProcessingShader(gpu, true)
@@ -103,7 +103,7 @@ export default class PostProcessingSystem extends System {
         //
         // bindTexture(
         //     0,
-        //     shadowsSystem.rsmFramebuffer.rsmFluxTexture,
+        //     systems[SYSTEMS.SHADOWS].rsmFramebuffer.rsmFluxTexture,
         //     this.shadowMapDebugShader.shadowMapULocation,
         //     this.gpu)
         //

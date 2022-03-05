@@ -1,5 +1,5 @@
 import System from "../../../basic/System";
-import LightPropagationShader from "../../../../shaders/classes/gi/LightPropagationShader";
+
 import GIFramebuffer from "../../../../elements/buffer/gi/GIFramebuffer";
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
 import {bindTexture, createVAO} from "../../../../utils/misc/utils";
@@ -11,9 +11,6 @@ export default class PropagationSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        //
-        // this.size = size
-        // this.framebufferSize = framebufferSize
 
         this.shader = new Shader(vertex, fragment, gpu)
 
@@ -28,8 +25,7 @@ export default class PropagationSystem extends System {
                 positionData[positionIndex++] = y;
             }
         }
-        const s = new LightPropagationShader(this.gpu)
-        this.program = s.program
+
         this.propagation = GlobalIlluminationSystem.createPointsData(positionData, this.gpu)
         this.ready = true
     }
@@ -50,6 +46,7 @@ export default class PropagationSystem extends System {
         this.gpu.enable(this.gpu.BLEND);
         this.gpu.blendFunc(this.gpu.ONE, this.gpu.ONE);
 
+        this.shader.use()
         for (let i = 0; i < iterations; i++) {
             lpvIndex = i & 1;
             const readLPV = LPVS[lpvIndex];

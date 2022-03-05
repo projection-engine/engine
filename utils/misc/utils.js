@@ -98,8 +98,8 @@ export function enableBasics(gpu) {
     gpu?.depthFunc(gpu?.LESS);
 
 
-    gpu?.enable(gpu?.STENCIL_TEST)
-    gpu?.stencilOp(gpu?.KEEP, gpu?.KEEP, gpu?.REPLACE)
+    // gpu?.enable(gpu?.STENCIL_TEST)
+    // gpu?.stencilOp(gpu?.KEEP, gpu?.KEEP, gpu?.REPLACE)
 
     gpu?.frontFace(gpu?.CCW);
 

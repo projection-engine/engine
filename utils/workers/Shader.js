@@ -84,10 +84,8 @@ export default class Shader {
     }
 
     bindForUse(data) {
-        this.gpu.useProgram(this.program)
         let currentSamplerIndex = 0
-        if(this.uniforms.length < 8)
-            console.log(data, this.uniforms)
+        console.log(data, this.uniforms)
         for (let v = 0; v < this.uniforms.length; v++) {
             const current = this.uniforms[v]
             switch (current.type){
@@ -103,7 +101,7 @@ export default class Shader {
                     break
                 case 'mat3':
                 case 'mat4':
-                    this.gpu[TYPES[current.type]](data[current.name], false, current.uLocation)
+                    this.gpu[TYPES[current.type]](current.uLocation, false, data[current.name])
                     break
                 case 'samplerCube':
                     this.gpu.activeTexture(this.gpu.TEXTURE0 + currentSamplerIndex)
