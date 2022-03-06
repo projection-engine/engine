@@ -110,7 +110,8 @@ export default class MeshSystem extends System {
                     roughness: material.roughness.texture,
                     normal: material.normal.texture,
                     height: material.height.texture,
-                    ao: material.ao.texture
+                    ao: material.ao.texture,
+                    emissive: material.emissive.texture
                 },
                 heightScale: material.parallaxHeightScale,
                 layers: material.parallaxLayers,

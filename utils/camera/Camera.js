@@ -71,6 +71,10 @@ export default class Camera {
     get projectionMatrix() {
         return Array.from(this._projectionMatrix)
     }
+    set position(data) {
+        this._position = data
+    }
+
     get position() {
         return this._position
     }

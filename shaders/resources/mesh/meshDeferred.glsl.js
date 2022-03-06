@@ -7,6 +7,7 @@ layout (location = 4) in vec3 tangentVec;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
+uniform mat3 normalMatrix;
 uniform mat4 projectionMatrix;
 uniform vec3 cameraVec;
 
@@ -16,24 +17,24 @@ out vec2 texCoord;
 out mat3 toTangentSpace;
 out vec3 normalVec;
 
-out vec3 viewPosition;
-out vec3 fragPosition;
+out vec3 viewDirection;
+ 
 
 void main(){
 
 
     vPosition =  transformMatrix *   vec4(position, 1.0);
     
-    vec3 T = normalize(vec3(transformMatrix * vec4(normalize(tangentVec), .0)));
-   vec3 N =  normalize(vec3(transformMatrix * vec4(normal, .0)));
+    vec3 T = normalize( normalMatrix  * normalize(tangentVec));
+    vec3 N =  normalize(normalMatrix * normal);
     vec3 biTangent = cross(N, tangentVec); 
-    vec3 B =  normalize(vec3(transformMatrix * vec4(biTangent, .0)));
+    vec3 B =  normalize(normalMatrix * biTangent);
     B = dot(biTangent, B)  > 0. ? -B : B;
     
     toTangentSpace = mat3(T, B, N);
     
-    viewPosition = toTangentSpace * cameraVec;
-    fragPosition = toTangentSpace *  vPosition.xyz;
+    viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
+   
 
     texCoord = uvTexture;
    
@@ -48,9 +49,8 @@ in vec4 vPosition;
 in highp vec2 texCoord;
 in mat3 toTangentSpace;
 
-in vec3 viewPosition;
-in vec3 fragPosition;
-
+in vec3 viewDirection;
+ 
 uniform int parallaxEnabled;
 uniform float heightScale;
 uniform float layers;
@@ -62,6 +62,7 @@ struct PBR {
     sampler2D normal;
     sampler2D height;
     sampler2D ao;
+    sampler2D emissive;
 };
 uniform PBR pbrMaterial;
 
@@ -97,8 +98,8 @@ vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap, int type
                          + layer_depth;
             float weight = next / (next - prev);
             vec2 UVs = mix(cur_uv, prev_uv, weight);
-            if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
-                discard;
+//            if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
+//                discard;
             return UVs;
     }
     else{
@@ -110,28 +111,26 @@ vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap, int type
 
 void main(){
 
-    gPosition = vec4(1.0);
     gBehaviour = vec4(1.0);
-    gAlbedo = vec4(1.0);
-    gNormal = vec4(1.0);
+ 
+   
     gPosition = vPosition;
     
-    vec2 UVs = parallaxMapping(texCoord,  normalize(fragPosition- viewPosition ), pbrMaterial.height, parallaxEnabled);
+    vec2 UVs = parallaxMapping(texCoord,  viewDirection, pbrMaterial.height, parallaxEnabled);
    
-
     vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);
     if(albedoTexture.a <= 0.1)
         discard;
         
-    gAlbedo.rgb = albedoTexture.rgb;
+    gAlbedo = vec4(albedoTexture.rgb, 1.);
+ 
+    gBehaviour = vec4(
+        texture(pbrMaterial.ao, UVs).r,
+        texture(pbrMaterial.roughness, UVs).r,
+        texture(pbrMaterial.metallic, UVs).r,
+        1.
+    );
     
-    gAlbedo.a = 1.0;
-
-    gBehaviour.r = texture(pbrMaterial.ao, UVs).r;
-    gBehaviour.g = texture(pbrMaterial.roughness, UVs).r;
-    gBehaviour.b = texture(pbrMaterial.metallic, UVs).r;
-
-
     gNormal = vec4(normalize(toTangentSpace * ((texture(pbrMaterial.normal, UVs).xyz * 2.0)- 1.0)), 1.0);
 
 }

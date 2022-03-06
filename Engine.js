@@ -69,7 +69,9 @@ export default class Engine extends RenderLoop {
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }
-
+    get canvas(){
+        return this.gpu.canvas
+    }
     set fov(data) {
         this._fov = data
         this.camera.fov = data

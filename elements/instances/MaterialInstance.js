@@ -24,7 +24,8 @@ export default class MaterialInstance {
         roughness = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
         height = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
-        ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)')
+        ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
+        emissive = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)')
     ) {
 
         if(!this._initializing) {
@@ -59,6 +60,9 @@ export default class MaterialInstance {
 
             texture = await base64ToBuffer(ao, sharedImg)
             this.ao = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+
+            texture = await base64ToBuffer(emissive, sharedImg)
+            this.emissive = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
 
             this._ready = true
