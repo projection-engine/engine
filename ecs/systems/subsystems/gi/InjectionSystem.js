@@ -1,5 +1,5 @@
 import System from "../../../basic/System";
-import {vertex, fragment} from '../../../../shaders/resources/gi/lightInjection.glsl'
+import {fragment, vertex} from '../../../../shaders/resources/gi/lightInjection.glsl'
 import Shader from "../../../../utils/workers/Shader";
 import * as geometryShader from '../../../../shaders/resources/gi/geometryInjection.glsl'
 import GIFramebuffer from "../../../../elements/buffer/gi/GIFramebuffer";

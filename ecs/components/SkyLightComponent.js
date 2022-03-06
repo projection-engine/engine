@@ -1,5 +1,3 @@
-import Component from "../basic/Component";
-import {mat4} from "gl-matrix";
 import DirectionalLightComponent from "./DirectionalLightComponent";
 
 export default class SkylightComponent extends DirectionalLightComponent {

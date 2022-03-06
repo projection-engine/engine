@@ -2,9 +2,9 @@ import System from "../../../basic/System";
 
 import GIFramebuffer from "../../../../elements/buffer/gi/GIFramebuffer";
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
-import {bindTexture, createVAO} from "../../../../utils/misc/utils";
-import {vertex, fragment} from '../../../../shaders/resources/gi/lightPropagation.glsl'
+import {fragment, vertex} from '../../../../shaders/resources/gi/lightPropagation.glsl'
 import Shader from "../../../../utils/workers/Shader";
+
 export default class PropagationSystem extends System {
     size =  512;
     framebufferSize =  32;

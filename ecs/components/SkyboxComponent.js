@@ -1,9 +1,7 @@
 import CubeMapShader from "../../shaders/classes/misc/CubeMapShader";
-import {createTexture, createVAO} from "../../utils/misc/utils";
-import cube from "../../assets/cube.json";
+import {createTexture} from "../../utils/misc/utils";
 import Component from "../basic/Component";
 import CubeMapInstance from "../../elements/instances/CubeMapInstance";
-import VBO from "../../utils/workers/VBO";
 
 export default class SkyboxComponent extends Component {
     _hdrTexture
