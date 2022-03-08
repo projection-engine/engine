@@ -49,12 +49,15 @@ export default class ShadowMapSystem extends System {
             skylight
         } = data
 
-        const {
+        let {
             shadingModel,
-            injectMaterial
+            injectMaterial,
+            dataChanged,
+            setDataChanged
         } = options
 
-        let changed = systems[SYSTEMS.TRANSFORMATION].changed
+
+        let changed = systems[SYSTEMS.TRANSFORMATION].changed || dataChanged
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i].components.DirectionalLightComponent
             changed = changed || current.changed
@@ -69,6 +72,8 @@ export default class ShadowMapSystem extends System {
         }
 
         if (shadingModel === SHADING_MODELS.DETAIL && changed) {
+            if(dataChanged)
+                setDataChanged()
             this.shadowMapShader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0

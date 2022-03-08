@@ -16,6 +16,7 @@ import PostProcessingSystem from "./ecs/systems/PostProcessingSystem";
 import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
 import TransformSystem from "./ecs/systems/TransformSystem";
 import SYSTEMS from "./utils/misc/SYSTEMS";
+import MATERIAL_TYPES from "./utils/misc/MATERIAL_TYPES";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -69,9 +70,11 @@ export default class Engine extends RenderLoop {
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }
-    get canvas(){
+
+    get canvas() {
         return this.gpu.canvas
     }
+
     set fov(data) {
         this._fov = data
         this.camera.fov = data
@@ -164,7 +167,7 @@ export default class Engine extends RenderLoop {
     }
 
     start(entities, materials, meshes, params) {
-        if(!this._inExecution){
+        if (!this._inExecution) {
             this._inExecution = true
             this.cameraEvents.startTracking()
             this.gpu?.enable(this.gpu.CULL_FACE)
@@ -173,11 +176,27 @@ export default class Engine extends RenderLoop {
 
 
             const filteredEntities = entities.filter(e => e.active)
-
+            console.log({
+                translucentMeshes: toObject(filteredEntities.filter(e => {
+                    if (e.components.MaterialComponent) {
+                        const material = materials.find(m => m.id === e.components.MaterialComponent.materialID)
+                        return material && material.type === MATERIAL_TYPES.TRANSPARENT
+                    } else
+                        return false
+                })),
+            },
+                materials)
             const data = {
                 pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
                 spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
                 terrains: filteredEntities.filter(e => e.components.TerrainComponent),
+                translucentMeshes: toObject(filteredEntities.filter(e => {
+                    if (e.components.MaterialComponent) {
+                        const material = materials.find(m => m.id === e.components.MaterialComponent.materialID)
+                        return material && material.type === MATERIAL_TYPES.TRANSPARENT
+                    } else
+                        return false
+                })),
                 meshes: filteredEntities.filter(e => e.components.MeshComponent),
                 skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0]?.components.SkyboxComponent,
                 directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
@@ -187,7 +206,7 @@ export default class Engine extends RenderLoop {
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
             }
             const systems = Object.keys(this._systems).sort()
-
+            this._changed = true
             super.start((timestamp) => {
 
                 this.camera.updatePlacement()
@@ -201,6 +220,10 @@ export default class Engine extends RenderLoop {
                                 clicked: this.data.clicked,
                                 setClicked: e => {
                                     this.data.clicked = e
+                                },
+                                dataChanged: this._changed,
+                                setDataChanged: () => {
+                                    this._changed = false
                                 },
                                 currentCoords: this.data.currentCoord,
                                 camera: this.camera,

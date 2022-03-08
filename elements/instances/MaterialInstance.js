@@ -1,5 +1,6 @@
 import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../../../workers/ImageProcessor";
+import MATERIAL_TYPES from "../../utils/misc/MATERIAL_TYPES";
 
 export default class MaterialInstance {
     _ready = false
@@ -9,13 +10,16 @@ export default class MaterialInstance {
         id,
         parallax = 0,
         heightScale = 0,
-        parallaxLayers = 0
+        parallaxLayers = 0,
+        type
     ) {
         this.id = id
         this.gpu = gpu
         this.parallaxEnabled = parallax
         this.parallaxHeightScale = heightScale
         this.parallaxLayers = parallaxLayers
+
+        this.type = type
     }
 
     async initializeTextures(
@@ -25,7 +29,10 @@ export default class MaterialInstance {
         normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
         height = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
         ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
-        emissive = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)')
+        emissive = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
+        opacity,
+        subSurface
+
     ) {
 
         if(!this._initializing) {
@@ -64,6 +71,10 @@ export default class MaterialInstance {
             texture = await base64ToBuffer(emissive, sharedImg)
             this.emissive = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
+            if(this.type === MATERIAL_TYPES.TRANSPARENT){
+                texture = await base64ToBuffer(opacity ? opacity : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), sharedImg)
+                this.opacity = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+            }
 
             this._ready = true
         }

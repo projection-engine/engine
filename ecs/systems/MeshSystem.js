@@ -34,7 +34,8 @@ export default class MeshSystem extends System {
             directionalLights,
             materials,
             meshSources,
-            cubeMaps
+            cubeMaps,
+            translucentMeshes
         } = data
 
         if (this._ready) {
@@ -54,8 +55,7 @@ export default class MeshSystem extends System {
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
                 const mesh = meshSources[current.components.MeshComponent.meshID]
-
-                if (mesh !== undefined && (!selected || !selected.includes(current.id))) {
+                if (mesh !== undefined && !translucentMeshes[current.id] &&(!selected || !selected.includes(current.id))) {
                     const t = current.components.TransformComponent
                     const currentMaterial = materials[current.components.MaterialComponent.materialID]
 
