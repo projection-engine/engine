@@ -176,16 +176,7 @@ export default class Engine extends RenderLoop {
 
 
             const filteredEntities = entities.filter(e => e.active)
-            console.log({
-                translucentMeshes: toObject(filteredEntities.filter(e => {
-                    if (e.components.MaterialComponent) {
-                        const material = materials.find(m => m.id === e.components.MaterialComponent.materialID)
-                        return material && material.type === MATERIAL_TYPES.TRANSPARENT
-                    } else
-                        return false
-                })),
-            },
-                materials)
+
             const data = {
                 pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
                 spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),

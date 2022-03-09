@@ -63,15 +63,15 @@ export default class DeferredSystem extends System {
             dirLights.push(skylight)
 
 
-
         deferred.use()
         let maxTextures = dirLights.length > 2 ? 2 : dirLights.length,
             pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
         deferred.bindForUse({
-            positionSampler: deferredSystem.gBuffer.gPositionTexture,
-            normalSampler: deferredSystem.gBuffer.gNormalTexture,
-            albedoSampler: deferredSystem.gBuffer.gAlbedo,
-            behaviourSampler: deferredSystem.gBuffer.gBehaviorTexture,
+            positionSampler: deferredSystem.frameBuffer.colors[0],
+            normalSampler: deferredSystem.frameBuffer.colors[1],
+            albedoSampler: deferredSystem.frameBuffer.colors[2],
+            behaviourSampler: deferredSystem.frameBuffer.colors[3],
+
             lightQuantity: pointLightsQuantity,
             irradianceMap: skyboxElement?.irradianceMap,
             prefilteredMapSampler: skyboxElement?.cubeMapPrefiltered,
@@ -96,18 +96,18 @@ export default class DeferredSystem extends System {
             lightColor: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
             lightAttenuationFactors: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation),
             shadowMapResolution: shadowMapSystem?.maxResolution,
-            shadowMapTexture: shadowMapSystem?.shadowMapAtlas.frameBufferTexture,
+            shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer.depthSampler,
             shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,
-            redIndirectSampler: giFBO?.redTexture,
-            greenIndirectSampler: giFBO?.greenTexture,
-            blueIndirectSampler: giFBO?.blueTexture,
+
+            redIndirectSampler: giFBO?.colors[0],
+            greenIndirectSampler: giFBO?.colors[1],
+            blueIndirectSampler: giFBO?.colors[2],
+
             indirectLightAttenuation: skylight?.attenuation,
             gridSize: giGridSize,
             noGI: giFBO !== undefined ? 0 : 1
         })
-
-        deferredSystem.gBuffer.draw(deferred)
-
+        deferredSystem.frameBuffer.draw()
     }
 
 }

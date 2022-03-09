@@ -1,7 +1,7 @@
 import CubeMapShader from "../../shaders/classes/misc/CubeMapShader";
 import {createTexture} from "../../utils/misc/utils";
 import Component from "../basic/Component";
-import CubeMapInstance from "../../elements/instances/CubeMapInstance";
+import CubeMapInstance from "../../instances/CubeMapInstance";
 
 export default class SkyboxComponent extends Component {
     _hdrTexture

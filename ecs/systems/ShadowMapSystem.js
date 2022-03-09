@@ -1,11 +1,10 @@
 import System from "../basic/System";
-import ShadowMapFramebuffer from "../../elements/buffer/shadows/ShadowMapFramebuffer";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
-import RSMFramebuffer from "../../elements/buffer/gi/RSMFramebuffer";
 import * as rsmShaders from '../../shaders/resources/gi/rsm.glsl'
 import * as smShaders from '../../shaders/resources/shadows/shadow.glsl'
 import Shader from "../../utils/workers/Shader";
+import Framebuffer from "../../instances/Framebuffer";
 
 export default class ShadowMapSystem extends System {
     _needsGIUpdate = true
@@ -15,11 +14,17 @@ export default class ShadowMapSystem extends System {
         this.gpu = gpu
         this.resolutionPerTexture = 1024
         this.maxResolution = 4096
-        this.shadowMapAtlas = new ShadowMapFramebuffer(this.maxResolution, gpu)
-
-
         this.rsmResolution = 512
-        this.rsmFramebuffer = new RSMFramebuffer(this.rsmResolution, gpu)
+        this.rsmFramebuffer = new Framebuffer(gpu, this.rsmResolution, this.rsmResolution)
+        this.rsmFramebuffer
+            .texture(undefined, undefined, 0)
+            .texture(undefined, undefined, 1)
+            .texture(undefined, undefined, 2)
+            .depthTest()
+
+        this.shadowsFrameBuffer = new Framebuffer(gpu, this.maxResolution, this.maxResolution)
+        this.shadowsFrameBuffer
+            .depthTexture()
 
 
         this.reflectiveShadowMapShader = new Shader(rsmShaders.vertex, rsmShaders.fragment, gpu)
@@ -29,7 +34,6 @@ export default class ShadowMapSystem extends System {
     set needsGIUpdate(data) {
         this._needsGIUpdate = data
     }
-
     get needsGIUpdate() {
         return this._needsGIUpdate
     }
@@ -72,16 +76,16 @@ export default class ShadowMapSystem extends System {
         }
 
         if (shadingModel === SHADING_MODELS.DETAIL && changed) {
-            if(dataChanged)
+            if (dataChanged)
                 setDataChanged()
             this.shadowMapShader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
             const maxLights = directionalLights.length + spotLights.length + (skylight ? 1 : 0)
-
             this.gpu.clearDepth(1);
-            this.shadowMapAtlas.startMapping()
+
             // this.gpu.cullFace(this.gpu.FRONT)
+            this.shadowsFrameBuffer.startMapping()
             for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
                 if (face < maxLights) {
                     this.gpu.viewport(
@@ -103,7 +107,7 @@ export default class ShadowMapSystem extends System {
                     const isSpotLight = face > directionalLights.length - 1
                     let currentLight = isSpotLight ? spotLights[face]?.SpotLightComponent : directionalLights[face].components.DirectionalLightComponent
 
-                    if(!currentLight)
+                    if (!currentLight)
                         currentLight = skylight
                     currentLight.atlasFace = [currentColumn, 0]
 
@@ -117,8 +121,9 @@ export default class ShadowMapSystem extends System {
                 } else
                     currentColumn += 1
             }
+            this.shadowsFrameBuffer.stopMapping()
+            this.gpu.cullFace(this.gpu.BACK)
 
-            this.shadowMapAtlas.stopMapping()
             if (skylight) {
                 this.needsGIUpdate = true
 
@@ -139,16 +144,16 @@ export default class ShadowMapSystem extends System {
             if (mesh !== undefined) {
                 const currentMaterialID = current.components.MaterialComponent.materialID
                 let mat = injectMaterial ? injectMaterial : (materials[currentMaterialID] ? materials[currentMaterialID] : this.fallbackMaterial)
-                if(!mat || !mat.ready)
+                if (!mat || !mat.ready)
                     mat = meshSystem.fallbackMaterial
                 const t = current.components.TransformComponent
 
-                this._drawMesh(mesh, currentLight.lightView, currentLight.lightProjection, t.transformationMatrix,  mat.albedo.texture, mat.normal.texture, currentLight.fixedColor, shader)
+                this._drawMesh(mesh, currentLight.lightView, currentLight.lightProjection, t.transformationMatrix, mat.albedo.texture, mat.normal.texture, currentLight.fixedColor, shader)
             }
         }
     }
 
-    _drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix,  albedo, normal, lightColor, shader) {
+    _drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, albedo, normal, lightColor, shader) {
         this.gpu.bindVertexArray(mesh.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
 

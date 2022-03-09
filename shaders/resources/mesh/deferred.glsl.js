@@ -223,7 +223,7 @@ void main() {
     }
   
 
-
+    // TODO - DISABLED WITHOUT SKYBOX
     // DIFFUSE IBL
     vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);

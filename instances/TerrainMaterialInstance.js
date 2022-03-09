@@ -1,5 +1,5 @@
 import TextureInstance from "./TextureInstance";
-import ImageProcessor from "../../../workers/ImageProcessor";
+import ImageProcessor from "../../workers/ImageProcessor";
 
 export default class TerrainMaterialInstance {
     _ready = false

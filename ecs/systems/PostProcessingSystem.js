@@ -1,6 +1,4 @@
 import System from "../basic/System";
-
-import PostProcessingFramebuffer from "../../elements/buffer/mics/PostProcessingFramebuffer";
 import DeferredSystem from "./subsystems/DeferredSystem";
 import GridSystem from "./subsystems/GridSystem";
 import BillboardSystem from "./subsystems/BillboardSystem";
@@ -13,14 +11,15 @@ import Shader from "../../utils/workers/Shader";
 import * as debug from '../../shaders/resources/shadows/shadow.glsl'
 
 import * as shaderCode from '../../shaders/resources/misc/postProcessing.glsl'
+import Framebuffer from "../../instances/Framebuffer";
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
-
-        // this.screenSpace = new ScreenSpaceBuffer(gpu, resolutionMultiplier)
-        this.postProcessing = new PostProcessingFramebuffer(gpu, resolutionMultiplier)
+        this.frameBuffer = new Framebuffer(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        this.frameBuffer
+            .texture()
 
         this.shadowMapDebugShader = new Shader(debug.debugVertex, debug.debugFragment, gpu)
         this.quad = new Quad(gpu)
@@ -72,11 +71,10 @@ export default class PostProcessingSystem extends System {
 
 
 
-        this.postProcessing.startMapping()
+        this.frameBuffer.startMapping()
         this.skyboxSystem.execute(skybox, camera)
         this.gridSystem.execute(gridVisibility, camera)
 
-        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
@@ -89,8 +87,12 @@ export default class PostProcessingSystem extends System {
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
         this.gpu.disable(this.gpu.DEPTH_TEST)
 
+        this.gpu.disable(this.gpu.DEPTH_TEST)
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
-        this.postProcessing.stopMapping()
+        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
+        this.gpu.enable(this.gpu.DEPTH_TEST)
+
+        this.frameBuffer.stopMapping()
 
         let shaderToApply = this.shader
 
@@ -99,7 +101,7 @@ export default class PostProcessingSystem extends System {
 
         shaderToApply.use()
         shaderToApply.bindForUse({
-            uSampler: this.postProcessing.frameBufferTexture,
+            uSampler: this.frameBuffer.colors[0],
             gamma: gamma ? gamma : 1,
             exposure: exposure ? exposure : 2,
             FXAASpanMax: 8,
@@ -107,14 +109,14 @@ export default class PostProcessingSystem extends System {
             inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
             FXAAReduceMul: 1 / 8
         })
-        this.postProcessing.draw()
+        this.frameBuffer.draw()
 
 
-        //
-        // this.gpu.viewport(0, 0, this.postProcessing.width, this.postProcessing.height);
+
+        // this.gpu.viewport(0, 0, this.frameBuffer.width, this.frameBuffer.height);
         // this.shadowMapDebugShader.use()
         // this.shadowMapDebugShader.bindForUse({
-        //     uSampler:systems[SYSTEMS.SHADOWS].rsmFramebuffer.rsmFluxTexture
+        //     uSampler:systems[SYSTEMS.SHADOWS].rsmFramebuffer.colors[1]
         // })
         // this.quad.draw()
 

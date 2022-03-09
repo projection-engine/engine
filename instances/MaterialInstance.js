@@ -1,6 +1,6 @@
 import TextureInstance from "./TextureInstance";
-import ImageProcessor from "../../../workers/ImageProcessor";
-import MATERIAL_TYPES from "../../utils/misc/MATERIAL_TYPES";
+import ImageProcessor from "../../workers/ImageProcessor";
+import MATERIAL_TYPES from "../utils/misc/MATERIAL_TYPES";
 
 export default class MaterialInstance {
     _ready = false

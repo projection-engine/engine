@@ -1,8 +1,8 @@
 import {mat4} from "gl-matrix";
-import {lookAt} from "../../utils/misc/utils";
-import cube from "../../assets/cube.json";
-import CubeMapShader from "../../shaders/classes/misc/CubeMapShader";
-import VBO from "../../utils/workers/VBO";
+import {lookAt} from "../utils/misc/utils";
+import cube from "../assets/cube.json";
+import CubeMapShader from "../shaders/classes/misc/CubeMapShader";
+import VBO from "../utils/workers/VBO";
 
 export default class CubeMapInstance {
     texture

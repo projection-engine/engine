@@ -48,17 +48,10 @@ export default class GlobalIlluminationSystem extends System {
     _clear() {
         this.gpu.disable(this.gpu.BLEND)
         this.gpu.viewport(0, 0, this.framebufferSize ** 2, this.framebufferSize)
-
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.lightPropagationSystem.accumulatedBuffer.frameBufferObject)
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT)
-
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.injectionSystem.geometryInjectionFramebuffer.frameBufferObject)
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT)
-
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.injectionSystem.injectionFramebuffer.frameBufferObject)
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT)
+        this.lightPropagationSystem.accumulatedBuffer.clear()
+        this.injectionSystem.geometryInjectionFramebuffer.clear()
+        this.injectionSystem.injectionFramebuffer.clear()
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
-
     }
 
     static createPointsData(positionData, gpu) {

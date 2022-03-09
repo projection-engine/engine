@@ -1,9 +1,10 @@
 import System from "../basic/System";
-import GBuffer from "../../elements/buffer/mics/GBuffer";
-import MaterialInstance from "../../elements/instances/MaterialInstance";
+
+import MaterialInstance from "../../instances/MaterialInstance";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import * as shaderCode from '../../shaders/resources/mesh/meshDeferred.glsl'
 import Shader from "../../utils/workers/Shader";
+import Framebuffer from "../../instances/Framebuffer";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -11,7 +12,17 @@ export default class MeshSystem extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
-        this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
+        // this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
+
+        this.frameBuffer = new Framebuffer(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        this.frameBuffer
+            .texture(undefined, undefined, 0)
+            .texture(undefined, undefined, 1)
+            .texture(undefined, undefined, 2)
+            .texture(undefined, undefined, 3)
+            .depthTest()
+
+        console.log(this.frameBuffer)
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
 
     }
@@ -50,16 +61,16 @@ export default class MeshSystem extends System {
 
             this.shader.use()
             this.gpu.clearDepth(1);
-            this.gBuffer.startMapping()
+            this.frameBuffer.startMapping()
 
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
                 const mesh = meshSources[current.components.MeshComponent.meshID]
-                if (mesh !== undefined && !translucentMeshes[current.id] &&(!selected || !selected.includes(current.id))) {
+                if (mesh !== undefined && !translucentMeshes[current.id] && (!selected || !selected.includes(current.id))) {
                     const t = current.components.TransformComponent
                     const currentMaterial = materials[current.components.MaterialComponent.materialID]
 
-                    let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components.MaterialComponent.overrideInjection? injectMaterial : this.fallbackMaterial
+                    let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components.MaterialComponent.overrideInjection ? injectMaterial : this.fallbackMaterial
                     if (!mat || !mat.ready)
                         mat = this.fallbackMaterial
                     MeshSystem.drawMesh(
@@ -76,7 +87,7 @@ export default class MeshSystem extends System {
                     )
                 }
             }
-            this.gBuffer.stopMapping()
+            this.frameBuffer.stopMapping(false)
         }
 
     }

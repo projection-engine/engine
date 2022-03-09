@@ -15,7 +15,7 @@ export default class SelectedSystem extends System {
 
         if (selected) {
             this.shader.use()
-            this.gpu.disable(this.gpu.DEPTH_TEST)
+
             for (let i = 0; i < selected.length; i++) {
                 const el = meshes.find(m => m.id === selected[i])
 
@@ -34,7 +34,7 @@ export default class SelectedSystem extends System {
 
 
             }
-            this.gpu.enable(this.gpu.DEPTH_TEST)
+
         }
     }
 }

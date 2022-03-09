@@ -4,8 +4,8 @@ import pointLightIcon from "../../../../../static/icons/point_light.png";
 import directionalLightIcon from "../../../../../static/icons/directional_light.png";
 import spotLightIcon from "../../../../../static/icons/spot_light.png";
 import cubeMapIcon from "../../../../../static/icons/cubemap.png";
-import TextureInstance from "../../../elements/instances/TextureInstance";
-import BillboardsInstance from "../../../elements/instances/BillboardsInstance";
+import TextureInstance from "../../../instances/TextureInstance";
+import BillboardsInstance from "../../../instances/BillboardsInstance";
 
 export default class BillboardSystem extends System {
     _ready = false

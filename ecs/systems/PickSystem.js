@@ -1,12 +1,18 @@
 import System from "../basic/System";
-import MousePickerFramebuffer from "../../elements/buffer/mics/MousePickerFramebuffer";
 import * as shaderCode from "../../shaders/resources/misc/picker.glsl";
 import Shader from "../../utils/workers/Shader";
+import Framebuffer from "../../instances/Framebuffer";
+import {mat4} from "gl-matrix";
 
 export default class PickSystem extends System {
     constructor(gpu) {
         super([]);
-        this.picker = new MousePickerFramebuffer(gpu)
+        this.gpu = gpu
+
+        this.frameBuffer = new Framebuffer(gpu, 1, 1)
+        this.frameBuffer
+            .texture(1, 1, 0, this.gpu.RGBA, this.gpu.RGBA, this.gpu.UNSIGNED_BYTE, false, true, true)
+            .depthTest(this.gpu.DEPTH_COMPONENT16)
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
     }
 
@@ -39,10 +45,9 @@ export default class PickSystem extends System {
             setClicked(false)
 
             this.shader.use()
-            this.picker.start()
+            this.frameBuffer.startMapping()
 
-            const pickerProjection =  this.picker.getProjection(currentCoords, camera)
-
+            const pickerProjection =  this._getProjection(currentCoords, camera)
             for (let m = 0; m < meshes.length; m++) {
                 const currentInstance = meshes[m]
                 const mesh  = meshSources[currentInstance.components.MeshComponent.meshID]
@@ -54,13 +59,13 @@ export default class PickSystem extends System {
             }
 
             let data = new Uint8Array(4);
-            this.picker.gpu.readPixels(
+            this.gpu.readPixels(
                 0,
                 0,
                 1,
                 1,
-                this.picker.gpu.RGBA,
-                this.picker.gpu.UNSIGNED_BYTE,
+                this.gpu.RGBA,
+                this.gpu.UNSIGNED_BYTE,
                 data
             );
 
@@ -70,11 +75,45 @@ export default class PickSystem extends System {
                 setSelected([meshes.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
             else
                 setSelected([])
-            this.picker.stopMapping();
+            this.frameBuffer.stopMapping();
 
         }
 
     }
+    _getProjection({x, y}, camera) {
+
+        const aspect = camera.aspectRatio
+        let top = Math.tan(camera.fov / 2) * camera.zNear,
+            bottom = -top,
+            left = aspect * bottom,
+            right = aspect * top
+
+        const width = Math.abs(right - left);
+        const height = Math.abs(top - bottom);
+
+        const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
+
+        const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
+
+        const subLeft = left + pixelX * width / this.gpu.canvas.width;
+        const subBottom = bottom + pixelY * height / this.gpu.canvas.height;
+        const subWidth = 1 / this.gpu.canvas.width;
+        const subHeight = 1 / this.gpu.canvas.height;
+
+        let m = mat4.create()
+
+        mat4.frustum(
+            m,
+            subLeft,
+            subLeft + subWidth,
+            subBottom,
+            subBottom + subHeight,
+            camera.zNear,
+            camera.zFar);
+
+        return  m
+    }
+
     _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix) {
         this.shader.bindForUse({
             uID: [...instance.components.PickComponent.pickID, 1],
@@ -84,13 +123,13 @@ export default class PickSystem extends System {
         })
 
 
-        this.picker.gpu.bindVertexArray(mesh.VAO)
-        this.picker.gpu.bindBuffer(this.picker.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
+        this.gpu.bindVertexArray(mesh.VAO)
+        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
         mesh.vertexVBO.enable()
 
-        this.picker.gpu.drawElements(this.picker.gpu.TRIANGLES, mesh.verticesQuantity, this.picker.gpu.UNSIGNED_INT, 0)
-        this.picker.gpu.bindVertexArray(null)
-        this.picker.gpu.bindBuffer(this.picker.gpu.ELEMENT_ARRAY_BUFFER, null)
+        this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
+        this.gpu.bindVertexArray(null)
+        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
         mesh.vertexVBO.disable()
     }
 }

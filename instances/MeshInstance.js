@@ -1,6 +1,6 @@
-import {createVAO, createVBO} from "../../utils/misc/utils";
-import VBO from "../../utils/workers/VBO";
-import randomID from "../../../utils/misc/randomID";
+import {createVAO, createVBO} from "../utils/misc/utils";
+import VBO from "../utils/workers/VBO";
+import randomID from "../../utils/misc/randomID";
 
 
 export default class MeshInstance {

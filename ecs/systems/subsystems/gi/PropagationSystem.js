@@ -1,9 +1,8 @@
 import System from "../../../basic/System";
-
-import GIFramebuffer from "../../../../elements/buffer/gi/GIFramebuffer";
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
 import {fragment, vertex} from '../../../../shaders/resources/gi/lightPropagation.glsl'
 import Shader from "../../../../utils/workers/Shader";
+import Framebuffer from "../../../../instances/Framebuffer";
 
 export default class PropagationSystem extends System {
     size =  512;
@@ -14,8 +13,19 @@ export default class PropagationSystem extends System {
 
         this.shader = new Shader(vertex, fragment, gpu)
 
-        this.propagationFramebuffer = new GIFramebuffer(this.framebufferSize, gpu)
-        this.accumulatedBuffer = new GIFramebuffer(this.framebufferSize, gpu)
+
+        this.propagationFramebuffer = new Framebuffer(gpu, this.framebufferSize** 2, this.framebufferSize)
+        this.accumulatedBuffer =new Framebuffer(gpu, this.framebufferSize** 2, this.framebufferSize)
+
+        this.propagationFramebuffer
+            .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)
+            .texture(undefined, undefined, 1, undefined, undefined, undefined, undefined, true, true)
+            .texture(undefined, undefined, 2, undefined, undefined, undefined, undefined, true, true)
+
+        this.accumulatedBuffer
+            .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)
+            .texture(undefined, undefined, 1, undefined, undefined, undefined, undefined, true, true)
+            .texture(undefined, undefined, 2, undefined, undefined, undefined, undefined, true, true)
 
         const positionData = new Float32Array(this.framebufferSize * this.framebufferSize * this.framebufferSize * 2);
         let positionIndex = 0;
@@ -53,7 +63,7 @@ export default class PropagationSystem extends System {
             const nextIterationLPV = LPVS[lpvIndex ^ 1];
 
 
-            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, nextIterationLPV.frameBufferObject)
+            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, nextIterationLPV.FBO)
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT | this.gpu.STENCIL_BUFFER_BIT )
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
 
@@ -62,35 +72,28 @@ export default class PropagationSystem extends System {
         }
     }
     _drawTargets(currentBuffer){
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, this.accumulatedBuffer.frameBufferObject);
-        this.gpu.framebufferTexture2D(
-            this.gpu.FRAMEBUFFER,
-            this.gpu.COLOR_ATTACHMENT3,
-            this.gpu.TEXTURE_2D,
-            currentBuffer.redTexture,
-            0);
 
-        this.gpu.framebufferTexture2D(
-            this.gpu.FRAMEBUFFER,
-            this.gpu.COLOR_ATTACHMENT4,
-            this.gpu.TEXTURE_2D,
-            currentBuffer.greenTexture,
-            0);
-        this.gpu.framebufferTexture2D(
-            this.gpu.FRAMEBUFFER,
-            this.gpu.COLOR_ATTACHMENT5,
-            this.gpu.TEXTURE_2D,
-            currentBuffer.blueTexture,
-            0);
-        this.gpu.drawBuffers([
-            this.gpu.COLOR_ATTACHMENT0,
-            this.gpu.COLOR_ATTACHMENT1,
-            this.gpu.COLOR_ATTACHMENT2,
+        this.accumulatedBuffer.appendTexture(
+            currentBuffer.colors[0],
+            3,
+            true,
+            false
+        )
+        this.accumulatedBuffer.appendTexture(
+            currentBuffer.colors[1],
+            4,
+            false,
+            false
+        )
+        this.accumulatedBuffer.appendTexture(
+            currentBuffer.colors[2],
+            5,
+            false,
+            true
+        )
 
-            this.gpu.COLOR_ATTACHMENT3,
-            this.gpu.COLOR_ATTACHMENT4,
-            this.gpu.COLOR_ATTACHMENT5
-        ])
+
+
 
     }
     _lightPropagationIteration(iteration, readLPV, nextIterationLPV, geometryInjectionFBO) {
@@ -100,12 +103,14 @@ export default class PropagationSystem extends System {
 
                 this.shader.bindForUse({
                     u_grid_size: this.framebufferSize,
-                    u_red_contribution: readLPV.redTexture,
-                    u_green_contribution: readLPV.greenTexture,
-                    u_blue_contribution:readLPV.blueTexture,
-                    u_red_geometry_volume: geometryInjectionFBO.redTexture,
-                    u_green_geometry_volume: geometryInjectionFBO.greenTexture,
-                    u_blue_geometry_volume: geometryInjectionFBO.blueTexture,
+                    u_red_contribution: readLPV.colors[0],
+                    u_green_contribution: readLPV.colors[1],
+                    u_blue_contribution:readLPV.colors[2],
+
+                    u_red_geometry_volume: geometryInjectionFBO.colors[0],
+                    u_green_geometry_volume: geometryInjectionFBO.colors[1],
+                    u_blue_geometry_volume: geometryInjectionFBO.colors[2],
+
                     u_first_iteration: iteration <= 0
                 })
 
