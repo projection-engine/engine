@@ -1,7 +1,7 @@
 import System from "../../basic/System";
 import MeshSystem from "../MeshSystem";
 import Shader from "../../../utils/workers/Shader";
-import * as shaderCode from "../../../shaders/resources/mesh/meshSelected.glsl";
+import * as shaderCode from "../../../shaders/mesh/meshSelected.glsl";
 
 export default class SelectedSystem extends System {
     constructor(gpu) {

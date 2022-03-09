@@ -1,6 +1,6 @@
 import {createVAO} from "../utils/misc/utils";
 import VBO from "../utils/workers/VBO";
-import * as shaderCode from '../shaders/resources/misc/billboard.glsl'
+import * as shaderCode from '../shaders/misc/billboard.glsl'
 import Shader from "../utils/workers/Shader";
 
 

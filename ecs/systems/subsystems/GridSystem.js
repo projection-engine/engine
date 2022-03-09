@@ -1,6 +1,6 @@
 import System from "../../basic/System";
 import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
-import * as shaderCode from '../../../shaders/resources/misc/grid.glsl'
+import * as shaderCode from '../../../shaders/misc/grid.glsl'
 import Shader from "../../../utils/workers/Shader";
 import Quad from "../../../utils/workers/Quad";
 

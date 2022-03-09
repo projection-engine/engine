@@ -4,8 +4,8 @@ import brdfImg from "../../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../../utils/misc/utils";
 import SYSTEMS from "../../../utils/misc/SYSTEMS";
 import Shader from "../../../utils/workers/Shader";
-import * as shaderCode from '../../../shaders/resources/mesh/deferred.glsl'
-import * as shaderFlatCode from '../../../shaders/resources/mesh/deferredFlat.glsl'
+import * as shaderCode from '../../../shaders/mesh/deferred.glsl'
+import * as shaderFlatCode from '../../../shaders/mesh/deferredFlat.glsl'
 
 export default class DeferredSystem extends System {
     constructor(gpu) {

@@ -1,6 +1,6 @@
 import System from "../../../basic/System";
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
-import {fragment, vertex} from '../../../../shaders/resources/gi/lightPropagation.glsl'
+import {fragment, vertex} from '../../../../shaders/gi/lightPropagation.glsl'
 import Shader from "../../../../utils/workers/Shader";
 import Framebuffer from "../../../../instances/Framebuffer";
 

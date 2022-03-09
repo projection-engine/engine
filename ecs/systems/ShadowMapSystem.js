@@ -1,8 +1,8 @@
 import System from "../basic/System";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
-import * as rsmShaders from '../../shaders/resources/gi/rsm.glsl'
-import * as smShaders from '../../shaders/resources/shadows/shadow.glsl'
+import * as rsmShaders from '../../shaders/gi/rsm.glsl'
+import * as smShaders from '../../shaders/shadows/shadow.glsl'
 import Shader from "../../utils/workers/Shader";
 import Framebuffer from "../../instances/Framebuffer";
 

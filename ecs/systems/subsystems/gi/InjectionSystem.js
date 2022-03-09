@@ -1,7 +1,7 @@
 import System from "../../../basic/System";
-import {fragment, vertex} from '../../../../shaders/resources/gi/lightInjection.glsl'
+import {fragment, vertex} from '../../../../shaders/gi/lightInjection.glsl'
 import Shader from "../../../../utils/workers/Shader";
-import * as geometryShader from '../../../../shaders/resources/gi/geometryInjection.glsl'
+import * as geometryShader from '../../../../shaders/gi/geometryInjection.glsl'
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
 import Framebuffer from "../../../../instances/Framebuffer";
 

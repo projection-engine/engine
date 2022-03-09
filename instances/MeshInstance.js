@@ -18,13 +18,15 @@ export default class MeshInstance {
     tangentVBO
 
     constructor({
+                    id = randomID(),
+                    gpu,
+
                     vertices,
                     indices,
                     normals,
                     uvs,
-                    tangents = [],
-                    id = randomID(),
-                    gpu,
+                    tangents,
+
                     maxBoundingBox,
                     minBoundingBox,
                     wireframeBuffer,

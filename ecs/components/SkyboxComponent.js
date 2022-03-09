@@ -1,7 +1,8 @@
-import CubeMapShader from "../../shaders/classes/misc/CubeMapShader";
-import {createTexture} from "../../utils/misc/utils";
+import {createTexture, lookAt} from "../../utils/misc/utils";
 import Component from "../basic/Component";
 import CubeMapInstance from "../../instances/CubeMapInstance";
+import Shader from "../../utils/workers/Shader";
+import * as shaderCode from "../../shaders/misc/cubeMap.glsl";
 
 export default class SkyboxComponent extends Component {
     _hdrTexture
@@ -9,23 +10,23 @@ export default class SkyboxComponent extends Component {
     _irradianceMap
     _initialized = false
     _resolution = 512
-    gamma =1
-    exposure =1
+    gamma = 1
+    exposure = 1
     imageID = undefined
 
     constructor(id, gpu) {
         super(id, 'SkyboxComponent');
         this.gpu = gpu
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
-        this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
+
+        this._cubeMap = new CubeMapInstance(gpu, 512)
+        this._irradianceMap = new CubeMapInstance(gpu, 32)
     }
 
-    get resolution(){
+    get resolution() {
         return this._resolution
     }
 
-    set resolution(data){
-        console.log(data)
+    set resolution(data) {
         this._resolution = data
         this._compile()
     }
@@ -49,9 +50,10 @@ export default class SkyboxComponent extends Component {
         this._compile()
     }
 
-    get ready(){
+    get ready() {
         return this._initialized
     }
+
     get cubeMapPrefiltered() {
         return this._cubeMap?.prefiltered
     }
@@ -64,24 +66,34 @@ export default class SkyboxComponent extends Component {
         return this._irradianceMap?.texture
     }
 
-    _compile( ){
+    _compile() {
         this._initialized = false
-        const baseShader = new CubeMapShader(this.gpu, 0)
-        const irradianceShader = new CubeMapShader(this.gpu, 1)
+        const baseShader = new Shader(shaderCode.vertex, shaderCode.fragment, this.gpu)
+        const irradianceShader = new Shader(shaderCode.vertex, shaderCode.irradiance, this.gpu)
 
-        this._cubeMap = new CubeMapInstance(baseShader, this.gpu, this._resolution, (c) => {
-            this.gpu.activeTexture(this.gpu.TEXTURE0)
-            this.gpu.bindTexture(this.gpu.TEXTURE_2D, this._hdrTexture)
-            this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-        }, [0, 0, 0], true)
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-        this._irradianceMap = new CubeMapInstance(
-            irradianceShader,
-            this.gpu, 32, (c) => {
-                this.gpu.activeTexture(this.gpu.TEXTURE0)
-                this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, this._cubeMap.texture)
-                this.gpu.uniform1i(c.equirectangularMapULocation, 0)
-            }, [0, 0, 0], false, true)
+        baseShader.use()
+        this._cubeMap.resolution = this._resolution
+        this._cubeMap.draw((yaw, pitch, perspective) => {
+            baseShader.bindForUse({
+                projectionMatrix: perspective,
+                viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
+                uSampler: this._hdrTexture
+            })
+            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
+        }, true)
+
+        irradianceShader.use()
+        this._irradianceMap.draw((yaw, pitch, perspective) => {
+            irradianceShader.bindForUse({
+                projectionMatrix: perspective,
+                viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
+                uSampler: this._cubeMap.texture
+            })
+            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
+        }, true)
+
+
+        this._cubeMap.generatePrefiltered(6, this._resolution/4)
         this._initialized = true
     }
 }

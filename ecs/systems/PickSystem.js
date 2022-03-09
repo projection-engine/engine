@@ -1,5 +1,5 @@
 import System from "../basic/System";
-import * as shaderCode from "../../shaders/resources/misc/picker.glsl";
+import * as shaderCode from "../../shaders/misc/picker.glsl";
 import Shader from "../../utils/workers/Shader";
 import Framebuffer from "../../instances/Framebuffer";
 import {mat4} from "gl-matrix";

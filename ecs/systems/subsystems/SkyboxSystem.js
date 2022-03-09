@@ -1,6 +1,6 @@
 import System from "../../basic/System";
 import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
-import * as shaderCode from "../../../shaders/resources/misc/skybox.glsl";
+import * as shaderCode from "../../../shaders/misc/skybox.glsl";
 import Shader from "../../../utils/workers/Shader";
 import {createVAO} from "../../../utils/misc/utils";
 import VBO from "../../../utils/workers/VBO";

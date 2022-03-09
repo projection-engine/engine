@@ -1,5 +1,5 @@
-import {PBR} from '../../shaders/resources/mesh/PBR'
-import {SHADOWS} from "../../shaders/resources/shadows/Shadows";
+import {PBR} from '../../shaders/mesh/PBR'
+import {SHADOWS} from "../../shaders/shadows/Shadows";
 
 export const METHODS = {
     distributionGGX: '@import(distributionGGX)',

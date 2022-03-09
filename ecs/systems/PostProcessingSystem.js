@@ -8,9 +8,9 @@ import Quad from "../../utils/workers/Quad";
 import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
-import * as debug from '../../shaders/resources/shadows/shadow.glsl'
+import * as debug from '../../shaders/shadows/shadow.glsl'
 
-import * as shaderCode from '../../shaders/resources/misc/postProcessing.glsl'
+import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import Framebuffer from "../../instances/Framebuffer";
 
 export default class PostProcessingSystem extends System {
