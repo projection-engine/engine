@@ -2,7 +2,7 @@ import {linearAlgebraMath, Vector} from 'pj-math'
 import {lookAt} from "../../misc/utils";
 import conf from "../../../assets/config.json";
 import Camera from "../Camera";
-import {mat4} from "gl-matrix";
+import {mat4, vec4} from "gl-matrix";
 
 export default class FreeCamera extends Camera {
     direction = {
@@ -78,8 +78,11 @@ export default class FreeCamera extends Camera {
         if (this.direction.forward) {
             changed = true
             const z = conf.sensitivity.forwards ? conf.sensitivity.forwards : 1
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
-            newPosition = newPosition.matrix
+            console.log(this.yaw, this.pitch)
+            const mat = mat4.fromRotation([], -this.yaw, [0, 1, 0]),
+                matX = mat4.fromRotation([], -this.pitch, [1, 0, 0])
+            let newPosition = vec4.transformMat4([], [0, 0, z, 0], mat)
+            vec4.transformMat4(newPosition, newPosition, matX)
 
             this._position[0] += newPosition[0]
             this._position[1] += newPosition[1]
@@ -88,9 +91,14 @@ export default class FreeCamera extends Camera {
         }
         if (this.direction.backward) {
             changed = true
-            const z = -(conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
-            newPosition = newPosition.matrix
+            const z = conf.sensitivity.forwards ? conf.sensitivity.forwards : 1
+
+            console.log(this.yaw, this.pitch)
+            const mat = mat4.fromRotation([], -this.yaw, [0, 1, 0]),
+                matX = mat4.fromRotation([], -this.pitch, [1, 0, 0])
+            let newPosition = vec4.transformMat4([], [0, 0, -z, 0], mat)
+            vec4.transformMat4(newPosition, newPosition, matX)
+
 
             this._position[0] += newPosition[0]
             this._position[1] += newPosition[1]
@@ -98,6 +106,7 @@ export default class FreeCamera extends Camera {
         }
         if (this.direction.left) {
             changed = true
+
             const x = conf.sensitivity.right ? conf.sensitivity.right : 1
             let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
             newPosition = newPosition.matrix

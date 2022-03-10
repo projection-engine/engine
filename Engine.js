@@ -196,6 +196,7 @@ export default class Engine extends RenderLoop {
                 skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent,
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
             }
+
             const systems = Object.keys(this._systems).sort()
             this._changed = true
             super.start((timestamp) => {

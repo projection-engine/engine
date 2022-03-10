@@ -10,7 +10,6 @@ export default class SkyboxSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.vao = createVAO(gpu)
         this._vertexBuffer = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
@@ -20,7 +19,6 @@ export default class SkyboxSystem extends System {
         super.execute()
 
         if (skyboxElement && skyboxElement.ready && !(camera instanceof OrthographicCamera)) {
-
             this.gpu.depthMask(false)
             this.shader.use()
             this.gpu.bindVertexArray(this.vao)

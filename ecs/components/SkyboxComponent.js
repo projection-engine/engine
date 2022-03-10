@@ -18,7 +18,7 @@ export default class SkyboxComponent extends Component {
         super(id, 'SkyboxComponent');
         this.gpu = gpu
 
-        this._cubeMap = new CubeMapInstance(gpu, 512)
+        this._cubeMap = new CubeMapInstance(gpu, this._resolution)
         this._irradianceMap = new CubeMapInstance(gpu, 32)
     }
 
@@ -35,8 +35,8 @@ export default class SkyboxComponent extends Component {
         this.imageID = imageID
         this._hdrTexture = createTexture(
             this.gpu,
-            blob.width,
-            blob.height,
+            blob.naturalWidth,
+            blob.naturalHeight,
             this.gpu.RGB16F,
             0,
             this.gpu.RGB,
@@ -47,6 +47,7 @@ export default class SkyboxComponent extends Component {
             this.gpu.CLAMP_TO_EDGE,
             this.gpu.CLAMP_TO_EDGE
         )
+
         this._compile()
     }
 
@@ -74,6 +75,7 @@ export default class SkyboxComponent extends Component {
         baseShader.use()
         this._cubeMap.resolution = this._resolution
         this._cubeMap.draw((yaw, pitch, perspective) => {
+
             baseShader.bindForUse({
                 projectionMatrix: perspective,
                 viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
@@ -84,6 +86,11 @@ export default class SkyboxComponent extends Component {
 
         irradianceShader.use()
         this._irradianceMap.draw((yaw, pitch, perspective) => {
+            console.log({
+                projectionMatrix: perspective,
+                viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
+                uSampler: this._cubeMap.texture
+            })
             irradianceShader.bindForUse({
                 projectionMatrix: perspective,
                 viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
@@ -95,5 +102,6 @@ export default class SkyboxComponent extends Component {
 
         this._cubeMap.generatePrefiltered(6, this._resolution/4)
         this._initialized = true
+        this.gpu.deleteTexture(this._hdrTexture)
     }
 }
