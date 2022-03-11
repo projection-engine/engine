@@ -36,10 +36,9 @@ export default class MaterialInstance {
         ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
         emissive = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
         opacity,
-        subSurface
-
+        tiling = [1,1]
     ) {
-
+        this.uvScale = tiling
         if(!this._initializing) {
             this._initializing = true
             let heightToApply = height

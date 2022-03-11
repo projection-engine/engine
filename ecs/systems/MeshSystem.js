@@ -137,7 +137,6 @@ export default class MeshSystem extends System {
             transformMatrix,
             viewMatrix,
             cameraVec: camPosition,
-
             normalMatrix,
             indexSelected
         })
