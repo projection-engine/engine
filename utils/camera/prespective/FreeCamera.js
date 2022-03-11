@@ -13,6 +13,7 @@ export default class FreeCamera extends Camera {
         up: false, down: false
     }
     onMove
+
     constructor(
         origin,
         fov,
@@ -34,21 +35,25 @@ export default class FreeCamera extends Camera {
     }
 
     // FOV - ASPECT - PROJECTION
-    get fov (){
+    get fov() {
         return this._fov
     }
-    set fov(data){
+
+    set fov(data) {
         this._fov = data
         this.updateProjection()
     }
+
     get aspectRatio() {
         return this._aspectRatio
     }
+
     set aspectRatio(data) {
         this._aspectRatio = data
         this.updateProjection()
     }
-    updateProjection(){
+
+    updateProjection() {
 
         mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
     }
@@ -57,6 +62,7 @@ export default class FreeCamera extends Camera {
         super.updateViewMatrix()
         this.viewMatrix = lookAt(this._yaw, this._pitch, this._position)
     }
+
     set yaw(data) {
         this._yaw = data
     }
@@ -64,10 +70,12 @@ export default class FreeCamera extends Camera {
     set pitch(data) {
         this._pitch = data
     }
-    get yaw(){
+
+    get yaw() {
         return this._yaw
     }
-    get pitch(){
+
+    get pitch() {
         return this._pitch
     }
 
@@ -78,30 +86,23 @@ export default class FreeCamera extends Camera {
         if (this.direction.forward) {
             changed = true
             const z = conf.sensitivity.forwards ? conf.sensitivity.forwards : 1
-            console.log(this.yaw, this.pitch)
-            const mat = mat4.fromRotation([], -this.yaw, [0, 1, 0]),
-                matX = mat4.fromRotation([], -this.pitch, [1, 0, 0])
-            let newPosition = vec4.transformMat4([], [0, 0, z, 0], mat)
-            vec4.transformMat4(newPosition, newPosition, matX)
+            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
+            newPosition = newPosition.matrix
 
             this._position[0] += newPosition[0]
-            this._position[1] += newPosition[1]
+            this._position[1] +=  Math.sin(this._pitch)
             this._position[2] -= newPosition[2]
 
         }
         if (this.direction.backward) {
             changed = true
-            const z = conf.sensitivity.forwards ? conf.sensitivity.forwards : 1
-
-            console.log(this.yaw, this.pitch)
-            const mat = mat4.fromRotation([], -this.yaw, [0, 1, 0]),
-                matX = mat4.fromRotation([], -this.pitch, [1, 0, 0])
-            let newPosition = vec4.transformMat4([], [0, 0, -z, 0], mat)
-            vec4.transformMat4(newPosition, newPosition, matX)
+            const z = -(conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
+            newPosition = newPosition.matrix
 
 
             this._position[0] += newPosition[0]
-            this._position[1] += newPosition[1]
+            this._position[1] -= Math.sin(this._pitch)
             this._position[2] -= newPosition[2]
         }
         if (this.direction.left) {
@@ -139,7 +140,7 @@ export default class FreeCamera extends Camera {
 
         if (changed) {
             this.updateViewMatrix()
-            if(this.onMove)
+            if (this.onMove)
                 this.onMove()
         }
     }

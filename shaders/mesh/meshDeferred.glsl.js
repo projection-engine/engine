@@ -10,7 +10,7 @@ uniform mat4 transformMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 projectionMatrix;
 uniform vec3 cameraVec;
-
+uniform vec2 uvScale;
 
 out vec4 vPosition;
 out vec2 texCoord;
@@ -36,7 +36,7 @@ void main(){
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
    
 
-    texCoord = uvTexture;
+    texCoord = uvTexture * uvScale;
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 }

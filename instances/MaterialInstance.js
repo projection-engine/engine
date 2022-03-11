@@ -5,13 +5,15 @@ import MATERIAL_TYPES from "../utils/misc/MATERIAL_TYPES";
 export default class MaterialInstance {
     _ready = false
     _initializing = false
+    uvScale = [1,1]
     constructor(
         gpu,
         id,
         parallax = 0,
         heightScale = 0,
         parallaxLayers = 0,
-        type
+        type,
+        uvScale
     ) {
         this.id = id
         this.gpu = gpu
@@ -20,6 +22,9 @@ export default class MaterialInstance {
         this.parallaxLayers = parallaxLayers
 
         this.type = type
+
+        if(uvScale !== undefined && Array.isArray(uvScale) && uvScale.length === 2)
+            this.uvScale = uvScale
     }
 
     async initializeTextures(

@@ -127,6 +127,7 @@ export default class MeshSystem extends System {
                 heightScale: material.parallaxHeightScale,
                 layers: material.parallaxLayers,
                 parallaxEnabled: material.parallaxEnabled,
+                uvScale: material.uvScale
             }
         }
 

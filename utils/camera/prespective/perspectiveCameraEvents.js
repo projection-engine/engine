@@ -50,18 +50,16 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                 const forward = event.deltaY < 0
                 const distance = (forward ? 1 : -1) * (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
                 if (camera instanceof FreeCamera) {
-                    const mat = mat4.fromRotation([], -camera.yaw, [0, 1, 0]),
-                        matX = mat4.fromRotation([], -camera.pitch, [1, 0, 0])
-                    let newPosition = vec4.transformMat4([], [0, 0, distance, 0], mat)
-                    vec4.transformMat4(newPosition, newPosition, matX)
+                    let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', camera.yaw), new Vector(0, 0, distance))
+                    newPosition = newPosition.matrix
 
                     if (forward) {
                         camera.position[0] += newPosition[0]
-                        camera.position[1] += newPosition[1]
+                        camera.position[1] += Math.sin(camera.pitch)
                         camera.position[2] -= newPosition[2]
                     } else {
                         camera.position[0] += newPosition[0]
-                        camera.position[1] += newPosition[1]
+                        camera.position[1] -= Math.sin(camera.pitch)
                         camera.position[2] -= newPosition[2]
                     }
 
