@@ -2,7 +2,7 @@ import System from "../../../basic/System";
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
 import {fragment, vertex} from '../../../../shaders/gi/lightPropagation.glsl'
 import Shader from "../../../../utils/workers/Shader";
-import Framebuffer from "../../../../instances/Framebuffer";
+import FramebufferInstance from "../../../../instances/FramebufferInstance";
 
 export default class PropagationSystem extends System {
     size =  512;
@@ -14,8 +14,8 @@ export default class PropagationSystem extends System {
         this.shader = new Shader(vertex, fragment, gpu)
 
 
-        this.propagationFramebuffer = new Framebuffer(gpu, this.framebufferSize** 2, this.framebufferSize)
-        this.accumulatedBuffer =new Framebuffer(gpu, this.framebufferSize** 2, this.framebufferSize)
+        this.propagationFramebuffer = new FramebufferInstance(gpu, this.framebufferSize** 2, this.framebufferSize)
+        this.accumulatedBuffer =new FramebufferInstance(gpu, this.framebufferSize** 2, this.framebufferSize)
 
         this.propagationFramebuffer
             .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)

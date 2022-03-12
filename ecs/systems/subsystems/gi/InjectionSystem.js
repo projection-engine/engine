@@ -3,7 +3,7 @@ import {fragment, vertex} from '../../../../shaders/gi/lightInjection.glsl'
 import Shader from "../../../../utils/workers/Shader";
 import * as geometryShader from '../../../../shaders/gi/geometryInjection.glsl'
 import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
-import Framebuffer from "../../../../instances/Framebuffer";
+import FramebufferInstance from "../../../../instances/FramebufferInstance";
 
 export default class InjectionSystem extends System {
     size = 512;
@@ -16,8 +16,8 @@ export default class InjectionSystem extends System {
         this.lightInjectionShader = new Shader(vertex, fragment, gpu)
         this.geometryInjectionShader = new Shader(geometryShader.vertex, geometryShader.fragment, gpu)
 
-        this.injectionFramebuffer = new Framebuffer(gpu, this.framebufferSize ** 2, this.framebufferSize)
-        this.geometryInjectionFramebuffer =new Framebuffer(gpu, this.framebufferSize** 2, this.framebufferSize)
+        this.injectionFramebuffer = new FramebufferInstance(gpu, this.framebufferSize ** 2, this.framebufferSize)
+        this.geometryInjectionFramebuffer =new FramebufferInstance(gpu, this.framebufferSize** 2, this.framebufferSize)
 
         this.injectionFramebuffer
             .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)

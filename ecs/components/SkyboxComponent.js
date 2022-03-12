@@ -75,7 +75,6 @@ export default class SkyboxComponent extends Component {
         baseShader.use()
         this._cubeMap.resolution = this._resolution
         this._cubeMap.draw((yaw, pitch, perspective) => {
-
             baseShader.bindForUse({
                 projectionMatrix: perspective,
                 viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
@@ -86,11 +85,6 @@ export default class SkyboxComponent extends Component {
 
         irradianceShader.use()
         this._irradianceMap.draw((yaw, pitch, perspective) => {
-            console.log({
-                projectionMatrix: perspective,
-                viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
-                uSampler: this._cubeMap.texture
-            })
             irradianceShader.bindForUse({
                 projectionMatrix: perspective,
                 viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),

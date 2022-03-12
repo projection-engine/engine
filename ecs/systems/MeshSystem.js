@@ -4,7 +4,7 @@ import MaterialInstance from "../../instances/MaterialInstance";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import * as shaderCode from '../../shaders/mesh/meshDeferred.glsl'
 import Shader from "../../utils/workers/Shader";
-import Framebuffer from "../../instances/Framebuffer";
+import FramebufferInstance from "../../instances/FramebufferInstance";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -14,7 +14,7 @@ export default class MeshSystem extends System {
         this.gpu = gpu
         // this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
 
-        this.frameBuffer = new Framebuffer(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
         this.frameBuffer
             .texture(undefined, undefined, 0)
             .texture(undefined, undefined, 1)

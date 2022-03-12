@@ -46,6 +46,7 @@ in mat4 dirLightPOV[MAX_LIGHTS];
 
 uniform vec3 cameraVec;
 uniform int noGI;
+uniform vec2 lightClippingPlane[MAX_LIGHTS];
 uniform vec3 lightPosition[MAX_LIGHTS];
 uniform vec3 lightColor[MAX_LIGHTS];
 uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
@@ -55,6 +56,8 @@ uniform samplerCube irradianceMap;
 uniform samplerCube prefilteredMapSampler;
 
 uniform float shadowMapResolution;
+uniform samplerCube shadowCube0;
+uniform samplerCube shadowCube1;
 
 uniform sampler2D positionSampler;
 uniform sampler2D normalSampler;
@@ -79,6 +82,7 @@ uniform sampler2D previousFrameSampler;
 
 uniform float shadowMapsQuantity;
 uniform sampler2D brdfSampler;
+
 
 uniform DirectionalLight directionalLights[MAX_LIGHTS];
 out vec4 finalColor;
@@ -142,6 +146,24 @@ vec3 computeGIIntensity(vec3 fragPosition, vec3 normal)
     return vec3(dot(sh_intensity, red), dot(sh_intensity, green), dot(sh_intensity, blue));
 }
 
+float pointLightShadow(vec3 fragPosition, vec3 lightPos, int index, vec2 shadowClipNearFar) {
+    if(index > 1){
+        return 1.;
+    }else{
+        vec3 lightToFrag = normalize(lightPos - fragPosition); 
+        float depth;
+        if(index == 0 )
+            depth = texture(shadowCube0, -lightToFrag).r ;
+        else
+            depth = texture(shadowCube1,-lightToFrag).r ;
+        depth += 0.05;
+        float fromLightToFrag = (length(fragPosition - lightPos) - shadowClipNearFar.x)  / (shadowClipNearFar.y - shadowClipNearFar.x);
+        
+        return  fromLightToFrag > depth ? 0. : 1.; 
+    }
+}
+
+
 void main() {
 
     ivec2 fragCoord = ivec2(gl_FragCoord.xy);
@@ -149,7 +171,7 @@ void main() {
     
     vec3 fragPosition = texture(positionSampler, texCoord).rgb;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
-    discard;
+        discard;
 
     vec3 V = normalize(cameraVec - fragPosition);
     vec3 albedo = texture(albedoSampler, texCoord).rgb;
@@ -178,26 +200,29 @@ void main() {
     }
 
     // DIRECTIONAL LIGHT
-    float shadows = dirLightsQuantity > 0?  0. : 1.0;
+    float shadows = dirLightsQuantity > 0 || lightQuantity > 0?  0. : 1.0;
+    float quantityToDivide = float(dirLightsQuantity) + float(lightQuantity);
     for (int i = 0; i < dirLightsQuantity; i++){
         vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
         vec3 lightDir =  normalize(directionalLights[i].direction);
 
         Lo += computeDirectionalLight(
-        V,
-        F0,
-        lightDir,
-        directionalLights[i].ambient,
-        fragPosition,
-        roughness,
-        metallic,
-        N,
-        albedo
+            V,
+            F0,
+            lightDir,
+            directionalLights[i].ambient,
+            fragPosition,
+            roughness,
+            metallic,
+            N,
+            albedo
         );
-        shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/float(dirLightsQuantity + 1);
+        shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/quantityToDivide;
     }
-    Lo = Lo* shadows; 
+ 
+    
     // POINT LIGHTS
+ 
     for (int i = 0; i < lightQuantity; ++i){
         vec3 L = normalize(lightPosition[i] - fragPosition);
         vec3 H = normalize(V + L);
@@ -219,10 +244,11 @@ void main() {
 
         float NdotL = max(dot(N, L), 0.0);
 
+        shadows += pointLightShadow(fragPosition, lightPosition[i], i, lightClippingPlane[i])/quantityToDivide;
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
   
-
+    Lo = Lo* shadows; 
     // TODO - DISABLED WITHOUT SKYBOX
     // DIFFUSE IBL
     vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
@@ -241,7 +267,9 @@ void main() {
     vec3 color = (ambient  + Lo +  GI) ;
     color = color / (color + vec3(1.0));
 
-    
-    finalColor = vec4(color , 1.0); 
+//    if(shadows > 1.)
+        finalColor = vec4(color, 1.0);
+//        else
+//         finalColor = vec4(color , 1.0);
 }
 `

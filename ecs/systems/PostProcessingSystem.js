@@ -11,13 +11,13 @@ import Shader from "../../utils/workers/Shader";
 import * as debug from '../../shaders/shadows/shadow.glsl'
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
-import Framebuffer from "../../instances/Framebuffer";
+import FramebufferInstance from "../../instances/FramebufferInstance";
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
-        this.frameBuffer = new Framebuffer(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
         this.frameBuffer
             .texture()
 

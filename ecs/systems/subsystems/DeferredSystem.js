@@ -92,6 +92,7 @@ export default class DeferredSystem extends System {
                     lightProjectionMatrix: dirLights[i].lightProjection
                 }
             }),
+            lightClippingPlane: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
             lightPosition: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  pointLights[i].components.PointLightComponent.position),
             lightColor: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
             lightAttenuationFactors: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation),
@@ -105,7 +106,10 @@ export default class DeferredSystem extends System {
 
             indirectLightAttenuation: skylight?.attenuation,
             gridSize: giGridSize,
-            noGI: giFBO !== undefined ? 0 : 1
+            noGI: giFBO !== undefined ? 0 : 1,
+
+            shadowCube0: shadowMapSystem.cubeMaps[0].texture,
+            shadowCube1: shadowMapSystem.cubeMaps[1].texture,
         })
         deferredSystem.frameBuffer.draw()
     }

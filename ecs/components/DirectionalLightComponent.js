@@ -13,6 +13,9 @@ export default class DirectionalLightComponent extends Component {
     _atlasFace = [0,0]
     _fixedColor = this._color
     _changed = true
+    shadowMap = true
+
+
     constructor(id) {
         super(id, 'DirectionalLightComponent');
         this._update()

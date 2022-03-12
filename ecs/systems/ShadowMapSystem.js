@@ -4,7 +4,30 @@ import SYSTEMS from "../../utils/misc/SYSTEMS";
 import * as rsmShaders from '../../shaders/gi/rsm.glsl'
 import * as smShaders from '../../shaders/shadows/shadow.glsl'
 import Shader from "../../utils/workers/Shader";
-import Framebuffer from "../../instances/Framebuffer";
+import FramebufferInstance from "../../instances/FramebufferInstance";
+import CubeMapInstance from "../../instances/CubeMapInstance";
+import {lookAt} from "../../utils/misc/utils";
+import {omniFragment} from "../../shaders/shadows/shadow.glsl";
+import {mat4, vec3} from "gl-matrix";
+const VIEWS = {
+    target: [
+        [1., 0., 0.],
+        [-1., 0., 0.],
+        [0., 1., 0.],
+        [0., -1., 0.],
+        [0., 0., 1.],
+        [0., 0., -1.],
+    ],
+    up: [
+        [0., -1., 0.],
+        [0., -1., 0.],
+        [0., 0., 1.],
+        [0., 0., -1.],
+        [0., -1., 0.],
+        [0., -1., 0.],
+    ]
+}
+
 
 export default class ShadowMapSystem extends System {
     _needsGIUpdate = true
@@ -12,28 +35,36 @@ export default class ShadowMapSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
+        this.maxCubeMaps = 2
+        this.cubeMaps = [
+            new CubeMapInstance(gpu, 512, true),
+            new CubeMapInstance(gpu, 512, true)
+        ]
         this.resolutionPerTexture = 1024
         this.maxResolution = 4096
         this.rsmResolution = 512
-        this.rsmFramebuffer = new Framebuffer(gpu, this.rsmResolution, this.rsmResolution)
+        this.rsmFramebuffer = new FramebufferInstance(gpu, this.rsmResolution, this.rsmResolution)
         this.rsmFramebuffer
             .texture(undefined, undefined, 0)
             .texture(undefined, undefined, 1)
             .texture(undefined, undefined, 2)
             .depthTest()
 
-        this.shadowsFrameBuffer = new Framebuffer(gpu, this.maxResolution, this.maxResolution)
+        this.shadowsFrameBuffer = new FramebufferInstance(gpu, this.maxResolution, this.maxResolution)
         this.shadowsFrameBuffer
             .depthTexture()
 
-
         this.reflectiveShadowMapShader = new Shader(rsmShaders.vertex, rsmShaders.fragment, gpu)
+
+
         this.shadowMapShader = new Shader(smShaders.vertex, smShaders.fragment, gpu)
+        this.shadowMapOmniShader = new Shader(smShaders.vertex, smShaders.omniFragment, gpu)
     }
 
     set needsGIUpdate(data) {
         this._needsGIUpdate = data
     }
+
     get needsGIUpdate() {
         return this._needsGIUpdate
     }
@@ -55,105 +86,134 @@ export default class ShadowMapSystem extends System {
 
         let {
             shadingModel,
-            injectMaterial,
             dataChanged,
             setDataChanged
         } = options
 
 
-        let changed = systems[SYSTEMS.TRANSFORMATION].changed || dataChanged
+        let lights2D = [], sky = false, lights3D = [], transformChanged = systems[SYSTEMS.TRANSFORMATION].changed
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i].components.DirectionalLightComponent
-            changed = changed || current.changed
-
-            current.changed = false
+            if ((current.changed || transformChanged || skylight?.changed) && current.shadowMap) {
+                lights2D.push(current)
+                current.changed = false
+            }
         }
-
-        if (skylight) {
-            changed = changed || skylight.changed
+        for (let i = 0; i < pointLights.length; i++) {
+            const current = pointLights[i].components.PointLightComponent
+            if ((current.changed || transformChanged) && current.shadowMap) {
+                lights3D.push(current)
+                current.changed = false
+            }
+        }
+        if (skylight && (skylight.changed || lights2D.length > 0)) {
+            sky = skylight.changed || transformChanged
+            if (skylight.shadowMap && (lights2D.length > 0 || skylight.changed))
+                lights2D.push(skylight)
 
             skylight.changed = false
         }
 
-        if (shadingModel === SHADING_MODELS.DETAIL && changed) {
+        if (shadingModel === SHADING_MODELS.DETAIL && (lights2D.length > 0 || lights3D.length > 0)) {
             if (dataChanged)
                 setDataChanged()
             this.shadowMapShader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
-            const maxLights = directionalLights.length + spotLights.length + (skylight ? 1 : 0)
+
             this.gpu.clearDepth(1);
 
-            // this.gpu.cullFace(this.gpu.FRONT)
-            this.shadowsFrameBuffer.startMapping()
-            for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
-                if (face < maxLights) {
-                    this.gpu.viewport(
-                        currentColumn * this.resolutionPerTexture,
-                        currentRow * this.resolutionPerTexture,
-                        this.resolutionPerTexture,
-                        this.resolutionPerTexture
-                    )
-                    this.gpu.scissor(
-                        currentColumn * this.resolutionPerTexture,
-                        currentRow * this.resolutionPerTexture,
-                        this.resolutionPerTexture,
-                        this.resolutionPerTexture
-                    )
-                    this.gpu.enable(this.gpu.SCISSOR_TEST);
-                    this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
+            if (lights2D.length > 0) {
+                // this.gpu.cullFace(this.gpu.FRONT)
+                this.shadowsFrameBuffer.startMapping()
+                this.gpu.enable(this.gpu.SCISSOR_TEST);
 
+                for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
+                    if (face < lights2D.length) {
+                        this.gpu.viewport(
+                            currentColumn * this.resolutionPerTexture,
+                            currentRow * this.resolutionPerTexture,
+                            this.resolutionPerTexture,
+                            this.resolutionPerTexture
+                        )
+                        this.gpu.scissor(
+                            currentColumn * this.resolutionPerTexture,
+                            currentRow * this.resolutionPerTexture,
+                            this.resolutionPerTexture,
+                            this.resolutionPerTexture
+                        )
 
-                    const isSpotLight = face > directionalLights.length - 1
-                    let currentLight = isSpotLight ? spotLights[face]?.SpotLightComponent : directionalLights[face].components.DirectionalLightComponent
+                        this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
 
-                    if (!currentLight)
-                        currentLight = skylight
-                    currentLight.atlasFace = [currentColumn, 0]
+                        let currentLight = lights2D[face]
+                        currentLight.atlasFace = [currentColumn, 0]
 
-                    this.gpu.disable(this.gpu.SCISSOR_TEST);
-
-                    this._loopMeshes(meshes, injectMaterial, meshSources, meshSystem, currentLight, materials, this.shadowMapShader)
+                        this._loopMeshes(meshes, meshSources, meshSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
+                    }
+                    if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
+                        currentColumn = 0
+                        currentRow += 1
+                    } else
+                        currentColumn += 1
                 }
-                if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
-                    currentColumn = 0
-                    currentRow += 1
-                } else
-                    currentColumn += 1
+                this.gpu.disable(this.gpu.SCISSOR_TEST);
+                this.shadowsFrameBuffer.stopMapping()
+                this.gpu.cullFace(this.gpu.BACK)
             }
-            this.shadowsFrameBuffer.stopMapping()
-            this.gpu.cullFace(this.gpu.BACK)
 
-            if (skylight) {
+            if (sky) {
                 this.needsGIUpdate = true
-
                 this.reflectiveShadowMapShader.use()
 
                 this.rsmFramebuffer.startMapping()
-                this._loopMeshes(meshes, injectMaterial, meshSources, meshSystem, skylight, materials, this.reflectiveShadowMapShader)
+                this._loopMeshes(meshes, meshSources, meshSystem, materials, this.reflectiveShadowMapShader, skylight.lightView, skylight.lightProjection, skylight.fixedColor)
                 this.rsmFramebuffer.stopMapping()
             }
+            if (lights3D.length > 0) {
+                this.shadowMapOmniShader.use()
+                this.gpu.viewport(
+                    0,
+                    0,
+                    512,
+                    512
+                )
+                for (let i = 0; i < this.maxCubeMaps; i++) {
+                    const current = lights3D[i]
+                    if (current) {
+                        this.cubeMaps[i].draw((yaw, pitch, perspective, index) => {
+                            const target = vec3.add([], current.position, VIEWS.target[index])
+                            this._loopMeshes(
+                                meshes,
+                                meshSources,
+                                meshSystem,
+                                materials,
+                                this.shadowMapOmniShader,
+                                mat4.lookAt([], current.position, target, VIEWS.up[index]), perspective, undefined, current.position, [current.zNear, current.zFar])
+                        }, false, current.zFar, current.zNear)
 
+                    }
+                }
+            }
         }
     }
 
-    _loopMeshes(meshes, injectMaterial, meshSources, meshSystem, currentLight, materials, shader) {
+    _loopMeshes(meshes, meshSources, meshSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
         for (let m = 0; m < meshes.length; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components.MeshComponent.meshID]
             if (mesh !== undefined) {
                 const currentMaterialID = current.components.MaterialComponent.materialID
-                let mat = injectMaterial ? injectMaterial : (materials[currentMaterialID] ? materials[currentMaterialID] : this.fallbackMaterial)
+                let mat = materials[currentMaterialID] ? materials[currentMaterialID] : undefined
                 if (!mat || !mat.ready)
                     mat = meshSystem.fallbackMaterial
                 const t = current.components.TransformComponent
 
-                this._drawMesh(mesh, currentLight.lightView, currentLight.lightProjection, t.transformationMatrix, mat.albedo.texture, mat.normal.texture, currentLight.fixedColor, shader)
+                this._drawMesh(mesh, view, projection, t.transformationMatrix, mat.albedo.texture, mat.normal.texture, color, shader, lightPosition, shadowClipNearFar)
             }
         }
     }
 
-    _drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, albedo, normal, lightColor, shader) {
+    _drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, albedo, normal, lightColor, shader, lightPosition, shadowClipNearFar) {
         this.gpu.bindVertexArray(mesh.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
 
@@ -163,13 +223,16 @@ export default class ShadowMapSystem extends System {
             mesh.uvVBO.enable()
         }
 
+
         shader.bindForUse({
+            shadowClipNearFar,
             viewMatrix,
             transformMatrix,
             projectionMatrix,
             lightColor,
             albedoSampler: albedo,
-            normalSampler: normal
+            normalSampler: normal,
+            lightPosition
         })
 
         this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)

@@ -1,7 +1,7 @@
 import System from "../basic/System";
 import * as shaderCode from "../../shaders/misc/picker.glsl";
 import Shader from "../../utils/workers/Shader";
-import Framebuffer from "../../instances/Framebuffer";
+import FramebufferInstance from "../../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
 
 export default class PickSystem extends System {
@@ -9,7 +9,7 @@ export default class PickSystem extends System {
         super([]);
         this.gpu = gpu
 
-        this.frameBuffer = new Framebuffer(gpu, 1, 1)
+        this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
         this.frameBuffer
             .texture(1, 1, 0, this.gpu.RGBA, this.gpu.RGBA, this.gpu.UNSIGNED_BYTE, false, true, true)
             .depthTest(this.gpu.DEPTH_COMPONENT16)

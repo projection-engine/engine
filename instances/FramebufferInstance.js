@@ -1,7 +1,7 @@
 import {createRBO, createTexture} from "../utils/misc/utils";
 import Quad from "../utils/workers/Quad";
 
-export default class Framebuffer extends Quad {
+export default class FramebufferInstance extends Quad {
     FBO
     frameBufferTexture
     renderBufferObject
@@ -23,11 +23,12 @@ export default class Framebuffer extends Quad {
     }
 
 
-    startMapping(buffer = this.FBO, autoSetViewport = true) {
+    startMapping(buffer = this.FBO, autoSetViewport = true, clear=true) {
         if (autoSetViewport)
             this.gpu.viewport(0, 0, this.width, this.height);
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, buffer);
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
+        if(clear)
+            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
     }
 
     stopMapping(clear = true, unbind = true) {

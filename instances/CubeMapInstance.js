@@ -1,5 +1,5 @@
 import {mat4} from "gl-matrix";
-import {lookAt} from "../utils/misc/utils";
+import {createTexture, lookAt} from "../utils/misc/utils";
 import cube from "../assets/cube.json";
 import VBO from "../utils/workers/VBO";
 import * as  shaderCode from '../shaders/misc/cubeMap.glsl'
@@ -12,74 +12,84 @@ export default class CubeMapInstance {
     _prefilteredShader
     _res
 
-    constructor(gpu, resolution) {
+    constructor(gpu, resolution, asDepth) {
         this.gpu = gpu
-
-        this._vertexBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        if (!asDepth)
+            this._vertexBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         this._res = resolution
-        this._prefilteredShader = new Shader(shaderCode.vertex, shaderCode.prefiltered, gpu)
+        this._prefilteredShader = asDepth ? null : new Shader(shaderCode.vertex, shaderCode.prefiltered, gpu)
+
+        this._asDepth = asDepth
     }
-    set resolution (data){
+
+    set resolution(data) {
         this._res = data
     }
-    get resolution(){
+
+    get resolution() {
         return this._res
     }
 
-    generatePrefiltered(mipLevels=6, resolution=128) {
-        const perspective = mat4.perspective([], 1.57, 1, .1, 10),
-             gpu = this.gpu
-        gpu.viewport(0, 0, resolution, resolution)
-        this.prefiltered = this._initializeTexture(resolution, true);
-        gpu.generateMipmap(gpu.TEXTURE_CUBE_MAP)
+    generatePrefiltered(mipLevels = 6, resolution = 128) {
+        if (!this._asDepth) {
+            const perspective = mat4.perspective([], 1.57, 1, .1, 10),
+                gpu = this.gpu
+            gpu.viewport(0, 0, resolution, resolution)
+            this.prefiltered = this._initializeTexture(resolution, true);
+            gpu.generateMipmap(gpu.TEXTURE_CUBE_MAP)
 
 
-        const frameBuffer = gpu.createFramebuffer()
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, frameBuffer)
+            const frameBuffer = gpu.createFramebuffer()
+            gpu.bindFramebuffer(gpu.FRAMEBUFFER, frameBuffer)
 
-        const rbo = gpu.createRenderbuffer();
-        gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
-        gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
-        gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
+            const rbo = gpu.createRenderbuffer();
+            gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
+            gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
+            gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
 
 
-        gpu.disable(gpu.CULL_FACE);
-        this._prefilteredShader.use()
-        this._vertexBuffer.enable()
+            gpu.disable(gpu.CULL_FACE);
+            this._prefilteredShader.use()
+            this._vertexBuffer.enable()
 
-        for (let i = 0; i < mipLevels; i++) {
-            const currentRes = resolution * Math.pow(0.5, i)
-            const roughness = i / (mipLevels - 1)
-            gpu.viewport(0, 0, currentRes, currentRes)
-            for (let j = 0; j < 6; j++) {
-                gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, currentRes, currentRes);
-                const rotations = getRotation(j)
-                gpu.framebufferTexture2D(
-                    gpu.FRAMEBUFFER,
-                    gpu.COLOR_ATTACHMENT0,
-                    gpu.TEXTURE_CUBE_MAP_POSITIVE_X + j,
-                    this.prefiltered,
-                    i
-                );
+            for (let i = 0; i < mipLevels; i++) {
+                const currentRes = resolution * Math.pow(0.5, i)
+                const roughness = i / (mipLevels - 1)
+                gpu.viewport(0, 0, currentRes, currentRes)
+                for (let j = 0; j < 6; j++) {
+                    gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, currentRes, currentRes);
+                    const rotations = getRotation(j)
+                    gpu.framebufferTexture2D(
+                        gpu.FRAMEBUFFER,
+                        gpu.COLOR_ATTACHMENT0,
+                        gpu.TEXTURE_CUBE_MAP_POSITIVE_X + j,
+                        this.prefiltered,
+                        i
+                    );
 
-                this._prefilteredShader.bindForUse({
-                    projectionMatrix: perspective,
-                    viewMatrix: lookAt(rotations.yaw, rotations.pitch, [0,0,0]),
-                    roughness: roughness,
-                    environmentMap: this.texture
-                })
+                    this._prefilteredShader.bindForUse({
+                        projectionMatrix: perspective,
+                        viewMatrix: lookAt(rotations.yaw, rotations.pitch, [0, 0, 0]),
+                        roughness: roughness,
+                        environmentMap: this.texture
+                    })
 
-                gpu.drawArrays(gpu.TRIANGLES, 0, 36)
+                    gpu.drawArrays(gpu.TRIANGLES, 0, 36)
+                }
             }
-        }
-        this._vertexBuffer.disable()
-        return this
+            this._vertexBuffer.disable()
+            return this
+        } else
+            return this
     }
 
-    draw(callback, useVBO) {
+    draw(callback, useVBO, zFar = 10, zNear = .1) {
         this.gpu.viewport(0, 0, this._res, this._res)
-        this.texture= this._initializeTexture(this._res);
-        const perspective = mat4.perspective([], Math.PI / 2, 1, .1, 10)
+        if (this.texture)
+            this.gpu.deleteTexture(this.texture)
+
+        this.texture = this._initializeTexture(this._res);
+        const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
         const gpu = this.gpu
         const frameBuffer = gpu.createFramebuffer()
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, frameBuffer)
@@ -88,21 +98,26 @@ export default class CubeMapInstance {
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
         gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, this._res, this._res)
         gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
-        if(useVBO)
+        if (useVBO && !this._asDepth)
             this._vertexBuffer.enable()
         for (let i = 0; i < 6; i++) {
             const rotations = getRotation(i)
             gpu.framebufferTexture2D(
                 gpu.FRAMEBUFFER,
-                gpu.COLOR_ATTACHMENT0,
+                this._asDepth ? gpu.DEPTH_ATTACHMENT : gpu.COLOR_ATTACHMENT0,
                 gpu.TEXTURE_CUBE_MAP_POSITIVE_X + i,
                 this.texture,
                 0
             )
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT);
-            callback(rotations.yaw, rotations.pitch, perspective)
+            callback(rotations.yaw, rotations.pitch, perspective, i)
         }
-        this._vertexBuffer.disable()
+        if (useVBO && !this._asDepth)
+            this._vertexBuffer.disable()
+
+        this.gpu.deleteFramebuffer(frameBuffer)
+        this.gpu.deleteRenderbuffer(rbo)
+
         return this
     }
 
@@ -112,20 +127,22 @@ export default class CubeMapInstance {
         let texture = gpu.createTexture();
         gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, texture);
 
-        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MAG_FILTER, gpu.LINEAR);
-        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MIN_FILTER, mipmap ? gpu.LINEAR_MIPMAP_LINEAR : gpu.LINEAR);
+        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MAG_FILTER, this._asDepth ? gpu.NEAREST : gpu.LINEAR);
+        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MIN_FILTER, this._asDepth ? gpu.NEAREST : (mipmap ? gpu.LINEAR_MIPMAP_LINEAR : gpu.LINEAR));
+
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_S, gpu.CLAMP_TO_EDGE);
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_T, gpu.CLAMP_TO_EDGE);
-
+        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_R, gpu.CLAMP_TO_EDGE);
+        const d = directions(gpu)
         for (let i = 0; i < 6; i++) {
             gpu.texImage2D(
-                gpu.TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                d[i].access,
                 0,
-                gpu.RGBA16F,
+                this._asDepth ? gpu.DEPTH_COMPONENT32F : gpu.RGBA16F,
                 resolution,
                 resolution,
                 0,
-                gpu.RGBA,
+                this._asDepth ? gpu.DEPTH_COMPONENT : gpu.RGBA,
                 gpu.FLOAT,
                 null);
         }
@@ -134,7 +151,17 @@ export default class CubeMapInstance {
     }
 
 }
+const directions = (gpu) => {
 
+    return [
+        {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_X},
+        {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_X},
+        {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_Y},
+        {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Y},
+        {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_Z},
+        {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Z}
+    ]
+}
 function getRotation(index) {
 
     switch (index) {
@@ -176,3 +203,5 @@ function getRotation(index) {
     }
 
 }
+
+

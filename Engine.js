@@ -204,6 +204,7 @@ export default class Engine extends RenderLoop {
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
                 for (let s = 0; s < systems.length; s++) {
+
                     this._systems[systems[s]]
                         .execute(
                             {
