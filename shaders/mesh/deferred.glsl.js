@@ -52,8 +52,9 @@ uniform vec3 lightColor[MAX_LIGHTS];
 uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
 uniform int lightQuantity;
 
-uniform samplerCube irradianceMap;
-uniform samplerCube prefilteredMapSampler;
+//uniform samplerCube irradianceMap;
+//uniform samplerCube prefilteredMapSampler;
+//uniform sampler2D brdfSampler;
 
 uniform float shadowMapResolution;
 uniform samplerCube shadowCube0;
@@ -63,6 +64,8 @@ uniform sampler2D positionSampler;
 uniform sampler2D normalSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D behaviourSampler;
+uniform sampler2D ambientSampler;
+
 
 uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
@@ -81,7 +84,7 @@ uniform sampler2D shadowMapTexture;
 uniform sampler2D previousFrameSampler;
 
 uniform float shadowMapsQuantity;
-uniform sampler2D brdfSampler;
+
 
 
 uniform DirectionalLight directionalLights[MAX_LIGHTS];
@@ -176,7 +179,9 @@ void main() {
     vec3 V = normalize(cameraVec - fragPosition);
     vec3 albedo = texture(albedoSampler, texCoord).rgb;
     vec3 N = texture(normalSampler, texCoord).rgb;
+    vec3 ambient = texture(ambientSampler, texCoord).rgb;
     float ao = texture(behaviourSampler, texCoord).r;
+   
 //    if(hasAO == 1)
 //        ao += texture(aoSampler, texCoord).r;
     float roughness = texture(behaviourSampler, texCoord).g;
@@ -251,17 +256,17 @@ void main() {
     Lo = Lo* shadows; 
     // TODO - DISABLED WITHOUT SKYBOX
     // DIFFUSE IBL
-    vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
-    vec3 kD = (1.0 - F) * (1.0 - metallic);
-    vec3 diffuse = texture(irradianceMap, vec3(N.x, -N.y, N.z)).rgb * albedo * kD;
+//    vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
+//    vec3 kD = (1.0 - F) * (1.0 - metallic);
+//    vec3 diffuse = texture(irradianceMap, vec3(N.x, -N.y, N.z)).rgb * albedo * kD;
+//
+//    const float MAX_REFLECTION_LOD = 4.0;
+//    vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, N), roughness * MAX_REFLECTION_LOD).rgb;
+//    vec2 brdf = texture(brdfSampler, vec2(NdotV, roughness)).rg;
+//    vec3 specular = prefilteredColor * (F * brdf.r + brdf.g);
 
-    const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, N), roughness * MAX_REFLECTION_LOD).rgb;
-    vec2 brdf = texture(brdfSampler, vec2(NdotV, roughness)).rg;
-    vec3 specular = prefilteredColor * (F * brdf.r + brdf.g);
 
-
-    vec3 ambient = (diffuse + specular) * ao;
+//    vec3 ambient = (diffuse + specular) * ao;
 
     // SHADOW MAP + TONEMAPPING
     vec3 color = (ambient  + Lo +  GI) ;

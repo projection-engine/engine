@@ -3,6 +3,7 @@ import Component from "../basic/Component";
 import CubeMapInstance from "../../instances/CubeMapInstance";
 import Shader from "../../utils/workers/Shader";
 import * as shaderCode from "../../shaders/misc/cubeMap.glsl";
+import * as skyboxCode from "../../shaders/misc/skybox.glsl";
 
 export default class SkyboxComponent extends Component {
     _hdrTexture
@@ -69,7 +70,7 @@ export default class SkyboxComponent extends Component {
 
     _compile() {
         this._initialized = false
-        const baseShader = new Shader(shaderCode.vertex, shaderCode.fragment, this.gpu)
+        const baseShader = new Shader(shaderCode.vertex, skyboxCode.generationFragment, this.gpu)
         const irradianceShader = new Shader(shaderCode.vertex, shaderCode.irradiance, this.gpu)
 
         baseShader.use()

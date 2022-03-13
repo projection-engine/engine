@@ -51,9 +51,10 @@ in mat3 toTangentSpace;
 
 in vec3 viewDirection;
  
-uniform int parallaxEnabled;
+uniform lowp ivec3 settings;
 uniform float heightScale;
 uniform float layers;
+uniform vec3 cameraVec;
 
 struct PBR {
     sampler2D albedo;
@@ -66,17 +67,24 @@ struct PBR {
 };
 uniform PBR pbrMaterial;
 
+uniform sampler2D brdfSampler;
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilteredMapSampler;
+
 // OUTPUTS
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour;
+layout (location = 4) out vec4 gAmbient;
+const float PI = 3.14159265359;
 
 
+@import(fresnelSchlickRoughness)
 
-vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap, int type)
+vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap )
 {
-    if(type == 1){
+    if(settings.x == 1){
             float layer_depth = 1.0 / layers;
             float currentLayerDepth = 0.0;
             vec2 delta_uv = viewDir.xy * heightScale / (viewDir.z * layers);
@@ -98,16 +106,20 @@ vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap, int type
                          + layer_depth;
             float weight = next / (next - prev);
             vec2 UVs = mix(cur_uv, prev_uv, weight);
-//            if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
-//                discard;
+            if (settings.y == 1 && ( UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0))
+                discard;
             return UVs;
     }
     else{
-//           float depth = texture(heightMap, texCoord).r;    
-//            vec2 p = viewDir.xy * (depth * heightScale) / viewDir.z;
             return texCoord ;  
     }
 }
+
+//settings = [
+//    parallaxEnabled,
+//    discardOffPixels,
+//    generateAmbient
+//]
 
 void main(){
 
@@ -116,7 +128,7 @@ void main(){
    
     gPosition = vPosition;
     
-    vec2 UVs = parallaxMapping(texCoord,  viewDirection, pbrMaterial.height, parallaxEnabled);
+    vec2 UVs = parallaxMapping(texCoord,  viewDirection, pbrMaterial.height);
    
     vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);
     if(albedoTexture.a <= 0.1)
@@ -131,8 +143,28 @@ void main(){
         1.
     );
     
-    gNormal = vec4(normalize(toTangentSpace * ((texture(pbrMaterial.normal, UVs).xyz * 2.0)- 1.0)), 1.0);
 
+    gNormal = vec4(normalize(toTangentSpace * ((texture(pbrMaterial.normal, UVs).xyz * 2.0)- 1.0)), 1.0);
+    vec3 diffuse = vec3(0.);
+    vec3 specular = vec3(0.);
+    
+    if(settings.z == 1){
+        vec3 V = normalize(cameraVec - vPosition.xyz);
+        float NdotV    = max(dot(gNormal.rgb, V), 0.000001);
+        vec3 F0 = mix(vec3(0.04), albedoTexture.rgb, gBehaviour.b);
+        
+        vec3 F    = fresnelSchlickRoughness(NdotV, F0, gBehaviour.g);
+        vec3 kD = (1.0 - F) * (1.0 - gBehaviour.b);
+        diffuse = texture(irradianceMap, vec3(gNormal.x, -gNormal.y, gNormal.z)).rgb * gAlbedo.rgb * kD;
+    
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, gNormal.rgb), gBehaviour.g * MAX_REFLECTION_LOD).rgb;
+        vec2 brdf = texture(brdfSampler, vec2(NdotV, gBehaviour.g)).rg;
+        specular = prefilteredColor * (F * brdf.r + brdf.g);
+    }
+
+
+    gAmbient = vec4((diffuse + specular) * gBehaviour.r, 1.);
 }
 `
 

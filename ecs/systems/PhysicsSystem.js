@@ -73,7 +73,7 @@ function intersectBoundingSphere(current, target) {
     let radiusDistance = current.ColliderComponent.radius + target.ColliderComponent.radius,
         centerDistance = [0, 0, 0, 1]
     vec4.subtract(centerDistance, target.TransformComponent.position, current.TransformComponent.position)
-    centerDistance = vec4.length(centerDistance)
+   centerDistance = vec4.length(centerDistance)
 
     return (centerDistance - radiusDistance) <= .1;
 }

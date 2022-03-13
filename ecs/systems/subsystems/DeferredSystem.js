@@ -16,25 +16,7 @@ export default class DeferredSystem extends System {
         this.deferredShader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.flatDeferredShader = new Shader(shaderFlatCode.vertex, shaderFlatCode.fragment, gpu)
 
-        const brdf = new Image()
-        brdf.src = brdfImg
 
-        brdf.onload = () => {
-            this.BRDF = createTexture(
-                gpu,
-                512,
-                512,
-                gpu.RGBA32F,
-                0,
-                gpu.RGBA,
-                gpu.FLOAT,
-                brdf,
-                gpu.LINEAR,
-                gpu.LINEAR,
-                gpu.CLAMP_TO_EDGE,
-                gpu.CLAMP_TO_EDGE
-            )
-        }
     }
 
     _getDeferredShader(shadingModel) {
@@ -71,14 +53,12 @@ export default class DeferredSystem extends System {
             normalSampler: deferredSystem.frameBuffer.colors[1],
             albedoSampler: deferredSystem.frameBuffer.colors[2],
             behaviourSampler: deferredSystem.frameBuffer.colors[3],
+            ambientSampler: deferredSystem.frameBuffer.colors[4],
 
             lightQuantity: pointLightsQuantity,
-            irradianceMap: skyboxElement?.irradianceMap,
-            prefilteredMapSampler: skyboxElement?.cubeMapPrefiltered,
-            brdfSampler: this.BRDF,
+
             cameraVec: camera.position,
             dirLightQuantity: maxTextures,
-            // previousFrameSampler
             directionalLights: (new Array(maxTextures).fill(null)).map((_, i) => {
                 return {
                     direction: dirLights[i].direction,

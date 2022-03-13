@@ -5,6 +5,8 @@ import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import * as shaderCode from '../../shaders/mesh/meshDeferred.glsl'
 import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
+import brdfImg from "../../../../static/brdf_lut.jpg";
+import {createTexture} from "../../utils/misc/utils";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -20,9 +22,28 @@ export default class MeshSystem extends System {
             .texture(undefined, undefined, 1)
             .texture(undefined, undefined, 2)
             .texture(undefined, undefined, 3)
+            .texture(undefined, undefined, 4)
             .depthTest()
 
-        console.log(this.frameBuffer)
+        const brdf = new Image()
+        brdf.src = brdfImg
+
+        brdf.onload = () => {
+            this.brdf = createTexture(
+                gpu,
+                512,
+                512,
+                gpu.RGBA32F,
+                0,
+                gpu.RGBA,
+                gpu.FLOAT,
+                brdf,
+                gpu.LINEAR,
+                gpu.LINEAR,
+                gpu.CLAMP_TO_EDGE,
+                gpu.CLAMP_TO_EDGE
+            )
+        }
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
 
     }
@@ -84,7 +105,11 @@ export default class MeshSystem extends System {
                         mat,
                         current.components.MeshComponent.normalMatrix,
                         undefined,
-                        current.components.MaterialComponent
+                        current.components.MaterialComponent,
+
+                        skybox?.irradianceMap,
+                        skybox?.cubeMapPrefiltered,
+                        this.brdf
                     )
                 }
             }
@@ -102,12 +127,13 @@ export default class MeshSystem extends System {
         projectionMatrix,
         transformMatrix,
         material,
-
-
         normalMatrix,
         indexSelected,
-
-        materialComponent) {
+        materialComponent,
+        closestIrradiance,
+        closestPrefiltered,
+        brdf
+    ) {
 
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
@@ -131,8 +157,10 @@ export default class MeshSystem extends System {
                 },
                 heightScale: material.parallaxHeightScale,
                 layers: material.parallaxLayers,
-                parallaxEnabled: material.parallaxEnabled,
-                uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale
+
+                uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale,
+
+
             }
         }
 
@@ -143,7 +171,15 @@ export default class MeshSystem extends System {
             viewMatrix,
             cameraVec: camPosition,
             normalMatrix,
-            indexSelected
+            indexSelected,
+            brdfSampler: brdf,
+            irradianceMap: closestIrradiance,
+            prefilteredMapSampler: closestPrefiltered,
+            settings: [
+                material?.parallaxEnabled ? 1 : 0,
+                materialComponent?.discardOffPixels ? 1 : 0,
+                closestIrradiance && closestPrefiltered ? 1 : 0
+            ]
         })
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
