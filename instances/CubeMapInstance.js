@@ -23,7 +23,11 @@ export default class CubeMapInstance {
 
         this._asDepth = asDepth
     }
-
+    get vbo(){
+        return this._vertexBuffer
+    }
+    set vbo(_){
+    }
     set resolution(data) {
         this._res = data
     }
@@ -33,6 +37,7 @@ export default class CubeMapInstance {
     }
     generateIrradiance(){
         if (!this._asDepth) {
+
             this._irradianceShader.use()
             this.draw((yaw, pitch, perspective) => {
                 this._irradianceShader.bindForUse({

@@ -9,7 +9,7 @@ import CubeMapInstance from "../../instances/CubeMapInstance";
 import {lookAt} from "../../utils/misc/utils";
 import {omniFragment} from "../../shaders/shadows/shadow.glsl";
 import {mat4, vec3} from "gl-matrix";
-const VIEWS = {
+export const VIEWS = {
     target: [
         [1., 0., 0.],
         [-1., 0., 0.],

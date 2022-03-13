@@ -1,10 +1,15 @@
 import System from "../basic/System";
 
 import * as shaderCode from '../../shaders/mesh/forwardMesh.glsl'
+import * as skyShader from '../../shaders/misc/skybox.glsl'
 import Shader from "../../utils/workers/Shader";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
 import CubeMapInstance from "../../instances/CubeMapInstance";
-import {lookAt} from "../../utils/misc/utils";
+import {createVAO, lookAt} from "../../utils/misc/utils";
+import {mat4, vec3} from "gl-matrix";
+import {VIEWS} from "./ShadowMapSystem";
+import VBO from "../../utils/workers/VBO";
+import cube from "../../assets/cube.json";
 
 export default class CubeMapSystem extends System {
 
@@ -12,7 +17,10 @@ export default class CubeMapSystem extends System {
         super([]);
         this.gpu = gpu
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.skyShader = new Shader(skyShader.vertex, skyShader.fragment, gpu)
 
+        this.vao = createVAO(gpu)
+        this.vbo = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
     }
 
 
@@ -35,7 +43,7 @@ export default class CubeMapSystem extends System {
         if (!this._compiled || options.recompile) {
             console.log('REBUILDING')
             const meshSystem = systems[SYSTEMS.MESH]
-            this.shader.use()
+
             this.gpu.clearDepth(1);
             const dirLightsE = directionalLights.map(d => d.components.DirectionalLightComponent)
             let maxTextures = dirLightsE.length > 2 ? 2 : dirLightsE.length,
@@ -57,42 +65,75 @@ export default class CubeMapSystem extends System {
                 lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.position),
                 lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
                 lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
+            for (let i = 0; i < cubeMaps.length; i++) {
+                const current = cubeMaps[i].components.CubeMapComponent
+                if(current.cubeMap) {
+                    current.cubeMap.generateIrradiance()
+                    current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
+                }
+            }
 
 
             for (let i = 0; i < cubeMaps.length; i++) {
-
                 const current = cubeMaps[i].components.CubeMapComponent
 
                 if (!current.cubeMap)
-                    current.cubeMap = new CubeMapInstance(this.gpu, current.resolution, false)
+                    current.cubeMap = new CubeMapInstance(this.gpu, current.resolution)
 
-                current.cubeMap.draw((yaw, pitch, projection) => {
+                current.cubeMap.resolution = current.resolution
+                current.cubeMap.draw((yaw, pitch, projection, index) => {
+                        const target = vec3.add([], current.position, VIEWS.target[index])
+                        const view = mat4.lookAt([], current.position, target, VIEWS.up[index])
+                        const nView = [...view]
+                        nView[12] = nView[13] = nView[14] = 0
 
-                    const view = lookAt(yaw, pitch, current.position)
-                    this._loopMeshes(
-                        view,
-                        projection,
-                        current.position,
-                        meshSystem,
-                        materials,
-                        translucentMeshes,
-                        meshSources,
-                        meshes,
+                    if(skybox) {
+                        this.gpu.depthMask(false)
+                        this.skyShader.use()
+                        this.gpu.bindVertexArray(this.vao)
+                        this.vbo.enable()
+                        this.skyShader.bindForUse({
+                            uTexture: skybox?.cubeMap,
+                            projectionMatrix: projection,
+                            viewMatrix: nView,
+                            gamma: skybox?.gamma,
+                            exposure: skybox?.exposure
+                        })
 
-                        pointLightsQuantity,
-                        maxTextures,
-                        dirLights,
-                        dirLightsPov,
-                        lClip,
-                        lPosition,
-                        lColor,
-                        lAttenuation
-                    )
-                }, false)
-                current.cubeMap.generateIrradiance()
-                current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
+                        this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
+                        this.vbo.disable()
+                        this.gpu.depthMask(true)
+                    }
+                        this.shader.use()
+                        this._loopMeshes(
+                            view,
+                            projection,
+                            current.position,
+                            meshSystem,
+                            materials,
+                            translucentMeshes,
+                            meshSources,
+                            meshes,
+
+                            pointLightsQuantity,
+                            maxTextures,
+                            dirLights,
+                            dirLightsPov,
+                            lClip,
+                            lPosition,
+                            lColor,
+                            lAttenuation
+                        )
+                    },
+                    false,
+                    10000, 1)
+
+                // current.cubeMap.generateIrradiance()
+                // current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
+
                 current.compiled = true
             }
+
 
             if (options.recompile)
                 options.setRecompile(false)
@@ -109,7 +150,6 @@ export default class CubeMapSystem extends System {
         translucentMeshes,
         meshSources,
         meshes,
-
         pointLightsQuantity,
         maxTextures,
         dirLights,
@@ -218,6 +258,7 @@ export default class CubeMapSystem extends System {
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
         gpu.bindVertexArray(null)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
+
         mesh.vertexVBO.disable()
         mesh.uvVBO.disable()
         mesh.normalVBO.disable()

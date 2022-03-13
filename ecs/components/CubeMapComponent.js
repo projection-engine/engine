@@ -3,7 +3,7 @@ import {mat4} from "gl-matrix";
 
 export default class CubeMapComponent extends Component {
 
-    _position = [0, 0, 0]
+    pos = [0, 0, 0]
     _res = 128
     _cubeMap
     _transformationMatrix = Array.from(mat4.create())
@@ -67,10 +67,10 @@ export default class CubeMapComponent extends Component {
     }
 
     get position() {
-        return this._position
+        return this.pos
     }
     set position(data) {
-        this._position = data
+        this.pos = data
 
         this._transformationMatrix[12] = data[0]
         this._transformationMatrix[13] = data[1]

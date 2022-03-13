@@ -86,6 +86,7 @@ export default class SkyboxComponent extends Component {
             })
             this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
         }, true)
+
         this._cubeMap.generateIrradiance()
         this._cubeMap.generatePrefiltered(this._prefilteredMipmaps, this._resolution/this._prefilteredMipmaps)
         this._initialized = true
