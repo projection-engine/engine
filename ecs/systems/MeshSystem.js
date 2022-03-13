@@ -83,7 +83,8 @@ export default class MeshSystem extends System {
                         t.transformationMatrix,
                         mat,
                         current.components.MeshComponent.normalMatrix,
-                        shadingModel === SHADING_MODELS.WIREFRAME
+                        undefined,
+                        current.components.MaterialComponent
                     )
                 }
             }
@@ -101,8 +102,12 @@ export default class MeshSystem extends System {
         projectionMatrix,
         transformMatrix,
         material,
+
+
         normalMatrix,
-        indexSelected) {
+        indexSelected,
+
+        materialComponent) {
 
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
@@ -113,7 +118,7 @@ export default class MeshSystem extends System {
         mesh.tangentVBO.enable()
         let materialAttrs = {}
 
-        if (material) {
+        if (material && materialComponent) {
             materialAttrs = {
                 pbrMaterial: {
                     albedo: material.albedo.texture,
@@ -127,7 +132,7 @@ export default class MeshSystem extends System {
                 heightScale: material.parallaxHeightScale,
                 layers: material.parallaxLayers,
                 parallaxEnabled: material.parallaxEnabled,
-                uvScale: material.uvScale
+                uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale
             }
         }
 

@@ -89,7 +89,7 @@ export default class PostProcessingSystem extends System {
 
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
-        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility)
+        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.gpu.enable(this.gpu.DEPTH_TEST)
 
         this.frameBuffer.stopMapping()

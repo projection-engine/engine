@@ -56,7 +56,7 @@ export default class BillboardSystem extends System {
         }
     }
 
-    execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility) {
+    execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight) {
         super.execute()
         if (this._ready) {
             const billboards = [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps]
@@ -65,6 +65,9 @@ export default class BillboardSystem extends System {
 
                 this.billboardRenderer.draw(mapped.pointLights, this.pointLightTexture.texture, camera)
                 this.billboardRenderer.draw(mapped.directionalLights, this.directionalLightTexture.texture, camera)
+                if(skylight)
+                    this.billboardRenderer.draw([skylight.transformationMatrix], this.directionalLightTexture.texture, camera)
+
                 this.billboardRenderer.draw(mapped.spotLights, this.spotLightTexture.texture, camera)
                 this.billboardRenderer.draw(mapped.cubemaps, this.cubemapTexture.texture, camera)
             }
