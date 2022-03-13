@@ -17,10 +17,12 @@ import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
 import TransformSystem from "./ecs/systems/TransformSystem";
 import SYSTEMS from "./utils/misc/SYSTEMS";
 import MATERIAL_TYPES from "./utils/misc/MATERIAL_TYPES";
+import CubeMapSystem from "./ecs/systems/CubeMapSystem";
 
 export default class Engine extends RenderLoop {
     types = {}
     cameraType = CAMERA_TYPES.SPHERICAL
+    recompiled = false
     data = {
         fpsTarget: undefined,
         currentCoord: {x: 0, y: 0},
@@ -81,25 +83,13 @@ export default class Engine extends RenderLoop {
     }
 
     set systems(data) {
-
         let newSystems = {}
-        if (Object.keys(this._systems).length > data.length) {
+        data.forEach(s => {
+            let key = getKey(s)
 
-            Object.keys(this._systems).forEach(s => {
-                const found = data.find(sis => getKey(sis) === s)
-
-                if (found)
-                    newSystems[s] = found
-                else
-                    newSystems[s] = this._systems[s]
-            })
-        } else {
-            data.forEach(s => {
-                let key = getKey(s)
-                if (key)
-                    newSystems[key] = s
-            })
-        }
+            if (key)
+                newSystems[key] = s
+        })
 
         this._systems = newSystems
 
@@ -197,6 +187,7 @@ export default class Engine extends RenderLoop {
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
             }
 
+
             const systems = Object.keys(this._systems).sort()
             this._changed = true
             super.start((timestamp) => {
@@ -204,7 +195,6 @@ export default class Engine extends RenderLoop {
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
                 for (let s = 0; s < systems.length; s++) {
-
                     this._systems[systems[s]]
                         .execute(
                             {
@@ -220,7 +210,9 @@ export default class Engine extends RenderLoop {
                                 },
                                 currentCoords: this.data.currentCoord,
                                 camera: this.camera,
-                                elapsed: timestamp
+                                elapsed: timestamp,
+                                recompile: !this.recompiled,
+                                setRecompile: () => this.recompiled = true
                             },
                             this._systems,
                             data
@@ -271,6 +263,9 @@ function getKey(s) {
 
         case s instanceof TransformSystem:
             return SYSTEMS.TRANSFORMATION
+
+        case s instanceof CubeMapSystem:
+            return SYSTEMS.CUBE_MAP
 
         default:
             return undefined

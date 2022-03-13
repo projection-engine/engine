@@ -8,6 +8,7 @@ import Shader from "../utils/workers/Shader";
 export default class CubeMapInstance {
     texture
     prefiltered
+    irradianceTexture
     gpu
     _prefilteredShader
     _res
@@ -18,6 +19,7 @@ export default class CubeMapInstance {
             this._vertexBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         this._res = resolution
         this._prefilteredShader = asDepth ? null : new Shader(shaderCode.vertex, shaderCode.prefiltered, gpu)
+        this._irradianceShader = asDepth ? null : new Shader(shaderCode.vertex, shaderCode.irradiance, gpu)
 
         this._asDepth = asDepth
     }
@@ -29,8 +31,21 @@ export default class CubeMapInstance {
     get resolution() {
         return this._res
     }
-
+    generateIrradiance(){
+        if (!this._asDepth) {
+            this._irradianceShader.use()
+            this.draw((yaw, pitch, perspective) => {
+                this._irradianceShader.bindForUse({
+                    projectionMatrix: perspective,
+                    viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
+                    uSampler: this.texture
+                })
+                this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
+            }, true, undefined, undefined, 32, true)
+        }
+    }
     generatePrefiltered(mipLevels = 6, resolution = 128) {
+
         if (!this._asDepth) {
             const perspective = mat4.perspective([], 1.57, 1, .1, 10),
                 gpu = this.gpu
@@ -83,12 +98,21 @@ export default class CubeMapInstance {
             return this
     }
 
-    draw(callback, useVBO, zFar = 10, zNear = .1) {
-        this.gpu.viewport(0, 0, this._res, this._res)
-        if (this.texture)
-            this.gpu.deleteTexture(this.texture)
+    draw(callback, useVBO, zFar = 10, zNear = .1, resolution=this._res, asIrradiance) {
+        let texture
+        this.gpu.viewport(0, 0, resolution, resolution)
+        if(!asIrradiance) {
+            if (!this.texture)
+                this.texture = this._initializeTexture(resolution);
 
-        this.texture = this._initializeTexture(this._res);
+            texture = this.texture
+        }else {
+            if (!this.irradianceTexture)
+                this.irradianceTexture = this._initializeTexture(resolution);
+            texture = this.irradianceTexture
+        }
+
+
         const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
         const gpu = this.gpu
         const frameBuffer = gpu.createFramebuffer()
@@ -96,7 +120,7 @@ export default class CubeMapInstance {
 
         const rbo = gpu.createRenderbuffer();
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
-        gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, this._res, this._res)
+        gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
         gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
         if (useVBO && !this._asDepth)
             this._vertexBuffer.enable()
@@ -106,7 +130,7 @@ export default class CubeMapInstance {
                 gpu.FRAMEBUFFER,
                 this._asDepth ? gpu.DEPTH_ATTACHMENT : gpu.COLOR_ATTACHMENT0,
                 gpu.TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                this.texture,
+                texture,
                 0
             )
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT);

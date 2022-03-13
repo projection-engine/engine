@@ -14,13 +14,13 @@ export default class SkyboxComponent extends Component {
     gamma = 1
     exposure = 1
     imageID = undefined
-
+    _prefilteredMipmaps = 6
     constructor(id, gpu) {
         super(id, 'SkyboxComponent');
         this.gpu = gpu
 
         this._cubeMap = new CubeMapInstance(gpu, this._resolution)
-        this._irradianceMap = new CubeMapInstance(gpu, 32)
+
     }
 
     get resolution() {
@@ -65,13 +65,16 @@ export default class SkyboxComponent extends Component {
     }
 
     get irradianceMap() {
-        return this._irradianceMap?.texture
+        return this._cubeMap?.irradianceTexture
     }
+    get prefilteredMipmaps(){
+     return this._prefilteredMipmaps
+    }
+    set prefilteredMipmaps(_){}
 
     _compile() {
         this._initialized = false
         const baseShader = new Shader(shaderCode.vertex, skyboxCode.generationFragment, this.gpu)
-        const irradianceShader = new Shader(shaderCode.vertex, shaderCode.irradiance, this.gpu)
 
         baseShader.use()
         this._cubeMap.resolution = this._resolution
@@ -83,20 +86,8 @@ export default class SkyboxComponent extends Component {
             })
             this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
         }, true)
-
-        irradianceShader.use()
-        this._irradianceMap.draw((yaw, pitch, perspective) => {
-            irradianceShader.bindForUse({
-                projectionMatrix: perspective,
-                viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
-                uSampler: this._cubeMap.texture
-            })
-            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
-        }, true)
-
-
-        this._cubeMap.generatePrefiltered(6, this._resolution/4)
+        this._cubeMap.generateIrradiance()
+        this._cubeMap.generatePrefiltered(this._prefilteredMipmaps, this._resolution/this._prefilteredMipmaps)
         this._initialized = true
-        this.gpu.deleteTexture(this._hdrTexture)
     }
 }

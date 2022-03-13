@@ -94,6 +94,9 @@ export default class MeshSystem extends System {
                     let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components.MaterialComponent.overrideInjection ? injectMaterial : this.fallbackMaterial
                     if (!mat || !mat.ready)
                         mat = this.fallbackMaterial
+
+                    const first = cubeMaps[0]
+
                     MeshSystem.drawMesh(
                         this.shader,
                         this.gpu,
@@ -107,9 +110,10 @@ export default class MeshSystem extends System {
                         undefined,
                         current.components.MaterialComponent,
 
-                        skybox?.irradianceMap,
-                        skybox?.cubeMapPrefiltered,
-                        this.brdf
+                        cubeMaps.length > 0 && first.components.CubeMapComponent.cubeMap? first.components.CubeMapComponent.irradianceMap : skybox?.irradianceMap,
+                        cubeMaps.length > 0 && first.components.CubeMapComponent.cubeMap? first.components.CubeMapComponent.prefilteredMap : skybox?.cubeMapPrefiltered,
+                        this.brdf,
+                        cubeMaps.length > 0 && first.components.CubeMapComponent.cubeMap ? first.components.CubeMapComponent.prefilteredMipmaps : skybox?.prefilteredMipmaps
                     )
                 }
             }
@@ -132,7 +136,8 @@ export default class MeshSystem extends System {
         materialComponent,
         closestIrradiance,
         closestPrefiltered,
-        brdf
+        brdf,
+        prefilteredLod
     ) {
 
         gpu.bindVertexArray(mesh.VAO)
@@ -179,7 +184,8 @@ export default class MeshSystem extends System {
                 material?.parallaxEnabled ? 1 : 0,
                 materialComponent?.discardOffPixels ? 1 : 0,
                 closestIrradiance && closestPrefiltered ? 1 : 0
-            ]
+            ],
+            ambientLODSamples: prefilteredLod
         })
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)

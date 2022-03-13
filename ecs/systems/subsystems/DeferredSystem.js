@@ -56,7 +56,6 @@ export default class DeferredSystem extends System {
             ambientSampler: deferredSystem.frameBuffer.colors[4],
 
             lightQuantity: pointLightsQuantity,
-
             cameraVec: camera.position,
             dirLightQuantity: maxTextures,
             directionalLights: (new Array(maxTextures).fill(null)).map((_, i) => {
@@ -76,6 +75,7 @@ export default class DeferredSystem extends System {
             lightPosition: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  pointLights[i].components.PointLightComponent.position),
             lightColor: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
             lightAttenuationFactors: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation),
+
             shadowMapResolution: shadowMapSystem?.maxResolution,
             shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer.depthSampler,
             shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,

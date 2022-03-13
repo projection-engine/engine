@@ -70,6 +70,7 @@ uniform PBR pbrMaterial;
 uniform sampler2D brdfSampler;
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilteredMapSampler;
+uniform float ambientLODSamples;
 
 // OUTPUTS
 layout (location = 0) out vec4 gPosition;
@@ -157,8 +158,8 @@ void main(){
         vec3 kD = (1.0 - F) * (1.0 - gBehaviour.b);
         diffuse = texture(irradianceMap, vec3(gNormal.x, -gNormal.y, gNormal.z)).rgb * gAlbedo.rgb * kD;
     
-        const float MAX_REFLECTION_LOD = 4.0;
-        vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, gNormal.rgb), gBehaviour.g * MAX_REFLECTION_LOD).rgb;
+   
+        vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, gNormal.rgb), gBehaviour.g * ambientLODSamples).rgb;
         vec2 brdf = texture(brdfSampler, vec2(NdotV, gBehaviour.g)).rg;
         specular = prefilteredColor * (F * brdf.r + brdf.g);
     }
