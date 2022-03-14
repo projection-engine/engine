@@ -7,20 +7,34 @@ export default class DirectionalLightComponent extends Component {
     _zNear = -1
     _zFar = 10000
     _transformationMatrix = Array.from(mat4.create())
-    lightView = Array.from(mat4.create())
+    _lightView = Array.from(mat4.create())
     _lightProjection = Array.from(mat4.create())
     _size = 35
     _atlasFace = [0,0]
     _fixedColor = this._color
     _changed = true
-    shadowMap = true
-    center = [0, 0, 0]
+    _shadowMap = true
+    _center = [0, 0, 0]
 
     constructor(id) {
         super(id, 'DirectionalLightComponent');
         this._update()
 
     }
+    get shadowMap(){
+        return this._shadowMap
+    }
+    set shadowMap(data){
+        this._shadowMap = data
+    }
+
+    get lightView(){
+        return this._lightView
+    }
+    set lightView(data){
+        this._lightView = data
+    }
+
     get changed(){
         return this._changed
     }
@@ -98,15 +112,15 @@ export default class DirectionalLightComponent extends Component {
         return this._lightProjection
     }
 
-    get centerPoint(){
-        return this.center
+    get center(){
+        return this._center
     }
-    set centerPoint(data){
-        this.center = data
+    set center(data){
+        this._center = data
     }
     _update() {
-        this.lightView = []
-        mat4.lookAt(this.lightView, this._direction, this.center, [0, 1, 0])
+        this._lightView = []
+        mat4.lookAt(this._lightView, this._direction, this._center, [0, 1, 0])
 
         this._lightProjection = []
         mat4.ortho(this._lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar);

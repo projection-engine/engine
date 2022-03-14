@@ -166,6 +166,7 @@ export default class ShadowMapSystem extends System {
                 this.reflectiveShadowMapShader.use()
 
                 this.rsmFramebuffer.startMapping()
+
                 this._loopMeshes(meshes, meshSources, meshSystem, materials, this.reflectiveShadowMapShader, skylight.lightView, skylight.lightProjection, skylight.fixedColor)
                 this.rsmFramebuffer.stopMapping()
             }

@@ -77,7 +77,7 @@ export default class DeferredSystem extends System {
             lightAttenuationFactors: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation),
 
             shadowMapResolution: shadowMapSystem?.maxResolution,
-            shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer.depthSampler,
+            shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,
             shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,
 
             redIndirectSampler: giFBO?.colors[0],
@@ -88,8 +88,8 @@ export default class DeferredSystem extends System {
             gridSize: giGridSize,
             noGI: giFBO !== undefined ? 0 : 1,
 
-            shadowCube0: shadowMapSystem.cubeMaps[0].texture,
-            shadowCube1: shadowMapSystem.cubeMaps[1].texture,
+            shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
+            shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,
         })
         deferredSystem.frameBuffer.draw()
     }

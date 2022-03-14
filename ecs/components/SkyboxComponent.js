@@ -6,10 +6,10 @@ import * as shaderCode from "../../shaders/misc/cubeMap.glsl";
 import * as skyboxCode from "../../shaders/misc/skybox.glsl";
 
 export default class SkyboxComponent extends Component {
-    _hdrTexture
-    _cubeMap
-    _irradianceMap
-    _initialized = false
+    __hdrTexture
+    __cubeMap
+
+    __initialized = false
     _resolution = 512
     gamma = 1
     exposure = 1
@@ -17,9 +17,9 @@ export default class SkyboxComponent extends Component {
     _prefilteredMipmaps = 6
     constructor(id, gpu) {
         super(id, 'SkyboxComponent');
-        this.gpu = gpu
+        this.__gpu = gpu
 
-        this._cubeMap = new CubeMapInstance(gpu, this._resolution)
+        this.__cubeMap = new CubeMapInstance(gpu, this._resolution)
 
     }
 
@@ -34,38 +34,38 @@ export default class SkyboxComponent extends Component {
 
     set hdrTexture({blob, imageID}) {
         this.imageID = imageID
-        this._hdrTexture = createTexture(
-            this.gpu,
+        this.__hdrTexture = createTexture(
+            this.__gpu,
             blob.naturalWidth,
             blob.naturalHeight,
-            this.gpu.RGB16F,
+            this.__gpu.RGB16F,
             0,
-            this.gpu.RGB,
-            this.gpu.FLOAT,
+            this.__gpu.RGB,
+            this.__gpu.FLOAT,
             blob,
-            this.gpu.LINEAR,
-            this.gpu.LINEAR,
-            this.gpu.CLAMP_TO_EDGE,
-            this.gpu.CLAMP_TO_EDGE
+            this.__gpu.LINEAR,
+            this.__gpu.LINEAR,
+            this.__gpu.CLAMP_TO_EDGE,
+            this.__gpu.CLAMP_TO_EDGE
         )
 
         this._compile()
     }
 
     get ready() {
-        return this._initialized
+        return this.__initialized
     }
 
     get cubeMapPrefiltered() {
-        return this._cubeMap?.prefiltered
+        return this.__cubeMap?.prefiltered
     }
 
     get cubeMap() {
-        return this._cubeMap?.texture
+        return this.__cubeMap?.texture
     }
 
     get irradianceMap() {
-        return this._cubeMap?.irradianceTexture
+        return this.__cubeMap?.irradianceTexture
     }
     get prefilteredMipmaps(){
      return this._prefilteredMipmaps
@@ -73,22 +73,22 @@ export default class SkyboxComponent extends Component {
     set prefilteredMipmaps(_){}
 
     _compile() {
-        this._initialized = false
-        const baseShader = new Shader(shaderCode.vertex, skyboxCode.generationFragment, this.gpu)
+        this.__initialized = false
+        const baseShader = new Shader(shaderCode.vertex, skyboxCode.generationFragment, this.__gpu)
 
         baseShader.use()
-        this._cubeMap.resolution = this._resolution
-        this._cubeMap.draw((yaw, pitch, perspective) => {
+        this.__cubeMap.resolution = this._resolution
+        this.__cubeMap.draw((yaw, pitch, perspective) => {
             baseShader.bindForUse({
                 projectionMatrix: perspective,
                 viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
-                uSampler: this._hdrTexture
+                uSampler: this.__hdrTexture
             })
-            this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
+            this.__gpu.drawArrays(this.__gpu.TRIANGLES, 0, 36)
         }, true)
 
-        this._cubeMap.generateIrradiance()
-        this._cubeMap.generatePrefiltered(this._prefilteredMipmaps, this._resolution/this._prefilteredMipmaps)
-        this._initialized = true
+        this.__cubeMap.generateIrradiance()
+        this.__cubeMap.generatePrefiltered(this._prefilteredMipmaps, this._resolution/this._prefilteredMipmaps)
+        this.__initialized = true
     }
 }

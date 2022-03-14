@@ -4,7 +4,15 @@ import SYSTEMS from "../../../../utils/misc/SYSTEMS";
 import PropagationSystem from "./PropagationSystem";
 import InjectionSystem from "./InjectionSystem";
 
+export const STEPS = {
+    LIGHT_INJECTION: 0,
+    GEOMETRY_INJECTION: 1,
+    LIGHT_PROPAGATION: 2,
+    DONE: 3
+}
 export default class GlobalIlluminationSystem extends System {
+    step = STEPS.LIGHT_INJECTION
+
     constructor(gpu) {
         super([]);
 
@@ -22,27 +30,48 @@ export default class GlobalIlluminationSystem extends System {
         return this.lightPropagationSystem.accumulatedBuffer
     }
 
-    execute(systems, skylight) {
+    execute(shadowMapSystem, skylight, noRSM) {
         super.execute()
 
-        const shadowMapSystem = systems[SYSTEMS.SHADOWS]
-        shadowMapSystem.needsGIUpdate = false
 
+        if(shadowMapSystem.needsGIUpdate && skylight && !noRSM) {
+            this.step = STEPS.LIGHT_INJECTION
+            shadowMapSystem.needsGIUpdate = false
+        }
+        if(noRSM || !skylight)
+            this.step = STEPS.DONE
 
-        this._clear();
-        this.injectionSystem.execute(shadowMapSystem.rsmFramebuffer, skylight.direction)
+        if (this.step !== STEPS.DONE) {
+            switch (this.step) {
+                case STEPS.LIGHT_INJECTION:
+                    this._clear();
+                    this.injectionSystem.execute(shadowMapSystem.rsmFramebuffer, skylight.direction, this.step)
+                    this.step = STEPS.GEOMETRY_INJECTION
+                    break
+                case STEPS.GEOMETRY_INJECTION:
+                    this.injectionSystem.execute(shadowMapSystem.rsmFramebuffer, skylight.direction, this.step)
+                    this.step = STEPS.LIGHT_PROPAGATION
+                    break
+                case STEPS.LIGHT_PROPAGATION:
+                    this.lightPropagationSystem.execute(
+                        {
+                            iterations: skylight.lpvSamples,
+                            skylight,
+                            lightInjectionFBO: this.injectionSystem.injectionFramebuffer,
+                            geometryInjectionFBO: this.injectionSystem.geometryInjectionFramebuffer
+                        })
+                    this.step = STEPS.DONE
+                    break
+                default:
+                    this.step = STEPS.DONE
+                    break
+            }
+            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
+            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
+            this.gpu.enable(this.gpu.DEPTH_TEST);
+            this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
 
-        this.lightPropagationSystem.execute(
-            {
-                iterations: skylight.lpvSamples,
-                skylight,
-                lightInjectionFBO: this.injectionSystem.injectionFramebuffer,
-                geometryInjectionFBO: this.injectionSystem.geometryInjectionFramebuffer
-            })
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
-        this.gpu.enable(this.gpu.DEPTH_TEST);
-        this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA);
+        }
     }
 
     _clear() {

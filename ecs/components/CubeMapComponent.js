@@ -3,11 +3,11 @@ import {mat4} from "gl-matrix";
 
 export default class CubeMapComponent extends Component {
 
-    pos = [0, 0, 0]
+    _position = [0, 0, 0]
     _res = 128
-    _cubeMap
+    __cubeMap
     _transformationMatrix = Array.from(mat4.create())
-    _compiled = false
+    __compiled = false
     _irradiance = true
     _prefilteredMipmaps = 6
 
@@ -25,29 +25,30 @@ export default class CubeMapComponent extends Component {
 
     set resolution(data) {
         this._res = data
-        this._compiled = false
     }
 
     get cubeMap() {
-        return this._cubeMap
+        return this.__cubeMap
     }
     set cubeMap(data){
-        this._cubeMap = data
+        this.__cubeMap = data
     }
 
     get prefilteredMap() {
-        return this._cubeMap?.prefiltered
+        return this.__cubeMap?.prefiltered
     }
 
     get irradianceMap() {
-        return this._cubeMap?.irradianceTexture
+        return this.__cubeMap?.irradianceTexture
     }
 
     get compiled() {
-        return this._compiled
+
+        return this.__compiled
     }
     set compiled(data){
-        this._compiled = data && this._cubeMap
+
+        this.__compiled = data
     }
 
     get prefilteredMipmaps() {
@@ -55,7 +56,6 @@ export default class CubeMapComponent extends Component {
     }
     set prefilteredMipmaps(data){
         this._prefilteredMipmaps = data
-        this._compiled = false
     }
 
     get irradiance() {
@@ -63,14 +63,13 @@ export default class CubeMapComponent extends Component {
     }
     set irradiance(data){
         this._irradiance = data
-        this._compiled = false
     }
 
     get position() {
-        return this.pos
+        return this._position
     }
     set position(data) {
-        this.pos = data
+        this._position = data
 
         this._transformationMatrix[12] = data[0]
         this._transformationMatrix[13] = data[1]

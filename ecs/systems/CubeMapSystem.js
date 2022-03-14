@@ -11,7 +11,15 @@ import {VIEWS} from "./ShadowMapSystem";
 import VBO from "../../utils/workers/VBO";
 import cube from "../../assets/cube.json";
 
+const STEPS = {
+    BASE: 0,
+    IRRADIANCE: 1,
+    PREFILTERED: 2,
+    DONE: 3
+}
 export default class CubeMapSystem extends System {
+    step = STEPS.BASE
+    lastCallLength = -1
 
     constructor(gpu) {
         super([]);
@@ -27,6 +35,46 @@ export default class CubeMapSystem extends System {
     execute(options, systems, data) {
         super.execute()
         const {
+            cubeMaps
+        } = data
+
+
+        if(options.recompile || this.lastCallLength !== cubeMaps.length) {
+            this.step = STEPS.BASE
+            this.lastCallLength = cubeMaps.length
+        }
+
+        if (this.step !== STEPS.DONE) {
+            switch (this.step){
+                case STEPS.BASE:
+                    this._generateBaseTexture(options, systems, data)
+                    options.setRecompile(false)
+                    this.step = STEPS.IRRADIANCE
+                    break
+                case STEPS.IRRADIANCE:
+                    for (let i = 0; i < cubeMaps.length; i++) {
+                        const current = cubeMaps[i].components.CubeMapComponent
+                        current.cubeMap.generateIrradiance()
+
+                    }
+                    this.step = STEPS.PREFILTERED
+                    break
+                case STEPS.PREFILTERED:
+                    for (let i = 0; i < cubeMaps.length; i++) {
+                        const current = cubeMaps[i].components.CubeMapComponent
+                        current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
+                    }
+                    this.step = STEPS.DONE
+                    break
+                default:
+                    this.step = STEPS.DONE
+                    break
+            }
+        }
+    }
+
+    _generateBaseTexture(options, systems, data) {
+        const {
             pointLights,
             spotLights,
             terrains,
@@ -38,56 +86,40 @@ export default class CubeMapSystem extends System {
             cubeMaps,
             translucentMeshes
         } = data
+        const meshSystem = systems[SYSTEMS.MESH]
 
-
-        if (!this._compiled || options.recompile) {
-            console.log('REBUILDING')
-            const meshSystem = systems[SYSTEMS.MESH]
-
-            this.gpu.clearDepth(1);
-            const dirLightsE = directionalLights.map(d => d.components.DirectionalLightComponent)
-            let maxTextures = dirLightsE.length > 2 ? 2 : dirLightsE.length,
-                pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
-            const dirLights = (new Array(maxTextures).fill(null)).map((_, i) => {
-                return {
-                    direction: dirLightsE[i].direction,
-                    ambient: dirLightsE[i].fixedColor,
-                    atlasFace: dirLightsE[i].atlasFace
-                }
-            })
-            const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
-                return {
-                    lightViewMatrix: dirLightsE[i].lightView,
-                    lightProjectionMatrix: dirLightsE[i].lightProjection
-                }
-            })
-            let lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-                lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.position),
-                lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
-                lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
-            for (let i = 0; i < cubeMaps.length; i++) {
-                const current = cubeMaps[i].components.CubeMapComponent
-                if(current.cubeMap) {
-                    current.cubeMap.generateIrradiance()
-                    current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
-                }
+        this.gpu.clearDepth(1);
+        const dirLightsE = directionalLights.map(d => d.components.DirectionalLightComponent)
+        let maxTextures = dirLightsE.length > 2 ? 2 : dirLightsE.length,
+            pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
+        const dirLights = (new Array(maxTextures).fill(null)).map((_, i) => {
+            return {
+                direction: dirLightsE[i].direction,
+                ambient: dirLightsE[i].fixedColor,
+                atlasFace: dirLightsE[i].atlasFace
             }
+        })
+        const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
+            return {
+                lightViewMatrix: dirLightsE[i].lightView,
+                lightProjectionMatrix: dirLightsE[i].lightProjection
+            }
+        })
+        let lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
+            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.position),
+            lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
+            lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
 
+        for (let i = 0; i < cubeMaps.length; i++) {
+            const current = cubeMaps[i].components.CubeMapComponent
+            current.cubeMap.resolution = current.resolution
+            current.cubeMap.draw((yaw, pitch, projection, index) => {
+                    const target = vec3.add([], current.position, VIEWS.target[index])
+                    const view = mat4.lookAt([], current.position, target, VIEWS.up[index])
+                    const nView = [...view]
+                    nView[12] = nView[13] = nView[14] = 0
 
-            for (let i = 0; i < cubeMaps.length; i++) {
-                const current = cubeMaps[i].components.CubeMapComponent
-
-                if (!current.cubeMap)
-                    current.cubeMap = new CubeMapInstance(this.gpu, current.resolution)
-
-                current.cubeMap.resolution = current.resolution
-                current.cubeMap.draw((yaw, pitch, projection, index) => {
-                        const target = vec3.add([], current.position, VIEWS.target[index])
-                        const view = mat4.lookAt([], current.position, target, VIEWS.up[index])
-                        const nView = [...view]
-                        nView[12] = nView[13] = nView[14] = 0
-
-                    if(skybox) {
+                    if (skybox) {
                         this.gpu.depthMask(false)
                         this.skyShader.use()
                         this.gpu.bindVertexArray(this.vao)
@@ -104,40 +136,31 @@ export default class CubeMapSystem extends System {
                         this.vbo.disable()
                         this.gpu.depthMask(true)
                     }
-                        this.shader.use()
-                        this._loopMeshes(
-                            view,
-                            projection,
-                            current.position,
-                            meshSystem,
-                            materials,
-                            translucentMeshes,
-                            meshSources,
-                            meshes,
+                    this.shader.use()
+                    this._loopMeshes(
+                        view,
+                        projection,
+                        current.position,
+                        meshSystem,
+                        materials,
+                        translucentMeshes,
+                        meshSources,
+                        meshes,
 
-                            pointLightsQuantity,
-                            maxTextures,
-                            dirLights,
-                            dirLightsPov,
-                            lClip,
-                            lPosition,
-                            lColor,
-                            lAttenuation
-                        )
-                    },
-                    false,
-                    10000, 1)
-
-                // current.cubeMap.generateIrradiance()
-                // current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
-
-                current.compiled = true
-            }
-
-
-            if (options.recompile)
-                options.setRecompile(false)
-            this._compiled = true
+                        pointLightsQuantity,
+                        maxTextures,
+                        dirLights,
+                        dirLightsPov,
+                        lClip,
+                        lPosition,
+                        lColor,
+                        lAttenuation
+                    )
+                },
+                false,
+                10000,
+                1
+            )
         }
     }
 

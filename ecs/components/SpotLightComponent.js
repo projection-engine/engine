@@ -2,16 +2,18 @@ import Component from "../basic/Component";
 import {mat4} from "gl-matrix";
 
 export default class SpotLightComponent extends Component{
-    constructor(id) {
-        super(id, SpotLightComponent.constructor.name);
-    }
-
     color = [1, 1, 1]
     cutoff = 0
     direction = [0, 0, 0]
 
     _transformationMatrix = Array.from(mat4.create())
     _position = [0, 0, 0]
+
+    constructor(id) {
+        super(id, SpotLightComponent.constructor.name);
+    }
+
+
     get position () {
         return this._position
     }

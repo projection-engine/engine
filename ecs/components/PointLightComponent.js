@@ -9,8 +9,8 @@ export default class PointLightComponent extends Component{
     _changed = true
     _transformationMatrix = Array.from(mat4.create())
     _position = [0, 0, 0]
-    zN = 1
-    zF = 1000
+    _zNear = 1
+    _zFar = 1000
     shadowMap = true
 
     constructor(id) {
@@ -18,21 +18,21 @@ export default class PointLightComponent extends Component{
     }
 
     get zNear() {
-        return this.zN
+        return this._zNear
     }
 
     set zNear(data) {
-        this.zN = data
+        this._zNear = data
         this._changed = true
     }
 
 
     get zFar() {
-        return this.zF
+        return this._zFar
     }
 
     set zFar(data) {
-        this.zF = data
+        this._zFar = data
         this._changed = true
     }
 

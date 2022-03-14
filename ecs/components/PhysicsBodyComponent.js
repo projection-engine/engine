@@ -1,9 +1,7 @@
 import Component from "../basic/Component";
 
 export default class PhysicsBodyComponent extends Component {
-
     _mass = 1
-
     _acceleration = [0, 0, 0]
     _velocity = [0, 0, 0]
 

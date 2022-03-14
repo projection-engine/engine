@@ -63,13 +63,7 @@ export default class PostProcessingSystem extends System {
             exposure
         } = options
 
-        if (!noRSM && systems[SYSTEMS.SHADOWS].needsGIUpdate && skylight)
-            this.GISystem.execute(systems, skylight)
-
-
-
-
-
+        this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
 
         this.frameBuffer.startMapping()
         this.skyboxSystem.execute(skybox, camera)
@@ -110,7 +104,6 @@ export default class PostProcessingSystem extends System {
             FXAAReduceMul: 1 / 8
         })
         this.frameBuffer.draw()
-
 
 
         // this.gpu.viewport(0, 0, this.frameBuffer.width, this.frameBuffer.height);

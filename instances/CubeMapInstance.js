@@ -23,11 +23,14 @@ export default class CubeMapInstance {
 
         this._asDepth = asDepth
     }
-    get vbo(){
+
+    get vbo() {
         return this._vertexBuffer
     }
-    set vbo(_){
+
+    set vbo(_) {
     }
+
     set resolution(data) {
         this._res = data
     }
@@ -35,20 +38,23 @@ export default class CubeMapInstance {
     get resolution() {
         return this._res
     }
-    generateIrradiance(){
-        if (!this._asDepth) {
 
+    generateIrradiance() {
+
+        if (!this._asDepth) {
             this._irradianceShader.use()
             this.draw((yaw, pitch, perspective) => {
+                this._vertexBuffer.enable()
                 this._irradianceShader.bindForUse({
                     projectionMatrix: perspective,
                     viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
                     uSampler: this.texture
                 })
                 this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
-            }, true, undefined, undefined, 32, true)
+            }, true, undefined, undefined, true)
         }
     }
+
     generatePrefiltered(mipLevels = 6, resolution = 128) {
 
         if (!this._asDepth) {
@@ -68,7 +74,6 @@ export default class CubeMapInstance {
             gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
 
 
-            gpu.disable(gpu.CULL_FACE);
             this._prefilteredShader.use()
             this._vertexBuffer.enable()
 
@@ -98,37 +103,53 @@ export default class CubeMapInstance {
                 }
             }
             this._vertexBuffer.disable()
+
+
+            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
+            this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
+            this.gpu.bindTexture(this.gpu.TEXTURE_2D, null)
+            this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, null)
+
+            this.gpu.deleteFramebuffer(frameBuffer)
+            this.gpu.deleteRenderbuffer(rbo)
+
             return this
         } else
             return this
     }
 
-    draw(callback, useVBO, zFar = 10, zNear = .1, resolution=this._res, asIrradiance) {
-        let texture
-        this.gpu.viewport(0, 0, resolution, resolution)
-        if(!asIrradiance) {
+    draw(callback, useVBO, zFar = 10, zNear = .1, asIrradiance) {
+        let resolution = asIrradiance ? 32 : this._res, texture
+
+
+
+        const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar),
+            gpu = this.gpu,
+            frameBuffer = gpu.createFramebuffer()
+
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, frameBuffer)
+        gpu.viewport(0, 0, resolution, resolution)
+
+        const rbo = gpu.createRenderbuffer();
+        gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
+        gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
+        gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
+
+
+        if (!asIrradiance) {
             if (!this.texture)
                 this.texture = this._initializeTexture(resolution);
-
             texture = this.texture
-        }else {
+        } else {
             if (!this.irradianceTexture)
                 this.irradianceTexture = this._initializeTexture(resolution);
             texture = this.irradianceTexture
         }
 
 
-        const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
-        const gpu = this.gpu
-        const frameBuffer = gpu.createFramebuffer()
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, frameBuffer)
-
-        const rbo = gpu.createRenderbuffer();
-        gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
-        gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
-        gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
         if (useVBO && !this._asDepth)
             this._vertexBuffer.enable()
+
         for (let i = 0; i < 6; i++) {
             const rotations = getRotation(i)
             gpu.framebufferTexture2D(
@@ -144,8 +165,13 @@ export default class CubeMapInstance {
         if (useVBO && !this._asDepth)
             this._vertexBuffer.disable()
 
-        this.gpu.deleteFramebuffer(frameBuffer)
-        this.gpu.deleteRenderbuffer(rbo)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+        gpu.bindRenderbuffer(gpu.RENDERBUFFER, null)
+        gpu.bindTexture(gpu.TEXTURE_2D, null)
+        gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, null)
+
+        gpu.deleteFramebuffer(frameBuffer)
+        gpu.deleteRenderbuffer(rbo)
 
         return this
     }
@@ -191,6 +217,7 @@ const directions = (gpu) => {
         {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Z}
     ]
 }
+
 function getRotation(index) {
 
     switch (index) {
