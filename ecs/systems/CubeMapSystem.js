@@ -10,6 +10,7 @@ import {mat4, vec3} from "gl-matrix";
 import {VIEWS} from "./ShadowMapSystem";
 import VBO from "../../utils/workers/VBO";
 import cube from "../../assets/cube.json";
+import {intersectBoundingSphere} from "./PhysicsSystem";
 
 const STEPS = {
     BASE: 0,
@@ -20,6 +21,7 @@ const STEPS = {
 export default class CubeMapSystem extends System {
     step = STEPS.BASE
     lastCallLength = -1
+    cubeMapsConsumeMap = {}
 
     constructor(gpu) {
         super([]);
@@ -29,23 +31,45 @@ export default class CubeMapSystem extends System {
 
         this.vao = createVAO(gpu)
         this.vbo = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        gpu.bindVertexArray(null)
     }
 
 
     execute(options, systems, data) {
         super.execute()
         const {
-            cubeMaps
+            cubeMaps,
+            meshSources,
+            meshes
         } = data
 
+        // RADIUS 10
 
-        if(options.recompile || this.lastCallLength !== cubeMaps.length) {
+        if (options.recompile || this.lastCallLength !== cubeMaps.length) {
             this.step = STEPS.BASE
             this.lastCallLength = cubeMaps.length
         }
+        if (systems[SYSTEMS.TRANSFORMATION]?.changed) {
+            const changedMeshes = systems[SYSTEMS.TRANSFORMATION]?.changedMeshes
+            let newCubeMaps = {}
 
+            for (let i = 0; i < cubeMaps.length; i++) {
+                const current = cubeMaps[i].components.CubeMapComponent,
+                    pos = current.position,
+                    radius = current.radius
+
+                for (let m = 0; m < changedMeshes.length; m++) {
+
+                    const currentMesh = changedMeshes[m].components
+                    if (intersectBoundingSphere(currentMesh.MaterialComponent.radius, radius, currentMesh.TransformComponent.position.slice(0, 3), pos))
+                        newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
+                }
+            }
+
+            this.cubeMapsConsumeMap = newCubeMaps
+        }
         if (this.step !== STEPS.DONE) {
-            switch (this.step){
+            switch (this.step) {
                 case STEPS.BASE:
                     this._generateBaseTexture(options, systems, data)
                     options.setRecompile(false)
@@ -76,8 +100,6 @@ export default class CubeMapSystem extends System {
     _generateBaseTexture(options, systems, data) {
         const {
             pointLights,
-            spotLights,
-            terrains,
             meshes,
             skybox,
             directionalLights,

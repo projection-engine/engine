@@ -10,6 +10,7 @@ export default class CubeMapComponent extends Component {
     __compiled = false
     _irradiance = true
     _prefilteredMipmaps = 6
+    radius = 50
 
     constructor(id, resolution, position) {
         super(id, CubeMapComponent.constructor.name);

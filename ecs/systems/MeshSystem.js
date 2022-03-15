@@ -7,6 +7,7 @@ import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import brdfImg from "../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../utils/misc/utils";
+import SYSTEMS from "../../utils/misc/SYSTEMS";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -67,7 +68,8 @@ export default class MeshSystem extends System {
             materials,
             meshSources,
             cubeMaps,
-            translucentMeshes
+            translucentMeshes,
+            cubeMapsSources
         } = data
 
         if (this._ready) {
@@ -83,6 +85,7 @@ export default class MeshSystem extends System {
             this.shader.use()
             this.gpu.clearDepth(1);
             this.frameBuffer.startMapping()
+            const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
 
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
@@ -94,8 +97,20 @@ export default class MeshSystem extends System {
                     let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components.MaterialComponent.overrideInjection ? injectMaterial : this.fallbackMaterial
                     if (!mat || !mat.ready)
                         mat = this.fallbackMaterial
+                    const c = toConsumeCubeMaps ?toConsumeCubeMaps[current.id] : undefined
+                    let cubeMapToApply, ambient = {}
 
-                    const first = cubeMaps[0]
+                    if(c)
+                        cubeMapToApply =  cubeMapsSources[c]
+                    if(cubeMapToApply){
+                        ambient.irradianceMap = cubeMapToApply.components.CubeMapComponent.irradianceMap
+                        ambient.prefilteredMap = cubeMapToApply.components.CubeMapComponent.prefilteredMap
+                        ambient.prefilteredLod = cubeMapToApply.components.CubeMapComponent.prefilteredMipmaps
+                    }else{
+                        ambient.irradianceMap = skybox?.irradianceMap
+                        ambient.prefilteredMap = skybox?.cubeMapPrefiltered
+                        ambient.prefilteredLod = 6
+                    }
 
                     MeshSystem.drawMesh(
                         this.shader,
@@ -110,10 +125,10 @@ export default class MeshSystem extends System {
                         undefined,
                         current.components.MaterialComponent,
 
-                        cubeMaps.length > 0 && first.components.CubeMapComponent.cubeMap? first.components.CubeMapComponent.irradianceMap : skybox?.irradianceMap,
-                        cubeMaps.length > 0 && first.components.CubeMapComponent.cubeMap? first.components.CubeMapComponent.prefilteredMap : skybox?.cubeMapPrefiltered,
+                        ambient.irradianceMap,
+                        ambient.prefilteredMap,
                         this.brdf,
-                        cubeMaps.length > 0 && first.components.CubeMapComponent.cubeMap ? first.components.CubeMapComponent.prefilteredMipmaps : skybox?.prefilteredMipmaps
+                        ambient.prefilteredLod
                     )
                 }
             }

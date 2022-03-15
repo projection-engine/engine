@@ -52,6 +52,10 @@ export default class MeshInstance {
         this.normalVBO = new VBO(gpu, 2, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         this.uvVBO = new VBO(gpu, 3, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
         this.tangentVBO = new VBO(gpu, 4, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+
+        gpu.bindVertexArray(null)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
+
     }
 
 

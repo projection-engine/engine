@@ -1,5 +1,5 @@
 import System from "../basic/System";
-import {vec4} from "gl-matrix";
+import {vec3, vec4} from "gl-matrix";
 
 const GRAVITY = .1
 export default class PhysicsSystem extends System {
@@ -9,7 +9,7 @@ export default class PhysicsSystem extends System {
 
     execute(options, systems, data) {
         super.execute()
-        const  {
+        const {
             pointLights,
             spotLights,
             terrains,
@@ -33,8 +33,8 @@ export default class PhysicsSystem extends System {
 
         // TODO
         if (canExecutePhysicsAnimation) {
-            const staticMeshes =[] //this._find(entities, e => filteredEntities.staticPhysicsMeshes[e.id] !== undefined)
-            const dynamicMeshes =[]// this._find(entities, e => filteredEntities.dynamicPhysicsMeshes[e.id] !== undefined)
+            const staticMeshes = [] //this._find(entities, e => filteredEntities.staticPhysicsMeshes[e.id] !== undefined)
+            const dynamicMeshes = []// this._find(entities, e => filteredEntities.dynamicPhysicsMeshes[e.id] !== undefined)
 
             for (let i = 0; i < dynamicMeshes.length; i++) {
                 const current = dynamicMeshes[i]
@@ -48,11 +48,11 @@ export default class PhysicsSystem extends System {
                 ]
 
                 for (let j = 0; j < staticMeshes.length; j++) {
-                    const res = intersectBoundingSphere(current.components, staticMeshes[j].components)
+                    const res = intersectBoundingSphere(current.components.ColliderComponent.radius, staticMeshes[j].components.ColliderComponent.radius, current.components.ColliderComponent.position, staticMeshes[j].components.ColliderComponent.position)
                     intersecting = intersecting || res
                 }
 
-                if(!intersecting) {
+                if (!intersecting) {
                     physicsComp.acceleration = acceleration
                     physicsComp.velocity = divideArray(acceleration, time)
 
@@ -69,13 +69,21 @@ export default class PhysicsSystem extends System {
     }
 }
 
-function intersectBoundingSphere(current, target) {
-    let radiusDistance = current.ColliderComponent.radius + target.ColliderComponent.radius,
-        centerDistance = [0, 0, 0, 1]
-    vec4.subtract(centerDistance, target.TransformComponent.position, current.TransformComponent.position)
-   centerDistance = vec4.length(centerDistance)
+export function intersectBoundingSphere(currentRadius, targetRadius, currentPosition, targetPosition) {
+    let radiusDistance = currentRadius + targetRadius
+    if (targetPosition.length === 3 || currentPosition === 3) {
+        let centerDistance = [0, 0, 0]
+        vec3.subtract(centerDistance, targetPosition, currentPosition)
+        centerDistance = vec3.length(centerDistance)
 
-    return (centerDistance - radiusDistance) <= .1;
+        return (centerDistance - radiusDistance) <= .1;
+    } else {
+        let centerDistance = [0, 0, 0, 1]
+        vec4.subtract(centerDistance, targetPosition, currentPosition)
+        centerDistance = vec4.length(centerDistance)
+
+        return (centerDistance - radiusDistance) <= .1;
+    }
 }
 
 function calculateDisplacement(u, t, a) {

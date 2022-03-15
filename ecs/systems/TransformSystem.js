@@ -5,6 +5,7 @@ import Transformation from "../../utils/workers/Transformation";
 
 export default class TransformSystem extends System {
     _changed = false
+    _changedMeshes = []
 
     constructor() {
         super([]);
@@ -12,6 +13,9 @@ export default class TransformSystem extends System {
 
     get changed() {
         return this._changed
+    }
+    get changedMeshes(){
+        return this._changedMeshes
     }
 
     execute(options, systems, data) {
@@ -31,9 +35,11 @@ export default class TransformSystem extends System {
         super.execute()
         const filtered = [...meshes, ...terrains]
         this._changed = false
+        this._changedMeshes = []
         for (let i = 0; i < filtered.length; i++) {
             const current = filtered[i]
             if (current !== undefined && current.components.TransformComponent.changed) {
+                this._changedMeshes.push(current)
                 this._changed = true
                 let parent
                 if (current.linkedTo)

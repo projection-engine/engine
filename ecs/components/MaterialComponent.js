@@ -5,6 +5,7 @@ export default class MaterialComponent extends Component{
     tiling = [1,1]
     overrideTiling = false
     discardOffPixels = false
+    radius = 50
     constructor(id, materialID, overrideInjection) {
         super(id, MaterialComponent.constructor.name);
         this.materialID = materialID

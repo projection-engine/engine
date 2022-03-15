@@ -1,11 +1,11 @@
 export default {
-    FREE: 'free',
-    SPHERICAL: 'spherical',
+    FREE: 'Free',
+    SPHERICAL: 'Spherical',
 
-    TOP: 'ortho-top',
-    BOTTOM: 'ortho-bottom',
-    LEFT: 'ortho-left',
-    RIGHT: 'ortho-right',
-    FRONT: 'ortho-front',
-    BACK: 'ortho-back'
+    TOP: 'Top',
+    BOTTOM: 'Bottom',
+    LEFT: 'Left',
+    RIGHT: 'Right',
+    FRONT: 'Front',
+    BACK: 'Back'
 }

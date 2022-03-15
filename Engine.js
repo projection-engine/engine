@@ -187,6 +187,7 @@ export default class Engine extends RenderLoop {
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent)
             }
 
+            data.cubeMapsSources = toObject(data.cubeMaps)
 
             const systems = Object.keys(this._systems).sort()
             this._changed = true
