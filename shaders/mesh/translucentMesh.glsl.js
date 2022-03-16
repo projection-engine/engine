@@ -1,18 +1,17 @@
-export const fragment = `
-#version 300 es
+
+
+export const fragment = `#version 300 es
 precision highp float;
 // IN
+#define MAX_LIGHTS 2
 in vec4 vPosition;
 in highp vec2 texCoord;
 in mat3 toTangentSpace;
-
-in vec3 viewDirection;
+flat in int dirLightsQuantity;
+in mat4 dirLightPOV[MAX_LIGHTS];
  
-uniform int parallaxEnabled;
-uniform float heightScale;
-uniform float layers;
-uniform samplerCube irradianceMap;
-uniform samplerCube prefilteredMapSampler;
+
+uniform vec3 cameraVec;
 
 struct PBR {
     sampler2D albedo;
@@ -25,82 +24,107 @@ struct PBR {
 };
 uniform PBR pbrMaterial;
 
+uniform vec2 lightClippingPlane[MAX_LIGHTS];
+uniform vec3 lightPosition[MAX_LIGHTS];
+uniform vec3 lightColor[MAX_LIGHTS];
+uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
+uniform int lightQuantity;
+struct DirectionalLight {
+    vec3 direction;
+    vec3 ambient;
+    vec2 atlasFace;
+};
+uniform DirectionalLight directionalLights[MAX_LIGHTS];
+
+uniform sampler2D brdfSampler;
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilteredMapSampler;
+
 // OUTPUTS
-layout (location = 0) out vec4 gPosition;
-layout (location = 1) out vec4 gNormal;
-layout (location = 2) out vec4 gAlbedo;
-layout (location = 3) out vec4 gBehaviour;
+out vec4 finalColor;
 
+const float PI = 3.14159265359;
 
+@import(fresnelSchlickRoughness)
 
-vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap, int type)
-{
-    if(type == 1){
-            float layer_depth = 1.0 / layers;
-            float currentLayerDepth = 0.0;
-            vec2 delta_uv = viewDir.xy * heightScale / (viewDir.z * layers);
-            vec2 cur_uv = texCoord;
-    
-            float depth_from_tex = 1.-texture(heightMap, cur_uv).r;
-    
-            for (int i = 0; i < 32; i++) {
-                currentLayerDepth += layer_depth;
-                cur_uv -= delta_uv;
-                depth_from_tex = 1.-texture(heightMap, cur_uv).r;
-                if (depth_from_tex < currentLayerDepth) {
-                    break;
-                }
-            }
-            vec2 prev_uv = cur_uv + delta_uv;
-            float next = depth_from_tex - currentLayerDepth;
-            float prev = texture(heightMap, prev_uv).r - currentLayerDepth
-                         + layer_depth;
-            float weight = next / (next - prev);
-            vec2 UVs = mix(cur_uv, prev_uv, weight);
-//            if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
-//                discard;
-            return UVs;
-    }
-    else{
-//           float depth = texture(heightMap, texCoord).r;    
-//            vec2 p = viewDir.xy * (depth * heightScale) / viewDir.z;
-            return texCoord ;  
-    }
-}
+@import(fresnelSchlick)
 
-void main(){
+@import(geometrySchlickGGX)
 
-    gBehaviour = vec4(1.0);
+@import(distributionGGX)
  
-   
-    gPosition = vPosition;
-    
-    vec2 UVs = parallaxMapping(texCoord,  viewDirection, pbrMaterial.height, parallaxEnabled);
-   
-    vec4 albedoTexture = texture(pbrMaterial.albedo, UVs);
-    if(albedoTexture.a <= 0.1)
+@import(geometrySmith)
+ 
+@import(computeDirectionalLight)
+void main(){
+ 
+    vec4 albedoTex = texture(pbrMaterial.albedo, texCoord);
+
+    if(albedoTex.a <= 0.1)
         discard;
         
-    gAlbedo = vec4(albedoTexture.rgb, 1.);
- 
-    gBehaviour = vec4(
-        texture(pbrMaterial.ao, UVs).r,
-        texture(pbrMaterial.roughness, UVs).r,
-        texture(pbrMaterial.metallic, UVs).r,
-        1.
-    );
+    vec3 albedo = vec3(albedoTex);
+    float roughness = texture(pbrMaterial.roughness, texCoord).r;
+    float metallic = texture(pbrMaterial.metallic, texCoord).r;
+    float ao = texture(pbrMaterial.ao, texCoord).r; 
+    vec3 fragPosition = vPosition.xyz;
+    vec3 N = normalize(toTangentSpace * ((texture(pbrMaterial.normal, texCoord).xyz * 2.0)- 1.0));
+    vec3 V = normalize(cameraVec - fragPosition);
     
-    gNormal = vec4(normalize(toTangentSpace * ((texture(pbrMaterial.normal, UVs).xyz * 2.0)- 1.0)), 1.0);
-}
+    float NdotV    = max(dot(N, V), 0.000001);
+    vec3 F0 = vec3(0.04);
+    vec3 Lo = vec3(0.0);
+    F0 = mix(F0, albedo, metallic);
+    
+    // DIRECTIONAL LIGHT
+    float quantityToDivide = float(dirLightsQuantity) + float(lightQuantity);
+    for (int i = 0; i < dirLightsQuantity; i++){
+        vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
+        vec3 lightDir =  normalize(directionalLights[i].direction);
 
-out vec4 fragColor;
-uniform 
+        Lo += computeDirectionalLight(
+            V,
+            F0,
+            lightDir,
+            directionalLights[i].ambient,
+            fragPosition,
+            roughness,
+            metallic,
+            N,
+            albedo
+        );
+    }
+ 
+    for (int i = 0; i < lightQuantity; ++i){
+        vec3 L = normalize(lightPosition[i] - fragPosition);
+        vec3 H = normalize(V + L);
+        float distance    = length(lightPosition[i] - fragPosition);
+        float attFactor = 1.0 / (lightAttenuationFactors[i].x + (lightAttenuationFactors[i].y * distance) + (lightAttenuationFactors[i].z * distance * distance));
+        vec3 radiance     = lightColor[i] * attFactor;
 
-out vec4 fragColor;
-void main()
-{
-    float refractiveIndex = 1.5;
-    vec3 refractedDirection = refract(normalize(viewDirection), normalize(normalDirection), 1.0 / refractiveIndex);
-    fragColor = texture(_Cube, refractedDirection);
+        float NDF = distributionGGX(N, H, roughness);
+        float G   = geometrySmith(N, V, L, roughness);
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        vec3 numerator    = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        vec3 specular     = numerator / denominator;
+
+        float NdotL = max(dot(N, L), 0.0);
+
+        
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }
+ 
+
+    vec3 color = Lo;
+    color = color / (color + vec3(1.0));
+    finalColor = vec4(color, 1.0);
+  
 }
 `
+

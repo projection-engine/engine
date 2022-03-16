@@ -12,6 +12,8 @@ import * as debug from '../../shaders/shadows/shadow.glsl'
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
+import {copyTexture} from "../../utils/misc/utils";
+import TransparencySystem from "./subsystems/TransparencySystem";
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
@@ -21,13 +23,10 @@ export default class PostProcessingSystem extends System {
         this.frameBuffer
             .texture()
 
-        this.shadowMapDebugShader = new Shader(debug.debugVertex, debug.debugFragment, gpu)
-        this.quad = new Quad(gpu)
-
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
 
-
+        this.transparencySystem = new TransparencySystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)
         this.deferredSystem = new DeferredSystem(gpu)
@@ -49,7 +48,8 @@ export default class PostProcessingSystem extends System {
             materials,
             meshSources,
             cubeMaps,
-            skylight
+            skylight,
+            translucentMeshes
         } = data
         const {
             selected,
@@ -76,6 +76,9 @@ export default class PostProcessingSystem extends System {
         }
 
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
+
+        copyTexture(this.frameBuffer.FBO, systems[SYSTEMS.MESH].frameBuffer.FBO, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
+        this.transparencySystem.execute(translucentMeshes, materials)
 
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)

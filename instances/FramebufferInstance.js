@@ -3,8 +3,7 @@ import Quad from "../utils/workers/Quad";
 
 export default class FramebufferInstance extends Quad {
     FBO
-    frameBufferTexture
-    renderBufferObject
+
 
     RBO
 
