@@ -3,9 +3,7 @@ import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
 import * as shaderCode from "../../../shaders/mesh/translucentMesh.glsl";
 import * as shaderBaseCode from "../../../shaders/mesh/forwardMesh.glsl";
 import Shader from "../../../utils/workers/Shader";
-import {createVAO} from "../../../utils/misc/utils";
-import VBO from "../../../utils/workers/VBO";
-import cube from "../../../assets/cube.json";
+
 
 export default class TransparencySystem extends System {
     constructor(gpu) {
@@ -16,7 +14,7 @@ export default class TransparencySystem extends System {
 
     execute(transparentMeshes, materials) {
         super.execute()
-        console.log(transparentMeshes)
+        // console.log(transparentMeshes)
 
     }
 }

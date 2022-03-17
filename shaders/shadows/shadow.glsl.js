@@ -23,7 +23,7 @@ void main(void){
 `
 
 export const omniFragment = `#version 300 es
-precision highp  float;
+precision mediump  float;
 
 uniform vec3 lightPosition;
 uniform vec2 shadowClipNearFar;

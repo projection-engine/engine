@@ -114,7 +114,9 @@ export default class ShadowMapSystem extends System {
             skylight.changed = false
         }
 
+
         if (shadingModel === SHADING_MODELS.DETAIL && (lights2D.length > 0 || lights3D.length > 0)) {
+
             if (dataChanged)
                 setDataChanged()
             this.shadowMapShader.use()
@@ -181,7 +183,8 @@ export default class ShadowMapSystem extends System {
                 for (let i = 0; i < this.maxCubeMaps; i++) {
                     const current = lights3D[i]
                     if (current) {
-                        this.cubeMaps[i].draw((yaw, pitch, perspective, index) => {
+                        this.cubeMaps[i]
+                            .draw((yaw, pitch, perspective, index) => {
                             const target = vec3.add([], current.position, VIEWS.target[index])
                             this._loopMeshes(
                                 meshes,
@@ -189,7 +192,11 @@ export default class ShadowMapSystem extends System {
                                 meshSystem,
                                 materials,
                                 this.shadowMapOmniShader,
-                                mat4.lookAt([], current.position, target, VIEWS.up[index]), perspective, undefined, current.position, [current.zNear, current.zFar])
+                                mat4.lookAt([], current.position, target, VIEWS.up[index]),
+                                perspective,
+                                undefined,
+                                current.position,
+                                [current.zNear, current.zFar])
                         }, false, current.zFar, current.zNear)
 
                     }
@@ -235,6 +242,7 @@ export default class ShadowMapSystem extends System {
             normalSampler: normal,
             lightPosition
         })
+
 
         this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
         this.gpu.bindVertexArray(null)

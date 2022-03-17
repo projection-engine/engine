@@ -121,8 +121,6 @@ export default class CubeMapInstance {
     draw(callback, useVBO, zFar = 10, zNear = .1, asIrradiance) {
         let resolution = asIrradiance ? 32 : this._res, texture
 
-
-
         const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar),
             gpu = this.gpu,
             frameBuffer = gpu.createFramebuffer()
@@ -165,10 +163,10 @@ export default class CubeMapInstance {
         if (useVBO && !this._asDepth)
             this._vertexBuffer.disable()
 
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
-        gpu.bindRenderbuffer(gpu.RENDERBUFFER, null)
-        gpu.bindTexture(gpu.TEXTURE_2D, null)
-        gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, null)
+        // gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+        // gpu.bindRenderbuffer(gpu.RENDERBUFFER, null)
+        // gpu.bindTexture(gpu.TEXTURE_2D, null)
+        // gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, null)
 
         gpu.deleteFramebuffer(frameBuffer)
         gpu.deleteRenderbuffer(rbo)

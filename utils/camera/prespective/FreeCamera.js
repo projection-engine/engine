@@ -14,6 +14,9 @@ export default class FreeCamera extends Camera {
     }
     onMove
 
+    forwardVelocity = 0
+    sideVelocity = 0
+    upVelocity = 0
     constructor(
         origin,
         fov,
@@ -85,18 +88,22 @@ export default class FreeCamera extends Camera {
 
         if (this.direction.forward) {
             changed = true
-            const z = conf.sensitivity.forwards ? conf.sensitivity.forwards : 1
+            if (this.forwardVelocity <= 1)
+                this.forwardVelocity += .005
+            const z = this.forwardVelocity
             let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
             newPosition = newPosition.matrix
 
             this._position[0] += newPosition[0]
-            this._position[1] +=  Math.sin(this._pitch)
+            this._position[1] += Math.sin(this._pitch / 2)
             this._position[2] -= newPosition[2]
 
         }
         if (this.direction.backward) {
             changed = true
-            const z = -(conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+            if (this.forwardVelocity <= 1)
+                this.forwardVelocity += .005
+            const z = -this.forwardVelocity
             let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
             newPosition = newPosition.matrix
 
@@ -107,8 +114,10 @@ export default class FreeCamera extends Camera {
         }
         if (this.direction.left) {
             changed = true
+            if (this.sideVelocity <= 1)
+                this.sideVelocity += .005
 
-            const x = conf.sensitivity.right ? conf.sensitivity.right : 1
+            const x = this.sideVelocity
             let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
             newPosition = newPosition.matrix
 
@@ -118,7 +127,11 @@ export default class FreeCamera extends Camera {
         }
         if (this.direction.right) {
             changed = true
-            const x = -(conf.sensitivity.right ? conf.sensitivity.right : 1)
+            if (this.sideVelocity <= 1)
+                this.sideVelocity += .005
+
+            const x = -this.sideVelocity
+
             let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
             newPosition = newPosition.matrix
 
@@ -128,13 +141,21 @@ export default class FreeCamera extends Camera {
         }
         if (this.direction.up) {
             changed = true
-            const y = (conf.sensitivity.up ? conf.sensitivity.up : 1)
+            if (this.upVelocity <= 1)
+                this.upVelocity += .005
+
+
+            const y = this.upVelocity
             this._position[1] += y
 
         }
         if (this.direction.down) {
             changed = true
-            const y = (conf.sensitivity.up ? conf.sensitivity.up : 1)
+            if (this.upVelocity <= 1)
+                this.upVelocity += .005
+
+
+            const y = this.upVelocity
             this._position[1] -= y
         }
 
@@ -142,6 +163,11 @@ export default class FreeCamera extends Camera {
             this.updateViewMatrix()
             if (this.onMove)
                 this.onMove()
+
+        } else {
+            this.forwardVelocity = 0
+            this.sideVelocity = 0
+            this.upVelocity = 0
         }
     }
 }

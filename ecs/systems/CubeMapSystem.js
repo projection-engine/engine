@@ -16,7 +16,8 @@ const STEPS = {
     BASE: 0,
     IRRADIANCE: 1,
     PREFILTERED: 2,
-    DONE: 3
+    DONE: 3,
+    CALCULATE: 4
 }
 export default class CubeMapSystem extends System {
     step = STEPS.BASE
@@ -49,26 +50,13 @@ export default class CubeMapSystem extends System {
             this.step = STEPS.BASE
             this.lastCallLength = cubeMaps.length
         }
-        if (systems[SYSTEMS.TRANSFORMATION]?.changed) {
-            const changedMeshes = systems[SYSTEMS.TRANSFORMATION]?.changedMeshes
-            let newCubeMaps = {}
 
-            for (let i = 0; i < cubeMaps.length; i++) {
-                const current = cubeMaps[i].components.CubeMapComponent,
-                    pos = current.position,
-                    radius = current.radius
-
-                for (let m = 0; m < changedMeshes.length; m++) {
-
-                    const currentMesh = changedMeshes[m].components
-                    if (intersectBoundingSphere(currentMesh.MaterialComponent.radius, radius, currentMesh.TransformComponent.position.slice(0, 3), pos))
-                        newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
-                }
-            }
-
-            this.cubeMapsConsumeMap = newCubeMaps
+        if(this.lastMeshLength !== meshes.length) {
+            this.lastMeshLength = meshes.length
+            this.step = STEPS.CALCULATE
         }
         if (this.step !== STEPS.DONE) {
+
             switch (this.step) {
                 case STEPS.BASE:
                     this._generateBaseTexture(options, systems, data)
@@ -88,6 +76,28 @@ export default class CubeMapSystem extends System {
                         const current = cubeMaps[i].components.CubeMapComponent
                         current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
                     }
+                    this.step = STEPS.CALCULATE
+                    break
+                case STEPS.CALCULATE:
+
+                    const changedMeshes = meshes
+                    let newCubeMaps = {}
+
+                    for (let i = 0; i < cubeMaps.length; i++) {
+                        const current = cubeMaps[i].components.CubeMapComponent,
+                            pos = current.position,
+                            radius = current.radius
+
+                        for (let m = 0; m < changedMeshes.length; m++) {
+
+                            const currentMesh = changedMeshes[m].components
+                            if (intersectBoundingSphere(currentMesh.MaterialComponent.radius, radius, currentMesh.TransformComponent.position.slice(0, 3), pos))
+                                newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
+                        }
+                    }
+                    console.log('HERE')
+                    console.log(newCubeMaps)
+                    this.cubeMapsConsumeMap = newCubeMaps
                     this.step = STEPS.DONE
                     break
                 default:

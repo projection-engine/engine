@@ -1,65 +1,55 @@
-import {mat4, quat} from "gl-matrix";
+import {mat4, quat, vec4} from "gl-matrix";
 import {ENTITY_ACTIONS} from "../../../utils/entityReducer";
 import ROTATION_TYPES from "../misc/ROTATION_TYPES";
 
+const toDeg = 57.2957795131
+const E = .00001
 export default class Transformation {
     static transform(translation, rotate, scale, rotationType) {
-        const t = Transformation.translate(translation),
-            r = Transformation.rotate(rotate, rotationType),
-            s = Transformation.scale(scale)
-        const res = mat4.create()
-        mat4.multiply(res, t, r)
-        mat4.multiply(res, res, s)
-        return Array.from(res)
+        let matrix = []
+
+        if (rotationType !== ROTATION_TYPES.RELATIVE)
+            mat4.fromRotationTranslationScale(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale)
+        else
+            mat4.fromRotationTranslationScaleOrigin(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale, [0,0,0])
+
+        return matrix
     }
 
-    static translate(translation) {
-        const translationMatrix = mat4.create()
-        mat4.translate(translationMatrix, translationMatrix, translation)
-        return translationMatrix
-    }
-
-    static rotate(rotation, rotationType) {
-        const rotationMatrix = mat4.create()
-
-        if(rotationType === ROTATION_TYPES.RELATIVE) {
-            mat4.rotate(
-                rotationMatrix,
-                rotationMatrix,
-                rotation[0],
-                [1, 0, 0]
-            )
-            mat4.rotate(
-                rotationMatrix,
-                rotationMatrix,
-                rotation[1],
-                [0, 1, 0]
-            )
-            mat4.rotate(
-                rotationMatrix,
-                rotationMatrix,
-                rotation[2],
-                [0, 0, 1]
-            )
+    static extractTransformations(mat) {
+        return {
+            translation: mat4.getTranslation([], mat),
+            rotation: Transformation.getEuler(mat4.getRotation([], mat)),
+            scaling: mat4.getScaling([], mat)
         }
-        else{
-            const quaternion = quat.create()
-            quat.fromEuler(quaternion, rotation[0], rotation[1], rotation[2])
-            mat4.fromQuat(rotationMatrix, quaternion)
-        }
-
-
-        return rotationMatrix
     }
 
-    static scale(scaling) {
-        const scalingMatrix = mat4.create()
-        mat4.scale(scalingMatrix, scalingMatrix, scaling)
 
-        return scalingMatrix
+    static getEuler(q) {
+        const angles = []
+
+        // roll (x-axis rotation)
+        const sinr_cosp = 2 * (q[3] * q[0] + q[1] * q[2]);
+        const cosr_cosp = 1 - 2 * (q[0] * q[0] + q[1] * q[1]);
+        angles[0] = Math.atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        const sinp = 2 * (q[3] * q[1] - q[2] * q[0]);
+        if (Math.abs(sinp) >= 1)
+            angles[1] = 3.14 * sinp/Math.abs(sinp) // use 90 degrees if out of range
+        else
+            angles[1] = Math.asin(sinp);
+
+        // yaw (z-axis rotation)
+        const siny_cosp = 2 * (q[3] * q[2] + q[0] * q[1]);
+        const cosy_cosp = 1 - 2 * (q[1] * q[1] + q[2] * q[2]);
+        angles[2] = Math.atan2(siny_cosp, cosy_cosp);
+
+        return angles
     }
-    static updateTransform (axis, data, key, engine, entityID) {
-        const entity  = engine.entities.find(e => e.id === entityID)
+
+    static updateTransform(axis, data, key, engine, entityID) {
+        const entity = engine.entities.find(e => e.id === entityID)
 
         const component = entity.components.TransformComponent
         const prev = component[key]
