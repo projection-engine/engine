@@ -95,7 +95,7 @@ export default class FreeCamera extends Camera {
             newPosition = newPosition.matrix
 
             this._position[0] += newPosition[0]
-            this._position[1] += Math.sin(this._pitch )
+            this._position[1] += Math.sin(this._pitch)
             this._position[2] -= newPosition[2]
 
         }

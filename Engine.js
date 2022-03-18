@@ -66,6 +66,7 @@ export default class Engine extends RenderLoop {
 
     constructor(id, gpu) {
         super();
+        this.id = id
         this.data.canvasRef = document.getElementById(id + '-canvas')
         this.gpu = gpu
         this.camera = this.sphericalCamera
@@ -191,7 +192,11 @@ export default class Engine extends RenderLoop {
 
             const systems = Object.keys(this._systems).sort()
             this._changed = true
+            const cameraTarget = document.getElementById(this.id + '-camera')
+
             super.start((timestamp) => {
+                const t = this.camera.getNotTranslatedViewMatrix()
+                cameraTarget.style.transform = `translateZ(calc(var(--cubeSize) * -3)) matrix3d(${t})`
 
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
