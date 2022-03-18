@@ -17,7 +17,7 @@ void main(){
     if(indexSelected == 0)
         color = vec3(1.0, 1.0, 0.0) * brightness;
         
-    fragColor = vec4(color, 0.7);
+    fragColor = vec4(color, 0.2);
 }
 `
 

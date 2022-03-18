@@ -54,29 +54,29 @@ export default class MaterialInstance {
             const sharedImg = new Image()
 
 
-            let texture = await base64ToBuffer(albedo, sharedImg)
+            let texture = await loadImage(albedo, sharedImg)
             this.albedo = new TextureInstance(texture.data, false, this.gpu, ...[, ,], true, false, undefined, texture.width, texture.height)
 
-            texture = await base64ToBuffer(metallic, sharedImg)
+            texture = await loadImage(metallic, sharedImg)
             this.metallic = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
-            texture = await base64ToBuffer(roughness, sharedImg)
+            texture = await loadImage(roughness, sharedImg)
             this.roughness = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
-            texture = await base64ToBuffer(normal, sharedImg)
+            texture = await loadImage(normal, sharedImg)
             this.normal = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
-            texture = await base64ToBuffer(heightToApply, sharedImg)
+            texture = await loadImage(heightToApply, sharedImg)
             this.height = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
-            texture = await base64ToBuffer(ao, sharedImg)
+            texture = await loadImage(ao, sharedImg)
             this.ao = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
-            texture = await base64ToBuffer(emissive, sharedImg)
+            texture = await loadImage(emissive, sharedImg)
             this.emissive = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
 
             if(this.type === MATERIAL_TYPES.TRANSPARENT){
-                texture = await base64ToBuffer(opacity ? opacity : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), sharedImg)
+                texture = await loadImage(opacity ? opacity : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), sharedImg)
                 this.opacity = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
             }
 
@@ -89,7 +89,7 @@ export default class MaterialInstance {
     }
 }
 
-async function base64ToBuffer(b64Data, img) {
+async function loadImage(b64Data, img) {
     const p = new Promise(resolve => {
         img.onload = () => {
             resolve({

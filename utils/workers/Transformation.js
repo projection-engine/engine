@@ -8,10 +8,10 @@ export default class Transformation {
     static transform(translation, rotate, scale, rotationType) {
         let matrix = []
 
-        if (rotationType !== ROTATION_TYPES.RELATIVE)
+        if (rotationType === ROTATION_TYPES.GLOBAL)
             mat4.fromRotationTranslationScale(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale)
         else
-            mat4.fromRotationTranslationScaleOrigin(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale, [0,0,0])
+            mat4.fromRotationTranslationScaleOrigin(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale, translation)
 
         return matrix
     }

@@ -77,15 +77,16 @@ export default class PostProcessingSystem extends System {
 
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
 
-        // copyTexture(this.frameBuffer.FBO, systems[SYSTEMS.MESH].frameBuffer.FBO, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-        // this.transparencySystem.execute(translucentMeshes, materials)
+        copyTexture(this.frameBuffer.FBO, systems[SYSTEMS.MESH].frameBuffer.FBO, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
+        this.transparencySystem.execute(translucentMeshes, materials)
 
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
-        this.gpu.disable(this.gpu.DEPTH_TEST)
 
-        this.gpu.disable(this.gpu.DEPTH_TEST)
+
+
         this.selectedSystem.execute(meshes, meshSources, selected, camera)
+        this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.gpu.enable(this.gpu.DEPTH_TEST)
 
