@@ -55,7 +55,7 @@ void main(){
 export const vertexRot = `#version 300 es
 
 layout (location = 1) in vec3 position;
-layout (location = 3) in vec3 uvs;
+layout (location = 3) in vec2 uvs;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
@@ -84,10 +84,11 @@ uniform sampler2D circleSampler;
 out vec4 fragColor;
 
 void main(){
-    vec3 colorS = texture(circleSampler, uv);
-    if(colorS.a <= 0.1)
+    vec4 colorS = texture(circleSampler, uv);
+    if(colorS.a <= .1)
         discard;
-    vec3 color = vec3(0.);
+        
+    vec3 color = vec3(colorS.rgb);
     switch (axis) {
         case 1:
             color = vec3(1., 0., 0.);

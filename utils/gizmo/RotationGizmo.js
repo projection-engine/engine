@@ -13,7 +13,7 @@ import PickComponent from "../../ecs/components/PickComponent";
 import COMPONENTS from "../../../utils/misc/COMPONENTS";
 import TextureInstance from "../../instances/TextureInstance";
 import circle from "../../../../static/icons/circle.png";
-import cube from "../../../../static/assets/Cube.json";
+import plane from "../../../../static/assets/Plane.json";
 
 export default class RotationGizmo extends System {
     eventStarted = false
@@ -32,11 +32,11 @@ export default class RotationGizmo extends System {
 
         this.xyz = new MeshInstance({
             gpu,
-            vertices: cube.vertices,
-            indices: cube.indices,
-            normals: cube.normals,
-            uvs: cube.uvs,
-            tangents: cube.tangents,
+            vertices: plane.vertices,
+            indices: plane.indices,
+            normals: plane.normals,
+            uvs: plane.uvs,
+            tangents: plane.tangents,
         })
         this.texture = new TextureInstance(circle, false, this.gpu)
         this.handlerListener = this.handler.bind(this)
@@ -47,22 +47,19 @@ export default class RotationGizmo extends System {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
         e.addComponent(new TransformComponent())
-        let s, t, r
+        let s, t = [0, 0, 0], r
         switch (axis) {
             case 'x':
-                s = [1.5, 0.1, 0.1]
-                t = [3, 0, 0]
-                r = [0, 0, 0]
-                break
-            case 'y':
-                s = [1.5, 0.1, 0.1]
-                t = [0, 3, 0]
+                s = [1.5, .1, 1.5]
                 r = [0, 0, 1.57]
                 break
-            case 'z':
-                s = [1.5, 0.1, 0.1]
-                t = [0, 0, 3]
+            case 'y':
+                s = [1.5, .1, 1.5]
                 r = [3.141592653589793, -1.57, 3.141592653589793]
+                break
+            case 'z':
+                s = [1.5, .1, 1.5]
+                r = [1.57, 0, 0]
                 break
             case 'c':
                 s = [.3, .3, .3]
@@ -94,27 +91,27 @@ export default class RotationGizmo extends System {
                 this.currentCoord = undefined
                 document.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
-                this.lockCamera(false)
+
                 this.t = 0
                 break
             case 'mousemove':
                 const w = this.gpu.canvas.width
                 const h = this.gpu.canvas.height
-                const times = (w > h ? h / w : w / h)/10
+                const times = (w > h ? h / w : w / h) / 10
 
-                const vector = [event.movementX , event.movementY , event.movementX ]
+                const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.rotateElement([vector[0], 0, 0])
+                        this.rotateElement([vector[0]* times, 0, 0])
                         break
                     case 2: // y
-                        this.rotateElement([0, vector[1] * times , 0])
+                        this.rotateElement([0, vector[1] * times, 0])
 
                         break
                     case 3: // z
-                        this.rotateElement([0, 0, vector[2] * times * 5])
+                        this.rotateElement([0, 0, vector[2] * times])
                         break
                 }
 
@@ -125,64 +122,14 @@ export default class RotationGizmo extends System {
     }
 
     rotateElement(vec) {
-        const k = Object.keys(this.target.components)
-        let key
-        for (let i = 0; i < k.length; i++) {
-            switch (k[i]) {
-                case COMPONENTS.CUBE_MAP:
-                case COMPONENTS.POINT_LIGHT:
-                    key = k[i] === COMPONENTS.CUBE_MAP ? 'CubeMapComponent' : 'PointLightComponent'
-                    this.target.components[key].position = [
-                        this.target.components[key].position[0] - vec[0],
-                        this.target.components[key].position[1] - vec[1],
-                        this.target.components[key].position[2] - vec[2]
-                    ]
-                    break
-                case COMPONENTS.SKYLIGHT:
-                case COMPONENTS.DIRECTIONAL_LIGHT:
-                    key = k[i] === COMPONENTS.SKYLIGHT ? 'SkylightComponent' : 'DirectionalLightComponent'
-                    this.target.components[key].direction = [
-                        this.target.components[key].direction[0] - vec[0],
-                        this.target.components[key].direction[1] - vec[1],
-                        this.target.components[key].direction[2] - vec[2]
-                    ]
-                    break
-                case COMPONENTS.TRANSFORM:
-                    this.target.components.TransformComponent.translation = [
-                        this.target.components.TransformComponent.translation[0] - vec[0],
-                        this.target.components.TransformComponent.translation[1] - vec[1],
-                        this.target.components.TransformComponent.translation[2] - vec[2]
-                    ]
-                    break
-                default:
-                    break
-            }
-        }
-
+        this.target.components.TransformComponent.rotation = [
+            this.target.components.TransformComponent.rotation[0] - vec[0],
+            this.target.components.TransformComponent.rotation[1] - vec[1],
+            this.target.components.TransformComponent.rotation[2] - vec[2]
+        ]
     }
 
-    getTranslation(el) {
-        const k = Object.keys(el.components)
-        let key
 
-        for (let i = 0; i < k.length; i++) {
-            switch (k[i]) {
-                case COMPONENTS.CUBE_MAP:
-                case COMPONENTS.POINT_LIGHT:
-                    key = k[i] === COMPONENTS.CUBE_MAP ? 'CubeMapComponent' : 'PointLightComponent'
-                    return el.components[key].position
-                case COMPONENTS.SKYLIGHT:
-                case COMPONENTS.DIRECTIONAL_LIGHT:
-                    key = k[i] === COMPONENTS.SKYLIGHT ? 'SkylightComponent' : 'DirectionalLightComponent'
-                    return el.components[key].direction
-                case COMPONENTS.TRANSFORM:
-                    return el.components.TransformComponent.translation
-                default:
-                    break
-            }
-        }
-
-    }
 
     execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities) {
         super.execute()
@@ -191,27 +138,28 @@ export default class RotationGizmo extends System {
             this.camera = camera
             this.shader.use()
             if (this.currentCoord && !this.tracking) {
-                this.lockCamera = lockCamera
-                const el = entities.find(m => m.id === selected[0])
-                const translation = this.getTranslation(el)
+                const el = meshes.find(m => m.id === selected[0])
+                if(el) {
+                    const translation = el.components.TransformComponent.translation
 
-                if (translation !== undefined) {
-                    const pickID = pickSystem.pickElement((shader, proj) => {
-                        this._drawGizmo(translation, camera.viewMatrix, proj, shader, true)
-                    }, this.currentCoord, camera)
+                    if (translation !== undefined) {
+                        const pickID = pickSystem.pickElement((shader, proj) => {
+                            this._drawGizmo(translation, camera.viewMatrix, proj, shader, true)
+                        }, this.currentCoord, camera)
 
-                    this.clickedAxis = pickID - 2
+                        this.clickedAxis = pickID - 2
 
-                    if (pickID === 0) {
-                        lockCamera(false)
-                        setSelected([])
-                        this.currentCoord = undefined
-                    } else {
-                        this.tracking = true
-                        lockCamera(true)
-                        this.target = el
-                        this.gpu.canvas.requestPointerLock()
-                        document.addEventListener("mousemove", this.handlerListener)
+                        if (pickID === 0) {
+                            lockCamera(false)
+                            setSelected([])
+                            this.currentCoord = undefined
+                        } else {
+                            this.tracking = true
+                            lockCamera(true)
+                            this.target = el
+                            this.gpu.canvas.requestPointerLock()
+                            document.addEventListener("mousemove", this.handlerListener)
+                        }
                     }
                 }
             }
@@ -223,10 +171,11 @@ export default class RotationGizmo extends System {
 
             for (let i = 0; i < selected.length; i++) {
 
-                const el = entities.find(m => m.id === selected[i])
-                const translation = this.getTranslation(el)
+                const el = meshes.find(m => m.id === selected[i])
 
-                if (el && translation) {
+
+                if (el ) {
+                    const translation =el.components.TransformComponent.translation
                     if (selected.length === 1)
                         this._drawGizmo(translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
                     if (el.components.TransformComponent)
@@ -257,7 +206,7 @@ export default class RotationGizmo extends System {
     }
 
     _drawGizmo(translation, view, proj, shader, pick) {
-
+        this.gpu.disable(this.gpu.CULL_FACE)
         const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
         const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
         const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix)
@@ -268,16 +217,17 @@ export default class RotationGizmo extends System {
         this.gpu.bindVertexArray(this.xyz.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.xyz.indexVBO)
         this.xyz.vertexVBO.enable()
-
+        this.xyz.uvVBO.enable()
         this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
         this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
         this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
-        if(!pick)
+        if (!pick)
             this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
+        this.gpu.enable(this.gpu.CULL_FACE)
     }
 
     _draw(view, t, proj, a, id, shader) {

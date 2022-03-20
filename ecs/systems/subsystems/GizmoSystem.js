@@ -1,5 +1,6 @@
 import System from "../../basic/System";
 import TranslationGizmo from "../../../utils/gizmo/TranslationGizmo";
+import RotationGizmo from "../../../utils/gizmo/RotationGizmo";
 
 export default class GizmoSystem extends System {
 
@@ -8,11 +9,12 @@ export default class GizmoSystem extends System {
         this.gpu = gpu
 
         this.translationGizmo = new TranslationGizmo(gpu)
+        this.rotationGizmo = new RotationGizmo(gpu)
     }
 
 
     execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities) {
         super.execute()
-        this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities)
+        this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities)
     }
 }
