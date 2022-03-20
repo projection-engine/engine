@@ -17,7 +17,7 @@ export default class GridSystem extends System {
         super.execute()
 
         if(gridVisibility) {
-            this.gpu.disable(this.gpu.DEPTH_TEST)
+
             this.gridShader.use()
 
 
@@ -28,7 +28,7 @@ export default class GridSystem extends System {
             })
 
             this.grid.draw()
-            this.gpu.enable(this.gpu.DEPTH_TEST)
+
         }
     }
 }

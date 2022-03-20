@@ -195,8 +195,11 @@ export default class Engine extends RenderLoop {
             const cameraTarget = document.getElementById(this.id + '-camera')
 
             super.start((timestamp) => {
-                const t = this.camera.getNotTranslatedViewMatrix()
-                cameraTarget.style.transform = `translateZ(calc(var(--cubeSize) * -3)) matrix3d(${t})`
+
+                if (cameraTarget !== null) {
+                    const t = this.camera.getNotTranslatedViewMatrix()
+                    cameraTarget.style.transform = `translateZ(calc(var(--cubeSize) * -3)) matrix3d(${t})`
+                }
 
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)

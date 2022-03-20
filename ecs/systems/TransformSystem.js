@@ -45,7 +45,7 @@ export default class TransformSystem extends System {
                 if (current.linkedTo)
                     parent = this._find(filtered, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
                 const component = current.components.TransformComponent
-                const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling,  options.rotationType, component.position)
+                const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling,  options.rotationType, component.transformationMatrix)
 
                 if (current.components.SphereCollider) {
                     switch (current.components.SphereCollider.axis) {
@@ -67,11 +67,11 @@ export default class TransformSystem extends System {
                 if (parent)
                     mat4.multiply(
                         current.components.TransformComponent.transformationMatrix,
-                        parent,
+                        mat4.fromTranslation([], mat4.getTranslation([], parent)),
                         transformationMatrix
                     )
                 else
-                    current.components.TransformComponent.transformationMatrix = transformationMatrix
+                current.components.TransformComponent.transformationMatrix = transformationMatrix
 
                 for (let j = 0; j < filtered.length; j++) {
                     if (filtered[j].linkedTo === current.id)

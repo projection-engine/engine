@@ -3,17 +3,30 @@ import {ENTITY_ACTIONS} from "../../../utils/entityReducer";
 import ROTATION_TYPES from "../misc/ROTATION_TYPES";
 
 const toDeg = 57.2957795131
-const E = .00001
+
 export default class Transformation {
     static transform(translation, rotate, scale, rotationType) {
-        let matrix = []
+        // let r = mat4.create()
+        // mat4.rotate(r, r, rotate[0], [1,0,0])
+        // mat4.rotate(r, r, rotate[1], [0,1,0])
+        // mat4.rotate(r, r, rotate[2], [0,0,1])
+        //
+        // let t = mat4.fromTranslation([], translation)
+        // let s = mat4.fromScaling([], scale)
+        // let res = []
+        const quaternion = quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg)
+        // const center = rotationType === ROTATION_TYPES.GLOBAL? [0, 0, 0] : translation
 
-        if (rotationType === ROTATION_TYPES.GLOBAL)
-            mat4.fromRotationTranslationScale(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale)
-        else
-            mat4.fromRotationTranslationScaleOrigin(matrix, quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg), translation, scale, translation)
 
-        return matrix
+        //
+        // if(rotationType === ROTATION_TYPES.GLOBAL)
+        //     mat4.multiply(res, t, r)
+        // else
+        //     mat4.multiply(res, r, t)
+        // mat4.multiply(res, res, s)
+        //
+
+        return mat4.fromRotationTranslationScale([], quaternion, translation, scale)
     }
 
     static extractTransformations(mat) {
@@ -36,7 +49,7 @@ export default class Transformation {
         // pitch (y-axis rotation)
         const sinp = 2 * (q[3] * q[1] - q[2] * q[0]);
         if (Math.abs(sinp) >= 1)
-            angles[1] = 3.14 * sinp/Math.abs(sinp) // use 90 degrees if out of range
+            angles[1] = 3.14 * sinp / Math.abs(sinp) // use 90 degrees if out of range
         else
             angles[1] = Math.asin(sinp);
 

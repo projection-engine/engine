@@ -2,7 +2,7 @@ import {linearAlgebraMath, Vector} from 'pj-math'
 import {lookAt} from "../../misc/utils";
 import conf from "../../../assets/config.json";
 import Camera from "../Camera";
-import {mat4, vec4} from "gl-matrix";
+import {mat4, quat, vec3, vec4} from "gl-matrix";
 
 export default class FreeCamera extends Camera {
     direction = {
@@ -17,6 +17,7 @@ export default class FreeCamera extends Camera {
     forwardVelocity = 0
     sideVelocity = 0
     upVelocity = 0
+
     constructor(
         origin,
         fov,
@@ -82,84 +83,65 @@ export default class FreeCamera extends Camera {
         return this._pitch
     }
 
+    get orientation() {
+        const pQuat = quat.fromEuler([], this.pitch* 57.25, 0, 0)
+        const yQuat = quat.fromEuler([], 0, this.yaw * 57.25, 0)
+
+        return quat.multiply([], yQuat, pQuat)
+    }
+
     updatePlacement() {
         super.updatePlacement()
         let changed = false
+        let t = [0, 0, 0]
 
         if (this.direction.forward) {
             changed = true
             if (this.forwardVelocity <= 1)
-                this.forwardVelocity += .005
-            const z = this.forwardVelocity
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
-            newPosition = newPosition.matrix
-
-            this._position[0] += newPosition[0]
-            this._position[1] += Math.sin(this._pitch)
-            this._position[2] -= newPosition[2]
-
+                this.forwardVelocity += .01
+            t[2] = -this.forwardVelocity
         }
         if (this.direction.backward) {
             changed = true
             if (this.forwardVelocity <= 1)
-                this.forwardVelocity += .005
-            const z = -this.forwardVelocity
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(0, 0, z))
-            newPosition = newPosition.matrix
-
-
-            this._position[0] += newPosition[0]
-            this._position[1] -= Math.sin(this._pitch )
-            this._position[2] -= newPosition[2]
+                this.forwardVelocity += .01
+            t[2] = this.forwardVelocity
         }
         if (this.direction.left) {
             changed = true
             if (this.sideVelocity <= 1)
-                this.sideVelocity += .005
-
-            const x = this.sideVelocity
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
-            newPosition = newPosition.matrix
-
-            this._position[0] -= newPosition[0]
-            this._position[1] += newPosition[1]
-            this._position[2] += newPosition[2]
+                this.sideVelocity += .01
+            t[0] = -this.sideVelocity
         }
         if (this.direction.right) {
             changed = true
             if (this.sideVelocity <= 1)
-                this.sideVelocity += .005
-
-            const x = -this.sideVelocity
-
-            let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', this.yaw), new Vector(x, 0, 0))
-            newPosition = newPosition.matrix
-
-            this._position[0] -= newPosition[0]
-            this._position[1] += newPosition[1]
-            this._position[2] += newPosition[2]
+                this.sideVelocity += .01
+            t[0] = this.sideVelocity
         }
         if (this.direction.up) {
             changed = true
             if (this.upVelocity <= 1)
-                this.upVelocity += .005
+                this.upVelocity += .01
 
 
             const y = this.upVelocity
-            this._position[1] += y
+            t[1] += y
 
         }
         if (this.direction.down) {
             changed = true
             if (this.upVelocity <= 1)
-                this.upVelocity += .005
-
-
+                this.upVelocity += .01
             const y = this.upVelocity
-            this._position[1] -= y
+            t[1] -= y
         }
 
         if (changed) {
+
+            vec3.transformQuat(t, t, this.orientation);
+
+            vec3.add(this.position, this.position, t)
             this.updateViewMatrix()
             if (this.onMove)
                 this.onMove()

@@ -2,104 +2,89 @@ import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../../workers/ImageProcessor";
 import MATERIAL_TYPES from "../utils/misc/MATERIAL_TYPES";
 
+
 export default class MaterialInstance {
     _ready = false
     _initializing = false
-    uvScale = [1,1]
+    uvScale = [1, 1]
+
     constructor(
         gpu,
         id,
-        parallax = 0,
-        heightScale = 0,
-        parallaxLayers = 0,
         type,
         uvScale
     ) {
         this.id = id
         this.gpu = gpu
-        this.parallaxEnabled = parallax
-        this.parallaxHeightScale = heightScale
-        this.parallaxLayers = parallaxLayers
+        this.parallaxEnabled = 0
 
         this.type = type
 
-        if(uvScale !== undefined && Array.isArray(uvScale) && uvScale.length === 2)
+        if (uvScale !== undefined && Array.isArray(uvScale) && uvScale.length === 2)
             this.uvScale = uvScale
     }
 
-    async initializeTextures(
-        albedo = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
-        metallic = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
-        roughness = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
-        normal = ImageProcessor.colorToImage('rgba(127, 127, 255, 1)'),
-        height = ImageProcessor.colorToImage('rgba(127, 127, 127, 1)'),
-        ao = ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'),
-        emissive = ImageProcessor.colorToImage('rgba(0, 0, 0, 1)'),
-        opacity,
-        tiling = [1,1]
-    ) {
-        this.uvScale = tiling
-        if(!this._initializing) {
+    async initializeTextures(material, update) {
+
+        const albedo = material?.albedo?.low ? material.albedo.low : ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 128),
+            metallic = material?.metallic?.low ? material.metallic.low : ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 128),
+            roughness = material?.roughness?.low ? material.roughness.low : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 128),
+            normal = material?.normal?.low ? material.normal.low : ImageProcessor.colorToImage('rgba(127, 127, 255, 1)', 128),
+            height = material?.height?.low ? material.height.low : ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 128),
+            ao = material?.ao?.low ? material.ao.low : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 128),
+            emissive = material?.emissive?.low ? material.emissive.low : ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 128),
+            opacity = material?.opacity?.low ? material.opacity.low : undefined,
+            tiling = material?.tiling ? material.tiling : [1, 1]
+
+        if (!this._initializing) {
+            this.uvScale = tiling
             this._initializing = true
-            let heightToApply = height
-            const asPOM = typeof height === "object"
-            if (asPOM) {
+
+            if (typeof material?.heightMeta === 'object') {
                 this.parallaxEnabled = 1
-                this.parallaxHeightScale = height.heightScale
-                this.parallaxLayers = height.layers
-                heightToApply = height.image
+                this.parallaxHeightScale = material.heightMeta.heightScale
+                this.parallaxLayers = material.heightMeta.layers
+
             }
 
 
-            const sharedImg = new Image()
+            this.albedo = new TextureInstance(albedo, false, this.gpu, undefined, undefined, true)
+            this.metallic = new TextureInstance(metallic, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+            this.roughness = new TextureInstance(roughness, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+            this.normal = new TextureInstance(normal, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+            this.height = new TextureInstance(height, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+            this.ao = new TextureInstance(ao, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
+            this.emissive = new TextureInstance(emissive, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
 
+            if (this.type === MATERIAL_TYPES.TRANSPARENT) {
 
-            let texture = await loadImage(albedo, sharedImg)
-            this.albedo = new TextureInstance(texture.data, false, this.gpu, ...[, ,], true, false, undefined, texture.width, texture.height)
-
-            texture = await loadImage(metallic, sharedImg)
-            this.metallic = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
-
-            texture = await loadImage(roughness, sharedImg)
-            this.roughness = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
-
-            texture = await loadImage(normal, sharedImg)
-            this.normal = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
-
-            texture = await loadImage(heightToApply, sharedImg)
-            this.height = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
-
-            texture = await loadImage(ao, sharedImg)
-            this.ao = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
-
-            texture = await loadImage(emissive, sharedImg)
-            this.emissive = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
-
-            if(this.type === MATERIAL_TYPES.TRANSPARENT){
-                texture = await loadImage(opacity ? opacity : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), sharedImg)
-                this.opacity = new TextureInstance(texture.data, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, texture.width, texture.height)
+                this.opacity = new TextureInstance(opacity ? opacity : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, undefined, undefined, true)
             }
 
             this._ready = true
+        }
+        if (update) {
+            if (typeof material?.heightMeta === 'object') {
+                this.parallaxEnabled = 1
+                this.parallaxHeightScale = material.heightMeta.heightScale
+                this.parallaxLayers = material.heightMeta.layers
+
+            }
+
+            this.albedo.update(albedo, this.gpu)
+            this.metallic.update(metallic, this.gpu)
+            this.roughness.update(roughness, this.gpu)
+            this.normal.update(normal, this.gpu)
+            this.height.update(height, this.gpu)
+            this.ao.update(ao, this.gpu)
+            this.emissive.update(emissive, this.gpu)
+            if (this.type === MATERIAL_TYPES.TRANSPARENT)
+                this.opacity.update(opacity, this.gpu)
+
         }
     }
 
     get ready() {
         return this._ready
     }
-}
-
-async function loadImage(b64Data, img) {
-    const p = new Promise(resolve => {
-        img.onload = () => {
-            resolve({
-                data: img,
-                width: img.naturalWidth,
-                height: img.naturalHeight
-            })
-        }
-        img.src = b64Data
-    })
-
-    return await p
 }
