@@ -11,6 +11,7 @@ import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
+import {copyTexture} from "../../utils/misc/utils";
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
@@ -77,9 +78,12 @@ export default class PostProcessingSystem extends System {
         }
 
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
+        copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
+
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
         this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities)
+
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.gpu.enable(this.gpu.DEPTH_TEST)

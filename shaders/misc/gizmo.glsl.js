@@ -85,10 +85,10 @@ out vec4 fragColor;
 
 void main(){
     vec4 colorS = texture(circleSampler, uv);
-    if(colorS.a <= .1)
+    if(colorS.a <= .1 && axis > 0)
         discard;
         
-    vec3 color = vec3(colorS.rgb);
+    vec3 color = vec3(1.);
     switch (axis) {
         case 1:
             color = vec3(1., 0., 0.);

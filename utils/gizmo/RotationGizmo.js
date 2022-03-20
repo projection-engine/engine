@@ -104,7 +104,7 @@ export default class RotationGizmo extends System {
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.rotateElement([vector[0]* times, 0, 0])
+                        this.rotateElement([vector[0] * times, 0, 0])
                         break
                     case 2: // y
                         this.rotateElement([0, vector[1] * times, 0])
@@ -130,16 +130,17 @@ export default class RotationGizmo extends System {
     }
 
 
-
     execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities) {
         super.execute()
+        this.gpu.enable(this.gpu.DEPTH_TEST)
+        this.gpu?.depthFunc(this.gpu?.LESS)
 
         if (selected.length > 0) {
             this.camera = camera
             this.shader.use()
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
-                if(el) {
+                if (el) {
                     const translation = el.components.TransformComponent.translation
 
                     if (translation !== undefined) {
@@ -170,26 +171,22 @@ export default class RotationGizmo extends System {
             }
 
             for (let i = 0; i < selected.length; i++) {
-
                 const el = meshes.find(m => m.id === selected[i])
-
-
-                if (el ) {
-                    const translation =el.components.TransformComponent.translation
+                if (el) {
+                    const translation = el.components.TransformComponent.translation
                     if (selected.length === 1)
                         this._drawGizmo(translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
-                    if (el.components.TransformComponent)
-                        MeshSystem.drawMesh(
-                            this.shader,
-                            this.gpu,
-                            meshSources[el.components.MeshComponent.meshID],
-                            camera.position,
-                            camera.viewMatrix,
-                            camera.projectionMatrix,
-                            el.components.TransformComponent.transformationMatrix,
-                            undefined,
-                            el.components.MeshComponent.normalMatrix,
-                            i)
+                    MeshSystem.drawMesh(
+                        this.shader,
+                        this.gpu,
+                        meshSources[el.components.MeshComponent.meshID],
+                        camera.position,
+                        camera.viewMatrix,
+                        camera.projectionMatrix,
+                        el.components.TransformComponent.transformationMatrix,
+                        undefined,
+                        el.components.MeshComponent.normalMatrix,
+                        i)
                 }
             }
         }
@@ -206,7 +203,7 @@ export default class RotationGizmo extends System {
     }
 
     _drawGizmo(translation, view, proj, shader, pick) {
-        this.gpu.enable(this.gpu.DEPTH_TEST)
+
         this.gpu.disable(this.gpu.CULL_FACE)
         const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
         const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
@@ -219,9 +216,13 @@ export default class RotationGizmo extends System {
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.xyz.indexVBO)
         this.xyz.vertexVBO.enable()
         this.xyz.uvVBO.enable()
-        this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
-        this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
-        this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
+
+        if (this.tracking && this.clickedAxis === 1 || !this.tracking)
+            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
+        if (this.tracking && this.clickedAxis === 2 || !this.tracking)
+            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
+        if (this.tracking && this.clickedAxis === 3 || !this.tracking)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
         if (!pick)
             this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
 

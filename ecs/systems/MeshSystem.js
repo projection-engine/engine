@@ -83,7 +83,7 @@ export default class MeshSystem extends System {
 
 
             this.shader.use()
-            this.gpu.clearDepth(1);
+
             this.frameBuffer.startMapping()
             const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
 
@@ -132,7 +132,7 @@ export default class MeshSystem extends System {
                     )
                 }
             }
-            this.frameBuffer.stopMapping(false)
+            this.frameBuffer.stopMapping()
         }
 
     }

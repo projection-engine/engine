@@ -30,9 +30,8 @@ export default class FramebufferInstance extends Quad {
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
     }
 
-    stopMapping(clear = true, unbind = true) {
+    stopMapping(clear = true,) {
 
-        if (unbind)
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
 
         if (clear) {
