@@ -1,6 +1,5 @@
-import {mat4, quat, vec4} from "gl-matrix";
+import {mat4, quat} from "gl-matrix";
 import {ENTITY_ACTIONS} from "../../../utils/entityReducer";
-import ROTATION_TYPES from "../misc/ROTATION_TYPES";
 
 const toDeg = 57.2957795131
 

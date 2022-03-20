@@ -1,8 +1,6 @@
-import {linearAlgebraMath, Vector} from 'pj-math'
 import {lookAt} from "../../misc/utils";
-import conf from "../../../assets/config.json";
 import Camera from "../Camera";
-import {mat4, quat, vec3, vec4} from "gl-matrix";
+import {mat4, vec3} from "gl-matrix";
 
 export default class FreeCamera extends Camera {
     direction = {
@@ -83,12 +81,6 @@ export default class FreeCamera extends Camera {
         return this._pitch
     }
 
-    get orientation() {
-        const pQuat = quat.fromEuler([], this.pitch* 57.25, 0, 0)
-        const yQuat = quat.fromEuler([], 0, this.yaw * 57.25, 0)
-
-        return quat.multiply([], yQuat, pQuat)
-    }
 
     updatePlacement() {
         super.updatePlacement()

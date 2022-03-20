@@ -6,9 +6,8 @@ import * as smShaders from '../../shaders/shadows/shadow.glsl'
 import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import CubeMapInstance from "../../instances/CubeMapInstance";
-import {lookAt} from "../../utils/misc/utils";
-import {omniFragment} from "../../shaders/shadows/shadow.glsl";
 import {mat4, vec3} from "gl-matrix";
+
 export const VIEWS = {
     target: [
         [1., 0., 0.],

@@ -1,5 +1,5 @@
 import Component from "../basic/Component";
-import {mat4, vec3} from "gl-matrix";
+import {mat4} from "gl-matrix";
 
 export default class PointLightComponent extends Component{
     _color = [1, 1, 1]

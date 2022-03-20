@@ -1,5 +1,4 @@
 import System from "../../basic/System";
-import getImagePromise from "../../../utils/misc/getImagePromise";
 import pointLightIcon from "../../../../../static/icons/point_light.png";
 import directionalLightIcon from "../../../../../static/icons/directional_light.png";
 import spotLightIcon from "../../../../../static/icons/spot_light.png";
@@ -17,18 +16,11 @@ export default class BillboardSystem extends System {
     }
 
     async initializeTextures() {
+        this.pointLightTexture = new TextureInstance(pointLightIcon, false, this.gpu)
+        this.directionalLightTexture = new TextureInstance(directionalLightIcon, false, this.gpu)
 
-        const p = await getImagePromise(pointLightIcon),
-            dir = await getImagePromise(directionalLightIcon),
-            spot = await getImagePromise(spotLightIcon),
-            cube = await getImagePromise(cubeMapIcon)
-
-
-        this.pointLightTexture = new TextureInstance(p, false, this.gpu)
-        this.directionalLightTexture = new TextureInstance(dir, false, this.gpu)
-
-        this.spotLightTexture = new TextureInstance(spot, false, this.gpu)
-        this.cubemapTexture = new TextureInstance(cube, false, this.gpu)
+        this.spotLightTexture = new TextureInstance(spotLightIcon, false, this.gpu)
+        this.cubemapTexture = new TextureInstance(cubeMapIcon, false, this.gpu)
 
         this._ready = true
     }

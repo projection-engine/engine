@@ -1,5 +1,5 @@
 import {linearAlgebraMath} from "pj-math";
-import {mat4} from "gl-matrix";
+import {mat4, quat} from "gl-matrix";
 
 export default class Camera {
     _position = [0, 0, 0]
@@ -33,6 +33,12 @@ export default class Camera {
     }
 
 
+    get orientation() {
+        const pQuat = quat.fromEuler([], this.pitch* 57.25, 0, 0)
+        const yQuat = quat.fromEuler([], 0, this.yaw * 57.25, 0)
+
+        return quat.multiply([], yQuat, pQuat)
+    }
 
 
     get zNear() {

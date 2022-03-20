@@ -1,5 +1,4 @@
 import System from "../../basic/System";
-import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
 import * as shaderCode from "../../../shaders/mesh/translucentMesh.glsl";
 import * as shaderBaseCode from "../../../shaders/mesh/forwardMesh.glsl";
 import Shader from "../../../utils/workers/Shader";

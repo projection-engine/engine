@@ -1,7 +1,6 @@
 import System from "../basic/System";
 
 import MaterialInstance from "../../instances/MaterialInstance";
-import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
 import * as shaderCode from '../../shaders/mesh/meshDeferred.glsl'
 import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
@@ -54,6 +53,7 @@ export default class MeshSystem extends System {
         await this.fallbackMaterial.initializeTextures()
         this._ready = true
     }
+
 
 
     execute(options, systems, data) {

@@ -1,6 +1,4 @@
 import System from "../../../basic/System";
-
-import SYSTEMS from "../../../../utils/misc/SYSTEMS";
 import PropagationSystem from "./PropagationSystem";
 import InjectionSystem from "./InjectionSystem";
 

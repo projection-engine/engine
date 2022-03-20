@@ -22,11 +22,11 @@ export default class FramebufferInstance extends Quad {
     }
 
 
-    startMapping(buffer = this.FBO, autoSetViewport = true, clear=true) {
+    startMapping(buffer = this.FBO, autoSetViewport = true, clear = true) {
         if (autoSetViewport)
             this.gpu.viewport(0, 0, this.width, this.height);
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, buffer);
-        if(clear)
+        if (clear)
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT);
     }
 
@@ -94,19 +94,17 @@ export default class FramebufferInstance extends Quad {
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MIN_FILTER, linear ? this.gpu.LINEAR : this.gpu.NEAREST);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_S, repeat ? this.gpu.REPEAT : this.gpu.CLAMP_TO_EDGE);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_WRAP_T, repeat ? this.gpu.REPEAT : this.gpu.CLAMP_TO_EDGE);
-        if (storage)
-            this.gpu.texStorage2D(this.gpu.TEXTURE_2D, 1, precision, w, h);
-        else
-            this.gpu.texImage2D(
-                this.gpu.TEXTURE_2D,
-                0,
-                precision,
-                w,
-                h,
-                0,
-                format,
-                type,
-                null);
+
+        this.gpu.texImage2D(
+            this.gpu.TEXTURE_2D,
+            0,
+            precision,
+            w,
+            h,
+            0,
+            format,
+            type,
+            null);
         this.gpu.framebufferTexture2D(this.gpu.FRAMEBUFFER, this.gpu.COLOR_ATTACHMENT0 + attachment, this.gpu.TEXTURE_2D, texture, 0);
 
         this.colors.push(texture)
@@ -115,6 +113,7 @@ export default class FramebufferInstance extends Quad {
 
         return this
     }
+
 
     appendTexture(texture, attachment = 0, rebind = true, resetDrawBuffers = true) {
         if (rebind)

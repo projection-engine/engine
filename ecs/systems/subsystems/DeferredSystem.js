@@ -1,7 +1,5 @@
 import System from "../../basic/System";
 import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
-import brdfImg from "../../../../../static/brdf_lut.jpg";
-import {createTexture} from "../../../utils/misc/utils";
 import SYSTEMS from "../../../utils/misc/SYSTEMS";
 import Shader from "../../../utils/workers/Shader";
 import * as shaderCode from '../../../shaders/mesh/deferred.glsl'

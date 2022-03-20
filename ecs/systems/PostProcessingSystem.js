@@ -2,18 +2,15 @@ import System from "../basic/System";
 import DeferredSystem from "./subsystems/DeferredSystem";
 import GridSystem from "./subsystems/GridSystem";
 import BillboardSystem from "./subsystems/BillboardSystem";
-import SelectedSystem from "./subsystems/SelectedSystem";
 import SkyboxSystem from "./subsystems/SkyboxSystem";
-import Quad from "../../utils/workers/Quad";
 import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../utils/misc/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
-import * as debug from '../../shaders/shadows/shadow.glsl'
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
-import {copyTexture} from "../../utils/misc/utils";
 import TransparencySystem from "./subsystems/TransparencySystem";
+import GizmoSystem from "./subsystems/GizmoSystem";
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
@@ -33,7 +30,7 @@ export default class PostProcessingSystem extends System {
         this.gridSystem = new GridSystem(gpu)
         this.billboardSystem = new BillboardSystem(gpu)
         this.billboardSystem.initializeTextures().catch()
-        this.selectedSystem = new SelectedSystem(gpu)
+        this.gizmoSystem = new GizmoSystem(gpu)
     }
 
     execute(options, systems, data, entities) {
@@ -80,25 +77,15 @@ export default class PostProcessingSystem extends System {
         }
 
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
-
-        // copyTexture(this.frameBuffer.FBO, systems[SYSTEMS.MESH].frameBuffer.FBO, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-
-        // this.transparencySystem.execute(translucentMeshes, materials)
-
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
-
-
-
-        this.selectedSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities)
+        this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities)
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.gpu.enable(this.gpu.DEPTH_TEST)
-
         this.frameBuffer.stopMapping()
 
         let shaderToApply = this.shader
-
         if (!fxaa)
             shaderToApply = this.noFxaaShader
 
@@ -113,14 +100,5 @@ export default class PostProcessingSystem extends System {
             FXAAReduceMul: 1 / 8
         })
         this.frameBuffer.draw()
-
-
-        // this.gpu.viewport(0, 0, this.frameBuffer.width, this.frameBuffer.height);
-        // this.shadowMapDebugShader.use()
-        // this.shadowMapDebugShader.bindForUse({
-        //     uSampler:systems[SYSTEMS.SHADOWS].rsmFramebuffer.colors[1]
-        // })
-        // this.quad.draw()
-
     }
 }

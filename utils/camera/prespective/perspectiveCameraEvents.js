@@ -2,7 +2,6 @@ import conf from "../../../assets/config.json";
 import {linearAlgebraMath, Vector} from "pj-math";
 import FreeCamera from "./FreeCamera";
 import SphericalCamera from "./SphericalCamera";
-import {mat3, mat4, quat, vec3, vec4} from "gl-matrix";
 
 export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     let target = document.getElementById(canvasID),
