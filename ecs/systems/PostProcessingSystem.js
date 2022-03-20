@@ -36,7 +36,7 @@ export default class PostProcessingSystem extends System {
         this.selectedSystem = new SelectedSystem(gpu)
     }
 
-    execute(options, systems, data) {
+    execute(options, systems, data, entities) {
         super.execute()
         const {
             pointLights,
@@ -52,6 +52,10 @@ export default class PostProcessingSystem extends System {
             translucentMeshes
         } = data
         const {
+
+
+            lockCamera,
+            setSelected,
             selected,
             camera,
             fxaa,
@@ -86,7 +90,7 @@ export default class PostProcessingSystem extends System {
 
 
 
-        this.selectedSystem.execute(meshes, meshSources, selected, camera)
+        this.selectedSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities)
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.gpu.enable(this.gpu.DEPTH_TEST)

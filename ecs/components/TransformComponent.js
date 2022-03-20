@@ -42,6 +42,7 @@ export default class TransformComponent extends Component {
     }
 
     set translation(data) {
+
         this.changed = true
         this._translation = data
     }

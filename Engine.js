@@ -161,9 +161,7 @@ export default class Engine extends RenderLoop {
         if (!this._inExecution) {
             this._inExecution = true
             this.cameraEvents.startTracking()
-            this.gpu?.enable(this.gpu.CULL_FACE)
-            this.gpu?.enable(this.gpu.DEPTH_TEST)
-            this.gpu?.cullFace(this.gpu.BACK)
+
 
 
             const filteredEntities = entities.filter(e => e.active)
@@ -208,6 +206,13 @@ export default class Engine extends RenderLoop {
                         .execute(
                             {
                                 ...params,
+                                lockCamera: (lock) => {
+                                    if(lock){
+                                        this.cameraEvents.stopTracking()
+                                    }
+                                    else
+                                        this.cameraEvents.startTracking()
+                                },
                                 entitiesLength: entities.length,
                                 clicked: this.data.clicked,
                                 setClicked: e => {
@@ -224,7 +229,8 @@ export default class Engine extends RenderLoop {
                                 setRecompile: () => this.recompiled = true
                             },
                             this._systems,
-                            data
+                            data,
+                            entities
                         )
                 }
             })

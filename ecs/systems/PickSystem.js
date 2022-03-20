@@ -16,70 +16,59 @@ export default class PickSystem extends System {
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
     }
 
-    execute(options, systems, data) {
+    execute(options, systems, {meshes, meshSources}) {
         super.execute()
-        const  {
-            pointLights,
-            spotLights,
-            terrains,
-            meshes,
-            skybox,
-            directionalLights,
-            materials,
-            meshSources,
-            cubeMaps
-        } = data
-
-        const  {
+        const {
             setSelected,
             currentCoords,
             clicked,
-
-
             camera,
             setClicked
         } = options
 
-        if(clicked && typeof currentCoords === "object"){
-
+        if (clicked && typeof currentCoords === "object") {
             setClicked(false)
 
-            this.shader.use()
-            this.frameBuffer.startMapping()
+            const index = this.pickElement((shader, proj) => {
+                for (let m = 0; m < meshes.length; m++) {
+                    const currentInstance = meshes[m]
+                    const mesh = meshSources[currentInstance.components.MeshComponent.meshID]
 
-            const pickerProjection =  this._getProjection(currentCoords, camera)
-            for (let m = 0; m < meshes.length; m++) {
-                const currentInstance = meshes[m]
-                const mesh  = meshSources[currentInstance.components.MeshComponent.meshID]
-
-                if (mesh !== undefined) {
-                    const t = currentInstance.components.TransformComponent
-                    this._drawMesh(mesh, currentInstance, camera.viewMatrix, pickerProjection, t.transformationMatrix)
+                    if (mesh !== undefined) {
+                        const t = currentInstance.components.TransformComponent
+                        this._drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
+                    }
                 }
-            }
-
-            let data = new Uint8Array(4);
-            this.gpu.readPixels(
-                0,
-                0,
-                1,
-                1,
-                this.gpu.RGBA,
-                this.gpu.UNSIGNED_BYTE,
-                data
-            );
-
-            const index = data[0] + data[1] + data[2];
+            }, currentCoords, camera)
 
             if (index > 0)
                 setSelected([meshes.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
-            else
-                setSelected([])
-            this.frameBuffer.stopMapping();
 
         }
 
     }
+
+    pickElement(drawCallback, pickCoords, camera) {
+        this.shader.use()
+        this.frameBuffer.startMapping()
+
+        const pickerProjection = this._getProjection(pickCoords, camera)
+        drawCallback(this.shader, pickerProjection)
+        let data = new Uint8Array(4);
+        this.gpu.readPixels(
+            0,
+            0,
+            1,
+            1,
+            this.gpu.RGBA,
+            this.gpu.UNSIGNED_BYTE,
+            data
+        );
+
+        this.frameBuffer.stopMapping();
+        return data[0] + data[1] + data[2];
+    }
+
     _getProjection({x, y}, camera) {
 
         const aspect = camera.aspectRatio
@@ -111,7 +100,7 @@ export default class PickSystem extends System {
             camera.zNear,
             camera.zFar);
 
-        return  m
+        return m
     }
 
     _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix) {

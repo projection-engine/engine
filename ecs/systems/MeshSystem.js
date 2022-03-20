@@ -179,8 +179,6 @@ export default class MeshSystem extends System {
                 layers: material.parallaxLayers,
 
                 uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale,
-
-
             }
         }
 

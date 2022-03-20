@@ -7,7 +7,7 @@ export default class PickComponent extends Component {
     constructor(id, quantity) {
         super(id, PickComponent.constructor.name);
 
-        this.pickID = generateNextID(quantity+1)
+        this.pickID = generateNextID(quantity+4)
     }
 
 }
