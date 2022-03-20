@@ -206,6 +206,7 @@ export default class RotationGizmo extends System {
     }
 
     _drawGizmo(translation, view, proj, shader, pick) {
+        this.gpu.enable(this.gpu.DEPTH_TEST)
         this.gpu.disable(this.gpu.CULL_FACE)
         const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
         const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
@@ -228,6 +229,7 @@ export default class RotationGizmo extends System {
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
         this.gpu.enable(this.gpu.CULL_FACE)
+        // this.gpu.enable(this.gpu.DEPTH_TEST)
     }
 
     _draw(view, t, proj, a, id, shader) {
