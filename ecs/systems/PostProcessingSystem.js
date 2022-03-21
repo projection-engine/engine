@@ -20,6 +20,7 @@ export default class PostProcessingSystem extends System {
         this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
         this.frameBuffer
             .texture()
+            .depthTest()
 
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
@@ -34,7 +35,7 @@ export default class PostProcessingSystem extends System {
         this.gizmoSystem = new GizmoSystem(gpu)
     }
 
-    execute(options, systems, data, entities) {
+    execute(options, systems, data, entities, gizmo) {
         super.execute()
         const {
             pointLights,
@@ -68,9 +69,11 @@ export default class PostProcessingSystem extends System {
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
 
         this.frameBuffer.startMapping()
-        this.skyboxSystem.execute(skybox, camera)
-        this.gridSystem.execute(gridVisibility, camera)
 
+        this.skyboxSystem.execute(skybox, camera)
+        this.gpu.disable(this.gpu.DEPTH_TEST)
+        this.gridSystem.execute(gridVisibility, camera)
+        this.gpu.enable(this.gpu.DEPTH_TEST)
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
@@ -80,9 +83,12 @@ export default class PostProcessingSystem extends System {
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
         copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
+
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
-        this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities)
+
+        if(gizmo !== undefined)
+            this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities, gizmo)
 
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)

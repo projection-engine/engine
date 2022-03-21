@@ -21,6 +21,7 @@ import CubeMapSystem from "./ecs/systems/CubeMapSystem";
 
 export default class Engine extends RenderLoop {
     types = {}
+    gizmo
     cameraType = CAMERA_TYPES.SPHERICAL
     recompiled = false
     data = {
@@ -162,8 +163,6 @@ export default class Engine extends RenderLoop {
             this._inExecution = true
             this.cameraEvents.startTracking()
 
-
-
             const filteredEntities = entities.filter(e => e.active)
 
             const data = {
@@ -230,7 +229,8 @@ export default class Engine extends RenderLoop {
                             },
                             this._systems,
                             data,
-                            entities
+                            entities,
+                            this.gizmo
                         )
                 }
             })

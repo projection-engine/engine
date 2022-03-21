@@ -102,7 +102,7 @@ export function enableBasics(gpu) {
     // gpu?.stencilOp(gpu?.KEEP, gpu?.KEEP, gpu?.REPLACE)
 
     gpu?.frontFace(gpu?.CCW);
-
+    gpu.clearColor(0, .0, .0, 0)
     gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight);
 }
 

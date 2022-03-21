@@ -4,18 +4,17 @@ import Shader from "../workers/Shader";
 import * as shaderCode from "../../shaders/mesh/meshSelected.glsl";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
-import {mat4, vec3} from "gl-matrix";
+import {vec3} from "gl-matrix";
 import Entity from "../../ecs/basic/Entity";
 import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
 import COMPONENTS from "../../../utils/misc/COMPONENTS";
-import TextureInstance from "../../instances/TextureInstance";
-import circle from "../../../../static/icons/circle.png";
-import plane from "../../../../static/assets/Circle.json";
+import arrow from '../../../../static/assets/ScaleGizmo.json'
+import cube from '../../../../static/assets/Cube.json'
 
-export default class RotationGizmo extends System {
+export default class ScaleGizmo extends System {
     eventStarted = false
     clickedAxis = -1
     tracking = false
@@ -24,7 +23,8 @@ export default class RotationGizmo extends System {
         super([]);
         this.gpu = gpu
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.gizmoShader = new Shader(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot, gpu)
+        this.gizmoShader = new Shader(gizmoShaderCode.vertex, gizmoShaderCode.fragment, gpu)
+
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
         this.zGizmo = this._mapEntity(4, 'z')
@@ -32,34 +32,44 @@ export default class RotationGizmo extends System {
 
         this.xyz = new MeshInstance({
             gpu,
-            vertices: plane.vertices,
-            indices: plane.indices,
-            normals: plane.normals,
-            uvs: plane.uvs,
-            tangents: plane.tangents,
+            vertices: arrow.vertices,
+            indices: arrow.indices,
+            normals: arrow.normals,
+            uvs: [],
+            tangents: []
         })
-        this.texture = new TextureInstance(circle, false, this.gpu)
+
+        this.center = new MeshInstance({
+            gpu,
+            vertices: cube.vertices,
+            indices: cube.indices,
+            normals: cube.normals,
+            uvs: [],
+            tangents: [],
+        })
         this.handlerListener = this.handler.bind(this)
     }
-
 
     _mapEntity(i, axis) {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
         e.addComponent(new TransformComponent())
-        let s, t = [0, 0, 0], r
+        let s = [.3, 0.3, 0.3], t, r
         switch (axis) {
             case 'x':
-                s = [1.5, .1, 1.5]
-                r = [0, 0, 1.57]
+
+                t = [3, 0, 0]
+                r = [0, 1.57, 0]
                 break
             case 'y':
-                s = [1.5, .1, 1.5]
-                r = [0,0,0]
+
+                t = [0, 3, 0]
+                r = [-1.57, 1.57, 0]
                 break
             case 'z':
-                s = [1.5, .1, 1.5]
-                r = [1.57, 0, 0]
+
+                t = [0, 0, 3]
+                r = [3.1415, -3.1415, 3.1415]
                 break
             case 'c':
                 s = [.1, .1, .1]
@@ -77,6 +87,7 @@ export default class RotationGizmo extends System {
     }
 
     handler(event) {
+
         switch (event.type) {
             case 'mousedown':
                 if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas)) {
@@ -86,33 +97,31 @@ export default class RotationGizmo extends System {
 
                 break
             case 'mouseup':
-
                 this.tracking = false
-                this.clickedAxis = -1
                 this.currentCoord = undefined
                 document.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
-
+                this.clickedAxis = -1
                 this.t = 0
                 break
             case 'mousemove':
                 const w = this.gpu.canvas.width
                 const h = this.gpu.canvas.height
-
+                const times = (w > h ? h / w : w / h) / 10
 
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.rotateElement([vector[0] * .01, 0, 0])
+                        this.transformElement([vector[0] * .01, 0, 0])
                         break
                     case 2: // y
-                        this.rotateElement([0, vector[1] * .01, 0])
+                        this.transformElement([0, vector[1] * .01, 0])
 
                         break
                     case 3: // z
-                        this.rotateElement([0, 0, vector[2] * .01])
+                        this.transformElement([0, 0, vector[2] * .01])
                         break
                 }
 
@@ -122,11 +131,11 @@ export default class RotationGizmo extends System {
         }
     }
 
-    rotateElement(vec) {
-        this.target.components.TransformComponent.rotation = [
-            this.target.components.TransformComponent.rotation[0] - vec[0],
-            this.target.components.TransformComponent.rotation[1] - vec[1],
-            this.target.components.TransformComponent.rotation[2] - vec[2]
+    transformElement(vec) {
+        this.target.components.TransformComponent.scaling = [
+            this.target.components.TransformComponent.scaling[0] - vec[0],
+            this.target.components.TransformComponent.scaling[1] - vec[1],
+            this.target.components.TransformComponent.scaling[2] - vec[2]
         ]
     }
 
@@ -139,24 +148,22 @@ export default class RotationGizmo extends System {
             this.shader.use()
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
-                if (el) {
-                    const pickID = pickSystem.pickElement((shader, proj) => {
-                        this._drawGizmo( el.components.TransformComponent.translation, el.components.TransformComponent.rotation, camera.viewMatrix, proj, shader, true)
-                    }, this.currentCoord, camera)
+                const pickID = pickSystem.pickElement((shader, proj) => {
+                    this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, proj, shader, true)
+                }, this.currentCoord, camera)
 
-                    this.clickedAxis = pickID - 2
+                this.clickedAxis = pickID - 2
 
-                    if (pickID === 0) {
-                        lockCamera(false)
-                        setSelected([])
-                        this.currentCoord = undefined
-                    } else {
-                        this.tracking = true
-                        lockCamera(true)
-                        this.target = el
-                        this.gpu.canvas.requestPointerLock()
-                        document.addEventListener("mousemove", this.handlerListener)
-                    }
+                if (pickID === 0) {
+                    lockCamera(false)
+                    setSelected([])
+                    this.currentCoord = undefined
+                } else {
+                    this.tracking = true
+                    lockCamera(true)
+                    this.target = el
+                    this.gpu.canvas.requestPointerLock()
+                    document.addEventListener("mousemove", this.handlerListener)
                 }
             }
             if (!this.eventStarted) {
@@ -164,87 +171,76 @@ export default class RotationGizmo extends System {
                 document.addEventListener('mousedown', this.handlerListener)
                 document.addEventListener('mouseup', this.handlerListener)
             }
-            if (selected.length === 1) {
-                const el = meshes.find(m => m.id === selected[0])
-                if (el) {
-
-                    this._drawGizmo(el.components.TransformComponent.translation, el.components.TransformComponent.rotation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
-                }
-            }
 
             for (let i = 0; i < selected.length; i++) {
                 const el = meshes.find(m => m.id === selected[i])
                 if (el) {
-                    MeshSystem.drawMesh(
-                        this.shader,
-                        this.gpu,
-                        meshSources[el.components.MeshComponent.meshID],
-                        camera.position,
-                        camera.viewMatrix,
-                        camera.projectionMatrix,
-                        el.components.TransformComponent.transformationMatrix,
-                        undefined,
-                        el.components.MeshComponent.normalMatrix,
-                        i)
+                    if (selected.length === 1)
+                        this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
+                    if (el.components.TransformComponent)
+                        MeshSystem.drawMesh(
+                            this.shader,
+                            this.gpu,
+                            meshSources[el.components.MeshComponent.meshID],
+                            camera.position,
+                            camera.viewMatrix,
+                            camera.projectionMatrix,
+                            el.components.TransformComponent.transformationMatrix,
+                            undefined,
+                            el.components.MeshComponent.normalMatrix,
+                            i)
                 }
             }
         }
 
     }
 
-    _rotateMatrix(t, rotation, axis, m) {
+    _translateMatrix(t, m) {
         const matrix = [...m]
         matrix[12] += t[0]
         matrix[13] += t[1]
         matrix[14] += t[2]
 
-
-        switch (axis) {
-            case 'x':
-                mat4.rotateY(matrix, matrix, -rotation[0])
-                break
-            case 'y':
-                mat4.rotateY(matrix, matrix, rotation[1])
-                break
-            case 'z':
-                mat4.rotateY(matrix, matrix, rotation[2])
-                // mat4.rotateX(matrix, matrix, 1.57)
-                break
-            default:
-                break
-        }
         return matrix
     }
 
-    _drawGizmo(translation, rotation, view, proj, shader, pick) {
-        this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
-        this.gpu.disable(this.gpu.CULL_FACE)
+    _drawGizmo(translation, view, proj, shader, pick) {
 
-        const mX = this._rotateMatrix(translation, rotation, 'x', this.xGizmo.components.TransformComponent.transformationMatrix)
-        const mY = this._rotateMatrix(translation, rotation, 'y', this.yGizmo.components.TransformComponent.transformationMatrix)
-        const mZ = this._rotateMatrix(translation, rotation, 'z', this.zGizmo.components.TransformComponent.transformationMatrix)
-        const mC = this._rotateMatrix(translation, rotation, undefined, this.centerGizmo.components.TransformComponent.transformationMatrix)
+        const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
+        const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
+        const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix)
+        const mC = this._translateMatrix(translation, this.centerGizmo.components.TransformComponent.transformationMatrix)
 
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.xyz.indexVBO)
         this.xyz.vertexVBO.enable()
-        this.xyz.uvVBO.enable()
-
+        this.xyz.normalVBO.enable()
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
             this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
             this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
             this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
-        if (!pick)
-            this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
-        this.gpu.enable(this.gpu.CULL_FACE)
+
+
+        this.gpu.bindVertexArray(this.center.VAO)
+        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.center.indexVBO)
+        this.center.vertexVBO.enable()
+        this.center.normalVBO.enable()
+
+        if (!pick)
+            this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
+
+        this.center.vertexVBO.disable()
+        this.gpu.bindVertexArray(null)
+        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
+
 
     }
 
@@ -258,7 +254,6 @@ export default class RotationGizmo extends System {
             axis: a,
             selectedAxis: this.clickedAxis,
             uID: [...id, 1],
-            circleSampler: this.texture.texture
         })
         this.gpu.drawElements(this.gpu.TRIANGLES, this.xyz.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
 

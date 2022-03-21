@@ -11,6 +11,7 @@ import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
 import COMPONENTS from "../../../utils/misc/COMPONENTS";
+import arrow from '../../../../static/assets/Arrow.json'
 import cube from '../../../../static/assets/Cube.json'
 
 export default class TranslationGizmo extends System {
@@ -31,11 +32,19 @@ export default class TranslationGizmo extends System {
 
         this.xyz = new MeshInstance({
             gpu,
+            vertices: arrow.vertices,
+            indices: arrow.indices,
+            normals: arrow.normals,
+            uvs: [],
+            tangents: []
+        })
+        this.center = new MeshInstance({
+            gpu,
             vertices: cube.vertices,
             indices: cube.indices,
             normals: cube.normals,
-            uvs: cube.uvs,
-            tangents: cube.tangents,
+            uvs: [],
+            tangents: []
         })
         this.handlerListener = this.handler.bind(this)
     }
@@ -88,6 +97,7 @@ export default class TranslationGizmo extends System {
                 break
             case 'mouseup':
                 this.tracking = false
+                this.clickedAxis = -1
                 this.currentCoord = undefined
                 document.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
@@ -103,14 +113,14 @@ export default class TranslationGizmo extends System {
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.transformElement([vector[0], 0, 0])
+                        this.transformElement([vector[0] * .01, 0, 0])
                         break
                     case 2: // y
-                        this.transformElement([0, vector[1] * times, 0])
+                        this.transformElement([0, vector[1]  * .01, 0])
 
                         break
                     case 3: // z
-                        this.transformElement([0, 0, vector[2] * times * 5])
+                        this.transformElement([0, 0, vector[2]  * .01])
                         break
                 }
 
@@ -263,14 +273,30 @@ export default class TranslationGizmo extends System {
         this.gpu.bindVertexArray(this.xyz.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.xyz.indexVBO)
         this.xyz.vertexVBO.enable()
+        this.xyz.normalVBO.enable()
 
-        this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
-        this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
-        this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
+        if (this.tracking && this.clickedAxis === 1 || !this.tracking)
+            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
+        if (this.tracking && this.clickedAxis === 2 || !this.tracking)
+
+            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
+        if (this.tracking && this.clickedAxis === 3 || !this.tracking)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
+
+        this.xyz.vertexVBO.disable()
+        this.gpu.bindVertexArray(null)
+        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
+
+
+        this.gpu.bindVertexArray(this.center.VAO)
+        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.center.indexVBO)
+        this.center.vertexVBO.enable()
+        this.center.normalVBO.enable()
+
         if (!pick)
             this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
 
-        this.xyz.vertexVBO.disable()
+        this.center.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
 
