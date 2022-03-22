@@ -8,10 +8,13 @@ import SYSTEMS from "../../utils/misc/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
+import * as shaderCodePick from '../../shaders/misc/picker.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
 import {copyTexture} from "../../utils/misc/utils";
+
+
 
 export default class PostProcessingSystem extends System {
     constructor(gpu, resolutionMultiplier) {
@@ -33,6 +36,8 @@ export default class PostProcessingSystem extends System {
         this.billboardSystem = new BillboardSystem(gpu)
         this.billboardSystem.initializeTextures().catch()
         this.gizmoSystem = new GizmoSystem(gpu)
+
+        this.shaderPick = new Shader(shaderCodePick.vertex, shaderCodePick.fragment, gpu)
     }
 
     execute(options, systems, data, entities, gizmo) {
@@ -93,6 +98,7 @@ export default class PostProcessingSystem extends System {
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.gpu.enable(this.gpu.DEPTH_TEST)
+
         this.frameBuffer.stopMapping()
 
         let shaderToApply = this.shader

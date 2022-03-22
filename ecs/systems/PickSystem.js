@@ -3,6 +3,8 @@ import * as shaderCode from "../../shaders/misc/picker.glsl";
 import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
+import OrthographicCamera from "../../utils/camera/ortho/OrthographicCamera";
+import {ca} from "wait-on/exampleConfig";
 
 export default class PickSystem extends System {
     constructor(gpu) {
@@ -43,7 +45,8 @@ export default class PickSystem extends System {
 
             if (index > 0)
                 setSelected([meshes.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
-
+            else
+                setSelected([])
         }
 
     }
@@ -70,35 +73,37 @@ export default class PickSystem extends System {
     }
 
     _getProjection({x, y}, camera) {
-
-        const aspect = camera.aspectRatio
-        let top = Math.tan(camera.fov / 2) * camera.zNear,
-            bottom = -top,
-            left = aspect * bottom,
-            right = aspect * top
-
-        const width = Math.abs(right - left);
-        const height = Math.abs(top - bottom);
-
-        const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
-
-        const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
-
-        const subLeft = left + pixelX * width / this.gpu.canvas.width;
-        const subBottom = bottom + pixelY * height / this.gpu.canvas.height;
-        const subWidth = 1 / this.gpu.canvas.width;
-        const subHeight = 1 / this.gpu.canvas.height;
-
         let m = mat4.create()
 
-        mat4.frustum(
-            m,
-            subLeft,
-            subLeft + subWidth,
-            subBottom,
-            subBottom + subHeight,
-            camera.zNear,
-            camera.zFar);
+          const aspect = camera.aspectRatio
+          let top = Math.tan((camera.fov ? camera.fov  : 1.57)/ 2) * camera.zNear,
+              bottom = -top,
+              left = aspect * bottom,
+              right = aspect * top
+
+          const width = Math.abs(right - left);
+          const height = Math.abs(top - bottom);
+
+          const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
+
+          const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
+
+          const subLeft = left + pixelX * width / this.gpu.canvas.width;
+          const subBottom = bottom + pixelY * height / this.gpu.canvas.height;
+          const subWidth = 1 / this.gpu.canvas.width;
+          const subHeight = 1 / this.gpu.canvas.height;
+
+
+
+          mat4.frustum(
+              m,
+              subLeft,
+              subLeft + subWidth,
+              subBottom,
+              subBottom + subHeight,
+              camera.zNear,
+              camera.zFar);
+
 
         return m
     }

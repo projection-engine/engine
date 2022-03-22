@@ -56,22 +56,22 @@ export default class TranslationGizmo extends System {
         let s, t, r
         switch (axis) {
             case 'x':
-                s = [1.5, 0.1, 0.1]
-                t = [3, 0, 0]
+                s = [.75, 0.05, 0.05]
+                t = [1, 0, 0]
                 r = [0, 0, 0]
                 break
             case 'y':
-                s = [1.5, 0.1, 0.1]
-                t = [0, 3, 0]
+                s = [.75, 0.05, 0.05]
+                t = [0, 1, 0]
                 r = [0, 0, 1.57]
                 break
             case 'z':
-                s = [1.5, 0.1, 0.1]
-                t = [0, 0, 3]
+                s = [.75, 0.05, 0.05]
+                t = [0, 0, 1]
                 r = [3.141592653589793, -1.57, 3.141592653589793]
                 break
             case 'c':
-                s = [.3, .3, .3]
+                s = [.1, .1, .1]
                 t = [0, 0, 0]
                 r = [0, 0, 0]
                 break
@@ -104,9 +104,6 @@ export default class TranslationGizmo extends System {
                 this.t = 0
                 break
             case 'mousemove':
-                const w = this.gpu.canvas.width
-                const h = this.gpu.canvas.height
-                const times = (w > h ? h / w : w / h) / 10
 
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
@@ -273,7 +270,6 @@ export default class TranslationGizmo extends System {
         this.gpu.bindVertexArray(this.xyz.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.xyz.indexVBO)
         this.xyz.vertexVBO.enable()
-        this.xyz.normalVBO.enable()
 
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
             this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
@@ -291,7 +287,7 @@ export default class TranslationGizmo extends System {
         this.gpu.bindVertexArray(this.center.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.center.indexVBO)
         this.center.vertexVBO.enable()
-        this.center.normalVBO.enable()
+
 
         if (!pick)
             this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)

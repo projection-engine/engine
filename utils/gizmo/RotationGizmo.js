@@ -14,14 +14,15 @@ import COMPONENTS from "../../../utils/misc/COMPONENTS";
 import TextureInstance from "../../instances/TextureInstance";
 import circle from "../../../../static/icons/circle.png";
 import plane from "../../../../static/assets/Circle.json";
-
+const toDeg = 57.29
 export default class RotationGizmo extends System {
     eventStarted = false
     clickedAxis = -1
     tracking = false
 
-    constructor(gpu) {
+    constructor(gpu, renderTarget) {
         super([]);
+        this.renderTarget = renderTarget
         this.gpu = gpu
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.gizmoShader = new Shader(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot, gpu)
@@ -92,27 +93,26 @@ export default class RotationGizmo extends System {
                 this.currentCoord = undefined
                 document.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
+                this.renderTarget.style.display = 'none'
 
                 this.t = 0
                 break
             case 'mousemove':
-                const w = this.gpu.canvas.width
-                const h = this.gpu.canvas.height
-
-
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
                 switch (this.clickedAxis) {
                     case 1: // x
                         this.rotateElement([vector[0] * .01, 0, 0])
+                        this.renderTarget.innerHTML = `${(this.target.components.TransformComponent.rotation[0] * toDeg).toFixed(1)} θ`
                         break
                     case 2: // y
                         this.rotateElement([0, vector[1] * .01, 0])
-
+                        this.renderTarget.innerHTML = `${(this.target.components.TransformComponent.rotation[1] * toDeg).toFixed(1)} θ`
                         break
                     case 3: // z
                         this.rotateElement([0, 0, vector[2] * .01])
+                        this.renderTarget.innerHTML = `${(this.target.components.TransformComponent.rotation[2] * toDeg).toFixed(1)} θ`
                         break
                 }
 
@@ -153,6 +153,11 @@ export default class RotationGizmo extends System {
                     } else {
                         this.tracking = true
                         lockCamera(true)
+
+                        this.renderTarget.style.left = this.currentCoord.x + 'px'
+                        this.renderTarget.style.top = this.currentCoord.y + 'px'
+                        this.renderTarget.style.display = 'block'
+
                         this.target = el
                         this.gpu.canvas.requestPointerLock()
                         document.addEventListener("mousemove", this.handlerListener)
@@ -208,7 +213,6 @@ export default class RotationGizmo extends System {
                 break
             case 'z':
                 mat4.rotateY(matrix, matrix, rotation[2])
-                // mat4.rotateX(matrix, matrix, 1.57)
                 break
             default:
                 break

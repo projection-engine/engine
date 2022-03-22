@@ -54,21 +54,21 @@ export default class ScaleGizmo extends System {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
         e.addComponent(new TransformComponent())
-        let s = [.3, 0.3, 0.3], t, r
+        let s = [.2, 0.2, 0.2], t, r
         switch (axis) {
             case 'x':
 
-                t = [3, 0, 0]
+                t = [2, 0, 0]
                 r = [0, 1.57, 0]
                 break
             case 'y':
 
-                t = [0, 3, 0]
+                t = [0, 2, 0]
                 r = [-1.57, 1.57, 0]
                 break
             case 'z':
 
-                t = [0, 0, 3]
+                t = [0, 0, 2]
                 r = [3.1415, -3.1415, 3.1415]
                 break
             case 'c':
@@ -216,7 +216,7 @@ export default class ScaleGizmo extends System {
         this.gpu.bindVertexArray(this.xyz.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.xyz.indexVBO)
         this.xyz.vertexVBO.enable()
-        this.xyz.normalVBO.enable()
+
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
             this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
@@ -232,7 +232,7 @@ export default class ScaleGizmo extends System {
         this.gpu.bindVertexArray(this.center.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.center.indexVBO)
         this.center.vertexVBO.enable()
-        this.center.normalVBO.enable()
+
 
         if (!pick)
             this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)

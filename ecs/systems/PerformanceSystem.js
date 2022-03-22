@@ -1,6 +1,5 @@
 import System from "../basic/System";
 
-const si = window.require('systeminformation');
 
 
 export default class PerformanceSystem extends System {
@@ -19,7 +18,7 @@ export default class PerformanceSystem extends System {
         // this._renderer = gpu.getParameter(this.debug.UNMASKED_RENDERER_WEBGL)
         //
 
-        const canvas = document.getElementById(this.gpu.canvas.id)
+        const canvas = gpu.canvas
         const targetID = canvas.id.replace('-canvas', '-performance-metrics')
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
