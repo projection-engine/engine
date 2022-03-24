@@ -85,9 +85,12 @@ export default class FramebufferInstance extends Quad {
         return this
     }
 
-    texture(w = this.width, h = this.height, attachment = 0, precision = this.gpu.RGBA16F, format = this.gpu.RGBA, type = this.gpu.FLOAT, storage = true, linear, repeat) {
+    texture(w = this.width, h = this.height, attachment = 0, precision = this.gpu.RGBA16F, format = this.gpu.RGBA, type = this.gpu.FLOAT, storage = true, linear, repeat, flip) {
         this.use()
         const texture = this.gpu.createTexture()
+        console.log(flip)
+        if (flip === true) this.gpu.pixelStorei(this.gpu.UNPACK_FLIP_Y_WEBGL, true);
+
         this.gpu.bindTexture(this.gpu.TEXTURE_2D, texture);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MAG_FILTER, linear ? this.gpu.LINEAR : this.gpu.NEAREST);
         this.gpu.texParameteri(this.gpu.TEXTURE_2D, this.gpu.TEXTURE_MIN_FILTER, linear ? this.gpu.LINEAR : this.gpu.NEAREST);

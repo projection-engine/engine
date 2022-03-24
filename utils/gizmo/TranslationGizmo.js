@@ -4,7 +4,7 @@ import Shader from "../workers/Shader";
 import * as shaderCode from "../../shaders/mesh/meshSelected.glsl";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
-import {vec3} from "gl-matrix";
+import {mat4, quat, vec3, vec4} from "gl-matrix";
 import Entity from "../../ecs/basic/Entity";
 import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
@@ -13,11 +13,13 @@ import PickComponent from "../../ecs/components/PickComponent";
 import COMPONENTS from "../../../utils/misc/COMPONENTS";
 import arrow from '../../../../static/assets/Arrow.json'
 import cube from '../../../../static/assets/Cube.json'
+import ROTATION_TYPES from "../misc/ROTATION_TYPES";
 
 export default class TranslationGizmo extends System {
     eventStarted = false
     clickedAxis = -1
     tracking = false
+    rotationTarget = [0, 0, 0, 1]
 
     constructor(gpu) {
         super([]);
@@ -53,26 +55,22 @@ export default class TranslationGizmo extends System {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
         e.addComponent(new TransformComponent())
-        let s, t, r
+        let s, t = [0, 0,0], r
         switch (axis) {
             case 'x':
                 s = [.75, 0.05, 0.05]
-                t = [1, 0, 0]
                 r = [0, 0, 0]
                 break
             case 'y':
                 s = [.75, 0.05, 0.05]
-                t = [0, 1, 0]
                 r = [0, 0, 1.57]
                 break
             case 'z':
                 s = [.75, 0.05, 0.05]
-                t = [0, 0, 1]
                 r = [3.141592653589793, -1.57, 3.141592653589793]
                 break
             case 'c':
                 s = [.1, .1, .1]
-                t = [0, 0, 0]
                 r = [0, 0, 0]
                 break
             default:
@@ -80,7 +78,9 @@ export default class TranslationGizmo extends System {
         }
         e.components.TransformComponent.translation = t
         e.components.TransformComponent.rotation = r
-        e.components.TransformComponent.transformationMatrix = Transformation.transform(t, r, s)
+        e.components.TransformComponent.scaling = s
+
+        e.components.TransformComponent.transformationMatrix = Transformation.transform(t, e.components.TransformComponent.rotationQuat, s)
 
         return e
     }
@@ -113,11 +113,11 @@ export default class TranslationGizmo extends System {
                         this.transformElement([vector[0] * .01, 0, 0])
                         break
                     case 2: // y
-                        this.transformElement([0, vector[1]  * .01, 0])
+                        this.transformElement([0, vector[1] * .01, 0])
 
                         break
                     case 3: // z
-                        this.transformElement([0, 0, vector[2]  * .01])
+                        this.transformElement([0, 0, vector[2] * .01])
                         break
                 }
 
@@ -128,6 +128,12 @@ export default class TranslationGizmo extends System {
     }
 
     transformElement(vec) {
+        let toApply
+        if (this.typeRot === ROTATION_TYPES.GLOBAL || !this.target.components.TransformComponent)
+            toApply = vec
+        else
+            toApply = vec4.transformQuat([], vec, this.target.components.TransformComponent.rotationQuat)
+
         const k = Object.keys(this.target.components)
         let key
         for (let i = 0; i < k.length; i++) {
@@ -136,25 +142,25 @@ export default class TranslationGizmo extends System {
                 case COMPONENTS.POINT_LIGHT:
                     key = k[i] === COMPONENTS.CUBE_MAP ? 'CubeMapComponent' : 'PointLightComponent'
                     this.target.components[key].position = [
-                        this.target.components[key].position[0] - vec[0],
-                        this.target.components[key].position[1] - vec[1],
-                        this.target.components[key].position[2] - vec[2]
+                        this.target.components[key].position[0] - toApply[0],
+                        this.target.components[key].position[1] - toApply[1],
+                        this.target.components[key].position[2] - toApply[2]
                     ]
                     break
                 case COMPONENTS.SKYLIGHT:
                 case COMPONENTS.DIRECTIONAL_LIGHT:
                     key = k[i] === COMPONENTS.SKYLIGHT ? 'SkylightComponent' : 'DirectionalLightComponent'
                     this.target.components[key].direction = [
-                        this.target.components[key].direction[0] - vec[0],
-                        this.target.components[key].direction[1] - vec[1],
-                        this.target.components[key].direction[2] - vec[2]
+                        this.target.components[key].direction[0] - toApply[0],
+                        this.target.components[key].direction[1] - toApply[1],
+                        this.target.components[key].direction[2] - toApply[2]
                     ]
                     break
                 case COMPONENTS.TRANSFORM:
                     this.target.components.TransformComponent.translation = [
-                        this.target.components.TransformComponent.translation[0] - vec[0],
-                        this.target.components.TransformComponent.translation[1] - vec[1],
-                        this.target.components.TransformComponent.translation[2] - vec[2]
+                        this.target.components.TransformComponent.translation[0] - toApply[0],
+                        this.target.components.TransformComponent.translation[1] - toApply[1],
+                        this.target.components.TransformComponent.translation[2] - toApply[2]
                     ]
                     break
                 default:
@@ -187,14 +193,18 @@ export default class TranslationGizmo extends System {
 
     }
 
-    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities) {
+    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType) {
         super.execute()
 
         if (selected.length > 0) {
+            this.typeRot = transformationType
             this.camera = camera
             this.shader.use()
+
+
             if (this.currentCoord && !this.tracking) {
                 const el = entities.find(m => m.id === selected[0])
+
                 const translation = this.getTranslation(el)
 
                 if (translation !== undefined) {
@@ -229,8 +239,10 @@ export default class TranslationGizmo extends System {
                 const translation = this.getTranslation(el)
 
                 if (el && translation) {
-                    if (selected.length === 1)
+                    if (selected.length === 1) {
+                        this.rotationTarget = el.components.TransformComponent !== undefined ? el.components.TransformComponent.rotationQuat : [0, 0, 0, 1]
                         this._drawGizmo(translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
+                    }
                     if (el.components.TransformComponent)
                         MeshSystem.drawMesh(
                             this.shader,
@@ -249,22 +261,23 @@ export default class TranslationGizmo extends System {
 
     }
 
-    _translateMatrix(t, m) {
+    _translateMatrix(t, m, comp) {
         const matrix = [...m]
-        matrix[12] += t[0]
-        matrix[13] += t[1]
-        matrix[14] += t[2]
+
+        if (this.typeRot === ROTATION_TYPES.RELATIVE) {
+            mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([],  this.rotationTarget, comp.rotationQuat), vec3.add([], t, comp.translation), comp.scaling, comp.translation)
+        } else
+            mat4.translate(matrix, matrix, t)
 
         return matrix
     }
 
     _drawGizmo(translation, view, proj, shader, pick) {
 
-        const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
-        const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
-        const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix)
-        const mC = this._translateMatrix(translation, this.centerGizmo.components.TransformComponent.transformationMatrix)
-
+        const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix, this.xGizmo.components.TransformComponent)
+        const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix, this.yGizmo.components.TransformComponent)
+        const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix, this.zGizmo.components.TransformComponent)
+        const mC = this._translateMatrix(translation, this.centerGizmo.components.TransformComponent.transformationMatrix, this.centerGizmo.components.TransformComponent)
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)

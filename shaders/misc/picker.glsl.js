@@ -7,6 +7,7 @@ uniform mat4 transformMatrix;
 
 void main() {
     gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position, 1.0);
+  
 }
 `
 export const fragment =  `#version 300 es

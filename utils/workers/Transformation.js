@@ -5,15 +5,7 @@ const toDeg = 57.2957795131
 
 export default class Transformation {
     static transform(translation, rotate, scale, rotationType) {
-        // let r = mat4.create()
-        // mat4.rotate(r, r, rotate[0], [1,0,0])
-        // mat4.rotate(r, r, rotate[1], [0,1,0])
-        // mat4.rotate(r, r, rotate[2], [0,0,1])
-        //
-        // let t = mat4.fromTranslation([], translation)
-        // let s = mat4.fromScaling([], scale)
-        // let res = []
-        const quaternion = quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg)
+        const quaternion = rotate.length > 3 ? rotate : quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg)
         // const center = rotationType === ROTATION_TYPES.GLOBAL? [0, 0, 0] : translation
 
 

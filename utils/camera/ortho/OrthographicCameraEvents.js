@@ -78,10 +78,10 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
         let elapsedTime = performance.now() - startMouseDown;
 
         if (elapsedTime <= 250) {
-
             const target = document.getElementById(canvasID).getBoundingClientRect()
             onClick(event.clientX - target.left, event.clientY - target.top)
         }
+
     }
 
     function startTracking() {

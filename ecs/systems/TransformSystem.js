@@ -45,7 +45,7 @@ export default class TransformSystem extends System {
                 if (current.linkedTo)
                     parent = this._find(filtered, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
                 const component = current.components.TransformComponent
-                const transformationMatrix = Transformation.transform(component.translation, component.rotation, component.scaling,  options.rotationType, component.transformationMatrix)
+                const transformationMatrix = Transformation.transform(component.translation, component.rotationQuat, component.scaling,  options.rotationType, component.transformationMatrix)
 
                 if (current.components.SphereCollider) {
                     switch (current.components.SphereCollider.axis) {

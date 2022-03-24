@@ -3,6 +3,7 @@ import TranslationGizmo from "../../../utils/gizmo/TranslationGizmo";
 import RotationGizmo from "../../../utils/gizmo/RotationGizmo";
 import GIZMOS from "../../../utils/misc/GIZMOS";
 import ScaleGizmo from "../../../utils/gizmo/ScaleGizmo";
+import ROTATION_TYPES from "../../../utils/misc/ROTATION_TYPES";
 
 export default class GizmoSystem extends System {
 
@@ -34,18 +35,18 @@ export default class GizmoSystem extends System {
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, gizmo) {
+    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, gizmo, transformationType=ROTATION_TYPES.GLOBAL) {
         super.execute()
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
         switch (gizmo){
             case GIZMOS.TRANSLATION:
-                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities)
+                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType)
                 break
             case GIZMOS.ROTATION:
-                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities)
+                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType)
                 break
             case GIZMOS.SCALE:
-                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities)
+                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType)
                 break
         }
 

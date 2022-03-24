@@ -3,18 +3,22 @@ import * as shaderCode from "../../shaders/misc/picker.glsl";
 import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
+import SphericalCamera from "../../utils/camera/prespective/SphericalCamera";
+import FreeCamera from "../../utils/camera/prespective/FreeCamera";
+import {instanceOf} from "prop-types";
 import OrthographicCamera from "../../utils/camera/ortho/OrthographicCamera";
-import {ca} from "wait-on/exampleConfig";
 
 export default class PickSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
 
-        this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
+        this.frameBuffer = new FramebufferInstance(gpu, window.screen.width, window.screen.height)
         this.frameBuffer
-            .texture(1, 1, 0, this.gpu.RGBA, this.gpu.RGBA, this.gpu.UNSIGNED_BYTE, false, true, true)
+            .texture(undefined, undefined, 0, this.gpu.RGBA, this.gpu.RGBA, this.gpu.UNSIGNED_BYTE, false, true, true)
             .depthTest(this.gpu.DEPTH_COMPONENT16)
+
+
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
     }
 
@@ -45,22 +49,30 @@ export default class PickSystem extends System {
 
             if (index > 0)
                 setSelected([meshes.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
-            else
-                setSelected([])
         }
 
     }
 
     pickElement(drawCallback, pickCoords, camera) {
+
         this.shader.use()
         this.frameBuffer.startMapping()
 
         const pickerProjection = this._getProjection(pickCoords, camera)
         drawCallback(this.shader, pickerProjection)
-        let data = new Uint8Array(4);
+        let data = new Uint8Array(4)
+
+        const canvasX = pickCoords.x - this.gpu.canvas.offsetLeft;
+        const canvasY = this.gpu.canvas.height - pickCoords.y - this.gpu.canvas.offsetTop;
+
+        const pixelX = pickCoords.x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
+        const pixelY = this.gpu.canvas.height - pickCoords.y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
+
+        console.log(pixelX, canvasX, pixelY, canvasY)
+
         this.gpu.readPixels(
-            0,
-            0,
+            pixelX,
+            pixelY,
             1,
             1,
             this.gpu.RGBA,
@@ -75,37 +87,41 @@ export default class PickSystem extends System {
     _getProjection({x, y}, camera) {
         let m = mat4.create()
 
-          const aspect = camera.aspectRatio
-          let top = Math.tan((camera.fov ? camera.fov  : 1.57)/ 2) * camera.zNear,
-              bottom = -top,
-              left = aspect * bottom,
-              right = aspect * top
 
-          const width = Math.abs(right - left);
-          const height = Math.abs(top - bottom);
+        if (camera instanceof OrthographicCamera)
+            // m = camera.projectionMatrix
+           mat4.ortho (m,  -camera.size,camera.size,  -camera.size, camera.size, camera.zNear, camera.zFar)
+        else {
+            const aspect = camera.aspectRatio
+            let top = Math.tan(camera.fov / 2) * camera.zNear,
+                bottom = -top,
+                left = aspect * bottom,
+                right = aspect * top
 
-          const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
+            const width = Math.abs(right - left);
+            const height = Math.abs(top - bottom);
 
-          const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
+            const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
+            const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
 
-          const subLeft = left + pixelX * width / this.gpu.canvas.width;
-          const subBottom = bottom + pixelY * height / this.gpu.canvas.height;
-          const subWidth = 1 / this.gpu.canvas.width;
-          const subHeight = 1 / this.gpu.canvas.height;
+            const subLeft = left + pixelX * width / this.gpu.canvas.width;
+            const subBottom = bottom + pixelY * height / this.gpu.canvas.height;
+            const subWidth = 1 / this.gpu.canvas.width;
+            const subHeight = 1 / this.gpu.canvas.height;
 
-
-
-          mat4.frustum(
-              m,
-              subLeft,
-              subLeft + subWidth,
-              subBottom,
-              subBottom + subHeight,
-              camera.zNear,
-              camera.zFar);
+            mat4.frustum(
+                m,
+                subLeft,
+                subLeft + subWidth,
+                subBottom,
+                subBottom + subHeight,
+                camera.zNear,
+                camera.zFar);
+        }
 
 
         return m
+
     }
 
     _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix) {

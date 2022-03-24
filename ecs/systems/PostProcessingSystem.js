@@ -13,7 +13,8 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
 import {copyTexture} from "../../utils/misc/utils";
-
+import {AMDFSR1} from "../../shaders/misc/postProcessing.glsl";
+import RENDERING_TYPES from "../../utils/misc/RENDERING_TYPES";
 
 
 export default class PostProcessingSystem extends System {
@@ -27,6 +28,7 @@ export default class PostProcessingSystem extends System {
 
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
+        this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
         this.transparencySystem = new TransparencySystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
@@ -57,18 +59,18 @@ export default class PostProcessingSystem extends System {
         } = data
         const {
 
-
             lockCamera,
             setSelected,
             selected,
             camera,
-            fxaa,
+            typeRendering,
             iconsVisibility,
             gridVisibility,
             shadingModel,
             noRSM,
             gamma,
-            exposure
+            exposure,
+            rotationType
         } = options
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
@@ -92,8 +94,8 @@ export default class PostProcessingSystem extends System {
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
 
-        if(gizmo !== undefined)
-            this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities, gizmo)
+        if (gizmo !== undefined)
+            this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities, gizmo, rotationType)
 
         this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
@@ -101,9 +103,19 @@ export default class PostProcessingSystem extends System {
 
         this.frameBuffer.stopMapping()
 
-        let shaderToApply = this.shader
-        if (!fxaa)
-            shaderToApply = this.noFxaaShader
+        let shaderToApply
+
+        switch (typeRendering) {
+            case RENDERING_TYPES.FSR:
+                shaderToApply = this.FSRShader
+                break
+            case RENDERING_TYPES.DEFAULT:
+                shaderToApply = this.noFxaaShader
+                break
+            default:
+                shaderToApply = this.shader
+                break
+        }
 
         shaderToApply.use()
         shaderToApply.bindForUse({
