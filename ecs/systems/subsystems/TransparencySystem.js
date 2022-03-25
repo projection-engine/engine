@@ -13,7 +13,5 @@ export default class TransparencySystem extends System {
 
     execute(transparentMeshes, materials) {
         super.execute()
-        // console.log(transparentMeshes)
-
     }
 }

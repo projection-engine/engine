@@ -7,7 +7,7 @@ layout (location = 4) in vec3 tangentVec;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
-uniform mat3 normalMatrix;
+// uniform mat3 normalMatrix;
 uniform mat4 projectionMatrix;
 uniform vec3 cameraVec;
 uniform vec2 uvScale;
@@ -25,10 +25,10 @@ void main(){
 
     vPosition =  transformMatrix *   vec4(position, 1.0);
     
-    vec3 T = normalize( normalMatrix  * normalize(tangentVec));
-    vec3 N =  normalize(normalMatrix * normal);
+    vec3 T = normalize( mat3(transformMatrix)  * normalize(tangentVec));
+    vec3 N =  normalize(mat3(transformMatrix) * normal);
     vec3 biTangent = cross(N, tangentVec); 
-    vec3 B =  normalize(normalMatrix * biTangent);
+    vec3 B =  normalize(mat3(transformMatrix) * biTangent);
     B = dot(biTangent, B)  > 0. ? -B : B;
     
     toTangentSpace = mat3(T, B, N);

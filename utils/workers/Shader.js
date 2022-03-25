@@ -55,11 +55,9 @@ export default class Shader {
         let compiled = this.gpu.getShaderParameter(shader, this.gpu.COMPILE_STATUS);
 
 
-        if (!compiled) {
-            console.log(bundledCode);
-            console.log(this.gpu.getShaderInfoLog(shader))
+        if (!compiled)
             this.available = false
-        } else {
+         else {
             this.gpu.attachShader(this.program, shader)
             this.gpu.linkProgram(this.program)
             this.available = true
@@ -193,6 +191,8 @@ export default class Shader {
             case 'ivec2':
             case 'ivec3':
             case 'bool':
+                if(type === 'bool')
+                console.log(data)
                 this.gpu[TYPES[type]](uLocation, data)
                 break
             case 'mat3':

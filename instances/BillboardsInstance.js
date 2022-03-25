@@ -53,11 +53,8 @@ export default class BillboardsInstance {
             projectionMatrix: camera.projectionMatrix
         })
 
-        this.gpu.depthRange(0, 0.01)
         this.gpu.drawArraysInstanced(this.gpu.TRIANGLES, 0, 6, transformations.length)
-        this.gpu.depthRange(0, 1)
         this.gpu.bindVertexArray(null);
-
     }
 
 }

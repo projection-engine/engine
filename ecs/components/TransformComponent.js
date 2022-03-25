@@ -10,8 +10,11 @@ export default class TransformComponent extends Component {
     changed = false
     _transformationMatrix = mat4.create()
     _rotationUpdated = false
-    _position = [0, 0, 0, 1]
+ 
     __initializedEuler = false
+
+    lockedRotation= false
+    lockedScaling = false
 
     constructor(id) {
         const name = TransformComponent.constructor.name
@@ -19,7 +22,7 @@ export default class TransformComponent extends Component {
     }
 
     get position() {
-        return [...this._position]
+        return [...this._translation]
     }
 
     get rotation() {
@@ -71,6 +74,7 @@ export default class TransformComponent extends Component {
 
         this.changed = true
         this._translation = data
+
     }
 
     set scaling(data) {

@@ -3,10 +3,9 @@ import * as shaderCode from "../../shaders/misc/picker.glsl";
 import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
-import SphericalCamera from "../../utils/camera/prespective/SphericalCamera";
-import FreeCamera from "../../utils/camera/prespective/FreeCamera";
-import {instanceOf} from "prop-types";
 import OrthographicCamera from "../../utils/camera/ortho/OrthographicCamera";
+import MeshInstance from "../../instances/MeshInstance";
+
 
 export default class PickSystem extends System {
     constructor(gpu) {
@@ -20,9 +19,16 @@ export default class PickSystem extends System {
 
 
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+
+        this.mesh = new MeshInstance({
+            gpu,
+            vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
+            indices: [0, 3, 9, 0, 9, 6, 8, 10, 21, 8, 21, 19, 20, 23, 17, 20, 17, 14, 13, 15, 4, 13, 4, 2, 7, 18, 12, 7, 12, 1, 22, 11, 5, 22, 5, 16]
+        })
+
     }
 
-    execute(options, systems, {meshes, meshSources}) {
+    execute(options, systems, {meshes, meshSources}, entities) {
         super.execute()
         const {
             setSelected,
@@ -36,19 +42,21 @@ export default class PickSystem extends System {
             setClicked(false)
 
             const index = this.pickElement((shader, proj) => {
-                for (let m = 0; m < meshes.length; m++) {
-                    const currentInstance = meshes[m]
-                    const mesh = meshSources[currentInstance.components.MeshComponent.meshID]
+                for (let m = 0; m < entities.length; m++) {
+                    const currentInstance = entities[m]
+                    const t = currentInstance.components.TransformComponent
 
-                    if (mesh !== undefined) {
-                        const t = currentInstance.components.TransformComponent
-                        this._drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
-                    }
+                    if (currentInstance.components.MeshComponent) {
+                        const mesh = meshSources[currentInstance.components.MeshComponent?.meshID]
+                        if (mesh !== undefined)
+                            this._drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
+                    } else if (t)
+                        this._drawMesh(this.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
                 }
             }, currentCoords, camera)
 
             if (index > 0)
-                setSelected([meshes.find(e => e.components.PickComponent.pickID[0] * 255 === index)?.id])
+                setSelected([entities.find(e => e.components.PickComponent?.pickID[0] * 255 === index)?.id])
         }
 
     }
@@ -60,15 +68,11 @@ export default class PickSystem extends System {
 
         const pickerProjection = this._getProjection(pickCoords, camera)
         drawCallback(this.shader, pickerProjection)
-        let data = new Uint8Array(4)
 
-        const canvasX = pickCoords.x - this.gpu.canvas.offsetLeft;
-        const canvasY = this.gpu.canvas.height - pickCoords.y - this.gpu.canvas.offsetTop;
 
+        let data = new Uint8Array(  4)
         const pixelX = pickCoords.x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
         const pixelY = this.gpu.canvas.height - pickCoords.y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
-
-        console.log(pixelX, canvasX, pixelY, canvasY)
 
         this.gpu.readPixels(
             pixelX,
@@ -90,7 +94,7 @@ export default class PickSystem extends System {
 
         if (camera instanceof OrthographicCamera)
             // m = camera.projectionMatrix
-           mat4.ortho (m,  -camera.size,camera.size,  -camera.size, camera.size, camera.zNear, camera.zFar)
+            mat4.ortho(m, -camera.size, camera.size, -camera.size, camera.size, camera.zNear, camera.zFar)
         else {
             const aspect = camera.aspectRatio
             let top = Math.tan(camera.fov / 2) * camera.zNear,
@@ -131,7 +135,6 @@ export default class PickSystem extends System {
             transformMatrix,
             viewMatrix
         })
-
 
         this.gpu.bindVertexArray(mesh.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)

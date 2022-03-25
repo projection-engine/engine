@@ -1,7 +1,5 @@
 import System from "../../ecs/basic/System";
-import MeshSystem from "../../ecs/systems/MeshSystem";
 import Shader from "../workers/Shader";
-import * as shaderCode from "../../shaders/mesh/meshSelected.glsl";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 import {vec3} from "gl-matrix";
@@ -10,7 +8,6 @@ import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
-import COMPONENTS from "../../../utils/misc/COMPONENTS";
 import arrow from '../../../../static/assets/ScaleGizmo.json'
 import cube from '../../../../static/assets/Cube.json'
 
@@ -22,7 +19,6 @@ export default class ScaleGizmo extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.gizmoShader = new Shader(gizmoShaderCode.vertex, gizmoShaderCode.fragment, gpu)
 
         this.xGizmo = this._mapEntity(2, 'x')
@@ -145,25 +141,27 @@ export default class ScaleGizmo extends System {
 
         if (selected.length > 0) {
             this.camera = camera
-            this.shader.use()
+
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
-                const pickID = pickSystem.pickElement((shader, proj) => {
-                    this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, proj, shader, true)
-                }, this.currentCoord, camera)
+                if(el){
+                    const pickID = pickSystem.pickElement((shader, proj) => {
+                        this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, proj, shader, true)
+                    }, this.currentCoord, camera)
 
-                this.clickedAxis = pickID - 2
+                    this.clickedAxis = pickID - 2
 
-                if (pickID === 0) {
-                    lockCamera(false)
-                    setSelected([])
-                    this.currentCoord = undefined
-                } else {
-                    this.tracking = true
-                    lockCamera(true)
-                    this.target = el
-                    this.gpu.canvas.requestPointerLock()
-                    document.addEventListener("mousemove", this.handlerListener)
+                    if (pickID === 0) {
+                        lockCamera(false)
+                        setSelected([])
+                        this.currentCoord = undefined
+                    } else {
+                        this.tracking = true
+                        lockCamera(true)
+                        this.target = el
+                        this.gpu.canvas.requestPointerLock()
+                        document.addEventListener("mousemove", this.handlerListener)
+                    }
                 }
             }
             if (!this.eventStarted) {
@@ -172,25 +170,15 @@ export default class ScaleGizmo extends System {
                 document.addEventListener('mouseup', this.handlerListener)
             }
 
-            for (let i = 0; i < selected.length; i++) {
-                const el = meshes.find(m => m.id === selected[i])
+            if(selected.length === 1){
+                const el = meshes.find(m => m.id === selected[0])
                 if (el) {
                     if (selected.length === 1)
                         this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
-                    if (el.components.TransformComponent)
-                        MeshSystem.drawMesh(
-                            this.shader,
-                            this.gpu,
-                            meshSources[el.components.MeshComponent.meshID],
-                            camera.position,
-                            camera.viewMatrix,
-                            camera.projectionMatrix,
-                            el.components.TransformComponent.transformationMatrix,
-                            undefined,
-                            el.components.MeshComponent.normalMatrix,
-                            i)
+
                 }
             }
+
         }
 
     }

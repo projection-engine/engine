@@ -12,9 +12,10 @@ void main()
     if(color.r < 0.5 && color.g < 0.5 && color.b < 0.5)
         discard;
     else
-        finalColor = vec4(color, 1.0);
+        finalColor = vec4(color, .75);
 }
 `
+
 export const vertex = `#version 300 es
 
 // IN
@@ -33,7 +34,7 @@ void main(){
     texCoord = (position.xy) * 0.5 + 0.5;
     mat4 m =  viewMatrix * transformation;
 
-    float d = 1.0; // BILLBOARD SIZE
+    float d = .75; // BILLBOARD SIZE
 
     m[0][0]  = d;
     m[0][1]  = 0.0;

@@ -42,10 +42,11 @@ export default class DeferredSystem extends System {
         if(skylight)
             dirLights.push(skylight)
 
-
         deferred.use()
         let maxTextures = dirLights.length > 2 ? 2 : dirLights.length,
             pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
+
+
         deferred.bindForUse({
             positionSampler: deferredSystem.frameBuffer.colors[0],
             normalSampler: deferredSystem.frameBuffer.colors[1],
@@ -70,7 +71,7 @@ export default class DeferredSystem extends System {
                 }
             }),
             lightClippingPlane: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-            lightPosition: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  pointLights[i].components.PointLightComponent.position),
+            lightPosition: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  pointLights[i].components.TransformComponent.position),
             lightColor: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
             lightAttenuationFactors: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation),
 

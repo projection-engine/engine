@@ -101,7 +101,7 @@ export default class ShadowMapSystem extends System {
         for (let i = 0; i < pointLights.length; i++) {
             const current = pointLights[i].components.PointLightComponent
             if ((current.changed || transformChanged) && current.shadowMap) {
-                lights3D.push(current)
+                lights3D.push({...current, translation: pointLights[i].components.TransformComponent.position})
                 current.changed = false
             }
         }
@@ -116,6 +116,7 @@ export default class ShadowMapSystem extends System {
 
         if (shadingModel === SHADING_MODELS.DETAIL && (lights2D.length > 0 || lights3D.length > 0)) {
 
+            this.gpu.cullFace(this.gpu.FRONT)
             if (dataChanged)
                 setDataChanged()
             this.shadowMapShader.use()
@@ -125,7 +126,7 @@ export default class ShadowMapSystem extends System {
             this.gpu.clearDepth(1);
 
             if (lights2D.length > 0) {
-                // this.gpu.cullFace(this.gpu.FRONT)
+
                 this.shadowsFrameBuffer.startMapping()
                 this.gpu.enable(this.gpu.SCISSOR_TEST);
 
@@ -159,7 +160,7 @@ export default class ShadowMapSystem extends System {
                 }
                 this.gpu.disable(this.gpu.SCISSOR_TEST);
                 this.shadowsFrameBuffer.stopMapping()
-                this.gpu.cullFace(this.gpu.BACK)
+
             }
 
             if (sky) {
@@ -179,29 +180,32 @@ export default class ShadowMapSystem extends System {
                     512,
                     512
                 )
+
                 for (let i = 0; i < this.maxCubeMaps; i++) {
                     const current = lights3D[i]
                     if (current) {
                         this.cubeMaps[i]
                             .draw((yaw, pitch, perspective, index) => {
-                            const target = vec3.add([], current.position, VIEWS.target[index])
+                            const target = vec3.add([], current.translation, VIEWS.target[index])
                             this._loopMeshes(
                                 meshes,
                                 meshSources,
                                 meshSystem,
                                 materials,
                                 this.shadowMapOmniShader,
-                                mat4.lookAt([], current.position, target, VIEWS.up[index]),
+                                mat4.lookAt([], current.translation, target, VIEWS.up[index]),
                                 perspective,
                                 undefined,
-                                current.position,
+                                current.translation,
                                 [current.zNear, current.zFar])
                         }, false, current.zFar, current.zNear)
 
                     }
                 }
             }
+            this.gpu.cullFace(this.gpu.BACK)
         }
+
     }
 
     _loopMeshes(meshes, meshSources, meshSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {

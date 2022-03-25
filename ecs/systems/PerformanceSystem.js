@@ -1,7 +1,6 @@
 import System from "../basic/System";
 
 
-
 export default class PerformanceSystem extends System {
     _framesRendered = 0
     _times = []

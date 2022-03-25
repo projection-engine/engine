@@ -31,13 +31,13 @@ export default class BillboardSystem extends System {
 
         for (let i = 0; i < billboards.length; i++) {
             if (billboards[i].components.PointLightComponent)
-                point.push(Array.from(billboards[i].components.PointLightComponent.transformationMatrix))
+                point.push(Array.from(billboards[i].components.TransformComponent.transformationMatrix))
             else if (billboards[i].components.DirectionalLightComponent)
                 directional.push(Array.from(billboards[i].components.DirectionalLightComponent?.transformationMatrix))
             else if (billboards[i].components.SpotLightComponent)
                 spot.push(Array.from(billboards[i].components.SpotLightComponent.transformationMatrix))
             else if (billboards[i].components.CubeMapComponent)
-                cubemaps.push(Array.from(billboards[i].components.CubeMapComponent.transformationMatrix))
+                cubemaps.push(Array.from(billboards[i].components.TransformComponent.transformationMatrix))
         }
 
         return {
@@ -54,12 +54,10 @@ export default class BillboardSystem extends System {
             const billboards = [...pointLights, ...directionalLights, ...spotLights, ...cubeMaps]
             if (iconsVisibility) {
                 const mapped = this._map(billboards)
-
                 this.billboardRenderer.draw(mapped.pointLights, this.pointLightTexture.texture, camera)
                 this.billboardRenderer.draw(mapped.directionalLights, this.directionalLightTexture.texture, camera)
                 if(skylight)
                     this.billboardRenderer.draw([skylight.transformationMatrix], this.directionalLightTexture.texture, camera)
-
                 this.billboardRenderer.draw(mapped.spotLights, this.spotLightTexture.texture, camera)
                 this.billboardRenderer.draw(mapped.cubemaps, this.cubemapTexture.texture, camera)
             }

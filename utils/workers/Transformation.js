@@ -62,6 +62,9 @@ export default class Transformation {
             axis === 'y' ? data : prev[1],
             axis === 'z' ? data : prev[2]
         ]
+
+        if(entity.components.PointLightComponent)
+            entity.components.PointLightComponent.changed = true
         engine.dispatchEntities({
             type: ENTITY_ACTIONS.UPDATE_COMPONENT, payload: {
                 entityID,

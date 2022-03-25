@@ -13,7 +13,6 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
 import {copyTexture} from "../../utils/misc/utils";
-import {AMDFSR1} from "../../shaders/misc/postProcessing.glsl";
 import RENDERING_TYPES from "../../utils/misc/RENDERING_TYPES";
 
 
@@ -97,9 +96,9 @@ export default class PostProcessingSystem extends System {
         if (gizmo !== undefined)
             this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], setSelected, lockCamera, entities, gizmo, rotationType)
 
-        this.gpu.disable(this.gpu.DEPTH_TEST)
+        // this.gpu.disable(this.gpu.DEPTH_TEST)
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
-        this.gpu.enable(this.gpu.DEPTH_TEST)
+        // this.gpu.enable(this.gpu.DEPTH_TEST)
 
         this.frameBuffer.stopMapping()
 

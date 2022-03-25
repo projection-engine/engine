@@ -1,7 +1,5 @@
 import System from "../../ecs/basic/System";
-import MeshSystem from "../../ecs/systems/MeshSystem";
 import Shader from "../workers/Shader";
-import * as shaderCode from "../../shaders/mesh/meshSelected.glsl";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 import {mat4, quat, vec3} from "gl-matrix";
@@ -10,7 +8,6 @@ import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
-import COMPONENTS from "../../../utils/misc/COMPONENTS";
 import TextureInstance from "../../instances/TextureInstance";
 import circle from "../../../../static/icons/circle.png";
 import plane from "../../../../static/assets/Circle.json";
@@ -27,7 +24,7 @@ export default class RotationGizmo extends System {
         super([]);
         this.renderTarget = renderTarget
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+
         this.gizmoShader = new Shader(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot, gpu)
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
@@ -160,7 +157,7 @@ export default class RotationGizmo extends System {
         if (selected.length > 0) {
             this.typeRot = transformationType
             this.camera = camera
-            this.shader.use()
+
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
                 if (el) {
@@ -197,23 +194,6 @@ export default class RotationGizmo extends System {
                 const el = meshes.find(m => m.id === selected[0])
                 if (el)
                     this._drawGizmo(el.components.TransformComponent.translation, el.components.TransformComponent.rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
-            }
-
-            for (let i = 0; i < selected.length; i++) {
-                const el = meshes.find(m => m.id === selected[i])
-                if (el) {
-                    MeshSystem.drawMesh(
-                        this.shader,
-                        this.gpu,
-                        meshSources[el.components.MeshComponent.meshID],
-                        camera.position,
-                        camera.viewMatrix,
-                        camera.projectionMatrix,
-                        el.components.TransformComponent.transformationMatrix,
-                        undefined,
-                        el.components.MeshComponent.normalMatrix,
-                        i)
-                }
             }
         }
 

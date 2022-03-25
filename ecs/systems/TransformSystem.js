@@ -18,7 +18,7 @@ export default class TransformSystem extends System {
         return this._changedMeshes
     }
 
-    execute(options, systems, data) {
+    execute(options, systems, data, entities) {
         super.execute()
         const {
             pointLights,
@@ -33,17 +33,17 @@ export default class TransformSystem extends System {
         } = data
 
         super.execute()
-        const filtered = [...meshes, ...terrains]
+
         this._changed = false
         this._changedMeshes = []
-        for (let i = 0; i < filtered.length; i++) {
-            const current = filtered[i]
-            if (current !== undefined && current.components.TransformComponent.changed) {
+        for (let i = 0; i < entities.length; i++) {
+            const current = entities[i]
+            if (current !== undefined && current.components.TransformComponent?.changed) {
                 this._changedMeshes.push(current)
                 this._changed = true
                 let parent
                 if (current.linkedTo)
-                    parent = this._find(filtered, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
+                    parent = this._find(entities, (e) => e.id === current.linkedTo)[0]?.components.TransformComponent?.transformationMatrix
                 const component = current.components.TransformComponent
                 const transformationMatrix = Transformation.transform(component.translation, component.rotationQuat, component.scaling,  options.rotationType, component.transformationMatrix)
 
@@ -73,9 +73,9 @@ export default class TransformSystem extends System {
                 else
                 current.components.TransformComponent.transformationMatrix = transformationMatrix
 
-                for (let j = 0; j < filtered.length; j++) {
-                    if (filtered[j].linkedTo === current.id)
-                        filtered[j].components.TransformComponent.changed = true
+                for (let j = 0; j < entities.length; j++) {
+                    if (entities[j].components.TransformComponent && entities[j].linkedTo === current.id)
+                        entities[j].components.TransformComponent.changed = true
                 }
                 current.components.TransformComponent.changed = false
                 if (current.components.MeshComponent !== undefined)

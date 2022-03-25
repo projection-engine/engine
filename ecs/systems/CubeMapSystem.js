@@ -84,7 +84,7 @@ export default class CubeMapSystem extends System {
 
                     for (let i = 0; i < cubeMaps.length; i++) {
                         const current = cubeMaps[i].components.CubeMapComponent,
-                            pos = current.position,
+                            pos = cubeMaps[i].components.TransformComponent.position,
                             radius = current.radius
 
                         for (let m = 0; m < changedMeshes.length; m++) {
@@ -94,8 +94,6 @@ export default class CubeMapSystem extends System {
                                 newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
                         }
                     }
-                    console.log('HERE')
-                    console.log(newCubeMaps)
                     this.cubeMapsConsumeMap = newCubeMaps
                     this.step = STEPS.DONE
                     break
@@ -137,7 +135,7 @@ export default class CubeMapSystem extends System {
             }
         })
         let lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.position),
+            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.TransformComponent.position),
             lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
             lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
 
@@ -145,8 +143,8 @@ export default class CubeMapSystem extends System {
             const current = cubeMaps[i].components.CubeMapComponent
             current.cubeMap.resolution = current.resolution
             current.cubeMap.draw((yaw, pitch, projection, index) => {
-                    const target = vec3.add([], current.position, VIEWS.target[index])
-                    const view = mat4.lookAt([], current.position, target, VIEWS.up[index])
+                    const target = vec3.add([], cubeMaps[i].components.TransformComponent.position, VIEWS.target[index])
+                    const view = mat4.lookAt([], cubeMaps[i].components.TransformComponent.position, target, VIEWS.up[index])
                     const nView = [...view]
                     nView[12] = nView[13] = nView[14] = 0
 
@@ -171,7 +169,7 @@ export default class CubeMapSystem extends System {
                     this._loopMeshes(
                         view,
                         projection,
-                        current.position,
+                        cubeMaps[i].components.TransformComponent.position,
                         meshSystem,
                         materials,
                         translucentMeshes,
