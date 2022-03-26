@@ -142,6 +142,7 @@ export default class CubeMapSystem extends System {
         for (let i = 0; i < cubeMaps.length; i++) {
             const current = cubeMaps[i].components.CubeMapComponent
             current.cubeMap.resolution = current.resolution
+            console.log(current.cubeMap.resolution)
             current.cubeMap.draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], cubeMaps[i].components.TransformComponent.position, VIEWS.target[index])
                     const view = mat4.lookAt([], cubeMaps[i].components.TransformComponent.position, target, VIEWS.up[index])

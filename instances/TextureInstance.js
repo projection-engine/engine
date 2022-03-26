@@ -116,25 +116,23 @@ export default class TextureInstance {
     update(newImage, gpu) {
 
         if (this.loaded) {
+            gpu.deleteTexture( this.texture)
             const img = new Image()
             img.src = newImage
             img.onload = () => {
-                gpu.bindTexture(gpu.TEXTURE_2D, this.texture);
-                gpu.texImage2D(
-                    gpu.TEXTURE_2D,
-                    0,
+                this._init(
+                    img,
+                    this.attributes.yFlip,
+                    gpu,
                     this.attributes.internalFormat,
-
-                    img.naturalWidth,
-                    img.naturalHeight,
-                    this.attributes.border,
-
                     this.attributes.format,
+                    this.attributes.repeat,
+                    this.attributes.noMipMapping,
                     this.attributes.type,
-                    img
+                    this.attributes.width,
+                    this.attributes.height,
+                    this.attributes.border
                 )
-                gpu.generateMipmap(gpu.TEXTURE_2D);
-
             }
         }
     }

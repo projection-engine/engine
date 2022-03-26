@@ -84,7 +84,6 @@ export default class TranslationGizmo extends System {
     }
 
     handler(event) {
-
         switch (event.type) {
             case 'mousedown':
                 if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas)) {
@@ -94,10 +93,11 @@ export default class TranslationGizmo extends System {
 
                 break
             case 'mouseup':
+                this.onGizmoChange()
                 this.tracking = false
                 this.clickedAxis = -1
                 this.currentCoord = undefined
-                document.removeEventListener("mousemove", this.handlerListener)
+                this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
                 this.t = 0
                 break
@@ -156,7 +156,6 @@ export default class TranslationGizmo extends System {
                     break
             }
         }
-
     }
 
     getTranslation(el) {
@@ -180,13 +179,13 @@ export default class TranslationGizmo extends System {
 
     }
 
-    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType) {
+    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,onGizmoChange) {
         super.execute()
 
         if (selected.length > 0) {
             this.typeRot = transformationType
             this.camera = camera
-
+            this.onGizmoChange = onGizmoChange
             if (this.currentCoord && !this.tracking) {
                 const el = entities.find(m => m.id === selected[0])
                 if (el !== undefined) {
@@ -200,22 +199,21 @@ export default class TranslationGizmo extends System {
 
                         if (pickID === 0) {
                             lockCamera(false)
-                            setSelected([])
                             this.currentCoord = undefined
                         } else {
                             this.tracking = true
                             lockCamera(true)
                             this.target = el
                             this.gpu.canvas.requestPointerLock()
-                            document.addEventListener("mousemove", this.handlerListener)
+                            this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                         }
                     }
                 }
             }
             if (!this.eventStarted) {
                 this.eventStarted = true
-                document.addEventListener('mousedown', this.handlerListener)
-                document.addEventListener('mouseup', this.handlerListener)
+                this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
+                this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
 
             if (selected.length === 1) {
@@ -238,7 +236,11 @@ export default class TranslationGizmo extends System {
         if (this.typeRot === ROTATION_TYPES.RELATIVE) {
             mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([], this.rotationTarget, comp.rotationQuat), vec3.add([], t, comp.translation), comp.scaling, comp.translation)
         } else
-            mat4.translate(matrix, matrix, t)
+        {
+            matrix[12] += t[0]
+            matrix[13] += t[1]
+            matrix[14] += t[2]
+        }
 
         return matrix
     }

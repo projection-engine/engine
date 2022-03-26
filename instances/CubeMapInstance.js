@@ -12,7 +12,7 @@ export default class CubeMapInstance {
     gpu
     _prefilteredShader
     _res
-
+    __resChanged
     constructor(gpu, resolution, asDepth) {
         this.gpu = gpu
         if (!asDepth)
@@ -33,6 +33,7 @@ export default class CubeMapInstance {
 
     set resolution(data) {
         this._res = data
+        this.__resChanged = true
     }
 
     get resolution() {
@@ -135,12 +136,15 @@ export default class CubeMapInstance {
 
 
         if (!asIrradiance) {
-            if (!this.texture)
+            if (!this.texture || this.__resChanged)
                 this.texture = this._initializeTexture(resolution);
+
+            this.__resChanged = false
             texture = this.texture
         } else {
             if (!this.irradianceTexture)
                 this.irradianceTexture = this._initializeTexture(resolution);
+
             texture = this.irradianceTexture
         }
 

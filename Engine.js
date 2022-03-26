@@ -205,6 +205,7 @@ export default class Engine extends RenderLoop {
                         .execute(
                             {
                                 ...params,
+                                onGizmoChange: params.onGizmoChange ? params.onGizmoChange : () => null ,
                                 lockCamera: (lock) => {
                                     if(lock){
                                         this.cameraEvents.stopTracking()

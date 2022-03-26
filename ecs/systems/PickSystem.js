@@ -57,6 +57,8 @@ export default class PickSystem extends System {
 
             if (index > 0)
                 setSelected([entities.find(e => e.components.PickComponent?.pickID[0] * 255 === index)?.id])
+            else
+                setSelected([])
         }
 
     }
@@ -93,8 +95,7 @@ export default class PickSystem extends System {
 
 
         if (camera instanceof OrthographicCamera)
-            // m = camera.projectionMatrix
-            mat4.ortho(m, -camera.size, camera.size, -camera.size, camera.size, camera.zNear, camera.zFar)
+            m = camera.projectionMatrix
         else {
             const aspect = camera.aspectRatio
             let top = Math.tan(camera.fov / 2) * camera.zNear,

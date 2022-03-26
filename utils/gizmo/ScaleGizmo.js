@@ -54,17 +54,17 @@ export default class ScaleGizmo extends System {
         switch (axis) {
             case 'x':
 
-                t = [2, 0, 0]
+                t = [1.5, 0, 0]
                 r = [0, 1.57, 0]
                 break
             case 'y':
 
-                t = [0, 2, 0]
+                t = [0, 1.5, 0]
                 r = [-1.57, 1.57, 0]
                 break
             case 'z':
 
-                t = [0, 0, 2]
+                t = [0, 0, 1.5]
                 r = [3.1415, -3.1415, 3.1415]
                 break
             case 'c':
@@ -93,18 +93,15 @@ export default class ScaleGizmo extends System {
 
                 break
             case 'mouseup':
+                this.onGizmoChange()
                 this.tracking = false
                 this.currentCoord = undefined
-                document.removeEventListener("mousemove", this.handlerListener)
+                this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
                 this.clickedAxis = -1
                 this.t = 0
                 break
             case 'mousemove':
-                const w = this.gpu.canvas.width
-                const h = this.gpu.canvas.height
-                const times = (w > h ? h / w : w / h) / 10
-
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
@@ -136,12 +133,12 @@ export default class ScaleGizmo extends System {
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities) {
+    execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, onGizmoChange) {
         super.execute()
 
         if (selected.length > 0) {
             this.camera = camera
-
+            this.onGizmoChange = onGizmoChange
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
                 if(el){
@@ -153,21 +150,20 @@ export default class ScaleGizmo extends System {
 
                     if (pickID === 0) {
                         lockCamera(false)
-                        setSelected([])
                         this.currentCoord = undefined
                     } else {
                         this.tracking = true
                         lockCamera(true)
                         this.target = el
                         this.gpu.canvas.requestPointerLock()
-                        document.addEventListener("mousemove", this.handlerListener)
+                        this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                     }
                 }
             }
             if (!this.eventStarted) {
                 this.eventStarted = true
-                document.addEventListener('mousedown', this.handlerListener)
-                document.addEventListener('mouseup', this.handlerListener)
+                this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
+                this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
 
             if(selected.length === 1){

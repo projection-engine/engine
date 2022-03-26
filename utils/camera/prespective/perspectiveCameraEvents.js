@@ -8,7 +8,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
         cameraTarget = document.getElementById(canvasID.replace('-canvas', '') + '-camera-position')
 
     let isFocused = false
-    let startMouseDown
+    let positionChanged = false
     const maxAngle = 1.5
 
     const updateCamPosition = () => {
@@ -73,6 +73,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
             }
 
             case 'mousemove': {
+                positionChanged = true
                 if (isFocused) {
                     if (!requested) {
                         requested = true
@@ -112,15 +113,13 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                 break
             }
             case 'mousedown': {
-
-                startMouseDown = performance.now()
-
                 isFocused = true
                 break
             }
             case 'mouseup': {
                 requested = false
                 isFocused = false
+                positionChanged = false
                 document.exitPointerLock()
 
 
@@ -177,9 +176,9 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     }
 
     const handleClick = (event) => {
-        let elapsedTime = performance.now() - startMouseDown;
-        if (elapsedTime <= 250) {
 
+        if (!positionChanged) {
+            console.log('H')
             const target = document.getElementById(canvasID).getBoundingClientRect()
             onClick(event.clientX - target.left, event.clientY - target.top)
         }

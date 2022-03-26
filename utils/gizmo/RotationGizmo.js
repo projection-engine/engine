@@ -88,11 +88,11 @@ export default class RotationGizmo extends System {
 
                 break
             case 'mouseup':
-
+                this.onGizmoChange()
                 this.tracking = false
                 this.clickedAxis = -1
                 this.currentCoord = undefined
-                document.removeEventListener("mousemove", this.handlerListener)
+                this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
                 this.renderTarget.style.display = 'none'
 
@@ -151,13 +151,13 @@ export default class RotationGizmo extends System {
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType) {
+    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoChange) {
         super.execute()
 
         if (selected.length > 0) {
             this.typeRot = transformationType
             this.camera = camera
-
+            this.onGizmoChange = onGizmoChange
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
                 if (el) {
@@ -169,7 +169,6 @@ export default class RotationGizmo extends System {
 
                     if (pickID === 0) {
                         lockCamera(false)
-                        setSelected([])
                         this.currentCoord = undefined
                     } else {
                         this.tracking = true
@@ -181,14 +180,14 @@ export default class RotationGizmo extends System {
 
                         this.target = el
                         this.gpu.canvas.requestPointerLock()
-                        document.addEventListener("mousemove", this.handlerListener)
+                        this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                     }
                 }
             }
             if (!this.eventStarted) {
                 this.eventStarted = true
-                document.addEventListener('mousedown', this.handlerListener)
-                document.addEventListener('mouseup', this.handlerListener)
+                this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
+                this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
             if (selected.length === 1) {
                 const el = meshes.find(m => m.id === selected[0])

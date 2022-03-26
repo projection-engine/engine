@@ -64,7 +64,6 @@ export default class Shader {
         }
 
         return bundledCode
-
     }
 
     _extractUniforms(code) {

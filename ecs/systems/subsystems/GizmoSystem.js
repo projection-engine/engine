@@ -35,18 +35,18 @@ export default class GizmoSystem extends System {
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, gizmo, transformationType=ROTATION_TYPES.GLOBAL) {
+    execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, gizmo, transformationType=ROTATION_TYPES.GLOBAL, onGizmoChange) {
         super.execute()
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
         switch (gizmo){
             case GIZMOS.TRANSLATION:
-                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType)
+                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, transformationType, onGizmoChange)
                 break
             case GIZMOS.ROTATION:
-                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType)
+                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoChange)
                 break
             case GIZMOS.SCALE:
-                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, setSelected, lockCamera, entities, transformationType)
+                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, onGizmoChange)
                 break
         }
 

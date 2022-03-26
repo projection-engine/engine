@@ -52,7 +52,8 @@ export default class Transformation {
         return angles
     }
 
-    static updateTransform(axis, data, key, engine, entityID) {
+    static updateTransform(axis, data, key, engine, entityID, setAlert) {
+ 
         const entity = engine.entities.find(e => e.id === entityID)
 
         const component = entity.components.TransformComponent
@@ -65,6 +66,8 @@ export default class Transformation {
 
         if(entity.components.PointLightComponent)
             entity.components.PointLightComponent.changed = true
+        if(entity.components.CubeMapComponent)
+            setAlert({message: 'Reflection captures need to be rebuilt', type: 'alert'})
         engine.dispatchEntities({
             type: ENTITY_ACTIONS.UPDATE_COMPONENT, payload: {
                 entityID,
