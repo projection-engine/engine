@@ -8,7 +8,7 @@ import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
-import COMPONENTS from "../../../utils/misc/COMPONENTS";
+import COMPONENTS from "../misc/COMPONENTS";
 import arrow from '../../../../static/assets/Arrow.json'
 import cube from '../../../../static/assets/Cube.json'
 import ROTATION_TYPES from "../misc/ROTATION_TYPES";

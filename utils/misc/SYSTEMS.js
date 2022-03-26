@@ -1,14 +1,15 @@
 export default {
-    PERF: '0',
-    PHYSICS: '1',
-    TRANSFORMATION: '2',
-    CUBE_MAP: '3',
-    SHADOWS: '4',
-    PICK: '5',
-    MESH: '6',
-    POSTPROCESSING: '7',
+    SCRIPT: '0',
+    PERF: '1',
+    PHYSICS: '2',
+    TRANSFORMATION: '3',
+    CUBE_MAP: '4',
+    SHADOWS: '5',
+    PICK: '6',
+    MESH: '7',
+    POSTPROCESSING: '8',
 
-    AO: '8',
-    CULLING: '9',
+    AO: '9',
+    CULLING: '10',
 
 }
