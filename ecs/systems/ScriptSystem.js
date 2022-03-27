@@ -9,21 +9,37 @@ import COMPONENTS from "../../templates/COMPONENTS";
 import Getter from "../../../../views/scripting/nodes/Getter";
 import Setter from "../../../../views/scripting/nodes/Setter";
 
-import Subtract from "../../../../views/scripting/nodes/basic/Subtract";
-import Divide from "../../../../views/scripting/nodes/basic/Divide";
-import Add from "../../../../views/scripting/nodes/basic/Add";
-import Multiply from "../../../../views/scripting/nodes/basic/Multiply";
+import Subtract from "../../../../views/scripting/nodes/operators/math/Subtract";
+import Divide from "../../../../views/scripting/nodes/operators/math/Divide";
+import Add from "../../../../views/scripting/nodes/operators/math/Add";
+import Multiply from "../../../../views/scripting/nodes/operators/math/Multiply";
 import SetTransformationRelativeOrigin
     from "../../../../views/scripting/nodes/transformation/SetTransformationRelativeOrigin";
 import SetLocalRotation from "../../../../views/scripting/nodes/transformation/SetLocalRotation";
-import ToVector from "../../../../views/scripting/nodes/basic/ToVector";
-import FromVector from "../../../../views/scripting/nodes/basic/FromVector";
+import ToVector from "../../../../views/scripting/nodes/operators/conversions/ToVector";
+import FromVector from "../../../../views/scripting/nodes/operators/conversions/FromVector";
+import Print from "../../../../views/scripting/nodes/Print";
 
 
 export default class ScriptSystem extends System {
 
-    constructor() {
+    constructor(gpu) {
         super([]);
+
+
+        const targetID = gpu.canvas.id.replace('-canvas', '-scripting')
+        if (document.getElementById(targetID) !== null)
+            this.renderTarget = document.getElementById(targetID)
+        else {
+            this.renderTarget = document.createElement('code')
+            this.renderTarget.id = targetID
+            Object.assign(this.renderTarget.style, {
+                backdropFilter: "blur(10px) brightness(70%)", borderRadius: "5px", width: "fit-content",
+                height: 'fit-content', position: 'absolute', bottom: '4px', left: '4px', zIndex: '10',
+                color: 'white', padding: '8px', fontSize: '.75rem'
+            });
+            gpu.canvas.parentNode.appendChild(this.renderTarget)
+        }
 
         this.executors = {
             [EventTick.name]: EventTick.compile,
@@ -44,7 +60,8 @@ export default class ScriptSystem extends System {
             [SetTransformationRelativeOrigin.name]: SetTransformationRelativeOrigin.compile,
             [SetLocalRotation.name]: SetLocalRotation.compile,
             [ToVector.name]: ToVector.compile,
-            [FromVector.name]: FromVector.compile
+            [FromVector.name]: FromVector.compile,
+            [Print.name]: Print.compile
         }
 
 
@@ -53,39 +70,40 @@ export default class ScriptSystem extends System {
     execute(options, systems, data, entities) {
         super.execute()
         const {
-            scriptedEntities
+            scriptedEntities,
+            scripts
         } = data
 
         const {
             canExecutePhysicsAnimation,
-            camera,
-            selected,
-            shadingModel,
-            injectMaterial,
+
             elapsed
         } = options
 
         if (canExecutePhysicsAnimation) {
+            this.renderTarget.style.display = 'block'
             const keys = Object.keys(scriptedEntities)
             let attributes = {}
             for (let i = 0; i < keys.length; i++) {
-                const component = scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].executionTemplate
-                let inputs = {}
+                const component = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
 
-                for (let o = 0; o < component.order.length; o++) {
-                    const currentNode = component.order[o]
+                if(component) {
+                    let inputs = {}
 
-
-                    for (let inputO = 0; inputO < currentNode.inputs.length; inputO++) {
-                        const currentInput = currentNode.inputs[inputO]
-                        inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
+                    for (let o = 0; o < component.order.length; o++) {
+                        const currentNode = component.order[o]
+                        for (let inputO = 0; inputO < currentNode.inputs.length; inputO++) {
+                            const currentInput = currentNode.inputs[inputO]
+                            inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
+                        }
+                        attributes = this.executors[currentNode.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentNode.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget)
+                        inputs = {}
                     }
-                    attributes = this.executors[currentNode.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentNode.nodeID, component.executors, (newObj) => component.executors = newObj)
-                    inputs = {}
+                    attributes = {}
                 }
-                attributes = {}
             }
-        }
+        }else
+            this.renderTarget.style.display = 'none'
     }
 
 }

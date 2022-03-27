@@ -171,7 +171,7 @@ export default class TranslationGizmo extends System {
                     return el.components[key].direction
                 case COMPONENTS.TRANSFORM:
 
-                    return el.components.TransformComponent.translation
+                    return el.components.TransformComponent?.translation
                 default:
                     break
             }

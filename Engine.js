@@ -19,6 +19,7 @@ import SYSTEMS from "./templates/SYSTEMS";
 import MATERIAL_TYPES from "./templates/MATERIAL_TYPES";
 import CubeMapSystem from "./ecs/systems/CubeMapSystem";
 import ScriptSystem from "./ecs/systems/ScriptSystem";
+import cloneClass from "../utils/misc/cloneClass";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -159,13 +160,11 @@ export default class Engine extends RenderLoop {
         this.cameraEvents.startTracking()
     }
 
-    start(entities, materials, meshes, params) {
+    start(entities, materials, meshes, params, scripts=[]) {
         if (!this._inExecution) {
             this._inExecution = true
             this.cameraEvents.startTracking()
-
-            const filteredEntities = entities.filter(e => e.active)
-
+            const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
             const data = {
                 pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
                 spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
@@ -184,7 +183,8 @@ export default class Engine extends RenderLoop {
                 meshSources: toObject(meshes),
                 skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent,
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent),
-                scriptedEntities: toObject(filteredEntities.filter(e => e.components.ScriptComponent && e.components.ScriptComponent.ready))
+                scriptedEntities: toObject(filteredEntities.filter(e => e.components.ScriptComponent && e.components.ScriptComponent.ready)),
+                scripts: toObject(scripts)
             }
 
 
@@ -209,15 +209,14 @@ export default class Engine extends RenderLoop {
                         .execute(
                             {
                                 ...params,
-                                onGizmoChange: params.onGizmoChange ? params.onGizmoChange : () => null ,
+                                onGizmoChange: params.onGizmoChange ? params.onGizmoChange : () => null,
                                 lockCamera: (lock) => {
-                                    if(lock){
+                                    if (lock) {
                                         this.cameraEvents.stopTracking()
-                                    }
-                                    else
+                                    } else
                                         this.cameraEvents.startTracking()
                                 },
-                                entitiesLength: entities.length,
+                                entitiesLength: filteredEntities.length,
                                 clicked: this.data.clicked,
                                 setClicked: e => {
                                     this.data.clicked = e
@@ -234,7 +233,7 @@ export default class Engine extends RenderLoop {
                             },
                             this._systems,
                             data,
-                            entities,
+                            filteredEntities,
                             this.gizmo
                         )
                 }

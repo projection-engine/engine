@@ -12,6 +12,7 @@ import PhysicsBodyComponent from "../ecs/components/PhysicsBodyComponent";
 import SkyboxComponent from "../ecs/components/SkyboxComponent";
 import TerrainComponent from "../ecs/components/TerrainComponent";
 import ScriptComponent from "../ecs/components/ScriptComponent";
+import PickComponent from "../ecs/components/PickComponent";
 
 export default {
     TRANSFORM: TransformComponent.name,
@@ -19,6 +20,7 @@ export default {
     COLLIDER: ColliderComponent.name,
     DIRECTIONAL_LIGHT:DirectionalLightComponent.name,
     POINT_LIGHT: PointLightComponent.name,
+    PICK: PickComponent.name,
     SPOT_LIGHT: SpotLightComponent.name,
     FOLDER: FolderComponent.name,
     MATERIAL: MaterialComponent.name,
