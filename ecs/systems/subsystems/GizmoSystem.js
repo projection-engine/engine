@@ -1,9 +1,9 @@
 import System from "../../basic/System";
 import TranslationGizmo from "../../../utils/gizmo/TranslationGizmo";
 import RotationGizmo from "../../../utils/gizmo/RotationGizmo";
-import GIZMOS from "../../../utils/misc/GIZMOS";
+import GIZMOS from "../../../templates/GIZMOS";
 import ScaleGizmo from "../../../utils/gizmo/ScaleGizmo";
-import ROTATION_TYPES from "../../../utils/misc/ROTATION_TYPES";
+import ROTATION_TYPES from "../../../templates/ROTATION_TYPES";
 
 export default class GizmoSystem extends System {
 

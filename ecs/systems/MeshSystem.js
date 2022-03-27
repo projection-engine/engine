@@ -6,7 +6,7 @@ import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import brdfImg from "../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../utils/misc/utils";
-import SYSTEMS from "../../utils/misc/SYSTEMS";
+import SYSTEMS from "../../templates/SYSTEMS";
 
 export default class MeshSystem extends System {
     _ready = false

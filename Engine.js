@@ -3,7 +3,7 @@ import SphericalCamera from "./utils/camera/prespective/SphericalCamera";
 import FreeCamera from "./utils/camera/prespective/FreeCamera";
 import RenderLoop from "./utils/workers/RenderLoop";
 import OrthographicCamera, {DIRECTIONS} from "./utils/camera/ortho/OrthographicCamera";
-import CAMERA_TYPES from "./utils/camera/CAMERA_TYPES";
+import CAMERA_TYPES from "./templates/CAMERA_TYPES";
 import OrthographicCameraEvents from "./utils/camera/ortho/OrthographicCameraEvents";
 import toObject from "./utils/misc/toObject";
 import AOSystem from "./ecs/systems/AOSystem";
@@ -15,9 +15,10 @@ import PickSystem from "./ecs/systems/PickSystem";
 import PostProcessingSystem from "./ecs/systems/PostProcessingSystem";
 import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
 import TransformSystem from "./ecs/systems/TransformSystem";
-import SYSTEMS from "./utils/misc/SYSTEMS";
-import MATERIAL_TYPES from "./utils/misc/MATERIAL_TYPES";
+import SYSTEMS from "./templates/SYSTEMS";
+import MATERIAL_TYPES from "./templates/MATERIAL_TYPES";
 import CubeMapSystem from "./ecs/systems/CubeMapSystem";
+import ScriptSystem from "./ecs/systems/ScriptSystem";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -203,6 +204,7 @@ export default class Engine extends RenderLoop {
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
                 for (let s = 0; s < systems.length; s++) {
+
                     this._systems[systems[s]]
                         .execute(
                             {
@@ -284,7 +286,8 @@ function getKey(s) {
 
         case s instanceof CubeMapSystem:
             return SYSTEMS.CUBE_MAP
-
+        case s instanceof ScriptSystem:
+            return SYSTEMS.SCRIPT
         default:
             return undefined
     }

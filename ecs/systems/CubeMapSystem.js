@@ -3,7 +3,7 @@ import System from "../basic/System";
 import * as shaderCode from '../../shaders/mesh/forwardMesh.glsl'
 import * as skyShader from '../../shaders/misc/skybox.glsl'
 import Shader from "../../utils/workers/Shader";
-import SYSTEMS from "../../utils/misc/SYSTEMS";
+import SYSTEMS from "../../templates/SYSTEMS";
 import {createVAO} from "../../utils/misc/utils";
 import {mat4, vec3} from "gl-matrix";
 import {VIEWS} from "./ShadowMapSystem";

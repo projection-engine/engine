@@ -1,6 +1,6 @@
 import System from "../../basic/System";
 import {SHADING_MODELS} from "../../../../../pages/project/hook/useSettings";
-import SYSTEMS from "../../../utils/misc/SYSTEMS";
+import SYSTEMS from "../../../templates/SYSTEMS";
 import Shader from "../../../utils/workers/Shader";
 import * as shaderCode from '../../../shaders/mesh/deferred.glsl'
 import * as shaderFlatCode from '../../../shaders/mesh/deferredFlat.glsl'

@@ -1,6 +1,6 @@
 import System from "../basic/System";
 import {SHADING_MODELS} from "../../../../pages/project/hook/useSettings";
-import SYSTEMS from "../../utils/misc/SYSTEMS";
+import SYSTEMS from "../../templates/SYSTEMS";
 import * as rsmShaders from '../../shaders/gi/rsm.glsl'
 import * as smShaders from '../../shaders/shadows/shadow.glsl'
 import Shader from "../../utils/workers/Shader";

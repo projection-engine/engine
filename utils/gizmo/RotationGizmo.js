@@ -11,7 +11,7 @@ import PickComponent from "../../ecs/components/PickComponent";
 import TextureInstance from "../../instances/TextureInstance";
 import circle from "../../../../static/icons/circle.png";
 import plane from "../../../../static/assets/Circle.json";
-import ROTATION_TYPES from "../misc/ROTATION_TYPES";
+import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
 
 const toDeg = 57.29
 export default class RotationGizmo extends System {

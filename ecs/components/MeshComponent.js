@@ -1,6 +1,6 @@
 import Component from "../basic/Component";
 import {mat3} from "gl-matrix";
-import MESH_TYPES from "../../utils/misc/MESH_TYPES";
+import MESH_TYPES from "../../templates/MESH_TYPES";
 
 export default class MeshComponent extends Component{
     meshID

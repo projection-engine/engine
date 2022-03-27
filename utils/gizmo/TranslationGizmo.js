@@ -8,10 +8,10 @@ import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
-import COMPONENTS from "../misc/COMPONENTS";
+import COMPONENTS from "../../templates/COMPONENTS";
 import arrow from '../../../../static/assets/Arrow.json'
 import cube from '../../../../static/assets/Cube.json'
-import ROTATION_TYPES from "../misc/ROTATION_TYPES";
+import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
 
 export default class TranslationGizmo extends System {
     eventStarted = false

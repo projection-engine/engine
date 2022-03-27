@@ -1,6 +1,6 @@
 import {mat4, quat} from "gl-matrix";
 import {ENTITY_ACTIONS} from "../../../utils/entityReducer";
-import COMPONENTS from "../misc/COMPONENTS";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 const toDeg = 57.2957795131
 

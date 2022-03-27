@@ -4,7 +4,7 @@ import GridSystem from "./subsystems/GridSystem";
 import BillboardSystem from "./subsystems/BillboardSystem";
 import SkyboxSystem from "./subsystems/SkyboxSystem";
 import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
-import SYSTEMS from "../../utils/misc/SYSTEMS";
+import SYSTEMS from "../../templates/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
@@ -13,7 +13,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
 import {copyTexture} from "../../utils/misc/utils";
-import RENDERING_TYPES from "../../utils/misc/RENDERING_TYPES";
+import RENDERING_TYPES from "../../templates/RENDERING_TYPES";
 
 
 export default class PostProcessingSystem extends System {
