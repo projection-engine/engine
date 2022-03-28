@@ -19,6 +19,19 @@ import SetLocalRotation from "../../../../views/scripting/nodes/transformation/S
 import ToVector from "../../../../views/scripting/nodes/operators/conversions/ToVector";
 import FromVector from "../../../../views/scripting/nodes/operators/conversions/FromVector";
 import Print from "../../../../views/scripting/nodes/Print";
+import And from "../../../../views/scripting/nodes/operators/boolean/And";
+import Branch from "../../../../views/scripting/nodes/operators/boolean/Branch";
+import Equal from "../../../../views/scripting/nodes/operators/boolean/Equal";
+import Greater from "../../../../views/scripting/nodes/operators/boolean/Greater";
+import GreaterEqual from "../../../../views/scripting/nodes/operators/boolean/GreaterEqual";
+import Less from "../../../../views/scripting/nodes/operators/boolean/Less";
+import LessEqual from "../../../../views/scripting/nodes/operators/boolean/LessEqual";
+import Nand from "../../../../views/scripting/nodes/operators/boolean/Nand";
+import Nor from "../../../../views/scripting/nodes/operators/boolean/Nor";
+import Not from "../../../../views/scripting/nodes/operators/boolean/Not";
+import NotEqual from "../../../../views/scripting/nodes/operators/boolean/NotEqual";
+import Or from "../../../../views/scripting/nodes/operators/boolean/Or";
+import Xor from "../../../../views/scripting/nodes/operators/boolean/Xor";
 
 
 export default class ScriptSystem extends System {
@@ -61,7 +74,23 @@ export default class ScriptSystem extends System {
             [SetLocalRotation.name]: SetLocalRotation.compile,
             [ToVector.name]: ToVector.compile,
             [FromVector.name]: FromVector.compile,
-            [Print.name]: Print.compile
+            [Print.name]: Print.compile,
+
+
+            [And.name]: And.compile,
+            [Branch.name]: Branch.compile,
+            [Equal.name]: Equal.compile,
+            [Greater.name]: Greater.compile,
+            [GreaterEqual.name]: GreaterEqual.compile,
+            [Less.name]: Less.compile,
+            [LessEqual.name]: LessEqual.compile,
+            [Nand.name]: Nand.compile,
+            [Nor.name]: Nor.compile,
+            [Not.name]: Not.compile,
+            [NotEqual.name]: NotEqual.compile,
+            [Or.name]: Or.compile,
+            [Xor.name]: Xor.compile,
+
         }
 
 
@@ -87,23 +116,52 @@ export default class ScriptSystem extends System {
             for (let i = 0; i < keys.length; i++) {
                 const component = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
 
-                if(component) {
-                    let inputs = {}
-
-                    for (let o = 0; o < component.order.length; o++) {
-                        const currentNode = component.order[o]
-                        for (let inputO = 0; inputO < currentNode.inputs.length; inputO++) {
-                            const currentInput = currentNode.inputs[inputO]
-                            inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
-                        }
-                        attributes = this.executors[currentNode.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentNode.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget)
-                        inputs = {}
-                    }
+                if (component) {
+                    let inputs = {}, order = component.order
+                    this.executeLoop(order, attributes, elapsed, scriptedEntities, keys, entities, i, component)
+                    // for (let o = 0; o < order.length; o++) {
+                    //     const currentOrder = order[o]
+                    //     for (let inputO = 0; inputO < currentOrder.inputs.length; inputO++) {
+                    //         const currentInput = currentOrder.inputs[inputO]
+                    //         inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
+                    //     }
+                    //     if (!currentOrder.isBranch)
+                    //         attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget)
+                    //     else {
+                    //         order = this.executors[currentOrder.classExecutor](inputs, currentOrder)
+                    //         break
+                    //     }
+                    //     inputs = {}
+                    // }
                     attributes = {}
                 }
             }
-        }else
+        } else
             this.renderTarget.style.display = 'none'
+    }
+
+    executeLoop(order,  attr,  elapsed, scriptedEntities, keys, entities, i, component){
+        let inputs = {}, attributes = {...attr}
+
+        for (let o = 0; o < order.length; o++) {
+            const currentOrder = order[o]
+            console.log(attributes, currentOrder, order, o)
+            for (let inputO = 0; inputO < currentOrder.inputs.length; inputO++) {
+                const currentInput = currentOrder.inputs[inputO]
+
+                inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
+            }
+            if (!currentOrder.isBranch)
+                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget)
+            else {
+                const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder)
+                console.log(newOrder, currentOrder, inputs)
+                if(Array.isArray(newOrder))
+                    this.executeLoop(newOrder, attributes, elapsed, scriptedEntities, keys, entities, i, component)
+                break
+            }
+            inputs = {}
+        }
     }
 
 }
