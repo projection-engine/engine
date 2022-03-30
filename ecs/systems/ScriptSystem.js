@@ -1,13 +1,13 @@
 import System from "../basic/System";
-import EventTick from "../../../../views/scripting/nodes/EventTick";
+import EventTick from "../../../../views/scripting/nodes/events/EventTick";
 import GetWorldRotation from "../../../../views/scripting/nodes/transformation/GetWorldRotation";
 import GetWorldTranslation from "../../../../views/scripting/nodes/transformation/GetWorldTranslation";
 import SetWorldRotation from "../../../../views/scripting/nodes/transformation/SetWorldRotation";
 import SetWorldTranslation from "../../../../views/scripting/nodes/transformation/SetWorldTranslation";
-import QuaternionToEuler from "../../../../views/scripting/nodes/QuaternionToEuler";
+import QuaternionToEuler from "../../../../views/scripting/nodes/transformation/QuaternionToEuler";
 import COMPONENTS from "../../templates/COMPONENTS";
-import Getter from "../../../../views/scripting/nodes/Getter";
-import Setter from "../../../../views/scripting/nodes/Setter";
+import Getter from "../../../../views/scripting/nodes/utils/Getter";
+import Setter from "../../../../views/scripting/nodes/utils/Setter";
 
 import Subtract from "../../../../views/scripting/nodes/operators/math/Subtract";
 import Divide from "../../../../views/scripting/nodes/operators/math/Divide";
@@ -18,7 +18,7 @@ import SetTransformationRelativeOrigin
 import SetLocalRotation from "../../../../views/scripting/nodes/transformation/SetLocalRotation";
 import ToVector from "../../../../views/scripting/nodes/operators/conversions/ToVector";
 import FromVector from "../../../../views/scripting/nodes/operators/conversions/FromVector";
-import Print from "../../../../views/scripting/nodes/Print";
+import Print from "../../../../views/scripting/nodes/utils/Print";
 import And from "../../../../views/scripting/nodes/operators/boolean/And";
 import Branch from "../../../../views/scripting/nodes/operators/boolean/Branch";
 import Equal from "../../../../views/scripting/nodes/operators/boolean/Equal";
@@ -32,10 +32,17 @@ import Not from "../../../../views/scripting/nodes/operators/boolean/Not";
 import NotEqual from "../../../../views/scripting/nodes/operators/boolean/NotEqual";
 import Or from "../../../../views/scripting/nodes/operators/boolean/Or";
 import Xor from "../../../../views/scripting/nodes/operators/boolean/Xor";
+import RandomInt from "../../../../views/scripting/nodes/utils/RandomInt";
+import RandomFloat from "../../../../views/scripting/nodes/utils/RandomFloat";
+import MouseX from "../../../../views/scripting/nodes/events/MouseX";
+import MouseY from "../../../../views/scripting/nodes/events/MouseY";
+import MousePosition from "../../../../views/scripting/nodes/events/MousePosition";
 
 
 export default class ScriptSystem extends System {
-
+    pressedKeys = {}
+    eventSet = false
+    currentMousePosition = {x: 0, y: 0}
     constructor(gpu) {
         super([]);
 
@@ -49,7 +56,9 @@ export default class ScriptSystem extends System {
             Object.assign(this.renderTarget.style, {
                 backdropFilter: "blur(10px) brightness(70%)", borderRadius: "5px", width: "fit-content",
                 height: 'fit-content', position: 'absolute', bottom: '4px', left: '4px', zIndex: '10',
-                color: 'white', padding: '8px', fontSize: '.75rem'
+                color: 'white', padding: '8px', fontSize: '.75rem',
+                maxWidth: '15vw',
+                maxHeight: '50vh',overflow: 'hidden'
             });
             gpu.canvas.parentNode.appendChild(this.renderTarget)
         }
@@ -61,22 +70,17 @@ export default class ScriptSystem extends System {
             [SetWorldRotation.name]: SetWorldRotation.compile,
             [SetWorldTranslation.name]: SetWorldTranslation.compile,
             [QuaternionToEuler.name]: QuaternionToEuler.compile,
-
             [Getter.name]: Getter.compile,
             [Setter.name]: Setter.compile,
-
             [Add.name]: Add.compile,
             [Subtract.name]: Subtract.compile,
             [Divide.name]: Divide.compile,
             [Multiply.name]: Multiply.compile,
-
             [SetTransformationRelativeOrigin.name]: SetTransformationRelativeOrigin.compile,
             [SetLocalRotation.name]: SetLocalRotation.compile,
             [ToVector.name]: ToVector.compile,
             [FromVector.name]: FromVector.compile,
             [Print.name]: Print.compile,
-
-
             [And.name]: And.compile,
             [Branch.name]: Branch.compile,
             [Equal.name]: Equal.compile,
@@ -90,9 +94,21 @@ export default class ScriptSystem extends System {
             [NotEqual.name]: NotEqual.compile,
             [Or.name]: Or.compile,
             [Xor.name]: Xor.compile,
-
+            [RandomInt.name]: RandomInt.compile,
+            [RandomFloat.name]: RandomFloat.compile,
+            [MouseX.name]: MouseX.compile,
+            [MouseY.name]: MouseY.compile,
+            [MousePosition.name]: MousePosition.compile
         }
-
+        document.addKey = (key) => {
+            this.pressedKeys[key] = true
+        }
+        document.removeKey = (key) => {
+            delete this.pressedKeys[key]
+        }
+        document.setMouse = (position) => {
+            this.currentMousePosition = position
+        }
 
     }
 
@@ -105,39 +121,39 @@ export default class ScriptSystem extends System {
 
         const {
             canExecutePhysicsAnimation,
-
+            lockCamera,
             elapsed
         } = options
 
         if (canExecutePhysicsAnimation) {
+            if(!this.eventSet) {
+                lockCamera(true)
+                this.eventSet = true
+                document.addEventListener('keydown', handler)
+                document.addEventListener('keyup', handler)
+                document.addEventListener('mousemove', handler)
+            }
+
             this.renderTarget.style.display = 'block'
             const keys = Object.keys(scriptedEntities)
-            let attributes = {}
             for (let i = 0; i < keys.length; i++) {
-                const component = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
-
-                if (component) {
-                    let inputs = {}, order = component.order
-                    this.executeLoop(order, attributes, elapsed, scriptedEntities, keys, entities, i, component)
-                    // for (let o = 0; o < order.length; o++) {
-                    //     const currentOrder = order[o]
-                    //     for (let inputO = 0; inputO < currentOrder.inputs.length; inputO++) {
-                    //         const currentInput = currentOrder.inputs[inputO]
-                    //         inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
-                    //     }
-                    //     if (!currentOrder.isBranch)
-                    //         attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget)
-                    //     else {
-                    //         order = this.executors[currentOrder.classExecutor](inputs, currentOrder)
-                    //         break
-                    //     }
-                    //     inputs = {}
-                    // }
-                    attributes = {}
+                const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
+                for(let j = 0; j < currentS.length; j++){
+                    if (currentS[j]) {
+                        let order = currentS[j].order
+                        this.executeLoop(order, {}, elapsed, scriptedEntities, keys, entities, i, currentS[j])
+                    }
                 }
             }
-        } else
+        } else if(this.eventSet){
+            lockCamera(false)
+            this.eventSet = false
             this.renderTarget.style.display = 'none'
+            this.renderTarget.innerText = ''
+            document.removeEventListener('keydown', handler)
+            document.removeEventListener('keyup', handler)
+            document.removeEventListener('mousemove', handler)
+        }
     }
 
     executeLoop(order,  attr,  elapsed, scriptedEntities, keys, entities, i, component){
@@ -145,17 +161,16 @@ export default class ScriptSystem extends System {
 
         for (let o = 0; o < order.length; o++) {
             const currentOrder = order[o]
-            console.log(attributes, currentOrder, order, o)
             for (let inputO = 0; inputO < currentOrder.inputs.length; inputO++) {
                 const currentInput = currentOrder.inputs[inputO]
 
                 inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
             }
+
             if (!currentOrder.isBranch)
-                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget)
+                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget, this.pressedKeys, this.currentMousePosition)
             else {
                 const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder)
-                console.log(newOrder, currentOrder, inputs)
                 if(Array.isArray(newOrder))
                     this.executeLoop(newOrder, attributes, elapsed, scriptedEntities, keys, entities, i, component)
                 break
@@ -163,5 +178,22 @@ export default class ScriptSystem extends System {
             inputs = {}
         }
     }
+}
 
+function handler(event){
+    const addKey = event.currentTarget.addKey
+    const removeKey = event.currentTarget.removeKey
+    const setMouse = event.currentTarget.setMouse
+    switch (event.type){
+        case 'keydown':
+            addKey(event.code)
+            break
+        case 'keyup':
+            removeKey(event.code)
+            break
+        case 'mousemove':
+            setMouse({x: event.clientX, y: event.clientY})
+            break
+        default:break
+    }
 }
