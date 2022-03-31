@@ -56,7 +56,6 @@ export default class FreeCamera extends Camera {
     }
 
     updateProjection() {
-
         mat4.perspective(this._projectionMatrix, this._fov, this._aspectRatio, this._zNear, this._zFar)
     }
 

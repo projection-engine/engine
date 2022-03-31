@@ -13,6 +13,7 @@ import SkyboxComponent from "../ecs/components/SkyboxComponent";
 import TerrainComponent from "../ecs/components/TerrainComponent";
 import ScriptComponent from "../ecs/components/ScriptComponent";
 import PickComponent from "../ecs/components/PickComponent";
+import CameraComponent from "../ecs/components/CameraComponent";
 
 export default {
     TRANSFORM: TransformComponent.name,
@@ -29,5 +30,6 @@ export default {
     SKYBOX: SkyboxComponent.name,
     TERRAIN: TerrainComponent.name,
     SKYLIGHT: SkylightComponent.name,
-    SCRIPT: ScriptComponent.name
+    SCRIPT: ScriptComponent.name,
+    CAMERA: CameraComponent.name
 }

@@ -16,6 +16,8 @@ export default class TransformComponent extends Component {
     lockedRotation= false
     lockedScaling = false
 
+    updateQuatOnEulerChange = true
+
     constructor(id) {
         const name = TransformComponent.constructor.name
         super(id, name);
@@ -66,7 +68,8 @@ export default class TransformComponent extends Component {
         const toDeg = 57.29
 
         this._rotationUpdated = true
-        this._rotationQuat = quat.fromEuler([], this.__rotation[0] * toDeg, this.__rotation[1] * toDeg, this.__rotation[2] * toDeg)
+        if(this.updateQuatOnEulerChange)
+            this._rotationQuat = quat.fromEuler([], this.__rotation[0] * toDeg, this.__rotation[1] * toDeg, this.__rotation[2] * toDeg)
     }
 
 

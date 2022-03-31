@@ -5,11 +5,11 @@ export default class Camera {
     _position = [0, 0, 0]
     _yaw = 0
     _pitch = 0
-    viewMatrix = linearAlgebraMath.generateMatrix(4, 4, 0)
+
     direction = {}
     _fov = Math.PI/2
     _projectionMatrix = mat4.create()
-    _viewProjection = mat4.create()
+
     _viewMatrix = mat4.create()
 
     constructor(

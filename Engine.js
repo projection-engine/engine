@@ -20,6 +20,7 @@ import MATERIAL_TYPES from "./templates/MATERIAL_TYPES";
 import CubeMapSystem from "./ecs/systems/CubeMapSystem";
 import ScriptSystem from "./ecs/systems/ScriptSystem";
 import cloneClass from "../utils/misc/cloneClass";
+import COMPONENTS from "./templates/COMPONENTS";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -184,7 +185,8 @@ export default class Engine extends RenderLoop {
                 skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent,
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent),
                 scriptedEntities: toObject(filteredEntities.filter(e => e.components.ScriptComponent && e.components.ScriptComponent.ready)),
-                scripts: toObject(scripts)
+                scripts: toObject(scripts),
+                cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA])
             }
 
 
