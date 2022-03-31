@@ -45,6 +45,8 @@ in mat4 dirLightPOV[MAX_LIGHTS];
 
 uniform vec3 cameraVec;
 uniform int noGI;
+uniform float gamma;
+uniform float exposure;
 uniform vec2 lightClippingPlane[MAX_LIGHTS];
 uniform vec3 lightPosition[MAX_LIGHTS];
 uniform vec3 lightColor[MAX_LIGHTS];
@@ -244,6 +246,10 @@ void main() {
 
     vec3 color = (ambient  + Lo +  GI) ;
     color = color / (color + vec3(1.0));
+    
+    color = vec3(1.0) - exp(-color * exposure);
+    color = pow(color, vec3(1.0/gamma));
+    
     finalColor = vec4(color, 1.0);
 }
 `

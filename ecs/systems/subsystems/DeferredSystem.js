@@ -30,7 +30,7 @@ export default class DeferredSystem extends System {
         }
     }
 
-    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight) {
+    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight, gamma, exposure) {
         super.execute()
 
         const shadowMapSystem = systems[SYSTEMS.SHADOWS],
@@ -89,6 +89,9 @@ export default class DeferredSystem extends System {
 
             shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
             shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,
+
+            gamma: gamma ? gamma : 1,
+            exposure: exposure ? exposure : 2,
         })
         deferredSystem.frameBuffer.draw()
     }

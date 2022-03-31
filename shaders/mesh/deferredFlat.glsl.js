@@ -16,7 +16,8 @@ in vec2 texCoord;
 uniform sampler2D positionSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D normalSampler;
-
+uniform float gamma;
+uniform float exposure;
 out vec4 finalColor;
 
 
@@ -33,7 +34,9 @@ void main() {
     float brightness = max(0.2, shadingIntensity);
     vec3 color = albedo* brightness;
  
- 
+     color = vec3(1.0) - exp(-color * exposure);
+    color = pow(color, vec3(1.0/gamma));
+    
     finalColor = vec4(color, 1.0);
 }
 `

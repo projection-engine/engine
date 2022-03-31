@@ -53,8 +53,7 @@ in vec2 vTexcoord;
  
 
 uniform sampler2D uSampler;
-uniform float gamma;
-uniform float exposure;
+
 
 
 out vec4 finalColor;
@@ -135,9 +134,6 @@ void main(){
     FsrRcasCon(con,sharpness);
     
     vec3 fragment = FsrRcasF(gl_FragCoord.xy, con);   
-    fragment = vec3(1.0) - exp(-fragment * exposure);
-    fragment = pow(fragment, vec3(1.0/gamma));
-
     finalColor = vec4(fragment, 1.);
 }
 `
@@ -159,8 +155,7 @@ precision highp float;
 in vec2 vTexcoord;
 
 uniform sampler2D uSampler;
-uniform float gamma;
-uniform float exposure;
+
 uniform vec3 inverseFilterTextureSize;
 
 
@@ -211,10 +206,6 @@ void main() {
         fragment = result1;
     else
         fragment = result2;
-
-    fragment = vec3(1.0) - exp(-fragment * exposure);
-    fragment = pow(fragment, vec3(1.0/gamma));
-
     // GAMMA
     finalColor = vec4(fragment, 1.0);
 }
@@ -227,17 +218,12 @@ precision highp float;
 in vec2 vTexcoord;
 
 uniform sampler2D uSampler;
-uniform float gamma;
-uniform float exposure;
 
 
 out vec4 finalColor;
 
 void main() {
     vec3 fragment = texture(uSampler, vTexcoord).rgb;   
-    fragment = vec3(1.0) - exp(-fragment * exposure);
-    fragment = pow(fragment, vec3(1.0/gamma));
-
     finalColor = vec4(fragment, 1.0);
 }
 

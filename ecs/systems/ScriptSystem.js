@@ -1,42 +1,43 @@
 import System from "../basic/System";
-import EventTick from "../../../../views/scripting/nodes/events/EventTick";
-import GetWorldRotation from "../../../../views/scripting/nodes/transformation/GetWorldRotation";
-import GetWorldTranslation from "../../../../views/scripting/nodes/transformation/GetWorldTranslation";
-import SetWorldRotation from "../../../../views/scripting/nodes/transformation/SetWorldRotation";
-import SetWorldTranslation from "../../../../views/scripting/nodes/transformation/SetWorldTranslation";
-import QuaternionToEuler from "../../../../views/scripting/nodes/transformation/QuaternionToEuler";
+import EventTick from "../../../../views/blueprint/nodes/events/EventTick";
+import GetWorldRotation from "../../../../views/blueprint/nodes/transformation/GetWorldRotation";
+import GetWorldTranslation from "../../../../views/blueprint/nodes/transformation/GetWorldTranslation";
+import SetWorldRotation from "../../../../views/blueprint/nodes/transformation/SetWorldRotation";
+import SetWorldTranslation from "../../../../views/blueprint/nodes/transformation/SetWorldTranslation";
+import QuaternionToEuler from "../../../../views/blueprint/nodes/transformation/QuaternionToEuler";
 import COMPONENTS from "../../templates/COMPONENTS";
-import Getter from "../../../../views/scripting/nodes/utils/Getter";
-import Setter from "../../../../views/scripting/nodes/utils/Setter";
+import Getter from "../../../../views/blueprint/nodes/utils/Getter";
+import Setter from "../../../../views/blueprint/nodes/utils/Setter";
 
-import Subtract from "../../../../views/scripting/nodes/operators/math/Subtract";
-import Divide from "../../../../views/scripting/nodes/operators/math/Divide";
-import Add from "../../../../views/scripting/nodes/operators/math/Add";
-import Multiply from "../../../../views/scripting/nodes/operators/math/Multiply";
+import Subtract from "../../../../views/blueprint/nodes/operators/math/Subtract";
+import Divide from "../../../../views/blueprint/nodes/operators/math/Divide";
+import Add from "../../../../views/blueprint/nodes/operators/math/Add";
+import Multiply from "../../../../views/blueprint/nodes/operators/math/Multiply";
 import SetTransformationRelativeOrigin
-    from "../../../../views/scripting/nodes/transformation/SetTransformationRelativeOrigin";
-import SetLocalRotation from "../../../../views/scripting/nodes/transformation/SetLocalRotation";
-import ToVector from "../../../../views/scripting/nodes/operators/conversions/ToVector";
-import FromVector from "../../../../views/scripting/nodes/operators/conversions/FromVector";
-import Print from "../../../../views/scripting/nodes/utils/Print";
-import And from "../../../../views/scripting/nodes/operators/boolean/And";
-import Branch from "../../../../views/scripting/nodes/operators/boolean/Branch";
-import Equal from "../../../../views/scripting/nodes/operators/boolean/Equal";
-import Greater from "../../../../views/scripting/nodes/operators/boolean/Greater";
-import GreaterEqual from "../../../../views/scripting/nodes/operators/boolean/GreaterEqual";
-import Less from "../../../../views/scripting/nodes/operators/boolean/Less";
-import LessEqual from "../../../../views/scripting/nodes/operators/boolean/LessEqual";
-import Nand from "../../../../views/scripting/nodes/operators/boolean/Nand";
-import Nor from "../../../../views/scripting/nodes/operators/boolean/Nor";
-import Not from "../../../../views/scripting/nodes/operators/boolean/Not";
-import NotEqual from "../../../../views/scripting/nodes/operators/boolean/NotEqual";
-import Or from "../../../../views/scripting/nodes/operators/boolean/Or";
-import Xor from "../../../../views/scripting/nodes/operators/boolean/Xor";
-import RandomInt from "../../../../views/scripting/nodes/utils/RandomInt";
-import RandomFloat from "../../../../views/scripting/nodes/utils/RandomFloat";
-import MouseX from "../../../../views/scripting/nodes/events/MouseX";
-import MouseY from "../../../../views/scripting/nodes/events/MouseY";
-import MousePosition from "../../../../views/scripting/nodes/events/MousePosition";
+    from "../../../../views/blueprint/nodes/transformation/SetTransformationRelativeOrigin";
+import SetLocalRotation from "../../../../views/blueprint/nodes/transformation/SetLocalRotation";
+import ToVector from "../../../../views/blueprint/nodes/operators/conversions/ToVector";
+import FromVector from "../../../../views/blueprint/nodes/operators/conversions/FromVector";
+import Print from "../../../../views/blueprint/nodes/utils/Print";
+import And from "../../../../views/blueprint/nodes/operators/boolean/And";
+import Branch from "../../../../views/blueprint/nodes/operators/boolean/Branch";
+import Equal from "../../../../views/blueprint/nodes/operators/boolean/Equal";
+import Greater from "../../../../views/blueprint/nodes/operators/boolean/Greater";
+import GreaterEqual from "../../../../views/blueprint/nodes/operators/boolean/GreaterEqual";
+import Less from "../../../../views/blueprint/nodes/operators/boolean/Less";
+import LessEqual from "../../../../views/blueprint/nodes/operators/boolean/LessEqual";
+import Nand from "../../../../views/blueprint/nodes/operators/boolean/Nand";
+import Nor from "../../../../views/blueprint/nodes/operators/boolean/Nor";
+import Not from "../../../../views/blueprint/nodes/operators/boolean/Not";
+import NotEqual from "../../../../views/blueprint/nodes/operators/boolean/NotEqual";
+import Or from "../../../../views/blueprint/nodes/operators/boolean/Or";
+import Xor from "../../../../views/blueprint/nodes/operators/boolean/Xor";
+import RandomInt from "../../../../views/blueprint/nodes/utils/RandomInt";
+import RandomFloat from "../../../../views/blueprint/nodes/utils/RandomFloat";
+import MouseX from "../../../../views/blueprint/nodes/events/MouseX";
+import MouseY from "../../../../views/blueprint/nodes/events/MouseY";
+import MousePosition from "../../../../views/blueprint/nodes/events/MousePosition";
+import EntityReference from "../../../../views/blueprint/nodes/events/EntityReference";
 
 
 export default class ScriptSystem extends System {
@@ -98,7 +99,8 @@ export default class ScriptSystem extends System {
             [RandomFloat.name]: RandomFloat.compile,
             [MouseX.name]: MouseX.compile,
             [MouseY.name]: MouseY.compile,
-            [MousePosition.name]: MousePosition.compile
+            [MousePosition.name]: MousePosition.compile,
+            [EntityReference.name]: EntityReference.compile,
         }
         document.addKey = (key) => {
             this.pressedKeys[key] = true
@@ -163,16 +165,15 @@ export default class ScriptSystem extends System {
             const currentOrder = order[o]
             for (let inputO = 0; inputO < currentOrder.inputs.length; inputO++) {
                 const currentInput = currentOrder.inputs[inputO]
-
                 inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
             }
 
             if (!currentOrder.isBranch)
-                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities[keys[i]], entities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget, this.pressedKeys, this.currentMousePosition)
+                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget, this.pressedKeys, this.currentMousePosition)
             else {
                 const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder)
                 if(Array.isArray(newOrder))
-                    this.executeLoop(newOrder, attributes, elapsed, scriptedEntities, keys, entities, i, component)
+                    this.executeLoop(newOrder, attributes, elapsed, scriptedEntities, keys, scriptedEntities, i, component)
                 break
             }
             inputs = {}

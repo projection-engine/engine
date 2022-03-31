@@ -37,8 +37,6 @@ export default class PostProcessingSystem extends System {
         this.billboardSystem = new BillboardSystem(gpu)
         this.billboardSystem.initializeTextures().catch()
         this.gizmoSystem = new GizmoSystem(gpu)
-
-        this.shaderPick = new Shader(shaderCodePick.vertex, shaderCodePick.fragment, gpu)
     }
 
     execute(options, systems, data, entities, gizmo) {
@@ -87,7 +85,7 @@ export default class PostProcessingSystem extends System {
             giFBO = this.GISystem.accumulatedBuffer
         }
 
-        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight)
+        this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight, gamma, exposure)
         copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
 
@@ -117,8 +115,7 @@ export default class PostProcessingSystem extends System {
         shaderToApply.use()
         shaderToApply.bindForUse({
             uSampler: this.frameBuffer.colors[0],
-            gamma: gamma ? gamma : 1,
-            exposure: exposure ? exposure : 2,
+
             FXAASpanMax: 8,
             FXAAReduceMin: 1 / 128,
             inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
