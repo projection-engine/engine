@@ -184,7 +184,7 @@ export default class Engine extends RenderLoop {
                 meshSources: toObject(meshes),
                 skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent,
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent),
-                scriptedEntities: toObject(filteredEntities.filter(e => e.components.ScriptComponent && e.components.ScriptComponent.ready)),
+                scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
                 scripts: toObject(scripts),
                 cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA])
             }

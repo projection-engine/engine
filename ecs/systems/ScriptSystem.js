@@ -138,9 +138,12 @@ export default class ScriptSystem extends System {
 
             this.renderTarget.style.display = 'block'
             const keys = Object.keys(scriptedEntities)
+
+
             for (let i = 0; i < keys.length; i++) {
-                const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
-                for(let j = 0; j < currentS.length; j++){
+                const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executors
+
+                for(let j = 0; j < currentS?.length; j++){
                     if (currentS[j]) {
                         let order = currentS[j].order
                         this.executeLoop(order, {}, elapsed, scriptedEntities, keys, entities, i, currentS[j])
@@ -167,7 +170,7 @@ export default class ScriptSystem extends System {
                 const currentInput = currentOrder.inputs[inputO]
                 inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
             }
-
+            console.log(attributes)
             if (!currentOrder.isBranch)
                 attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget, this.pressedKeys, this.currentMousePosition)
             else {

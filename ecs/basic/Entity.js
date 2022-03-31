@@ -7,12 +7,12 @@ export default class Entity {
     active
     components = {}
     linkedTo
-
-    constructor(id = randomID(), name = 'Empty entity', active=true, linkedTo) {
+    isBlueprint = false
+    constructor(id = randomID(), name = 'Empty entity', active=true, linkedTo, isBlueprint) {
         this.id = id
         this.name = name
         this.active = active
-
+        this.isBlueprint = isBlueprint
         this.linkedTo = linkedTo
     }
 
@@ -23,6 +23,4 @@ export default class Entity {
     removeComponent(componentName) {
         delete this.components[componentName]
     }
-
-
 }
