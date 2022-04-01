@@ -11,8 +11,8 @@ export default class SkyboxComponent extends Component {
 
     __initialized = false
     _resolution = 512
-    gamma = 1
-    exposure = 1
+    _gamma = 1
+    _exposure = 1
     imageID = undefined
     _prefilteredMipmaps = 6
     constructor(id, gpu) {
@@ -50,6 +50,19 @@ export default class SkyboxComponent extends Component {
         )
 
         this._compile()
+    }
+    set gamma (data){
+      this._gamma = data
+    }
+    set exposure (data){
+        this._exposure = data
+    }
+
+    get gamma (){
+        return this._gamma
+    }
+    get exposure (){
+        return this._exposure
     }
 
     get ready() {

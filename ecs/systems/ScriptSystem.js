@@ -38,12 +38,23 @@ import MouseX from "../../../../views/blueprint/nodes/events/MouseX";
 import MouseY from "../../../../views/blueprint/nodes/events/MouseY";
 import MousePosition from "../../../../views/blueprint/nodes/events/MousePosition";
 import EntityReference from "../../../../views/blueprint/nodes/events/EntityReference";
+import Cos from "../../../../views/blueprint/nodes/operators/math/Cos";
+import Sin from "../../../../views/blueprint/nodes/operators/math/Sin";
+import ASin from "../../../../views/blueprint/nodes/operators/math/ASin";
+import ACos from "../../../../views/blueprint/nodes/operators/math/ACos";
+import ATan from "../../../../views/blueprint/nodes/operators/math/ATan";
+import Tan from "../../../../views/blueprint/nodes/operators/math/Tan";
+import Mod from "../../../../views/blueprint/nodes/operators/math/Mod";
+import Abs from "../../../../views/blueprint/nodes/operators/math/Abs";
+import KeyPress from "../../../../views/blueprint/nodes/events/KeyPress";
 
 
 export default class ScriptSystem extends System {
     pressedKeys = {}
     eventSet = false
     currentMousePosition = {x: 0, y: 0}
+    state = {}
+
     constructor(gpu) {
         super([]);
 
@@ -59,7 +70,7 @@ export default class ScriptSystem extends System {
                 height: 'fit-content', position: 'absolute', bottom: '4px', left: '4px', zIndex: '10',
                 color: 'white', padding: '8px', fontSize: '.75rem',
                 maxWidth: '15vw',
-                maxHeight: '50vh',overflow: 'hidden'
+                maxHeight: '50vh', overflow: 'hidden'
             });
             gpu.canvas.parentNode.appendChild(this.renderTarget)
         }
@@ -101,6 +112,16 @@ export default class ScriptSystem extends System {
             [MouseY.name]: MouseY.compile,
             [MousePosition.name]: MousePosition.compile,
             [EntityReference.name]: EntityReference.compile,
+
+            [Cos.name]: Cos.compile,
+            [Sin.name]: Sin.compile,
+            [ASin.name]: ASin.compile,
+            [ACos.name]: ACos.compile,
+            [ATan.name]: ATan.compile,
+            [Tan.name]: Tan.compile,
+            [Mod.name]: Mod.compile,
+            [Abs.name]: Abs.compile,
+            [KeyPress.name]: KeyPress.compile,
         }
         document.addKey = (key) => {
             this.pressedKeys[key] = true
@@ -128,7 +149,7 @@ export default class ScriptSystem extends System {
         } = options
 
         if (canExecutePhysicsAnimation) {
-            if(!this.eventSet) {
+            if (!this.eventSet) {
                 lockCamera(true)
                 this.eventSet = true
                 document.addEventListener('keydown', handler)
@@ -143,14 +164,14 @@ export default class ScriptSystem extends System {
             for (let i = 0; i < keys.length; i++) {
                 const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executors
 
-                for(let j = 0; j < currentS?.length; j++){
+                for (let j = 0; j < currentS?.length; j++) {
                     if (currentS[j]) {
                         let order = currentS[j].order
                         this.executeLoop(order, {}, elapsed, scriptedEntities, keys, entities, i, currentS[j])
                     }
                 }
             }
-        } else if(this.eventSet){
+        } else if (this.eventSet) {
             lockCamera(false)
             this.eventSet = false
             this.renderTarget.style.display = 'none'
@@ -161,7 +182,7 @@ export default class ScriptSystem extends System {
         }
     }
 
-    executeLoop(order,  attr,  elapsed, scriptedEntities, keys, entities, i, component){
+    executeLoop(order, attr, elapsed, scriptedEntities, keys, entities, i, component) {
         let inputs = {}, attributes = {...attr}
 
         for (let o = 0; o < order.length; o++) {
@@ -170,12 +191,16 @@ export default class ScriptSystem extends System {
                 const currentInput = currentOrder.inputs[inputO]
                 inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
             }
-            console.log(attributes)
+
             if (!currentOrder.isBranch)
                 attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget, this.pressedKeys, this.currentMousePosition)
             else {
-                const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder)
-                if(Array.isArray(newOrder))
+                const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder, currentOrder.nodeID, component.executors, this.pressedKeys, this.state[currentOrder.nodeID], (value, key) => {
+                    if (!this.state[currentOrder.nodeID])
+                        this.state[currentOrder.nodeID] = {}
+                    this.state[currentOrder.nodeID][key] = value
+                })
+                if (Array.isArray(newOrder))
                     this.executeLoop(newOrder, attributes, elapsed, scriptedEntities, keys, scriptedEntities, i, component)
                 break
             }
@@ -184,11 +209,11 @@ export default class ScriptSystem extends System {
     }
 }
 
-function handler(event){
+function handler(event) {
     const addKey = event.currentTarget.addKey
     const removeKey = event.currentTarget.removeKey
     const setMouse = event.currentTarget.setMouse
-    switch (event.type){
+    switch (event.type) {
         case 'keydown':
             addKey(event.code)
             break
@@ -198,6 +223,7 @@ function handler(event){
         case 'mousemove':
             setMouse({x: event.clientX, y: event.clientY})
             break
-        default:break
+        default:
+            break
     }
 }
