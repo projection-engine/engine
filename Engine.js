@@ -164,25 +164,28 @@ export default class Engine extends RenderLoop {
     start(entities, materials, meshes, params, scripts=[]) {
         if (!this._inExecution) {
             this._inExecution = true
-            this.cameraEvents.startTracking()
+            if(!params.canExecutePhysicsAnimation)
+                this.cameraEvents.startTracking()
+            else
+                this.cameraEvents.stopTracking()
             const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
             const data = {
-                pointLights: filteredEntities.filter(e => e.components.PointLightComponent),
-                spotLights: filteredEntities.filter(e => e.components.SpotLightComponent),
-                terrains: filteredEntities.filter(e => e.components.TerrainComponent),
+                pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
+                spotLights: filteredEntities.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
+                terrains: filteredEntities.filter(e => e.components[COMPONENTS.TERRAIN]),
                 translucentMeshes: toObject(filteredEntities.filter(e => {
-                    if (e.components.MaterialComponent) {
-                        const material = materials.find(m => m.id === e.components.MaterialComponent.materialID)
+                    if (e.components[COMPONENTS.MATERIAL]) {
+                        const material = materials.find(m => m.id === e.components[COMPONENTS.MATERIAL].materialID)
                         return material && material.type === MATERIAL_TYPES.TRANSPARENT
                     } else
                         return false
                 })),
-                meshes: filteredEntities.filter(e => e.components.MeshComponent),
-                skybox: filteredEntities.filter(e => e.components.SkyboxComponent && e.active)[0]?.components.SkyboxComponent,
-                directionalLights: filteredEntities.filter(e => e.components.DirectionalLightComponent),
+                meshes: filteredEntities.filter(e => e.components[COMPONENTS.MESH]),
+                skybox: filteredEntities.filter(e => e.components[COMPONENTS.SKYBOX] && e.active)[0]?.components[COMPONENTS.SKYBOX],
+                directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
                 materials: toObject(materials),
                 meshSources: toObject(meshes),
-                skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components?.SkylightComponent,
+                skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
                 cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent),
                 scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
                 scripts: toObject(scripts),

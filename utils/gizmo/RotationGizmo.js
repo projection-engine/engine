@@ -12,6 +12,7 @@ import TextureInstance from "../../instances/TextureInstance";
 import circle from "../../../../static/icons/circle.png";
 import plane from "../../../../static/assets/Circle.json";
 import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 const toDeg = 57.29
 export default class RotationGizmo extends System {
@@ -71,9 +72,9 @@ export default class RotationGizmo extends System {
             default:
                 break
         }
-        e.components.TransformComponent.translation = t
-        e.components.TransformComponent.rotation = r
-        e.components.TransformComponent.transformationMatrix = Transformation.transform(t, r, s)
+        e.components[COMPONENTS.TRANSFORM].translation = t
+        e.components[COMPONENTS.TRANSFORM].rotation = r
+        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform(t, r, s)
 
         return e
     }

@@ -68,7 +68,8 @@ export default class PostProcessingSystem extends System {
             gamma,
             exposure,
             rotationType,
-            onGizmoChange
+            onGizmoChange,
+            canExecutePhysicsAnimation
         } = options
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
@@ -92,7 +93,7 @@ export default class PostProcessingSystem extends System {
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
 
-        if (gizmo !== undefined)
+        if (gizmo !== undefined && !canExecutePhysicsAnimation)
             this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], lockCamera, entities, gizmo, rotationType, onGizmoChange)
 
         this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)

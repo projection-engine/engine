@@ -7,6 +7,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import brdfImg from "../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../utils/misc/utils";
 import SYSTEMS from "../../templates/SYSTEMS";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -89,12 +90,12 @@ export default class MeshSystem extends System {
 
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
-                const mesh = meshSources[current.components.MeshComponent.meshID]
+                const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
                 if (mesh !== undefined && !translucentMeshes[current.id]) {
-                    const t = current.components.TransformComponent
-                    const currentMaterial = materials[current.components.MaterialComponent.materialID]
+                    const t = current.components[COMPONENTS.TRANSFORM]
+                    const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
-                    let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components.MaterialComponent.overrideInjection ? injectMaterial : this.fallbackMaterial
+                    let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components[COMPONENTS.MATERIAL].overrideInjection ? injectMaterial : this.fallbackMaterial
                     if (!mat || !mat.ready)
                         mat = this.fallbackMaterial
                     const c = toConsumeCubeMaps ?toConsumeCubeMaps[current.id] : undefined
@@ -103,9 +104,9 @@ export default class MeshSystem extends System {
                     if(c)
                         cubeMapToApply =  cubeMapsSources[c]
                     if(cubeMapToApply){
-                        ambient.irradianceMap = cubeMapToApply.components.CubeMapComponent.irradianceMap
-                        ambient.prefilteredMap = cubeMapToApply.components.CubeMapComponent.prefilteredMap
-                        ambient.prefilteredLod = cubeMapToApply.components.CubeMapComponent.prefilteredMipmaps
+                        ambient.irradianceMap = cubeMapToApply.components[COMPONENTS.CUBE_MAP].irradianceMap
+                        ambient.prefilteredMap = cubeMapToApply.components[COMPONENTS.CUBE_MAP].prefilteredMap
+                        ambient.prefilteredLod = cubeMapToApply.components[COMPONENTS.CUBE_MAP].prefilteredMipmaps
                     }else{
                         ambient.irradianceMap = skybox?.irradianceMap
                         ambient.prefilteredMap = skybox?.cubeMapPrefiltered

@@ -57,8 +57,6 @@ export default class ScriptSystem extends System {
 
     constructor(gpu) {
         super([]);
-
-
         const targetID = gpu.canvas.id.replace('-canvas', '-scripting')
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
@@ -69,7 +67,7 @@ export default class ScriptSystem extends System {
                 backdropFilter: "blur(10px) brightness(70%)", borderRadius: "5px", width: "fit-content",
                 height: 'fit-content', position: 'absolute', bottom: '4px', left: '4px', zIndex: '10',
                 color: 'white', padding: '8px', fontSize: '.75rem',
-                maxWidth: '15vw',
+                maxWidth: '15vw', display: 'none',
                 maxHeight: '50vh', overflow: 'hidden'
             });
             gpu.canvas.parentNode.appendChild(this.renderTarget)
@@ -193,9 +191,13 @@ export default class ScriptSystem extends System {
             }
 
             if (!currentOrder.isBranch)
-                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities, attributes, currentOrder.nodeID, component.executors, (newObj) => component.executors = newObj, this.renderTarget, this.pressedKeys, this.currentMousePosition)
+                attributes = this.executors[currentOrder.classExecutor](elapsed, inputs, scriptedEntities, attributes, currentOrder.nodeID, component.executors, (newObj) => {
+
+                    component.executors = newObj
+                }, this.renderTarget, this.pressedKeys, this.currentMousePosition)
             else {
                 const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder, currentOrder.nodeID, component.executors, this.pressedKeys, this.state[currentOrder.nodeID], (value, key) => {
+
                     if (!this.state[currentOrder.nodeID])
                         this.state[currentOrder.nodeID] = {}
                     this.state[currentOrder.nodeID][key] = value

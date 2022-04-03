@@ -10,6 +10,7 @@ import Transformation from "../workers/Transformation";
 import PickComponent from "../../ecs/components/PickComponent";
 import arrow from '../../../../static/assets/ScaleGizmo.json'
 import cube from '../../../../static/assets/Cube.json'
+import COMPONENTS from "../../templates/COMPONENTS";
 
 export default class ScaleGizmo extends System {
     eventStarted = false
@@ -75,9 +76,9 @@ export default class ScaleGizmo extends System {
             default:
                 break
         }
-        e.components.TransformComponent.translation = t
-        e.components.TransformComponent.rotation = r
-        e.components.TransformComponent.transformationMatrix = Transformation.transform(t, r, s)
+        e.components[COMPONENTS.TRANSFORM].translation = t
+        e.components[COMPONENTS.TRANSFORM].rotation = r
+        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform(t, r, s)
 
         return e
     }
