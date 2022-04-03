@@ -30,7 +30,6 @@ export default class RotationGizmo extends System {
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
         this.zGizmo = this._mapEntity(4, 'z')
-        this.centerGizmo = this._mapEntity(1, 'c')
 
 
         this.xyz = new MeshInstance({
@@ -231,15 +230,13 @@ export default class RotationGizmo extends System {
         return matrix
     }
 
-    _drawGizmo(translation, rotation, view, proj, shader, pick) {
+    _drawGizmo(translation, rotation, view, proj, shader) {
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
         this.gpu.disable(this.gpu.CULL_FACE)
 
         const mX = this._rotateMatrix(translation, rotation, 'x', this.xGizmo.components.TransformComponent.transformationMatrix, this.xGizmo.components.TransformComponent)
         const mY = this._rotateMatrix(translation, rotation, 'y', this.yGizmo.components.TransformComponent.transformationMatrix, this.yGizmo.components.TransformComponent)
         const mZ = this._rotateMatrix(translation, rotation, 'z', this.zGizmo.components.TransformComponent.transformationMatrix, this.zGizmo.components.TransformComponent)
-        const mC = this._rotateMatrix(translation, rotation, undefined, this.centerGizmo.components.TransformComponent.transformationMatrix, this.centerGizmo.components.TransformComponent)
-
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)
@@ -253,8 +250,6 @@ export default class RotationGizmo extends System {
             this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
             this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
-        if (!pick)
-            this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)

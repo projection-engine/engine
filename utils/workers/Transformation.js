@@ -13,7 +13,7 @@ export default class Transformation {
     static extractTransformations(mat) {
         return {
             translation: mat4.getTranslation([], mat),
-            rotation: Transformation.getEuler(mat4.getRotation([], mat)),
+            rotationQuat: quat.normalize([], mat4.getRotation([], mat)),
             scaling: mat4.getScaling([], mat)
         }
     }
@@ -40,7 +40,7 @@ export default class Transformation {
     }
 
     static updateTransform(axis, data, key, engine, entityID, setAlert) {
- 
+
         const entity = engine.entities.find(e => e.id === entityID)
 
         const component = entity.components.TransformComponent
@@ -51,9 +51,9 @@ export default class Transformation {
             axis === 'z' ? data : prev[2]
         ]
 
-        if(entity.components.PointLightComponent)
+        if (entity.components.PointLightComponent)
             entity.components.PointLightComponent.changed = true
-        if(entity.components.CubeMapComponent)
+        if (entity.components.CubeMapComponent)
             setAlert({message: 'Reflection captures need to be rebuilt', type: 'alert'})
         engine.dispatchEntities({
             type: ENTITY_ACTIONS.UPDATE_COMPONENT, payload: {

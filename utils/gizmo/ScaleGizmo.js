@@ -25,7 +25,7 @@ export default class ScaleGizmo extends System {
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
         this.zGizmo = this._mapEntity(4, 'z')
-        this.centerGizmo = this._mapEntity(1, 'c')
+
 
         this.xyz = new MeshInstance({
             gpu,
@@ -194,8 +194,6 @@ export default class ScaleGizmo extends System {
         const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
         const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
         const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix)
-        const mC = this._translateMatrix(translation, this.centerGizmo.components.TransformComponent.transformationMatrix)
-
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)
@@ -213,18 +211,6 @@ export default class ScaleGizmo extends System {
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
 
-
-        this.gpu.bindVertexArray(this.center.VAO)
-        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.center.indexVBO)
-        this.center.vertexVBO.enable()
-
-
-        if (!pick)
-            this._draw(view, mC, proj, 0, this.centerGizmo.components.PickComponent.pickID, shader)
-
-        this.center.vertexVBO.disable()
-        this.gpu.bindVertexArray(null)
-        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
 
 
     }

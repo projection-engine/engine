@@ -80,10 +80,8 @@ export default class TransformComponent extends Component {
 
 
     set translation(data) {
-
         this.__changed = true
         this._translation = data
-
     }
 
     set scaling(data) {
