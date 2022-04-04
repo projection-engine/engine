@@ -47,6 +47,7 @@ import Tan from "../../../../views/material/implementations/blueprint/nodes/oper
 import Mod from "../../../../views/material/implementations/blueprint/nodes/operators/math/Mod";
 import Abs from "../../../../views/material/implementations/blueprint/nodes/operators/math/Abs";
 import KeyPress from "../../../../views/material/implementations/blueprint/nodes/events/KeyPress";
+import RotateVector from "../../../../views/material/implementations/blueprint/nodes/transformation/RotateVector";
 
 
 export default class ScriptSystem extends System {
@@ -120,6 +121,8 @@ export default class ScriptSystem extends System {
             [Mod.name]: Mod.compile,
             [Abs.name]: Abs.compile,
             [KeyPress.name]: KeyPress.compile,
+
+            [RotateVector.name]: RotateVector.compile
         }
         document.addKey = (key) => {
             this.pressedKeys[key] = true

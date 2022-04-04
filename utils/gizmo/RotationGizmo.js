@@ -36,9 +36,9 @@ export default class RotationGizmo extends System {
             gpu,
             vertices: plane.vertices,
             indices: plane.indices,
-            normals: plane.normals,
+            normals: [],
             uvs: plane.uvs,
-            tangents: plane.tangents,
+            tangents: [],
         })
         this.texture = new TextureInstance(circle, false, this.gpu)
         this.handlerListener = this.handler.bind(this)
@@ -190,9 +190,9 @@ export default class RotationGizmo extends System {
                 this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
             if (selected.length === 1) {
-                const el = meshes.find(m => m.id === selected[0])
-                if (el)
-                    this._drawGizmo(el.components.TransformComponent.translation, el.components.TransformComponent.rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
+                const el = entities.find(m => m.id === selected[0])
+                if (el && el.components[COMPONENTS.TRANSFORM])
+                    this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
             }
         }
 

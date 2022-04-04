@@ -52,10 +52,10 @@ export default class PostProcessingSystem extends System {
             meshSources,
             cubeMaps,
             skylight,
-            translucentMeshes
+            translucentMeshes,
+            cameras
         } = data
         const {
-
             lockCamera,
             setSelected,
             selected,
@@ -92,11 +92,12 @@ export default class PostProcessingSystem extends System {
 
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
-
+        if(!canExecutePhysicsAnimation) {
+            this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight, cameras)
+        }
         if (gizmo !== undefined && !canExecutePhysicsAnimation)
             this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], lockCamera, entities, gizmo, rotationType, onGizmoChange)
 
-        this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight)
         this.frameBuffer.stopMapping()
 
         let shaderToApply
