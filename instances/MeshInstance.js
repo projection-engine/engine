@@ -1,7 +1,6 @@
 import {createVAO, createVBO} from "../utils/misc/utils";
 import VBO from "../utils/workers/VBO";
-import randomID from "../../utils/misc/randomID";
-
+import {v4 as uuidv4} from 'uuid';
 
 export default class MeshInstance {
     verticesQuantity = 0
@@ -18,7 +17,7 @@ export default class MeshInstance {
     tangentVBO
 
     constructor({
-                    id = randomID(),
+                    id = uuidv4(),
                     gpu,
 
                     vertices,

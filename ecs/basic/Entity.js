@@ -1,5 +1,4 @@
-import randomID from "../../../utils/misc/randomID";
-
+import {v4 as uuidv4} from 'uuid';
 
 export default class Entity {
     id
@@ -8,7 +7,7 @@ export default class Entity {
     components = {}
     linkedTo
     isBlueprint = false
-    constructor(id = randomID(), name = 'Empty entity', active=true, linkedTo, isBlueprint) {
+    constructor(id = uuidv4(), name = 'Empty entity', active=true, linkedTo, isBlueprint) {
         this.id = id
         this.name = name
         this.active = active

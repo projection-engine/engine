@@ -86,7 +86,6 @@ export default class SphericalCamera extends Camera {
 
         vec3.add(this._position, this._position, this.centerOn)
         mat4.lookAt(this.viewMatrix, this._position, this.centerOn, [0, 1, 0])
-
     }
 }
 

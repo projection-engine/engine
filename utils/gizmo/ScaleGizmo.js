@@ -94,8 +94,9 @@ export default class ScaleGizmo extends System {
 
                 break
             case 'mouseup':
-                this.onGizmoChange()
+                this.onGizmoEnd()
                 this.tracking = false
+                this.started = false
                 this.currentCoord = undefined
                 this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
                 document.exitPointerLock()
@@ -103,6 +104,10 @@ export default class ScaleGizmo extends System {
                 this.t = 0
                 break
             case 'mousemove':
+                if(!this.started) {
+                    this.started = true
+                    this.onGizmoStart()
+                }
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
@@ -134,12 +139,15 @@ export default class ScaleGizmo extends System {
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, onGizmoChange) {
+    execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities,
+            onGizmoStart,
+            onGizmoEnd) {
         super.execute()
 
         if (selected.length > 0) {
             this.camera = camera
-            this.onGizmoChange = onGizmoChange
+            this.onGizmoStart = onGizmoStart
+            this.onGizmoEnd = onGizmoEnd
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
                 if(el){

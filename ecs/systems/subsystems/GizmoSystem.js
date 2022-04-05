@@ -27,26 +27,38 @@ export default class GizmoSystem extends System {
             canvas.parentNode.appendChild(this.renderTarget)
         }
 
-        this.translationGizmo = new TranslationGizmo(gpu,this.renderTarget)
-        this.rotationGizmo = new RotationGizmo(gpu,this.renderTarget)
-        this.scaleGizmo = new ScaleGizmo(gpu,this.renderTarget)
+        this.translationGizmo = new TranslationGizmo(gpu, this.renderTarget)
+        this.rotationGizmo = new RotationGizmo(gpu, this.renderTarget)
+        this.scaleGizmo = new ScaleGizmo(gpu, this.renderTarget)
 
 
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, gizmo, transformationType=ROTATION_TYPES.GLOBAL, onGizmoChange) {
+    execute(
+        meshes,
+        meshSources,
+        selected,
+        camera,
+        pickSystem,
+        lockCamera,
+        entities,
+        gizmo,
+        transformationType = ROTATION_TYPES.GLOBAL,
+        onGizmoStart,
+        onGizmoEnd
+    ) {
         super.execute()
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
-        switch (gizmo){
+        switch (gizmo) {
             case GIZMOS.TRANSLATION:
-                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, transformationType, onGizmoChange)
+                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd)
                 break
             case GIZMOS.ROTATION:
-                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoChange)
+                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd)
                 break
             case GIZMOS.SCALE:
-                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities, onGizmoChange)
+                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, onGizmoStart, onGizmoEnd)
                 break
         }
 

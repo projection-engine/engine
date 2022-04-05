@@ -8,7 +8,6 @@ import SYSTEMS from "../../templates/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
-import * as shaderCodePick from '../../shaders/misc/picker.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
@@ -68,7 +67,8 @@ export default class PostProcessingSystem extends System {
             gamma,
             exposure,
             rotationType,
-            onGizmoChange,
+            onGizmoStart,
+            onGizmoEnd,
             canExecutePhysicsAnimation
         } = options
 
@@ -77,9 +77,11 @@ export default class PostProcessingSystem extends System {
         this.frameBuffer.startMapping()
 
         this.skyboxSystem.execute(skybox, camera)
-        this.gpu.disable(this.gpu.DEPTH_TEST)
-        this.gridSystem.execute(gridVisibility, camera)
-        this.gpu.enable(this.gpu.DEPTH_TEST)
+        if(!canExecutePhysicsAnimation) {
+            this.gpu.disable(this.gpu.DEPTH_TEST)
+            this.gridSystem.execute(gridVisibility, camera)
+            this.gpu.enable(this.gpu.DEPTH_TEST)
+        }
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
@@ -92,11 +94,23 @@ export default class PostProcessingSystem extends System {
 
         this.gpu.enable(this.gpu.BLEND)
         this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
-        if(!canExecutePhysicsAnimation) {
+        if (!canExecutePhysicsAnimation) {
             this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight, cameras)
         }
         if (gizmo !== undefined && !canExecutePhysicsAnimation)
-            this.gizmoSystem.execute(meshes, meshSources, selected, camera, systems[SYSTEMS.PICK], lockCamera, entities, gizmo, rotationType, onGizmoChange)
+            this.gizmoSystem.execute(
+                meshes,
+                meshSources,
+                selected,
+                camera,
+                systems[SYSTEMS.PICK],
+                lockCamera,
+                entities,
+                gizmo,
+                rotationType,
+                onGizmoStart,
+                onGizmoEnd
+            )
 
         this.frameBuffer.stopMapping()
 

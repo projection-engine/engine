@@ -1,4 +1,3 @@
-import {linearAlgebraMath} from "pj-math";
 import {mat4, quat} from "gl-matrix";
 
 export default class Camera {

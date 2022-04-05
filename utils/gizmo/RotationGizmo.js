@@ -88,7 +88,8 @@ export default class RotationGizmo extends System {
 
                 break
             case 'mouseup':
-                this.onGizmoChange()
+                this.onGizmoEnd()
+                this.started = false
                 this.tracking = false
                 this.clickedAxis = -1
                 this.currentCoord = undefined
@@ -101,6 +102,11 @@ export default class RotationGizmo extends System {
                 this.t = 0
                 break
             case 'mousemove':
+                if(!this.started) {
+                    this.started = true
+                    this.onGizmoStart()
+                }
+
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
@@ -151,13 +157,16 @@ export default class RotationGizmo extends System {
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoChange) {
+    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,
+            onGizmoStart,
+            onGizmoEnd) {
         super.execute()
 
         if (selected.length > 0) {
             this.typeRot = transformationType
             this.camera = camera
-            this.onGizmoChange = onGizmoChange
+            this.onGizmoStart = onGizmoStart
+            this.onGizmoEnd = onGizmoEnd
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
                 if (el) {

@@ -92,8 +92,9 @@ export default class TranslationGizmo extends System {
 
                 break
             case 'mouseup':
-                this.onGizmoChange()
+                this.onGizmoEnd()
                 this.tracking = false
+                this.started = false
                 this.clickedAxis = -1
                 this.currentCoord = undefined
                 this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
@@ -101,7 +102,10 @@ export default class TranslationGizmo extends System {
                 this.t = 0
                 break
             case 'mousemove':
-
+                if(!this.started) {
+                    this.started = true
+                    this.onGizmoStart()
+                }
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
@@ -178,13 +182,16 @@ export default class TranslationGizmo extends System {
 
     }
 
-    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,onGizmoChange) {
+    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,
+            onGizmoStart,
+            onGizmoEnd) {
         super.execute()
 
         if (selected.length > 0) {
             this.typeRot = transformationType
             this.camera = camera
-            this.onGizmoChange = onGizmoChange
+            this.onGizmoStart = onGizmoStart
+            this.onGizmoEnd = onGizmoEnd
             if (this.currentCoord && !this.tracking) {
                 const el = entities.find(m => m.id === selected[0])
                 if (el !== undefined) {
@@ -204,6 +211,7 @@ export default class TranslationGizmo extends System {
                             lockCamera(true)
                             this.target = el
                             this.gpu.canvas.requestPointerLock()
+
                             this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                         }
                     }

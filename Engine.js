@@ -21,6 +21,7 @@ import CubeMapSystem from "./ecs/systems/CubeMapSystem";
 import ScriptSystem from "./ecs/systems/ScriptSystem";
 import cloneClass from "../utils/misc/cloneClass";
 import COMPONENTS from "./templates/COMPONENTS";
+import RootCamera from "./RootCamera";
 
 export default class Engine extends RenderLoop {
     types = {}
@@ -74,6 +75,7 @@ export default class Engine extends RenderLoop {
         this.data.canvasRef = document.getElementById(id + '-canvas')
         this.gpu = gpu
         this.camera = this.sphericalCamera
+        this.rootCamera = new RootCamera()
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
     }
@@ -161,10 +163,10 @@ export default class Engine extends RenderLoop {
         this.cameraEvents.startTracking()
     }
 
-    start(entities, materials, meshes, params, scripts=[]) {
+    start(entities, materials, meshes, params, scripts = [], onGizmoStart, onGizmoEnd) {
         if (!this._inExecution) {
             this._inExecution = true
-            if(!params.canExecutePhysicsAnimation)
+            if (!params.canExecutePhysicsAnimation)
                 this.cameraEvents.startTracking()
             else
                 this.cameraEvents.stopTracking()
@@ -192,15 +194,15 @@ export default class Engine extends RenderLoop {
                 cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA])
             }
 
-
+            const entitiesMap = toObject(entities)
             data.cubeMapsSources = toObject(data.cubeMaps)
 
             const systems = Object.keys(this._systems).sort()
             this._changed = true
             const cameraTarget = document.getElementById(this.id + '-camera')
 
-            super.start((timestamp) => {
 
+            super.start((timestamp) => {
                 if (cameraTarget !== null) {
                     const t = this.camera.getNotTranslatedViewMatrix()
                     cameraTarget.style.transform = `translateZ(calc(var(--cubeSize) * -3)) matrix3d(${t})`
@@ -208,39 +210,42 @@ export default class Engine extends RenderLoop {
 
                 this.camera.updatePlacement()
                 this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+                const camera = params.canExecutePhysicsAnimation ? this.rootCamera : this.camera
                 for (let s = 0; s < systems.length; s++) {
-
-                    this._systems[systems[s]]
-                        .execute(
-                            {
-                                ...params,
-                                onGizmoChange: params.onGizmoChange ? params.onGizmoChange : () => null,
-                                lockCamera: (lock) => {
-                                    if (lock) {
-                                        this.cameraEvents.stopTracking()
-                                    } else
-                                        this.cameraEvents.startTracking()
+                    if (!params.canExecutePhysicsAnimation || systems[s] !== SYSTEMS.PICK && params.canExecutePhysicsAnimation)
+                        this._systems[systems[s]]
+                            .execute(
+                                {
+                                    ...params,
+                                    onGizmoStart,
+                                    onGizmoEnd,
+                                    lockCamera: (lock) => {
+                                        if (lock) {
+                                            this.cameraEvents.stopTracking()
+                                        } else
+                                            this.cameraEvents.startTracking()
+                                    },
+                                    entitiesLength: filteredEntities.length,
+                                    clicked: this.data.clicked,
+                                    setClicked: e => {
+                                        this.data.clicked = e
+                                    },
+                                    dataChanged: this._changed,
+                                    setDataChanged: () => {
+                                        this._changed = false
+                                    },
+                                    currentCoords: this.data.currentCoord,
+                                    camera: camera,
+                                    elapsed: timestamp,
+                                    recompile: !this.recompiled,
+                                    setRecompile: () => this.recompiled = true
                                 },
-                                entitiesLength: filteredEntities.length,
-                                clicked: this.data.clicked,
-                                setClicked: e => {
-                                    this.data.clicked = e
-                                },
-                                dataChanged: this._changed,
-                                setDataChanged: () => {
-                                    this._changed = false
-                                },
-                                currentCoords: this.data.currentCoord,
-                                camera: this.camera,
-                                elapsed: timestamp,
-                                recompile: !this.recompiled,
-                                setRecompile: () => this.recompiled = true
-                            },
-                            this._systems,
-                            data,
-                            filteredEntities,
-                            this.gizmo
-                        )
+                                this._systems,
+                                data,
+                                filteredEntities,
+                                this.gizmo,
+                                entitiesMap
+                            )
                 }
             })
         }
