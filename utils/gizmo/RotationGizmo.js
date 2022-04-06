@@ -168,12 +168,13 @@ export default class RotationGizmo extends System {
             this.onGizmoStart = onGizmoStart
             this.onGizmoEnd = onGizmoEnd
             if (this.currentCoord && !this.tracking) {
-                const el = meshes.find(m => m.id === selected[0])
-                if (el) {
-                    const pickID = pickSystem.pickElement((shader, proj) => {
-                        this._drawGizmo(el.components.TransformComponent.translation, el.components.TransformComponent.rotationQuat, camera.viewMatrix, proj, shader, true)
-                    }, this.currentCoord, camera)
+                const el = entities.find(m => m.id === selected[0])
 
+                if (el && el.components[COMPONENTS.TRANSFORM]) {
+                    const pickID = pickSystem.pickElement((shader, proj) => {
+                        this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader, true)
+                    }, this.currentCoord, camera)
+                    console.log(pickID)
                     this.clickedAxis = pickID - 2
 
                     if (pickID === 0) {

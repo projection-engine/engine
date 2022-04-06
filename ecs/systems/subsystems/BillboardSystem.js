@@ -82,6 +82,7 @@ export default class BillboardSystem extends System {
                 this.cameraMesh.normalVBO.enable()
 
                 for (let i = 0; i < cameras.length; i++) {
+
                     this.cameraShader.bindForUse({
                         viewMatrix: camera.viewMatrix,
                         transformMatrix: cameras[i].components[COMPONENTS.TRANSFORM].transformationMatrix,

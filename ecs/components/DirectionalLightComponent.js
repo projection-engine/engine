@@ -2,7 +2,7 @@ import Component from "../basic/Component";
 import {mat4} from "gl-matrix";
 
 export default class DirectionalLightComponent extends Component {
-    _color = [1, 1, 1]
+    _color = [255, 255, 255]
     _direction = [0, 0, 0]
     _zNear = -1
     _zFar = 10000
@@ -11,7 +11,7 @@ export default class DirectionalLightComponent extends Component {
     _lightProjection = Array.from(mat4.create())
     _size = 35
     _atlasFace = [0,0]
-    _fixedColor = this._color
+
     _changed = true
     _shadowMap = true
     _center = [0, 0, 0]
@@ -44,7 +44,7 @@ export default class DirectionalLightComponent extends Component {
 
 
     get fixedColor(){
-        return this._fixedColor
+        return  this._color.map(i => i/255)
     }
     get color(){
         return this._color
@@ -52,7 +52,6 @@ export default class DirectionalLightComponent extends Component {
     set color(data){
         this._color = data
 
-        this._fixedColor = data.map(i => i/255)
     }
 
     set atlasFace(data){

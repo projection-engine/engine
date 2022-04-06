@@ -67,6 +67,9 @@ import UpdateCameraProjection
     from "../../../../views/material/implementations/blueprint/nodes/camera/UpdateCameraProjection";
 import SetViewTarget from "../../../../views/material/implementations/blueprint/nodes/camera/SetViewTarget";
 import OnSpawn from "../../../../views/material/implementations/blueprint/nodes/events/OnSpawn";
+import QuatRotateX from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateX";
+import QuatRotateY from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateY";
+import QuatRotateZ from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateZ";
 
 
 export default class ScriptSystem extends System {
@@ -155,6 +158,10 @@ export default class ScriptSystem extends System {
             [SetViewTarget.name]: SetViewTarget.compile,
             [OnSpawn.name]: OnSpawn.compile,
 
+            [QuatRotateY.name]: QuatRotateY.compile,
+            [QuatRotateX.name]: QuatRotateX.compile,
+            [QuatRotateZ.name]: QuatRotateZ.compile,
+
         }
         document.addKey = (key) => {
             this.pressedKeys[key] = true
@@ -172,7 +179,7 @@ export default class ScriptSystem extends System {
         })
     }
 
-    execute(options, systems, data, entities, _,  entitiesMap) {
+    execute(options, systems, data, entities, _, entitiesMap) {
         super.execute()
         const {
             scriptedEntities,
@@ -264,11 +271,21 @@ export default class ScriptSystem extends System {
                         this.state[currentOrder.nodeID][key] = value
                     })
             else {
-                const newOrder = this.executors[currentOrder.classExecutor](inputs, currentOrder, currentOrder.nodeID, component.executors, this.pressedKeys, this.state[currentOrder.nodeID], (value, key) => {
-                    if (!this.state[currentOrder.nodeID])
-                        this.state[currentOrder.nodeID] = {}
-                    this.state[currentOrder.nodeID][key] = value
-                }, this.metrics)
+                const newOrder = this.executors[currentOrder.classExecutor]({
+                    inputs,
+                    object: currentOrder,
+                    nodeID: currentOrder.nodeID,
+                    executors: component.executors,
+                    keys: this.pressedKeys,
+                    state: this.state[currentOrder.nodeID],
+                    setState: (value, key) => {
+                        if (!this.state[currentOrder.nodeID])
+                            this.state[currentOrder.nodeID] = {}
+                        this.state[currentOrder.nodeID][key] = value
+                    },
+                    metrics: this.metrics,
+                    timeStamp: elapsed
+                })
                 if (Array.isArray(newOrder))
                     this.executeLoop(newOrder, attributes, elapsed, scriptedEntities, keys, scriptedEntities, component, camera)
                 break

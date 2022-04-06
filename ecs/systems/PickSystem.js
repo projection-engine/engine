@@ -5,6 +5,8 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
 import OrthographicCamera from "../../utils/camera/ortho/OrthographicCamera";
 import MeshInstance from "../../instances/MeshInstance";
+import camera from "../../../../static/assets/Camera.json";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 
 export default class PickSystem extends System {
@@ -19,7 +21,14 @@ export default class PickSystem extends System {
 
 
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-
+        this.cameraMesh = new MeshInstance({
+            gpu,
+            vertices: camera.vertices,
+            indices: camera.indices,
+            normals: [],
+            uvs: [],
+            tangents: [],
+        })
         this.mesh = new MeshInstance({
             gpu,
             vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
@@ -46,12 +55,12 @@ export default class PickSystem extends System {
                     const currentInstance = entities[m]
                     const t = currentInstance.components.TransformComponent
 
-                    if (currentInstance.components.MeshComponent) {
-                        const mesh = meshSources[currentInstance.components.MeshComponent?.meshID]
+                    if (currentInstance.components[COMPONENTS.MESH]) {
+                        const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
                         if (mesh !== undefined)
                             this._drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
                     } else if (t)
-                        this._drawMesh(this.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
+                        this._drawMesh(currentInstance.components[COMPONENTS.CAMERA] ? this.cameraMesh : this.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
                 }
             }, currentCoords, camera)
 
@@ -72,7 +81,7 @@ export default class PickSystem extends System {
         drawCallback(this.shader, pickerProjection)
 
 
-        let data = new Uint8Array(  4)
+        let data = new Uint8Array(4)
         const pixelX = pickCoords.x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
         const pixelY = this.gpu.canvas.height - pickCoords.y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
 

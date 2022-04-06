@@ -64,7 +64,8 @@ export default class TransformComponent extends Component {
         quat.normalize(this._rotationQuat, q)
         if (this.__initializedEuler) {
             this.__initializedEuler = true
-            Transformation.getEuler(this._rotationQuat)
+            console.log('EH')
+            this.__rotation = Transformation.getEuler(this._rotationQuat)
         }
     }
 

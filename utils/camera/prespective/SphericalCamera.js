@@ -79,10 +79,11 @@ export default class SphericalCamera extends Camera {
             this._pitch = 1.5
         if(this._pitch < -1.5)
             this._pitch = -1.5
+        const cosPitch = Math.cos(this._pitch)
 
-        this._position[0] = this.radius * Math.cos(this._pitch) * Math.cos(this._yaw)
+        this._position[0] = this.radius * cosPitch * Math.cos(this._yaw)
         this._position[1] = this.radius * Math.sin(this._pitch)
-        this._position[2] = this.radius * Math.cos(this._pitch) * Math.sin(this._yaw)
+        this._position[2] = this.radius * cosPitch * Math.sin(this._yaw)
 
         vec3.add(this._position, this._position, this.centerOn)
         mat4.lookAt(this.viewMatrix, this._position, this.centerOn, [0, 1, 0])

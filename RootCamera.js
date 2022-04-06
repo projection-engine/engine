@@ -4,10 +4,7 @@ import {lookAt} from "./utils/misc/utils";
 
 export default class RootCamera {
     position = [0, 10, 0]
-    yaw = 0
-    pitch = 0
-    roll = 0
-
+    rotation = [0, 0, 0, 1]
     zNear = .1
     zFar = 1000
     fov = Math.PI / 2
@@ -32,7 +29,9 @@ export default class RootCamera {
     }
 
     updateViewMatrix() {
-        this.viewMatrix = lookAt(this.yaw, this.pitch, this.position)
+        console.log(this.rotation, this.position)
+        mat4.fromRotationTranslation(this.viewMatrix, this.rotation, this.position);
+        mat4.invert(this.viewMatrix, this.viewMatrix);
     }
 }
 

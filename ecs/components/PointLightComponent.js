@@ -1,8 +1,7 @@
 import Component from "../basic/Component";
 
 export default class PointLightComponent extends Component{
-    _color = [1, 1, 1]
-    _fixedColor = this._color
+    _color = [255, 255, 255]
 
     attenuation = [1, 0, 0]
     _changed = true
@@ -44,7 +43,7 @@ export default class PointLightComponent extends Component{
 
 
     get fixedColor(){
-        return this._fixedColor
+        return this._color.map(i => i/255)
     }
     get color(){
         return this._color
@@ -52,7 +51,6 @@ export default class PointLightComponent extends Component{
     set color(data){
         this._color = data
 
-        this._fixedColor = data.map(i => i/255)
     }
 
 

@@ -153,7 +153,7 @@ void main(){
     if(selectedAxis == axis)
         color = vec3(1., 1., 0.);
     
-    float shadingIntensity = dot(normalVec, vec3(2., 5.0, 0.0));
+    float shadingIntensity = dot(normalVec, vec3(0., 5.0, 0.0));
     float brightness = max(0.5, shadingIntensity);
     color = color * brightness;
     

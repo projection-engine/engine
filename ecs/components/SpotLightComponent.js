@@ -2,7 +2,7 @@ import Component from "../basic/Component";
 import {mat4} from "gl-matrix";
 
 export default class SpotLightComponent extends Component{
-    color = [1, 1, 1]
+    color = [255, 255, 255]
     cutoff = 0
     direction = [0, 0, 0]
 
@@ -23,6 +23,9 @@ export default class SpotLightComponent extends Component{
         this._transformationMatrix[12] = data[0]
         this._transformationMatrix[13] = data[1]
         this._transformationMatrix[14] = data[2]
+    }
+    get fixedColor(){
+        return this.color.map(i => i/255)
     }
     get transformationMatrix () {
         return this._transformationMatrix
