@@ -277,7 +277,7 @@ export default class ScriptSystem extends System {
                     nodeID: currentOrder.nodeID,
                     executors: component.executors,
                     keys: this.pressedKeys,
-                    state: this.state[currentOrder.nodeID],
+                    state: this.state[currentOrder.nodeID] ? this.state[currentOrder.nodeID] : {},
                     setState: (value, key) => {
                         if (!this.state[currentOrder.nodeID])
                             this.state[currentOrder.nodeID] = {}
