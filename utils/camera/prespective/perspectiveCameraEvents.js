@@ -178,7 +178,6 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     const handleClick = (event) => {
 
         if (!positionChanged) {
-            console.log('H')
             const target = document.getElementById(canvasID).getBoundingClientRect()
             onClick(event.clientX - target.left, event.clientY - target.top)
         }

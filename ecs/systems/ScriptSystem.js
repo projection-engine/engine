@@ -70,6 +70,7 @@ import OnSpawn from "../../../../views/material/implementations/blueprint/nodes/
 import QuatRotateX from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateX";
 import QuatRotateY from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateY";
 import QuatRotateZ from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateZ";
+import OnInterval from "../../../../views/material/implementations/blueprint/nodes/events/OnInterval";
 
 
 export default class ScriptSystem extends System {
@@ -162,6 +163,8 @@ export default class ScriptSystem extends System {
             [QuatRotateX.name]: QuatRotateX.compile,
             [QuatRotateZ.name]: QuatRotateZ.compile,
 
+            [OnInterval.name]: OnInterval.compile
+
         }
         document.addKey = (key) => {
             this.pressedKeys[key] = true
@@ -194,7 +197,6 @@ export default class ScriptSystem extends System {
         } = options
 
         if (canExecutePhysicsAnimation) {
-
             if (!this.eventSet) {
                 lockCamera(true)
                 this.eventSet = true
@@ -209,13 +211,7 @@ export default class ScriptSystem extends System {
             this.renderTarget.style.display = 'block'
             const keys = Object.keys(scriptedEntities)
 
-            const levelExecution = scripts[this.id].executors
-            for (let j = 0; j < levelExecution?.length; j++) {
-                if (levelExecution[j]) {
-                    let order = levelExecution[j].order
-                    this.executeLoop(order, {}, elapsed, entitiesMap, keys, entities, levelExecution[j], camera)
-                }
-            }
+
             for (let i = 0; i < keys.length; i++) {
                 const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executors
 
@@ -224,6 +220,14 @@ export default class ScriptSystem extends System {
                         let order = currentS[j].order
                         this.executeLoop(order, {}, elapsed, scriptedEntities, keys, entities, currentS[j], camera)
                     }
+                }
+            }
+
+            const levelExecution = scripts[this.id].executors
+            for (let j = 0; j < levelExecution?.length; j++) {
+                if (levelExecution[j]) {
+                    let order = levelExecution[j].order
+                    this.executeLoop(order, {}, elapsed, entitiesMap, keys, entities, levelExecution[j], camera)
                 }
             }
         } else if (this.eventSet) {

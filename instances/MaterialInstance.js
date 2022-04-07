@@ -70,7 +70,6 @@ export default class MaterialInstance {
                 this.parallaxLayers = material.heightMeta.layers
 
             }
-            console.log(albedo)
             this.albedo.update(albedo, this.gpu)
             this.metallic.update(metallic, this.gpu)
             this.roughness.update(roughness, this.gpu)

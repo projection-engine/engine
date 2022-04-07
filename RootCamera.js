@@ -29,7 +29,6 @@ export default class RootCamera {
     }
 
     updateViewMatrix() {
-        console.log(this.rotation, this.position)
         mat4.fromRotationTranslation(this.viewMatrix, this.rotation, this.position);
         mat4.invert(this.viewMatrix, this.viewMatrix);
     }

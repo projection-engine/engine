@@ -174,7 +174,7 @@ export default class RotationGizmo extends System {
                     const pickID = pickSystem.pickElement((shader, proj) => {
                         this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader, true)
                     }, this.currentCoord, camera)
-                    console.log(pickID)
+
                     this.clickedAxis = pickID - 2
 
                     if (pickID === 0) {

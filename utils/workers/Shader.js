@@ -190,8 +190,7 @@ export default class Shader {
             case 'ivec2':
             case 'ivec3':
             case 'bool':
-                if(type === 'bool')
-                console.log(data)
+
                 this.gpu[TYPES[type]](uLocation, data)
                 break
             case 'mat3':
