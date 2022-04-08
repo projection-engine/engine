@@ -30,7 +30,7 @@ export default class TextureInstance {
         if (typeof img === 'string') {
             const i = new Image()
             i.src = img
-            i.onload = () => {
+            i.decode().then(() => {
                 this._init(
                     i,
                     yFlip,
@@ -44,7 +44,7 @@ export default class TextureInstance {
                     height,
                     border
                 )
-            }
+            })
         } else
             this._init(
                 img,
@@ -119,7 +119,7 @@ export default class TextureInstance {
             gpu.deleteTexture( this.texture)
             const img = new Image()
             img.src = newImage
-            img.onload = () => {
+            img.decode().then(() => {
                 this._init(
                     img,
                     this.attributes.yFlip,
@@ -133,7 +133,7 @@ export default class TextureInstance {
                     this.attributes.height,
                     this.attributes.border
                 )
-            }
+            })
         }
     }
 }

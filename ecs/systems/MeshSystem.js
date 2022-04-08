@@ -176,12 +176,13 @@ export default class MeshSystem extends System {
                     ao: material.ao.texture,
                     emissive: material.emissive.texture
                 },
-                heightScale: material.parallaxHeightScale,
-                layers: material.parallaxLayers,
+                heightScale: materialComponent.overrideTiling ? materialComponent.parallaxHeightScale : material.parallaxHeightScale,
+                layers: materialComponent.overrideTiling ? materialComponent.parallaxLayers : material.parallaxLayers,
 
                 uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale,
             }
         }
+
 
         shader.bindForUse({
             ...materialAttrs,
