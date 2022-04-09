@@ -9,7 +9,13 @@ out highp vec3 texCoord;
 
 void main(){
     texCoord = position;
-    gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);
+    
+    mat4 m = viewMatrix ;
+   m[3][0]  = 0.0;
+   m[3][1]  = 0.0;
+   m[3][2]  = 0.0;
+
+    gl_Position = projectionMatrix * m * vec4(position, 1.0);
 }
 `
 export const fragment = `#version 300 es

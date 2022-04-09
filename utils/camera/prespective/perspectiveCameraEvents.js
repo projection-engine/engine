@@ -46,29 +46,30 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     function handleInput(event) {
         switch (event.type) {
             case 'wheel': {
-                const forward = event.deltaY < 0
-                const distance = (forward ? 1 : -1) * (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
-                if (camera instanceof FreeCamera) {
-                    let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', camera.yaw), new Vector(0, 0, distance))
-                    newPosition = newPosition.matrix
+                if(!camera.notChangableRadius) {
+                    const forward = event.deltaY < 0
+                    const distance = (forward ? 1 : -1) * (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+                    if (camera instanceof FreeCamera) {
+                        let newPosition = linearAlgebraMath.multiplyMatrixVec(linearAlgebraMath.rotationMatrix('y', camera.yaw), new Vector(0, 0, distance))
+                        newPosition = newPosition.matrix
 
-                    if (forward) {
-                        camera.position[0] += newPosition[0]
-                        camera.position[1] += Math.sin(camera.pitch)
-                        camera.position[2] -= newPosition[2]
+                        if (forward) {
+                            camera.position[0] += newPosition[0]
+                            camera.position[1] += Math.sin(camera.pitch)
+                            camera.position[2] -= newPosition[2]
+                        } else {
+                            camera.position[0] += newPosition[0]
+                            camera.position[1] -= Math.sin(camera.pitch)
+                            camera.position[2] -= newPosition[2]
+                        }
+
+                        camera.updateViewMatrix()
+                        updateCamPosition()
                     } else {
-                        camera.position[0] += newPosition[0]
-                        camera.position[1] -= Math.sin(camera.pitch)
-                        camera.position[2] -= newPosition[2]
+                        camera.radius -= distance
+                        updateCamPosition()
                     }
-
-                    camera.updateViewMatrix()
-                    updateCamPosition()
-                } else {
-                    camera.radius -= distance
-                    updateCamPosition()
                 }
-
                 break
             }
 
@@ -127,44 +128,46 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
             }
             case 'keyup':
             case 'keydown': {
-                if (isFocused || event.type === 'keyup') {
-                    if (camera instanceof FreeCamera) {
-                        switch (event.code) {
-                            case conf.keybindings.forwards: {
-                                updateZ(true, event.type === 'keydown')
-                                break
+                if(!camera.notChangableRadius) {
+                    if (isFocused || event.type === 'keyup') {
+                        if (camera instanceof FreeCamera) {
+                            switch (event.code) {
+                                case conf.keybindings.forwards: {
+                                    updateZ(true, event.type === 'keydown')
+                                    break
+                                }
+                                case conf.keybindings.backwards: {
+                                    updateZ(false, event.type === 'keydown')
+                                    break
+                                }
+                                case conf.keybindings.up: {
+                                    updateY(true, event.type === 'keydown')
+                                    break
+                                }
+                                case conf.keybindings.down: {
+                                    updateY(false, event.type === 'keydown')
+                                    break
+                                }
+                                case conf.keybindings.left: {
+                                    updateX(false, event.type === 'keydown')
+                                    break
+                                }
+                                case conf.keybindings.right: {
+                                    updateX(true, event.type === 'keydown')
+                                    break
+                                }
+                                default:
+                                    break
                             }
-                            case conf.keybindings.backwards: {
-                                updateZ(false, event.type === 'keydown')
-                                break
-                            }
-                            case conf.keybindings.up: {
-                                updateY(true, event.type === 'keydown')
-                                break
-                            }
-                            case conf.keybindings.down: {
-                                updateY(false, event.type === 'keydown')
-                                break
-                            }
-                            case conf.keybindings.left: {
-                                updateX(false, event.type === 'keydown')
-                                break
-                            }
-                            case conf.keybindings.right: {
-                                updateX(true, event.type === 'keydown')
-                                break
-                            }
-                            default:
-                                break
-                        }
-                    } else if (isFocused && (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards)) {
-                        const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+                        } else if (isFocused && (event.code === conf.keybindings.forwards || event.code === conf.keybindings.backwards)) {
+                            const distance = (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
 
-                        let way = -1
-                        if (event.code === conf.keybindings.backwards) {
-                            way = 1
+                            let way = -1
+                            if (event.code === conf.keybindings.backwards) {
+                                way = 1
+                            }
+                            camera.radius += distance * way
                         }
-                        camera.radius += distance * way
                     }
                 }
                 break

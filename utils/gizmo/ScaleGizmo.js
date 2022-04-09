@@ -2,7 +2,7 @@ import System from "../../ecs/basic/System";
 import Shader from "../workers/Shader";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
-import {vec3} from "gl-matrix";
+import {mat4, quat, vec3, vec4} from "gl-matrix";
 import Entity from "../../ecs/basic/Entity";
 import TransformComponent from "../../ecs/components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
@@ -11,12 +11,13 @@ import PickComponent from "../../ecs/components/PickComponent";
 import arrow from '../../../../static/assets/ScaleGizmo.json'
 import cube from '../../../../static/assets/Cube.json'
 import COMPONENTS from "../../templates/COMPONENTS";
+import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
 
 export default class ScaleGizmo extends System {
     eventStarted = false
     clickedAxis = -1
     tracking = false
-
+    rotationTarget = [0, 0, 0, 1]
     constructor(gpu) {
         super([]);
         this.gpu = gpu
@@ -51,34 +52,30 @@ export default class ScaleGizmo extends System {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
         e.addComponent(new TransformComponent())
-        let s = [.2, 0.2, 0.2], t, r
+        let s = [.2, 0.2, 0.2], r
         switch (axis) {
             case 'x':
 
-                t = [1.5, 0, 0]
+
                 r = [0, 1.57, 0]
                 break
             case 'y':
 
-                t = [0, 1.5, 0]
+
                 r = [-1.57, 1.57, 0]
                 break
             case 'z':
 
-                t = [0, 0, 1.5]
+
                 r = [3.1415, -3.1415, 3.1415]
                 break
-            case 'c':
-                s = [.1, .1, .1]
-                t = [0, 0, 0]
-                r = [0, 0, 0]
-                break
+
             default:
                 break
         }
-        e.components[COMPONENTS.TRANSFORM].translation = t
+        e.components[COMPONENTS.TRANSFORM].translation = [0,0,0]
         e.components[COMPONENTS.TRANSFORM].rotation = r
-        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform(t, r, s)
+        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform([0,0,0], r, s)
 
         return e
     }
@@ -104,7 +101,7 @@ export default class ScaleGizmo extends System {
                 this.t = 0
                 break
             case 'mousemove':
-                if(!this.started) {
+                if (!this.started) {
                     this.started = true
                     this.onGizmoStart()
                 }
@@ -131,29 +128,38 @@ export default class ScaleGizmo extends System {
     }
 
     transformElement(vec) {
-        this.target.components.TransformComponent.scaling = [
-            this.target.components.TransformComponent.scaling[0] - vec[0],
-            this.target.components.TransformComponent.scaling[1] - vec[1],
-            this.target.components.TransformComponent.scaling[2] - vec[2]
+        let toApply
+        if (this.typeRot === ROTATION_TYPES.RELATIVE || !this.target.components[COMPONENTS.TRANSFORM])
+            toApply = vec
+        else
+            toApply = vec4.transformQuat([], vec, this.target.components[COMPONENTS.TRANSFORM].rotationQuat)
+
+
+        this.target.components[COMPONENTS.TRANSFORM].scaling = [
+            this.target.components[COMPONENTS.TRANSFORM].scaling[0] - toApply[0] ,
+            this.target.components[COMPONENTS.TRANSFORM].scaling[1] - toApply[1],
+            this.target.components[COMPONENTS.TRANSFORM].scaling[2] - toApply[2]
         ]
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem,  lockCamera, entities,
+    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities,
+            transformationType,
             onGizmoStart,
             onGizmoEnd) {
         super.execute()
 
         if (selected.length > 0) {
             this.camera = camera
+            this.typeRot = transformationType
             this.onGizmoStart = onGizmoStart
             this.onGizmoEnd = onGizmoEnd
             if (this.currentCoord && !this.tracking) {
                 const el = meshes.find(m => m.id === selected[0])
-                if(el){
+                if (el) {
                     const pickID = pickSystem.pickElement((shader, proj) => {
-                        this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, proj, shader, true)
-                    }, this.currentCoord, camera)
+                        this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, camera.viewMatrix, proj, shader, true)
+                    }, this.currentCoord, camera, true)
 
                     this.clickedAxis = pickID - 2
 
@@ -175,11 +181,13 @@ export default class ScaleGizmo extends System {
                 this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
 
-            if(selected.length === 1){
+            if (selected.length === 1) {
                 const el = meshes.find(m => m.id === selected[0])
                 if (el) {
-                    if (selected.length === 1)
-                        this._drawGizmo(el.components.TransformComponent.translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
+                    if (selected.length === 1) {
+                        this.rotationTarget = el.components[COMPONENTS.TRANSFORM] !== undefined ? el.components[COMPONENTS.TRANSFORM].rotationQuat : [0, 0, 0, 1]
+                        this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
+                    }
 
                 }
             }
@@ -187,21 +195,25 @@ export default class ScaleGizmo extends System {
         }
 
     }
-
-    _translateMatrix(t, m) {
+    _translateMatrix(t, m, comp) {
         const matrix = [...m]
-        matrix[12] += t[0]
-        matrix[13] += t[1]
-        matrix[14] += t[2]
+
+        if (this.typeRot === ROTATION_TYPES.RELATIVE) {
+            mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([], this.rotationTarget, comp.rotationQuat), vec3.add([], t, comp.translation), [.2, .2, .2], comp.translation)
+        } else
+        {
+            matrix[12] += t[0]
+            matrix[13] += t[1]
+            matrix[14] += t[2]
+        }
 
         return matrix
     }
 
-    _drawGizmo(translation, view, proj, shader, pick) {
-
-        const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix)
-        const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix)
-        const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix)
+    _drawGizmo(translation, view, proj, shader) {
+        const mX = this._translateMatrix(translation, this.xGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.xGizmo.components[COMPONENTS.TRANSFORM])
+        const mY = this._translateMatrix(translation, this.yGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.yGizmo.components[COMPONENTS.TRANSFORM])
+        const mZ = this._translateMatrix(translation, this.zGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.zGizmo.components[COMPONENTS.TRANSFORM])
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)
@@ -209,27 +221,28 @@ export default class ScaleGizmo extends System {
         this.xyz.vertexVBO.enable()
 
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
-            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
-            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
-            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader, translation)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
 
 
-
     }
 
-    _draw(view, t, proj, a, id, shader) {
+    _draw(view, t, proj, a, id, shader, tt) {
 
 
         shader.bindForUse({
             viewMatrix: view,
             transformMatrix: t,
             projectionMatrix: proj,
+            camPos: this.camera.position,
+            translation: tt,
             axis: a,
             selectedAxis: this.clickedAxis,
             uID: [...id, 1],

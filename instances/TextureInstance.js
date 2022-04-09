@@ -1,3 +1,5 @@
+import ImageProcessor from "../../workers/image/ImageProcessor";
+
 export default class TextureInstance {
     loaded = false
 
@@ -14,53 +16,24 @@ export default class TextureInstance {
         height,
         border
     ) {
+        this.attributes = {yFlip, internalFormat, format, repeat, noMipMapping, type, width, height, border,}
 
-        this.attributes = {
-            yFlip,
-            internalFormat,
-            format,
-            repeat,
-            noMipMapping,
-            type,
-            width,
-            height,
-            border,
-        }
-
+        const init = (res) => this._init(res, yFlip, gpu, internalFormat, format, repeat, noMipMapping, type, width, height, border)
         if (typeof img === 'string') {
-            const i = new Image()
-            i.src = img
-            i.decode().then(() => {
-                this._init(
-                    i,
-                    yFlip,
-                    gpu,
-                    internalFormat,
-                    format,
-                    repeat,
-                    noMipMapping,
-                    type,
-                    width,
-                    height,
-                    border
-                )
-            })
+
+            if (img.includes('data:image/'))
+                ImageProcessor.getImageBitmap(img).then(res =>{
+                    res.naturalHeight = res.height
+                    res.naturalWidth = res.width
+                    init(res)
+                })
+            else {
+                const i = new Image()
+                i.src = img
+                i.decode().then(() => init(i))
+            }
         } else
-            this._init(
-                img,
-                yFlip,
-                gpu,
-                internalFormat,
-                format,
-                repeat,
-                noMipMapping,
-                type,
-                width,
-                height,
-                border
-            )
-
-
+            init(img)
     }
 
     _init(
@@ -83,17 +56,7 @@ export default class TextureInstance {
         gpu.bindTexture(gpu.TEXTURE_2D, newTexture);
         gpu.texImage2D(
             gpu.TEXTURE_2D,
-            0,
-            internalFormat,
-
-            width ? width : img.naturalWidth,
-            height ? height : img.naturalHeight,
-            border,
-
-            format,
-            type,
-            img
-        )
+            0, internalFormat, width ? width : img.naturalWidth, height ? height : img.naturalHeight, border, format, type, img)
 
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR);
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR_MIPMAP_LINEAR);
@@ -114,14 +77,11 @@ export default class TextureInstance {
     }
 
     update(newImage, gpu) {
-
         if (this.loaded) {
-            gpu.deleteTexture( this.texture)
-            const img = new Image()
-            img.src = newImage
-            img.decode().then(() => {
+            gpu.deleteTexture(this.texture)
+            ImageProcessor.getImageBitmap(newImage).then(res => {
                 this._init(
-                    img,
+                    res,
                     this.attributes.yFlip,
                     gpu,
                     this.attributes.internalFormat,

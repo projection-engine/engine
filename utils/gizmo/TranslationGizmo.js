@@ -73,11 +73,11 @@ export default class TranslationGizmo extends System {
             default:
                 break
         }
-        e.components.TransformComponent.translation = t
-        e.components.TransformComponent.rotation = r
-        e.components.TransformComponent.scaling = s
+        e.components[COMPONENTS.TRANSFORM].translation = t
+        e.components[COMPONENTS.TRANSFORM].rotation = r
+        e.components[COMPONENTS.TRANSFORM].scaling = s
 
-        e.components.TransformComponent.transformationMatrix = Transformation.transform(t, e.components.TransformComponent.rotationQuat, s)
+        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform(t, e.components[COMPONENTS.TRANSFORM].rotationQuat, s)
 
         return e
     }
@@ -130,10 +130,10 @@ export default class TranslationGizmo extends System {
 
     transformElement(vec) {
         let toApply
-        if (this.typeRot === ROTATION_TYPES.GLOBAL || !this.target.components.TransformComponent)
+        if (this.typeRot === ROTATION_TYPES.GLOBAL || !this.target.components[COMPONENTS.TRANSFORM])
             toApply = vec
         else
-            toApply = vec4.transformQuat([], vec, this.target.components.TransformComponent.rotationQuat)
+            toApply = vec4.transformQuat([], vec, this.target.components[COMPONENTS.TRANSFORM].rotationQuat)
 
         const k = Object.keys(this.target.components)
         let key
@@ -149,10 +149,10 @@ export default class TranslationGizmo extends System {
                     ]
                     break
                 case COMPONENTS.TRANSFORM:
-                    this.target.components.TransformComponent.translation = [
-                        this.target.components.TransformComponent.translation[0] - toApply[0],
-                        this.target.components.TransformComponent.translation[1] - toApply[1],
-                        this.target.components.TransformComponent.translation[2] - toApply[2]
+                    this.target.components[COMPONENTS.TRANSFORM].translation = [
+                        this.target.components[COMPONENTS.TRANSFORM].translation[0] - toApply[0],
+                        this.target.components[COMPONENTS.TRANSFORM].translation[1] - toApply[1],
+                        this.target.components[COMPONENTS.TRANSFORM].translation[2] - toApply[2]
                     ]
                     break
                 default:
@@ -174,7 +174,7 @@ export default class TranslationGizmo extends System {
                     return el.components[key].direction
                 case COMPONENTS.TRANSFORM:
 
-                    return el.components.TransformComponent?.translation
+                    return el.components[COMPONENTS.TRANSFORM]?.translation
                 default:
                     break
             }
@@ -199,7 +199,7 @@ export default class TranslationGizmo extends System {
                     if (translation !== undefined) {
                         const pickID = pickSystem.pickElement((shader, proj) => {
                             this._drawGizmo(translation, camera.viewMatrix, proj, shader, true)
-                        }, this.currentCoord, camera)
+                        }, this.currentCoord, camera, true)
 
                         this.clickedAxis = pickID - 2
 
@@ -228,7 +228,7 @@ export default class TranslationGizmo extends System {
                 if (el) {
                     const translation = this.getTranslation(el)
                     if (translation) {
-                        this.rotationTarget = el.components.TransformComponent !== undefined ? el.components.TransformComponent.rotationQuat : [0, 0, 0, 1]
+                        this.rotationTarget = el.components[COMPONENTS.TRANSFORM] !== undefined ? el.components[COMPONENTS.TRANSFORM].rotationQuat : [0, 0, 0, 1]
                         this._drawGizmo(translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
                     }
                 }
@@ -254,9 +254,9 @@ export default class TranslationGizmo extends System {
 
     _drawGizmo(translation, view, proj, shader, pick) {
 
-        const mX = this._translateMatrix(translation, this.xGizmo.components.TransformComponent.transformationMatrix, this.xGizmo.components.TransformComponent)
-        const mY = this._translateMatrix(translation, this.yGizmo.components.TransformComponent.transformationMatrix, this.yGizmo.components.TransformComponent)
-        const mZ = this._translateMatrix(translation, this.zGizmo.components.TransformComponent.transformationMatrix, this.zGizmo.components.TransformComponent)
+        const mX = this._translateMatrix(translation, this.xGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.xGizmo.components[COMPONENTS.TRANSFORM])
+        const mY = this._translateMatrix(translation, this.yGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.yGizmo.components[COMPONENTS.TRANSFORM])
+        const mZ = this._translateMatrix(translation, this.zGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.zGizmo.components[COMPONENTS.TRANSFORM])
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)
@@ -264,12 +264,12 @@ export default class TranslationGizmo extends System {
         this.xyz.vertexVBO.enable()
 
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
-            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
 
-            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
-            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader, translation)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
@@ -279,13 +279,16 @@ export default class TranslationGizmo extends System {
 
     }
 
-    _draw(view, t, proj, a, id, shader) {
-
+    _draw(view, t, proj, a, id, shader, tt) {
 
         shader.bindForUse({
             viewMatrix: view,
             transformMatrix: t,
             projectionMatrix: proj,
+
+            translation: tt,
+            camPos: this.camera.position,
+
             axis: a,
             selectedAxis: this.clickedAxis,
             uID: [...id, 1],

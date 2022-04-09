@@ -14,13 +14,14 @@ export default class PickSystem extends System {
         super([]);
         this.gpu = gpu
 
-        this.frameBuffer = new FramebufferInstance(gpu, window.screen.width, window.screen.height)
+        this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
         this.frameBuffer
             .texture(undefined, undefined, 0, this.gpu.RGBA, this.gpu.RGBA, this.gpu.UNSIGNED_BYTE, false, true, true)
             .depthTest(this.gpu.DEPTH_COMPONENT16)
 
 
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.shaderSameSize = new Shader(shaderCode.sameSizeVertex, shaderCode.fragment, gpu)
         this.cameraMesh = new MeshInstance({
             gpu,
             vertices: camera.vertices,
@@ -72,22 +73,17 @@ export default class PickSystem extends System {
 
     }
 
-    pickElement(drawCallback, pickCoords, camera) {
+    pickElement(drawCallback, pickCoords, camera, sameSize) {
 
         this.shader.use()
         this.frameBuffer.startMapping()
 
         const pickerProjection = this._getProjection(pickCoords, camera)
-        drawCallback(this.shader, pickerProjection)
-
-
+        drawCallback(sameSize ? this.shaderSameSize : this.shader, pickerProjection)
         let data = new Uint8Array(4)
-        const pixelX = pickCoords.x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
-        const pixelY = this.gpu.canvas.height - pickCoords.y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
-
         this.gpu.readPixels(
-            pixelX,
-            pixelY,
+            0,
+            0,
             1,
             1,
             this.gpu.RGBA,

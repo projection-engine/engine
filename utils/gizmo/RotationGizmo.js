@@ -52,22 +52,18 @@ export default class RotationGizmo extends System {
         let s, t = [0, 0, 0], r
         switch (axis) {
             case 'x':
-                s = [1.5, .1, 1.5]
+                s = [1, .1, 1]
                 r = [0, 0, 1.57]
                 break
             case 'y':
-                s = [1.5, .1, 1.5]
+                s = [1, .1, 1]
                 r = [0, 0, 0]
                 break
             case 'z':
-                s = [1.5, .1, 1.5]
+                s = [1, .1, 1]
                 r = [1.57, 0, 0]
                 break
-            case 'c':
-                s = [.1, .1, .1]
-                t = [0, 0, 0]
-                r = [0, 0, 0]
-                break
+
             default:
                 break
         }
@@ -172,8 +168,8 @@ export default class RotationGizmo extends System {
 
                 if (el && el.components[COMPONENTS.TRANSFORM]) {
                     const pickID = pickSystem.pickElement((shader, proj) => {
-                        this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader, true)
-                    }, this.currentCoord, camera)
+                        this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader)
+                    }, this.currentCoord, camera,  true)
 
                     this.clickedAxis = pickID - 2
 
@@ -255,11 +251,11 @@ export default class RotationGizmo extends System {
         this.xyz.uvVBO.enable()
 
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
-            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
-            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
-            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader, translation)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
@@ -268,7 +264,7 @@ export default class RotationGizmo extends System {
 
     }
 
-    _draw(view, t, proj, a, id, shader) {
+    _draw(view, t, proj, a, id, shader, tt) {
 
 
         shader.bindForUse({
@@ -276,6 +272,8 @@ export default class RotationGizmo extends System {
             transformMatrix: t,
             projectionMatrix: proj,
             axis: a,
+            translation: tt,
+            camPos: this.camera.position,
             selectedAxis: this.clickedAxis,
             uID: [...id, 1],
             circleSampler: this.texture.texture

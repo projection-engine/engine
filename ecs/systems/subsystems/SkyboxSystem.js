@@ -27,7 +27,7 @@ export default class SkyboxSystem extends System {
             this.shader.bindForUse({
                 uTexture: skyboxElement.cubeMap,
                 projectionMatrix: camera.projectionMatrix,
-                viewMatrix: camera.getNotTranslatedViewMatrix(),
+                viewMatrix: camera.viewMatrix,
                 gamma: skyboxElement.gamma,
                 exposure: skyboxElement.exposure
             })

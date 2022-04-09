@@ -71,6 +71,7 @@ import QuatRotateX from "../../../../views/material/implementations/blueprint/no
 import QuatRotateY from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateY";
 import QuatRotateZ from "../../../../views/material/implementations/blueprint/nodes/operators/math/QuatRotateZ";
 import OnInterval from "../../../../views/material/implementations/blueprint/nodes/events/OnInterval";
+import FollowAround from "../../../../views/material/implementations/blueprint/nodes/camera/FollowAround";
 
 
 export default class ScriptSystem extends System {
@@ -163,7 +164,8 @@ export default class ScriptSystem extends System {
             [QuatRotateX.name]: QuatRotateX.compile,
             [QuatRotateZ.name]: QuatRotateZ.compile,
 
-            [OnInterval.name]: OnInterval.compile
+            [OnInterval.name]: OnInterval.compile,
+            [FollowAround.name]: FollowAround.compile
 
         }
         document.addKey = (key) => {
@@ -251,10 +253,12 @@ export default class ScriptSystem extends System {
 
         for (let o = 0; o < order.length; o++) {
             const currentOrder = order[o]
+
             for (let inputO = 0; inputO < currentOrder.inputs.length; inputO++) {
                 const currentInput = currentOrder.inputs[inputO]
                 inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
             }
+            console.log(inputs, currentOrder.inputs, attributes)
             inputs.cameraRoot = camera
 
             if (!currentOrder.isBranch)

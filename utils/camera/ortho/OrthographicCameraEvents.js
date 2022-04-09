@@ -17,9 +17,11 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
     function handleInput(event) {
         switch (event.type) {
             case 'wheel': {
-                const forward = event.deltaY < 0
-                if (camera.size > 0 || forward)
-                    camera.size += (forward ? 1 : -1) * (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+
+                    const forward = event.deltaY < 0
+                    if (camera.size > 0 || forward)
+                        camera.size += (forward ? 1 : -1) * (conf.sensitivity.forwards ? conf.sensitivity.forwards : 1)
+
                 break
             }
             case 'mousemove': {

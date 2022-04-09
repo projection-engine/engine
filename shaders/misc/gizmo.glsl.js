@@ -1,14 +1,37 @@
 export const vertex = `#version 300 es
-
+#define SIZE .2
 layout (location = 1) in vec3 position;
  
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
-
+uniform vec3 camPos;
+uniform vec3 translation;
 void main(){
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position,1.0);
+    vec3 t = translation - camPos;
+     
+    float len = length(camPos - translation) * SIZE; 
+    mat4 tt = transformMatrix;
+    
+     
+    mat4 sc;
+    for ( int x = 0; x < 4; x++ )
+        for ( int y = 0; y < 4; y++ )
+            if ( x == y && x <= 2 )
+                sc[x][y] = len;
+            else if ( x == y )
+                sc[x][y] = 1.;
+            else
+                sc[x][y] = 0.;
+
+        
+    tt[3][0]  += t.x;
+    tt[3][1]  += t.y;
+    tt[3][2]  += t.z;
+    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
+     
+ 
 }
 `
 
@@ -46,20 +69,43 @@ void main(){
 `
 export const vertexRot = `#version 300 es
 
+#define SIZE .2
 layout (location = 1) in vec3 position;
 layout (location = 3) in vec2 uvs;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
+uniform vec3 camPos;
+uniform vec3 translation;
+
 out vec2 uv;
+
+
 void main(){
-    mat4 modelView = viewMatrix * transformMatrix;
+ 
     uv = uvs; 
- 
-    gl_Position = projectionMatrix * modelView * vec4(position,1.0);
- 
+    vec3 t = translation - camPos;
+     
+    float len = length(camPos - translation) * SIZE; 
+    mat4 tt = transformMatrix;
     
+     
+    mat4 sc;
+    for ( int x = 0; x < 4; x++ )
+        for ( int y = 0; y < 4; y++ )
+            if ( x == y && x <= 2 )
+                sc[x][y] = len;
+            else if ( x == y )
+                sc[x][y] = 1.;
+            else
+                sc[x][y] = 0.;  
+                
+    tt[3][0]  += t.x;
+    tt[3][1]  += t.y;
+    tt[3][2]  += t.z;
+    
+    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);   
 }
 `
 

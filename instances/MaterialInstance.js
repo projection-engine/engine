@@ -1,5 +1,5 @@
 import TextureInstance from "./TextureInstance";
-import ImageProcessor from "../../workers/ImageProcessor";
+import ImageProcessor from "../../workers/image/ImageProcessor";
 import MATERIAL_TYPES from "../templates/MATERIAL_TYPES";
 
 
@@ -26,14 +26,14 @@ export default class MaterialInstance {
 
     async initializeTextures(material, update) {
 
-        const albedo = material?.albedo?.low ? material.albedo.low : ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 128),
-            metallic = material?.metallic?.low ? material.metallic.low : ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 128),
-            roughness = material?.roughness?.low ? material.roughness.low : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 128),
-            normal = material?.normal?.low ? material.normal.low : ImageProcessor.colorToImage('rgba(127, 127, 255, 1)', 128),
-            height = material?.height?.low ? material.height.low : ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 128),
-            ao = material?.ao?.low ? material.ao.low : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 128),
-            emissive = material?.emissive?.low ? material.emissive.low : ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 128),
-            opacity = material?.opacity?.low ? material.opacity.low : undefined,
+        const albedo = material?.albedo?.high ? material.albedo.high : await ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 32),
+            metallic = material?.metallic?.high ? material.metallic.high :await  ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 32),
+            roughness = material?.roughness?.high ? material.roughness.high : await ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 32),
+            normal = material?.normal?.high ? material.normal.high :await  ImageProcessor.colorToImage('rgba(127, 127, 255, 1)', 32),
+            height = material?.height?.high ? material.height.high : await ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 32),
+            ao = material?.ao?.high ? material.ao.high : await ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 32),
+            emissive = material?.emissive?.high ? material.emissive.high : await ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 32),
+            opacity = material?.opacity?.high ? material.opacity.high : undefined,
             tiling = material?.tiling ? material.tiling : [1, 1]
 
         if (!this._initializing) {
@@ -58,7 +58,7 @@ export default class MaterialInstance {
 
             if (this.type === MATERIAL_TYPES.TRANSPARENT) {
 
-                this.opacity = new TextureInstance(opacity ? opacity : ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, undefined, undefined, true)
+                this.opacity = new TextureInstance(opacity ? opacity : await ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, undefined, undefined, true)
             }
 
             this._ready = true
