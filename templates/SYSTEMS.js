@@ -3,13 +3,13 @@ export default {
     PERF: '1',
     PHYSICS: '2',
     TRANSFORMATION: '3',
-    CUBE_MAP: '4',
-    SHADOWS: '5',
-    PICK: '6',
-    MESH: '7',
-    POSTPROCESSING: '8',
 
-    AO: '9',
-    CULLING: '10',
+    SHADOWS: '4',
+    PICK: '5',
+    MESH: '6',
+    POSTPROCESSING: '7',
 
+    AO: '8',
+    CULLING: '9',
+    CUBE_MAP: '10',
 }

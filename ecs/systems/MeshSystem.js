@@ -15,8 +15,6 @@ export default class MeshSystem extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
-        // this.gBuffer = new GBuffer(gpu, resolutionMultiplier)
-
         this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
         this.frameBuffer
             .texture(undefined, undefined, 0)
@@ -60,15 +58,11 @@ export default class MeshSystem extends System {
     execute(options, systems, data) {
         super.execute()
         const {
-            pointLights,
-            spotLights,
-            terrains,
+
             meshes,
             skybox,
-            directionalLights,
             materials,
             meshSources,
-            cubeMaps,
             translucentMeshes,
             cubeMapsSources
         } = data
@@ -77,8 +71,6 @@ export default class MeshSystem extends System {
 
             const {
                 camera,
-                selected,
-                shadingModel,
                 injectMaterial
             } = options
 
@@ -107,9 +99,9 @@ export default class MeshSystem extends System {
                         ambient.irradianceMap = cubeMapToApply.components[COMPONENTS.CUBE_MAP].irradianceMap
                         ambient.prefilteredMap = cubeMapToApply.components[COMPONENTS.CUBE_MAP].prefilteredMap
                         ambient.prefilteredLod = cubeMapToApply.components[COMPONENTS.CUBE_MAP].prefilteredMipmaps
-                    }else{
-                        ambient.irradianceMap = skybox?.irradianceMap
-                        ambient.prefilteredMap = skybox?.cubeMapPrefiltered
+                    }else if(skybox && skybox.cubeMap !== undefined){
+                        ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
+                        ambient.prefilteredMap = skybox?.cubeMap.prefiltered
                         ambient.prefilteredLod = 6
                     }
 
@@ -156,13 +148,7 @@ export default class MeshSystem extends System {
         prefilteredLod
     ) {
 
-        gpu.bindVertexArray(mesh.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
-
-        mesh.vertexVBO.enable()
-        mesh.normalVBO.enable()
-        mesh.uvVBO.enable()
-        mesh.tangentVBO.enable()
+        mesh.use()
         let materialAttrs = {}
 
         if (material && materialComponent) {
@@ -204,13 +190,7 @@ export default class MeshSystem extends System {
         })
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-
-        gpu.bindVertexArray(null)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
-        mesh.vertexVBO.disable()
-        mesh.uvVBO.disable()
-        mesh.normalVBO.disable()
-        mesh.tangentVBO.disable()
+        mesh.finish()
 
 
     }

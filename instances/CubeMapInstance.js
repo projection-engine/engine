@@ -190,7 +190,14 @@ export default class CubeMapInstance {
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_S, gpu.CLAMP_TO_EDGE);
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_T, gpu.CLAMP_TO_EDGE);
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_R, gpu.CLAMP_TO_EDGE);
-        const d = directions(gpu)
+        const d =[
+            {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_X},
+            {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_X},
+            {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_Y},
+            {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Y},
+            {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_Z},
+            {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Z}
+        ]
         for (let i = 0; i < 6; i++) {
             gpu.texImage2D(
                 d[i].access,
@@ -208,17 +215,7 @@ export default class CubeMapInstance {
     }
 
 }
-const directions = (gpu) => {
 
-    return [
-        {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_X},
-        {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_X},
-        {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_Y},
-        {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Y},
-        {access: gpu.TEXTURE_CUBE_MAP_POSITIVE_Z},
-        {access: gpu.TEXTURE_CUBE_MAP_NEGATIVE_Z}
-    ]
-}
 
 function getRotation(index) {
 

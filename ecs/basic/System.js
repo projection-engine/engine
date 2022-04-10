@@ -1,8 +1,5 @@
 export default class System {
-
-
     constructor(requiredComponents = []) {
-
     }
     updateFBOResolution(){}
     execute() {}

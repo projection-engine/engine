@@ -97,9 +97,7 @@ export default class Engine extends RenderLoop {
             if (key)
                 newSystems[key] = s
         })
-
         this._systems = newSystems
-
     }
 
     get systems() {

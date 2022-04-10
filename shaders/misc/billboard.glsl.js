@@ -12,7 +12,7 @@ void main()
     if(color.r < 0.5 && color.g < 0.5 && color.b < 0.5)
         discard;
     else
-        finalColor = vec4(color, .75);
+        finalColor = vec4(color, 1.);
 }
 `
 

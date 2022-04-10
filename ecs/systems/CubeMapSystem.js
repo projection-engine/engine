@@ -10,11 +10,11 @@ import {VIEWS} from "./ShadowMapSystem";
 import VBO from "../../utils/workers/VBO";
 import cube from "../../assets/cube.json";
 import {intersectBoundingSphere} from "./PhysicsSystem";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 const STEPS = {
     BASE: 0,
-    IRRADIANCE: 1,
-    PREFILTERED: 2,
+
     DONE: 3,
     CALCULATE: 4
 }
@@ -59,22 +59,15 @@ export default class CubeMapSystem extends System {
             switch (this.step) {
                 case STEPS.BASE:
                     this._generateBaseTexture(options, systems, data)
-                    options.setRecompile(false)
-                    this.step = STEPS.IRRADIANCE
-                    break
-                case STEPS.IRRADIANCE:
                     for (let i = 0; i < cubeMaps.length; i++) {
-                        const current = cubeMaps[i].components.CubeMapComponent
+                        const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
                         current.cubeMap.generateIrradiance()
-
                     }
-                    this.step = STEPS.PREFILTERED
-                    break
-                case STEPS.PREFILTERED:
                     for (let i = 0; i < cubeMaps.length; i++) {
-                        const current = cubeMaps[i].components.CubeMapComponent
+                        const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
                         current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
                     }
+                    options.setRecompile(false)
                     this.step = STEPS.CALCULATE
                     break
                 case STEPS.CALCULATE:
@@ -83,7 +76,7 @@ export default class CubeMapSystem extends System {
                     let newCubeMaps = {}
 
                     for (let i = 0; i < cubeMaps.length; i++) {
-                        const current = cubeMaps[i].components.CubeMapComponent,
+                        const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
                             pos = cubeMaps[i].components.TransformComponent.position,
                             radius = current.radius
 
@@ -140,7 +133,7 @@ export default class CubeMapSystem extends System {
             lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
 
         for (let i = 0; i < cubeMaps.length; i++) {
-            const current = cubeMaps[i].components.CubeMapComponent
+            const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
             current.cubeMap.resolution = current.resolution
             current.cubeMap.draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], cubeMaps[i].components.TransformComponent.position, VIEWS.target[index])
@@ -154,7 +147,7 @@ export default class CubeMapSystem extends System {
                         this.gpu.bindVertexArray(this.vao)
                         this.vbo.enable()
                         this.skyShader.bindForUse({
-                            uTexture: skybox?.cubeMap,
+                            uTexture: skybox?.cubeMap.texture,
                             projectionMatrix: projection,
                             viewMatrix: nView,
                             gamma: skybox?.gamma,
