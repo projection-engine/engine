@@ -73,8 +73,17 @@ export default class Engine extends RenderLoop {
         super();
         this.id = id
         this.data.canvasRef = document.getElementById(id + '-canvas')
+
+
         this.gpu = gpu
         this.camera = this.sphericalCamera
+
+        const resizeObs = new ResizeObserver(() => {
+            const bBox = this.data.canvasRef.getBoundingClientRect()
+            this.camera.aspectRatio = bBox.width/bBox.height
+        })
+        resizeObs.observe(this.data.canvasRef)
+
         this.rootCamera = new RootCamera()
         this._canvasID = `${id}-canvas`
         this._resetCameraEvents()
@@ -153,7 +162,8 @@ export default class Engine extends RenderLoop {
                 cameraToApply = this.sphericalCamera
                 break
         }
-        cameraToApply.aspectRatio = this.gpu.canvas.width / this.gpu.canvas.height
+        const bBox = this.gpu.canvas.getBoundingClientRect()
+        cameraToApply.aspectRatio = bBox.width / bBox.height
 
         this.camera = cameraToApply
         this._resetCameraEvents()

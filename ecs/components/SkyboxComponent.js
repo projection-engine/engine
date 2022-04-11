@@ -1,9 +1,4 @@
-import {createTexture, lookAt} from "../../utils/misc/utils";
 import Component from "../basic/Component";
-import CubeMapInstance from "../../instances/CubeMapInstance";
-import Shader from "../../utils/workers/Shader";
-
-import * as skyboxCode from "../../shaders/misc/skybox.glsl";
 
 export default class SkyboxComponent extends Component {
     __cubeMap

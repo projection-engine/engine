@@ -1,6 +1,4 @@
-import {mat4, vec3} from "gl-matrix";
-import Camera from "./utils/camera/Camera";
-import {lookAt} from "./utils/misc/utils";
+import {mat4} from "gl-matrix";
 
 export default class RootCamera {
     position = [0, 10, 0]

@@ -1,15 +1,13 @@
 import System from "../../basic/System";
 import OrthographicCamera from "../../../utils/camera/ortho/OrthographicCamera";
 import * as shaderCode from "../../../shaders/misc/skybox.glsl";
+import * as skyboxCode from "../../../shaders/misc/skybox.glsl";
 import Shader from "../../../utils/workers/Shader";
 import {createTexture, createVAO, lookAt} from "../../../utils/misc/utils";
 import VBO from "../../../utils/workers/VBO";
 import cube from "../../../assets/cube.json";
-import * as skyboxCode from "../../../shaders/misc/skybox.glsl";
 import CubeMapInstance from "../../../instances/CubeMapInstance";
 import * as shaderCodeSkybox from '../../../shaders/misc/cubeMap.glsl'
-import ImageProcessor from "../../../../workers/image/ImageProcessor";
-import TextureInstance from "../../../instances/TextureInstance";
 
 
 export default class SkyboxSystem extends System {

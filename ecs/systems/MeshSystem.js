@@ -96,9 +96,10 @@ export default class MeshSystem extends System {
                     if(c)
                         cubeMapToApply =  cubeMapsSources[c]
                     if(cubeMapToApply){
-                        ambient.irradianceMap = cubeMapToApply.components[COMPONENTS.CUBE_MAP].irradianceMap
-                        ambient.prefilteredMap = cubeMapToApply.components[COMPONENTS.CUBE_MAP].prefilteredMap
-                        ambient.prefilteredLod = cubeMapToApply.components[COMPONENTS.CUBE_MAP].prefilteredMipmaps
+                        const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
+                        ambient.irradianceMap = cube.irradiance ? cube.irradianceMap: skybox?.cubeMap.irradianceTexture
+                        ambient.prefilteredMap = cube.prefilteredMap
+                        ambient.prefilteredLod = cube.prefilteredMipmaps
                     }else if(skybox && skybox.cubeMap !== undefined){
                         ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
                         ambient.prefilteredMap = skybox?.cubeMap.prefiltered

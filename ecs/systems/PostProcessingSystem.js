@@ -13,7 +13,6 @@ import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
 import {copyTexture} from "../../utils/misc/utils";
 import RENDERING_TYPES from "../../templates/RENDERING_TYPES";
-import COMPONENTS from "../../templates/COMPONENTS";
 
 
 export default class PostProcessingSystem extends System {

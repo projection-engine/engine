@@ -25,6 +25,7 @@ export default class SphericalCamera extends Camera {
         return this._aspectRatio
     }
     set aspectRatio(data) {
+
         this._aspectRatio = data
         this.updateProjection()
     }
