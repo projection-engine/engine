@@ -22,81 +22,36 @@ import ScriptSystem from "./ecs/systems/ScriptSystem";
 import cloneClass from "../utils/misc/cloneClass";
 import COMPONENTS from "./templates/COMPONENTS";
 import RootCamera from "./RootCamera";
+import EditorCameras from "./EditorCameras";
 
 export default class Engine extends RenderLoop {
-    types = {}
-    gizmo
-    cameraType = CAMERA_TYPES.SPHERICAL
-    recompiled = false
-    data = {
-        fpsTarget: undefined,
-        currentCoord: {x: 0, y: 0},
-
-        clicked: false,
-
-        performanceRef: undefined,
-        canvasRef: undefined
-    }
-
     _systems = {}
-    _fov = Math.PI / 2
+    recompiled = false
+    rootCamera = new RootCamera()
 
-    sphericalCamera = new SphericalCamera([0, 10, 30], 1.57, .1, 10000, 1)
-    freeCamera = new FreeCamera([0, 10, 30], 1.57, .1, 10000, 1)
-
-    topCamera = new OrthographicCamera(
-        1,
-        DIRECTIONS.TOP
-    )
-    bottomCamera = new OrthographicCamera(
-        1,
-        DIRECTIONS.BOTTOM
-    )
-    leftCamera = new OrthographicCamera(
-        1,
-        DIRECTIONS.LEFT
-    )
-    rightCamera = new OrthographicCamera(
-        1,
-        DIRECTIONS.RIGHT
-    )
-    frontCamera = new OrthographicCamera(
-        1,
-        DIRECTIONS.FRONT
-    )
-    backCamera = new OrthographicCamera(
-        1,
-        DIRECTIONS.BACK
-    )
+    gizmo
+    cameraData = {}
 
     constructor(id, gpu) {
         super();
         this.id = id
-        this.data.canvasRef = document.getElementById(id + '-canvas')
-
-
         this.gpu = gpu
-        this.camera = this.sphericalCamera
+        this.cameraData = new EditorCameras(id, CAMERA_TYPES.SPHERICAL,document.getElementById(id + '-canvas'))
 
-        const resizeObs = new ResizeObserver(() => {
-            const bBox = this.data.canvasRef.getBoundingClientRect()
-            this.camera.aspectRatio = bBox.width/bBox.height
-        })
-        resizeObs.observe(this.data.canvasRef)
-
-        this.rootCamera = new RootCamera()
-        this._canvasID = `${id}-canvas`
-        this._resetCameraEvents()
+        this.initialized=  true
     }
 
+    get camera(){
+        return this.cameraData.camera
+    }
+    set camera(data){
+        this.cameraData.camera = data
+    }
     get canvas() {
         return this.gpu.canvas
     }
 
-    set fov(data) {
-        this._fov = data
-        this.camera.fov = data
-    }
+
 
     set systems(data) {
         let newSystems = {}
@@ -113,71 +68,14 @@ export default class Engine extends RenderLoop {
         return this._systems
     }
 
-    _resetCameraEvents() {
-        if (this.cameraType === CAMERA_TYPES.SPHERICAL || this.cameraType === CAMERA_TYPES.FREE)
-            this.cameraEvents = new perspectiveCameraEvents(
-                this.camera,
-                this._canvasID,
-                (x, y) => {
-                    this.data.clicked = true
-                    this.data.currentCoord = {x, y}
-                })
-        else
-            this.cameraEvents = new OrthographicCameraEvents(
-                this.camera,
-                this._canvasID,
-                (x, y) => {
-                    this.data.clicked = true
-                    this.data.currentCoord = {x, y}
-                })
-    }
-
-    changeCamera(newType) {
-        this.cameraEvents.stopTracking()
-        let cameraToApply
-
-        switch (newType) {
-            case CAMERA_TYPES.BOTTOM:
-                cameraToApply = this.bottomCamera
-                break
-            case CAMERA_TYPES.TOP:
-                cameraToApply = this.topCamera
-                break
-            case CAMERA_TYPES.FRONT:
-                cameraToApply = this.frontCamera
-                break
-            case CAMERA_TYPES.BACK:
-                cameraToApply = this.backCamera
-                break
-            case CAMERA_TYPES.LEFT:
-                cameraToApply = this.leftCamera
-                break
-            case CAMERA_TYPES.RIGHT:
-                cameraToApply = this.rightCamera
-                break
-            case CAMERA_TYPES.FREE:
-                cameraToApply = this.freeCamera
-                break
-            default:
-                cameraToApply = this.sphericalCamera
-                break
-        }
-        const bBox = this.gpu.canvas.getBoundingClientRect()
-        cameraToApply.aspectRatio = bBox.width / bBox.height
-
-        this.camera = cameraToApply
-        this._resetCameraEvents()
-
-        this.cameraEvents.startTracking()
-    }
 
     start(entities, materials, meshes, params, scripts = [], onGizmoStart, onGizmoEnd) {
-        if (!this._inExecution) {
+        if (!this._inExecution && this.initialized) {
             this._inExecution = true
             if (!params.canExecutePhysicsAnimation)
-                this.cameraEvents.startTracking()
+                this.cameraData.cameraEvents.startTracking()
             else
-                this.cameraEvents.stopTracking()
+                this.cameraData.cameraEvents.stopTracking()
             const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
             const data = {
                 pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
@@ -229,20 +127,20 @@ export default class Engine extends RenderLoop {
                                     onGizmoEnd,
                                     lockCamera: (lock) => {
                                         if (lock) {
-                                            this.cameraEvents.stopTracking()
+                                            this.cameraData.cameraEvents.stopTracking()
                                         } else
-                                            this.cameraEvents.startTracking()
+                                            this.cameraData.cameraEvents.startTracking()
                                     },
                                     entitiesLength: filteredEntities.length,
-                                    clicked: this.data.clicked,
+                                    clicked: this.cameraData.clicked,
                                     setClicked: e => {
-                                        this.data.clicked = e
+                                        this.cameraData.clicked = e
                                     },
                                     dataChanged: this._changed,
                                     setDataChanged: () => {
                                         this._changed = false
                                     },
-                                    currentCoords: this.data.currentCoord,
+                                    currentCoords: this.cameraData.currentCoord,
                                     camera: camera,
                                     elapsed: timestamp,
                                     recompile: !this.recompiled,
@@ -260,16 +158,21 @@ export default class Engine extends RenderLoop {
     }
 
     stop() {
-        this._inExecution = false
-        this.cameraEvents.stopTracking()
-        cancelAnimationFrame(this._currentFrame)
+        if(this.initialized) {
+            this._inExecution = false
+            console.log(this.cameraData)
+            this.cameraData.cameraEvents.stopTracking()
+            cancelAnimationFrame(this._currentFrame)
+        }
     }
 
-    updateCamera(cameraType) {
-        this.cameraType = cameraType
-        this.changeCamera(cameraType)
+    get cameraType(){
+        return this.cameraData.cameraType
     }
-
+    set cameraType(data){
+        this.cameraData.cameraType = data
+        this.cameraData.changeCamera(data)
+    }
 }
 
 function getKey(s) {
