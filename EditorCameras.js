@@ -17,18 +17,15 @@ export default class EditorCameras{
     rightCamera = new OrthographicCamera(1, DIRECTIONS.RIGHT)
     frontCamera = new OrthographicCamera(1, DIRECTIONS.FRONT)
     backCamera = new OrthographicCamera(1, DIRECTIONS.BACK)
-
+    onClick = () => null
     constructor(id, cameraType, canvasRef) {
         this.camera = this.sphericalCamera
         this.id = id
         this.canvasID = canvasRef.id
         this.canvasRef = canvasRef
+
         this.cameraType = cameraType
-        const resizeObs = new ResizeObserver(() => {
-            const bBox = canvasRef.getBoundingClientRect()
-            this.camera.aspectRatio = bBox.width/bBox.height
-        })
-        resizeObs.observe(canvasRef)
+
         this._resetCameraEvents()
     }
 
@@ -37,18 +34,12 @@ export default class EditorCameras{
             this.cameraEvents = new perspectiveCameraEvents(
                 this.camera,
                 this.canvasID,
-                (x, y) => {
-                    this.clicked = true
-                    this.currentCoord = {x, y}
-                })
+                (x, y) => this.onClick({x, y}))
         else
             this.cameraEvents = new OrthographicCameraEvents(
                 this.camera,
                 this.canvasID,
-                (x, y) => {
-                    this.clicked = true
-                    this.currentCoord = {x, y}
-                })
+                (x, y) => this.onClick({x, y}))
     }
 
     changeCamera(newType) {

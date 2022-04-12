@@ -12,4 +12,5 @@ export default {
     AO: '8',
     CULLING: '9',
     CUBE_MAP: '10',
+    CAMERA_CUBE: '11',
 }

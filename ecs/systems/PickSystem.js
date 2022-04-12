@@ -45,31 +45,10 @@ export default class PickSystem extends System {
             currentCoords,
             clicked,
             camera,
-            setClicked
+            setClicked,
+            canExecutePhysicsAnimation
         } = options
 
-        if (clicked && typeof currentCoords === "object") {
-            setClicked(false)
-
-            const index = this.pickElement((shader, proj) => {
-                for (let m = 0; m < entities.length; m++) {
-                    const currentInstance = entities[m]
-                    const t = currentInstance.components.TransformComponent
-
-                    if (currentInstance.components[COMPONENTS.MESH]) {
-                        const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
-                        if (mesh !== undefined)
-                            this._drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
-                    } else if (t)
-                        this._drawMesh(currentInstance.components[COMPONENTS.CAMERA] ? this.cameraMesh : this.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix)
-                }
-            }, currentCoords, camera)
-
-            if (index > 0)
-                setSelected([entities.find(e => e.components.PickComponent?.pickID[0] * 255 === index)?.id])
-            else
-                setSelected([])
-        }
 
     }
 
@@ -134,21 +113,21 @@ export default class PickSystem extends System {
 
     }
 
-    _drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix) {
-        this.shader.bindForUse({
+    static drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix, shader, gpu) {
+        shader.bindForUse({
             uID: [...instance.components.PickComponent.pickID, 1],
             projectionMatrix,
             transformMatrix,
             viewMatrix
         })
 
-        this.gpu.bindVertexArray(mesh.VAO)
-        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
+        gpu.bindVertexArray(mesh.VAO)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
         mesh.vertexVBO.enable()
 
-        this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
-        this.gpu.bindVertexArray(null)
-        this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
+        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        gpu.bindVertexArray(null)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
         mesh.vertexVBO.disable()
     }
 }

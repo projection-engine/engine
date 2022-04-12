@@ -38,7 +38,7 @@ export default class PostProcessingSystem extends System {
         this.gizmoSystem = new GizmoSystem(gpu)
     }
 
-    execute(options, systems, data, entities, gizmo) {
+    execute(options, systems, data, entities) {
         super.execute()
         const {
             pointLights,
@@ -69,6 +69,7 @@ export default class PostProcessingSystem extends System {
             rotationType,
             onGizmoStart,
             onGizmoEnd,
+            gizmo,
             canExecutePhysicsAnimation
         } = options
 
