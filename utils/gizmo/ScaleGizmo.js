@@ -18,11 +18,10 @@ export default class ScaleGizmo extends System {
     clickedAxis = -1
     tracking = false
     rotationTarget = [0, 0, 0, 1]
-    constructor(gpu) {
+    constructor(gpu, gizmoShader) {
         super([]);
         this.gpu = gpu
-        this.gizmoShader = new Shader(gizmoShaderCode.vertex, gizmoShaderCode.fragment, gpu)
-
+        this.gizmoShader =  gizmoShader
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
         this.zGizmo = this._mapEntity(4, 'z')
@@ -31,20 +30,10 @@ export default class ScaleGizmo extends System {
         this.xyz = new MeshInstance({
             gpu,
             vertices: arrow.vertices,
-            indices: arrow.indices,
-            normals: arrow.normals,
-            uvs: [],
-            tangents: []
+            indices: arrow.indices
         })
 
-        this.center = new MeshInstance({
-            gpu,
-            vertices: cube.vertices,
-            indices: cube.indices,
-            normals: cube.normals,
-            uvs: [],
-            tangents: [],
-        })
+
         this.handlerListener = this.handler.bind(this)
     }
 

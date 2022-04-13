@@ -72,7 +72,7 @@ export default class RenderLoop {
 
         const canvasRef = this.gpu.canvas
         this.resizeObs = new ResizeObserver(() => {
-            console.log(canvasRef)
+
             if (canvasRef) {
                 const bBox = canvasRef.getBoundingClientRect()
                 this.viewTarget.aspectRatio = bBox.width / bBox.height

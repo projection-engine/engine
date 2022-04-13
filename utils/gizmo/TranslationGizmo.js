@@ -19,11 +19,11 @@ export default class TranslationGizmo extends System {
     tracking = false
     rotationTarget = [0, 0, 0, 1]
     currentCoord = undefined
-    constructor(gpu) {
+    constructor(gpu, gizmoShader) {
         super([]);
         this.gpu = gpu
 
-        this.gizmoShader = new Shader(gizmoShaderCode.vertex, gizmoShaderCode.fragment, gpu)
+        this.gizmoShader =  gizmoShader
 
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
@@ -37,14 +37,7 @@ export default class TranslationGizmo extends System {
             uvs: [],
             tangents: []
         })
-        this.center = new MeshInstance({
-            gpu,
-            vertices: cube.vertices,
-            indices: cube.indices,
-            normals: cube.normals,
-            uvs: [],
-            tangents: []
-        })
+
         this.handlerListener = this.handler.bind(this)
     }
 
@@ -252,7 +245,7 @@ export default class TranslationGizmo extends System {
         return matrix
     }
 
-    _drawGizmo(translation, view, proj, shader, pick) {
+    _drawGizmo(translation, view, proj, shader) {
 
         const mX = this._translateMatrix(translation, this.xGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.xGizmo.components[COMPONENTS.TRANSFORM])
         const mY = this._translateMatrix(translation, this.yGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.yGizmo.components[COMPONENTS.TRANSFORM])

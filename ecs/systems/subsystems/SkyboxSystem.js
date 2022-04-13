@@ -25,7 +25,6 @@ export default class SkyboxSystem extends System {
         if (skyboxElement && !skyboxElement.ready) {
             if (!skyboxElement.cubeMap)
                 skyboxElement.cubeMap = new CubeMapInstance(this.gpu, skyboxElement.resolution, false)
-
             if(skyboxElement.blob) {
                 skyboxElement.texture = createTexture(
                     this.gpu,
