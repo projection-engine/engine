@@ -14,14 +14,19 @@ import COMPONENTS from "../../templates/COMPONENTS";
 import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
 
 export default class ScaleGizmo extends System {
-    eventStarted = false
+
     clickedAxis = -1
     tracking = false
     rotationTarget = [0, 0, 0, 1]
+
+    distanceX = 0
+    distanceY = 0
+    distanceZ = 0
+
     constructor(gpu, gizmoShader) {
         super([]);
         this.gpu = gpu
-        this.gizmoShader =  gizmoShader
+        this.gizmoShader = gizmoShader
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
         this.zGizmo = this._mapEntity(4, 'z')
@@ -35,6 +40,8 @@ export default class ScaleGizmo extends System {
 
 
         this.handlerListener = this.handler.bind(this)
+        this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
+        this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
     }
 
     _mapEntity(i, axis) {
@@ -62,32 +69,38 @@ export default class ScaleGizmo extends System {
             default:
                 break
         }
-        e.components[COMPONENTS.TRANSFORM].translation = [0,0,0]
+        e.components[COMPONENTS.TRANSFORM].translation = [0, 0, 0]
         e.components[COMPONENTS.TRANSFORM].rotation = r
-        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform([0,0,0], r, s)
+        e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform([0, 0, 0], r, s)
 
         return e
     }
 
     handler(event) {
-
         switch (event.type) {
             case 'mousedown':
-                if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas)) {
+                if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas) && !this.firstPick) {
                     const target = this.gpu.canvas.getBoundingClientRect()
                     this.currentCoord = {x: event.clientX - target.left, y: event.clientY - target.top}
                 }
-
+                if (this.firstPick)
+                    this.firstPick = false
                 break
             case 'mouseup':
-                this.onGizmoEnd()
-                this.tracking = false
-                this.started = false
-                this.currentCoord = undefined
-                this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
-                document.exitPointerLock()
-                this.clickedAxis = -1
-                this.t = 0
+                this.firstPick = true
+                if (this.tracking) {
+                    this.onGizmoEnd()
+                    this.tracking = false
+                    this.started = false
+                    this.distanceX = 0
+                    this.distanceY = 0
+                    this.distanceZ = 0
+                    this.currentCoord = undefined
+                    this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
+                    document.exitPointerLock()
+                    this.clickedAxis = -1
+                    this.t = 0
+                }
                 break
             case 'mousemove':
                 if (!this.started) {
@@ -99,14 +112,25 @@ export default class ScaleGizmo extends System {
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.transformElement([vector[0] * .01, 0, 0])
+                        this.distanceX += Math.abs(vector[0] * 0.1)
+                        if (Math.abs(this.distanceX) >= this.gridSize) {
+                            this.transformElement([Math.sign(vector[0]) * this.distanceX, 0, 0])
+                            this.distanceX = 0
+                        }
                         break
                     case 2: // y
-                        this.transformElement([0, vector[1] * .01, 0])
-
+                        this.distanceY += Math.abs(vector[1] * 0.1)
+                        if (Math.abs(this.distanceY) >= this.gridSize) {
+                            this.transformElement([0, Math.sign(vector[1]) * this.distanceY, 0])
+                            this.distanceZ = 0
+                        }
                         break
                     case 3: // z
-                        this.transformElement([0, 0, vector[2] * .01])
+                        this.distanceZ += Math.abs(vector[2] * 0.1)
+                        if (Math.abs(this.distanceZ) >= this.gridSize) {
+                            this.transformElement([0, 0, Math.sign(vector[2]) * this.distanceZ])
+                            this.distanceZ = 0
+                        }
                         break
                 }
 
@@ -125,7 +149,7 @@ export default class ScaleGizmo extends System {
 
 
         this.target.components[COMPONENTS.TRANSFORM].scaling = [
-            this.target.components[COMPONENTS.TRANSFORM].scaling[0] - toApply[0] ,
+            this.target.components[COMPONENTS.TRANSFORM].scaling[0] - toApply[0],
             this.target.components[COMPONENTS.TRANSFORM].scaling[1] - toApply[1],
             this.target.components[COMPONENTS.TRANSFORM].scaling[2] - toApply[2]
         ]
@@ -135,10 +159,14 @@ export default class ScaleGizmo extends System {
     execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities,
             transformationType,
             onGizmoStart,
-            onGizmoEnd) {
+            onGizmoEnd,
+            gridSize
+    ) {
         super.execute()
 
         if (selected.length > 0) {
+            this.gridSize = gridSize
+            this.firstPick = false
             this.camera = camera
             this.typeRot = transformationType
             this.onGizmoStart = onGizmoStart
@@ -159,15 +187,11 @@ export default class ScaleGizmo extends System {
                         this.tracking = true
                         lockCamera(true)
                         this.target = el
+
                         this.gpu.canvas.requestPointerLock()
                         this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                     }
                 }
-            }
-            if (!this.eventStarted) {
-                this.eventStarted = true
-                this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
-                this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
 
             if (selected.length === 1) {
@@ -184,13 +208,13 @@ export default class ScaleGizmo extends System {
         }
 
     }
+
     _translateMatrix(t, m, comp) {
         const matrix = [...m]
 
         if (this.typeRot === ROTATION_TYPES.RELATIVE) {
             mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([], this.rotationTarget, comp.rotationQuat), vec3.add([], t, comp.translation), [.2, .2, .2], comp.translation)
-        } else
-        {
+        } else {
             matrix[12] += t[0]
             matrix[13] += t[1]
             matrix[14] += t[2]

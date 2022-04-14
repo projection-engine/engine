@@ -12,18 +12,24 @@ import COMPONENTS from "../../templates/COMPONENTS";
 import arrow from '../../../../static/assets/Arrow.json'
 import cube from '../../../../static/assets/Cube.json'
 import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
+import lockToGrid from "../misc/lockToGrid";
 
 export default class TranslationGizmo extends System {
-    eventStarted = false
+
     clickedAxis = -1
     tracking = false
     rotationTarget = [0, 0, 0, 1]
     currentCoord = undefined
+    firstPick = true
+    gridSize = .01
+    distanceX = 0
+    distanceY = 0
+    distanceZ = 0
     constructor(gpu, gizmoShader) {
         super([]);
         this.gpu = gpu
 
-        this.gizmoShader =  gizmoShader
+        this.gizmoShader = gizmoShader
 
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
@@ -39,6 +45,8 @@ export default class TranslationGizmo extends System {
         })
 
         this.handlerListener = this.handler.bind(this)
+        this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
+        this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
     }
 
     _mapEntity(i, axis) {
@@ -78,24 +86,33 @@ export default class TranslationGizmo extends System {
     handler(event) {
         switch (event.type) {
             case 'mousedown':
-                if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas)) {
+                if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas) && !this.firstPick) {
                     const target = this.gpu.canvas.getBoundingClientRect()
                     this.currentCoord = {x: event.clientX - target.left, y: event.clientY - target.top}
                 }
+                if (this.firstPick)
+                    this.firstPick = false
 
                 break
             case 'mouseup':
-                this.onGizmoEnd()
-                this.tracking = false
-                this.started = false
-                this.clickedAxis = -1
-                this.currentCoord = undefined
-                this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
-                document.exitPointerLock()
-                this.t = 0
+                this.firstPick = true
+                if (this.tracking) {
+                    this.onGizmoEnd()
+
+                    this.tracking = false
+                    this.started = false
+                    this.clickedAxis = -1
+                    this.currentCoord = undefined
+                    this.distanceX = 0
+                    this.distanceY = 0
+                    this.distanceZ = 0
+                    this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
+                    document.exitPointerLock()
+                    this.t = 0
+                }
                 break
             case 'mousemove':
-                if(!this.started) {
+                if (!this.started) {
                     this.started = true
                     this.onGizmoStart()
                 }
@@ -104,14 +121,26 @@ export default class TranslationGizmo extends System {
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.transformElement([vector[0] * .01, 0, 0])
+                        this.distanceX += Math.abs(vector[0] * 0.1)
+                        if (Math.abs(this.distanceX) >= this.gridSize) {
+                            this.transformElement([Math.sign(vector[0]) * this.distanceX, 0, 0])
+                            this.distanceX = 0
+                        }
                         break
                     case 2: // y
-                        this.transformElement([0, vector[1] * .01, 0])
-
+                        this.distanceY += Math.abs(vector[1] * 0.1)
+                        if (Math.abs(this.distanceY) >= this.gridSize) {
+                        this.transformElement([0, Math.sign(vector[1]) * this.distanceY, 0])
+                            this.distanceY = 0
+                        }
                         break
                     case 3: // z
-                        this.transformElement([0, 0, vector[2] * .01])
+                            this.distanceZ += Math.abs(vector[2] * 0.1)
+                            if (Math.abs(this.distanceZ) >= this.gridSize) {
+
+                                this.transformElement([0, 0, Math.sign(vector[2]) * this.distanceZ])
+                                this.distanceZ = 0
+                            }
                         break
                 }
 
@@ -175,12 +204,24 @@ export default class TranslationGizmo extends System {
 
     }
 
-    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,
-            onGizmoStart,
-            onGizmoEnd) {
-        super.execute()
+    execute(
+        meshes,
+        meshSources,
+        selected,
+        camera,
+        pickSystem,
+        lockCamera,
+        entities,
+        transformationType,
+        onGizmoStart,
+        onGizmoEnd,
+        gridSize
+        ) {
 
+        super.execute()
         if (selected.length > 0) {
+            this.gridSize = gridSize
+            this.firstPick = false
             this.typeRot = transformationType
             this.camera = camera
             this.onGizmoStart = onGizmoStart
@@ -190,6 +231,7 @@ export default class TranslationGizmo extends System {
                 if (el !== undefined) {
                     const translation = this.getTranslation(el)
                     if (translation !== undefined) {
+
                         const pickID = pickSystem.pickElement((shader, proj) => {
                             this._drawGizmo(translation, camera.viewMatrix, proj, shader, true)
                         }, this.currentCoord, camera, true)
@@ -203,18 +245,14 @@ export default class TranslationGizmo extends System {
                             this.tracking = true
                             lockCamera(true)
                             this.target = el
-                            this.gpu.canvas.requestPointerLock()
 
+                            this.gpu.canvas.requestPointerLock()
                             this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                         }
                     }
                 }
             }
-            if (!this.eventStarted) {
-                this.eventStarted = true
-                this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
-                this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
-            }
+
 
             if (selected.length === 1) {
                 const el = entities.find(m => m.id === selected[0])
@@ -235,8 +273,7 @@ export default class TranslationGizmo extends System {
 
         if (this.typeRot === ROTATION_TYPES.RELATIVE) {
             mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([], this.rotationTarget, comp.rotationQuat), vec3.add([], t, comp.translation), comp.scaling, comp.translation)
-        } else
-        {
+        } else {
             matrix[12] += t[0]
             matrix[13] += t[1]
             matrix[14] += t[2]
@@ -267,7 +304,6 @@ export default class TranslationGizmo extends System {
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, null)
-
 
 
     }

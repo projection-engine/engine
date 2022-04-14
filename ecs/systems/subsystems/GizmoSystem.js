@@ -50,14 +50,15 @@ export default class GizmoSystem extends System {
 
     }
 
-getMat(t){
-    return [
-        .1, 0, 0, 0,
-        0, .1, 0, 0,
-        0, 0, .1, 0,
-        t[0], t[1], t[2], 1
-    ]
-}
+    getMat(t) {
+        return [
+            .1, 0, 0, 0,
+            0, .1, 0, 0,
+            0, 0, .1, 0,
+            t[0], t[1], t[2], 1
+        ]
+    }
+
     execute(
         meshes,
         meshSources,
@@ -69,7 +70,8 @@ getMat(t){
         gizmo,
         transformationType = ROTATION_TYPES.GLOBAL,
         onGizmoStart,
-        onGizmoEnd
+        onGizmoEnd,
+        gridSize
     ) {
         super.execute()
 
@@ -101,13 +103,13 @@ getMat(t){
 
         switch (gizmo) {
             case GIZMOS.TRANSLATION:
-                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd)
+                this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize)
                 break
             case GIZMOS.ROTATION:
-                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd)
+                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize)
                 break
             case GIZMOS.SCALE:
-                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd)
+                this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize)
                 break
         }
 

@@ -70,7 +70,8 @@ export default class PostProcessingSystem extends System {
             onGizmoStart,
             onGizmoEnd,
             gizmo,
-            canExecutePhysicsAnimation
+            canExecutePhysicsAnimation,
+            gridSize
         } = options
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
@@ -110,7 +111,8 @@ export default class PostProcessingSystem extends System {
                 gizmo,
                 rotationType,
                 onGizmoStart,
-                onGizmoEnd
+                onGizmoEnd,
+                gridSize
             )
 
         this.frameBuffer.stopMapping()

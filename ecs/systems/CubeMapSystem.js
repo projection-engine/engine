@@ -12,14 +12,14 @@ import cube from "../../assets/cube.json";
 import {intersectBoundingSphere} from "./PhysicsSystem";
 import COMPONENTS from "../../templates/COMPONENTS";
 
-const STEPS = {
+export const STEPS_CUBE_MAP = {
     BASE: 0,
 
     DONE: 3,
     CALCULATE: 4
 }
 export default class CubeMapSystem extends System {
-    step = STEPS.BASE
+    step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
     cubeMapsConsumeMap = {}
 
@@ -39,61 +39,65 @@ export default class CubeMapSystem extends System {
         super.execute()
         const {
             cubeMaps,
-            meshSources,
-            meshes
+            skybox,
         } = data
 
         // RADIUS 10
-
-        if (options.recompile || this.lastCallLength !== cubeMaps.length) {
-            this.step = STEPS.BASE
+        if (this.lastCallLength !== cubeMaps.length) {
+            this.step = STEPS_CUBE_MAP.BASE
             this.lastCallLength = cubeMaps.length
         }
+        // if (this.lastMeshLength !== meshes.length) {
+        //     this.lastMeshLength = meshes.length
+        //     this.step = STEPS_CUBE_MAP.CALCULATE
+        // }
+        if (this.step !== STEPS_CUBE_MAP.DONE && (skybox && skybox.cubeMap || !skybox))
+            this.regenerate(data, options, systems)
+    }
 
-        if(this.lastMeshLength !== meshes.length) {
-            this.lastMeshLength = meshes.length
-            this.step = STEPS.CALCULATE
-        }
-        if (this.step !== STEPS.DONE) {
+    regenerate(data, options, systems) {
+        const {
+            cubeMaps,
+            meshes
+        } = data
+        switch (this.step) {
+            case STEPS_CUBE_MAP.BASE:
+                this._generateBaseTexture(options, systems, data)
+                for (let i = 0; i < cubeMaps.length; i++) {
+                    const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
+                    current.cubeMap.generateIrradiance()
+                }
+                for (let i = 0; i < cubeMaps.length; i++) {
+                    const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
+                    current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
+                }
+                this.step = STEPS_CUBE_MAP.CALCULATE
+                console.log('HERE')
+                break
 
-            switch (this.step) {
-                case STEPS.BASE:
-                    this._generateBaseTexture(options, systems, data)
-                    for (let i = 0; i < cubeMaps.length; i++) {
-                        const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-                        current.cubeMap.generateIrradiance()
+            case STEPS_CUBE_MAP.CALCULATE:
+
+                const changedMeshes = meshes
+                let newCubeMaps = {}
+
+                for (let i = 0; i < cubeMaps.length; i++) {
+                    const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
+                        pos = cubeMaps[i].components.TransformComponent.position,
+                        radius = current.radius
+
+                    for (let m = 0; m < changedMeshes.length; m++) {
+
+                        const currentMesh = changedMeshes[m].components
+                        if (intersectBoundingSphere(currentMesh.MaterialComponent.radius, radius, currentMesh.TransformComponent.position.slice(0, 3), pos))
+                            newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
                     }
-                    for (let i = 0; i < cubeMaps.length; i++) {
-                        const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-                        current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
-                    }
-                    options.setRecompile(false)
-                    this.step = STEPS.CALCULATE
-                    break
-                case STEPS.CALCULATE:
-
-                    const changedMeshes = meshes
-                    let newCubeMaps = {}
-
-                    for (let i = 0; i < cubeMaps.length; i++) {
-                        const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
-                            pos = cubeMaps[i].components.TransformComponent.position,
-                            radius = current.radius
-
-                        for (let m = 0; m < changedMeshes.length; m++) {
-
-                            const currentMesh = changedMeshes[m].components
-                            if (intersectBoundingSphere(currentMesh.MaterialComponent.radius, radius, currentMesh.TransformComponent.position.slice(0, 3), pos))
-                                newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
-                        }
-                    }
-                    this.cubeMapsConsumeMap = newCubeMaps
-                    this.step = STEPS.DONE
-                    break
-                default:
-                    this.step = STEPS.DONE
-                    break
-            }
+                }
+                this.cubeMapsConsumeMap = newCubeMaps
+                this.step = STEPS_CUBE_MAP.DONE
+                break
+            default:
+                this.step = STEPS_CUBE_MAP.DONE
+                break
         }
     }
 
@@ -141,7 +145,7 @@ export default class CubeMapSystem extends System {
                     const nView = [...view]
                     nView[12] = nView[13] = nView[14] = 0
 
-                    if (skybox) {
+                    if (skybox && skybox.cubeMap) {
                         this.gpu.depthMask(false)
                         this.skyShader.use()
                         this.gpu.bindVertexArray(this.vao)

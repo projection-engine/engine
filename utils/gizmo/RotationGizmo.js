@@ -16,10 +16,14 @@ import COMPONENTS from "../../templates/COMPONENTS";
 
 const toDeg = 57.29
 export default class RotationGizmo extends System {
-    eventStarted = false
+
     clickedAxis = -1
     tracking = false
     currentRotation = [0, 0, 0]
+    gridSize = .01
+    distanceX = 0
+    distanceY = 0
+    distanceZ = 0
 
     constructor(gpu, renderTarget) {
         super([]);
@@ -42,9 +46,9 @@ export default class RotationGizmo extends System {
         })
         this.texture = new TextureInstance(circle, false, this.gpu)
         this.handlerListener = this.handler.bind(this)
+        this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
+        this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
     }
-
-
     _mapEntity(i, axis) {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
@@ -77,47 +81,67 @@ export default class RotationGizmo extends System {
     handler(event) {
         switch (event.type) {
             case 'mousedown':
-                if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas)) {
+                if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas) && !this.firstPick) {
                     const target = this.gpu.canvas.getBoundingClientRect()
                     this.currentCoord = {x: event.clientX - target.left, y: event.clientY - target.top}
                 }
+                if (this.firstPick)
+                    this.firstPick = false
 
                 break
             case 'mouseup':
-                this.onGizmoEnd()
-                this.started = false
-                this.tracking = false
-                this.clickedAxis = -1
-                this.currentCoord = undefined
-                this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
-                document.exitPointerLock()
-                this.renderTarget.style.display = 'none'
+                this.firstPick = true
+                if (this.tracking) {
+                    this.onGizmoEnd()
+                    this.started = false
+                    this.distanceX = 0
+                    this.distanceY = 0
+                    this.distanceZ = 0
+                    this.tracking = false
+                    this.clickedAxis = -1
+                    this.currentCoord = undefined
+                    this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
+                    document.exitPointerLock()
+                    this.renderTarget.style.display = 'none'
 
-                this.currentRotation = [0, 0, 0]
+                    this.currentRotation = [0, 0, 0]
 
-                this.t = 0
+                    this.t = 0
+                }
                 break
             case 'mousemove':
-                if(!this.started) {
+                if (!this.started) {
                     this.started = true
                     this.onGizmoStart()
                 }
-
                 const vector = [event.movementX, event.movementY, event.movementX]
                 vec3.transformQuat(vector, vector, this.camera.orientation);
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.rotateElement([vector[0] * .01, 0, 0])
-                        this.renderTarget.innerHTML = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
+                        this.distanceX += Math.abs(vector[0] *0.01)
+                        if (Math.abs(this.distanceX) >= this.gridSize) {
+                            this.rotateElement([Math.sign(vector[0]) * this.distanceX *0.01745, 0, 0])
+                            this.distanceX = 0
+                            this.renderTarget.innerHTML = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
+                        }
                         break
                     case 2: // y
-                        this.rotateElement([0, vector[1] * .01, 0])
-                        this.renderTarget.innerHTML = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
+                        this.distanceY += Math.abs(vector[1]*0.01)
+                        if (Math.abs(this.distanceY) >= this.gridSize) {
+                            this.rotateElement([0, Math.sign(vector[1]) * this.distanceY*0.01745, 0])
+                            this.renderTarget.innerHTML = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
+                            this.distanceY= 0
+                        }
                         break
                     case 3: // z
-                        this.rotateElement([0, 0, vector[2] * .01])
-                        this.renderTarget.innerHTML = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
+                        this.distanceZ += Math.abs(vector[2] *0.01)
+                        if (Math.abs(this.distanceZ) >= this.gridSize) {
+                            this.rotateElement([0, 0, Math.sign(vector[2]) * this.distanceZ*0.01745])
+
+                            this.distanceZ = 0
+                            this.renderTarget.innerHTML = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
+                        }
                         break
                 }
 
@@ -155,10 +179,12 @@ export default class RotationGizmo extends System {
 
     execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,
             onGizmoStart,
-            onGizmoEnd) {
+            onGizmoEnd,gridSize) {
         super.execute()
 
         if (selected.length > 0) {
+            this.gridSize = gridSize
+            this.firstPick = false
             this.typeRot = transformationType
             this.camera = camera
             this.onGizmoStart = onGizmoStart
@@ -169,7 +195,7 @@ export default class RotationGizmo extends System {
                 if (el && el.components[COMPONENTS.TRANSFORM]) {
                     const pickID = pickSystem.pickElement((shader, proj) => {
                         this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader)
-                    }, this.currentCoord, camera,  true)
+                    }, this.currentCoord, camera, true)
 
                     this.clickedAxis = pickID - 2
 
@@ -185,15 +211,11 @@ export default class RotationGizmo extends System {
                         this.renderTarget.style.display = 'block'
 
                         this.target = el
+
                         this.gpu.canvas.requestPointerLock()
                         this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                     }
                 }
-            }
-            if (!this.eventStarted) {
-                this.eventStarted = true
-                this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
-                this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
             }
             if (selected.length === 1) {
                 const el = entities.find(m => m.id === selected[0])
@@ -225,9 +247,9 @@ export default class RotationGizmo extends System {
                 default:
                     break
             }
-        } else if(axis !== undefined)
+        } else if (axis !== undefined)
             matrix = mat4.fromRotationTranslationScale([], quat.multiply([], rotation, comp.rotationQuat), t, comp.scaling)
-        else{
+        else {
             matrix = [...m]
             matrix[12] += t[0]
             matrix[13] += t[1]

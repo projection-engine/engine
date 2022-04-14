@@ -17,7 +17,7 @@ import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
 import TransformSystem from "./ecs/systems/TransformSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import MATERIAL_TYPES from "./templates/MATERIAL_TYPES";
-import CubeMapSystem from "./ecs/systems/CubeMapSystem";
+import CubeMapSystem, {STEPS_CUBE_MAP} from "./ecs/systems/CubeMapSystem";
 import ScriptSystem from "./ecs/systems/ScriptSystem";
 import cloneClass from "../utils/misc/cloneClass";
 import COMPONENTS from "./templates/COMPONENTS";
@@ -69,7 +69,9 @@ export default class Engine extends RenderLoop {
     get systems() {
         return this._systems
     }
-
+    refreshCubemaps(){
+        this._systems[SYSTEMS.CUBE_MAP].step = STEPS_CUBE_MAP.BASE
+    }
 
     start(entities, materials, meshes, params, scripts = [], onGizmoStart, onGizmoEnd) {
         if (!this._inExecution && this.initialized) {
@@ -121,8 +123,6 @@ export default class Engine extends RenderLoop {
                     },
                     dataChanged: this._changed,
                     setDataChanged: () => this._changed = false,
-                    recompile: !this.recompiled,
-                    setRecompile: () => this.recompiled = true,
                     gizmo: this.gizmo
                 },
                 scripts,
