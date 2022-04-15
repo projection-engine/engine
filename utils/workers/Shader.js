@@ -55,8 +55,9 @@ export default class Shader {
         let compiled = this.gpu.getShaderParameter(shader, this.gpu.COMPILE_STATUS);
 
 
-        if (!compiled)
+        if (!compiled) {
             this.available = false
+        }
          else {
             this.gpu.attachShader(this.program, shader)
             this.gpu.linkProgram(this.program)

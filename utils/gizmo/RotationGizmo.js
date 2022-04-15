@@ -92,6 +92,7 @@ export default class RotationGizmo extends System {
             case 'mouseup':
                 this.firstPick = true
                 if (this.tracking) {
+                    this.renderTarget.innerText = ''
                     this.onGizmoEnd()
                     this.started = false
                     this.distanceX = 0
@@ -114,23 +115,21 @@ export default class RotationGizmo extends System {
                     this.started = true
                     this.onGizmoStart()
                 }
-                const vector = [event.movementX, event.movementY, event.movementX]
-                vec3.transformQuat(vector, vector, this.camera.orientation);
-
+                const vector = [event.movementX, event.movementX, event.movementX]
                 switch (this.clickedAxis) {
                     case 1: // x
                         this.distanceX += Math.abs(vector[0] *0.01)
                         if (Math.abs(this.distanceX) >= this.gridSize) {
                             this.rotateElement([Math.sign(vector[0]) * this.distanceX *0.01745, 0, 0])
                             this.distanceX = 0
-                            this.renderTarget.innerHTML = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
+                            this.renderTarget.innerText = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
                         }
                         break
                     case 2: // y
                         this.distanceY += Math.abs(vector[1]*0.01)
                         if (Math.abs(this.distanceY) >= this.gridSize) {
                             this.rotateElement([0, Math.sign(vector[1]) * this.distanceY*0.01745, 0])
-                            this.renderTarget.innerHTML = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
+                            this.renderTarget.innerText = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
                             this.distanceY= 0
                         }
                         break
@@ -140,7 +139,7 @@ export default class RotationGizmo extends System {
                             this.rotateElement([0, 0, Math.sign(vector[2]) * this.distanceZ*0.01745])
 
                             this.distanceZ = 0
-                            this.renderTarget.innerHTML = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
+                            this.renderTarget.innerText = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
                         }
                         break
                 }
@@ -209,6 +208,7 @@ export default class RotationGizmo extends System {
                         this.renderTarget.style.left = this.currentCoord.x + 'px'
                         this.renderTarget.style.top = this.currentCoord.y + 'px'
                         this.renderTarget.style.display = 'block'
+                        this.renderTarget.style.width = 'fit-content'
 
                         this.target = el
 

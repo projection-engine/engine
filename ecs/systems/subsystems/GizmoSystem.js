@@ -12,7 +12,7 @@ import COMPONENTS from "../../../templates/COMPONENTS";
 import {mat4} from "gl-matrix";
 
 export default class GizmoSystem extends System {
-
+    hiddenTarget = true
     constructor(gpu) {
         super([]);
         this.gpu = gpu
@@ -35,8 +35,8 @@ export default class GizmoSystem extends System {
                 canvas.parentNode.appendChild(this.renderTarget)
             }
 
-            this.translationGizmo = new TranslationGizmo(gpu, this.gizmoShader)
-            this.scaleGizmo = new ScaleGizmo(gpu, this.gizmoShader)
+            this.translationGizmo = new TranslationGizmo(gpu, this.gizmoShader, this.renderTarget)
+            this.scaleGizmo = new ScaleGizmo(gpu, this.gizmoShader, this.renderTarget)
 
             this.rotationGizmo = new RotationGizmo(gpu, this.renderTarget)
 
@@ -47,7 +47,6 @@ export default class GizmoSystem extends System {
                 indices: cube.indices
             })
         }
-
     }
 
     getMat(t) {
@@ -78,7 +77,7 @@ export default class GizmoSystem extends System {
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
 
         if (selected.length > 0) {
-
+            this.hiddenTarget = false
             const el = entities.find(m => m.id === selected[0])
             const comp = el ? el.components[COMPONENTS.TRANSFORM] : undefined
             if (comp) {
@@ -98,6 +97,10 @@ export default class GizmoSystem extends System {
                 })
                 this.gpu.drawElements(this.gpu.TRIANGLES, this.boundingBox.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
             }
+        }
+        else if(!this.hiddenTarget) {
+            this.hiddenTarget = true
+            this.renderTarget.style.display = 'none'
         }
 
 

@@ -12,6 +12,7 @@ import arrow from '../../../../static/assets/ScaleGizmo.json'
 import cube from '../../../../static/assets/Cube.json'
 import COMPONENTS from "../../templates/COMPONENTS";
 import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
+import GizmoToolTip from "./GizmoToolTip";
 
 export default class ScaleGizmo extends System {
 
@@ -23,8 +24,9 @@ export default class ScaleGizmo extends System {
     distanceY = 0
     distanceZ = 0
 
-    constructor(gpu, gizmoShader) {
+    constructor(gpu, gizmoShader, renderTarget) {
         super([]);
+        this.renderTarget = new GizmoToolTip(renderTarget)
         this.gpu = gpu
         this.gizmoShader = gizmoShader
         this.xGizmo = this._mapEntity(2, 'x')
@@ -85,10 +87,12 @@ export default class ScaleGizmo extends System {
                 }
                 if (this.firstPick)
                     this.firstPick = false
+
                 break
             case 'mouseup':
                 this.firstPick = true
                 if (this.tracking) {
+                    this.renderTarget.stop()
                     this.onGizmoEnd()
                     this.tracking = false
                     this.started = false
@@ -98,17 +102,19 @@ export default class ScaleGizmo extends System {
                     this.currentCoord = undefined
                     this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
                     document.exitPointerLock()
+
                     this.clickedAxis = -1
                     this.t = 0
                 }
                 break
             case 'mousemove':
                 if (!this.started) {
+
+                    this.renderTarget.start()
                     this.started = true
                     this.onGizmoStart()
                 }
-                const vector = [event.movementX, event.movementY, event.movementX]
-                vec3.transformQuat(vector, vector, this.camera.orientation);
+                const vector = [event.movementX, event.movementX, event.movementX]
 
                 switch (this.clickedAxis) {
                     case 1: // x
@@ -133,6 +139,7 @@ export default class ScaleGizmo extends System {
                         }
                         break
                 }
+                this.renderTarget.render(this.target.components[COMPONENTS.TRANSFORM].scaling)
 
                 break
             default:

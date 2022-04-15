@@ -1,6 +1,5 @@
 import System from "../../ecs/basic/System";
-import Shader from "../workers/Shader";
-import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
+
 
 import {mat4, quat, vec3, vec4} from "gl-matrix";
 import Entity from "../../ecs/basic/Entity";
@@ -13,6 +12,7 @@ import arrow from '../../../../static/assets/Arrow.json'
 import cube from '../../../../static/assets/Cube.json'
 import ROTATION_TYPES from "../../templates/ROTATION_TYPES";
 import lockToGrid from "../misc/lockToGrid";
+import GizmoToolTip from "./GizmoToolTip";
 
 export default class TranslationGizmo extends System {
 
@@ -25,8 +25,10 @@ export default class TranslationGizmo extends System {
     distanceX = 0
     distanceY = 0
     distanceZ = 0
-    constructor(gpu, gizmoShader) {
+
+    constructor(gpu, gizmoShader, renderTarget) {
         super([]);
+        this.renderTarget = new GizmoToolTip(renderTarget)
         this.gpu = gpu
 
         this.gizmoShader = gizmoShader
@@ -89,6 +91,7 @@ export default class TranslationGizmo extends System {
                 if (document.elementsFromPoint(event.clientX, event.clientY).includes(this.gpu.canvas) && !this.firstPick) {
                     const target = this.gpu.canvas.getBoundingClientRect()
                     this.currentCoord = {x: event.clientX - target.left, y: event.clientY - target.top}
+
                 }
                 if (this.firstPick)
                     this.firstPick = false
@@ -97,6 +100,7 @@ export default class TranslationGizmo extends System {
             case 'mouseup':
                 this.firstPick = true
                 if (this.tracking) {
+                    this.renderTarget.stop()
                     this.onGizmoEnd()
 
                     this.tracking = false
@@ -107,6 +111,7 @@ export default class TranslationGizmo extends System {
                     this.distanceY = 0
                     this.distanceZ = 0
                     this.gpu.canvas.removeEventListener("mousemove", this.handlerListener)
+
                     document.exitPointerLock()
                     this.t = 0
                 }
@@ -115,9 +120,9 @@ export default class TranslationGizmo extends System {
                 if (!this.started) {
                     this.started = true
                     this.onGizmoStart()
+                    this.renderTarget.start()
                 }
-                const vector = [event.movementX, event.movementY, event.movementX]
-                vec3.transformQuat(vector, vector, this.camera.orientation);
+                const vector = [event.movementX, event.movementX, event.movementX]
 
                 switch (this.clickedAxis) {
                     case 1: // x
@@ -130,24 +135,32 @@ export default class TranslationGizmo extends System {
                     case 2: // y
                         this.distanceY += Math.abs(vector[1] * 0.1)
                         if (Math.abs(this.distanceY) >= this.gridSize) {
-                        this.transformElement([0, Math.sign(vector[1]) * this.distanceY, 0])
+                            this.transformElement([0, Math.sign(vector[1]) * this.distanceY, 0])
                             this.distanceY = 0
                         }
                         break
                     case 3: // z
-                            this.distanceZ += Math.abs(vector[2] * 0.1)
-                            if (Math.abs(this.distanceZ) >= this.gridSize) {
+                        this.distanceZ += Math.abs(vector[2] * 0.1)
+                        if (Math.abs(this.distanceZ) >= this.gridSize) {
+                            this.transformElement([0, 0, Math.sign(vector[2]) * this.distanceZ])
 
-                                this.transformElement([0, 0, Math.sign(vector[2]) * this.distanceZ])
-                                this.distanceZ = 0
-                            }
+                            this.distanceZ = 0
+                        }
                         break
                 }
 
+                let t = this.target.components[COMPONENTS.TRANSFORM]?.translation
+                if (!t)
+                    t = this.target.components[COMPONENTS.SKYLIGHT]?.direction
+                if (!t)
+                    t = this.target.components[COMPONENTS.DIRECTIONAL_LIGHT]?.direction
+
+                this.renderTarget.render(t)
                 break
             default:
                 break
         }
+
     }
 
     transformElement(vec) {
@@ -216,7 +229,7 @@ export default class TranslationGizmo extends System {
         onGizmoStart,
         onGizmoEnd,
         gridSize
-        ) {
+    ) {
 
         super.execute()
         if (selected.length > 0) {
@@ -245,7 +258,7 @@ export default class TranslationGizmo extends System {
                             this.tracking = true
                             lockCamera(true)
                             this.target = el
-
+                            // this.gpu.canvas.gizmoTranslationTracking = true
                             this.gpu.canvas.requestPointerLock()
                             this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                         }

@@ -206,3 +206,28 @@ void main(){
     fragColor = vec4(color, .95);
 }
 `
+
+export const selectedVertex = `#version 300 es
+
+layout (location = 1) in vec3 position;
+ 
+
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 projectionMatrix;
+
+ 
+
+void main(){
+ 
+    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position,1.0);
+}
+`
+export const selectedFragment = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+
+void main(){
+    fragColor = vec4(1., 1., 0., .2);
+}
+`

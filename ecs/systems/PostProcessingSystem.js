@@ -13,6 +13,7 @@ import TransparencySystem from "./subsystems/TransparencySystem";
 import GizmoSystem from "./subsystems/GizmoSystem";
 import {copyTexture} from "../../utils/misc/utils";
 import RENDERING_TYPES from "../../templates/RENDERING_TYPES";
+import SelectedSystem from "./subsystems/SelectedSystem";
 
 
 export default class PostProcessingSystem extends System {
@@ -36,9 +37,10 @@ export default class PostProcessingSystem extends System {
         this.billboardSystem = new BillboardSystem(gpu)
         this.billboardSystem.initializeTextures().catch()
         this.gizmoSystem = new GizmoSystem(gpu)
+        this.selectedSystem = new SelectedSystem(gpu)
     }
 
-    execute(options, systems, data, entities) {
+    execute(options, systems, data, entities, entitiesMap) {
         super.execute()
         const {
             pointLights,
@@ -114,7 +116,7 @@ export default class PostProcessingSystem extends System {
                 onGizmoEnd,
                 gridSize
             )
-
+        this.selectedSystem.execute(selected, meshSources, camera, entitiesMap)
         this.frameBuffer.stopMapping()
 
         let shaderToApply
