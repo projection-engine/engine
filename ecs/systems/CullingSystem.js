@@ -10,17 +10,7 @@ export default class CullingSystem extends System {
 
     execute(options, systems, data) {
         super.execute()
-        const  {
-            pointLights,
-            spotLights,
-            terrains,
-            meshes,
-            skybox,
-            directionalLights,
-            materials,
-            meshSources,
-            cubeMaps
-        } = data
+
          // TODO - REMOVE NOT VISIBLE - REMOVE FRUSTUM CULLED - REMOVE GPU OCCLUSION CULLED
         // const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
         // filteredMeshes.forEach(m => {

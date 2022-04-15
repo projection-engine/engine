@@ -88,7 +88,7 @@ export default class CubeMapSystem extends System {
                     for (let m = 0; m < changedMeshes.length; m++) {
 
                         const currentMesh = changedMeshes[m].components
-                        if (intersectBoundingSphere(currentMesh.MaterialComponent.radius, radius, currentMesh.TransformComponent.position.slice(0, 3), pos))
+                        if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos))
                             newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
                     }
                 }
@@ -210,10 +210,10 @@ export default class CubeMapSystem extends System {
     ) {
         for (let m = 0; m < meshes.length; m++) {
             const current = meshes[m]
-            const mesh = meshSources[current.components.MeshComponent.meshID]
+            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined && !translucentMeshes[current.id]) {
-                const t = current.components.TransformComponent
-                const currentMaterial = materials[current.components.MaterialComponent.materialID]
+                const t = current.components[COMPONENTS.TRANSFORM]
+                const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
                 let mat = currentMaterial ? currentMaterial : meshSystem.fallbackMaterial
                 if (!mat || !mat.ready)
@@ -272,7 +272,7 @@ export default class CubeMapSystem extends System {
         mesh.normalVBO.enable()
         mesh.uvVBO.enable()
         mesh.tangentVBO.enable()
-
+        // TODO - USE MESH MATERIAL SHADER
         this.shader.bindForUse({
             pbrMaterial: {
                 albedo: material.albedo.texture,

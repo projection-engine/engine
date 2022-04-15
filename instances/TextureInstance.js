@@ -14,15 +14,16 @@ export default class TextureInstance {
         type,
         width,
         height,
-        border
+        border,
+        onLoad
     ) {
         this.attributes = {yFlip, internalFormat, format, repeat, noMipMapping, type, width, height, border,}
 
-        const init = (res) => this._init(res, yFlip, gpu, internalFormat, format, repeat, noMipMapping, type, width, height, border)
+        const init = (res) => this._init(res, yFlip, gpu, internalFormat, format, repeat, noMipMapping, type, width, height, border, onLoad)
         if (typeof img === 'string') {
 
             if (img.includes('data:image/'))
-                ImageProcessor.getImageBitmap(img).then(res =>{
+                ImageProcessor.getImageBitmap(img).then(res => {
                     res.naturalHeight = res.height
                     res.naturalWidth = res.width
                     init(res)
@@ -47,8 +48,10 @@ export default class TextureInstance {
         type = gpu.UNSIGNED_BYTE,
         width,
         height,
-        border = 0
+        border = 0,
+        onLoad=()=>null
     ) {
+
         const anisotropicEXT = gpu.getExtension('EXT_texture_filter_anisotropic')
         let newTexture = gpu.createTexture()
         if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true);
@@ -74,6 +77,7 @@ export default class TextureInstance {
         this.texture = newTexture
 
         this.loaded = true
+        onLoad()
     }
 
     update(newImage, gpu) {

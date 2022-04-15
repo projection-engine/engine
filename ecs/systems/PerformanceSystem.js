@@ -36,17 +36,7 @@ export default class PerformanceSystem extends System {
 
     execute(options, systems, data) {
         super.execute()
-        const  {
-            pointLights,
-            spotLights,
-            terrains,
-            meshes,
-            skybox,
-            directionalLights,
-            materials,
-            meshSources,
-            cubeMaps
-        } = data
+        const  {meshSources} = data
         if (options.performanceMetrics) {
 
             if (this._entitiesLength !== options.entitiesLength) {

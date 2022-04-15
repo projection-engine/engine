@@ -36,7 +36,9 @@ export default class Shader {
         const vCode = this._compileShader(vertex, gpu?.VERTEX_SHADER)
         const fCode = this._compileShader(fragment, gpu?.FRAGMENT_SHADER)
 
+        console.log(this._extractUniforms(fCode))
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
+        console.log(gpu.getError(), this.program, gpu.getUniformLocation(this.program, 't'))
         this.uniforms = this.uniforms.filter((value, index, self) =>
                 index === self.findIndex((t) => (
                     t.name === value.name
@@ -61,9 +63,10 @@ export default class Shader {
          else {
             this.gpu.attachShader(this.program, shader)
             this.gpu.linkProgram(this.program)
+
             this.available = true
         }
-
+      console.log(  this.gpu.getShaderInfoLog(shader))
         return bundledCode
     }
 
@@ -75,7 +78,7 @@ export default class Shader {
                 const match = u.match(this.regexMatch)
                 if (match) {
                     const type = match[4]
-                    const name = match[6].replace(' ', '')
+                    const name = match[6].replace(' ', '').trim()
 
                     if (TYPES[type] !== undefined) {
                         uniformObjects.push({
@@ -169,19 +172,19 @@ export default class Shader {
 
                 for (let i = 0; i < (current.arraySize < dataAttr.length ? current.arraySize : dataAttr.length); i++) {
                     if (current.parent)
-                        this._bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++)
+                        this._bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                     else
-                        this._bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++)
+                        this._bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                 }
             } else {
                 const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
-                this._bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++)
+                this._bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
             }
         }
 
     }
 
-    _bind(uLocation, data, type, currentSamplerIndex, increaseIndex) {
+    _bind(uLocation, data, type, currentSamplerIndex, increaseIndex, key) {
         switch (type) {
             case 'float':
             case 'int':
@@ -205,7 +208,6 @@ export default class Shader {
                 increaseIndex()
                 break
             case 'sampler2D':
-
                 bindTexture(currentSamplerIndex, data, uLocation, this.gpu)
                 increaseIndex()
                 break

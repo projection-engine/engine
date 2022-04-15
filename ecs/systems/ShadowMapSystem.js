@@ -148,7 +148,7 @@ export default class ShadowMapSystem extends System {
 
                         let currentLight = lights2D[face]
                         currentLight.atlasFace = [currentColumn, 0]
-
+                        // TODO - USE MESH MATERIAL SHADER
                         this._loopMeshes(meshes, meshSources, meshSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
                     }
                     if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
@@ -221,12 +221,12 @@ export default class ShadowMapSystem extends System {
                     mat = meshSystem.fallbackMaterial
                 const t = current.components.TransformComponent
 
-                this._drawMesh(mesh, view, projection, t.transformationMatrix, mat.albedo.texture, mat.normal.texture, color, shader, lightPosition, shadowClipNearFar)
+                this._drawMesh(mesh, view, projection, t.transformationMatrix, mat, color, shader, lightPosition, shadowClipNearFar)
             }
         }
     }
 
-    _drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, albedo, normal, lightColor, shader, lightPosition, shadowClipNearFar) {
+    _drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, mat, lightColor, shader, lightPosition, shadowClipNearFar) {
         this.gpu.bindVertexArray(mesh.VAO)
         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
 
@@ -243,8 +243,8 @@ export default class ShadowMapSystem extends System {
             transformMatrix,
             projectionMatrix,
             lightColor,
-            albedoSampler: albedo,
-            normalSampler: normal,
+            // albedoSampler: matalbedo,
+            // normalSampler: normal,
             lightPosition
         })
 

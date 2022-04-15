@@ -170,30 +170,22 @@ export default class TranslationGizmo extends System {
         else
             toApply = vec4.transformQuat([], vec, this.target.components[COMPONENTS.TRANSFORM].rotationQuat)
 
-        const k = Object.keys(this.target.components)
-        let key
-        for (let i = 0; i < k.length; i++) {
-            switch (k[i]) {
-                case COMPONENTS.SKYLIGHT:
-                case COMPONENTS.DIRECTIONAL_LIGHT:
-                    key = k[i] === COMPONENTS.SKYLIGHT ? 'SkylightComponent' : 'DirectionalLightComponent'
-                    this.target.components[key].direction = [
-                        this.target.components[key].direction[0] - toApply[0],
-                        this.target.components[key].direction[1] - toApply[1],
-                        this.target.components[key].direction[2] - toApply[2]
-                    ]
-                    break
-                case COMPONENTS.TRANSFORM:
-                    this.target.components[COMPONENTS.TRANSFORM].translation = [
-                        this.target.components[COMPONENTS.TRANSFORM].translation[0] - toApply[0],
-                        this.target.components[COMPONENTS.TRANSFORM].translation[1] - toApply[1],
-                        this.target.components[COMPONENTS.TRANSFORM].translation[2] - toApply[2]
-                    ]
-                    break
-                default:
-                    break
-            }
-        }
+
+        if (!this.target.components[COMPONENTS.TRANSFORM]) {
+            const key = this.target.components[COMPONENTS.SKYLIGHT] ? COMPONENTS.SKYLIGHT : COMPONENTS.DIRECTIONAL_LIGHT
+            this.target.components[key].direction = [
+                this.target.components[key].direction[0] - toApply[0],
+                this.target.components[key].direction[1] - toApply[1],
+                this.target.components[key].direction[2] - toApply[2]
+            ]
+        } else
+            this.target.components[COMPONENTS.TRANSFORM].translation = [
+                this.target.components[COMPONENTS.TRANSFORM].translation[0] - toApply[0],
+                this.target.components[COMPONENTS.TRANSFORM].translation[1] - toApply[1],
+                this.target.components[COMPONENTS.TRANSFORM].translation[2] - toApply[2]
+            ]
+
+
     }
 
     getTranslation(el) {

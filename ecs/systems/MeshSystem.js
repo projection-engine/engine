@@ -8,6 +8,7 @@ import brdfImg from "../../../../static/brdf_lut.jpg";
 import {createTexture} from "../../utils/misc/utils";
 import SYSTEMS from "../../templates/SYSTEMS";
 import COMPONENTS from "../../templates/COMPONENTS";
+import {DATA_TYPES} from "../../../../views/blueprints/base/DATA_TYPES";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -26,8 +27,7 @@ export default class MeshSystem extends System {
 
         const brdf = new Image()
         brdf.src = brdfImg
-
-        brdf.onload = () => {
+        brdf.decode().then(() => {
             this.brdf = createTexture(
                 gpu,
                 512,
@@ -42,18 +42,18 @@ export default class MeshSystem extends System {
                 gpu.CLAMP_TO_EDGE,
                 gpu.CLAMP_TO_EDGE
             )
-        }
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-
+            this.fallbackMaterial = new MaterialInstance(
+                this.gpu,
+                shaderCode.fragment,
+                [
+                    {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}
+                ],
+                () => {
+                    console.log('FINISHED')
+                    this._ready = true
+                })
+        })
     }
-
-    async initializeTextures() {
-        this.fallbackMaterial = new MaterialInstance(this.gpu, undefined, 0)
-        await this.fallbackMaterial.initializeTextures()
-        this._ready = true
-    }
-
-
 
     execute(options, systems, data) {
         super.execute()
@@ -64,7 +64,8 @@ export default class MeshSystem extends System {
             materials,
             meshSources,
             translucentMeshes,
-            cubeMapsSources
+            cubeMapsSources,
+            elapsed
         } = data
 
         if (this._ready) {
@@ -73,10 +74,6 @@ export default class MeshSystem extends System {
                 camera,
                 injectMaterial
             } = options
-
-
-            this.shader.use()
-
             this.frameBuffer.startMapping()
             const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
 
@@ -90,25 +87,23 @@ export default class MeshSystem extends System {
                     let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components[COMPONENTS.MATERIAL].overrideInjection ? injectMaterial : this.fallbackMaterial
                     if (!mat || !mat.ready)
                         mat = this.fallbackMaterial
-                    const c = toConsumeCubeMaps ?toConsumeCubeMaps[current.id] : undefined
+                    const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
                     let cubeMapToApply, ambient = {}
 
-                    if(c)
-                        cubeMapToApply =  cubeMapsSources[c]
-                    if(cubeMapToApply){
+                    if (c)
+                        cubeMapToApply = cubeMapsSources[c]
+                    if (cubeMapToApply) {
                         const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
-                        ambient.irradianceMap = cube.irradiance ? cube.irradianceMap: skybox?.cubeMap.irradianceTexture
+                        ambient.irradianceMap = cube.irradiance ? cube.irradianceMap : skybox?.cubeMap.irradianceTexture
                         ambient.prefilteredMap = cube.prefilteredMap
                         ambient.prefilteredLod = cube.prefilteredMipmaps
-                    }else if(skybox && skybox.cubeMap !== undefined){
+                    } else if (skybox && skybox.cubeMap !== undefined) {
                         ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
                         ambient.prefilteredMap = skybox?.cubeMap.prefiltered
                         ambient.prefilteredLod = 6
                     }
 
-                    MeshSystem.drawMesh(
-                        this.shader,
-                        this.gpu,
+                    this.drawMesh(
                         mesh,
                         camera.position,
                         camera.viewMatrix,
@@ -121,8 +116,8 @@ export default class MeshSystem extends System {
 
                         ambient.irradianceMap,
                         ambient.prefilteredMap,
-                        this.brdf,
-                        ambient.prefilteredLod
+                        ambient.prefilteredLod,
+                        elapsed
                     )
                 }
             }
@@ -131,9 +126,7 @@ export default class MeshSystem extends System {
 
     }
 
-    static drawMesh(
-        shader,
-        gpu,
+    drawMesh(
         mesh,
         camPosition,
         viewMatrix,
@@ -145,54 +138,31 @@ export default class MeshSystem extends System {
         materialComponent,
         closestIrradiance,
         closestPrefiltered,
-        brdf,
-        prefilteredLod
+        prefilteredLod,
+        elapsed
     ) {
-
+        const mat = material && material.ready ? material : this.fallbackMaterial
+        const gpu = this.gpu
         mesh.use()
-        let materialAttrs = {}
+        try {
+            mat.use(true, {
+                projectionMatrix,
+                transformMatrix,
+                viewMatrix,
+                cameraVec: camPosition,
+                normalMatrix,
+                indexSelected,
+                elapsed,
+                irradianceMap: closestIrradiance,
+                prefilteredMapSampler: closestPrefiltered,
+                ambientLODSamples: prefilteredLod,
+                ...(materialComponent.overrideTiling ? materialComponent.uniformValues : {})
+            })
 
-        if (material && materialComponent) {
-            materialAttrs = {
-                pbrMaterial: {
-                    albedo: material.albedo.texture,
-                    metallic: material.metallic.texture,
-                    roughness: material.roughness.texture,
-                    normal: material.normal.texture,
-                    height: material.height.texture,
-                    ao: material.ao.texture,
-                    emissive: material.emissive.texture
-                },
-                heightScale: materialComponent.overrideTiling ? materialComponent.parallaxHeightScale : material.parallaxHeightScale,
-                layers: materialComponent.overrideTiling ? materialComponent.parallaxLayers : material.parallaxLayers,
-
-                uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale,
-            }
+            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+            mesh.finish()
+        } catch (e) {
         }
-
-
-        shader.bindForUse({
-            ...materialAttrs,
-            projectionMatrix,
-            transformMatrix,
-            viewMatrix,
-            cameraVec: camPosition,
-            normalMatrix,
-            indexSelected,
-            brdfSampler: brdf,
-            irradianceMap: closestIrradiance,
-            prefilteredMapSampler: closestPrefiltered,
-            settings: [
-                material?.parallaxEnabled ? 1 : 0,
-                materialComponent?.discardOffPixels ? 1 : 0,
-                closestIrradiance && closestPrefiltered ? 1 : 0
-            ],
-            ambientLODSamples: prefilteredLod
-        })
-
-        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-        mesh.finish()
-
 
     }
 }
