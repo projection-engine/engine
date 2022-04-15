@@ -50,11 +50,12 @@ in highp vec2 texCoord;
 in mat3 toTangentSpace;
 
 in vec3 viewDirection;
+uniform vec3 cameraVec;
  
 uniform lowp ivec3 settings;
 uniform float heightScale;
 uniform float layers;
-uniform vec3 cameraVec;
+
 
 struct PBR {
     sampler2D albedo;
@@ -124,9 +125,7 @@ vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap )
 
 void main(){
 
-    gBehaviour = vec4(1.0);
- 
-   
+    gBehaviour = vec4(1.0);  
     gPosition = vPosition;
     
     vec2 UVs = parallaxMapping(texCoord,  viewDirection, pbrMaterial.height);

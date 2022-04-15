@@ -1,76 +1,76 @@
 import System from "../basic/System";
-import EventTick from "../../../../views/material/blueprint/nodes/events/EventTick";
+import EventTick from "../../../../views/blueprints/blueprint/nodes/events/EventTick";
 import GetWorldRotation
-    from "../../../../views/material/blueprint/nodes/transformation/GetWorldRotation";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/GetWorldRotation";
 import GetWorldTranslation
-    from "../../../../views/material/blueprint/nodes/transformation/GetWorldTranslation";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/GetWorldTranslation";
 import SetWorldRotation
-    from "../../../../views/material/blueprint/nodes/transformation/SetWorldRotation";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/SetWorldRotation";
 import SetWorldTranslation
-    from "../../../../views/material/blueprint/nodes/transformation/SetWorldTranslation";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/SetWorldTranslation";
 import QuaternionToEuler
-    from "../../../../views/material/blueprint/nodes/transformation/QuaternionToEuler";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/QuaternionToEuler";
 import COMPONENTS from "../../templates/COMPONENTS";
-import Getter from "../../../../views/material/blueprint/nodes/utils/Getter";
-import Setter from "../../../../views/material/blueprint/nodes/utils/Setter";
+import Getter from "../../../../views/blueprints/blueprint/nodes/utils/Getter";
+import Setter from "../../../../views/blueprints/blueprint/nodes/utils/Setter";
 
-import Subtract from "../../../../views/material/blueprint/nodes/operators/math/Subtract";
-import Divide from "../../../../views/material/blueprint/nodes/operators/math/Divide";
-import Add from "../../../../views/material/blueprint/nodes/operators/math/Add";
-import Multiply from "../../../../views/material/blueprint/nodes/operators/math/Multiply";
+import Subtract from "../../../../views/blueprints/blueprint/nodes/operators/math/Subtract";
+import Divide from "../../../../views/blueprints/blueprint/nodes/operators/math/Divide";
+import Add from "../../../../views/blueprints/blueprint/nodes/operators/math/Add";
+import Multiply from "../../../../views/blueprints/blueprint/nodes/operators/math/Multiply";
 import SetTransformationRelativeOrigin
-    from "../../../../views/material/blueprint/nodes/transformation/SetTransformationRelativeOrigin";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/SetTransformationRelativeOrigin";
 import SetLocalRotation
-    from "../../../../views/material/blueprint/nodes/transformation/SetLocalRotation";
-import ToVector from "../../../../views/material/blueprint/nodes/operators/conversions/ToVector";
-import FromVector from "../../../../views/material/blueprint/nodes/operators/conversions/FromVector";
-import Print from "../../../../views/material/blueprint/nodes/utils/Print";
-import And from "../../../../views/material/blueprint/nodes/operators/boolean/And";
-import Branch from "../../../../views/material/blueprint/nodes/branches/Branch";
-import Equal from "../../../../views/material/blueprint/nodes/operators/boolean/Equal";
-import Greater from "../../../../views/material/blueprint/nodes/operators/boolean/Greater";
-import GreaterEqual from "../../../../views/material/blueprint/nodes/operators/boolean/GreaterEqual";
-import Less from "../../../../views/material/blueprint/nodes/operators/boolean/Less";
-import LessEqual from "../../../../views/material/blueprint/nodes/operators/boolean/LessEqual";
-import Nand from "../../../../views/material/blueprint/nodes/operators/boolean/Nand";
-import Nor from "../../../../views/material/blueprint/nodes/operators/boolean/Nor";
-import Not from "../../../../views/material/blueprint/nodes/operators/boolean/Not";
-import NotEqual from "../../../../views/material/blueprint/nodes/operators/boolean/NotEqual";
-import Or from "../../../../views/material/blueprint/nodes/operators/boolean/Or";
-import Xor from "../../../../views/material/blueprint/nodes/operators/boolean/Xor";
-import RandomInt from "../../../../views/material/blueprint/nodes/utils/RandomInt";
-import RandomFloat from "../../../../views/material/blueprint/nodes/utils/RandomFloat";
-import MouseX from "../../../../views/material/blueprint/nodes/events/MouseX";
-import MouseY from "../../../../views/material/blueprint/nodes/events/MouseY";
-import MousePosition from "../../../../views/material/blueprint/nodes/events/MousePosition";
-import EntityReference from "../../../../views/material/blueprint/nodes/events/EntityReference";
-import Cos from "../../../../views/material/blueprint/nodes/operators/math/Cos";
-import Sin from "../../../../views/material/blueprint/nodes/operators/math/Sin";
-import ASin from "../../../../views/material/blueprint/nodes/operators/math/ASin";
-import ACos from "../../../../views/material/blueprint/nodes/operators/math/ACos";
-import ATan from "../../../../views/material/blueprint/nodes/operators/math/ATan";
-import Tan from "../../../../views/material/blueprint/nodes/operators/math/Tan";
-import Mod from "../../../../views/material/blueprint/nodes/operators/math/Mod";
-import Abs from "../../../../views/material/blueprint/nodes/operators/math/Abs";
-import KeyPress from "../../../../views/material/blueprint/nodes/events/KeyPress";
-import RotateVector from "../../../../views/material/blueprint/nodes/transformation/RotateVector";
+    from "../../../../views/blueprints/blueprint/nodes/transformation/SetLocalRotation";
+import ToVector from "../../../../views/blueprints/blueprint/nodes/operators/conversions/ToVector";
+import FromVector from "../../../../views/blueprints/blueprint/nodes/operators/conversions/FromVector";
+import Print from "../../../../views/blueprints/blueprint/nodes/utils/Print";
+import And from "../../../../views/blueprints/blueprint/nodes/operators/boolean/And";
+import Branch from "../../../../views/blueprints/blueprint/nodes/branches/Branch";
+import Equal from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Equal";
+import Greater from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Greater";
+import GreaterEqual from "../../../../views/blueprints/blueprint/nodes/operators/boolean/GreaterEqual";
+import Less from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Less";
+import LessEqual from "../../../../views/blueprints/blueprint/nodes/operators/boolean/LessEqual";
+import Nand from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Nand";
+import Nor from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Nor";
+import Not from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Not";
+import NotEqual from "../../../../views/blueprints/blueprint/nodes/operators/boolean/NotEqual";
+import Or from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Or";
+import Xor from "../../../../views/blueprints/blueprint/nodes/operators/boolean/Xor";
+import RandomInt from "../../../../views/blueprints/blueprint/nodes/utils/RandomInt";
+import RandomFloat from "../../../../views/blueprints/blueprint/nodes/utils/RandomFloat";
+import MouseX from "../../../../views/blueprints/blueprint/nodes/events/MouseX";
+import MouseY from "../../../../views/blueprints/blueprint/nodes/events/MouseY";
+import MousePosition from "../../../../views/blueprints/blueprint/nodes/events/MousePosition";
+import EntityReference from "../../../../views/blueprints/blueprint/nodes/events/EntityReference";
+import Cos from "../../../../views/blueprints/blueprint/nodes/operators/math/Cos";
+import Sin from "../../../../views/blueprints/blueprint/nodes/operators/math/Sin";
+import ASin from "../../../../views/blueprints/blueprint/nodes/operators/math/ASin";
+import ACos from "../../../../views/blueprints/blueprint/nodes/operators/math/ACos";
+import ATan from "../../../../views/blueprints/blueprint/nodes/operators/math/ATan";
+import Tan from "../../../../views/blueprints/blueprint/nodes/operators/math/Tan";
+import Mod from "../../../../views/blueprints/blueprint/nodes/operators/math/Mod";
+import Abs from "../../../../views/blueprints/blueprint/nodes/operators/math/Abs";
+import KeyPress from "../../../../views/blueprints/blueprint/nodes/events/KeyPress";
+import RotateVector from "../../../../views/blueprints/blueprint/nodes/transformation/RotateVector";
 
-import GetCameraPosition from "../../../../views/material/blueprint/nodes/camera/GetCameraPosition";
-import GetCameraRotation from "../../../../views/material/blueprint/nodes/camera/GetCameraRotation";
+import GetCameraPosition from "../../../../views/blueprints/blueprint/nodes/camera/GetCameraPosition";
+import GetCameraRotation from "../../../../views/blueprints/blueprint/nodes/camera/GetCameraRotation";
 
-import SetCameraFOV from "../../../../views/material/blueprint/nodes/camera/SetCameraFOV";
-import SetCameraPosition from "../../../../views/material/blueprint/nodes/camera/SetCameraPosition";
-import SetCameraRotation from "../../../../views/material/blueprint/nodes/camera/SetCameraRotation";
-import UpdateCameraLookAt from "../../../../views/material/blueprint/nodes/camera/UpdateCameraLookAt";
+import SetCameraFOV from "../../../../views/blueprints/blueprint/nodes/camera/SetCameraFOV";
+import SetCameraPosition from "../../../../views/blueprints/blueprint/nodes/camera/SetCameraPosition";
+import SetCameraRotation from "../../../../views/blueprints/blueprint/nodes/camera/SetCameraRotation";
+import UpdateCameraLookAt from "../../../../views/blueprints/blueprint/nodes/camera/UpdateCameraLookAt";
 import UpdateCameraProjection
-    from "../../../../views/material/blueprint/nodes/camera/UpdateCameraProjection";
-import SetViewTarget from "../../../../views/material/blueprint/nodes/camera/SetViewTarget";
-import OnSpawn from "../../../../views/material/blueprint/nodes/events/OnSpawn";
-import QuatRotateX from "../../../../views/material/blueprint/nodes/operators/math/QuatRotateX";
-import QuatRotateY from "../../../../views/material/blueprint/nodes/operators/math/QuatRotateY";
-import QuatRotateZ from "../../../../views/material/blueprint/nodes/operators/math/QuatRotateZ";
-import OnInterval from "../../../../views/material/blueprint/nodes/events/OnInterval";
-import FollowAround from "../../../../views/material/blueprint/nodes/camera/FollowAround";
+    from "../../../../views/blueprints/blueprint/nodes/camera/UpdateCameraProjection";
+import SetViewTarget from "../../../../views/blueprints/blueprint/nodes/camera/SetViewTarget";
+import OnSpawn from "../../../../views/blueprints/blueprint/nodes/events/OnSpawn";
+import QuatRotateX from "../../../../views/blueprints/blueprint/nodes/operators/math/QuatRotateX";
+import QuatRotateY from "../../../../views/blueprints/blueprint/nodes/operators/math/QuatRotateY";
+import QuatRotateZ from "../../../../views/blueprints/blueprint/nodes/operators/math/QuatRotateZ";
+import OnInterval from "../../../../views/blueprints/blueprint/nodes/events/OnInterval";
+import FollowAround from "../../../../views/blueprints/blueprint/nodes/camera/FollowAround";
 
 
 export default class ScriptSystem extends System {

@@ -101,7 +101,7 @@ export default class PostProcessingSystem extends System {
         if (!canExecutePhysicsAnimation) {
             this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight, cameras)
         }
-        if (gizmo !== undefined && !canExecutePhysicsAnimation)
+        if (gizmo !== undefined && !canExecutePhysicsAnimation) {
             this.gizmoSystem.execute(
                 meshes,
                 meshSources,
@@ -116,7 +116,9 @@ export default class PostProcessingSystem extends System {
                 onGizmoEnd,
                 gridSize
             )
-        this.selectedSystem.execute(selected, meshSources, camera, entitiesMap)
+            this.selectedSystem.execute(selected, meshSources, camera, entitiesMap)
+        }
+
         this.frameBuffer.stopMapping()
 
         let shaderToApply
