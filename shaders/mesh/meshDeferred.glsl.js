@@ -46,6 +46,7 @@ precision highp float;
 // IN
 in vec4 vPosition;
 in vec3 normalVec;
+in mat3 toTangentSpace;
 
 uniform sampler2D brdfSampler;
 uniform samplerCube irradianceMap;
@@ -107,8 +108,8 @@ void main(){
     gPosition = vPosition;
 
     gAlbedo = vec4(.5, .5, .5, 1.);
-    gBehaviour = vec4(0.,1.,0.,1.);
-    gNormal = vec4(normalize(normalVec), 1.0);
+    gBehaviour = vec4(1.,1.,0.,1.);
+    gNormal = vec4(normalize(toTangentSpace * ((vec3(.5, .5, 1.) * 2.0)- 1.0)), 1.0);
     
     vec3 diffuse = vec3(0.);
     vec3 specular = vec3(0.);
@@ -119,7 +120,7 @@ void main(){
     
     vec3 F    = fresnelSchlickRoughness(NdotV, F0, gBehaviour.g);
     vec3 kD = (1.0 - F) * (1.0 - gBehaviour.b);
-    diffuse = texture(irradianceMap, vec3(gNormal.x, -gNormal.y, gNormal.z)).rgb * gAlbedo.rgb * kD;
+    diffuse = texture(irradianceMap, gNormal.rgb).rgb * gAlbedo.rgb * kD;
 
     vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, gNormal.rgb), gBehaviour.g * ambientLODSamples).rgb;
     vec2 brdf = texture(brdfSampler, vec2(NdotV, gBehaviour.g)).rg;

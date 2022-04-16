@@ -27,12 +27,10 @@ export default class MaterialInstance {
                 switch (k.type) {
                     case DATA_TYPES.COLOR:
                     case DATA_TYPES.TEXTURE:
-                        console.log(k.data)
                         const img = k.type === DATA_TYPES.TEXTURE ? k.data: await ImageProcessor.colorToImage(k.data, 32)
                         let texture
                         await new Promise(r => {
-                            console.log(k, img, this.gpu[k.format?.internalFormat],   this.gpu[k.format?.format])
-                            // albedo, false, this.gpu, undefined, undefined, true
+
                             texture = new TextureInstance(
                                 img,
                                 k.yFlip,
@@ -47,12 +45,10 @@ export default class MaterialInstance {
                                 0,
                                 () => {
                                     r()
-                                    console.trace("loaded")
                                 }
                             )
                         })
                         this.uniformData[k.key] = texture.texture
-                        console.log(this.uniformData[k.key], k.key)
                         break
                     default:
                         this.uniformData[k.key] = k.data

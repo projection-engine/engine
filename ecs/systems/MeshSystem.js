@@ -150,15 +150,19 @@ export default class MeshSystem extends System {
                 projectionMatrix,
                 transformMatrix,
                 viewMatrix,
-                cameraVec: camPosition,
+
                 normalMatrix,
                 indexSelected,
+
+                brdfSampler: this.brdf,
                 elapsedTime: elapsed,
+                cameraVec: camPosition,
                 irradianceMap: closestIrradiance,
                 prefilteredMapSampler: closestPrefiltered,
                 ambientLODSamples: prefilteredLod,
                 ...(materialComponent.overrideTiling ? materialComponent.uniformValues : {})
             })
+
 
             gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
             mesh.finish()
