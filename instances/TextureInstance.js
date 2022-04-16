@@ -26,6 +26,7 @@ export default class TextureInstance {
                 ImageProcessor.getImageBitmap(img).then(res => {
                     res.naturalHeight = res.height
                     res.naturalWidth = res.width
+                    console.log(res)
                     init(res)
                 })
             else {

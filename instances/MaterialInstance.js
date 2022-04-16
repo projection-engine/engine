@@ -11,15 +11,16 @@ export default class MaterialInstance {
     uvScale = [1, 1]
     uniformData = {}
     uniforms = []
+
     // {key, data, type}
     constructor(gpu, shader, uniformData = [], onCompiled = () => null, id) {
         this.gpu = gpu
-        this.id =  id
+        this.id = id
 
         this.shader = [shader, uniformData, onCompiled]
     }
 
-    set shader([shader, uniformData, onCompiled]){
+    set shader([shader, uniformData, onCompiled]) {
         this.ready = false
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {
@@ -27,23 +28,23 @@ export default class MaterialInstance {
                     case DATA_TYPES.COLOR:
                     case DATA_TYPES.TEXTURE:
                         console.log(k.data)
-                        const img = k.type === DATA_TYPES.TEXTURE ? await ImageProcessor.getImageBitmap(k.data) : await ImageProcessor.colorToImage(k.data, 32)
+                        const img = k.type === DATA_TYPES.TEXTURE ? k.data: await ImageProcessor.colorToImage(k.data, 32)
                         let texture
                         await new Promise(r => {
+                            console.log(k, img, this.gpu[k.format?.internalFormat],   this.gpu[k.format?.format])
+                            // albedo, false, this.gpu, undefined, undefined, true
                             texture = new TextureInstance(
                                 img,
                                 k.yFlip,
                                 this.gpu,
-                                this.gpu[k.internalFormat],
-
-                                this.gpu[k.format],
-                                k.repeat,
-                                k.noMipMapping,
-                                this.gpu[k.type],
-
-                                img.width,
-                                img.height,
-                                k.border,
+                                this.gpu[k.format?.internalFormat],
+                                this.gpu[k.format?.format],
+                                true,
+                                false,
+                                this.gpu.UNSIGNED_BYTE,
+                                undefined,
+                                undefined,
+                                0,
                                 () => {
                                     r()
                                     console.trace("loaded")
@@ -51,7 +52,7 @@ export default class MaterialInstance {
                             )
                         })
                         this.uniformData[k.key] = texture.texture
-                        console.log(this.uniformData[k.key] , k.key)
+                        console.log(this.uniformData[k.key], k.key)
                         break
                     default:
                         this.uniformData[k.key] = k.data
@@ -61,12 +62,12 @@ export default class MaterialInstance {
             })
         }))
             .then(() => {
-                if(onCompiled)
-                onCompiled()
+                if (onCompiled)
+                    onCompiled()
                 this.ready = true
             })
 
-        if(this._shader)
+        if (this._shader)
             this.gpu.deleteProgram(this._shader.program)
 
         this._shader = new Shader(vertex, shader, this.gpu, true)

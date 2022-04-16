@@ -38,7 +38,7 @@ export default class Shader {
 
         console.log(this._extractUniforms(fCode))
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
-        console.log(gpu.getError(), this.program, gpu.getUniformLocation(this.program, 't'))
+        // console.log(gpu.getError(), this.program, gpu.getUniformLocation(this.program, 't'))
         this.uniforms = this.uniforms.filter((value, index, self) =>
                 index === self.findIndex((t) => (
                     t.name === value.name
@@ -66,7 +66,7 @@ export default class Shader {
 
             this.available = true
         }
-      console.log(  this.gpu.getShaderInfoLog(shader))
+      // console.log(  this.gpu.getShaderInfoLog(shader))
         return bundledCode
     }
 

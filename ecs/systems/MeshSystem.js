@@ -65,12 +65,13 @@ export default class MeshSystem extends System {
             meshSources,
             translucentMeshes,
             cubeMapsSources,
-            elapsed
+
         } = data
 
         if (this._ready) {
 
             const {
+                elapsed,
                 camera,
                 injectMaterial
             } = options
@@ -152,7 +153,7 @@ export default class MeshSystem extends System {
                 cameraVec: camPosition,
                 normalMatrix,
                 indexSelected,
-                elapsed,
+                elapsedTime: elapsed,
                 irradianceMap: closestIrradiance,
                 prefilteredMapSampler: closestPrefiltered,
                 ambientLODSamples: prefilteredLod,
