@@ -7,7 +7,7 @@ import brdfImg from "../../../utils/brdf_lut.jpg";
 import {createTexture} from "../../utils/misc/utils";
 import SYSTEMS from "../../templates/SYSTEMS";
 import COMPONENTS from "../../templates/COMPONENTS";
-import {DATA_TYPES} from "../../../../../views/blueprints/base/DATA_TYPES";
+import {DATA_TYPES} from "../../../../views/blueprints/base/DATA_TYPES";
 
 export default class MeshSystem extends System {
     _ready = false
@@ -158,7 +158,7 @@ export default class MeshSystem extends System {
                 irradianceMap: closestIrradiance,
                 prefilteredMapSampler: closestPrefiltered,
                 ambientLODSamples: prefilteredLod,
-                ...(materialComponent.overrideTiling ? materialComponent.uniformValues : {})
+                ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
 
 

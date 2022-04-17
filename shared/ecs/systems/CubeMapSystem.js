@@ -284,7 +284,7 @@ export default class CubeMapSystem extends System {
                 emissive: material.emissive.texture
             },
 
-            uvScale: materialComponent.overrideTiling ? materialComponent.tiling : material.uvScale,
+            uvScale: materialComponent.overrideMaterial ? materialComponent.tiling : material.uvScale,
             projectionMatrix,
             transformMatrix,
             viewMatrix,

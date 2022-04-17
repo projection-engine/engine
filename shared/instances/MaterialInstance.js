@@ -2,7 +2,7 @@ import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../../utils/image/ImageProcessor";
 import Shader from "../utils/workers/Shader";
 import {vertex} from "../shaders/mesh/meshDeferred.glsl";
-import {DATA_TYPES} from "../../../../views/blueprints/base/DATA_TYPES";
+import {DATA_TYPES} from "../../../views/blueprints/base/DATA_TYPES";
 
 
 export default class MaterialInstance {
@@ -29,7 +29,6 @@ export default class MaterialInstance {
                         const img = k.type === DATA_TYPES.TEXTURE ? k.data: await ImageProcessor.colorToImage(k.data, 32)
                         let texture
                         await new Promise(r => {
-
                             texture = new TextureInstance(
                                 img,
                                 k.yFlip,

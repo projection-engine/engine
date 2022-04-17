@@ -1,4 +1,4 @@
-import {WebWorker} from "../../../../pages/project/utils/workers/WebWorker";
+import {WebWorker} from "../../../pages/project/utils/workers/WebWorker";
 import blendWithColor, {colorToImage, heightBasedLinearInterpolate, linearInterpolate} from "./functions/blend";
 
 import resize, {extractChannel, getImageBitmap, invert} from "./functions/misc";

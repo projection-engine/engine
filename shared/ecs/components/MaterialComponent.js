@@ -5,7 +5,7 @@ export default class MaterialComponent extends Component{
 
     // OLD
     tiling = [1,1]
-    overrideTiling = false
+    overrideMaterial = false
     discardOffPixels = false
     radius = 50
     parallaxHeightScale = .1
