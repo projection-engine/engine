@@ -141,7 +141,6 @@ export default class TranslationGizmo extends System {
                         this.distanceZ += Math.abs(vector[2] * 0.1)
                         if (Math.abs(this.distanceZ) >= this.gridSize) {
                             this.transformElement([0, 0, Math.sign(vector[2]) * this.distanceZ])
-
                             this.distanceZ = 0
                         }
                         break
