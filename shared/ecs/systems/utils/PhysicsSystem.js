@@ -1,4 +1,4 @@
-import System from "../basic/System";
+import System from "../../basic/System";
 import {vec3, vec4} from "gl-matrix";
 
 const GRAVITY = .1

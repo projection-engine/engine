@@ -5,7 +5,7 @@ export default class MaterialComponent extends Component{
 
     overrideMaterial = false
     radius = 50
-
+    doubleSided = true
 
 
      uniforms = []

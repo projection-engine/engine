@@ -1,4 +1,4 @@
-import System from "../basic/System";
+import System from "../../basic/System";
 import {vec3} from "gl-matrix";
 
 export default class AOSystem extends System {

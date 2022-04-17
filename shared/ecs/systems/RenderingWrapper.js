@@ -1,22 +1,18 @@
 import System from "../basic/System";
-import DeferredSystem from "./subsystems/DeferredSystem";
-import GridSystem from "./subsystems/GridSystem";
-import BillboardSystem from "./subsystems/BillboardSystem";
-import SkyboxSystem from "./subsystems/SkyboxSystem";
-import GlobalIlluminationSystem from "./subsystems/gi/GlobalIlluminationSystem";
+import DeferredSystem from "./rendering/DeferredSystem";
+import SkyboxSystem from "./rendering/SkyboxSystem";
+import GlobalIlluminationSystem from "./rendering/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../templates/SYSTEMS";
 import Shader from "../../utils/workers/Shader";
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
-import TransparencySystem from "./subsystems/TransparencySystem";
-import GizmoSystem from "./subsystems/GizmoSystem";
+import ForwardSystem from "./rendering/ForwardSystem";
 import {copyTexture} from "../../utils/misc/utils";
 import RENDERING_TYPES from "../../templates/RENDERING_TYPES";
-import SelectedSystem from "./subsystems/SelectedSystem";
 
 
-export default class PostProcessingSystem extends System {
+export default class RenderingWrapper extends System {
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
@@ -29,100 +25,50 @@ export default class PostProcessingSystem extends System {
         this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
-        this.transparencySystem = new TransparencySystem(gpu)
+        this.transparencySystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)
         this.deferredSystem = new DeferredSystem(gpu)
-        this.gridSystem = new GridSystem(gpu)
-        this.billboardSystem = new BillboardSystem(gpu)
-        this.billboardSystem.initializeTextures().catch()
-        this.gizmoSystem = new GizmoSystem(gpu)
-        this.selectedSystem = new SelectedSystem(gpu)
     }
 
-    execute(options, systems, data, entities, entitiesMap) {
+    execute(options, systems, data, entities, entitiesMap, onWrap) {
         super.execute()
         const {
             pointLights,
             spotLights,
-            terrains,
-            meshes,
             skybox,
             directionalLights,
-            materials,
-            meshSources,
             cubeMaps,
             skylight,
-            translucentMeshes,
-            cameras
         } = data
         const {
-            lockCamera,
-            setSelected,
-            selected,
             camera,
             typeRendering,
-            iconsVisibility,
-            gridVisibility,
             shadingModel,
             noRSM,
             gamma,
-            exposure,
-            rotationType,
-            onGizmoStart,
-            onGizmoEnd,
-            gizmo,
-            canExecutePhysicsAnimation,
-            gridSize
+            exposure
         } = options
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
-
         this.frameBuffer.startMapping()
-
         this.skyboxSystem.execute(skybox, camera)
-        if(!canExecutePhysicsAnimation) {
-            this.gpu.disable(this.gpu.DEPTH_TEST)
-            this.gridSystem.execute(gridVisibility, camera)
-            this.gpu.enable(this.gpu.DEPTH_TEST)
-        }
+
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
             giFBO = this.GISystem.accumulatedBuffer
         }
 
+        if(onWrap)
+            onWrap.execute(options, systems, data, entities, entitiesMap, false)
         this.deferredSystem.execute(skybox, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight, gamma, exposure)
         copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-
-
-        this.gpu.enable(this.gpu.BLEND)
-        this.gpu.blendFunc(this.gpu.SRC_ALPHA, this.gpu.ONE_MINUS_SRC_ALPHA)
-        if (!canExecutePhysicsAnimation) {
-            this.billboardSystem.execute(pointLights, directionalLights, spotLights, cubeMaps, camera, iconsVisibility, skylight, cameras)
-        }
-        if (gizmo !== undefined && !canExecutePhysicsAnimation) {
-            this.gizmoSystem.execute(
-                meshes,
-                meshSources,
-                selected,
-                camera,
-                systems[SYSTEMS.PICK],
-                lockCamera,
-                entities,
-                gizmo,
-                rotationType,
-                onGizmoStart,
-                onGizmoEnd,
-                gridSize
-            )
-            this.selectedSystem.execute(selected, meshSources, camera, entitiesMap)
-        }
-
+        if(onWrap)
+            onWrap.execute(options, systems, data, entities, entitiesMap, true)
         this.frameBuffer.stopMapping()
 
         let shaderToApply
-
         switch (typeRendering) {
             case RENDERING_TYPES.FSR:
                 shaderToApply = this.FSRShader

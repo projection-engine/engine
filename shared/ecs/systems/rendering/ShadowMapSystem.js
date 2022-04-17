@@ -1,11 +1,11 @@
-import System from "../basic/System";
-import {SHADING_MODELS} from "../../../../pages/project/utils/hooks/useSettings";
-import SYSTEMS from "../../templates/SYSTEMS";
-import * as rsmShaders from '../../shaders/gi/rsm.glsl'
-import * as smShaders from '../../shaders/shadows/shadow.glsl'
-import Shader from "../../utils/workers/Shader";
-import FramebufferInstance from "../../instances/FramebufferInstance";
-import CubeMapInstance from "../../instances/CubeMapInstance";
+import System from "../../basic/System";
+import {SHADING_MODELS} from "../../../../../pages/project/utils/hooks/useSettings";
+import SYSTEMS from "../../../templates/SYSTEMS";
+import * as rsmShaders from '../../../shaders/gi/rsm.glsl'
+import * as smShaders from '../../../shaders/shadows/shadow.glsl'
+import Shader from "../../../utils/workers/Shader";
+import FramebufferInstance from "../../../instances/FramebufferInstance";
+import CubeMapInstance from "../../../instances/CubeMapInstance";
 import {mat4, vec3} from "gl-matrix";
 
 export const VIEWS = {
@@ -148,7 +148,7 @@ export default class ShadowMapSystem extends System {
 
                         let currentLight = lights2D[face]
                         currentLight.atlasFace = [currentColumn, 0]
-                        // TODO - USE MESH MATERIAL SHADER
+
                         this._loopMeshes(meshes, meshSources, meshSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
                     }
                     if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
@@ -167,7 +167,7 @@ export default class ShadowMapSystem extends System {
                 this.reflectiveShadowMapShader.use()
 
                 this.rsmFramebuffer.startMapping()
-
+// TODO - USE MESH MATERIAL SHADER
                 this._loopMeshes(meshes, meshSources, meshSystem, materials, this.reflectiveShadowMapShader, skylight.lightView, skylight.lightProjection, skylight.fixedColor)
                 this.rsmFramebuffer.stopMapping()
             }

@@ -1,8 +1,8 @@
-import System from "../basic/System";
+import System from "../../basic/System";
 import {mat4} from "gl-matrix";
 import {linearAlgebraMath} from "pj-math";
-import Transformation from "../../utils/workers/Transformation";
-import COMPONENTS from "../../templates/COMPONENTS";
+import Transformation from "../../../utils/workers/Transformation";
+import COMPONENTS from "../../../templates/COMPONENTS";
 
 export default class TransformSystem extends System {
     _changed = false

@@ -3,19 +3,21 @@ import COMPONENTS from "./templates/COMPONENTS";
 import toObject from "./utils/misc/toObject";
 import MATERIAL_TYPES from "./templates/MATERIAL_TYPES";
 import RootCamera from "./RootCamera";
+import RenderingWrapper from "./ecs/systems/RenderingWrapper";
 
 export default class RenderLoop {
     _currentFrame = 0
     rootCamera = new RootCamera()
     viewTarget = this.rootCamera
 
-    constructor(gpu) {
-        this.gpu = gpu
 
+    constructor(gpu, resolutionScale = 1) {
+        this.gpu = gpu
+        this.wrapper = new RenderingWrapper(gpu, resolutionScale)
 
     }
 
-    callback(systems, onBeforeRender) {
+    callback(systems, onBeforeRender, onWrap) {
         onBeforeRender()
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
         for (let s = 0; s < this.sortedSystems.length; s++) {
@@ -31,11 +33,20 @@ export default class RenderLoop {
                     this.entitiesMap
                 )
         }
+        this.wrapper.execute({
+                ...this.params,
+                camera: this.viewTarget,
+                elapsed: performance.now() - this._startedOn,
+            },
+            systems,
+            this.data,
+            this.filteredEntities,
+            this.entitiesMap, onWrap)
 
-        this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender));
+        this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap));
     }
 
-    start(systems, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null) {
+    start(systems, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
         const filteredEntities = this.filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
         this.data = {
             pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
@@ -80,7 +91,7 @@ export default class RenderLoop {
         })
         this.resizeObs.observe(canvasRef)
 
-        this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender))
+        this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap))
     }
 
     stop() {

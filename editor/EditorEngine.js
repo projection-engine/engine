@@ -1,23 +1,15 @@
 import RenderLoop from "../shared/RenderLoop";
 import CAMERA_TYPES from "./camera/CAMERA_TYPES";
 import toObject from "../shared/utils/misc/toObject";
-import AOSystem from "../shared/ecs/systems/AOSystem";
-import CullingSystem from "../shared/ecs/systems/CullingSystem";
-import MeshSystem from "../shared/ecs/systems/MeshSystem";
-import PerformanceSystem from "../shared/ecs/systems/PerformanceSystem";
-import PhysicsSystem from "../shared/ecs/systems/PhysicsSystem";
-import PickSystem from "../shared/ecs/systems/PickSystem";
-import PostProcessingSystem from "../shared/ecs/systems/PostProcessingSystem";
-import ShadowMapSystem from "../shared/ecs/systems/ShadowMapSystem";
-import TransformSystem from "../shared/ecs/systems/TransformSystem";
+import PickSystem from "../shared/ecs/systems/utils/PickSystem";
 import SYSTEMS from "../shared/templates/SYSTEMS";
-import CubeMapSystem, {STEPS_CUBE_MAP} from "../shared/ecs/systems/CubeMapSystem";
-import ScriptSystem from "../shared/ecs/systems/ScriptSystem";
+import {STEPS_CUBE_MAP} from "../shared/ecs/systems/rendering/CubeMapSystem";
 import COMPONENTS from "../shared/templates/COMPONENTS";
 import EditorCameras from "./EditorCameras";
-import CameraCubeSystem from "../shared/ecs/systems/CameraCubeSystem";
+import getSystemKey from "../utils/getSystemKey";
+import EditorSystem from "../shared/ecs/systems/EditorSystem2";
 
-export default class Engine extends RenderLoop {
+export default class EditorEngine extends RenderLoop {
     _systems = {}
     recompiled = false
 
@@ -32,6 +24,7 @@ export default class Engine extends RenderLoop {
         this.cameraData = new EditorCameras(id, CAMERA_TYPES.SPHERICAL, document.getElementById(id + '-canvas'))
 
         this.initialized = true
+        this.editorSystem = new EditorSystem(gpu, )
     }
 
     get camera() {
@@ -50,7 +43,7 @@ export default class Engine extends RenderLoop {
     set systems(data) {
         let newSystems = {}
         data.forEach(s => {
-            let key = getKey(s)
+            let key = getSystemKey(s)
 
             if (key)
                 newSystems[key] = s
@@ -120,7 +113,8 @@ export default class Engine extends RenderLoop {
                     gizmo: this.gizmo
                 },
                 scripts,
-                () => this.camera.updatePlacement()
+                () => this.camera.updatePlacement(),
+                this.editorSystem
             )
         }
     }
@@ -143,42 +137,3 @@ export default class Engine extends RenderLoop {
     }
 }
 
-function getKey(s) {
-    switch (true) {
-        case s instanceof CameraCubeSystem:
-            return SYSTEMS.CAMERA_CUBE
-        case s instanceof AOSystem:
-            return SYSTEMS.AO
-
-        case s instanceof CullingSystem:
-            return SYSTEMS.CULLING
-
-        case s instanceof MeshSystem:
-            return SYSTEMS.MESH
-
-        case s instanceof PerformanceSystem:
-            return SYSTEMS.PERF
-
-        case s instanceof PhysicsSystem:
-            return SYSTEMS.PHYSICS
-
-        case s instanceof PickSystem:
-            return SYSTEMS.PICK
-
-        case s instanceof PostProcessingSystem:
-            return SYSTEMS.POSTPROCESSING
-
-        case s instanceof ShadowMapSystem:
-            return SYSTEMS.SHADOWS
-
-        case s instanceof TransformSystem:
-            return SYSTEMS.TRANSFORMATION
-
-        case s instanceof CubeMapSystem:
-            return SYSTEMS.CUBE_MAP
-        case s instanceof ScriptSystem:
-            return SYSTEMS.SCRIPT
-        default:
-            return undefined
-    }
-}

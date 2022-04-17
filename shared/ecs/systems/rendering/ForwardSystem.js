@@ -4,7 +4,7 @@ import * as shaderBaseCode from "../../../shaders/mesh/forwardMesh.glsl";
 import Shader from "../../../utils/workers/Shader";
 
 
-export default class TransparencySystem extends System {
+export default class ForwardSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu

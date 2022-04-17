@@ -1,17 +1,18 @@
-import System from "../basic/System";
+import System from "../../basic/System";
 
-import MaterialInstance from "../../instances/MaterialInstance";
-import * as shaderCode from '../../shaders/mesh/meshDeferred.glsl'
-import FramebufferInstance from "../../instances/FramebufferInstance";
-import brdfImg from "../../../utils/brdf_lut.jpg";
-import {createTexture} from "../../utils/misc/utils";
-import SYSTEMS from "../../templates/SYSTEMS";
-import COMPONENTS from "../../templates/COMPONENTS";
-import {DATA_TYPES} from "../../../../views/blueprints/base/DATA_TYPES";
+import MaterialInstance from "../../../instances/MaterialInstance";
+import * as shaderCode from '../../../shaders/mesh/meshDeferred.glsl'
+import FramebufferInstance from "../../../instances/FramebufferInstance";
+import brdfImg from "../../../../utils/brdf_lut.jpg";
+import {createTexture} from "../../../utils/misc/utils";
+import SYSTEMS from "../../../templates/SYSTEMS";
+import COMPONENTS from "../../../templates/COMPONENTS";
+import {DATA_TYPES} from "../../../../../views/blueprints/base/DATA_TYPES";
+import {v4} from "uuid";
 
-export default class MeshSystem extends System {
+export default class GBufferSystem extends System {
     _ready = false
-
+    lastMaterial
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
@@ -48,7 +49,8 @@ export default class MeshSystem extends System {
                 ],
                 () => {
                     this._ready = true
-                })
+                },
+                v4())
         })
     }
 
@@ -74,7 +76,7 @@ export default class MeshSystem extends System {
             } = options
             this.frameBuffer.startMapping()
             const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
-
+            this.lastMaterial = undefined
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
                 const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
@@ -141,10 +143,10 @@ export default class MeshSystem extends System {
     ) {
         const mat = material && material.ready ? material : this.fallbackMaterial
         const gpu = this.gpu
+
         mesh.use()
         try {
-
-            mat.use(true, {
+            mat.use(this.lastMaterial !== mat.id, {
                 projectionMatrix,
                 transformMatrix,
                 viewMatrix,
@@ -160,9 +162,13 @@ export default class MeshSystem extends System {
                 ambientLODSamples: prefilteredLod,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
+            this.lastMaterial = mat.id
 
-
+            if(materialComponent.doubleSided)
+                gpu.disable(gpu.CULL_FACE)
             gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+            if(materialComponent.doubleSided)
+                gpu.enable(gpu.CULL_FACE)
             mesh.finish()
         } catch (e) {
         }

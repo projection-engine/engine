@@ -40,6 +40,7 @@ export default class GlobalIlluminationSystem extends System {
             this.step = STEPS.DONE
 
         if (this.step !== STEPS.DONE) {
+            console.log('BUILDING')
             switch (this.step) {
                 case STEPS.LIGHT_INJECTION:
                     this._clear();
