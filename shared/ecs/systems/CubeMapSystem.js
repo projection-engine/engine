@@ -72,7 +72,6 @@ export default class CubeMapSystem extends System {
                     current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution)
                 }
                 this.step = STEPS_CUBE_MAP.CALCULATE
-                console.log('HERE')
                 break
 
             case STEPS_CUBE_MAP.CALCULATE:

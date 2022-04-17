@@ -248,7 +248,6 @@ export default class ScriptSystem extends System {
                 const currentInput = currentOrder.inputs[inputO]
                 inputs[currentInput.localKey] = attributes[currentInput.sourceID][currentInput.sourceKey]
             }
-            console.log(inputs, currentOrder.inputs, attributes)
             inputs.cameraRoot = camera
 
             if (!currentOrder.isBranch)

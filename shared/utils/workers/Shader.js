@@ -36,7 +36,6 @@ export default class Shader {
         const vCode = this._compileShader(vertex, gpu?.VERTEX_SHADER)
         const fCode = this._compileShader(fragment, gpu?.FRAGMENT_SHADER)
 
-        console.log(this._extractUniforms(fCode))
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
         console.log(gpu.getError(), this.program, gpu.getUniformLocation(this.program, 't'))
         this.uniforms = this.uniforms.filter((value, index, self) =>

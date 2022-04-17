@@ -123,8 +123,6 @@ export function linearInterpolate() {
                     newImage[i + 2] = ddata1[i + 2] * (1 - factor) + ddata2[i + 2] * factor
                     newImage[i + 3] = ddata1[i + 3] * (1 - factor) + ddata2[i + 3] * factor
                 }
-                console.log(ddata1.length)
-
                 ddata1.set(newImage)
 
                 ctx1.putImageData(data1, 0, 0)

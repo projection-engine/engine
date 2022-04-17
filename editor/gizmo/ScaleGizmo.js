@@ -115,21 +115,21 @@ export default class ScaleGizmo extends System {
 
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.distanceX += Math.abs(vector[0] * 0.1)
+                        this.distanceX += Math.abs(vector[0] * 0.01)
                         if (Math.abs(this.distanceX) >= this.gridSize) {
                             this.transformElement([Math.sign(vector[0]) * this.distanceX, 0, 0])
                             this.distanceX = 0
                         }
                         break
                     case 2: // y
-                        this.distanceY += Math.abs(vector[1] * 0.1)
+                        this.distanceY += Math.abs(vector[1] * 0.01)
                         if (Math.abs(this.distanceY) >= this.gridSize) {
                             this.transformElement([0, Math.sign(vector[1]) * this.distanceY, 0])
-                            this.distanceZ = 0
+                            this.distanceY = 0
                         }
                         break
                     case 3: // z
-                        this.distanceZ += Math.abs(vector[2] * 0.1)
+                        this.distanceZ += Math.abs(vector[2] * 0.01)
                         if (Math.abs(this.distanceZ) >= this.gridSize) {
                             this.transformElement([0, 0, Math.sign(vector[2]) * this.distanceZ])
                             this.distanceZ = 0

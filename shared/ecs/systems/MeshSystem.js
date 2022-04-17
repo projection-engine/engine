@@ -47,7 +47,6 @@ export default class MeshSystem extends System {
                     {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}
                 ],
                 () => {
-                    console.log('FINISHED')
                     this._ready = true
                 })
         })
@@ -144,6 +143,7 @@ export default class MeshSystem extends System {
         const gpu = this.gpu
         mesh.use()
         try {
+
             mat.use(true, {
                 projectionMatrix,
                 transformMatrix,
