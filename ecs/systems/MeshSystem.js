@@ -44,8 +44,7 @@ export default class MeshSystem extends System {
             )
             this.fallbackMaterial = new MaterialInstance(
                 this.gpu,
-                shaderCode.fragment,
-                [
+                shaderCode.fragment, [
                     {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}
                 ],
                 () => {

@@ -90,13 +90,15 @@ export default class Engine extends RenderLoop {
                     const index = p.pickElement((shader, proj) => {
                         for (let m = 0; m < entities.length; m++) {
                             const currentInstance = entities[m]
-                            const t = currentInstance.components[COMPONENTS.TRANSFORM]
-                            if (currentInstance.components[COMPONENTS.MESH]) {
-                                const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
-                                if (mesh !== undefined)
-                                    PickSystem.drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
-                            } else if (t)
-                                PickSystem.drawMesh(currentInstance.components[COMPONENTS.CAMERA] ? p.cameraMesh : p.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
+                            if(entities[m].active) {
+                                const t = currentInstance.components[COMPONENTS.TRANSFORM]
+                                if (currentInstance.components[COMPONENTS.MESH]) {
+                                    const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
+                                    if (mesh !== undefined)
+                                        PickSystem.drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
+                                } else if (t)
+                                    PickSystem.drawMesh(currentInstance.components[COMPONENTS.CAMERA] ? p.cameraMesh : p.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
+                            }
                         }
                     }, currentCoords, camera)
                     if (index > 0)
