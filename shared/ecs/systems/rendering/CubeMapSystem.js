@@ -3,7 +3,6 @@ import System from "../../basic/System";
 import * as shaderCode from '../../../shaders/mesh/forwardMesh.glsl'
 import * as skyShader from '../../../shaders/misc/skybox.glsl'
 import Shader from "../../../utils/workers/Shader";
-import SYSTEMS from "../../../templates/SYSTEMS";
 import {createVAO} from "../../../utils/misc/utils";
 import {mat4, vec3} from "gl-matrix";
 import {VIEWS} from "./ShadowMapSystem";
@@ -47,10 +46,6 @@ export default class CubeMapSystem extends System {
             this.step = STEPS_CUBE_MAP.BASE
             this.lastCallLength = cubeMaps.length
         }
-        // if (this.lastMeshLength !== meshes.length) {
-        //     this.lastMeshLength = meshes.length
-        //     this.step = STEPS_CUBE_MAP.CALCULATE
-        // }
         if (this.step !== STEPS_CUBE_MAP.DONE && (skybox && skybox.cubeMap || !skybox))
             this.regenerate(data, options, systems)
     }
@@ -111,7 +106,11 @@ export default class CubeMapSystem extends System {
             cubeMaps,
             translucentMeshes
         } = data
-        const meshSystem = systems[SYSTEMS.MESH]
+
+        const  {
+            fallbackMaterial,
+            brdf
+        } = options
 
         this.gpu.clearDepth(1);
         const dirLightsE = directionalLights.map(d => d.components.DirectionalLightComponent)
@@ -165,8 +164,9 @@ export default class CubeMapSystem extends System {
                     this._loopMeshes(
                         view,
                         projection,
-                        cubeMaps[i].components.TransformComponent.position,
-                        meshSystem,
+                        cubeMaps[i].components[COMPONENTS.TRANSFORM].position,
+                        fallbackMaterial,
+                        brdf,
                         materials,
                         translucentMeshes,
                         meshSources,
@@ -193,7 +193,8 @@ export default class CubeMapSystem extends System {
         view,
         projection,
         cubeMapPosition,
-        meshSystem,
+        fallbackMaterial,
+        brdf,
         materials,
         translucentMeshes,
         meshSources,
@@ -214,9 +215,9 @@ export default class CubeMapSystem extends System {
                 const t = current.components[COMPONENTS.TRANSFORM]
                 const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
-                let mat = currentMaterial ? currentMaterial : meshSystem.fallbackMaterial
+                let mat = currentMaterial ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
-                    mat = meshSystem.fallbackMaterial
+                    mat = fallbackMaterial
 
                 this._drawMesh(
                     mesh,
@@ -225,9 +226,9 @@ export default class CubeMapSystem extends System {
                     projection,
                     t.transformationMatrix,
                     mat,
-                    current.components.MeshComponent.normalMatrix,
+                    current.components[COMPONENTS.MESH].normalMatrix,
                     current.components.MaterialComponent,
-                    meshSystem.brdf,
+                    brdf,
 
                     pointLightsQuantity,
                     maxTextures,
@@ -271,6 +272,7 @@ export default class CubeMapSystem extends System {
         mesh.normalVBO.enable()
         mesh.uvVBO.enable()
         mesh.tangentVBO.enable()
+
         // TODO - USE MESH MATERIAL SHADER
         this.shader.bindForUse({
             pbrMaterial: {

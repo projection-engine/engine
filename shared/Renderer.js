@@ -1,11 +1,17 @@
 import cloneClass from "../utils/cloneClass";
 import COMPONENTS from "./templates/COMPONENTS";
 import toObject from "./utils/misc/toObject";
-import MATERIAL_TYPES from "./templates/MATERIAL_TYPES";
 import RootCamera from "./RootCamera";
 import RenderingWrapper from "./ecs/systems/RenderingWrapper";
+import brdfImg from "../utils/brdf_lut.jpg";
+import {createTexture} from "./utils/misc/utils";
+import MaterialInstance from "./instances/MaterialInstance";
+import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
+import {DATA_TYPES} from "../../views/blueprints/base/DATA_TYPES";
+import ImageProcessor from "../utils/image/ImageProcessor";
+import {v4} from "uuid";
 
-export default class RenderLoop {
+export default class Renderer {
     _currentFrame = 0
     rootCamera = new RootCamera()
     viewTarget = this.rootCamera
@@ -14,7 +20,39 @@ export default class RenderLoop {
     constructor(gpu, resolutionScale = 1) {
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolutionScale)
-
+        const brdf = new Image()
+        brdf.src = brdfImg
+        brdf.decode().then(async () => {
+            this.brdf = createTexture(
+                gpu,
+                512,
+                512,
+                gpu.RGBA32F,
+                0,
+                gpu.RGBA,
+                gpu.FLOAT,
+                brdf,
+                gpu.LINEAR,
+                gpu.LINEAR,
+                gpu.CLAMP_TO_EDGE,
+                gpu.CLAMP_TO_EDGE
+            )
+            this.fallbackMaterial = new MaterialInstance(
+                this.gpu,
+                shaderCode.fragment,
+                [
+                    {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}
+                ],
+                {
+                    isForward: false,
+                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
+                    doubledSided: true
+                },
+                () => {
+                    this._ready = true
+                },
+                v4())
+        })
     }
 
     callback(systems, onBeforeRender, onWrap) {
@@ -26,6 +64,8 @@ export default class RenderLoop {
                         ...this.params,
                         camera: this.viewTarget,
                         elapsed: performance.now() - this._startedOn,
+                        brdf: this.brdf,
+                        fallbackMaterial: this.fallbackMaterial
                     },
                     systems,
                     this.data,

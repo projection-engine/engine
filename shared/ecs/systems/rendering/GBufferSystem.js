@@ -1,18 +1,9 @@
 import System from "../../basic/System";
-
-import MaterialInstance from "../../../instances/MaterialInstance";
-import * as shaderCode from '../../../shaders/mesh/meshDeferred.glsl'
 import FramebufferInstance from "../../../instances/FramebufferInstance";
-import brdfImg from "../../../../utils/brdf_lut.jpg";
-import {createTexture} from "../../../utils/misc/utils";
 import SYSTEMS from "../../../templates/SYSTEMS";
 import COMPONENTS from "../../../templates/COMPONENTS";
-import {DATA_TYPES} from "../../../../../views/blueprints/base/DATA_TYPES";
-import {v4} from "uuid";
-import ImageProcessor from "../../../../utils/image/ImageProcessor";
 
 export default class GBufferSystem extends System {
-    _ready = false
     lastMaterial
 
     constructor(gpu, resolutionMultiplier) {
@@ -26,40 +17,6 @@ export default class GBufferSystem extends System {
             .texture(undefined, undefined, 3)
             .texture(undefined, undefined, 4)
             .depthTest()
-
-        const brdf = new Image()
-        brdf.src = brdfImg
-        brdf.decode().then(async () => {
-            this.brdf = createTexture(
-                gpu,
-                512,
-                512,
-                gpu.RGBA32F,
-                0,
-                gpu.RGBA,
-                gpu.FLOAT,
-                brdf,
-                gpu.LINEAR,
-                gpu.LINEAR,
-                gpu.CLAMP_TO_EDGE,
-                gpu.CLAMP_TO_EDGE
-            )
-            this.fallbackMaterial = new MaterialInstance(
-                this.gpu,
-                shaderCode.fragment,
-                [
-                    {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}
-                ],
-                {
-                    isForward: false,
-                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
-                    doubledSided: true
-                },
-                () => {
-                    this._ready = true
-                },
-                v4())
-        })
     }
 
     execute(options, systems, data) {
@@ -69,66 +26,65 @@ export default class GBufferSystem extends System {
             skybox,
             materials,
             meshSources,
-            cubeMapsSources
+            cubeMapsSources,
         } = data
 
-        if (this._ready) {
+        const {
+            elapsed,
+            camera,
+            fallbackMaterial,
+            brdf
+        } = options
+        this.frameBuffer.startMapping()
+        const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
+        this.lastMaterial = undefined
+        for (let m = 0; m < meshes.length; m++) {
+            const current = meshes[m]
+            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
+            if (mesh !== undefined) {
+                const t = current.components[COMPONENTS.TRANSFORM]
+                const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
-            const {
-                elapsed,
-                camera,
-                injectMaterial
-            } = options
-            this.frameBuffer.startMapping()
-            const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
-            this.lastMaterial = undefined
-            for (let m = 0; m < meshes.length; m++) {
-                const current = meshes[m]
-                const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
-                if (mesh !== undefined) {
-                    const t = current.components[COMPONENTS.TRANSFORM]
-                    const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
+                let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
+                if (!mat || !mat.ready)
+                    mat = fallbackMaterial
+                const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
+                let cubeMapToApply, ambient = {}
 
-                    let mat = currentMaterial ? currentMaterial : injectMaterial && !current.components[COMPONENTS.MATERIAL].overrideInjection ? injectMaterial : this.fallbackMaterial
-                    if (!mat || !mat.ready)
-                        mat = this.fallbackMaterial
-                    const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
-                    let cubeMapToApply, ambient = {}
-
-                    if (c)
-                        cubeMapToApply = cubeMapsSources[c]
-                    if (cubeMapToApply) {
-                        const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
-                        ambient.irradianceMap = cube.irradiance ? cube.irradianceMap : skybox?.cubeMap.irradianceTexture
-                        ambient.prefilteredMap = cube.prefilteredMap
-                        ambient.prefilteredLod = cube.prefilteredMipmaps
-                    } else if (skybox && skybox.cubeMap !== undefined) {
-                        ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
-                        ambient.prefilteredMap = skybox?.cubeMap.prefiltered
-                        ambient.prefilteredLod = 6
-                    }
-
-                    this.drawMesh(
-                        mesh,
-                        camera.position,
-                        camera.viewMatrix,
-                        camera.projectionMatrix,
-                        t.transformationMatrix,
-                        mat,
-                        current.components.MeshComponent.normalMatrix,
-                        undefined,
-                        current.components.MaterialComponent,
-
-                        ambient.irradianceMap,
-                        ambient.prefilteredMap,
-                        ambient.prefilteredLod,
-                        elapsed
-                    )
+                if (c)
+                    cubeMapToApply = cubeMapsSources[c]
+                if (cubeMapToApply) {
+                    const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
+                    ambient.irradianceMap = cube.irradiance ? cube.irradianceMap : skybox?.cubeMap.irradianceTexture
+                    ambient.prefilteredMap = cube.prefilteredMap
+                    ambient.prefilteredLod = cube.prefilteredMipmaps
+                } else if (skybox && skybox.cubeMap !== undefined) {
+                    ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
+                    ambient.prefilteredMap = skybox?.cubeMap.prefiltered
+                    ambient.prefilteredLod = 6
                 }
+
+                console.trace(fallbackMaterial)
+                this.drawMesh(
+                    mesh,
+                    camera.position,
+                    camera.viewMatrix,
+                    camera.projectionMatrix,
+                    t.transformationMatrix,
+                    mat,
+                    current.components[COMPONENTS.MESH].normalMatrix,
+                    undefined,
+                    current.components.MaterialComponent,
+
+                    ambient.irradianceMap,
+                    ambient.prefilteredMap,
+                    ambient.prefilteredLod,
+                    elapsed,
+                    brdf
+                )
             }
             this.frameBuffer.stopMapping()
         }
-
     }
 
     drawMesh(
@@ -144,13 +100,16 @@ export default class GBufferSystem extends System {
         closestIrradiance,
         closestPrefiltered,
         prefilteredLod,
-        elapsed
+        elapsed,
+        brdf
     ) {
-        const mat = material && material.ready ? material : this.fallbackMaterial
-        if (!mat.isForwardShaded) {
+
+        console.log(material)
+        if (!material.settings?.isForwardShaded) {
             const gpu = this.gpu
             mesh.use()
-            mat.use(this.lastMaterial !== mat.id, {
+
+            material.use(this.lastMaterial !== material.id, {
                 projectionMatrix,
                 transformMatrix,
                 viewMatrix,
@@ -158,7 +117,7 @@ export default class GBufferSystem extends System {
                 normalMatrix,
                 indexSelected,
 
-                brdfSampler: this.brdf,
+                brdfSampler: brdf,
                 elapsedTime: elapsed,
                 cameraVec: camPosition,
                 irradianceMap: closestIrradiance,
@@ -166,11 +125,11 @@ export default class GBufferSystem extends System {
                 ambientLODSamples: prefilteredLod,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
-            this.lastMaterial = mat.id
-            if (mat.doubleSided)
+            this.lastMaterial = material.id
+            if (material.doubleSided)
                 gpu.disable(gpu.CULL_FACE)
             gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-            if (mat.doubleSided)
+            if (material.doubleSided)
                 gpu.enable(gpu.CULL_FACE)
             mesh.finish()
         }

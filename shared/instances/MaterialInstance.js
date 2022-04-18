@@ -18,28 +18,35 @@ export default class MaterialInstance {
     constructor(gpu, shader, uniformData = [], settings={}, onCompiled = () => null, id) {
         this.gpu = gpu
         this.id = id
-        this.settings = settings
-        if(settings.rsmAlbedo)
-            this.rsmAlbedo = new TextureInstance(
-                    settings.rsmAlbedo,
-                    false,
-                    this.gpu,
-                    this.gpu.SRGB8_ALPHA8,
-                    this.gpu.RGBA,
-                    true,
-                    false,
-                    this.gpu.UNSIGNED_BYTE,
-                    undefined,
-                    undefined,
-                    0,
-                    () => null
-                )
-
+        this._initializeSettings(settings)
         this.shader = [shader, uniformData, onCompiled]
     }
+    _initializeSettings(settings){
+        this.settings = settings
+        if(settings.rsmAlbedo) {
+            this.rsmAlbedo = new TextureInstance(
+                settings.rsmAlbedo,
+                false,
+                this.gpu,
+                this.gpu.SRGB8_ALPHA8,
+                this.gpu.RGBA,
+                true,
+                false,
+                this.gpu.UNSIGNED_BYTE,
+                undefined,
+                undefined,
+                0,
+                () => null
+            )
 
-    set shader([shader, uniformData, onCompiled]) {
+            delete this.settings.rsmAlbedo
+        }
+    }
+    set shader([shader, uniformData, onCompiled, settings]) {
         this.ready = false
+        if(settings) {
+            this._initializeSettings(settings)
+        }
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {
                 switch (k.type) {
@@ -84,6 +91,8 @@ export default class MaterialInstance {
             this.gpu.deleteProgram(this._shader.program)
 
         this._shader = new Shader(vertex, shader, this.gpu, true)
+
+        console.log(this.settings)
     }
 
     use(bind = true, additionalUniforms = {}) {

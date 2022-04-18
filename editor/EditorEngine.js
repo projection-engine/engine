@@ -1,4 +1,4 @@
-import RenderLoop from "../shared/RenderLoop";
+import Renderer from "../shared/Renderer";
 import CAMERA_TYPES from "./camera/CAMERA_TYPES";
 import toObject from "../shared/utils/misc/toObject";
 import PickSystem from "../shared/ecs/systems/utils/PickSystem";
@@ -9,7 +9,7 @@ import EditorCameras from "./EditorCameras";
 import getSystemKey from "../utils/getSystemKey";
 import EditorSystem from "../shared/ecs/systems/EditorSystem2";
 
-export default class EditorEngine extends RenderLoop {
+export default class EditorEngine extends Renderer {
     _systems = {}
     recompiled = false
 
