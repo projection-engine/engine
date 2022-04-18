@@ -52,13 +52,7 @@ export default class RenderLoop {
             pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
             spotLights: filteredEntities.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
             terrains: filteredEntities.filter(e => e.components[COMPONENTS.TERRAIN]),
-            translucentMeshes: toObject(filteredEntities.filter(e => {
-                if (e.components[COMPONENTS.MATERIAL]) {
-                    const material = materials.find(m => m.id === e.components[COMPONENTS.MATERIAL].materialID)
-                    return material && material.type === MATERIAL_TYPES.TRANSPARENT
-                } else
-                    return false
-            })),
+
             meshes: filteredEntities.filter(e => e.components[COMPONENTS.MESH]),
             skybox: filteredEntities.filter(e => e.components[COMPONENTS.SKYBOX] && e.active)[0]?.components[COMPONENTS.SKYBOX],
             directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),

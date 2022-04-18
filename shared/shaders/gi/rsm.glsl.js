@@ -9,23 +9,17 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
  
-out vec3 vWorldSpacePosition;
-out mat3 toTangentSpace;
+out vec3 vWorldSpacePosition; 
 out vec2 texCoord;
+out vec3 normalVec;
 
 void main() {
     texCoord = uvTexture;
     vec4 worldSpacePos = transformMatrix * vec4(position , 1.);
     vec4 p = projectionMatrix * viewMatrix * worldSpacePos;
     
-    vec3 T = normalize(vec3(transformMatrix * vec4(normalize(tangentVec), .0)));
-    vec3 N =  normalize(vec3(transformMatrix * vec4(normal, .0)));
-    vec3 biTangent = cross(N, tangentVec); 
-    vec3 B =  normalize(vec3(transformMatrix * vec4(biTangent, .0)));
-    B = dot(biTangent, B)  > 0. ? -B : B;
-    
-    toTangentSpace = mat3(T, B, N);
-    
+ 
+    normalVec = normalize(normal);
     vWorldSpacePosition = worldSpacePos.xyz;
     
     gl_Position = p;
@@ -38,11 +32,10 @@ precision mediump  float;
  
 in vec3 vWorldSpacePosition;
 in vec2 texCoord;
-in mat3 toTangentSpace;
+in vec3 normalVec;
 
 uniform vec3 lightColor;
-uniform sampler2D albedoSampler;
-uniform sampler2D normalSampler;
+uniform sampler2D albedoSampler; 
 
 layout (location = 0) out vec4 rsmNormal;
 layout (location = 1) out vec4 rsmFlux;
@@ -52,7 +45,7 @@ layout (location = 2) out vec4 rsmWorld;
 void main(void){
     
       
-    rsmNormal =  vec4(normalize(toTangentSpace * ((texture(normalSampler, texCoord).xyz * 2.0)- 1.0)), 1.0);
+    rsmNormal =  vec4(normalVec, 1.0);
     rsmFlux = vec4((lightColor * texture(albedoSampler, texCoord).rgb), 1.0);
     rsmWorld = vec4(vec3(vWorldSpacePosition.xyz), 1.0);
     

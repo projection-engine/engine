@@ -243,8 +243,8 @@ export default class ShadowMapSystem extends System {
             transformMatrix,
             projectionMatrix,
             lightColor,
-            // albedoSampler: matalbedo,
-            // normalSampler: normal,
+            albedoSampler: mat?.rsmAlbedo,
+
             lightPosition
         })
 

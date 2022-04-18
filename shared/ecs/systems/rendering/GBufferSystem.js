@@ -9,10 +9,12 @@ import SYSTEMS from "../../../templates/SYSTEMS";
 import COMPONENTS from "../../../templates/COMPONENTS";
 import {DATA_TYPES} from "../../../../../views/blueprints/base/DATA_TYPES";
 import {v4} from "uuid";
+import ImageProcessor from "../../../../utils/image/ImageProcessor";
 
 export default class GBufferSystem extends System {
     _ready = false
     lastMaterial
+
     constructor(gpu, resolutionMultiplier) {
         super([]);
         this.gpu = gpu
@@ -27,7 +29,7 @@ export default class GBufferSystem extends System {
 
         const brdf = new Image()
         brdf.src = brdfImg
-        brdf.decode().then(() => {
+        brdf.decode().then(async () => {
             this.brdf = createTexture(
                 gpu,
                 512,
@@ -44,9 +46,15 @@ export default class GBufferSystem extends System {
             )
             this.fallbackMaterial = new MaterialInstance(
                 this.gpu,
-                shaderCode.fragment, [
+                shaderCode.fragment,
+                [
                     {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}
                 ],
+                {
+                    isForward: false,
+                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
+                    doubledSided: true
+                },
                 () => {
                     this._ready = true
                 },
@@ -57,14 +65,11 @@ export default class GBufferSystem extends System {
     execute(options, systems, data) {
         super.execute()
         const {
-
             meshes,
             skybox,
             materials,
             meshSources,
-            translucentMeshes,
-            cubeMapsSources,
-
+            cubeMapsSources
         } = data
 
         if (this._ready) {
@@ -80,7 +85,7 @@ export default class GBufferSystem extends System {
             for (let m = 0; m < meshes.length; m++) {
                 const current = meshes[m]
                 const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
-                if (mesh !== undefined && !translucentMeshes[current.id]) {
+                if (mesh !== undefined) {
                     const t = current.components[COMPONENTS.TRANSFORM]
                     const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
@@ -142,10 +147,9 @@ export default class GBufferSystem extends System {
         elapsed
     ) {
         const mat = material && material.ready ? material : this.fallbackMaterial
-        const gpu = this.gpu
-
-        mesh.use()
-        try {
+        if (!mat.isForwardShaded) {
+            const gpu = this.gpu
+            mesh.use()
             mat.use(this.lastMaterial !== mat.id, {
                 projectionMatrix,
                 transformMatrix,
@@ -163,15 +167,12 @@ export default class GBufferSystem extends System {
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
             this.lastMaterial = mat.id
-
-            if(materialComponent.doubleSided)
+            if (mat.doubleSided)
                 gpu.disable(gpu.CULL_FACE)
             gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-            if(materialComponent.doubleSided)
+            if (mat.doubleSided)
                 gpu.enable(gpu.CULL_FACE)
             mesh.finish()
-        } catch (e) {
         }
-
     }
 }

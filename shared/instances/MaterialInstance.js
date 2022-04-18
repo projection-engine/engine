@@ -11,10 +11,29 @@ export default class MaterialInstance {
     uniformData = {}
     uniforms = []
 
+
+    isForwardShaded = false
+    rsmAlbedo
     // {key, data, type}
-    constructor(gpu, shader, uniformData = [], onCompiled = () => null, id) {
+    constructor(gpu, shader, uniformData = [], settings={}, onCompiled = () => null, id) {
         this.gpu = gpu
         this.id = id
+        this.settings = settings
+        if(settings.rsmAlbedo)
+            this.rsmAlbedo = new TextureInstance(
+                    settings.rsmAlbedo,
+                    false,
+                    this.gpu,
+                    this.gpu.SRGB8_ALPHA8,
+                    this.gpu.RGBA,
+                    true,
+                    false,
+                    this.gpu.UNSIGNED_BYTE,
+                    undefined,
+                    undefined,
+                    0,
+                    () => null
+                )
 
         this.shader = [shader, uniformData, onCompiled]
     }
