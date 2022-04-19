@@ -25,7 +25,7 @@ export default class RenderingWrapper extends System {
         this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
-        this.transparencySystem = new ForwardSystem(gpu)
+        this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)
         this.deferredSystem = new DeferredSystem(gpu)
@@ -66,6 +66,8 @@ export default class RenderingWrapper extends System {
         copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
         if(onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, true)
+
+        this.forwardSystem.execute(options, systems, data, entities, entitiesMap)
         this.frameBuffer.stopMapping()
 
         let shaderToApply

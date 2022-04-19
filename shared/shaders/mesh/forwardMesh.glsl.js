@@ -9,9 +9,7 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraVec;
-uniform vec2 uvScale;
-
+uniform vec3 cameraVec; 
 
 struct DirectionalLightPOV {
     mat4 lightProjectionMatrix;
@@ -44,7 +42,7 @@ void main(){
     toTangentSpace = mat3(T, B, N);
  
 
-    texCoord = uvTexture * uvScale;
+    texCoord = uvTexture;
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 
@@ -100,18 +98,13 @@ uniform samplerCube prefilteredMapSampler;
 out vec4 finalColor;
 
 const float PI = 3.14159265359;
-
 @import(fresnelSchlickRoughness)
-
 @import(fresnelSchlick)
-
 @import(geometrySchlickGGX)
-
 @import(distributionGGX)
- 
 @import(geometrySmith)
-
 @import(computeDirectionalLight)
+
 void main(){
  
     vec4 albedoTex = texture(pbrMaterial.albedo, texCoord);

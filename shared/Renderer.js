@@ -10,6 +10,10 @@ import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "../../views/blueprints/base/DATA_TYPES";
 import ImageProcessor from "../utils/image/ImageProcessor";
 import {v4} from "uuid";
+import GBufferSystem from "./ecs/systems/rendering/GBufferSystem";
+import DeferredSystem from "./ecs/systems/rendering/DeferredSystem";
+import SYSTEMS from "./templates/SYSTEMS";
+import ForwardSystem from "./ecs/systems/rendering/ForwardSystem";
 
 export default class Renderer {
     _currentFrame = 0
@@ -20,6 +24,8 @@ export default class Renderer {
     constructor(gpu, resolutionScale = 1) {
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolutionScale)
+        this.GBufferSystem = new GBufferSystem(gpu, resolutionScale)
+
         const brdf = new Image()
         brdf.src = brdfImg
         brdf.decode().then(async () => {
@@ -86,7 +92,8 @@ export default class Renderer {
         this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap));
     }
 
-    start(systems, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
+    start(s, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
+        const systems = {...s, [SYSTEMS.MESH]: this.GBufferSystem}
         const filteredEntities = this.filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
         this.data = {
             pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),

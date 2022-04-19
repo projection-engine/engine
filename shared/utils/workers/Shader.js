@@ -194,7 +194,11 @@ export default class Shader {
             case 'ivec3':
             case 'bool':
 
-                this.gpu[TYPES[type]](uLocation, data)
+                try{
+                    this.gpu[TYPES[type]](uLocation, data)
+                }catch (e){
+                    console.trace(e, uLocation, data, type, key)
+                }
                 break
             case 'mat3':
             case 'mat4':

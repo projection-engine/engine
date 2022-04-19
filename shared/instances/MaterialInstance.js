@@ -1,18 +1,16 @@
 import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../../utils/image/ImageProcessor";
 import Shader from "../utils/workers/Shader";
-import {vertex} from "../shaders/mesh/meshDeferred.glsl";
+import * as deferred from "../shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "../../../views/blueprints/base/DATA_TYPES";
-
+import * as forward from "../shaders/mesh/forwardMesh.glsl";
 
 export default class MaterialInstance {
     ready = false
-    uvScale = [1, 1]
     uniformData = {}
     uniforms = []
 
-
-    isForwardShaded = false
+    settings = {}
     rsmAlbedo
     // {key, data, type}
     constructor(gpu, shader, uniformData = [], settings={}, onCompiled = () => null, id) {
@@ -24,6 +22,8 @@ export default class MaterialInstance {
     _initializeSettings(settings){
         this.settings = settings
         if(settings.rsmAlbedo) {
+            if(this.rsmAlbedo)
+                this.gpu.deleteTexture(this.rsmAlbedo.texture)
             this.rsmAlbedo = new TextureInstance(
                 settings.rsmAlbedo,
                 false,
@@ -87,12 +87,11 @@ export default class MaterialInstance {
                 this.ready = true
             })
 
+
         if (this._shader)
             this.gpu.deleteProgram(this._shader.program)
+        this._shader = new Shader(this.settings.isForwardShaded ? forward.vertex : deferred.vertex, shader, this.gpu, true)
 
-        this._shader = new Shader(vertex, shader, this.gpu, true)
-
-        console.log(this.settings)
     }
 
     use(bind = true, additionalUniforms = {}) {
@@ -101,65 +100,6 @@ export default class MaterialInstance {
             this._shader.use()
         const data = {...this.uniformData, ...additionalUniforms}
         this._shader.bindForUse(data)
-    }
-
-    async initializeTextures(material, update) {
-        //
-        // const albedo = material?.albedo?.high ? material.albedo.high : await ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 32),
-        //     metallic = material?.metallic?.high ? material.metallic.high : await ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 32),
-        //     roughness = material?.roughness?.high ? material.roughness.high : await ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 32),
-        //     normal = material?.normal?.high ? material.normal.high : await ImageProcessor.colorToImage('rgba(127, 127, 255, 1)', 32),
-        //     height = material?.height?.high ? material.height.high : await ImageProcessor.colorToImage('rgba(127, 127, 127, 1)', 32),
-        //     ao = material?.ao?.high ? material.ao.high : await ImageProcessor.colorToImage('rgba(255, 255, 255, 1)', 32),
-        //     emissive = material?.emissive?.high ? material.emissive.high : await ImageProcessor.colorToImage('rgba(0, 0, 0, 1)', 32),
-        //     opacity = material?.opacity?.high ? material.opacity.high : undefined,
-        //     tiling = material?.tiling ? material.tiling : [1, 1]
-        //
-        // if (!this._initializing) {
-        //     this.uvScale = tiling
-        //     this._initializing = true
-        //
-        //     if (typeof material?.heightMeta === 'object') {
-        //         this.parallaxEnabled = 1
-        //         this.parallaxHeightScale = material.heightMeta.heightScale
-        //         this.parallaxLayers = material.heightMeta.layers
-        //
-        //     }
-        //
-        //
-        //     this.albedo = new TextureInstance(albedo, false, this.gpu, undefined, undefined, true)
-        //     this.metallic = new TextureInstance(metallic, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
-        //     this.roughness = new TextureInstance(roughness, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
-        //     this.normal = new TextureInstance(normal, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
-        //     this.height = new TextureInstance(height, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
-        //     this.ao = new TextureInstance(ao, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
-        //     this.emissive = new TextureInstance(emissive, false, this.gpu, this.gpu.RGB, this.gpu.RGB, true)
-        //
-        //     if (this.type === MATERIAL_TYPES.TRANSPARENT) {
-        //
-        //         this.opacity = new TextureInstance(opacity ? opacity : await ImageProcessor.colorToImage('rgba(255, 255, 255, 1)'), false, this.gpu, this.gpu.RGB, this.gpu.RGB, true, false, undefined, undefined, undefined, true)
-        //     }
-        //
-        //     this.ready = true
-        // }
-        // if (update) {
-        //     if (typeof material?.heightMeta === 'object') {
-        //         this.parallaxEnabled = 1
-        //         this.parallaxHeightScale = material.heightMeta.heightScale
-        //         this.parallaxLayers = material.heightMeta.layers
-        //
-        //     }
-        //     this.albedo.update(albedo, this.gpu)
-        //     this.metallic.update(metallic, this.gpu)
-        //     this.roughness.update(roughness, this.gpu)
-        //     this.normal.update(normal, this.gpu)
-        //     this.height.update(height, this.gpu)
-        //     this.ao.update(ao, this.gpu)
-        //     this.emissive.update(emissive, this.gpu)
-        //     if (this.type === MATERIAL_TYPES.TRANSPARENT)
-        //         this.opacity.update(opacity, this.gpu)
-        //
-        // }
     }
 
 

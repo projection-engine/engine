@@ -7,7 +7,7 @@ export default {
     SHADOWS: '4',
     PICK: '5',
     MESH: '6',
-    POSTPROCESSING: '7',
+    FORWARD: '7',
 
     AO: '8',
     CULLING: '9',

@@ -64,7 +64,6 @@ export default class GBufferSystem extends System {
                     ambient.prefilteredLod = 6
                 }
 
-                console.trace(fallbackMaterial)
                 this.drawMesh(
                     mesh,
                     camera.position,
@@ -104,8 +103,7 @@ export default class GBufferSystem extends System {
         brdf
     ) {
 
-        console.log(material)
-        if (!material.settings?.isForwardShaded) {
+        if (material && !material.settings?.isForwardShaded) {
             const gpu = this.gpu
             mesh.use()
 
