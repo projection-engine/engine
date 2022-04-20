@@ -11,9 +11,7 @@ import {DATA_TYPES} from "../../views/blueprints/base/DATA_TYPES";
 import ImageProcessor from "../utils/image/ImageProcessor";
 import {v4} from "uuid";
 import GBufferSystem from "./ecs/systems/rendering/GBufferSystem";
-import DeferredSystem from "./ecs/systems/rendering/DeferredSystem";
 import SYSTEMS from "./templates/SYSTEMS";
-import ForwardSystem from "./ecs/systems/rendering/ForwardSystem";
 
 export default class Renderer {
     _currentFrame = 0
@@ -61,8 +59,51 @@ export default class Renderer {
         })
     }
 
+
+    getLightsUniforms( ) {
+        const {
+            pointLights,
+            directionalLights
+        } = this.data
+
+
+        let maxTextures = directionalLights.length > 2 ? 2 : directionalLights.length,
+            pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
+        const dirLights = (new Array(maxTextures).fill(null)).map((_, i) => {
+            return {
+                direction: directionalLights[i].direction,
+                ambient: directionalLights[i].fixedColor,
+                atlasFace: directionalLights[i].atlasFace
+            }
+        })
+        const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
+            return {
+                lightViewMatrix: directionalLights[i].lightView,
+                lightProjectionMatrix: directionalLights[i].lightProjection
+            }
+        })
+        const lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
+            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.TransformComponent.position),
+            lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
+            lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
+
+
+        return {
+            pointLightsQuantity,
+            maxTextures,
+            dirLights,
+            dirLightsPov,
+            lClip,
+            lPosition,
+            lColor,
+            lAttenuation,
+        }
+    }
+
     callback(systems, onBeforeRender, onWrap) {
         onBeforeRender()
+        const l = this.getLightsUniforms( )
+        const data = {...this.data, ...l}
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
         for (let s = 0; s < this.sortedSystems.length; s++) {
             systems[this.sortedSystems[s]]
@@ -74,7 +115,7 @@ export default class Renderer {
                         fallbackMaterial: this.fallbackMaterial
                     },
                     systems,
-                    this.data,
+                    data,
                     this.filteredEntities,
                     this.entitiesMap
                 )
@@ -85,7 +126,7 @@ export default class Renderer {
                 elapsed: performance.now() - this._startedOn,
             },
             systems,
-            this.data,
+            data,
             this.filteredEntities,
             this.entitiesMap, onWrap)
 

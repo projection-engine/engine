@@ -104,7 +104,15 @@ export default class CubeMapSystem extends System {
             materials,
             meshSources,
             cubeMaps,
-            translucentMeshes
+            translucentMeshes,
+            pointLightsQuantity,
+            maxTextures,
+            dirLights,
+            dirLightsPov,
+            lClip,
+            lPosition,
+            lColor,
+            lAttenuation,
         } = data
 
         const  {
@@ -113,26 +121,6 @@ export default class CubeMapSystem extends System {
         } = options
 
         this.gpu.clearDepth(1);
-        const dirLightsE = directionalLights.map(d => d.components.DirectionalLightComponent)
-        let maxTextures = dirLightsE.length > 2 ? 2 : dirLightsE.length,
-            pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
-        const dirLights = (new Array(maxTextures).fill(null)).map((_, i) => {
-            return {
-                direction: dirLightsE[i].direction,
-                ambient: dirLightsE[i].fixedColor,
-                atlasFace: dirLightsE[i].atlasFace
-            }
-        })
-        const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
-            return {
-                lightViewMatrix: dirLightsE[i].lightView,
-                lightProjectionMatrix: dirLightsE[i].lightProjection
-            }
-        })
-        let lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.TransformComponent.position),
-            lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
-            lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
 
         for (let i = 0; i < cubeMaps.length; i++) {
             const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]

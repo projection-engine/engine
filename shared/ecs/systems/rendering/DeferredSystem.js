@@ -8,13 +8,9 @@ import * as shaderFlatCode from '../../../shaders/mesh/deferredFlat.glsl'
 export default class DeferredSystem extends System {
     constructor(gpu) {
         super([]);
-
         this.gpu = gpu
-
         this.deferredShader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.flatDeferredShader = new Shader(shaderFlatCode.vertex, shaderFlatCode.fragment, gpu)
-
-
     }
 
     _getDeferredShader(shadingModel) {
@@ -30,21 +26,46 @@ export default class DeferredSystem extends System {
         }
     }
 
-    execute(skyboxElement, pointLights, directionalLights, spotLights, cubeMaps, camera, shadingModel, systems, giFBO, giGridSize, skylight, gamma, exposure) {
+    execute(options, systems, data, giGridSize, giFBO) {
+        super.execute()
+        const {
+            meshes,
+            skybox,
+            materials,
+            meshSources,
+            cubeMapsSources,
+            pointLightsQuantity,
+            maxTextures,
+            dirLights,
+            dirLightsPov,
+            lClip,
+            lPosition,
+            lColor,
+            lAttenuation,
+            skylight,
+        } = data
+
+        const {
+            elapsed,
+            camera,
+            fallbackMaterial,
+            brdf,
+            gamma,
+            exposure,
+            shadingModel
+        } = options
+
         super.execute()
 
         const shadowMapSystem = systems[SYSTEMS.SHADOWS],
             deferredSystem = systems[SYSTEMS.MESH]
 
         const deferred = this._getDeferredShader(shadingModel)
-        let dirLights = directionalLights.map(d => d.components.DirectionalLightComponent)
 
         if(skylight)
             dirLights.push(skylight)
 
         deferred.use()
-        let maxTextures = dirLights.length > 2 ? 2 : dirLights.length,
-            pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
 
 
         deferred.bindForUse({
@@ -54,26 +75,18 @@ export default class DeferredSystem extends System {
             behaviourSampler: deferredSystem.frameBuffer.colors[3],
             ambientSampler: deferredSystem.frameBuffer.colors[4],
 
-            lightQuantity: pointLightsQuantity,
             cameraVec: camera.position,
+
             dirLightQuantity: maxTextures,
-            directionalLights: (new Array(maxTextures).fill(null)).map((_, i) => {
-                return {
-                    direction: dirLights[i].direction,
-                    ambient: dirLights[i].fixedColor,
-                    atlasFace: dirLights[i].atlasFace
-                }
-            }),
-            directionalLightsPOV: (new Array(maxTextures).fill(null)).map((_, i) => {
-                return {
-                    lightViewMatrix: dirLights[i].lightView,
-                    lightProjectionMatrix: dirLights[i].lightProjection
-                }
-            }),
-            lightClippingPlane: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-            lightPosition: (new Array(pointLightsQuantity).fill(null)).map((_, i) =>  pointLights[i].components.TransformComponent.position),
-            lightColor: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
-            lightAttenuationFactors: (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation),
+            directionalLights: dirLights,
+            directionalLightsPOV: dirLightsPov,
+
+            lightQuantity: pointLightsQuantity,
+            lightClippingPlane: lClip,
+            lightPosition: lPosition,
+            lightColor: lColor,
+            lightAttenuationFactors: lAttenuation,
+
 
             shadowMapResolution: shadowMapSystem?.maxResolution,
             shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,

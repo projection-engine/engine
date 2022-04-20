@@ -4,11 +4,8 @@ import * as shaderCode from '../../../shaders/mesh/forwardMesh.glsl'
 import * as skyShader from '../../../shaders/misc/skybox.glsl'
 import Shader from "../../../utils/workers/Shader";
 import {createVAO} from "../../../utils/misc/utils";
-import {mat4, vec3} from "gl-matrix";
-import {VIEWS} from "./ShadowMapSystem";
 import VBO from "../../../utils/workers/VBO";
 import cube from "../../../../utils/cube.json";
-import {intersectBoundingSphere} from "../utils/PhysicsSystem";
 import COMPONENTS from "../../../templates/COMPONENTS";
 import SYSTEMS from "../../../templates/SYSTEMS";
 
@@ -36,8 +33,14 @@ export default class ForwardSystem extends System {
             materials,
             meshSources,
             cubeMapsSources,
-            pointLights,
-            directionalLights
+            pointLightsQuantity,
+            maxTextures,
+            dirLights,
+            dirLightsPov,
+            lClip,
+            lPosition,
+            lColor,
+            lAttenuation,
         } = data
 
         const {
@@ -49,26 +52,6 @@ export default class ForwardSystem extends System {
         const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
         this.lastMaterial = undefined
 
-        const dirLightsE = directionalLights.map(d => d.components.DirectionalLightComponent)
-        let maxTextures = dirLightsE.length > 2 ? 2 : dirLightsE.length,
-            pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
-        const dirLights = (new Array(maxTextures).fill(null)).map((_, i) => {
-            return {
-                direction: dirLightsE[i].direction,
-                ambient: dirLightsE[i].fixedColor,
-                atlasFace: dirLightsE[i].atlasFace
-            }
-        })
-        const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
-            return {
-                lightViewMatrix: dirLightsE[i].lightView,
-                lightProjectionMatrix: dirLightsE[i].lightProjection
-            }
-        })
-        let lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.TransformComponent.position),
-            lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
-            lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
 
 
         for (let m = 0; m < meshes.length; m++) {

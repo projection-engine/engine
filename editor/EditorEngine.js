@@ -7,7 +7,7 @@ import {STEPS_CUBE_MAP} from "../shared/ecs/systems/rendering/CubeMapSystem";
 import COMPONENTS from "../shared/templates/COMPONENTS";
 import EditorCameras from "./EditorCameras";
 import getSystemKey from "../utils/getSystemKey";
-import EditorSystem from "../shared/ecs/systems/EditorSystem2";
+import EditorSystem from "../shared/ecs/systems/EditorSystem";
 
 export default class EditorEngine extends Renderer {
     _systems = {}

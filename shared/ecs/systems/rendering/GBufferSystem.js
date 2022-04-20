@@ -82,8 +82,8 @@ export default class GBufferSystem extends System {
                     brdf
                 )
             }
-            this.frameBuffer.stopMapping()
         }
+        this.frameBuffer.stopMapping()
     }
 
     drawMesh(
@@ -103,10 +103,10 @@ export default class GBufferSystem extends System {
         brdf
     ) {
 
-        if (material && !material.settings?.isForwardShaded) {
-            const gpu = this.gpu
-            mesh.use()
 
+        if (material && !material.settings?.isForwardShaded) {
+
+            mesh.use()
             material.use(this.lastMaterial !== material.id, {
                 projectionMatrix,
                 transformMatrix,
@@ -125,10 +125,10 @@ export default class GBufferSystem extends System {
             })
             this.lastMaterial = material.id
             if (material.doubleSided)
-                gpu.disable(gpu.CULL_FACE)
-            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+                this.gpu.disable(this.gpu.CULL_FACE)
+            this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
             if (material.doubleSided)
-                gpu.enable(gpu.CULL_FACE)
+                this.gpu.enable(this.gpu.CULL_FACE)
             mesh.finish()
         }
     }
