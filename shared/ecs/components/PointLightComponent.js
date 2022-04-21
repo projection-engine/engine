@@ -1,6 +1,6 @@
 import Component from "../basic/Component";
 
-export default class PointLightComponent extends Component{
+export default class PointLightComponent extends Component {
     _color = [255, 255, 255]
 
     attenuation = [1, 0, 0]
@@ -9,6 +9,8 @@ export default class PointLightComponent extends Component{
     _zNear = 1
     _zFar = 1000
     shadowMap = true
+    intensity = 1
+
 
     constructor(id) {
         super(id, PointLightComponent.constructor.name);
@@ -34,25 +36,27 @@ export default class PointLightComponent extends Component{
     }
 
 
-    get changed(){
+    get changed() {
         return this._changed
     }
-    set changed(_){
+
+    set changed(_) {
         this._changed = false
     }
 
 
-    get fixedColor(){
-        return this._color.map(i => i/255)
+    get fixedColor() {
+        return [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
-    get color(){
+
+    get color() {
         return this._color
     }
-    set color(data){
+
+    set color(data) {
         this._color = data
 
     }
-
 
 
 }

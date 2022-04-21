@@ -5,6 +5,7 @@ export default class SkylightComponent extends DirectionalLightComponent {
     samples = 32
     indirectAttenuation = 1
     shadowMap = true
+
     constructor(id) {
         super(id);
         this.name = 'SkylightComponent'

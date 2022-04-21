@@ -17,7 +17,7 @@ const TYPES = {
 }
 export default class Shader {
     available = false
-    regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/gm
+    regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     structRegex = (type) => {
         return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, 'gs')
     }
@@ -33,8 +33,8 @@ export default class Shader {
 
         this.program = gpu.createProgram()
         this.gpu = gpu
-        const vCode = this._compileShader(vertex, gpu?.VERTEX_SHADER)
-        const fCode = this._compileShader(fragment, gpu?.FRAGMENT_SHADER)
+        const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER)
+        const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER)
 
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
         console.log(gpu.getError(), this.program, gpu.getUniformLocation(this.program, 't'))
@@ -57,6 +57,7 @@ export default class Shader {
 
 
         if (!compiled) {
+            console.log(  this.gpu.getShaderInfoLog(shader))
             this.available = false
         }
          else {
@@ -65,7 +66,7 @@ export default class Shader {
 
             this.available = true
         }
-      console.log(  this.gpu.getShaderInfoLog(shader))
+
         return bundledCode
     }
 
@@ -222,4 +223,7 @@ export default class Shader {
     use() {
         this.gpu.useProgram(this.program)
     }
+}
+function trimString(str) {
+    return str.replaceAll(/^(\s*)/gm, '').replaceAll(/^\s*\n/gm, '')
 }

@@ -6,7 +6,6 @@ import {DATA_TYPES} from "../../../../views/blueprints/base/DATA_TYPES";
 export default class Getter extends Node {
 
     constructor(id, name, type) {
-        console.log(type, DATA_TYPES.NUMBER)
         super([], [{label: 'Value', key: 'value', type: type}]);
 
         this.id = id
@@ -18,7 +17,7 @@ export default class Getter extends Node {
         return NODE_TYPES.GETTER
     }
     static compile(tick, inputs, entities, attributes, nodeID, executors, setExecutors) {
-        const id = nodeID.split('/')[0] 
+        const id = nodeID.split('/')[0]
         attributes[nodeID] = {
             value:  executors[id].value
         }

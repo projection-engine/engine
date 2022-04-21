@@ -10,6 +10,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import ForwardSystem from "./rendering/ForwardSystem";
 import {copyTexture} from "../../utils/misc/utils";
 import RENDERING_TYPES from "../../templates/RENDERING_TYPES";
+import PostProcessingWrapper from "./PostProcessingWrapper";
 
 
 export default class RenderingWrapper extends System {
@@ -21,14 +22,17 @@ export default class RenderingWrapper extends System {
             .texture()
             .depthTest()
 
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
-        this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
+        // this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+        // this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
+        // this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
         this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)
         this.deferredSystem = new DeferredSystem(gpu)
+
+
+        this.postProcessingWrapper = new PostProcessingWrapper(gpu)
     }
 
     execute(options, systems, data, entities, entitiesMap, onWrap) {
@@ -60,37 +64,39 @@ export default class RenderingWrapper extends System {
             giFBO = this.GISystem.accumulatedBuffer
         }
 
-        if(onWrap)
+        if (onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, false)
         this.deferredSystem.execute(options, systems, data, giGridSize, giFBO)
         copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-        if(onWrap)
+        if (onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, true)
         this.forwardSystem.execute(options, systems, data, entities, entitiesMap)
         this.frameBuffer.stopMapping()
 
-        let shaderToApply
-        switch (typeRendering) {
-            case RENDERING_TYPES.FSR:
-                shaderToApply = this.FSRShader
-                break
-            case RENDERING_TYPES.DEFAULT:
-                shaderToApply = this.noFxaaShader
-                break
-            default:
-                shaderToApply = this.shader
-                break
-        }
 
-        shaderToApply.use()
-        shaderToApply.bindForUse({
-            uSampler: this.frameBuffer.colors[0],
-
-            FXAASpanMax: 8,
-            FXAAReduceMin: 1 / 128,
-            inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
-            FXAAReduceMul: 1 / 8
-        })
-        this.frameBuffer.draw()
+        this.postProcessingWrapper.execute(options, systems, data, entities, entitiesMap, this.frameBuffer.colors[0], this.frameBuffer)
+        // let shaderToApply
+        // switch (typeRendering) {
+        //     case RENDERING_TYPES.FSR:
+        //         shaderToApply = this.FSRShader
+        //         break
+        //     case RENDERING_TYPES.DEFAULT:
+        //         shaderToApply = this.noFxaaShader
+        //         break
+        //     default:
+        //         shaderToApply = this.shader
+        //         break
+        // }
+        //
+        // shaderToApply.use()
+        // shaderToApply.bindForUse({
+        //     uSampler: this.frameBuffer.colors[0],
+        //
+        //     FXAASpanMax: 8,
+        //     FXAAReduceMin: 1 / 128,
+        //     inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
+        //     FXAAReduceMul: 1 / 8
+        // })
+        // this.frameBuffer.draw()
     }
 }

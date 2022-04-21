@@ -1,4 +1,16 @@
 
+export const vertex = `#version 300 es
+layout (location = 0) in vec3 position;
+out vec2 vTexcoord;
+ 
+
+void main() {
+    vTexcoord = (position.xy) * 0.5 + 0.5;
+    gl_Position = vec4(position, 1.0);
+}    
+`
+
+
 export const AMDFSR1 = `#version 300 es
 precision highp float;
 /*
@@ -138,16 +150,6 @@ void main(){
 }
 `
 
-export const vertex = `#version 300 es
-layout (location = 0) in vec3 position;
-out vec2 vTexcoord;
- 
-
-void main() {
-    vTexcoord = (position.xy) * 0.5 + 0.5;
-    gl_Position = vec4(position, 1.0);
-}    
-`
 
 export const fragment = `#version 300 es
 precision highp float;

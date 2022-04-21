@@ -66,20 +66,19 @@ export default class Renderer {
             directionalLights
         } = this.data
 
-
         let maxTextures = directionalLights.length > 2 ? 2 : directionalLights.length,
             pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
-        const dirLights = (new Array(maxTextures).fill(null)).map((_, i) => {
+        const dirLights = (new Array(maxTextures).fill({})).map((_, i) => {
             return {
-                direction: directionalLights[i].direction,
-                ambient: directionalLights[i].fixedColor,
-                atlasFace: directionalLights[i].atlasFace
+                direction: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].direction,
+                ambient: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].fixedColor,
+                atlasFace: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].atlasFace
             }
         })
         const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
             return {
-                lightViewMatrix: directionalLights[i].lightView,
-                lightProjectionMatrix: directionalLights[i].lightProjection
+                lightViewMatrix: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].lightView,
+                lightProjectionMatrix: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].lightProjection
             }
         })
         const lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),

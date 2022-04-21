@@ -15,7 +15,7 @@ export default class DirectionalLightComponent extends Component {
     _changed = true
     _shadowMap = true
     _center = [0, 0, 0]
-
+    intensity = 1
     constructor(id) {
         super(id, 'DirectionalLightComponent');
         this._update()
@@ -43,8 +43,8 @@ export default class DirectionalLightComponent extends Component {
     }
 
 
-    get fixedColor(){
-        return  this._color.map(i => i/255)
+    get fixedColor() {
+        return [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
     get color(){
         return this._color
