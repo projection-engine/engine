@@ -16,6 +16,7 @@ export default class GBufferSystem extends System {
             .texture(undefined, undefined, 2)
             .texture(undefined, undefined, 3)
             .texture(undefined, undefined, 4)
+            .texture(undefined, undefined, 5) // EMISSIVE
             .depthTest()
     }
 

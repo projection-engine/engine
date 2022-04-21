@@ -40,7 +40,8 @@ in vec3 farPoint;
 
 in mat4 fragView;
 in mat4 fragProj;
-
+uniform float gamma;
+uniform float exposure;
 uniform int cameraType;
 out vec4 finalColor;
 
@@ -115,7 +116,11 @@ void main() {
          ) * float(t > 0.);
     
   
-        
+  
+
+    finalColor.rgb = vec3(1.0) - exp(-finalColor.rgb * exposure * .75);
+    finalColor.rgb = pow(finalColor.rgb, vec3(1.0/(gamma * .15)));
+    
     finalColor.a *= fading;
 }
 `

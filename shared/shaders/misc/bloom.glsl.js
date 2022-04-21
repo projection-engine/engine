@@ -20,6 +20,44 @@ void main(){
      
 }`
 
+export const blurBox = `#version 300 es
+
+precision mediump float;
+
+in vec2 vTexcoord;
+uniform sampler2D sceneColor;
+uniform vec2 resolution;
+out vec4 fragColor;
+const float kernel = 7.0;
+const float weight = 1.0;
+uniform bool isWidth; 
+
+
+void main( )
+{
+ 
+    vec3 sum = vec3(0);
+    float pixelSize = 1.0 / resolution.x; 
+    
+    // Horizontal Blur
+    vec3 accumulation = vec3(0);
+    vec3 weightsum = vec3(0);
+    
+    vec2 vector;
+    for (float i = -kernel; i <= kernel; i++){
+         if(isWidth == true)
+            vector = vec2(pixelSize * i, 0.); 
+        else
+            vector = vec2(0., pixelSize * i);
+        accumulation += texture(sceneColor, vTexcoord + vector).xyz * weight;
+        weightsum += weight;
+    }
+    
+    sum = accumulation / weightsum;
+    
+    fragColor = vec4(sum, 1.0);
+}
+`
 export const blurVertex = `#version 300 es
 layout (location = 0) in vec3 position;
 
@@ -116,39 +154,6 @@ void main(void){
 }
 `
 
-export const gaussian = `#version 300 es
-
-precision mediump float;
-
-out vec4 O;
-in vec2 vTexcoord; 
-uniform sampler2D sceneColor;
-uniform vec2 resolution;
-
-const int samples = 11,
-          LOD = 2,         // gaussian done on MIPmap at scale LOD
-          sLOD = 1 << LOD; // tile size = 2^LOD
-const float sigma = float(samples) * .25;
-
-float gaussian(vec2 i) {
-    return exp( -.5* dot(i/=sigma,i) ) / ( 6.28 * sigma*sigma );
-}
-
-vec4 blur(sampler2D sp, vec2 U, vec2 scale) {
-    vec4 O = vec4(0);  
-    int s = samples/sLOD;
-    
-    for ( int i = 0; i < s*s; i++ ) {
-        vec2 d = vec2(i%s, i/s)*float(sLOD) - float(samples)/2.;
-        O += gaussian(d) * textureLod( sp, U + scale * d , float(LOD) );
-    }
-    
-    return O / O.a;
-}
-
-void main() {
-    O = blur( sceneColor, vTexcoord, 1./resolution );
-}`
 
 export const compositeFragment = `
 #version 300 es
@@ -161,7 +166,10 @@ in vec2 vTexcoord;
 uniform vec2 resolution;
 uniform sampler2D blurred;
 uniform sampler2D sceneColor;
- 
+uniform float gamma;
+uniform float exposure;
+     
+            
  
 vec3 aces(vec3 x) {
   const float a = 2.51;
@@ -172,11 +180,12 @@ vec3 aces(vec3 x) {
   return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 void main(void){
-
-
-vec3 b = aces(texture(blurred, vTexcoord).rgb);
+    vec3 b = aces(texture(blurred, vTexcoord).rgb);
  
-    vec3 color = texture(sceneColor, vTexcoord).rgb + b;       
+    vec3 color = texture(sceneColor, vTexcoord).rgb + b;
+
+    color = vec3(1.0) - exp(-color * exposure);
+    color = pow(color, vec3(1.0/gamma));       
     fragColor = vec4(color, 1.);
 }
 `

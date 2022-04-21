@@ -58,6 +58,7 @@ layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour;
 layout (location = 4) out vec4 gAmbient;
+layout (location = 5) out vec4 gEmissive;
 const float PI = 3.14159265359;
 
 
@@ -118,13 +119,14 @@ void main(){
     
     vec3 F    = fresnelSchlickRoughness(NdotV, F0, gBehaviour.g);
     vec3 kD = (1.0 - F) * (1.0 - gBehaviour.b);
-    diffuse = texture(irradianceMap, gNormal.rgb).rgb * gAlbedo.rgb * kD;
+    diffuse = texture(irradianceMap, vec3(gNormal.r, -gNormal.g, gNormal.b)).rgb * gAlbedo.rgb * kD;
 
     vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, gNormal.rgb), gBehaviour.g * ambientLODSamples).rgb;
     vec2 brdf = texture(brdfSampler, vec2(NdotV, gBehaviour.g)).rg;
     specular = prefilteredColor * (F * brdf.r + brdf.g);
 
     gAmbient = vec4((diffuse + specular), 1.);
+    gEmissive = vec4(.0, 0., 0., 1.);
 }
 `
 

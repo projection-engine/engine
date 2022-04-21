@@ -56,7 +56,7 @@ export default class EditorSystem extends System {
 
         if(!after) {
             this.gpu.disable(this.gpu.DEPTH_TEST)
-            this.gridSystem.execute(gridVisibility, camera)
+            this.gridSystem.execute(options)
             this.gpu.enable(this.gpu.DEPTH_TEST)
         }
         else {

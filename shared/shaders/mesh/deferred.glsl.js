@@ -44,18 +44,12 @@ in mat4 dirLightPOV[MAX_LIGHTS];
 
 
 uniform vec3 cameraVec;
-uniform int noGI;
-uniform float gamma;
-uniform float exposure;
+uniform int noGI; 
 uniform vec2 lightClippingPlane[MAX_LIGHTS];
 uniform vec3 lightPosition[MAX_LIGHTS];
 uniform vec3 lightColor[MAX_LIGHTS];
 uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
 uniform int lightQuantity;
-
-//uniform samplerCube irradianceMap;
-//uniform samplerCube prefilteredMapSampler;
-//uniform sampler2D brdfSampler;
 
 uniform float shadowMapResolution;
 uniform samplerCube shadowCube0;
@@ -66,7 +60,7 @@ uniform sampler2D normalSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D behaviourSampler;
 uniform sampler2D ambientSampler;
-
+uniform sampler2D emissiveSampler;
 
 uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
@@ -175,81 +169,83 @@ void main() {
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
         discard;
 
-    vec3 V = normalize(cameraVec - fragPosition);
-    vec3 albedo = texture(albedoSampler, texCoord).rgb;
-    vec3 N = texture(normalSampler, texCoord).rgb;
-    vec3 ambient = texture(ambientSampler, texCoord).rgb;
-    float ao = texture(behaviourSampler, texCoord).r;
+    vec3 emissive = texture(emissiveSampler, texCoord).rgb;
+    vec3 color;
+    if(length(emissive) <= 1.){
+        vec3 V = normalize(cameraVec - fragPosition);
+        vec3 albedo = texture(albedoSampler, texCoord).rgb;
+        vec3 N = texture(normalSampler, texCoord).rgb;
+        vec3 ambient = texture(ambientSampler, texCoord).rgb;
+        float ao = texture(behaviourSampler, texCoord).r;
+     
+        float roughness = texture(behaviourSampler, texCoord).g;
+        float metallic =texture(behaviourSampler, texCoord).b;
+        
+        float NdotV    = max(dot(N, V), 0.000001);
+        vec3 F0 = vec3(0.04);
+        vec3 Lo = vec3(0.0);
+        vec3 GI = vec3(0.);
+        
+        F0 = mix(F0, albedo, metallic);
+        
+        if(noGI == 0){
+            vec3 lpvIntensity = computeGIIntensity(fragPosition, N);
+            vec3 lpvRadiance = vec3(max(0.0, lpvIntensity.r), max(0.0, lpvIntensity.g), max(0.0, lpvIntensity.b)) / PI;
+            GI = (lpvRadiance * albedo * ao) * indirectLightAttenuation;
+        }
+    
+        float shadows = dirLightsQuantity > 0 || lightQuantity > 0?  0. : 1.0;
+        float quantityToDivide = float(dirLightsQuantity) + float(lightQuantity);
+        for (int i = 0; i < dirLightsQuantity; i++){
+            vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
+            vec3 lightDir =  normalize(directionalLights[i].direction);
+    
+            Lo += computeDirectionalLight(
+                V,
+                F0,
+                lightDir,
+                directionalLights[i].ambient,
+                fragPosition,
+                roughness,
+                metallic,
+                N,
+                albedo
+            );
+            shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/quantityToDivide;
+        }
+    
+        for (int i = 0; i < lightQuantity; ++i){
+            vec3 L = normalize(lightPosition[i] - fragPosition);
+            vec3 H = normalize(V + L);
+            float distance    = length(lightPosition[i] - fragPosition);
+            float attFactor = 1.0 / (lightAttenuationFactors[i].x + (lightAttenuationFactors[i].y * distance) + (lightAttenuationFactors[i].z * distance * distance));
+            vec3 radiance     = lightColor[i] * attFactor;
+    
+            float NDF = distributionGGX(N, H, roughness);
+            float G   = geometrySmith(N, V, L, roughness);
+            vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    
+            vec3 kS = F;
+            vec3 kD = vec3(1.0) - kS;
+            kD *= 1.0 - metallic;
+    
+            vec3 numerator    = NDF * G * F;
+            float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+            vec3 specular     = numerator / denominator;
+    
+            float NdotL = max(dot(N, L), 0.0);
+    
+            shadows += pointLightShadow(fragPosition, lightPosition[i], i, lightClippingPlane[i])/quantityToDivide;
+            Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        }
+      
+        Lo = Lo* shadows; 
+        
+        color = (ambient  + Lo +  GI + emissive);
+    }
+    else
+        color = emissive ;
  
-    float roughness = texture(behaviourSampler, texCoord).g;
-    float metallic =texture(behaviourSampler, texCoord).b;
-    
-    float NdotV    = max(dot(N, V), 0.000001);
-    vec3 F0 = vec3(0.04);
-    vec3 Lo = vec3(0.0);
-    vec3 GI = vec3(0.);
-    
-    F0 = mix(F0, albedo, metallic);
-    
-    if(noGI == 0){
-        vec3 lpvIntensity = computeGIIntensity(fragPosition, N);
-        vec3 lpvRadiance = vec3(max(0.0, lpvIntensity.r), max(0.0, lpvIntensity.g), max(0.0, lpvIntensity.b)) / PI;
-        GI = (lpvRadiance * albedo * ao) * indirectLightAttenuation;
-    }
-
-    float shadows = dirLightsQuantity > 0 || lightQuantity > 0?  0. : 1.0;
-    float quantityToDivide = float(dirLightsQuantity) + float(lightQuantity);
-    for (int i = 0; i < dirLightsQuantity; i++){
-        vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
-        vec3 lightDir =  normalize(directionalLights[i].direction);
-
-        Lo += computeDirectionalLight(
-            V,
-            F0,
-            lightDir,
-            directionalLights[i].ambient,
-            fragPosition,
-            roughness,
-            metallic,
-            N,
-            albedo
-        );
-        shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/quantityToDivide;
-    }
-
-    for (int i = 0; i < lightQuantity; ++i){
-        vec3 L = normalize(lightPosition[i] - fragPosition);
-        vec3 H = normalize(V + L);
-        float distance    = length(lightPosition[i] - fragPosition);
-        float attFactor = 1.0 / (lightAttenuationFactors[i].x + (lightAttenuationFactors[i].y * distance) + (lightAttenuationFactors[i].z * distance * distance));
-        vec3 radiance     = lightColor[i] * attFactor;
-
-        float NDF = distributionGGX(N, H, roughness);
-        float G   = geometrySmith(N, V, L, roughness);
-        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-        vec3 kS = F;
-        vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic;
-
-        vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-        vec3 specular     = numerator / denominator;
-
-        float NdotL = max(dot(N, L), 0.0);
-
-        shadows += pointLightShadow(fragPosition, lightPosition[i], i, lightClippingPlane[i])/quantityToDivide;
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-    }
-  
-    Lo = Lo* shadows; 
-
-    vec3 color = (ambient  + Lo +  GI) ;
-    color = color / (color + vec3(1.0));
-    
-    color = vec3(1.0) - exp(-color * exposure);
-    color = pow(color, vec3(1.0/gamma));
-    
     finalColor = vec4(color, 1.0);
 }
 `

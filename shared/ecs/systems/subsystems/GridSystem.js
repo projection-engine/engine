@@ -13,9 +13,14 @@ export default class GridSystem extends System {
         this.grid = new Quad(gpu)
     }
 
-    execute(gridVisibility, camera) {
+    execute(options) {
         super.execute()
-
+        const {
+            gridVisibility,
+            camera,
+            gamma,
+            exposure
+        } = options
         if(gridVisibility) {
 
             this.gridShader.use()
@@ -24,7 +29,9 @@ export default class GridSystem extends System {
             this.gridShader.bindForUse({
                 cameraType: camera instanceof OrthographicCamera ? 1 + camera.direction : 0,
                 viewMatrix: camera instanceof OrthographicCamera ? camera.viewMatrixGrid : camera.viewMatrix,
-                projectionMatrix: camera.projectionMatrix
+                projectionMatrix: camera.projectionMatrix,
+                gamma,
+                exposure
             })
 
             this.grid.draw()

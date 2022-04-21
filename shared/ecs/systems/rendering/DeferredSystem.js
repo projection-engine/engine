@@ -29,11 +29,6 @@ export default class DeferredSystem extends System {
     execute(options, systems, data, giGridSize, giFBO) {
         super.execute()
         const {
-            meshes,
-            skybox,
-            materials,
-            meshSources,
-            cubeMapsSources,
             pointLightsQuantity,
             maxTextures,
             dirLights,
@@ -46,10 +41,7 @@ export default class DeferredSystem extends System {
         } = data
 
         const {
-            elapsed,
             camera,
-            fallbackMaterial,
-            brdf,
             gamma,
             exposure,
             shadingModel
@@ -66,14 +58,13 @@ export default class DeferredSystem extends System {
             dirLights.push(skylight)
 
         deferred.use()
-
-
         deferred.bindForUse({
             positionSampler: deferredSystem.frameBuffer.colors[0],
             normalSampler: deferredSystem.frameBuffer.colors[1],
             albedoSampler: deferredSystem.frameBuffer.colors[2],
             behaviourSampler: deferredSystem.frameBuffer.colors[3],
             ambientSampler: deferredSystem.frameBuffer.colors[4],
+            emissiveSampler: deferredSystem.frameBuffer.colors[5],
 
             cameraVec: camera.position,
 
