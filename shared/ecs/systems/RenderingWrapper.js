@@ -68,9 +68,10 @@ export default class RenderingWrapper extends System {
             onWrap.execute(options, systems, data, entities, entitiesMap, false)
         this.deferredSystem.execute(options, systems, data, giGridSize, giFBO)
         copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
+        this.forwardSystem.execute(options, systems, data, entities, entitiesMap)
         if (onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, true)
-        this.forwardSystem.execute(options, systems, data, entities, entitiesMap)
+
         this.frameBuffer.stopMapping()
 
 
