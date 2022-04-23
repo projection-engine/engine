@@ -18,14 +18,14 @@ export default class PropagationSystem extends System {
         this.accumulatedBuffer =new FramebufferInstance(gpu, this.framebufferSize** 2, this.framebufferSize)
 
         this.propagationFramebuffer
-            .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 1, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 2, undefined, undefined, undefined, undefined, true, true)
+            .texture({attachment: 0, linear: true, repeat: true})
+            .texture({attachment: 1, linear: true, repeat: true})
+            .texture({attachment: 2, linear: true, repeat: true})
 
         this.accumulatedBuffer
-            .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 1, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 2, undefined, undefined, undefined, undefined, true, true)
+            .texture({attachment: 0, linear: true, repeat: true})
+            .texture({attachment: 1, linear: true, repeat: true})
+            .texture({attachment: 2, linear: true, repeat: true})
 
         const positionData = new Float32Array(this.framebufferSize * this.framebufferSize * this.framebufferSize * 2);
         let positionIndex = 0;

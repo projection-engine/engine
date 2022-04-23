@@ -15,7 +15,6 @@ in vec2 texCoord;
 
 uniform sampler2D positionSampler;
 uniform sampler2D albedoSampler;
-uniform sampler2D normalSampler;
 
 out vec4 finalColor;
 
@@ -25,14 +24,7 @@ void main() {
 
     vec3 fragPosition = texelFetch(positionSampler, fragCoord, 0).xyz;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
-    discard;
-    
-    
-    vec3 albedo = texture(albedoSampler, texCoord).rgb;
-    float shadingIntensity = dot( normalize(texture(normalSampler, texCoord).rgb), vec3(0.0, 1.0, 0.0));
-    float brightness = max(0.2, shadingIntensity);
-    vec3 color = albedo* brightness;
-     
-    finalColor = vec4(color, 1.0);
+        discard;     
+    finalColor = vec4(texture(albedoSampler, texCoord).rgb, 1.0);
 }
 `

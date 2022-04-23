@@ -44,9 +44,9 @@ export default class ShadowMapSystem extends System {
         this.rsmResolution = 512
         this.rsmFramebuffer = new FramebufferInstance(gpu, this.rsmResolution, this.rsmResolution)
         this.rsmFramebuffer
-            .texture(undefined, undefined, 0)
-            .texture(undefined, undefined, 1)
-            .texture(undefined, undefined, 2)
+            .texture({attachment: 0})
+            .texture({attachment: 1})
+            .texture({attachment: 2})
             .depthTest()
 
         this.shadowsFrameBuffer = new FramebufferInstance(gpu, this.maxResolution, this.maxResolution)

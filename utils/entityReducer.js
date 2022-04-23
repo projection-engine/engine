@@ -2,7 +2,7 @@ import Entity from "../shared/ecs/basic/Entity";
 import Component from "../shared/ecs/basic/Component";
 import PickComponent from "../shared/ecs/components/PickComponent";
 import generateNextID from "./generateNextID";
-import cloneClass from "./cloneClass";
+import COMPONENTS from "../shared/templates/COMPONENTS";
 
 
 export const ENTITY_ACTIONS = {
@@ -35,7 +35,7 @@ export default function entityReducer(state, {type, payload}) {
     const entityIndex = state.findIndex(e => e.id === payload?.entityID)
 
     if (entityIndex > -1) {
-        const entity = cloneClass(stateCopy[entityIndex])
+        const entity = stateCopy[entityIndex]
         switch (type) {
 
             // ENTITY
@@ -121,7 +121,14 @@ export default function entityReducer(state, {type, payload}) {
                 const block = payload
 
                 if (Array.isArray(block))
-                    return [...stateCopy, ...block]
+                    return [...stateCopy, ...block.map((e, i) => {
+                        if (e.components[COMPONENTS.PICK]) {
+                            delete e.components[COMPONENTS.PICK]
+                            e.components[COMPONENTS.PICK] = new PickComponent(undefined, i + stateCopy.length + 1)
+                        }
+
+                        return e
+                    })]
                 else
                     return stateCopy
             }

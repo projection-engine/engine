@@ -3,13 +3,9 @@ import DeferredSystem from "./rendering/DeferredSystem";
 import SkyboxSystem from "./rendering/SkyboxSystem";
 import GlobalIlluminationSystem from "./rendering/gi/GlobalIlluminationSystem";
 import SYSTEMS from "../../templates/SYSTEMS";
-import Shader from "../../utils/workers/Shader";
-
-import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import ForwardSystem from "./rendering/ForwardSystem";
 import {copyTexture} from "../../utils/misc/utils";
-import RENDERING_TYPES from "../../templates/RENDERING_TYPES";
 import PostProcessingWrapper from "./PostProcessingWrapper";
 
 

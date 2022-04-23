@@ -3,7 +3,6 @@ import Shader from "../../../utils/workers/Shader";
 import {vertex} from '../../../shaders/misc/postProcessing.glsl'
 import * as shaderCode from '../../../shaders/misc/bloom.glsl'
 import FramebufferInstance from "../../../instances/FramebufferInstance";
-import {blur, blurBox, brightFragment, compositeFragment} from "../../../shaders/misc/bloom.glsl";
 
 export default class Bloom extends System {
     constructor(gpu) {
@@ -13,7 +12,7 @@ export default class Bloom extends System {
         this.h = window.screen.height
         this.brightFrameBuffer = new FramebufferInstance(gpu, this.w, this.h)
         this.brightFrameBuffer
-            .texture()
+            .texture({linear: true})
 
         this.blurBuffers = []
         this.upSampledBuffers = []
@@ -23,10 +22,10 @@ export default class Bloom extends System {
             const [wW, hH] = [pW / 2, pH / 2]
             const wBlurFrameBuffer = new FramebufferInstance(gpu, wW, hH)
             wBlurFrameBuffer
-                .texture()
+                .texture({linear: true})
             const hBlurFrameBuffer = new FramebufferInstance(gpu, wW, hH)
             hBlurFrameBuffer
-                .texture()
+                .texture({linear: true})
             this.blurBuffers.push({
                 height: hBlurFrameBuffer,
                 width: wBlurFrameBuffer
@@ -40,7 +39,7 @@ export default class Bloom extends System {
         for (let i = 0; i < 4; i++) {
             const [wW, hH] = [pW * 2, pH * 2]
             const b = new FramebufferInstance(gpu, wW, hH)
-            b.texture()
+                .texture({linear: true})
             this.upSampledBuffers.push(b)
 
             pW = wW
@@ -58,7 +57,6 @@ export default class Bloom extends System {
     execute(options, systems, data, entities, entitiesMap, sceneColor) {
         super.execute()
         const {
-            camera,
             gamma,
             exposure
         } = options
@@ -90,11 +88,9 @@ export default class Bloom extends System {
             current.stopMapping()
         }
         this.blurShader.use()
-        const blurredSampler = this.blurSample(1, this.blurShader, this.upSampledBuffers[2].colors[0])
-
         this.compositeShader.use()
         this.compositeShader.bindForUse({
-            blurred: blurredSampler,
+            blurred: this.upSampledBuffers[2].colors[0],
             sceneColor,
             resolution: [this.w, this.h],
             gamma,
@@ -124,6 +120,5 @@ export default class Bloom extends System {
 
         height.draw()
         height.stopMapping()
-        return height.colors[0]
     }
 }

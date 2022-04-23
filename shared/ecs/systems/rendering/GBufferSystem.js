@@ -11,12 +11,14 @@ export default class GBufferSystem extends System {
         this.gpu = gpu
         this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
         this.frameBuffer
-            .texture(undefined, undefined, 0)
-            .texture(undefined, undefined, 1)
-            .texture(undefined, undefined, 2)
-            .texture(undefined, undefined, 3)
-            .texture(undefined, undefined, 4)
-            .texture(undefined, undefined, 5) // EMISSIVE
+
+            .texture({attachment: 0, precision: this.gpu.RGBA32F, format: this.gpu.RGBA, type: this.gpu.FLOAT})
+
+            .texture({attachment: 1})
+            .texture({attachment: 2})
+            .texture({attachment: 3})
+            .texture({attachment: 4})
+            .texture({attachment: 5})
             .depthTest()
     }
 

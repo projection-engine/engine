@@ -15,7 +15,7 @@ export default class PickSystem extends System {
 
         this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
         this.frameBuffer
-            .texture(undefined, undefined, 0, this.gpu.RGBA, this.gpu.RGBA, this.gpu.UNSIGNED_BYTE, false, true, true)
+            .texture({attachment: 0, linear: true, repeat: true, storage: false, precision: this.gpu.RGBA, format: this.gpu.RGBA, type: this.gpu.UNSIGNED_BYTE})
             .depthTest(this.gpu.DEPTH_COMPONENT16)
 
 

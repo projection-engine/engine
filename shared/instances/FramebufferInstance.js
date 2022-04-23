@@ -3,8 +3,6 @@ import Quad from "../utils/workers/Quad";
 
 export default class FramebufferInstance extends Quad {
     FBO
-
-
     RBO
 
     depthSampler
@@ -19,6 +17,19 @@ export default class FramebufferInstance extends Quad {
         this.height = height
 
         this.FBO = gpu.createFramebuffer()
+
+        this.fallback = {
+            w: this.width,
+            h: this.height,
+            attachment: 0,
+            precision: this.gpu.RGBA16F,
+            format: this.gpu.RGBA,
+            type: this.gpu.FLOAT,
+            storage: true,
+            linear: false,
+            repeat: false,
+            flip: false
+        }
     }
 
 
@@ -32,7 +43,7 @@ export default class FramebufferInstance extends Quad {
 
     stopMapping(clear = true,) {
 
-            this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
 
         if (clear) {
             this.gpu?.viewport(0, 0, this.gpu.drawingBufferWidth, this.gpu.drawingBufferHeight);
@@ -85,7 +96,21 @@ export default class FramebufferInstance extends Quad {
         return this
     }
 
-    texture(w = this.width, h = this.height, attachment = 0, precision = this.gpu.RGBA16F, format = this.gpu.RGBA, type = this.gpu.FLOAT, storage = true, linear, repeat, flip) {
+    texture(obj) {
+        const {
+            w,
+            h,
+            attachment,
+            precision,
+            format,
+            type,
+            storage,
+            linear,
+            repeat,
+            flip
+        } = {...this.fallback, ...obj}
+
+
         this.use()
         const texture = this.gpu.createTexture()
         if (flip === true) this.gpu.pixelStorei(this.gpu.UNPACK_FLIP_Y_WEBGL, true);

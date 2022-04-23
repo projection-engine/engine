@@ -1,6 +1,5 @@
 import Node from "../../../../views/blueprints/base/Node";
 import NODE_TYPES from "../../../../views/blueprints/base/NODE_TYPES";
-import {DATA_TYPES} from "../../../../views/blueprints/base/DATA_TYPES";
 
 
 export default class Getter extends Node {

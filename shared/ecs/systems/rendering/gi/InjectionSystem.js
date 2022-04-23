@@ -20,14 +20,15 @@ export default class InjectionSystem extends System {
         this.geometryInjectionFramebuffer =new FramebufferInstance(gpu, this.framebufferSize** 2, this.framebufferSize)
 
         this.injectionFramebuffer
-            .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 1, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 2, undefined, undefined, undefined, undefined, true, true)
+
+            .texture({attachment: 0, linear: true, repeat: true})
+            .texture({attachment: 1, linear: true, repeat: true})
+            .texture({attachment: 2, linear: true, repeat: true})
 
         this.geometryInjectionFramebuffer
-            .texture(undefined, undefined, 0, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 1, undefined, undefined, undefined, undefined, true, true)
-            .texture(undefined, undefined, 2, undefined, undefined, undefined, undefined, true, true)
+            .texture({attachment: 0, linear: true, repeat: true})
+            .texture({attachment: 1, linear: true, repeat: true})
+            .texture({attachment: 2, linear: true, repeat: true})
         this.injection = GlobalIlluminationSystem.createPointsData(GlobalIlluminationSystem.createInjectionPointCloud(this.size), this.gpu)
     }
 

@@ -216,11 +216,18 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
 
- 
-
 void main(){
- 
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position,1.0);
+    mat4 sc;
+    for ( int x = 0; x < 4; x++ )
+        for ( int y = 0; y < 4; y++ )
+            if ( x == y && x <= 2 )
+                sc[x][y] = 1.001;
+            else if ( x == y )
+                sc[x][y] = 1.;
+            else
+                sc[x][y] = 0.;  
+                
+    gl_Position = projectionMatrix * viewMatrix * transformMatrix * sc * vec4(position,1.0);
 }
 `
 export const selectedFragment = `#version 300 es
