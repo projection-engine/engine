@@ -12,6 +12,7 @@ import ImageProcessor from "../utils/image/ImageProcessor";
 import {v4} from "uuid";
 import GBufferSystem from "./ecs/systems/rendering/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
+import FramebufferInstance from "./instances/FramebufferInstance";
 
 export default class Renderer {
     _currentFrame = 0
@@ -57,10 +58,15 @@ export default class Renderer {
                 },
                 v4())
         })
+        const a = new FramebufferInstance(gpu), b = new FramebufferInstance(gpu)
+        a.texture().depthTest()
+        b.texture()
+
+        this.postProcessingFramebuffers = [a, b]
     }
 
 
-    getLightsUniforms( ) {
+    getLightsUniforms() {
         const {
             pointLights,
             directionalLights
@@ -101,7 +107,7 @@ export default class Renderer {
 
     callback(systems, onBeforeRender, onWrap) {
         onBeforeRender()
-        const l = this.getLightsUniforms( )
+        const l = this.getLightsUniforms()
         const data = {...this.data, ...l}
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
         for (let s = 0; s < this.sortedSystems.length; s++) {
@@ -127,7 +133,9 @@ export default class Renderer {
             systems,
             data,
             this.filteredEntities,
-            this.entitiesMap, onWrap)
+            this.entitiesMap,
+            onWrap,
+            this.postProcessingFramebuffers)
 
         this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap));
     }

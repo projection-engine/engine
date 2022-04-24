@@ -62,12 +62,7 @@ precision highp float;
 
 
 in vec2 vTexcoord;
- 
-
 uniform sampler2D uSampler;
-
-
-
 out vec4 finalColor;
 
 vec4 FsrRcasLoadF(vec2 p);

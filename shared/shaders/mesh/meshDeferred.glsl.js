@@ -31,7 +31,7 @@ void main(){
     toTangentSpace = mat3(T, B, N);
     
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
-   texCoord = uvTexture;
+    texCoord = uvTexture;
     normalVec = normal;
 
    

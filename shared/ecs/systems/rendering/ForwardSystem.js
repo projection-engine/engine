@@ -25,7 +25,7 @@ export default class ForwardSystem extends System {
     }
 
 
-    execute(options, systems, data) {
+    execute(options, systems, data, sceneColor) {
         super.execute()
         const {
             meshes,
@@ -108,6 +108,7 @@ export default class ForwardSystem extends System {
                     ambient.irradianceMap,
                     ambient.prefilteredMap,
                     ambient.prefilteredLod,
+                    sceneColor
                 )
             }
         }
@@ -135,7 +136,8 @@ export default class ForwardSystem extends System {
         elapsed,
         closestIrradiance,
         closestPrefiltered,
-        prefilteredLod
+        prefilteredLod,
+        sceneColor
     ) {
 
         if (material && material.settings?.isForwardShaded) {
@@ -149,7 +151,7 @@ export default class ForwardSystem extends System {
                 viewMatrix,
 
                 normalMatrix,
-
+                sceneColor,
                 brdfSampler: brdf,
                 elapsedTime: elapsed,
                 cameraVec: camPosition,

@@ -7,6 +7,8 @@ import FramebufferInstance from "../../instances/FramebufferInstance";
 import ForwardSystem from "./rendering/ForwardSystem";
 import {copyTexture} from "../../utils/misc/utils";
 import PostProcessingWrapper from "./PostProcessingWrapper";
+import Shader from "../../utils/workers/Shader";
+import * as shaderCode from "../../shaders/misc/postProcessing.glsl";
 
 
 export default class RenderingWrapper extends System {
@@ -19,7 +21,7 @@ export default class RenderingWrapper extends System {
             .depthTest()
 
         // this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        // this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
+        this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         // this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
         this.forwardSystem = new ForwardSystem(gpu)
@@ -31,7 +33,7 @@ export default class RenderingWrapper extends System {
         this.postProcessingWrapper = new PostProcessingWrapper(gpu)
     }
 
-    execute(options, systems, data, entities, entitiesMap, onWrap) {
+    execute(options, systems, data, entities, entitiesMap, onWrap, [a, b]) {
         super.execute()
         const {
             pointLights,
@@ -43,17 +45,12 @@ export default class RenderingWrapper extends System {
         } = data
         const {
             camera,
-            typeRendering,
-            shadingModel,
-            noRSM,
-            gamma,
-            exposure
+            noRSM
         } = options
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
         this.frameBuffer.startMapping()
         this.skyboxSystem.execute(skybox, camera)
-
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size
@@ -63,37 +60,22 @@ export default class RenderingWrapper extends System {
         if (onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, false)
         this.deferredSystem.execute(options, systems, data, giGridSize, giFBO)
-        copyTexture(this.frameBuffer, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
-        this.forwardSystem.execute(options, systems, data, entities, entitiesMap)
-        if (onWrap)
-            onWrap.execute(options, systems, data, entities, entitiesMap, true)
-
         this.frameBuffer.stopMapping()
 
+        a.startMapping()
+        this.noFxaaShader.use()
+        this.noFxaaShader.bindForUse({
+            uSampler: this.frameBuffer.colors[0]
+        })
+        b.draw()
 
-        this.postProcessingWrapper.execute(options, systems, data, entities, entitiesMap, this.frameBuffer.colors[0], this.frameBuffer)
-        // let shaderToApply
-        // switch (typeRendering) {
-        //     case RENDERING_TYPES.FSR:
-        //         shaderToApply = this.FSRShader
-        //         break
-        //     case RENDERING_TYPES.DEFAULT:
-        //         shaderToApply = this.noFxaaShader
-        //         break
-        //     default:
-        //         shaderToApply = this.shader
-        //         break
-        // }
-        //
-        // shaderToApply.use()
-        // shaderToApply.bindForUse({
-        //     uSampler: this.frameBuffer.colors[0],
-        //
-        //     FXAASpanMax: 8,
-        //     FXAAReduceMin: 1 / 128,
-        //     inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
-        //     FXAAReduceMul: 1 / 8
-        // })
-        // this.frameBuffer.draw()
+        copyTexture(a, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
+
+        this.forwardSystem.execute(options, systems, data, this.frameBuffer.colors[0])
+        if (onWrap)
+            onWrap.execute(options, systems, data, entities, entitiesMap, true)
+        a.stopMapping()
+
+        this.postProcessingWrapper.execute(options, systems, data, entities, entitiesMap, [a, b])
     }
 }
