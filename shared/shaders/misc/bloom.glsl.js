@@ -127,6 +127,7 @@ in vec2 vTexcoord;
 uniform vec2 resolution;
 uniform sampler2D blurred;
 uniform sampler2D nextSampler;
+uniform float bloomIntensity;
  
 
 vec4 upsampleTent(vec2 texelSize, vec4 sampleScale)
@@ -150,7 +151,7 @@ vec4 upsampleTent(vec2 texelSize, vec4 sampleScale)
 }
 
 void main(void){
-    fragColor = vec4(vec3(upsampleTent(1./resolution, vec4(2.)) + texture(nextSampler, vTexcoord)), 1.);
+    fragColor = vec4(vec3(upsampleTent(1./resolution, vec4(2.)) + texture(nextSampler, vTexcoord)), bloomIntensity);
 }
 `
 

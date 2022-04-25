@@ -231,10 +231,15 @@ void main(){
 }
 `
 export const selectedFragment = `#version 300 es
-precision highp float;
+precision lowp float;
+
+uniform int index;
 out vec4 fragColor;
 
 void main(){
-    fragColor = vec4(1., 1., 0., .2);
+    if(index == 0)
+        fragColor = vec4(1., 1., 0., .7);
+    else
+        fragColor = vec4(1., 0.2, 0., 1.);
 }
 `

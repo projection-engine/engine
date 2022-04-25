@@ -46,9 +46,7 @@ export default class Bloom extends System {
         this.compositeShader = new Shader(vertex, shaderCode.compositeFragment, gpu)
         this.upSamplingShader = new Shader(vertex, shaderCode.bilinearUpSampling, gpu)
         this.brightShader = new Shader(vertex, shaderCode.brightFragment, gpu)
-        this.blurShader = new Shader(shaderCode.blurVertex, shaderCode.blur, gpu)
-        this.blurShaderB = new Shader(vertex, shaderCode.blurBox, gpu)
-
+        this.blurShader = new Shader(vertex, shaderCode.blurBox, gpu)
     }
 
     execute(options, systems, data, entities, entitiesMap, [a, b]) {
@@ -68,9 +66,9 @@ export default class Bloom extends System {
         b.stopMapping()
 
 
-        this.blurShaderB.use()
+        this.blurShader.use()
         for (let index = 0; index < 4; index++) {
-            this.blurSample(index, this.blurShaderB,  b)
+            this.blurSample(index, this.blurShader,  b)
         }
         for (let index = 0; index < 3; index++) {
             const current = this.upSampledBuffers[index]
@@ -79,14 +77,14 @@ export default class Bloom extends System {
             this.upSamplingShader.bindForUse({
                 blurred: this.blurBuffers[index].height.colors[0],
                 nextSampler: this.blurBuffers[index + 1].height.colors[0],
-                resolution: [current.width, current.height]
+                resolution: [current.width, current.height],
+                bloomIntensity: .3
             })
             current.draw()
             current.stopMapping()
         }
 
         b.startMapping()
-        this.blurShader.use()
         this.compositeShader.use()
         this.compositeShader.bindForUse({
             blurred: this.upSampledBuffers[2].colors[0],
@@ -99,7 +97,7 @@ export default class Bloom extends System {
         b.stopMapping()
     }
 
-    blurSample(level, shader = this.blurShaderB, a) {
+    blurSample(level, shader = this.blurShader, a) {
         const {width, height} = this.blurBuffers[level]
         const previousColor = level > 0 ? this.blurBuffers[level - 1].height.colors[0] : a.colors[0]
         width.startMapping()

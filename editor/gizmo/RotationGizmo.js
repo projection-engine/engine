@@ -49,6 +49,7 @@ export default class RotationGizmo extends System {
         this.gpu.canvas.addEventListener('mouseup', this.handlerListener)
         this.gpu.canvas.addEventListener('mousedown', this.handlerListener)
     }
+
     _mapEntity(i, axis) {
         const e = new Entity(undefined)
         e.addComponent(new PickComponent(undefined, i - 3))
@@ -118,25 +119,25 @@ export default class RotationGizmo extends System {
                 const vector = [event.movementX, event.movementX, event.movementX]
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.distanceX += Math.abs(vector[0] *0.01)
+                        this.distanceX += Math.abs(vector[0] * 0.01)
                         if (Math.abs(this.distanceX) >= this.gridSize) {
-                            this.rotateElement([Math.sign(vector[0]) * this.distanceX *0.01745, 0, 0])
+                            this.rotateElement([Math.sign(vector[0]) * this.distanceX * 0.01745, 0, 0])
                             this.distanceX = 0
                             this.renderTarget.innerText = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
                         }
                         break
                     case 2: // y
-                        this.distanceY += Math.abs(vector[1]*0.01)
+                        this.distanceY += Math.abs(vector[1] * 0.01)
                         if (Math.abs(this.distanceY) >= this.gridSize) {
-                            this.rotateElement([0, Math.sign(vector[1]) * this.distanceY*0.01745, 0])
+                            this.rotateElement([0, Math.sign(vector[1]) * this.distanceY * 0.01745, 0])
                             this.renderTarget.innerText = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
-                            this.distanceY= 0
+                            this.distanceY = 0
                         }
                         break
                     case 3: // z
-                        this.distanceZ += Math.abs(vector[2] *0.01)
+                        this.distanceZ += Math.abs(vector[2] * 0.01)
                         if (Math.abs(this.distanceZ) >= this.gridSize) {
-                            this.rotateElement([0, 0, Math.sign(vector[2]) * this.distanceZ*0.01745])
+                            this.rotateElement([0, 0, Math.sign(vector[2]) * this.distanceZ * 0.01745])
 
                             this.distanceZ = 0
                             this.renderTarget.innerText = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
@@ -150,78 +151,75 @@ export default class RotationGizmo extends System {
         }
     }
 
-    rotateElement(vec, element = this.target.components.TransformComponent, type = this.typeRot, local = true) {
+    rotateElement(vec) {
         let quatA = [0, 0, 0, 1]
-
-        if (local)
-            vec3.add(this.currentRotation, this.currentRotation, vec)
-
-
-        if (vec[0] !== 0) {
+        vec3.add(this.currentRotation, this.currentRotation, vec)
+        if (vec[0] !== 0)
             quat.rotateX(quatA, quatA, vec[0])
-        }
-        if (vec[1] !== 0) {
+        if (vec[1] !== 0)
             quat.rotateY(quatA, quatA, vec[1])
-        }
-        if (vec[2] !== 0) {
+        if (vec[2] !== 0)
             quat.rotateZ(quatA, quatA, vec[2])
+
+        for (let i = 0; i < this.target.length; i++) {
+            const target = this.target[i].components[COMPONENTS.TRANSFORM]
+            if (this.typeRot === ROTATION_TYPES.GLOBAL || this.target.length > 1)
+                target.rotationQuat = quat.multiply([], quatA, target.rotationQuat)
+            else
+                target.rotationQuat = quat.multiply([], target.rotationQuat, quatA)
         }
-
-
-        if (type === ROTATION_TYPES.GLOBAL)
-            element.rotationQuat = quat.multiply([], quatA, element.rotationQuat)
-        else
-            element.rotationQuat = quat.multiply([], element.rotationQuat, quatA)
-
     }
 
 
-    execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType,
-            onGizmoStart,
-            onGizmoEnd,gridSize) {
+    execute(
+        meshes,
+        meshSources,
+        selected,
+        camera,
+        pickSystem,
+        lockCamera,
+        entities,
+        transformationType,
+        onGizmoStart,
+        onGizmoEnd,
+        gridSize
+    ) {
         super.execute()
 
         if (selected.length > 0) {
+            const el = entities[selected[0]]
             this.gridSize = gridSize
             this.firstPick = false
             this.typeRot = transformationType
             this.camera = camera
             this.onGizmoStart = onGizmoStart
             this.onGizmoEnd = onGizmoEnd
-            if (this.currentCoord && !this.tracking) {
-                const el = entities.find(m => m.id === selected[0])
+            if (this.currentCoord && !this.tracking && el.components[COMPONENTS.TRANSFORM]) {
+                const pickID = pickSystem.pickElement((shader, proj) => {
+                    this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader)
+                }, this.currentCoord, camera, true)
+                this.clickedAxis = pickID - 2
+                if (pickID === 0) {
+                    lockCamera(false)
+                    this.currentCoord = undefined
+                } else {
+                    this.tracking = true
+                    lockCamera(true)
 
-                if (el && el.components[COMPONENTS.TRANSFORM]) {
-                    const pickID = pickSystem.pickElement((shader, proj) => {
-                        this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader)
-                    }, this.currentCoord, camera, true)
+                    this.renderTarget.style.left = this.currentCoord.x + 'px'
+                    this.renderTarget.style.top = this.currentCoord.y + 'px'
+                    this.renderTarget.style.display = 'block'
+                    this.renderTarget.style.width = 'fit-content'
 
-                    this.clickedAxis = pickID - 2
+                    this.target = selected.map(e => entities[e])
 
-                    if (pickID === 0) {
-                        lockCamera(false)
-                        this.currentCoord = undefined
-                    } else {
-                        this.tracking = true
-                        lockCamera(true)
-
-                        this.renderTarget.style.left = this.currentCoord.x + 'px'
-                        this.renderTarget.style.top = this.currentCoord.y + 'px'
-                        this.renderTarget.style.display = 'block'
-                        this.renderTarget.style.width = 'fit-content'
-
-                        this.target = el
-
-                        this.gpu.canvas.requestPointerLock()
-                        this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
-                    }
+                    this.gpu.canvas.requestPointerLock()
+                    this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                 }
             }
-            if (selected.length === 1) {
-                const el = entities.find(m => m.id === selected[0])
-                if (el && el.components[COMPONENTS.TRANSFORM])
-                    this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
-            }
+
+            if (el.components[COMPONENTS.TRANSFORM])
+                this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
         }
 
     }

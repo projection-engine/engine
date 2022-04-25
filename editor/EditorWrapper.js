@@ -1,12 +1,12 @@
-import System from "../basic/System";
-import GridSystem from "./subsystems/GridSystem";
-import BillboardSystem from "./subsystems/BillboardSystem";
-import SYSTEMS from "../../templates/SYSTEMS";
-import GizmoSystem from "./subsystems/GizmoSystem";
-import SelectedSystem from "./subsystems/SelectedSystem";
+import System from "../shared/ecs/basic/System";
+import GridSystem from "./systems/GridSystem";
+import BillboardSystem from "../shared/ecs/systems/subsystems/BillboardSystem";
+import SYSTEMS from "../shared/templates/SYSTEMS";
+import GizmoSystem from "./systems/GizmoSystem";
+import SelectedSystem from "./systems/SelectedSystem";
 
 
-export default class EditorSystem extends System {
+export default class EditorWrapper extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
@@ -23,35 +23,28 @@ export default class EditorSystem extends System {
         const {
             pointLights,
             spotLights,
-            terrains,
             meshes,
-            skybox,
             directionalLights,
-            materials,
             meshSources,
             cubeMaps,
             skylight,
-            translucentMeshes,
             cameras
         } = data
         const {
             lockCamera,
-            setSelected,
             selected,
             camera,
-            typeRendering,
             iconsVisibility,
-            gridVisibility,
-            shadingModel,
-            noRSM,
-            gamma,
-            exposure,
+
             rotationType,
             onGizmoStart,
             onGizmoEnd,
             gizmo,
             canExecutePhysicsAnimation,
-            gridSize
+
+            gridSize,
+            gridRotationSize,
+            gridScaleSize
         } = options
 
         if(!after) {
@@ -74,12 +67,14 @@ export default class EditorSystem extends System {
                     camera,
                     systems[SYSTEMS.PICK],
                     lockCamera,
-                    entities,
+                    entitiesMap,
                     gizmo,
                     rotationType,
                     onGizmoStart,
                     onGizmoEnd,
-                    gridSize
+                    gridSize,
+                    gridRotationSize,
+                    gridScaleSize
                 )
 
             }

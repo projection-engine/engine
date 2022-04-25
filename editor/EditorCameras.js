@@ -34,12 +34,12 @@ export default class EditorCameras{
             this.cameraEvents = new perspectiveCameraEvents(
                 this.camera,
                 this.canvasID,
-                (x, y) => this.onClick({x, y}))
+                (x, y, ctrlKey) => this.onClick({x, y}, ctrlKey))
         else
             this.cameraEvents = new OrthographicCameraEvents(
                 this.camera,
                 this.canvasID,
-                (x, y) => this.onClick({x, y}))
+                (x, y, ctrlKey) => this.onClick({x, y}, ctrlKey))
     }
 
     changeCamera(newType) {

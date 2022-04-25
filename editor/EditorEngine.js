@@ -7,7 +7,7 @@ import {STEPS_CUBE_MAP} from "../shared/ecs/systems/rendering/CubeMapSystem";
 import COMPONENTS from "../shared/templates/COMPONENTS";
 import EditorCameras from "./EditorCameras";
 import getSystemKey from "../utils/getSystemKey";
-import EditorSystem from "../shared/ecs/systems/EditorSystem";
+import EditorWrapper from "./EditorWrapper";
 
 export default class EditorEngine extends Renderer {
     _systems = {}
@@ -24,7 +24,7 @@ export default class EditorEngine extends Renderer {
         this.cameraData = new EditorCameras(id, CAMERA_TYPES.SPHERICAL, document.getElementById(id + '-canvas'))
 
         this.initialized = true
-        this.editorSystem = new EditorSystem(gpu, )
+        this.editorSystem = new EditorWrapper(gpu, )
     }
 
     get camera() {
@@ -70,7 +70,7 @@ export default class EditorEngine extends Renderer {
 
             const meshSources = toObject(meshes)
             if (typeof params.setSelected === 'function')
-                this.cameraData.onClick = (currentCoords) => {
+                this.cameraData.onClick = (currentCoords, ctrlKey) => {
                     const p = this._systems[SYSTEMS.PICK]
                     const index = p.pickElement((shader, proj) => {
                         for (let m = 0; m < entities.length; m++) {
@@ -87,7 +87,12 @@ export default class EditorEngine extends Renderer {
                         }
                     }, currentCoords, camera)
                     if (index > 0)
-                        params.setSelected([entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)?.id])
+                        params.setSelected(prev => {
+                            if(ctrlKey)
+                                return [...prev, entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)?.id]
+                            else
+                                return [entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)?.id]
+                        })
                     else
                         params.setSelected([])
                 }

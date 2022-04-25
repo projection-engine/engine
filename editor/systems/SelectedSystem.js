@@ -1,10 +1,9 @@
-import System from "../../basic/System";
-import Shader from "../../../utils/workers/Shader";
-import * as gizmoShaderCode from '../../../shaders/misc/gizmo.glsl'
-import COMPONENTS from "../../../templates/COMPONENTS";
+import System from "../../shared/ecs/basic/System";
+import Shader from "../../shared/utils/workers/Shader";
+import * as gizmoShaderCode from '../../shared/shaders/misc/gizmo.glsl'
+import COMPONENTS from "../../shared/templates/COMPONENTS";
 
 export default class SelectedSystem extends System {
-    _ready = false
 
     constructor(gpu) {
         super([]);
@@ -25,7 +24,8 @@ export default class SelectedSystem extends System {
                     mesh,
                     viewMatrix: camera.viewMatrix,
                     projectionMatrix: camera.projectionMatrix,
-                    transformMatrix: t.transformationMatrix
+                    transformMatrix: t.transformationMatrix,
+                    index: m
                 })
             }
         }
@@ -35,13 +35,15 @@ export default class SelectedSystem extends System {
             mesh,
             viewMatrix,
             projectionMatrix,
-            transformMatrix
+            transformMatrix,
+            index
         }) {
         mesh.use()
         this.shader.bindForUse({
             projectionMatrix,
             transformMatrix,
-            viewMatrix
+            viewMatrix,
+            index
         })
 
         this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)

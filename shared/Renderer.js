@@ -53,9 +53,7 @@ export default class Renderer {
                     rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
                     doubledSided: true
                 },
-                () => {
-                    this._ready = true
-                },
+                () => null,
                 v4())
         })
         const a = new FramebufferInstance(gpu), b = new FramebufferInstance(gpu)

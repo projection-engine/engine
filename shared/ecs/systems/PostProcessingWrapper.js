@@ -12,7 +12,6 @@ export default class PostProcessingWrapper extends System {
         this.gpu = gpu
 
         this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-
         this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
         this.bloomSystem = new Bloom(gpu)

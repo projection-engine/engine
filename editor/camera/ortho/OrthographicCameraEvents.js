@@ -80,7 +80,7 @@ export default function OrthographicCameraEvents(camera, canvasID, onClick) {
 
         if (elapsedTime <= 250) {
             const target = document.getElementById(canvasID).getBoundingClientRect()
-            onClick(event.clientX - target.left, event.clientY - target.top)
+            onClick(event.clientX - target.left, event.clientY - target.top, event.ctrlKey)
         }
 
     }
