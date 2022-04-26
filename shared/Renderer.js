@@ -13,6 +13,7 @@ import {v4} from "uuid";
 import GBufferSystem from "./ecs/systems/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
+import {WebWorker} from "../../pages/project/utils/workers/WebWorker";
 
 export default class Renderer {
     _currentFrame = 0
@@ -26,8 +27,10 @@ export default class Renderer {
         this.GBufferSystem = new GBufferSystem(gpu, resolutionScale)
 
         const brdf = new Image()
+        console.log(brdfImg)
         brdf.src = brdfImg
         brdf.decode().then(async () => {
+            console.log('EHTE')
             this.brdf = createTexture(
                 gpu,
                 512,
@@ -42,6 +45,19 @@ export default class Renderer {
                 gpu.CLAMP_TO_EDGE,
                 gpu.CLAMP_TO_EDGE
             )
+
+            // console.log('TABOM1')
+            // const w =new WebWorker()
+            // const d = () => {
+            //     self.addEventListener('message', (event) => {
+            //         console.log('CAFE')
+            //     })
+            // }
+            // w.createExecution('', d.toString())
+            // const t = await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)')
+            // console.log('TABOM2', t)
+
+
             this.fallbackMaterial = new MaterialInstance(
                 this.gpu,
                 shaderCode.fragment,
@@ -50,11 +66,12 @@ export default class Renderer {
                 ],
                 {
                     isForward: false,
-                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
+                    rsmAlbedo:  await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
                     doubledSided: true
                 },
-                () => null,
+                () => this._ready = true,
                 v4())
+            console.log('TABOM')
         })
         const a = new FramebufferInstance(gpu), b = new FramebufferInstance(gpu)
         a.texture().depthTest()

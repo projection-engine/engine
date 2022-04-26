@@ -41,11 +41,16 @@ export default function resize() {
 }
 
 export function getImageBitmap() {
-    self.addEventListener('message', async (event) => {
-        const res = await fetch(event.data)
-        const blob = await res.blob()
-        self.postMessage(await createImageBitmap(blob))
-    })
+    const doIt = (event) => {
+        fetch(event.data)
+            .then(res => {
+                res.blob().then(blob => {
+                    createImageBitmap(blob)
+                        .then(result => self.postMessage(result))
+                })
+            })
+    }
+    self.addEventListener('message', (event) => doIt(event))
 }
 
 export function extractChannel() {

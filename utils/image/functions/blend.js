@@ -1,93 +1,92 @@
 export default function blendWithColor() {
     const COLOR_BLEND_OPERATIONS = {ADD: 0, MULTIPLY: 1, POWER: 2, LERP: 3}
-    self.addEventListener('message', async (event) => {
-        const {
-            src,
-            color,
-            operation
-        } = event.data
-        const split = color.match(/[\d.]+/g)
-        const [r, g, b] = split.map(v => parseFloat(v))
+    const doIt = async (event) => {
+        {
+            const {
+                src,
+                color,
+                operation
+            } = event.data
+            const split = color.match(/[\d.]+/g)
+            const [r, g, b] = split.map(v => parseFloat(v))
 
-        const res = await fetch(src)
-        const blob = await res.blob()
-        const imageToLoad = await createImageBitmap(blob)
+            const res = await fetch(src)
+            const blob = await res.blob()
+            const imageToLoad = await createImageBitmap(blob)
 
 
-        self.postMessage(
-            await new Promise(resolve => {
-                const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height);
-                let ctx = c.getContext("2d");
-                ctx.drawImage(imageToLoad, 0, 0)
+            self.postMessage(
+                await new Promise(resolve => {
+                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height);
+                    let ctx = c.getContext("2d");
+                    ctx.drawImage(imageToLoad, 0, 0)
 
-                const imgData = ctx.getImageData(0, 0, imageToLoad.width, imageToLoad.height);
-                const data = imgData.data;
-                let newImage = new Array(data.length)
-                for (let i = 0; i < data.length; i += 4) {
-                    switch (operation) {
-                        case COLOR_BLEND_OPERATIONS.POWER:
-                            newImage[i] = data[i] ** r
-                            newImage[i + 1] = data[i + 1] ** g
-                            newImage[i + 2] = data[i + 2] ** b
-                            newImage[i + 3] = data[i + 3]
-                            break
-                        case COLOR_BLEND_OPERATIONS.ADD:
-                            newImage[i] = data[i] + r
-                            newImage[i + 1] = data[i + 1] + g
-                            newImage[i + 2] = data[i + 2] + b
-                            newImage[i + 3] = data[i + 3]
-                            break
-                        default:
-                            newImage[i] = data[i] * r
-                            newImage[i + 1] = data[i + 1] * g
-                            newImage[i + 2] = data[i + 2] * b
-                            newImage[i + 3] = data[i + 3]
-                            break
+                    const imgData = ctx.getImageData(0, 0, imageToLoad.width, imageToLoad.height);
+                    const data = imgData.data;
+                    let newImage = new Array(data.length)
+                    for (let i = 0; i < data.length; i += 4) {
+                        switch (operation) {
+                            case COLOR_BLEND_OPERATIONS.POWER:
+                                newImage[i] = data[i] ** r
+                                newImage[i + 1] = data[i + 1] ** g
+                                newImage[i + 2] = data[i + 2] ** b
+                                newImage[i + 3] = data[i + 3]
+                                break
+                            case COLOR_BLEND_OPERATIONS.ADD:
+                                newImage[i] = data[i] + r
+                                newImage[i + 1] = data[i + 1] + g
+                                newImage[i + 2] = data[i + 2] + b
+                                newImage[i + 3] = data[i + 3]
+                                break
+                            default:
+                                newImage[i] = data[i] * r
+                                newImage[i + 1] = data[i + 1] * g
+                                newImage[i + 2] = data[i + 2] * b
+                                newImage[i + 3] = data[i + 3]
+                                break
+                        }
                     }
-                }
-                imgData.data.set(newImage)
-                ctx.putImageData(imgData, 0, 0)
+                    imgData.data.set(newImage)
+                    ctx.putImageData(imgData, 0, 0)
 
-                c.convertToBlob({
-                    type: "image/png",
-                    quality: 1
-                }).then(blob => {
+                    c.convertToBlob({
+                        type: "image/png",
+                        quality: 1
+                    }).then(blob => {
 
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    })
                 })
-            })
-        )
-    })
+            )
+        }
+    }
+    self.addEventListener('message', (event) => doIt(event))
 }
 
 export function colorToImage() {
-
-    self.addEventListener('message', async (event) => {
+    const doIt = (event) => {
         const {
             color,
             resolution
         } = event.data
+        const c = new OffscreenCanvas(resolution, resolution);
+        let ctx = c.getContext("2d");
+        ctx.fillStyle = typeof color === 'string' ? color : `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
+        ctx.fillRect(0, 0, resolution, resolution)
+        c.convertToBlob({
+            type: "image/png",
+            quality: .1
+        }).then(blob => {
 
-        self.postMessage(
-            await new Promise(resolve => {
-                const c = new OffscreenCanvas(resolution, resolution);
-                let ctx = c.getContext("2d");
-                ctx.fillStyle = typeof color === 'string' ? color : `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
-                ctx.fillRect(0, 0, resolution, resolution)
-                c.convertToBlob({
-                    type: "image/png",
-                    quality: .1
-                }).then(blob => {
+            const reader = new FileReader();
+            reader.onloadend = () => self.postMessage(reader.result);
+            reader.readAsDataURL(blob);
+        })
 
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
-                })
-            })
-        )
-    })
+    }
+    self.addEventListener('message', (event) => doIt(event))
 }
 
 export function linearInterpolate() {
@@ -142,8 +141,6 @@ export function linearInterpolate() {
 }
 
 
-
-
 export function heightBasedLinearInterpolate() {
 
     self.addEventListener('message', async (event) => {
@@ -164,7 +161,8 @@ export function heightBasedLinearInterpolate() {
             await new Promise(resolve => {
                 const canvas1 = new OffscreenCanvas(image1.width, image1.height), ctx1 = canvas1.getContext("2d")
                 const canvas2 = new OffscreenCanvas(image2.width, image2.height), ctx2 = canvas2.getContext("2d")
-                const canvasHeight = new OffscreenCanvas(heightMap.width, heightMap.height), ctxHeight = canvasHeight.getContext("2d")
+                const canvasHeight = new OffscreenCanvas(heightMap.width, heightMap.height),
+                    ctxHeight = canvasHeight.getContext("2d")
 
                 ctx1.drawImage(image1, 0, 0)
                 ctx2.drawImage(image2, 0, 0)
