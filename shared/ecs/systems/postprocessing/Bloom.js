@@ -60,7 +60,7 @@ export default class Bloom extends System {
         this.brightShader.use()
         this.brightShader.bindForUse({
             sceneColor: a.colors[0],
-            threshold: .85
+            threshold: .75
         })
         b.draw()
         b.stopMapping()

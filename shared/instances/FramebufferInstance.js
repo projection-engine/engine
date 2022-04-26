@@ -25,7 +25,6 @@ export default class FramebufferInstance extends Quad {
             precision: this.gpu.RGBA16F,
             format: this.gpu.RGBA,
             type: this.gpu.FLOAT,
-            storage: true,
             linear: false,
             repeat: false,
             flip: false
@@ -104,7 +103,7 @@ export default class FramebufferInstance extends Quad {
             precision,
             format,
             type,
-            storage,
+
             linear,
             repeat,
             flip
