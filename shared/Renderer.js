@@ -7,10 +7,10 @@ import brdfImg from "../utils/brdf_lut.jpg";
 import {createTexture} from "./utils/misc/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
-import {DATA_TYPES} from "../../views/blueprints/base/DATA_TYPES";
+import {DATA_TYPES} from "../../views/blueprints/components/DATA_TYPES";
 import ImageProcessor from "../utils/image/ImageProcessor";
 import {v4} from "uuid";
-import GBufferSystem from "./ecs/systems/rendering/GBufferSystem";
+import GBufferSystem from "./ecs/systems/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
 

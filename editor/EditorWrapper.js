@@ -1,6 +1,6 @@
 import System from "../shared/ecs/basic/System";
 import GridSystem from "./systems/GridSystem";
-import BillboardSystem from "../shared/ecs/systems/subsystems/BillboardSystem";
+import BillboardSystem from "../shared/ecs/systems/BillboardSystem";
 import SYSTEMS from "../shared/templates/SYSTEMS";
 import GizmoSystem from "./systems/GizmoSystem";
 import SelectedSystem from "./systems/SelectedSystem";

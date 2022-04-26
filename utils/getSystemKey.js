@@ -1,18 +1,18 @@
-import CameraCubeSystem from "../shared/ecs/systems/utils/CameraCubeSystem";
+import CameraCubeSystem from "../shared/ecs/systems/CameraCubeSystem";
 import SYSTEMS from "../shared/templates/SYSTEMS";
-import AOSystem from "../shared/ecs/systems/rendering/AOSystem";
-import CullingSystem from "../shared/ecs/systems/utils/CullingSystem";
-import GBufferSystem from "../shared/ecs/systems/rendering/GBufferSystem";
-import PerformanceSystem from "../shared/ecs/systems/utils/PerformanceSystem";
-import PhysicsSystem from "../shared/ecs/systems/utils/PhysicsSystem";
-import PickSystem from "../shared/ecs/systems/utils/PickSystem";
+import AOSystem from "../shared/ecs/systems/AOSystem";
+import CullingSystem from "../shared/ecs/systems/CullingSystem";
+import GBufferSystem from "../shared/ecs/systems/GBufferSystem";
+import PerformanceSystem from "../shared/ecs/systems/PerformanceSystem";
+import PhysicsSystem from "../shared/ecs/systems/PhysicsSystem";
+import PickSystem from "../shared/ecs/systems/PickSystem";
 
-import ShadowMapSystem from "../shared/ecs/systems/rendering/ShadowMapSystem";
-import TransformSystem from "../shared/ecs/systems/utils/TransformSystem";
-import CubeMapSystem from "../shared/ecs/systems/rendering/CubeMapSystem";
-import ScriptSystem from "../shared/ecs/systems/utils/ScriptSystem";
-import ForwardSystem from "../shared/ecs/systems/rendering/ForwardSystem";
-import DeferredSystem from "../shared/ecs/systems/rendering/DeferredSystem";
+import ShadowMapSystem from "../shared/ecs/systems/ShadowMapSystem";
+import TransformSystem from "../shared/ecs/systems/TransformSystem";
+import CubeMapSystem from "../shared/ecs/systems/CubeMapSystem";
+import ScriptSystem from "../shared/ecs/systems/ScriptSystem";
+import ForwardSystem from "../shared/ecs/systems/ForwardSystem";
+import DeferredSystem from "../shared/ecs/systems/DeferredSystem";
 
 export default function getSystemKey(s) {
     switch (true) {

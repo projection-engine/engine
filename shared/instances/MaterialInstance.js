@@ -2,7 +2,7 @@ import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../../utils/image/ImageProcessor";
 import Shader from "../utils/workers/Shader";
 import * as deferred from "../shaders/mesh/meshDeferred.glsl";
-import {DATA_TYPES} from "../../../views/blueprints/base/DATA_TYPES";
+import {DATA_TYPES} from "../../../views/blueprints/components/DATA_TYPES";
 import * as forward from "../shaders/mesh/forwardMesh.glsl";
 
 export default class MaterialInstance {
