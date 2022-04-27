@@ -32,40 +32,40 @@ export default class PhysicsSystem extends System {
         } = options
 
         // TODO
-        if (canExecutePhysicsAnimation) {
-            const staticMeshes = [] //this._find(entities, e => filteredEntities.staticPhysicsMeshes[e.id] !== undefined)
-            const dynamicMeshes = []// this._find(entities, e => filteredEntities.dynamicPhysicsMeshes[e.id] !== undefined)
-
-            for (let i = 0; i < dynamicMeshes.length; i++) {
-                const current = dynamicMeshes[i]
-                let intersecting = false
-                const physicsComp = current.components.PhysicsComponent
-                const time = elapsed / 1000
-                const acceleration = [
-                    0,
-                    -GRAVITY * time,
-                    0
-                ]
-
-                for (let j = 0; j < staticMeshes.length; j++) {
-                    const res = intersectBoundingSphere(current.components.ColliderComponent.radius, staticMeshes[j].components.ColliderComponent.radius, current.components.ColliderComponent.position, staticMeshes[j].components.ColliderComponent.position)
-                    intersecting = intersecting || res
-                }
-
-                if (!intersecting) {
-                    physicsComp.acceleration = acceleration
-                    physicsComp.velocity = divideArray(acceleration, time)
-
-                    const displacement = [
-                        calculateDisplacement(physicsComp.velocity[0], time, acceleration[0]),
-                        calculateDisplacement(physicsComp.velocity[1], time, acceleration[1]),
-                        calculateDisplacement(physicsComp.velocity[2], time, acceleration[2]),
-                    ]
-                    current.components.TransformComponent.translation = sumArrays(displacement, current.components.TransformComponent.translation)
-                }
-
-            }
-        }
+        // if (canExecutePhysicsAnimation) {
+        //     const staticMeshes = [] //this._find(entities, e => filteredEntities.staticPhysicsMeshes[e.id] !== undefined)
+        //     const dynamicMeshes = []// this._find(entities, e => filteredEntities.dynamicPhysicsMeshes[e.id] !== undefined)
+        //
+        //     for (let i = 0; i < dynamicMeshes.length; i++) {
+        //         const current = dynamicMeshes[i]
+        //         let intersecting = false
+        //         const physicsComp = current.components.PhysicsComponent
+        //         const time = elapsed / 1000
+        //         const acceleration = [
+        //             0,
+        //             -GRAVITY * time,
+        //             0
+        //         ]
+        //
+        //         for (let j = 0; j < staticMeshes.length; j++) {
+        //             const res = intersectBoundingSphere(current.components.ColliderComponent.radius, staticMeshes[j].components.ColliderComponent.radius, current.components.ColliderComponent.position, staticMeshes[j].components.ColliderComponent.position)
+        //             intersecting = intersecting || res
+        //         }
+        //
+        //         if (!intersecting) {
+        //             physicsComp.acceleration = acceleration
+        //             physicsComp.velocity = divideArray(acceleration, time)
+        //
+        //             const displacement = [
+        //                 calculateDisplacement(physicsComp.velocity[0], time, acceleration[0]),
+        //                 calculateDisplacement(physicsComp.velocity[1], time, acceleration[1]),
+        //                 calculateDisplacement(physicsComp.velocity[2], time, acceleration[2]),
+        //             ]
+        //             current.components.TransformComponent.translation = sumArrays(displacement, current.components.TransformComponent.translation)
+        //         }
+        //
+        //     }
+        // }
     }
 }
 

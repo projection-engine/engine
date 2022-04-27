@@ -6,6 +6,7 @@ import {mat4} from "gl-matrix";
 import OrthographicCamera from "../../../editor/camera/ortho/OrthographicCamera";
 import MeshInstance from "../../instances/MeshInstance";
 import camera from "../../../editor/assets/Camera.json";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 
 export default class PickSystem extends System {
@@ -114,7 +115,7 @@ export default class PickSystem extends System {
 
     static drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix, shader, gpu) {
         shader.bindForUse({
-            uID: [...instance.components.PickComponent.pickID, 1],
+            uID: [...instance.components[COMPONENTS.PICK].pickID, 1],
             projectionMatrix,
             transformMatrix,
             viewMatrix

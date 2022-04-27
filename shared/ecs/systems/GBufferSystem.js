@@ -76,7 +76,7 @@ export default class GBufferSystem extends System {
                     mat,
                     current.components[COMPONENTS.MESH].normalMatrix,
                     undefined,
-                    current.components.MaterialComponent,
+                    current.components[COMPONENTS.MATERIAL],
 
                     ambient.irradianceMap,
                     ambient.prefilteredMap,

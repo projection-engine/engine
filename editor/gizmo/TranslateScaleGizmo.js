@@ -60,7 +60,10 @@ export default class TranslateScaleGizmo extends System {
                 break
         }
     }
-    transformElement(){}
+
+    transformElement() {
+    }
+
     getTranslation(el) {
         const k = Object.keys(el.components)
         let key
@@ -79,6 +82,7 @@ export default class TranslateScaleGizmo extends System {
             }
         }
     }
+
     execute(
         meshes,
         meshSources,
@@ -124,17 +128,23 @@ export default class TranslateScaleGizmo extends System {
                     }
                 }
             }
-            this.rotationTarget = el.components[COMPONENTS.TRANSFORM] !== undefined ? el.components[COMPONENTS.TRANSFORM].rotationQuat : [0, 0, 0, 1]
-            this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader, arrow)
+            const t = el.components[COMPONENTS.TRANSFORM]
+            this.rotationTarget = t !== undefined ? t.rotationQuat : [0, 0, 0, 1]
+
+            this._drawGizmo(t ? t.translation : this.getLightData('direction', el.components), camera.viewMatrix, camera.projectionMatrix, this.gizmoShader, arrow)
         }
 
     }
 
-    _translateMatrix(t, m, comp) {
-        const matrix = [...m]
+    _translateMatrix(t, components) {
+        const comp = components[COMPONENTS.TRANSFORM]
+        const matrix =comp ?  [...comp.transformationMatrix] : this.getLightData('transformationMatrix', components)
 
+        const translation = comp ? comp.translation : this.getLightData('direction', components),
+            rotationQuat = comp ? comp.rotationQuat : [0, 0, 0, 1],
+            scale = comp ? comp.scaling : [1, 1, 1]
         if (this.typeRot === ROTATION_TYPES.RELATIVE) {
-            mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([], this.rotationTarget, comp.rotationQuat), vec3.add([], t, comp.translation), comp.scaling, comp.translation)
+            mat4.fromRotationTranslationScaleOrigin(matrix, quat.multiply([], this.rotationTarget, rotationQuat), vec3.add([], t, translation), scale, translation)
         } else {
             matrix[12] += t[0]
             matrix[13] += t[1]
@@ -144,10 +154,15 @@ export default class TranslateScaleGizmo extends System {
         return matrix
     }
 
+    getLightData(key, components) {
+        return components[COMPONENTS.DIRECTIONAL_LIGHT] ? components[COMPONENTS.DIRECTIONAL_LIGHT][key] : components[COMPONENTS.SKYLIGHT][key]
+    }
+
     _drawGizmo(translation, view, proj, shader, arrow) {
-        const mX = this._translateMatrix(translation, this.xGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.xGizmo.components[COMPONENTS.TRANSFORM])
-        const mY = this._translateMatrix(translation, this.yGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.yGizmo.components[COMPONENTS.TRANSFORM])
-        const mZ = this._translateMatrix(translation, this.zGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.zGizmo.components[COMPONENTS.TRANSFORM])
+
+        const mX = this._translateMatrix(translation, this.xGizmo.components)
+        const mY = this._translateMatrix(translation, this.yGizmo.components)
+        const mZ = this._translateMatrix(translation, this.zGizmo.components)
 
         shader.use()
         this.gpu.bindVertexArray(arrow.VAO)
@@ -155,11 +170,11 @@ export default class TranslateScaleGizmo extends System {
         arrow.vertexVBO.enable()
 
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
-            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader, translation, arrow)
+            this._draw(view, mX, proj, 1, this.xGizmo.components[COMPONENTS.PICK].pickID, shader, translation, arrow)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
-            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader, translation, arrow)
+            this._draw(view, mY, proj, 2, this.yGizmo.components[COMPONENTS.PICK].pickID, shader, translation, arrow)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
-            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader, translation, arrow)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components[COMPONENTS.PICK].pickID, shader, translation, arrow)
 
         arrow.vertexVBO.disable()
         this.gpu.bindVertexArray(null)

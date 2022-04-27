@@ -52,8 +52,8 @@ export default class RotationGizmo extends System {
 
     _mapEntity(i, axis) {
         const e = new Entity(undefined)
-        e.addComponent(new PickComponent(undefined, i - 3))
-        e.addComponent(new TransformComponent())
+        e.components[COMPONENTS.PICK] = new PickComponent(undefined, i - 3)
+        e.components[COMPONENTS.TRANSFORM] = new TransformComponent()
         let s, t = [0, 0, 0], r
         switch (axis) {
             case 'x':
@@ -260,9 +260,9 @@ export default class RotationGizmo extends System {
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
         this.gpu.disable(this.gpu.CULL_FACE)
 
-        const mX = this._rotateMatrix(translation, rotation, 'x', this.xGizmo.components.TransformComponent.transformationMatrix, this.xGizmo.components.TransformComponent)
-        const mY = this._rotateMatrix(translation, rotation, 'y', this.yGizmo.components.TransformComponent.transformationMatrix, this.yGizmo.components.TransformComponent)
-        const mZ = this._rotateMatrix(translation, rotation, 'z', this.zGizmo.components.TransformComponent.transformationMatrix, this.zGizmo.components.TransformComponent)
+        const mX = this._rotateMatrix(translation, rotation, 'x', this.xGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.xGizmo.components[COMPONENTS.TRANSFORM])
+        const mY = this._rotateMatrix(translation, rotation, 'y', this.yGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.yGizmo.components[COMPONENTS.TRANSFORM])
+        const mZ = this._rotateMatrix(translation, rotation, 'z', this.zGizmo.components[COMPONENTS.TRANSFORM].transformationMatrix, this.zGizmo.components[COMPONENTS.TRANSFORM])
 
         shader.use()
         this.gpu.bindVertexArray(this.xyz.VAO)
@@ -271,11 +271,11 @@ export default class RotationGizmo extends System {
         this.xyz.uvVBO.enable()
 
         if (this.tracking && this.clickedAxis === 1 || !this.tracking)
-            this._draw(view, mX, proj, 1, this.xGizmo.components.PickComponent.pickID, shader, translation)
+            this._draw(view, mX, proj, 1, this.xGizmo.components[COMPONENTS.PICK].pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 2 || !this.tracking)
-            this._draw(view, mY, proj, 2, this.yGizmo.components.PickComponent.pickID, shader, translation)
+            this._draw(view, mY, proj, 2, this.yGizmo.components[COMPONENTS.PICK].pickID, shader, translation)
         if (this.tracking && this.clickedAxis === 3 || !this.tracking)
-            this._draw(view, mZ, proj, 3, this.zGizmo.components.PickComponent.pickID, shader, translation)
+            this._draw(view, mZ, proj, 3, this.zGizmo.components[COMPONENTS.PICK].pickID, shader, translation)
 
         this.xyz.vertexVBO.disable()
         this.gpu.bindVertexArray(null)

@@ -90,7 +90,7 @@ export default class ForwardSystem extends System {
                     t.transformationMatrix,
                     mat,
                     current.components[COMPONENTS.MESH].normalMatrix,
-                    current.components.MaterialComponent,
+                    current.components[COMPONENTS.MATERIAL],
                     brdf,
 
                     pointLightsQuantity,

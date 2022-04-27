@@ -47,8 +47,9 @@ export default class TranslationGizmo extends TranslateScaleGizmo {
 
     _mapEntity(i, axis) {
         const e = new Entity(undefined)
-        e.addComponent(new PickComponent(undefined, i - 3))
-        e.addComponent(new TransformComponent())
+        e.components[COMPONENTS.PICK] = new PickComponent(undefined, i - 3)
+        e.components[COMPONENTS.TRANSFORM] = new TransformComponent()
+
         let s, t = [0, 0, 0], r
         switch (axis) {
             case 'x':

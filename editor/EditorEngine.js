@@ -72,6 +72,7 @@ export default class EditorEngine extends Renderer {
             if (typeof params.setSelected === 'function')
                 this.cameraData.onClick = (currentCoords, ctrlKey) => {
                     const p = this._systems[SYSTEMS.PICK]
+                    console.log(entities)
                     const index = p.pickElement((shader, proj) => {
                         for (let m = 0; m < entities.length; m++) {
                             const currentInstance = entities[m]

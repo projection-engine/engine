@@ -76,7 +76,7 @@ export default class CubeMapSystem extends System {
 
                 for (let i = 0; i < cubeMaps.length; i++) {
                     const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
-                        pos = cubeMaps[i].components.TransformComponent.position,
+                        pos = cubeMaps[i].components[COMPONENTS.TRANSFORM].position,
                         radius = current.radius
 
                     for (let m = 0; m < changedMeshes.length; m++) {
@@ -126,8 +126,8 @@ export default class CubeMapSystem extends System {
             const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
             current.cubeMap.resolution = current.resolution
             current.cubeMap.draw((yaw, pitch, projection, index) => {
-                    const target = vec3.add([], cubeMaps[i].components.TransformComponent.position, VIEWS.target[index])
-                    const view = mat4.lookAt([], cubeMaps[i].components.TransformComponent.position, target, VIEWS.up[index])
+                    const target = vec3.add([], cubeMaps[i].components[COMPONENTS.TRANSFORM].position, VIEWS.target[index])
+                    const view = mat4.lookAt([], cubeMaps[i].components[COMPONENTS.TRANSFORM].position, target, VIEWS.up[index])
                     const nView = [...view]
                     nView[12] = nView[13] = nView[14] = 0
 
@@ -215,7 +215,7 @@ export default class CubeMapSystem extends System {
                     t.transformationMatrix,
                     mat,
                     current.components[COMPONENTS.MESH].normalMatrix,
-                    current.components.MaterialComponent,
+                    current.components[COMPONENTS.MATERIAL],
                     brdf,
 
                     pointLightsQuantity,

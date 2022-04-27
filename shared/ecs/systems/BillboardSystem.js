@@ -44,14 +44,14 @@ export default class BillboardSystem extends System {
 
 
         for (let i = 0; i < billboards.length; i++) {
-            if (billboards[i].components.PointLightComponent)
-                point.push(Array.from(billboards[i].components.TransformComponent.transformationMatrix))
-            else if (billboards[i].components.DirectionalLightComponent)
-                directional.push(Array.from(billboards[i].components.DirectionalLightComponent?.transformationMatrix))
-            else if (billboards[i].components.SpotLightComponent)
-                spot.push(Array.from(billboards[i].components.SpotLightComponent.transformationMatrix))
-            else if (billboards[i].components.CubeMapComponent)
-                cubemaps.push(Array.from(billboards[i].components.TransformComponent.transformationMatrix))
+            if (billboards[i].components[COMPONENTS.POINT_LIGHT])
+                point.push(billboards[i].components[COMPONENTS.TRANSFORM].transformationMatrix)
+            else if (billboards[i].components[COMPONENTS.DIRECTIONAL_LIGHT])
+                directional.push(billboards[i].components[COMPONENTS.DIRECTIONAL_LIGHT]?.transformationMatrix)
+            else if (billboards[i].components[COMPONENTS.SPOT_LIGHT])
+                spot.push(billboards[i].components[COMPONENTS.SPOT_LIGHT].transformationMatrix)
+            else if (billboards[i].components[COMPONENTS.CUBE_MAP])
+                cubemaps.push(Array.from(billboards[i].components[COMPONENTS.TRANSFORM].transformationMatrix))
         }
 
         return {

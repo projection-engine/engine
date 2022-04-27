@@ -7,6 +7,7 @@ import Shader from "../../utils/workers/Shader";
 import FramebufferInstance from "../../instances/FramebufferInstance";
 import CubeMapInstance from "../../instances/CubeMapInstance";
 import {mat4, vec3} from "gl-matrix";
+import COMPONENTS from "../../templates/COMPONENTS";
 
 export const VIEWS = {
     target: [
@@ -92,16 +93,16 @@ export default class ShadowMapSystem extends System {
 
         let lights2D = [], sky = false, lights3D = [], transformChanged = systems[SYSTEMS.TRANSFORMATION].changed
         for (let i = 0; i < directionalLights.length; i++) {
-            const current = directionalLights[i].components.DirectionalLightComponent
+            const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
             if ((current.changed || transformChanged || skylight?.changed) && current.shadowMap) {
                 lights2D.push(current)
                 current.changed = false
             }
         }
         for (let i = 0; i < pointLights.length; i++) {
-            const current = pointLights[i].components.PointLightComponent
+            const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
             if ((current.changed || transformChanged) && current.shadowMap) {
-                lights3D.push({...current, translation: pointLights[i].components.TransformComponent.position})
+                lights3D.push({...current, translation: pointLights[i].components[COMPONENTS.TRANSFORM].position})
                 current.changed = false
             }
         }
@@ -213,13 +214,13 @@ export default class ShadowMapSystem extends System {
     _loopMeshes(meshes, meshSources, meshSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
         for (let m = 0; m < meshes.length; m++) {
             const current = meshes[m]
-            const mesh = meshSources[current.components.MeshComponent.meshID]
+            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined) {
-                const currentMaterialID = current.components.MaterialComponent.materialID
+                const currentMaterialID = current.components[COMPONENTS.MATERIAL].materialID
                 let mat = materials[currentMaterialID] ? materials[currentMaterialID] : undefined
                 if (!mat || !mat.ready)
                     mat = meshSystem.fallbackMaterial
-                const t = current.components.TransformComponent
+                const t = current.components[COMPONENTS.TRANSFORM]
 
                 this._drawMesh(mesh, view, projection, t.transformationMatrix, mat, color, shader, lightPosition, shadowClipNearFar)
             }

@@ -42,8 +42,8 @@ export default class ScaleGizmo extends TranslateScaleGizmo {
 
     _mapEntity(i, axis) {
         const e = new Entity(undefined)
-        e.addComponent(new PickComponent(undefined, i - 3))
-        e.addComponent(new TransformComponent())
+        e.components[COMPONENTS.PICK] = new PickComponent(undefined, i - 3)
+        e.components[COMPONENTS.TRANSFORM] = new TransformComponent()
         let s = [.2, 0.2, 0.2], r
         switch (axis) {
             case 'x':
@@ -121,6 +121,7 @@ export default class ScaleGizmo extends TranslateScaleGizmo {
     }
 
     execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize) {
-        super.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize, this.xyz);
+        if(selected[0] && entities[selected[0]].components[COMPONENTS.TRANSFORM])
+            super.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize, this.xyz);
     }
 }

@@ -7,7 +7,6 @@ import COMPONENTS from "../shared/templates/COMPONENTS";
 
 export const ENTITY_ACTIONS = {
     ADD: 0,
-    ADD_COMPONENT: 1,
 
     UPDATE: 2,
     UPDATE_COMPONENT: 3,
@@ -59,22 +58,6 @@ export default function entityReducer(state, {type, payload}) {
                 return deleteEntity(stateCopy[entityIndex], stateCopy)
             }
 
-            // COMPONENT
-            case ENTITY_ACTIONS.ADD_COMPONENT: {
-
-                if (payload.data instanceof Component) {
-                    if (payload instanceof PickComponent) {
-                        const existing = state.filter(s => s.components.MeshComponent !== undefined)
-                        payload.data.pickID = generateNextID(existing.length)
-                    }
-
-
-                    entity.addComponent(payload.data)
-                }
-
-                stateCopy[entityIndex] = entity
-                return stateCopy
-            }
             case ENTITY_ACTIONS.UPDATE_COMPONENT: {
                 const {
                     key,
@@ -98,8 +81,12 @@ export default function entityReducer(state, {type, payload}) {
             case ENTITY_ACTIONS.CLEAR:
                 return []
             case ENTITY_ACTIONS.ADD: {
-                if (payload instanceof Entity)
+                if (payload instanceof Entity) {
+                    if (payload.components[COMPONENTS.PICK] instanceof PickComponent)
+                        payload.components[COMPONENTS.PICK].__pickID = generateNextID(state.length + 2)
+
                     stateCopy.push(payload)
+                }
 
                 return stateCopy
             }

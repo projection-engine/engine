@@ -66,7 +66,7 @@ export default class Renderer {
                 ],
                 {
                     isForward: false,
-                    rsmAlbedo:  await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
+                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
                     doubledSided: true
                 },
                 () => this._ready = true,
@@ -89,25 +89,39 @@ export default class Renderer {
 
         let maxTextures = directionalLights.length > 2 ? 2 : directionalLights.length,
             pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
-        const dirLights = (new Array(maxTextures).fill({})).map((_, i) => {
-            return {
-                direction: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].direction,
-                ambient: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].fixedColor,
-                atlasFace: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].atlasFace
+
+        let dirLights = [],
+            dirLightsPov = [],
+            lClip = [],
+            lPosition = [],
+            lColor = [],
+            lAttenuation = []
+
+        getArray(maxTextures, i => {
+            const current = directionalLights[i]
+            if (current && current.components[COMPONENTS.DIRECTIONAL_LIGHT]) {
+                dirLights[i] = {
+                    direction: current.components[COMPONENTS.DIRECTIONAL_LIGHT].direction,
+                    ambient: current.components[COMPONENTS.DIRECTIONAL_LIGHT].fixedColor,
+                    atlasFace: current.components[COMPONENTS.DIRECTIONAL_LIGHT].atlasFace
+                }
+                dirLightsPov[i] = {
+                    lightViewMatrix: current.components[COMPONENTS.DIRECTIONAL_LIGHT].lightView,
+                    lightProjectionMatrix: current.components[COMPONENTS.DIRECTIONAL_LIGHT].lightProjection
+                }
             }
         })
-        const dirLightsPov = (new Array(maxTextures).fill(null)).map((_, i) => {
-            return {
-                lightViewMatrix: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].lightView,
-                lightProjectionMatrix: directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT].lightProjection
+
+        getArray(pointLightsQuantity, i => {
+            const current = pointLights[i]
+            if (current && current.components[COMPONENTS.POINT_LIGHT]) {
+                lClip[i] = [current.components[COMPONENTS.POINT_LIGHT]?.zNear, current.components[COMPONENTS.POINT_LIGHT]?.zFar]
+
+                lPosition[i] = current.components[COMPONENTS.TRANSFORM].position
+                lColor[i] = current.components[COMPONENTS.POINT_LIGHT]?.fixedColor
+                lAttenuation[i] = current.components[COMPONENTS.POINT_LIGHT]?.attenuation
             }
         })
-        const lClip = (new Array(pointLightsQuantity).fill(null)).map((_, i) => [pointLights[i].components.PointLightComponent.zNear, pointLights[i].components.PointLightComponent.zFar]),
-            lPosition = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.TransformComponent.position),
-            lColor = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.fixedColor),
-            lAttenuation = (new Array(pointLightsQuantity).fill(null)).map((_, i) => pointLights[i].components.PointLightComponent.attenuation)
-
-
         return {
             pointLightsQuantity,
             maxTextures,
@@ -168,8 +182,8 @@ export default class Renderer {
             directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
             materials: toObject(materials),
             meshSources: toObject(meshes),
-            skylight: filteredEntities.filter(e => e.components.SkylightComponent && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
-            cubeMaps: filteredEntities.filter(e => e.components.CubeMapComponent),
+            skylight: filteredEntities.filter(e => e.components[COMPONENTS.SKYLIGHT] && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
+            cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP]),
             scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
             scripts: toObject(scripts),
             cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA])
@@ -202,4 +216,11 @@ export default class Renderer {
         this.resizeObs?.disconnect()
         cancelAnimationFrame(this._currentFrame)
     }
+}
+
+function getArray(size, onIndex) {
+    for (let i = 0; i < size; i++) {
+        onIndex(i)
+    }
+
 }
