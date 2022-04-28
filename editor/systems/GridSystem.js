@@ -1,8 +1,8 @@
-import System from "../../shared/ecs/basic/System";
+import System from "../../ecs/basic/System";
 import OrthographicCamera from "../camera/ortho/OrthographicCamera";
-import * as shaderCode from '../../shared/shaders/misc/grid.glsl'
-import Shader from "../../shared/utils/workers/Shader";
-import Quad from "../../shared/utils/workers/Quad";
+import * as shaderCode from '../../shaders/misc/grid.glsl'
+import Shader from "../../utils/Shader";
+import Quad from "../../utils/Quad";
 
 export default class GridSystem extends System {
     constructor(gpu) {

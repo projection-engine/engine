@@ -1,7 +1,7 @@
-import System from "../../shared/ecs/basic/System";
-import Shader from "../../shared/utils/workers/Shader";
-import * as gizmoShaderCode from '../../shared/shaders/misc/gizmo.glsl'
-import COMPONENTS from "../../shared/templates/COMPONENTS";
+import System from "../../ecs/basic/System";
+import Shader from "../../utils/Shader";
+import * as gizmoShaderCode from '../../shaders/misc/gizmo.glsl'
+import COMPONENTS from "../../templates/COMPONENTS";
 
 export default class SelectedSystem extends System {
 

@@ -1,10 +1,10 @@
-import Renderer from "../shared/Renderer";
+import Renderer from "../Renderer";
 import CAMERA_TYPES from "./camera/CAMERA_TYPES";
-import toObject from "../shared/utils/misc/toObject";
-import PickSystem from "../shared/ecs/systems/PickSystem";
-import SYSTEMS from "../shared/templates/SYSTEMS";
-import {STEPS_CUBE_MAP} from "../shared/ecs/systems/CubeMapSystem";
-import COMPONENTS from "../shared/templates/COMPONENTS";
+import toObject from "../utils/toObject";
+import PickSystem from "../ecs/systems/PickSystem";
+import SYSTEMS from "../templates/SYSTEMS";
+import {STEPS_CUBE_MAP} from "../ecs/systems/CubeMapSystem";
+import COMPONENTS from "../templates/COMPONENTS";
 import EditorCameras from "./EditorCameras";
 import getSystemKey from "../utils/getSystemKey";
 import EditorWrapper from "./EditorWrapper";
@@ -24,7 +24,7 @@ export default class EditorEngine extends Renderer {
         this.cameraData = new EditorCameras(id, CAMERA_TYPES.SPHERICAL, document.getElementById(id + '-canvas'))
 
         this.initialized = true
-        this.editorSystem = new EditorWrapper(gpu, )
+        this.editorSystem = new EditorWrapper(gpu,)
     }
 
     get camera() {
@@ -54,7 +54,8 @@ export default class EditorEngine extends Renderer {
     get systems() {
         return this._systems
     }
-    refreshCubemaps(){
+
+    refreshCubemaps() {
         this._systems[SYSTEMS.CUBE_MAP].step = STEPS_CUBE_MAP.BASE
     }
 
@@ -72,11 +73,10 @@ export default class EditorEngine extends Renderer {
             if (typeof params.setSelected === 'function')
                 this.cameraData.onClick = (currentCoords, ctrlKey) => {
                     const p = this._systems[SYSTEMS.PICK]
-                    console.log(entities)
                     const index = p.pickElement((shader, proj) => {
                         for (let m = 0; m < entities.length; m++) {
                             const currentInstance = entities[m]
-                            if(entities[m].active) {
+                            if (entities[m].active) {
                                 const t = currentInstance.components[COMPONENTS.TRANSFORM]
                                 if (currentInstance.components[COMPONENTS.MESH]) {
                                     const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
@@ -87,14 +87,21 @@ export default class EditorEngine extends Renderer {
                             }
                         }
                     }, currentCoords, camera)
-                    if (index > 0)
-                        params.setSelected(prev => {
-                            if(ctrlKey)
-                                return [...prev, entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)?.id]
-                            else
-                                return [entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)?.id]
-                        })
-                    else
+                    if (index > 0) {
+                        const entity = entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)
+                        if (entity)
+                            params.setSelected(prev => {
+                                const i = prev.findIndex(e => e === entity.id)
+                                if (i > -1) {
+                                    prev.splice(i, 1)
+                                    return prev
+                                }
+                                if (ctrlKey)
+                                    return [...prev, entity.id]
+                                else
+                                    return [entity.id]
+                            })
+                    } else
                         params.setSelected([])
                 }
 

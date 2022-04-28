@@ -1,44 +1,37 @@
 export default function resize() {
     self.addEventListener('message', (event) => {
-        new Promise(async resolve => {
-            const {
-                src, w, h, sizePercent, quality
-            } = event.data
+        const {
+            src, w, h, sizePercent, quality
+        } = event.data
+        fetch(src)
+            .then(res => {
+                res.blob()
+                    .then(blob => {
+                        createImageBitmap(blob)
+                            .then(imageToLoad => {
+                                const width = w ? w : sizePercent ? imageToLoad.width * sizePercent : imageToLoad.width
+                                const height = h ? h : sizePercent ? imageToLoad.height * sizePercent : imageToLoad.height
+                                if (width === 0 || height === 0)
+                                    self.postMessage(undefined)
+                                if (imageToLoad.width === width && imageToLoad.height === height)
+                                    self.postMessage(src)
 
-            const res = await fetch(src)
-            const blob = await res.blob()
-            const imageToLoad = await createImageBitmap(blob)
-
-
-            const width = w ? w : sizePercent ? imageToLoad.width * sizePercent : imageToLoad.width
-            const height = h ? h : sizePercent ? imageToLoad.height * sizePercent : imageToLoad.height
-            if (width === 0 || height === 0)
-                self.postMessage(undefined)
-            if (imageToLoad.width === width && imageToLoad.height === height)
-                self.postMessage(src)
-
-            else {
-                const canvas = new OffscreenCanvas(width, height),
-                    ctx = canvas.getContext("2d");
-
-                ctx.drawImage(imageToLoad, 0, 0, width, height);
-
-                const blob = await canvas.convertToBlob({
-                    type: "image/png",
-                    quality: quality
-                })
-
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                self.postMessage(
-                    await new Promise(resolve => {
-                        reader.onloadend = () => resolve(reader.result)
+                                else {
+                                    const canvas = new OffscreenCanvas(width, height),
+                                        ctx = canvas.getContext("2d");
+                                    ctx.drawImage(imageToLoad, 0, 0, width, height);
+                                    canvas.convertToBlob({
+                                        type: "image/png",
+                                        quality: quality
+                                    }).then(b => {
+                                        const reader = new FileReader();
+                                        reader.readAsDataURL(b);
+                                        reader.onloadend = () => self.postMessage(reader.result)
+                                    })
+                                }
+                            })
                     })
-                )
-            }
-
-            resolve()
-        }).catch()
+            })
     })
 }
 

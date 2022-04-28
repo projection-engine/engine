@@ -1,7 +1,7 @@
-import System from "../../shared/ecs/basic/System";
+import System from "../../ecs/basic/System";
 
 import {mat4, quat, vec3} from "gl-matrix";
-import COMPONENTS from "../../shared/templates/COMPONENTS";
+import COMPONENTS from "../../templates/COMPONENTS";
 import ROTATION_TYPES from "./ROTATION_TYPES";
 import GizmoToolTip from "./GizmoToolTip";
 
@@ -61,7 +61,6 @@ export default class TranslateScaleGizmo extends System {
     getTranslation(el) {
         const k = Object.keys(el.components)
         let key
-
         for (let i = 0; i < k.length; i++) {
             switch (k[i]) {
                 case COMPONENTS.SKYLIGHT:
@@ -75,6 +74,7 @@ export default class TranslateScaleGizmo extends System {
                     break
             }
         }
+        return [0,0,0]
     }
 
     execute(
@@ -95,15 +95,23 @@ export default class TranslateScaleGizmo extends System {
 
         if (selected.length > 0) {
             const el = entities[selected[0]]
-            this.gridSize = gridSize
-            this.firstPick = false
-            this.camera = camera
-            this.typeRot = transformationType
-            this.onGizmoStart = onGizmoStart
-            this.onGizmoEnd = onGizmoEnd
-            if (this.currentCoord && !this.tracking) {
-                const translation = this.getTranslation(el)
-                if (translation !== undefined) {
+            const parent = el ? entities[el.linkedTo] : undefined
+            const currentTranslation = this.getTranslation(el),
+                parentTranslation = parent ? this.getTranslation(parent) : [0, 0, 0],
+                translation = currentTranslation ? [
+                    currentTranslation[0] + parentTranslation[0],
+                    currentTranslation[1] + parentTranslation[1],
+                    currentTranslation[2] + parentTranslation[2]
+                ] : undefined
+            if (translation) {
+                this.gridSize = gridSize
+                this.firstPick = false
+                this.camera = camera
+                this.typeRot = transformationType
+                this.onGizmoStart = onGizmoStart
+                this.onGizmoEnd = onGizmoEnd
+                if (this.currentCoord && !this.tracking) {
+
                     const pickID = pickSystem.pickElement((shader, proj) => {
                         this._drawGizmo(translation, camera.viewMatrix, proj, shader, arrow)
                     }, this.currentCoord, camera, true)
@@ -120,19 +128,21 @@ export default class TranslateScaleGizmo extends System {
                         this.gpu.canvas.requestPointerLock()
                         this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
                     }
-                }
-            }
-            const t = el.components[COMPONENTS.TRANSFORM]
-            this.rotationTarget = t !== undefined ? t.rotationQuat : [0, 0, 0, 1]
 
-            this._drawGizmo(t ? t.translation : this.getLightData('direction', el.components), camera.viewMatrix, camera.projectionMatrix, this.gizmoShader, arrow)
+                }
+                const t = el.components[COMPONENTS.TRANSFORM]
+
+                this.rotationTarget = t !== undefined ? t.rotationQuat : [0, 0, 0, 1]
+
+                this._drawGizmo(translation, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader, arrow)
+            }
         }
 
     }
 
     _translateMatrix(t, components) {
         const comp = components[COMPONENTS.TRANSFORM]
-        const matrix =comp ?  [...comp.transformationMatrix] : this.getLightData('transformationMatrix', components)
+        const matrix = comp ? [...comp.transformationMatrix] : this.getLightData('transformationMatrix', components)
 
         const translation = comp ? comp.translation : this.getLightData('direction', components),
             rotationQuat = comp ? comp.rotationQuat : [0, 0, 0, 1],

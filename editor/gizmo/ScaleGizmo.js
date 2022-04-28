@@ -1,11 +1,11 @@
 import {vec4} from "gl-matrix";
-import Entity from "../../shared/ecs/basic/Entity";
-import TransformComponent from "../../shared/ecs/components/TransformComponent";
-import MeshInstance from "../../shared/instances/MeshInstance";
-import Transformation from "../../shared/utils/workers/Transformation";
-import PickComponent from "../../shared/ecs/components/PickComponent";
+import Entity from "../../ecs/basic/Entity";
+import TransformComponent from "../../ecs/components/TransformComponent";
+import MeshInstance from "../../instances/MeshInstance";
+import Transformation from "../../utils/Transformation";
+import PickComponent from "../../ecs/components/PickComponent";
 import arrow from '../assets/ScaleGizmo.json'
-import COMPONENTS from "../../shared/templates/COMPONENTS";
+import COMPONENTS from "../../templates/COMPONENTS";
 import ROTATION_TYPES from "./ROTATION_TYPES";
 import TranslateScaleGizmo from "./TranslateScaleGizmo";
 

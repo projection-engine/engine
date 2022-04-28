@@ -1,20 +1,20 @@
-import System from "../../shared/ecs/basic/System";
-import Shader from "../../shared/utils/workers/Shader";
-import * as gizmoShaderCode from "../../shared/shaders/misc/gizmo.glsl";
+import System from "../../ecs/basic/System";
+import Shader from "../../utils/Shader";
+import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 import {mat4, quat, vec3} from "gl-matrix";
-import Entity from "../../shared/ecs/basic/Entity";
-import TransformComponent from "../../shared/ecs/components/TransformComponent";
-import MeshInstance from "../../shared/instances/MeshInstance";
-import Transformation from "../../shared/utils/workers/Transformation";
-import PickComponent from "../../shared/ecs/components/PickComponent";
-import TextureInstance from "../../shared/instances/TextureInstance";
+import Entity from "../../ecs/basic/Entity";
+import TransformComponent from "../../ecs/components/TransformComponent";
+import MeshInstance from "../../instances/MeshInstance";
+import Transformation from "../../utils/Transformation";
+import PickComponent from "../../ecs/components/PickComponent";
+import TextureInstance from "../../instances/TextureInstance";
 import circle from "../icons/circle.png";
 import plane from "../assets/Circle.json";
 import ROTATION_TYPES from "./ROTATION_TYPES";
-import COMPONENTS from "../../shared/templates/COMPONENTS";
+import COMPONENTS from "../../templates/COMPONENTS";
 
-const toDeg = 57.29
+const toDeg = 57.29, toRad = 3.1415 / 180
 export default class RotationGizmo extends System {
 
     clickedAxis = -1
@@ -116,28 +116,28 @@ export default class RotationGizmo extends System {
                     this.started = true
                     this.onGizmoStart()
                 }
-                const vector = [event.movementX, event.movementX, event.movementX]
+
                 switch (this.clickedAxis) {
                     case 1: // x
-                        this.distanceX += Math.abs(vector[0] * 0.01)
+                        this.distanceX += Math.abs(event.movementX * 0.05)
                         if (Math.abs(this.distanceX) >= this.gridSize) {
-                            this.rotateElement([Math.sign(vector[0]) * this.distanceX * 0.01745, 0, 0])
+                            this.rotateElement([Math.sign(event.movementX) * this.gridSize * toRad, 0, 0])
                             this.distanceX = 0
                             this.renderTarget.innerText = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
                         }
                         break
                     case 2: // y
-                        this.distanceY += Math.abs(vector[1] * 0.01)
+                        this.distanceY += Math.abs(event.movementX * 0.05)
                         if (Math.abs(this.distanceY) >= this.gridSize) {
-                            this.rotateElement([0, Math.sign(vector[1]) * this.distanceY * 0.01745, 0])
+                            this.rotateElement([0, Math.sign(event.movementX) * this.gridSize * toRad, 0])
                             this.renderTarget.innerText = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
                             this.distanceY = 0
                         }
                         break
                     case 3: // z
-                        this.distanceZ += Math.abs(vector[2] * 0.01)
+                        this.distanceZ += Math.abs(event.movementX * 0.05)
                         if (Math.abs(this.distanceZ) >= this.gridSize) {
-                            this.rotateElement([0, 0, Math.sign(vector[2]) * this.distanceZ * 0.01745])
+                            this.rotateElement([0, 0, Math.sign(event.movementX) * this.gridSize * toRad])
 
                             this.distanceZ = 0
                             this.renderTarget.innerText = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
@@ -170,6 +170,24 @@ export default class RotationGizmo extends System {
         }
     }
 
+    getTranslation(el) {
+        const k = Object.keys(el.components)
+        let key
+        for (let i = 0; i < k.length; i++) {
+            switch (k[i]) {
+                case COMPONENTS.SKYLIGHT:
+                case COMPONENTS.DIRECTIONAL_LIGHT:
+                    key = k[i] === COMPONENTS.SKYLIGHT ? 'SkylightComponent' : 'DirectionalLightComponent'
+                    return el.components[key].direction
+                case COMPONENTS.TRANSFORM:
+
+                    return el.components[COMPONENTS.TRANSFORM]?.translation
+                default:
+                    break
+            }
+        }
+        return [0,0,0]
+    }
 
     execute(
         meshes,
@@ -188,38 +206,49 @@ export default class RotationGizmo extends System {
 
         if (selected.length > 0) {
             const el = entities[selected[0]]
-            this.gridSize = gridSize
-            this.firstPick = false
-            this.typeRot = transformationType
-            this.camera = camera
-            this.onGizmoStart = onGizmoStart
-            this.onGizmoEnd = onGizmoEnd
-            if (this.currentCoord && !this.tracking && el.components[COMPONENTS.TRANSFORM]) {
-                const pickID = pickSystem.pickElement((shader, proj) => {
-                    this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader)
-                }, this.currentCoord, camera, true)
-                this.clickedAxis = pickID - 2
-                if (pickID === 0) {
-                    lockCamera(false)
-                    this.currentCoord = undefined
-                } else {
-                    this.tracking = true
-                    lockCamera(true)
+            if (el && el.components[COMPONENTS.TRANSFORM]) {
+                const parent = el ? entities[el.linkedTo] : undefined
+                const currentTranslation = this.getTranslation(el),
+                    parentTranslation = parent ? this.getTranslation(parent) : [0, 0, 0],
+                    translation = currentTranslation ? [
+                        currentTranslation[0] + parentTranslation[0],
+                        currentTranslation[1] + parentTranslation[1],
+                        currentTranslation[2] + parentTranslation[2]
+                    ] : undefined
+                if (translation) {
+                    this.gridSize = gridSize
+                    this.firstPick = false
+                    this.typeRot = transformationType
+                    this.camera = camera
+                    this.onGizmoStart = onGizmoStart
+                    this.onGizmoEnd = onGizmoEnd
+                    if (this.currentCoord && !this.tracking) {
+                        const pickID = pickSystem.pickElement((shader, proj) => {
+                            this._drawGizmo(translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, proj, shader)
+                        }, this.currentCoord, camera, true)
+                        this.clickedAxis = pickID - 2
+                        if (pickID === 0) {
+                            lockCamera(false)
+                            this.currentCoord = undefined
+                        } else {
+                            this.tracking = true
+                            lockCamera(true)
 
-                    this.renderTarget.style.left = this.currentCoord.x + 'px'
-                    this.renderTarget.style.top = this.currentCoord.y + 'px'
-                    this.renderTarget.style.display = 'block'
-                    this.renderTarget.style.width = 'fit-content'
+                            this.renderTarget.style.left = this.currentCoord.x + 'px'
+                            this.renderTarget.style.top = this.currentCoord.y + 'px'
+                            this.renderTarget.style.display = 'block'
+                            this.renderTarget.style.width = 'fit-content'
 
-                    this.target = selected.map(e => entities[e])
+                            this.target = selected.map(e => entities[e])
 
-                    this.gpu.canvas.requestPointerLock()
-                    this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
+                            this.gpu.canvas.requestPointerLock()
+                            this.gpu.canvas.addEventListener("mousemove", this.handlerListener)
+                        }
+                    }
+
+                    this._drawGizmo(translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
                 }
             }
-
-            if (el.components[COMPONENTS.TRANSFORM])
-                this._drawGizmo(el.components[COMPONENTS.TRANSFORM].translation, el.components[COMPONENTS.TRANSFORM].rotationQuat, camera.viewMatrix, camera.projectionMatrix, this.gizmoShader)
         }
 
     }

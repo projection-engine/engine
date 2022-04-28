@@ -1,4 +1,4 @@
-import {lookAt} from "../../../shared/utils/misc/utils";
+import {lookAt} from "../../../utils/utils";
 import Camera from "../Camera";
 import {mat4, vec3} from "gl-matrix";
 

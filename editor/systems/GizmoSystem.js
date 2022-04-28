@@ -1,13 +1,13 @@
-import System from "../../shared/ecs/basic/System";
+import System from "../../ecs/basic/System";
 import TranslationGizmo from "../gizmo/TranslationGizmo";
 import RotationGizmo from "../gizmo/RotationGizmo";
 import GIZMOS from "../gizmo/GIZMOS";
 import ScaleGizmo from "../gizmo/ScaleGizmo";
 import ROTATION_TYPES from "../gizmo/ROTATION_TYPES";
-import MeshInstance from "../../shared/instances/MeshInstance";
+import MeshInstance from "../../instances/MeshInstance";
 import cube from "../assets/Cube.json";
-import Shader from "../../shared/utils/workers/Shader";
-import * as gizmoShaderCode from "../../shared/shaders/misc/gizmo.glsl";
+import Shader from "../../utils/Shader";
+import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 export default class GizmoSystem extends System {
     hiddenTarget = true
@@ -75,33 +75,7 @@ export default class GizmoSystem extends System {
         super.execute()
 
         this.gpu.clear(this.gpu.DEPTH_BUFFER_BIT)
-        //
-        // if (selected.length > 0) {
-        //     this.hiddenTarget = false
-        //     const el = entities[selected[0]]
-        //     const comp = el ? el.components[COMPONENTS.TRANSFORM] : undefined
-        //     if (comp) {
-        //         this.gizmoShader.use()
-        //         this.gpu.bindVertexArray(this.boundingBox.VAO)
-        //         this.gpu.bindBuffer(this.gpu.ELEMENT_ARRAY_BUFFER, this.boundingBox.indexVBO)
-        //         this.boundingBox.vertexVBO.enable()
-        //         this.gizmoShader.bindForUse({
-        //             viewMatrix: camera.viewMatrix,
-        //             transformMatrix: this.getMat(comp.translation),
-        //             projectionMatrix: camera.projectionMatrix,
-        //
-        //             translation: comp.translation,
-        //             camPos: camera.position,
-        //             axis: 4,
-        //             selectedAxis: this.clickedAxis
-        //         })
-        //         this.gpu.drawElements(this.gpu.TRIANGLES, this.boundingBox.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
-        //     }
-        // }
-        // else if(!this.hiddenTarget) {
-        //     this.hiddenTarget = true
-        //     this.renderTarget.style.display = 'none'
-        // }
+
 
 
         switch (gizmo) {
@@ -109,7 +83,7 @@ export default class GizmoSystem extends System {
                 this.translationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridSize ? gridSize : .0001)
                 break
             case GIZMOS.ROTATION:
-                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridRotationSize ? gridRotationSize : .0001)
+                this.rotationGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridRotationSize ? gridRotationSize : .1)
                 break
             case GIZMOS.SCALE:
                 this.scaleGizmo.execute(meshes, meshSources, selected, camera, pickSystem, lockCamera, entities, transformationType, onGizmoStart, onGizmoEnd, gridScaleSize ? gridScaleSize : .0001)
