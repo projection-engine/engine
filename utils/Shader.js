@@ -29,15 +29,23 @@ export default class Shader {
         return new RegExp('uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$', global ? 'gm' : 'm')
     }
 
-    constructor(vertex, fragment, gpu) {
+    constructor(vertex, fragment, gpu, setMessage = () => null) {
+        let alert = []
 
         this.program = gpu.createProgram()
         this.gpu = gpu
-        const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER)
-        const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER)
+
+        const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER, m => alert.push(m))
+        const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER, m => alert.push(m))
 
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
-        console.log(gpu.getError(), this.program, gpu.getUniformLocation(this.program, 't'))
+
+        setMessage({
+            error: gpu.getError(),
+            messages: alert,
+            hasError: alert.length > 0
+        })
+
         this.uniforms = this.uniforms.filter((value, index, self) =>
                 index === self.findIndex((t) => (
                     t.name === value.name
@@ -47,7 +55,7 @@ export default class Shader {
 
     }
 
-    _compileShader(shaderCode, shaderType) {
+    _compileShader(shaderCode, shaderType, pushMessage) {
         const bundledCode = Bundler.applyMethods(shaderCode)
         const shader = this.gpu.createShader(shaderType)
 
@@ -57,10 +65,9 @@ export default class Shader {
 
 
         if (!compiled) {
-            console.log(  this.gpu.getShaderInfoLog(shader))
+            pushMessage(this.gpu.getShaderInfoLog(shader))
             this.available = false
-        }
-         else {
+        } else {
             this.gpu.attachShader(this.program, shader)
             this.gpu.linkProgram(this.program)
 
@@ -195,9 +202,9 @@ export default class Shader {
             case 'ivec3':
             case 'bool':
 
-                try{
+                try {
                     this.gpu[TYPES[type]](uLocation, data)
-                }catch (e){
+                } catch (e) {
                     console.trace(e, uLocation, data, type, key)
                 }
                 break
@@ -224,6 +231,7 @@ export default class Shader {
         this.gpu.useProgram(this.program)
     }
 }
+
 function trimString(str) {
     return str.replaceAll(/^(\s*)/gm, '').replaceAll(/^\s*\n/gm, '')
 }

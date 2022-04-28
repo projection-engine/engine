@@ -47,6 +47,11 @@ export default class MaterialInstance {
         if(settings) {
             this._initializeSettings(settings)
         }
+        let message
+        if (this._shader)
+            this.gpu.deleteProgram(this._shader.program)
+        this._shader = new Shader(this.settings.isForwardShaded ? forward.vertex : deferred.vertex, shader, this.gpu, m => message= m)
+
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {
                 switch (k.type) {
@@ -83,14 +88,12 @@ export default class MaterialInstance {
         }))
             .then(() => {
                 if (onCompiled)
-                    onCompiled()
+                    onCompiled(message)
                 this.ready = true
             })
 
 
-        if (this._shader)
-            this.gpu.deleteProgram(this._shader.program)
-        this._shader = new Shader(this.settings.isForwardShaded ? forward.vertex : deferred.vertex, shader, this.gpu, true)
+
 
     }
 
