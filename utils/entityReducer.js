@@ -1,5 +1,4 @@
 import Entity from "../shared/ecs/basic/Entity";
-import Component from "../shared/ecs/basic/Component";
 import PickComponent from "../shared/ecs/components/PickComponent";
 import generateNextID from "./generateNextID";
 import COMPONENTS from "../shared/templates/COMPONENTS";

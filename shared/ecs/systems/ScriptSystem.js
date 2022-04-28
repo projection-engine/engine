@@ -13,7 +13,8 @@ import Subtract from "../../../../views/blueprints/scripts/nodes/operators/math/
 import Divide from "../../../../views/blueprints/scripts/nodes/operators/math/Divide";
 import Add from "../../../../views/blueprints/scripts/nodes/operators/math/Add";
 import Multiply from "../../../../views/blueprints/scripts/nodes/operators/math/Multiply";
-import SetTransformationRelativeOrigin from "../../../../views/blueprints/scripts/nodes/transformation/SetTransformationRelativeOrigin";
+import SetTransformationRelativeOrigin
+    from "../../../../views/blueprints/scripts/nodes/transformation/SetTransformationRelativeOrigin";
 import SetLocalRotation from "../../../../views/blueprints/scripts/nodes/transformation/SetLocalRotation";
 import ToVector from "../../../../views/blueprints/scripts/nodes/operators/conversions/ToVector";
 import FromVector from "../../../../views/blueprints/scripts/nodes/operators/conversions/FromVector";

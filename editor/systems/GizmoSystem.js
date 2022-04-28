@@ -8,7 +8,6 @@ import MeshInstance from "../../shared/instances/MeshInstance";
 import cube from "../assets/Cube.json";
 import Shader from "../../shared/utils/workers/Shader";
 import * as gizmoShaderCode from "../../shared/shaders/misc/gizmo.glsl";
-import COMPONENTS from "../../shared/templates/COMPONENTS";
 
 export default class GizmoSystem extends System {
     hiddenTarget = true

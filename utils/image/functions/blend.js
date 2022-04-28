@@ -1,7 +1,8 @@
 export default function blendWithColor() {
     const COLOR_BLEND_OPERATIONS = {ADD: 0, MULTIPLY: 1, POWER: 2, LERP: 3}
-    const doIt = async (event) => {
-        {
+
+    self.addEventListener('message', (event) => {
+        new Promise(async resolve => {
             const {
                 src,
                 color,
@@ -60,13 +61,13 @@ export default function blendWithColor() {
                     })
                 })
             )
-        }
-    }
-    self.addEventListener('message', (event) => doIt(event))
+            resolve()
+        }).catch()
+    })
 }
 
 export function colorToImage() {
-    const doIt = (event) => {
+    self.addEventListener('message', (event) => {
         const {
             color,
             resolution
@@ -79,131 +80,134 @@ export function colorToImage() {
             type: "image/png",
             quality: .1
         }).then(blob => {
-
             const reader = new FileReader();
             reader.onloadend = () => self.postMessage(reader.result);
             reader.readAsDataURL(blob);
         })
-
-    }
-    self.addEventListener('message', (event) => doIt(event))
+    })
 }
 
 export function linearInterpolate() {
 
-    self.addEventListener('message', async (event) => {
-        const {
-            img, img0, factor
-        } = event.data
-        const getBitmap = async (src) => {
-            const res = await fetch(src)
-            const blob = await res.blob()
-            return await createImageBitmap(blob)
-        }
+    self.addEventListener('message', (event) => {
+        new Promise(async resolve => {
+            const {
+                img, img0, factor
+            } = event.data
+            const getBitmap = async (src) => {
+                const res = await fetch(src)
+                const blob = await res.blob()
+                return await createImageBitmap(blob)
+            }
 
-        const image1 = await getBitmap(img)
-        const image2 = await getBitmap(img0)
+            const image1 = await getBitmap(img)
+            const image2 = await getBitmap(img0)
 
-        self.postMessage(
-            await new Promise(resolve => {
-                const canvas1 = new OffscreenCanvas(image1.width, image1.height), ctx1 = canvas1.getContext("2d")
-                const canvas2 = new OffscreenCanvas(image2.width, image2.height), ctx2 = canvas2.getContext("2d")
-                ctx1.drawImage(image1, 0, 0)
-                ctx2.drawImage(image2, 0, 0)
+            self.postMessage(
+                await new Promise(resolve => {
+                    const canvas1 = new OffscreenCanvas(image1.width, image1.height), ctx1 = canvas1.getContext("2d")
+                    const canvas2 = new OffscreenCanvas(image2.width, image2.height), ctx2 = canvas2.getContext("2d")
+                    ctx1.drawImage(image1, 0, 0)
+                    ctx2.drawImage(image2, 0, 0)
 
-                const data1 = ctx1.getImageData(0, 0, image1.width, image1.height)
-                const data2 = ctx2.getImageData(0, 0, image2.width, image2.height)
-                const ddata1 = data1.data
-                const ddata2 = data2.data
-                let newImage = new Uint8Array(ddata1.length)
-                for (let i = 0; i < ddata1.length; i += 4) {
-                    newImage[i] = ddata1[i] * (1 - factor) + ddata2[i] * factor
-                    newImage[i + 1] = ddata1[i + 1] * (1 - factor) + ddata2[i + 1] * factor
-                    newImage[i + 2] = ddata1[i + 2] * (1 - factor) + ddata2[i + 2] * factor
-                    newImage[i + 3] = ddata1[i + 3] * (1 - factor) + ddata2[i + 3] * factor
-                }
-                ddata1.set(newImage)
+                    const data1 = ctx1.getImageData(0, 0, image1.width, image1.height)
+                    const data2 = ctx2.getImageData(0, 0, image2.width, image2.height)
+                    const ddata1 = data1.data
+                    const ddata2 = data2.data
+                    let newImage = new Uint8Array(ddata1.length)
+                    for (let i = 0; i < ddata1.length; i += 4) {
+                        newImage[i] = ddata1[i] * (1 - factor) + ddata2[i] * factor
+                        newImage[i + 1] = ddata1[i + 1] * (1 - factor) + ddata2[i + 1] * factor
+                        newImage[i + 2] = ddata1[i + 2] * (1 - factor) + ddata2[i + 2] * factor
+                        newImage[i + 3] = ddata1[i + 3] * (1 - factor) + ddata2[i + 3] * factor
+                    }
+                    ddata1.set(newImage)
 
-                ctx1.putImageData(data1, 0, 0)
+                    ctx1.putImageData(data1, 0, 0)
 
-                canvas1.convertToBlob({
-                    type: "image/png",
-                    quality: 1
-                }).then(blob => {
+                    canvas1.convertToBlob({
+                        type: "image/png",
+                        quality: 1
+                    }).then(blob => {
 
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    })
                 })
-            })
-        )
+            )
+            resolve()
+        }).catch()
     })
 }
 
 
 export function heightBasedLinearInterpolate() {
 
-    self.addEventListener('message', async (event) => {
-        const {
-            img, img0, heightImg, f
-        } = event.data
-        const getBitmap = async (src) => {
-            const res = await fetch(src)
-            const blob = await res.blob()
-            return await createImageBitmap(blob)
-        }
+    self.addEventListener('message', (event) => {
+        new Promise(async resolve => {
+            const {
+                img, img0, heightImg, f
+            } = event.data
+            const getBitmap = async (src) => {
+                const res = await fetch(src)
+                const blob = await res.blob()
+                return await createImageBitmap(blob)
+            }
 
-        const image1 = await getBitmap(img)
-        const image2 = await getBitmap(img0)
-        const heightMap = await getBitmap(heightImg)
+            const image1 = await getBitmap(img)
+            const image2 = await getBitmap(img0)
+            const heightMap = await getBitmap(heightImg)
 
-        self.postMessage(
-            await new Promise(resolve => {
-                const canvas1 = new OffscreenCanvas(image1.width, image1.height), ctx1 = canvas1.getContext("2d")
-                const canvas2 = new OffscreenCanvas(image2.width, image2.height), ctx2 = canvas2.getContext("2d")
-                const canvasHeight = new OffscreenCanvas(heightMap.width, heightMap.height),
-                    ctxHeight = canvasHeight.getContext("2d")
+            self.postMessage(
+                await new Promise(resolve => {
+                    const canvas1 = new OffscreenCanvas(image1.width, image1.height), ctx1 = canvas1.getContext("2d")
+                    const canvas2 = new OffscreenCanvas(image2.width, image2.height), ctx2 = canvas2.getContext("2d")
+                    const canvasHeight = new OffscreenCanvas(heightMap.width, heightMap.height),
+                        ctxHeight = canvasHeight.getContext("2d")
 
-                ctx1.drawImage(image1, 0, 0)
-                ctx2.drawImage(image2, 0, 0)
+                    ctx1.drawImage(image1, 0, 0)
+                    ctx2.drawImage(image2, 0, 0)
 
-                const data1 = ctx1.getImageData(0, 0, image1.width, image1.height)
-                const data2 = ctx2.getImageData(0, 0, image2.width, image2.height)
-                const heightMapData = ctxHeight.getImageData(0, 0, heightMap.width, heightMap.height)
+                    const data1 = ctx1.getImageData(0, 0, image1.width, image1.height)
+                    const data2 = ctx2.getImageData(0, 0, image2.width, image2.height)
+                    const heightMapData = ctxHeight.getImageData(0, 0, heightMap.width, heightMap.height)
 
-                const ddata1 = data1.data
-                const ddata2 = data2.data
-                const height = heightMapData.data
-                const factor = f * 255
-                let newImage = new Uint8Array(ddata1.length)
-                for (let i = 0; i < ddata1.length; i += 4) {
-                    if (factor <= height[i]) {
-                        newImage[i] = ddata1[i]
-                        newImage[i + 1] = ddata1[i + 1]
-                        newImage[i + 2] = ddata1[i + 2]
-                        newImage[i + 3] = ddata1[i + 3]
-                    } else {
-                        newImage[i] = ddata2[i]
-                        newImage[i + 1] = ddata2[i + 1]
-                        newImage[i + 2] = ddata2[i + 2]
-                        newImage[i + 3] = ddata2[i + 3]
+                    const ddata1 = data1.data
+                    const ddata2 = data2.data
+                    const height = heightMapData.data
+                    const factor = f * 255
+                    let newImage = new Uint8Array(ddata1.length)
+                    for (let i = 0; i < ddata1.length; i += 4) {
+                        if (factor <= height[i]) {
+                            newImage[i] = ddata1[i]
+                            newImage[i + 1] = ddata1[i + 1]
+                            newImage[i + 2] = ddata1[i + 2]
+                            newImage[i + 3] = ddata1[i + 3]
+                        } else {
+                            newImage[i] = ddata2[i]
+                            newImage[i + 1] = ddata2[i + 1]
+                            newImage[i + 2] = ddata2[i + 2]
+                            newImage[i + 3] = ddata2[i + 3]
+                        }
+
                     }
 
-                }
+                    ddata1.set(newImage)
+                    ctx1.putImageData(data1, 0, 0)
 
-                ddata1.set(newImage)
-                ctx1.putImageData(data1, 0, 0)
+                    canvas1.convertToBlob({
+                        type: "image/png",
+                        quality: 1
+                    }).then(blob => {
 
-                canvas1.convertToBlob({
-                    type: "image/png",
-                    quality: 1
-                }).then(blob => {
-
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    })
                 })
-            })
-        )
+            )
+            resolve()
+        }).catch()
     })
 }

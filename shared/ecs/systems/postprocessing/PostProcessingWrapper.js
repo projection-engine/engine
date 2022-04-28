@@ -3,7 +3,6 @@ import Shader from "../../../utils/workers/Shader";
 
 import * as shaderCode from '../../../shaders/misc/postProcessing.glsl'
 import Bloom from "./Bloom";
-import RENDERING_TYPES from "../../../templates/RENDERING_TYPES";
 
 
 export default class PostProcessingWrapper extends System {

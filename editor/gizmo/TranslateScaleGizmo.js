@@ -1,12 +1,6 @@
 import System from "../../shared/ecs/basic/System";
 
-import {mat4, quat, vec3, vec4} from "gl-matrix";
-import Entity from "../../shared/ecs/basic/Entity";
-import TransformComponent from "../../shared/ecs/components/TransformComponent";
-import MeshInstance from "../../shared/instances/MeshInstance";
-import Transformation from "../../shared/utils/workers/Transformation";
-import PickComponent from "../../shared/ecs/components/PickComponent";
-import arrow from '../assets/ScaleGizmo.json'
+import {mat4, quat, vec3} from "gl-matrix";
 import COMPONENTS from "../../shared/templates/COMPONENTS";
 import ROTATION_TYPES from "./ROTATION_TYPES";
 import GizmoToolTip from "./GizmoToolTip";

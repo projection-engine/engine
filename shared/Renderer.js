@@ -13,7 +13,6 @@ import {v4} from "uuid";
 import GBufferSystem from "./ecs/systems/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
-import {WebWorker} from "../../pages/project/utils/workers/WebWorker";
 
 export default class Renderer {
     _currentFrame = 0

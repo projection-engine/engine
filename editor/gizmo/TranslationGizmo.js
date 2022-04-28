@@ -1,7 +1,4 @@
-import System from "../../shared/ecs/basic/System";
-
-
-import {mat4, quat, vec3, vec4} from "gl-matrix";
+import {vec4} from "gl-matrix";
 import Entity from "../../shared/ecs/basic/Entity";
 import TransformComponent from "../../shared/ecs/components/TransformComponent";
 import MeshInstance from "../../shared/instances/MeshInstance";
@@ -10,7 +7,6 @@ import PickComponent from "../../shared/ecs/components/PickComponent";
 import COMPONENTS from "../../shared/templates/COMPONENTS";
 import arrow from '../assets/Arrow.json'
 import ROTATION_TYPES from "./ROTATION_TYPES";
-import GizmoToolTip from "./GizmoToolTip";
 import TranslateScaleGizmo from "./TranslateScaleGizmo";
 
 export default class TranslationGizmo extends TranslateScaleGizmo {
