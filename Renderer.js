@@ -4,7 +4,7 @@ import toObject from "./utils/toObject";
 import RootCamera from "./RootCamera";
 import RenderingWrapper from "./ecs/systems/RenderingWrapper";
 import brdfImg from "./utils/brdf_lut.jpg";
-import {createTexture} from "./utils/utils";
+import {createTexture, lookAt} from "./utils/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "../views/blueprints/components/DATA_TYPES";
@@ -13,6 +13,10 @@ import {v4} from "uuid";
 import GBufferSystem from "./ecs/systems/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
+import CubeMapInstance from "./instances/CubeMapInstance";
+import Shader from "./utils/Shader";
+import * as shaderCodeSkybox from "./shaders/misc/cubeMap.glsl";
+import * as skyboxCode from "./shaders/misc/skybox.glsl";
 
 export default class Renderer {
     _currentFrame = 0
@@ -193,6 +197,47 @@ export default class Renderer {
             }
         })
         this.resizeObs.observe(canvasRef)
+
+        // SKYBOX COMPILATION
+        const skyboxElement = this.data.skybox
+        if (skyboxElement && !skyboxElement.ready) {
+            const shader = new Shader(shaderCodeSkybox.vertex, skyboxCode.generationFragment, this.gpu)
+            if (!skyboxElement.cubeMap)
+                skyboxElement.cubeMap = new CubeMapInstance(this.gpu, skyboxElement.resolution, false)
+            if (skyboxElement.blob) {
+                skyboxElement.texture = createTexture(
+                    this.gpu,
+                    skyboxElement.blob.width,
+                    skyboxElement.blob.height,
+                    this.gpu.RGB16F,
+                    0,
+                    this.gpu.RGB,
+                    this.gpu.FLOAT,
+                    skyboxElement.blob,
+                    this.gpu.LINEAR,
+                    this.gpu.LINEAR,
+                    this.gpu.CLAMP_TO_EDGE,
+                    this.gpu.CLAMP_TO_EDGE
+                )
+
+                shader.use()
+                skyboxElement.cubeMap.resolution = skyboxElement.resolution
+                skyboxElement.cubeMap.draw((yaw, pitch, perspective) => {
+                    shader.bindForUse({
+                        projectionMatrix: perspective,
+                        viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
+                        uSampler: skyboxElement.texture
+                    })
+                    this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
+                }, true)
+
+                skyboxElement.cubeMap.generateIrradiance()
+                skyboxElement.cubeMap.generatePrefiltered(skyboxElement.prefilteredMipmaps, skyboxElement.resolution / skyboxElement.prefilteredMipmaps)
+                skyboxElement.ready = true
+            }
+            this.gpu.deleteProgram(shader.program)
+        }
+        // SKYBOX COMPILATION
 
         this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap))
     }

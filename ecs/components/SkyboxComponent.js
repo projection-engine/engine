@@ -18,8 +18,8 @@ export default class SkyboxComponent extends Component {
     }
     set blob(data){
         this.__blob = data
-        if(data)
-            this.__initialized = false
+
+        this.__initialized = false
     }
 
 
@@ -29,7 +29,7 @@ export default class SkyboxComponent extends Component {
 
     set resolution(data) {
         this._resolution = data
-        this.ready = false
+        this.__initialized = false
     }
     set ready(data) {
          this.__initialized = data

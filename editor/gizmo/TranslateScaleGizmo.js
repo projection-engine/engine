@@ -60,21 +60,27 @@ export default class TranslateScaleGizmo extends System {
 
     getTranslation(el) {
         const k = Object.keys(el.components)
-        let key
         for (let i = 0; i < k.length; i++) {
             switch (k[i]) {
                 case COMPONENTS.SKYLIGHT:
                 case COMPONENTS.DIRECTIONAL_LIGHT:
-                    key = k[i] === COMPONENTS.SKYLIGHT ? 'SkylightComponent' : 'DirectionalLightComponent'
-                    return el.components[key].direction
+                    return {
+                        valid: true,
+                        data: el.components[k[i]].direction
+                    }
                 case COMPONENTS.TRANSFORM:
-
-                    return el.components[COMPONENTS.TRANSFORM]?.translation
+                    return {
+                        valid: true,
+                        data: el.components[COMPONENTS.TRANSFORM]?.translation
+                    }
                 default:
                     break
             }
         }
-        return [0,0,0]
+        return {
+            valid: false,
+            data: [0,0,0]
+        }
     }
 
     execute(
@@ -97,11 +103,11 @@ export default class TranslateScaleGizmo extends System {
             const el = entities[selected[0]]
             const parent = el ? entities[el.linkedTo] : undefined
             const currentTranslation = this.getTranslation(el),
-                parentTranslation = parent ? this.getTranslation(parent) : [0, 0, 0],
-                translation = currentTranslation ? [
-                    currentTranslation[0] + parentTranslation[0],
-                    currentTranslation[1] + parentTranslation[1],
-                    currentTranslation[2] + parentTranslation[2]
+                parentTranslation = parent ? this.getTranslation(parent) : {data: [0, 0, 0]},
+                translation = currentTranslation.valid ? [
+                    currentTranslation.data[0] + parentTranslation.data[0],
+                    currentTranslation.data[1] + parentTranslation.data[1],
+                    currentTranslation.data[2] + parentTranslation.data[2]
                 ] : undefined
             if (translation) {
                 this.gridSize = gridSize
