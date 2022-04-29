@@ -22,10 +22,7 @@ export default class GridSystem extends System {
             exposure
         } = options
         if(gridVisibility) {
-
             this.gridShader.use()
-
-
             this.gridShader.bindForUse({
                 cameraType: camera instanceof OrthographicCamera ? 1 + camera.direction : 0,
                 viewMatrix: camera instanceof OrthographicCamera ? camera.viewMatrixGrid : camera.viewMatrix,
