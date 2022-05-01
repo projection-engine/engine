@@ -2,6 +2,9 @@ import System from "../basic/System";
 import COMPONENTS from "../../templates/COMPONENTS";
 import * as glMatrix from "gl-matrix";
 import {KEYS} from "../../../pages/project/utils/hooks/useHotKeys";
+import Transformation from "../../utils/Transformation";
+import PickSystem from "./PickSystem";
+import SYSTEMS from "../../templates/SYSTEMS";
 
 export default class ScriptSystem extends System {
     pressedKeys = {}
@@ -10,6 +13,7 @@ export default class ScriptSystem extends System {
 
     constructor(gpu) {
         super([]);
+        this.gpu = gpu
         this.id = gpu.canvas.id.replace('-canvas', '')
         const targetID = gpu.canvas.id.replace('-canvas', '-scripting')
         if (document.getElementById(targetID) !== null)
@@ -43,7 +47,8 @@ export default class ScriptSystem extends System {
         super.execute()
         const {
             scriptedEntities,
-            scripts
+            scripts,
+            meshSources
         } = data
 
         const {
@@ -68,11 +73,11 @@ export default class ScriptSystem extends System {
             const keys = Object.keys(scriptedEntities)
             for (let i = 0; i < keys.length; i++) {
                 const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
-                this.executeLoop(currentS.executor, elapsed, entitiesMap, camera)
+                this.executeLoop(currentS.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
 
             }
             // LEVEL BLUEPRINT
-            this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera)
+            this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
         } else if (this.eventSet) {
             lockCamera(false)
 
@@ -87,7 +92,7 @@ export default class ScriptSystem extends System {
         }
     }
 
-    executeLoop(executor, elapsed, entities, camera) {
+    executeLoop(executor, elapsed, entities, camera, meshSources, pickSystem, entitiesArr) {
         executor.execute({
             elapsed,
             entities,
@@ -97,7 +102,21 @@ export default class ScriptSystem extends System {
             mousePosition: this.mousePosition,
             camera,
             glMatrix,
-            COMPONENTS
+            COMPONENTS,
+            utils: {
+                toEuler: Transformation.getEuler,
+                pick: (entity, coords = this.mousePosition) => {
+                    if (entity.components[COMPONENTS.MESH]) {
+                        const index = pickSystem.pickElement((shader, proj) => {
+                            const mesh = meshSources[entity.components[COMPONENTS.MESH]?.meshID]
+                            PickSystem.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader, this.gpu)
+                        }, coords, camera)
+
+                        return entitiesArr.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)
+                    }
+                    return undefined
+                }
+            }
         })
     }
 
