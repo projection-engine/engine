@@ -1,9 +1,8 @@
 import System from "../basic/System";
 import OrthographicCamera from "../../editor/camera/ortho/OrthographicCamera";
 import * as shaderCode from "../../shaders/misc/skybox.glsl";
-import * as skyboxCode from "../../shaders/misc/skybox.glsl";
 import Shader from "../../utils/Shader";
-import {createTexture, createVAO, lookAt} from "../../utils/utils";
+import {createVAO} from "../../utils/utils";
 import VBO from "../../utils/VBO";
 import cube from "../../utils/cube.json";
 

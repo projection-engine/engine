@@ -10,9 +10,9 @@ import PickSystem from "../ecs/systems/PickSystem";
 import ShadowMapSystem from "../ecs/systems/ShadowMapSystem";
 import TransformSystem from "../ecs/systems/TransformSystem";
 import CubeMapSystem from "../ecs/systems/CubeMapSystem";
-import ScriptSystem from "../ecs/systems/ScriptSystem";
 import ForwardSystem from "../ecs/systems/ForwardSystem";
 import DeferredSystem from "../ecs/systems/DeferredSystem";
+import ScriptSystem from "../ecs/systems/ScriptSystem";
 
 export default function getSystemKey(s) {
     switch (true) {

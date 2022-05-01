@@ -17,6 +17,7 @@ import CubeMapInstance from "./instances/CubeMapInstance";
 import Shader from "./utils/Shader";
 import * as shaderCodeSkybox from "./shaders/misc/cubeMap.glsl";
 import * as skyboxCode from "./shaders/misc/skybox.glsl";
+import ScriptSystem from "./ecs/systems/ScriptSystem";
 
 export default class Renderer {
     _currentFrame = 0
@@ -174,7 +175,7 @@ export default class Renderer {
             skylight: filteredEntities.filter(e => e.components[COMPONENTS.SKYLIGHT] && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
             cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP]),
             scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
-            scripts: toObject(scripts),
+            scripts: toObject(this.parseScripts(scripts)),
             cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA])
         }
 
@@ -242,6 +243,26 @@ export default class Renderer {
         this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap))
     }
 
+    parseScripts(scripts) {
+        // {
+        //     executor: CODE,
+        //     id: SCRIPT_ID,
+        //     name: SCRIPT_NAME
+        // }
+        return scripts.map(s => {
+            try {
+                console.log(prepareName(s.name) )
+                return {
+                    id: s.id,
+                    executor: ScriptSystem.parseScript(s.executors, prepareName(s.name))
+                }
+            } catch (e) {
+                console.log(e)
+                return undefined
+            }
+        }).filter(e => e !== undefined)
+    }
+
     stop() {
         this.resizeObs?.disconnect()
         cancelAnimationFrame(this._currentFrame)
@@ -252,5 +273,10 @@ function getArray(size, onIndex) {
     for (let i = 0; i < size; i++) {
         onIndex(i)
     }
+}
 
+function prepareName(name) {
+
+    const word = name.trim().replaceAll(/\s/g, "").replaceAll('-', '').replaceAll('_', '').replaceAll('.', '').replaceAll(',', '')
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
 }

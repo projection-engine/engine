@@ -1,7 +1,5 @@
 import {useEffect, useReducer, useState} from "react";
-import Entity from "./ecs/basic/Entity";
 import PickComponent from "./ecs/components/PickComponent";
-import generateNextID from "./utils/generateNextID";
 import COMPONENTS from "./templates/COMPONENTS";
 
 

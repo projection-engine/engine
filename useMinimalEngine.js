@@ -1,13 +1,12 @@
-import {useContext, useEffect, useMemo, useRef, useState} from "react";
+import {useContext, useEffect, useMemo, useState} from "react";
 
-import {ENTITY_ACTIONS} from "./useEngineEssentials";
+import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
 import Entity from "./ecs/basic/Entity";
 import sphereMesh from './editor/assets/Sphere.json'
 
 import EditorEngine from "./editor/EditorEngine";
 import TransformSystem from "./ecs/systems/TransformSystem";
 import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
-import SkyboxComponent from "./ecs/components/SkyboxComponent";
 import DirectionalLightComponent from "./ecs/components/DirectionalLightComponent";
 
 import MeshComponent from "./ecs/components/MeshComponent";
@@ -15,13 +14,10 @@ import TransformComponent from "./ecs/components/TransformComponent";
 import MeshInstance from "./instances/MeshInstance";
 
 import {SHADING_MODELS} from "../pages/project/utils/hooks/useSettings";
-import EVENTS from "../pages/project/utils/utils/EVENTS";
 import CAMERA_TYPES from "./editor/camera/CAMERA_TYPES";
 import MaterialComponent from "./ecs/components/MaterialComponent";
 
 import {v4 as uuidv4} from 'uuid';
-import useEngineEssentials from "./useEngineEssentials";
-import ImageProcessor from "./utils/image/ImageProcessor";
 import COMPONENTS from "./templates/COMPONENTS";
 import LoaderProvider from "../components/loader/LoaderProvider";
 import QuickAccessProvider from "../pages/project/utils/hooks/QuickAccessProvider";

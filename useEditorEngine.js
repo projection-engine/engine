@@ -1,19 +1,16 @@
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import TransformSystem from "./ecs/systems/TransformSystem";
 import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
 import PickSystem from "./ecs/systems/PickSystem";
 import EditorEngine from "./editor/EditorEngine";
-import EVENTS from "../pages/project/utils/utils/EVENTS";
 import PerformanceSystem from "./ecs/systems/PerformanceSystem";
-import SYSTEMS from "./templates/SYSTEMS";
 import CubeMapSystem from "./ecs/systems/CubeMapSystem";
-import ScriptSystem from "./ecs/systems/ScriptSystem";
-import useEngineEssentials from "./useEngineEssentials";
+import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
 import useHistory from "../pages/project/utils/hooks/useHistory";
 import {HISTORY_ACTIONS} from "../pages/project/utils/hooks/historyReducer";
 import COMPONENTS from "./templates/COMPONENTS";
 import CameraCubeSystem from "./ecs/systems/CameraCubeSystem";
-import {ENTITY_ACTIONS} from "./useEngineEssentials";
+import ScriptSystem from "./ecs/systems/ScriptSystem";
 
 
 export default function useEditorEngine(id, canExecutePhysicsAnimation, settings, load, canStart, setAlert) {
