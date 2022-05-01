@@ -1,6 +1,7 @@
 import {useEffect, useReducer, useState} from "react";
 import PickComponent from "./ecs/components/PickComponent";
 import COMPONENTS from "./templates/COMPONENTS";
+import ScriptComponent from "./ecs/components/ScriptComponent";
 
 
 export default function useEngineEssentials(renderingTarget) {
@@ -114,7 +115,7 @@ function entityReducer(state, {type, payload}) {
         switch (type) {
             case ENTITY_ACTIONS.LINK_MULTIPLE:
                 return state.map(s => {
-                    if(payload.indexOf(s.id) > 0){
+                    if (payload.indexOf(s.id) > 0) {
                         s.linkedTo = payload[0]
                     }
                     return s
@@ -124,6 +125,7 @@ function entityReducer(state, {type, payload}) {
             case ENTITY_ACTIONS.ADD: {
                 const entity = payload
                 entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + 1)
+                entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                 return [...state, entity]
             }
             case ENTITY_ACTIONS.DISPATCH_BLOCK: {
@@ -131,6 +133,8 @@ function entityReducer(state, {type, payload}) {
                 if (Array.isArray(block))
                     return block.map((entity, i) => {
                         entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + 1)
+                        if (!entity.components[COMPONENTS.SCRIPT])
+                            entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                         return entity
                     })
                 else
@@ -150,6 +154,8 @@ function entityReducer(state, {type, payload}) {
                     return [...stateCopy, ...block.map((e, i) => {
                         const entity = e
                         entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + state.length + 1)
+                        if (!entity.components[COMPONENTS.SCRIPT])
+                            entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                         return entity
                     })]
                 else

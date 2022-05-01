@@ -121,9 +121,10 @@ export default class ScriptSystem extends System {
     }
 
     static parseScript(code, className = 'Script') {
+        const hasName = code.match(/class(\s+)(\w+)/gm)
+
         const body = `
-            class ${className} ${code}            
-           
+            ${hasName ? code : `class ${className} ${code}`}            
             return new ${className}()
         `;
         const executionLine = new Function('', body);

@@ -1,9 +1,11 @@
 import Component from "../basic/Component";
 
 export default class ScriptComponent extends Component{
-    executionTemplate
+
     ready = false
+    scripts = []
+
     constructor(id) {
-        super(id, ScriptComponent.constructor.name);
+        super(id);
     }
 }
