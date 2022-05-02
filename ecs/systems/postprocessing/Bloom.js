@@ -53,14 +53,16 @@ export default class Bloom extends System {
         super.execute()
         const {
             gamma,
-            exposure
+            exposure,
+            bloomStrength,
+            bloomThreshold
         } = options
 
         b.startMapping()
         this.brightShader.use()
         this.brightShader.bindForUse({
             sceneColor: a.colors[0],
-            threshold: .75
+            threshold: bloomThreshold
         })
         b.draw()
         b.stopMapping()
@@ -78,7 +80,7 @@ export default class Bloom extends System {
                 blurred: this.blurBuffers[index].height.colors[0],
                 nextSampler: this.blurBuffers[index + 1].height.colors[0],
                 resolution: [current.width, current.height],
-                bloomIntensity: .3
+                bloomIntensity: bloomStrength
             })
             current.draw()
             current.stopMapping()

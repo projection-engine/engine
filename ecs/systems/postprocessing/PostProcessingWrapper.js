@@ -20,9 +20,6 @@ export default class PostProcessingWrapper extends System {
     execute(options, systems, data, entities, entitiesMap, [a, b]) {
         super.execute()
 
-        const {
-            typeRendering,
-        } = options
 
 
         this.bloomSystem.execute(options, systems, data, entities, entitiesMap, [a, b])
