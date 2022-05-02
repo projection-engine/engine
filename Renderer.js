@@ -51,6 +51,7 @@ export default class Renderer {
 
             this.fallbackMaterial = new MaterialInstance(
                 this.gpu,
+                shaderCode.vertex,
                 shaderCode.fragment,
                 [
                     {key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED}

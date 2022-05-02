@@ -1,9 +1,7 @@
 import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../utils/image/ImageProcessor";
 import Shader from "../utils/Shader";
-import * as deferred from "../shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "../../views/blueprints/components/DATA_TYPES";
-import * as forward from "../shaders/mesh/forwardMesh.glsl";
 
 export default class MaterialInstance {
     ready = false
@@ -12,12 +10,13 @@ export default class MaterialInstance {
 
     settings = {}
     rsmAlbedo
-    // {key, data, type}
-    constructor(gpu, shader, uniformData = [], settings={}, onCompiled = () => null, id) {
+
+
+    constructor(gpu, vertexShader, shader, uniformData = [], settings={}, onCompiled = () => null, id) {
         this.gpu = gpu
         this.id = id
         this._initializeSettings(settings)
-        this.shader = [shader, uniformData, onCompiled]
+        this.shader = [shader, vertexShader, uniformData, onCompiled]
     }
     _initializeSettings(settings){
         this.settings = settings
@@ -42,7 +41,7 @@ export default class MaterialInstance {
             delete this.settings.rsmAlbedo
         }
     }
-    set shader([shader, uniformData, onCompiled, settings]) {
+    set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
         this.ready = false
         if(settings) {
             this._initializeSettings(settings)
@@ -50,7 +49,7 @@ export default class MaterialInstance {
         let message
         if (this._shader)
             this.gpu.deleteProgram(this._shader.program)
-        this._shader = new Shader(this.settings.isForwardShaded ? forward.vertex : deferred.vertex, shader, this.gpu, m => message= m)
+        this._shader = new Shader(vertexShader, shader, this.gpu, m => message= m)
 
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {

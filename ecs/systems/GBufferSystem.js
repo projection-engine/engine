@@ -127,11 +127,31 @@ export default class GBufferSystem extends System {
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
             this.lastMaterial = material.id
-            if (material.doubleSided)
+
+            if (material.settings?.doubleSided)
                 this.gpu.disable(this.gpu.CULL_FACE)
+            else if(material.settings?.cullFace)
+                this.gpu.cullFace(this.gpu[material.settings?.cullFace])
+            if (!material.settings?.depthMask)
+                this.gpu.depthMask(false)
+            if (!material.settings?.depthTest)
+                this.gpu.disable(this.gpu.DEPTH_TEST)
+            if (!material.settings?.blend)
+                this.gpu.disable(this.gpu.BLEND)
+            else if(material.settings?.blendFunc)
+                this.gpu.blendFunc(this.gpu[material.settings?.blendFuncSource], this.gpu[material.settings?.blendFuncTarget])
+
             this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
-            if (material.doubleSided)
+
+            if (material.settings?.doubleSided)
                 this.gpu.enable(this.gpu.CULL_FACE)
+            if (!material.settings?.depthMask)
+                this.gpu.depthMask(true)
+            if (!material.settings?.depthTest)
+                this.gpu.enable(this.gpu.DEPTH_TEST)
+            if (!material.settings?.blend)
+                this.gpu.enable(this.gpu.BLEND)
+
             mesh.finish()
         }
     }
