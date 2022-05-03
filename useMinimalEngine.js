@@ -37,7 +37,6 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
     const renderer = useMemo(() => {
         if (gpu) {
             const r = new EditorEngine(id, gpu)
-            console.log(quickAccess)
             if(quickAccess.sampleSkybox)
                 dispatchEntities({
                     type: ENTITY_ACTIONS.ADD,

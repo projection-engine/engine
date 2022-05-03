@@ -1,4 +1,3 @@
-
 export const vertex = `#version 300 es
 layout (location = 0) in vec3 position;
 out vec2 vTexcoord;
@@ -152,17 +151,16 @@ precision highp float;
 in vec2 vTexcoord;
 
 uniform sampler2D uSampler;
-
 uniform vec3 inverseFilterTextureSize;
 
+uniform ivec2 enabled ;// [fxaa, filmGrain]
+uniform  vec4 settings; //[FXAASpanMax, FXAAReduceMin, FXAAReduceMul, amountFilmGrain]
+uniform vec3 colorGrading; //[gamma, exposure, elapsed]
 
-//uniform float fxaaSpanMax;
-//uniform float fxaaReduceMin;
-//uniform float fxaaReduceMul;
 
 out vec4 finalColor;
 
-void main() {
+vec3 FXAA(){
     float fxaaSpanMax = 8.0;
     float fxaaReduceMin = 1.0/128.0;
     float fxaaReduceMul = 1.0/8.0;
@@ -198,25 +196,48 @@ void main() {
     float lumaMax = max(lumaM, max(max(lumaTL, lumaTR), max(lumaBL, lumaBR)));
     float lumaResult2 = dot(luma, result2);
 
-    vec3 fragment = vec3(0.0);
     if(lumaResult2 < lumaMin || lumaResult2 > lumaMax)
-        fragment = result1;
+        return result1;
     else
-        fragment = result2;
-    // GAMMA
+        return result2;
+}
+
+vec3 filmGrain(vec3 fragCurrentColor){
+
+    vec2 texSize  = vec2(textureSize(uSampler, 0).xy);
+    vec2 texCoord = gl_FragCoord.xy / texSize;
+    
+    vec3 color = fragCurrentColor;
+    float randomIntensity = fract(10000. * sin((gl_FragCoord.x + gl_FragCoord.y * colorGrading.b/2.)));
+    color += settings.w * randomIntensity;
+    return color;
+}
+
+void main() {  
+    vec3 fragment;    
+
+    if(enabled.r == 1)
+        fragment = FXAA();
+    else
+        fragment = texture(uSampler, vTexcoord).rgb;
+        
+    fragment = vec3(1.0) - exp(-fragment * colorGrading.g);
+    fragment = pow(fragment, vec3(1.0/colorGrading.r));
+
+    if(enabled.g == 1)
+        fragment = filmGrain(fragment);
+      
     finalColor = vec4(fragment, 1.0);
 }
 
 `
 
 export const noFxaaFragment = `#version 300 es
-precision highp float;
+precision mediump float;
 
 in vec2 vTexcoord;
 
 uniform sampler2D uSampler;
-
-
 out vec4 finalColor;
 
 void main() {

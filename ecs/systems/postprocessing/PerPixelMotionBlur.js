@@ -7,11 +7,11 @@ import SYSTEMS from "../../../templates/SYSTEMS";
 import {copyTexture} from "../../../utils/utils";
 
 export default class PerPixelMotionBlur extends System {
-    constructor(gpu) {
+    constructor(gpu, postProcessingResolution = {w: window.screen.width, h: window.screen.height}) {
         super([]);
         this.gpu = gpu
 
-        this.velocityFramebuffer = new FramebufferInstance(gpu)
+        this.velocityFramebuffer = new FramebufferInstance(gpu, postProcessingResolution.w, postProcessingResolution.h)
         this.velocityFramebuffer.texture()
 
         this.velocityShader = new Shader(vertex, shaderCode.blurBox, gpu)
@@ -22,9 +22,7 @@ export default class PerPixelMotionBlur extends System {
 
     execute(options, systems, data, entities, entitiesMap, [worker, output]) {
         super.execute()
-        const {
-
-        } = options
+        const {} = options
 
 
         // DRAW DIFFERENCE
@@ -32,7 +30,7 @@ export default class PerPixelMotionBlur extends System {
         this.velocityShader.use()
         this.velocityShader.bindForUse({
             previousSampler: this.velocityFramebuffer.colors[0],
-            currentSampler:  systems[SYSTEMS.MESH].framebuffer.colors[0]
+            currentSampler: systems[SYSTEMS.MESH].framebuffer.colors[0]
         })
         worker.draw()
         worker.stopMapping()
@@ -51,7 +49,7 @@ export default class PerPixelMotionBlur extends System {
         this.motionBlurShader.use()
         this.motionBlurShader.bindForUse({
             velocityScale: 1.,
-            velocitySampler:  worker.colors[0]
+            velocitySampler: worker.colors[0]
         })
         output.draw()
         output.stopMapping()

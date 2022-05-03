@@ -21,9 +21,7 @@ export default class RenderingWrapper extends System {
             .depthTest()
 
         // this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.noFxaaShader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
-        // this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
-
+        this.shader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)
@@ -63,8 +61,8 @@ export default class RenderingWrapper extends System {
         this.frameBuffer.stopMapping()
 
         a.startMapping()
-        this.noFxaaShader.use()
-        this.noFxaaShader.bindForUse({
+        this.shader.use()
+        this.shader.bindForUse({
             uSampler: this.frameBuffer.colors[0]
         })
         b.draw()

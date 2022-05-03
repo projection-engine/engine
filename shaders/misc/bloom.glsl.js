@@ -182,11 +182,7 @@ vec3 aces(vec3 x) {
 }
 void main(void){
     vec3 b = aces(texture(blurred, vTexcoord).rgb);
- 
-    vec3 color = texture(sceneColor, vTexcoord).rgb + b;
-
-    color = vec3(1.0) - exp(-color * exposure);
-    color = pow(color, vec3(1.0/gamma));       
+    vec3 color = texture(sceneColor, vTexcoord).rgb + b;  
     fragColor = vec4(color, 1.);
 }
 `

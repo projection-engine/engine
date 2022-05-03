@@ -137,7 +137,7 @@ export default class Renderer {
                         camera: this.viewTarget,
                         elapsed: performance.now() - this._startedOn,
                         brdf: this.brdf,
-                        fallbackMaterial: this.fallbackMaterial
+                        fallbackMaterial: this.fallbackMaterial,
                     },
                     systems,
                     data,

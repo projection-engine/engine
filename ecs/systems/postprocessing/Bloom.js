@@ -5,11 +5,11 @@ import * as shaderCode from '../../../shaders/misc/bloom.glsl'
 import FramebufferInstance from "../../../instances/FramebufferInstance";
 
 export default class Bloom extends System {
-    constructor(gpu) {
+    constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
         super([]);
         this.gpu = gpu
-        this.w = window.screen.width
-        this.h = window.screen.height
+        this.w = postProcessingResolution.w
+        this.h = postProcessingResolution.h
 
         this.blurBuffers = []
         this.upSampledBuffers = []
@@ -49,28 +49,26 @@ export default class Bloom extends System {
         this.blurShader = new Shader(vertex, shaderCode.blurBox, gpu)
     }
 
-    execute(options, systems, data, entities, entitiesMap, [a, b]) {
+    execute(options, systems, data, entities, entitiesMap, [worker, output]) {
         super.execute()
         const {
-            gamma,
-            exposure,
             bloomStrength,
             bloomThreshold
         } = options
 
-        b.startMapping()
+        output.startMapping()
         this.brightShader.use()
         this.brightShader.bindForUse({
-            sceneColor: a.colors[0],
+            sceneColor: worker.colors[0],
             threshold: bloomThreshold
         })
-        b.draw()
-        b.stopMapping()
+        output.draw()
+        output.stopMapping()
 
 
         this.blurShader.use()
         for (let index = 0; index < 4; index++) {
-            this.blurSample(index, this.blurShader,  b)
+            this.blurSample(index, this.blurShader,  output)
         }
         for (let index = 0; index < 3; index++) {
             const current = this.upSampledBuffers[index]
@@ -86,22 +84,20 @@ export default class Bloom extends System {
             current.stopMapping()
         }
 
-        b.startMapping()
+        output.startMapping()
         this.compositeShader.use()
         this.compositeShader.bindForUse({
             blurred: this.upSampledBuffers[2].colors[0],
-            sceneColor: a.colors[0],
-            resolution: [this.w, this.h],
-            gamma,
-            exposure
+            sceneColor: worker.colors[0],
+            resolution: [this.w, this.h]
         })
-        b.draw()
-        b.stopMapping()
+        output.draw()
+        output.stopMapping()
     }
 
-    blurSample(level, shader = this.blurShader, a) {
+    blurSample(level, shader = this.blurShader, framebuffer) {
         const {width, height} = this.blurBuffers[level]
-        const previousColor = level > 0 ? this.blurBuffers[level - 1].height.colors[0] : a.colors[0]
+        const previousColor = level > 0 ? this.blurBuffers[level - 1].height.colors[0] : framebuffer.colors[0]
         width.startMapping()
         shader.bindForUse({
             sceneColor: previousColor,
