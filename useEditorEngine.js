@@ -6,8 +6,8 @@ import EditorEngine from "./editor/EditorEngine";
 import PerformanceSystem from "./ecs/systems/PerformanceSystem";
 import CubeMapSystem from "./ecs/systems/CubeMapSystem";
 import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
-import useHistory from "../pages/project/utils/hooks/useHistory";
-import {HISTORY_ACTIONS} from "../pages/project/utils/hooks/historyReducer";
+import useHistory from "../pages/project/hooks/useHistory";
+import {HISTORY_ACTIONS} from "../pages/project/hooks/historyReducer";
 import COMPONENTS from "./templates/COMPONENTS";
 import CameraCubeSystem from "./ecs/systems/CameraCubeSystem";
 import ScriptSystem from "./ecs/systems/ScriptSystem";
@@ -28,8 +28,8 @@ export default function useEditorEngine(id, canExecutePhysicsAnimation, settings
 
 
     const renderer = useMemo(() => {
-        if (gpu) {
-            const r = new EditorEngine(id, gpu)
+        if (gpu && canStart) {
+            const r = new EditorEngine(id, gpu, {w: settings.resolution[0], h: settings.resolution[1]})
             r.systems = [
                 new ScriptSystem(gpu),
                 new PerformanceSystem(gpu),
@@ -42,7 +42,7 @@ export default function useEditorEngine(id, canExecutePhysicsAnimation, settings
             return r
         }
         return undefined
-    }, [gpu])
+    }, [gpu, canStart])
 
 
     const onGizmoStart = () => {

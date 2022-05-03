@@ -4,7 +4,7 @@ import {vertex} from '../../../shaders/misc/postProcessing.glsl'
 import * as shaderCode from '../../../shaders/misc/bloom.glsl'
 import FramebufferInstance from "../../../instances/FramebufferInstance";
 
-export default class Bloom extends System {
+export default class CompositPass extends System {
     constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
         super([]);
         this.gpu = gpu
@@ -53,35 +53,42 @@ export default class Bloom extends System {
         super.execute()
         const {
             bloomStrength,
-            bloomThreshold
+            bloomThreshold,
+
+            distortion,
+            chromaticAberration,
+            bloom,
+            distortionStrength, chromaticAberrationStrength
         } = options
 
-        output.startMapping()
-        this.brightShader.use()
-        this.brightShader.bindForUse({
-            sceneColor: worker.colors[0],
-            threshold: bloomThreshold
-        })
-        output.draw()
-        output.stopMapping()
-
-
-        this.blurShader.use()
-        for (let index = 0; index < 4; index++) {
-            this.blurSample(index, this.blurShader,  output)
-        }
-        for (let index = 0; index < 3; index++) {
-            const current = this.upSampledBuffers[index]
-            current.startMapping()
-            this.upSamplingShader.use()
-            this.upSamplingShader.bindForUse({
-                blurred: this.blurBuffers[index].height.colors[0],
-                nextSampler: this.blurBuffers[index + 1].height.colors[0],
-                resolution: [current.width, current.height],
-                bloomIntensity: bloomStrength
+        if(bloom){
+            output.startMapping()
+            this.brightShader.use()
+            this.brightShader.bindForUse({
+                sceneColor: worker.colors[0],
+                threshold: bloomThreshold
             })
-            current.draw()
-            current.stopMapping()
+            output.draw()
+            output.stopMapping()
+
+
+            this.blurShader.use()
+            for (let index = 0; index < 4; index++) {
+                this.blurSample(index, this.blurShader,  output)
+            }
+            for (let index = 0; index < 3; index++) {
+                const current = this.upSampledBuffers[index]
+                current.startMapping()
+                this.upSamplingShader.use()
+                this.upSamplingShader.bindForUse({
+                    blurred: this.blurBuffers[index].height.colors[0],
+                    nextSampler: this.blurBuffers[index + 1].height.colors[0],
+                    resolution: [current.width, current.height],
+                    bloomIntensity: bloomStrength
+                })
+                current.draw()
+                current.stopMapping()
+            }
         }
 
         output.startMapping()
@@ -89,7 +96,9 @@ export default class Bloom extends System {
         this.compositeShader.bindForUse({
             blurred: this.upSampledBuffers[2].colors[0],
             sceneColor: worker.colors[0],
-            resolution: [this.w, this.h]
+            resolution: [this.w, this.h],
+            intensity: [distortionStrength, chromaticAberrationStrength],
+            settings: [distortion ? 1 : 0, chromaticAberration ? 1 : 0, bloom ? 1 : 0]
         })
         output.draw()
         output.stopMapping()

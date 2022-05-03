@@ -164,25 +164,36 @@ precision mediump float;
 out vec4 fragColor;
 in vec2 vTexcoord;
 
-uniform vec2 resolution;
 uniform sampler2D blurred;
 uniform sampler2D sceneColor;
-uniform float gamma;
-uniform float exposure;
-     
-            
- 
-vec3 aces(vec3 x) {
-  const float a = 2.51;
-  const float b = 0.03;
-  const float c = 2.43;
-  const float d = 0.59;
-  const float e = 0.14;
-  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+uniform vec2 intensity; // [Distortion, CA] 
+uniform ivec3 settings; // [Distortion, Chromatic aberration, bloom]
+
+
+vec3 cA(vec2 uv){
+    float amount = intensity.y * .001;
+    vec3 col;
+    col.r = texture( sceneColor, vec2(uv.x+amount,uv.y) ).r;
+    col.g = texture( sceneColor, uv ).g;
+    col.b = texture( sceneColor, vec2(uv.x-amount,uv.y) ).b;
+    return col;
 }
+vec2 computeUV( vec2 uv, float k){
+    vec2 t = uv - .5;
+    float r2 = t.x * t.x + t.y * t.y;
+    float f = 1. + r2 * (  .1 - k * sqrt(r2));
+   
+    vec2 nUv = f * t + .5;
+    return nUv;    
+}
+ 
 void main(void){
-    vec3 b = aces(texture(blurred, vTexcoord).rgb);
-    vec3 color = texture(sceneColor, vTexcoord).rgb + b;  
-    fragColor = vec4(color, 1.);
+    vec2 texCoord = settings.r == 1 ? computeUV( vTexcoord, intensity.x * .5)  : vTexcoord;
+    vec3 b = settings.b == 1 ? texture(blurred, texCoord).rgb : vec3(0.);
+    vec3 color = settings.g == 1 ? cA(texCoord): texture(sceneColor, texCoord).rgb;
+    
+     
+    fragColor = vec4(color + b, 1.);
+ 
 }
 `

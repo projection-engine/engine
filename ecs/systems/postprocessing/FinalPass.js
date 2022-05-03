@@ -2,7 +2,7 @@ import System from "../../basic/System";
 import Shader from "../../../utils/Shader";
 
 import * as shaderCode from '../../../shaders/misc/postProcessing.glsl'
-import Bloom from "./Bloom";
+import CompositPass from "./CompositPass";
 
 
 export default class FinalPass extends System {
@@ -15,8 +15,6 @@ export default class FinalPass extends System {
         for (let i=1e6; i> 0; i--) {
             this.lookUpRandom.push(Math.random());
         }
-
-
     }
 
     lookup() {

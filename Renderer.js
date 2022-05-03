@@ -25,10 +25,10 @@ export default class Renderer {
     viewTarget = this.rootCamera
 
 
-    constructor(gpu, resolutionScale = 1) {
+    constructor(gpu, resolution) {
         this.gpu = gpu
-        this.wrapper = new RenderingWrapper(gpu, resolutionScale)
-        this.GBufferSystem = new GBufferSystem(gpu, resolutionScale)
+        this.wrapper = new RenderingWrapper(gpu, resolution)
+        this.GBufferSystem = new GBufferSystem(gpu, resolution)
 
         const brdf = new Image()
 
@@ -126,38 +126,46 @@ export default class Renderer {
     }
 
     callback(systems, onBeforeRender, onWrap) {
-        onBeforeRender()
-        const l = this.getLightsUniforms()
-        const data = {...this.data, ...l}
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-        for (let s = 0; s < this.sortedSystems.length; s++) {
-            systems[this.sortedSystems[s]]
-                .execute({
-                        ...this.params,
-                        camera: this.viewTarget,
-                        elapsed: performance.now() - this._startedOn,
-                        brdf: this.brdf,
-                        fallbackMaterial: this.fallbackMaterial,
-                    },
-                    systems,
-                    data,
-                    this.filteredEntities,
-                    this.entitiesMap
-                )
-        }
-        this.wrapper.execute({
-                ...this.params,
-                camera: this.viewTarget,
-                elapsed: performance.now() - this._startedOn,
-            },
-            systems,
-            data,
-            this.filteredEntities,
-            this.entitiesMap,
-            onWrap,
-            this.postProcessingFramebuffers)
-
+        const elapsed = performance.now() - this.then
         this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap));
+
+        if(elapsed > this.fpsInterval) {
+            const now = performance.now()
+            this.then = now - (elapsed % this.fpsInterval);
+            onBeforeRender()
+
+            const l = this.getLightsUniforms()
+            const data = {...this.data, ...l}
+            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+            for (let s = 0; s < this.sortedSystems.length; s++) {
+                systems[this.sortedSystems[s]]
+                    .execute({
+                            ...this.params,
+                            camera: this.viewTarget,
+                            elapsed ,
+                            brdf: this.brdf,
+                            fallbackMaterial: this.fallbackMaterial,
+                        },
+                        systems,
+                        data,
+                        this.filteredEntities,
+                        this.entitiesMap
+                    )
+            }
+            this.wrapper.execute({
+                    ...this.params,
+                    camera: this.viewTarget,
+                    elapsed,
+                },
+                systems,
+                data,
+                this.filteredEntities,
+                this.entitiesMap,
+                onWrap,
+                this.postProcessingFramebuffers)
+
+        }
+
     }
 
     start(s, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
@@ -187,7 +195,7 @@ export default class Renderer {
 
 
         this.viewTarget = params.camera ? params.camera : this.rootCamera
-        this._startedOn = performance.now()
+
         this.params = {...params, entitiesLength: this.filteredEntities.length}
 
         const canvasRef = this.gpu.canvas
@@ -241,6 +249,8 @@ export default class Renderer {
             this.gpu.deleteProgram(shader.program)
         }
         // SKYBOX COMPILATION
+        this.fpsInterval = 1000 / (this.params.frameRate ? this.params.frameRate : 75);
+        this.then = performance.now();
 
         this._currentFrame = requestAnimationFrame(() => this.callback(systems, onBeforeRender, onWrap))
     }
@@ -248,13 +258,11 @@ export default class Renderer {
     parseScripts(scripts) {
         return scripts.map(s => {
             try {
-
                 return {
                     id: s.id,
                     executor: ScriptSystem.parseScript(s.executors)
                 }
             } catch (e) {
-                console.log(e)
                 return undefined
             }
         }).filter(e => e !== undefined)

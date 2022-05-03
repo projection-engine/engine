@@ -13,14 +13,14 @@ import MeshComponent from "./ecs/components/MeshComponent";
 import TransformComponent from "./ecs/components/TransformComponent";
 import MeshInstance from "./instances/MeshInstance";
 
-import {SHADING_MODELS} from "../pages/project/utils/hooks/useSettings";
+import {SHADING_MODELS} from "../pages/project/hooks/useSettings";
 import CAMERA_TYPES from "./editor/camera/CAMERA_TYPES";
 import MaterialComponent from "./ecs/components/MaterialComponent";
 
 import {v4 as uuidv4} from 'uuid';
 import COMPONENTS from "./templates/COMPONENTS";
 import LoaderProvider from "../components/loader/LoaderProvider";
-import QuickAccessProvider from "../pages/project/utils/hooks/QuickAccessProvider";
+import QuickAccessProvider from "../pages/project/hooks/QuickAccessProvider";
 
 const id = uuidv4().toString()
 export default function useMinimalEngine(initializeSphere, centerOnSphere, loadAllMeshes) {
@@ -36,7 +36,7 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
 
     const renderer = useMemo(() => {
         if (gpu) {
-            const r = new EditorEngine(id, gpu)
+            const r = new EditorEngine(id, gpu, {w: window.screen.width,h: window.screen.height})
             if(quickAccess.sampleSkybox)
                 dispatchEntities({
                     type: ENTITY_ACTIONS.ADD,
@@ -80,7 +80,12 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
                     materials: [],
                     noRSM: true,
                     shadingModel: SHADING_MODELS.DETAIL,
-                    cameraType: CAMERA_TYPES.SPHERICAL
+                    cameraType: CAMERA_TYPES.SPHERICAL,
+                    bloom: true,
+                    filmGrain: true,
+                    filmGrainStrength: .07,
+                    bloomStrength: .1,
+                    bloomThreshold: .75
                 })
             }
         }

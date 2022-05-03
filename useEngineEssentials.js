@@ -3,7 +3,6 @@ import PickComponent from "./ecs/components/PickComponent";
 import COMPONENTS from "./templates/COMPONENTS";
 import ScriptComponent from "./ecs/components/ScriptComponent";
 
-
 export default function useEngineEssentials(renderingTarget) {
     const [meshes, setMeshes] = useState([])
     const [materials, setMaterials] = useState([])
@@ -19,7 +18,6 @@ export default function useEngineEssentials(renderingTarget) {
                     preserveDrawingBuffer: true,
                     premultipliedAlpha: false
                 })
-
                 ctx.getExtension("EXT_color_buffer_float")
                 ctx.getExtension('OES_texture_float')
                 ctx.getExtension('OES_texture_float_linear')
@@ -35,7 +33,6 @@ export default function useEngineEssentials(renderingTarget) {
             }
         }
     }, [renderingTarget])
-
 
     return {
         gpu,

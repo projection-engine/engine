@@ -6,14 +6,12 @@ import COMPONENTS from "../../templates/COMPONENTS";
 export default class GBufferSystem extends System {
     lastMaterial
 
-    constructor(gpu, resolutionMultiplier) {
+    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
         super([]);
         this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
         this.frameBuffer
-
             .texture({attachment: 0, precision: this.gpu.RGBA32F, format: this.gpu.RGBA, type: this.gpu.FLOAT})
-
             .texture({attachment: 1})
             .texture({attachment: 2})
             .texture({attachment: 3})
@@ -132,11 +130,11 @@ export default class GBufferSystem extends System {
                 this.gpu.disable(this.gpu.CULL_FACE)
             else if(material.settings?.cullFace)
                 this.gpu.cullFace(this.gpu[material.settings?.cullFace])
-            if (!material.settings?.depthMask)
+            if (material.settings?.depthMask === false)
                 this.gpu.depthMask(false)
-            if (!material.settings?.depthTest)
+            if (material.settings?.depthTest === false)
                 this.gpu.disable(this.gpu.DEPTH_TEST)
-            if (!material.settings?.blend)
+            if (material.settings?.blend === false)
                 this.gpu.disable(this.gpu.BLEND)
             else if(material.settings?.blendFunc)
                 this.gpu.blendFunc(this.gpu[material.settings?.blendFuncSource], this.gpu[material.settings?.blendFuncTarget])
@@ -145,11 +143,11 @@ export default class GBufferSystem extends System {
 
             if (material.settings?.doubleSided)
                 this.gpu.enable(this.gpu.CULL_FACE)
-            if (!material.settings?.depthMask)
+            if (material.settings?.depthMask === false)
                 this.gpu.depthMask(true)
-            if (!material.settings?.depthTest)
+            if (material.settings?.depthTest === false)
                 this.gpu.enable(this.gpu.DEPTH_TEST)
-            if (!material.settings?.blend)
+            if (material.settings?.blend === false)
                 this.gpu.enable(this.gpu.BLEND)
 
             mesh.finish()

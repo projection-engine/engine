@@ -1,7 +1,7 @@
 import System from "../basic/System";
 import COMPONENTS from "../../templates/COMPONENTS";
 import * as glMatrix from "gl-matrix";
-import {KEYS} from "../../../pages/project/utils/hooks/useHotKeys";
+import {KEYS} from "../../../pages/project/hooks/useHotKeys";
 import Transformation from "../../utils/Transformation";
 import PickSystem from "./PickSystem";
 import SYSTEMS from "../../templates/SYSTEMS";

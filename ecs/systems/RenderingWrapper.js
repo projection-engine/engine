@@ -12,10 +12,10 @@ import * as shaderCode from "../../shaders/misc/postProcessing.glsl";
 
 
 export default class RenderingWrapper extends System {
-    constructor(gpu, resolutionMultiplier) {
+    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
         super([]);
         this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, window.screen.width * resolutionMultiplier, window.screen.height * resolutionMultiplier)
+        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
         this.frameBuffer
             .texture()
             .depthTest()
@@ -28,7 +28,7 @@ export default class RenderingWrapper extends System {
         this.deferredSystem = new DeferredSystem(gpu)
 
 
-        this.postProcessingWrapper = new PostProcessingWrapper(gpu)
+        this.postProcessingWrapper = new PostProcessingWrapper(gpu, resolution)
     }
 
     execute(options, systems, data, entities, entitiesMap, onWrap, [a, b]) {
