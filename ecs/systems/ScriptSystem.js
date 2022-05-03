@@ -72,12 +72,21 @@ export default class ScriptSystem extends System {
             this.renderTarget.style.display = 'block'
             const keys = Object.keys(scriptedEntities)
             for (let i = 0; i < keys.length; i++) {
-                const currentS = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID].executor
-                this.executeLoop(currentS.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
-
+                const embeddedScript = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID]
+                if(embeddedScript)
+                    this.executeLoop(embeddedScript.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
+                else {
+                    const entityScripts =  scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].scripts
+                    for (let j = 0; j < entityScripts.length; j++) {
+                        const currentS = scripts[entityScripts[j]]
+                        if (currentS)
+                            this.executeLoop(currentS.executor, elapsed, {[scriptedEntities[keys[i]].id]: scriptedEntities[keys[i]]}, camera, meshSources, systems[SYSTEMS.PICK], entities)
+                    }
+                }
             }
             // LEVEL BLUEPRINT
-            this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
+            if (scripts[this.id])
+                this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
         } else if (this.eventSet) {
             lockCamera(false)
 
@@ -120,17 +129,24 @@ export default class ScriptSystem extends System {
         })
     }
 
-    static parseScript(code, className = 'Script') {
+    static parseScript(code) {
+        const className = code.name ? prepareName(code.name) : 'Script'
         const hasName = code.match(/class(\s+)(\w+)/gm)
 
         const body = `
-            ${hasName ? code : `class ${className} ${code}`}            
-            return new ${className}()
+            ${hasName !== null ? code : `class ${className} ${code}`}            
+            return new ${hasName !== null ? hasName[0].replace('class', '') : className}()
         `;
         const executionLine = new Function('', body);
         return executionLine([])
 
     }
+}
+
+function prepareName(name) {
+
+    const word = name.trim().replaceAll(/\s/g, "").replaceAll('-', '').replaceAll('_', '').replaceAll('.', '').replaceAll(',', '')
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
 }
 
 function handler(event) {

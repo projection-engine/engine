@@ -3,6 +3,7 @@ import Shader from "../../../utils/Shader";
 
 import * as shaderCode from '../../../shaders/misc/postProcessing.glsl'
 import Bloom from "./Bloom";
+import FXAA from "./FXAA";
 
 
 export default class PostProcessingWrapper extends System {
@@ -14,34 +15,43 @@ export default class PostProcessingWrapper extends System {
         this.FSRShader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
 
         this.bloomSystem = new Bloom(gpu)
-
+        this.fxaaSystem = new FXAA(gpu)
     }
 
     execute(options, systems, data, entities, entitiesMap, [a, b]) {
         super.execute()
+        const {fxaa, bloom} = options
 
 
+        let worker = a, output = b
+        if(bloom) {
+            this.bloomSystem.execute(options, systems, data, entities, entitiesMap, [worker, output])
+            worker = b
+            output = a
+        }
 
-        this.bloomSystem.execute(options, systems, data, entities, entitiesMap, [a, b])
+        if(fxaa) {
+            this.fxaaSystem.execute(options, [worker, output])
+            const cache = output
+            output = worker
+            worker = cache
+        }
 
-        a.startMapping()
         this.FSRShader.use()
         this.FSRShader.bindForUse({
-            uSampler: b.colors[0]
+            uSampler: worker.colors[0]
         })
-        a.draw()
-        a.stopMapping()
+        output.draw()
 
-
-        this.shader.use()
-        this.shader.bindForUse({
-            uSampler: a.colors[0],
-
-            FXAASpanMax: 8,
-            FXAAReduceMin: 1 / 128,
-            inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
-            FXAAReduceMul: 1 / 8
-        })
-        a.draw()
+        // this.shader.use()
+        // this.shader.bindForUse({
+        //     uSampler: a.colors[0],
+        //
+        //     FXAASpanMax: 8,
+        //     FXAAReduceMin: 1 / 128,
+        //     inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
+        //     FXAAReduceMul: 1 / 8
+        // })
+        // a.draw()
     }
 }

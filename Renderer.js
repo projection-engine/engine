@@ -162,6 +162,7 @@ export default class Renderer {
 
     start(s, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
         const systems = {...s, [SYSTEMS.MESH]: this.GBufferSystem}
+
         const filteredEntities = this.filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
         this.data = {
             pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
@@ -245,17 +246,12 @@ export default class Renderer {
     }
 
     parseScripts(scripts) {
-        // {
-        //     executor: CODE,
-        //     id: SCRIPT_ID,
-        //     name: SCRIPT_NAME
-        // }
         return scripts.map(s => {
             try {
-                console.log(prepareName(s.name) )
+
                 return {
                     id: s.id,
-                    executor: ScriptSystem.parseScript(s.executors, prepareName(s.name))
+                    executor: ScriptSystem.parseScript(s.executors)
                 }
             } catch (e) {
                 console.log(e)
@@ -274,10 +270,4 @@ function getArray(size, onIndex) {
     for (let i = 0; i < size; i++) {
         onIndex(i)
     }
-}
-
-function prepareName(name) {
-
-    const word = name.trim().replaceAll(/\s/g, "").replaceAll('-', '').replaceAll('_', '').replaceAll('.', '').replaceAll(',', '')
-    return word[0].toUpperCase() + word.substring(1).toLowerCase();
 }
