@@ -1,9 +1,9 @@
 import System from "../basic/System";
-import {SHADING_MODELS} from "../../../pages/project/hooks/useSettings";
-import SYSTEMS from "../../templates/SYSTEMS";
-import Shader from "../../utils/Shader";
-import * as shaderCode from '../../shaders/mesh/deferred.glsl'
-import * as shaderFlatCode from '../../shaders/mesh/deferredFlat.glsl'
+import {SHADING_MODELS} from "../../pages/project/hooks/useSettings";
+import SYSTEMS from "../templates/SYSTEMS";
+import Shader from "../utils/Shader";
+import * as shaderCode from '../shaders/mesh/deferred.glsl'
+import * as shaderFlatCode from '../shaders/mesh/deferredFlat.glsl'
 
 export default class DeferredSystem extends System {
     constructor(gpu) {

@@ -1,15 +1,15 @@
 import System from "../basic/System";
 
-import * as shaderCode from '../../shaders/mesh/forwardMesh.glsl'
-import * as skyShader from '../../shaders/misc/skybox.glsl'
-import Shader from "../../utils/Shader";
-import {createVAO} from "../../utils/utils";
+import * as shaderCode from '../shaders/mesh/forwardMesh.glsl'
+import * as skyShader from '../shaders/misc/skybox.glsl'
+import Shader from "../utils/Shader";
+import {createVAO} from "../utils/utils";
 import {mat4, vec3} from "gl-matrix";
 import {VIEWS} from "./ShadowMapSystem";
-import VBO from "../../utils/VBO";
-import cube from "../../utils/cube.json";
+import VBO from "../utils/VBO";
+import cube from "../utils/cube.json";
 import {intersectBoundingSphere} from "./PhysicsSystem";
-import COMPONENTS from "../../templates/COMPONENTS";
+import COMPONENTS from "../templates/COMPONENTS";
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,

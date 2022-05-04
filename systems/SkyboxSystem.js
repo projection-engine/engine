@@ -1,10 +1,10 @@
 import System from "../basic/System";
-import OrthographicCamera from "../../editor/camera/ortho/OrthographicCamera";
-import * as shaderCode from "../../shaders/misc/skybox.glsl";
-import Shader from "../../utils/Shader";
-import {createVAO} from "../../utils/utils";
-import VBO from "../../utils/VBO";
-import cube from "../../utils/cube.json";
+import OrthographicCamera from "../editor/camera/ortho/OrthographicCamera";
+import * as shaderCode from "../shaders/misc/skybox.glsl";
+import Shader from "../utils/Shader";
+import {createVAO} from "../utils/utils";
+import VBO from "../utils/VBO";
+import cube from "../utils/cube.json";
 
 
 export default class SkyboxSystem extends System {

@@ -1,13 +1,13 @@
-import System from "../../ecs/basic/System";
+import System from "../../basic/System";
 import Shader from "../../utils/Shader";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 import {mat4, quat, vec3} from "gl-matrix";
-import Entity from "../../ecs/basic/Entity";
-import TransformComponent from "../../ecs/components/TransformComponent";
+import Entity from "../../basic/Entity";
+import TransformComponent from "../../components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
 import Transformation from "../../utils/Transformation";
-import PickComponent from "../../ecs/components/PickComponent";
+import PickComponent from "../../components/PickComponent";
 import TextureInstance from "../../instances/TextureInstance";
 import circle from "../icons/circle.png";
 import plane from "../assets/Circle.json";

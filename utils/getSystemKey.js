@@ -1,18 +1,18 @@
-import CameraCubeSystem from "../ecs/systems/CameraCubeSystem";
+import CameraCubeSystem from "../systems/CameraCubeSystem";
 import SYSTEMS from "../templates/SYSTEMS";
-import AOSystem from "../ecs/systems/AOSystem";
-import CullingSystem from "../ecs/systems/CullingSystem";
-import GBufferSystem from "../ecs/systems/GBufferSystem";
-import PerformanceSystem from "../ecs/systems/PerformanceSystem";
-import PhysicsSystem from "../ecs/systems/PhysicsSystem";
-import PickSystem from "../ecs/systems/PickSystem";
+import AOSystem from "../systems/AOSystem";
+import CullingSystem from "../systems/CullingSystem";
+import GBufferSystem from "../systems/GBufferSystem";
+import PerformanceSystem from "../systems/PerformanceSystem";
+import PhysicsSystem from "../systems/PhysicsSystem";
+import PickSystem from "../systems/PickSystem";
 
-import ShadowMapSystem from "../ecs/systems/ShadowMapSystem";
-import TransformSystem from "../ecs/systems/TransformSystem";
-import CubeMapSystem from "../ecs/systems/CubeMapSystem";
-import ForwardSystem from "../ecs/systems/ForwardSystem";
-import DeferredSystem from "../ecs/systems/DeferredSystem";
-import ScriptSystem from "../ecs/systems/ScriptSystem";
+import ShadowMapSystem from "../systems/ShadowMapSystem";
+import TransformSystem from "../systems/TransformSystem";
+import CubeMapSystem from "../systems/CubeMapSystem";
+import ForwardSystem from "../systems/ForwardSystem";
+import DeferredSystem from "../systems/DeferredSystem";
+import ScriptSystem from "../systems/ScriptSystem";
 
 export default function getSystemKey(s) {
     switch (true) {

@@ -1,10 +1,10 @@
 import System from "../basic/System";
-import COMPONENTS from "../../templates/COMPONENTS";
+import COMPONENTS from "../templates/COMPONENTS";
 import * as glMatrix from "gl-matrix";
-import {KEYS} from "../../../pages/project/hooks/useHotKeys";
-import Transformation from "../../utils/Transformation";
+import {KEYS} from "../../pages/project/hooks/useHotKeys";
+import Transformation from "../utils/Transformation";
 import PickSystem from "./PickSystem";
-import SYSTEMS from "../../templates/SYSTEMS";
+import SYSTEMS from "../templates/SYSTEMS";
 
 export default class ScriptSystem extends System {
     pressedKeys = {}

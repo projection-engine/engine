@@ -4,10 +4,9 @@ import * as shaderCodeSkybox from "./shaders/misc/cubeMap.glsl";
 import * as skyboxCode from "./shaders/misc/skybox.glsl";
 import CubeMapInstance from "./instances/CubeMapInstance";
 import {createTexture, lookAt} from "./utils/utils";
-import SYSTEMS from "./templates/SYSTEMS";
 import cloneClass from "./utils/cloneClass";
 import toObject from "./utils/toObject";
-import ScriptSystem from "./ecs/systems/ScriptSystem";
+import ScriptSystem from "./systems/ScriptSystem";
 import RootCameraInstance from "./instances/RootCameraInstance";
 
 export default class RenderingPackager {

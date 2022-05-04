@@ -1,21 +1,21 @@
 import {useContext, useEffect, useMemo, useState} from "react";
 
 import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
-import Entity from "../ecs/basic/Entity";
+import Entity from "../basic/Entity";
 import sphereMesh from '../editor/assets/Sphere.json'
 
 import EditorEngine from "../editor/EditorEngine";
-import TransformSystem from "../ecs/systems/TransformSystem";
-import ShadowMapSystem from "../ecs/systems/ShadowMapSystem";
-import DirectionalLightComponent from "../ecs/components/DirectionalLightComponent";
+import TransformSystem from "../systems/TransformSystem";
+import ShadowMapSystem from "../systems/ShadowMapSystem";
+import DirectionalLightComponent from "../components/DirectionalLightComponent";
 
-import MeshComponent from "../ecs/components/MeshComponent";
-import TransformComponent from "../ecs/components/TransformComponent";
+import MeshComponent from "../components/MeshComponent";
+import TransformComponent from "../components/TransformComponent";
 import MeshInstance from "../instances/MeshInstance";
 
 import {SHADING_MODELS} from "../../pages/project/hooks/useSettings";
 import CAMERA_TYPES from "../editor/camera/CAMERA_TYPES";
-import MaterialComponent from "../ecs/components/MaterialComponent";
+import MaterialComponent from "../components/MaterialComponent";
 
 import {v4 as uuidv4} from 'uuid';
 import COMPONENTS from "../templates/COMPONENTS";

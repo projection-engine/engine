@@ -1,8 +1,8 @@
 import System from "../../basic/System";
-import Shader from "../../../utils/Shader";
-import {vertex} from '../../../shaders/misc/postProcessing.glsl'
-import * as shaderCode from '../../../shaders/misc/bloom.glsl'
-import FramebufferInstance from "../../../instances/FramebufferInstance";
+import Shader from "../../utils/Shader";
+import {vertex} from '../../shaders/misc/postProcessing.glsl'
+import * as shaderCode from '../../shaders/misc/bloom.glsl'
+import FramebufferInstance from "../../instances/FramebufferInstance";
 
 export default class CompositPass extends System {
     constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {

@@ -1,4 +1,4 @@
-import System from "../../ecs/basic/System";
+import System from "../../basic/System";
 import OrthographicCamera from "../camera/ortho/OrthographicCamera";
 import * as shaderCode from '../../shaders/misc/grid.glsl'
 import Shader from "../../utils/Shader";

@@ -1,31 +1,26 @@
 import System from "../basic/System";
+import FramebufferInstance from "../instances/FramebufferInstance";
+import SYSTEMS from "../templates/SYSTEMS";
+import COMPONENTS from "../templates/COMPONENTS";
 
-import * as shaderCode from '../../shaders/mesh/forwardMesh.glsl'
-import * as skyShader from '../../shaders/misc/skybox.glsl'
-import Shader from "../../utils/Shader";
-import {createVAO} from "../../utils/utils";
-import VBO from "../../utils/VBO";
-import cube from "../../utils/cube.json";
-import COMPONENTS from "../../templates/COMPONENTS";
-import SYSTEMS from "../../templates/SYSTEMS";
-
-export default class ForwardSystem extends System {
+export default class GBufferSystem extends System {
     lastMaterial
-    cubeMapsConsumeMap = {}
 
-    constructor(gpu) {
+    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
         super([]);
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.skyShader = new Shader(skyShader.vertex, skyShader.fragment, gpu)
-
-        this.vao = createVAO(gpu)
-        this.vbo = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
-        gpu.bindVertexArray(null)
+        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        this.frameBuffer
+            .texture({attachment: 0, precision: this.gpu.RGBA32F, format: this.gpu.RGBA, type: this.gpu.FLOAT})
+            .texture({attachment: 1})
+            .texture({attachment: 2})
+            .texture({attachment: 3})
+            .texture({attachment: 4})
+            .texture({attachment: 5})
+            .depthTest()
     }
 
-
-    execute(options, systems, data, sceneColor) {
+    execute(options, systems, data) {
         super.execute()
         const {
             meshes,
@@ -33,14 +28,6 @@ export default class ForwardSystem extends System {
             materials,
             meshSources,
             cubeMapsSources,
-            pointLightsQuantity,
-            maxTextures,
-            dirLights,
-            dirLightsPov,
-            lClip,
-            lPosition,
-            lColor,
-            lAttenuation,
         } = data
 
         const {
@@ -49,11 +36,9 @@ export default class ForwardSystem extends System {
             fallbackMaterial,
             brdf
         } = options
+        this.frameBuffer.startMapping()
         const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
         this.lastMaterial = undefined
-
-
-
         for (let m = 0; m < meshes.length; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
@@ -80,8 +65,6 @@ export default class ForwardSystem extends System {
                     ambient.prefilteredLod = 6
                 }
 
-
-
                 this.drawMesh(
                     mesh,
                     camera.position,
@@ -90,28 +73,18 @@ export default class ForwardSystem extends System {
                     t.transformationMatrix,
                     mat,
                     current.components[COMPONENTS.MESH].normalMatrix,
+                    undefined,
                     current.components[COMPONENTS.MATERIAL],
-                    brdf,
 
-                    pointLightsQuantity,
-                    maxTextures,
-                    dirLights,
-                    dirLightsPov,
-                    lClip,
-                    lPosition,
-                    lColor,
-                    lAttenuation,
-
-
-
-                    elapsed,
                     ambient.irradianceMap,
                     ambient.prefilteredMap,
                     ambient.prefilteredLod,
-                    sceneColor
+                    elapsed,
+                    brdf
                 )
             }
         }
+        this.frameBuffer.stopMapping()
     }
 
     drawMesh(
@@ -122,65 +95,46 @@ export default class ForwardSystem extends System {
         transformMatrix,
         material,
         normalMatrix,
+        indexSelected,
         materialComponent,
-        brdf,
-        pointLightsQuantity,
-        maxTextures,
-        dirLights,
-        dirLightsPov,
-        lClip,
-        lPosition,
-        lColor,
-        lAttenuation,
-
-        elapsed,
         closestIrradiance,
         closestPrefiltered,
         prefilteredLod,
-        sceneColor
+        elapsed,
+        brdf
     ) {
 
-        if (material && material.settings?.isForwardShaded) {
+
+        if (material && !material.settings?.isForwardShaded) {
 
             mesh.use()
-
             material.use(this.lastMaterial !== material.id, {
                 projectionMatrix,
                 transformMatrix,
                 viewMatrix,
 
                 normalMatrix,
-                sceneColor,
+                indexSelected,
+
                 brdfSampler: brdf,
                 elapsedTime: elapsed,
                 cameraVec: camPosition,
                 irradianceMap: closestIrradiance,
                 prefilteredMapSampler: closestPrefiltered,
                 ambientLODSamples: prefilteredLod,
-
-                dirLightQuantity: maxTextures,
-                directionalLights: dirLights,
-                directionalLightsPOV: dirLightsPov,
-
-                lightQuantity: pointLightsQuantity,
-                lightClippingPlane: lClip,
-                lightPosition: lPosition.slice(0,3),
-                lightColor: lColor,
-                lightAttenuationFactors: lAttenuation,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
-
-
             this.lastMaterial = material.id
+
             if (material.settings?.doubleSided)
                 this.gpu.disable(this.gpu.CULL_FACE)
             else if(material.settings?.cullFace)
                 this.gpu.cullFace(this.gpu[material.settings?.cullFace])
-            if (!material.settings?.depthMask)
+            if (material.settings?.depthMask === false)
                 this.gpu.depthMask(false)
-            if (!material.settings?.depthTest)
+            if (material.settings?.depthTest === false)
                 this.gpu.disable(this.gpu.DEPTH_TEST)
-            if (!material.settings?.blend)
+            if (material.settings?.blend === false)
                 this.gpu.disable(this.gpu.BLEND)
             else if(material.settings?.blendFunc)
                 this.gpu.blendFunc(this.gpu[material.settings?.blendFuncSource], this.gpu[material.settings?.blendFuncTarget])
@@ -189,12 +143,13 @@ export default class ForwardSystem extends System {
 
             if (material.settings?.doubleSided)
                 this.gpu.enable(this.gpu.CULL_FACE)
-            if (!material.settings?.depthMask)
+            if (material.settings?.depthMask === false)
                 this.gpu.depthMask(true)
-            if (!material.settings?.depthTest)
+            if (material.settings?.depthTest === false)
                 this.gpu.enable(this.gpu.DEPTH_TEST)
-            if (!material.settings?.blend)
+            if (material.settings?.blend === false)
                 this.gpu.enable(this.gpu.BLEND)
+
             mesh.finish()
         }
     }

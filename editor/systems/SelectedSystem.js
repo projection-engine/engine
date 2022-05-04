@@ -1,4 +1,4 @@
-import System from "../../ecs/basic/System";
+import System from "../../basic/System";
 import Shader from "../../utils/Shader";
 import * as gizmoShaderCode from '../../shaders/misc/gizmo.glsl'
 import COMPONENTS from "../../templates/COMPONENTS";

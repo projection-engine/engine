@@ -1,10 +1,9 @@
 import System from "../../basic/System";
-import Shader from "../../../utils/Shader";
-import {vertex} from '../../../shaders/misc/postProcessing.glsl'
-import * as shaderCode from '../../../shaders/misc/bloom.glsl'
-import FramebufferInstance from "../../../instances/FramebufferInstance";
-import SYSTEMS from "../../../templates/SYSTEMS";
-import {copyTexture} from "../../../utils/utils";
+import Shader from "../../utils/Shader";
+import {vertex} from '../../shaders/misc/postProcessing.glsl'
+import * as shaderCode from '../../shaders/misc/bloom.glsl'
+import FramebufferInstance from "../../instances/FramebufferInstance";
+import SYSTEMS from "../../templates/SYSTEMS";
 
 export default class PerPixelMotionBlur extends System {
     constructor(gpu, postProcessingResolution = {w: window.screen.width, h: window.screen.height}) {

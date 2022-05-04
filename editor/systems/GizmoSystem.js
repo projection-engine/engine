@@ -1,4 +1,4 @@
-import System from "../../ecs/basic/System";
+import System from "../../basic/System";
 import TranslationGizmo from "../gizmo/TranslationGizmo";
 import RotationGizmo from "../gizmo/RotationGizmo";
 import GIZMOS from "../gizmo/GIZMOS";

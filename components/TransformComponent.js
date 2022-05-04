@@ -1,6 +1,6 @@
 import Component from "../basic/Component";
 import {mat4, quat} from "gl-matrix";
-import Transformation from "../../utils/Transformation";
+import Transformation from "../utils/Transformation";
 
 export default class TransformComponent extends Component {
     __rotation = [0, 0, 0]

@@ -1,12 +1,12 @@
 import System from "../basic/System";
-import * as shaderCode from "../../shaders/misc/picker.glsl";
-import Shader from "../../utils/Shader";
-import FramebufferInstance from "../../instances/FramebufferInstance";
+import * as shaderCode from "../shaders/misc/picker.glsl";
+import Shader from "../utils/Shader";
+import FramebufferInstance from "../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
-import OrthographicCamera from "../../editor/camera/ortho/OrthographicCamera";
-import MeshInstance from "../../instances/MeshInstance";
-import camera from "../../editor/assets/Camera.json";
-import COMPONENTS from "../../templates/COMPONENTS";
+import OrthographicCamera from "../editor/camera/ortho/OrthographicCamera";
+import MeshInstance from "../instances/MeshInstance";
+import camera from "../editor/assets/Camera.json";
+import COMPONENTS from "../templates/COMPONENTS";
 
 
 export default class PickSystem extends System {

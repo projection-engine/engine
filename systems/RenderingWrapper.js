@@ -2,13 +2,13 @@ import System from "../basic/System";
 import DeferredSystem from "./DeferredSystem";
 import SkyboxSystem from "./SkyboxSystem";
 import GlobalIlluminationSystem from "./gi/GlobalIlluminationSystem";
-import SYSTEMS from "../../templates/SYSTEMS";
-import FramebufferInstance from "../../instances/FramebufferInstance";
+import SYSTEMS from "../templates/SYSTEMS";
+import FramebufferInstance from "../instances/FramebufferInstance";
 import ForwardSystem from "./ForwardSystem";
-import {copyTexture} from "../../utils/utils";
+import {copyTexture} from "../utils/utils";
 import PostProcessingWrapper from "./postprocessing/PostProcessingWrapper";
-import Shader from "../../utils/Shader";
-import * as shaderCode from "../../shaders/misc/postProcessing.glsl";
+import Shader from "../utils/Shader";
+import * as shaderCode from "../shaders/misc/postProcessing.glsl";
 
 
 export default class RenderingWrapper extends System {

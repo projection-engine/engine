@@ -1,23 +1,15 @@
-import cloneClass from "./utils/cloneClass";
-import COMPONENTS from "./templates/COMPONENTS";
-import toObject from "./utils/toObject";
 import RootCameraInstance from "./instances/RootCameraInstance";
-import RenderingWrapper from "./ecs/systems/RenderingWrapper";
+import RenderingWrapper from "./systems/RenderingWrapper";
 import brdfImg from "./utils/brdf_lut.jpg";
-import {createTexture, lookAt} from "./utils/utils";
+import {createTexture} from "./utils/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "../views/blueprints/components/DATA_TYPES";
 import ImageProcessor from "./utils/image/ImageProcessor";
 import {v4} from "uuid";
-import GBufferSystem from "./ecs/systems/GBufferSystem";
+import GBufferSystem from "./systems/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
-import CubeMapInstance from "./instances/CubeMapInstance";
-import Shader from "./utils/Shader";
-import * as shaderCodeSkybox from "./shaders/misc/cubeMap.glsl";
-import * as skyboxCode from "./shaders/misc/skybox.glsl";
-import ScriptSystem from "./ecs/systems/ScriptSystem";
 import RenderingPackager from "./RenderingPackager";
 
 export default class Renderer {
@@ -86,7 +78,6 @@ export default class Renderer {
 
     updatePackage(s, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
         this.#systems = {...s, [SYSTEMS.MESH]: this.GBufferSystem}
-        console.log(this.#systems)
         this.sortedSystems = Object.keys(this.#systems).sort()
         const packageData = this.packager.makePackage({
             entities,

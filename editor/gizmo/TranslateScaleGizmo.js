@@ -1,4 +1,4 @@
-import System from "../../ecs/basic/System";
+import System from "../../basic/System";
 
 import {mat4, quat, vec3} from "gl-matrix";
 import COMPONENTS from "../../templates/COMPONENTS";

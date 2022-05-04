@@ -1,15 +1,15 @@
 import System from "../basic/System";
-import pointLightIcon from "../../editor/icons/point_light.png";
-import directionalLightIcon from "../../editor/icons/directional_light.png";
-import spotLightIcon from "../../editor/icons/spot_light.png";
-import cubeMapIcon from "../../editor/icons/cubemap.png";
-import TextureInstance from "../../instances/TextureInstance";
-import BillboardsInstance from "../../instances/BillboardsInstance";
-import * as shaderCode from '../../shaders/misc/gizmo.glsl'
-import Shader from "../../utils/Shader";
-import COMPONENTS from "../../templates/COMPONENTS";
-import MeshInstance from "../../instances/MeshInstance";
-import camera from "../../editor/assets/Camera.json";
+import pointLightIcon from "../editor/icons/point_light.png";
+import directionalLightIcon from "../editor/icons/directional_light.png";
+import spotLightIcon from "../editor/icons/spot_light.png";
+import cubeMapIcon from "../editor/icons/cubemap.png";
+import TextureInstance from "../instances/TextureInstance";
+import BillboardsInstance from "../instances/BillboardsInstance";
+import * as shaderCode from '../shaders/misc/gizmo.glsl'
+import Shader from "../utils/Shader";
+import COMPONENTS from "../templates/COMPONENTS";
+import MeshInstance from "../instances/MeshInstance";
+import camera from "../editor/assets/Camera.json";
 
 export default class BillboardSystem extends System {
     _ready = false

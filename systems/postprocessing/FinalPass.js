@@ -1,8 +1,7 @@
 import System from "../../basic/System";
-import Shader from "../../../utils/Shader";
+import Shader from "../../utils/Shader";
 
-import * as shaderCode from '../../../shaders/misc/postProcessing.glsl'
-import CompositPass from "./CompositPass";
+import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 
 
 export default class FinalPass extends System {
