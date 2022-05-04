@@ -1,26 +1,26 @@
 import {useContext, useEffect, useMemo, useState} from "react";
 
 import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
-import Entity from "./ecs/basic/Entity";
-import sphereMesh from './editor/assets/Sphere.json'
+import Entity from "../ecs/basic/Entity";
+import sphereMesh from '../editor/assets/Sphere.json'
 
-import EditorEngine from "./editor/EditorEngine";
-import TransformSystem from "./ecs/systems/TransformSystem";
-import ShadowMapSystem from "./ecs/systems/ShadowMapSystem";
-import DirectionalLightComponent from "./ecs/components/DirectionalLightComponent";
+import EditorEngine from "../editor/EditorEngine";
+import TransformSystem from "../ecs/systems/TransformSystem";
+import ShadowMapSystem from "../ecs/systems/ShadowMapSystem";
+import DirectionalLightComponent from "../ecs/components/DirectionalLightComponent";
 
-import MeshComponent from "./ecs/components/MeshComponent";
-import TransformComponent from "./ecs/components/TransformComponent";
-import MeshInstance from "./instances/MeshInstance";
+import MeshComponent from "../ecs/components/MeshComponent";
+import TransformComponent from "../ecs/components/TransformComponent";
+import MeshInstance from "../instances/MeshInstance";
 
-import {SHADING_MODELS} from "../pages/project/hooks/useSettings";
-import CAMERA_TYPES from "./editor/camera/CAMERA_TYPES";
-import MaterialComponent from "./ecs/components/MaterialComponent";
+import {SHADING_MODELS} from "../../pages/project/hooks/useSettings";
+import CAMERA_TYPES from "../editor/camera/CAMERA_TYPES";
+import MaterialComponent from "../ecs/components/MaterialComponent";
 
 import {v4 as uuidv4} from 'uuid';
-import COMPONENTS from "./templates/COMPONENTS";
-import LoaderProvider from "../components/loader/LoaderProvider";
-import QuickAccessProvider from "../pages/project/hooks/QuickAccessProvider";
+import COMPONENTS from "../templates/COMPONENTS";
+import LoaderProvider from "../../components/loader/LoaderProvider";
+import QuickAccessProvider from "../../pages/project/hooks/QuickAccessProvider";
 
 const id = uuidv4().toString()
 export default function useMinimalEngine(initializeSphere, centerOnSphere, loadAllMeshes) {
@@ -36,8 +36,8 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
 
     const renderer = useMemo(() => {
         if (gpu) {
-            const r = new EditorEngine(id, gpu, {w: window.screen.width,h: window.screen.height})
-            if(quickAccess.sampleSkybox)
+            const r = new EditorEngine(id, gpu, {w: window.screen.width, h: window.screen.height})
+            if (quickAccess.sampleSkybox)
                 dispatchEntities({
                     type: ENTITY_ACTIONS.ADD,
                     payload: quickAccess.sampleSkybox
@@ -48,7 +48,7 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
                 initializeMesh(sphereMesh, gpu, IDS.SPHERE, 'Sphere', dispatchEntities, setMeshes)
 
             if (loadAllMeshes)
-                import('./editor/assets/Cube.json')
+                import('../editor/assets/Cube.json')
                     .then(cubeData => initializeMesh(cubeData, gpu, IDS.CUBE, 'Sphere', dispatchEntities, setMeshes, undefined, true))
 
             r.camera.notChangableRadius = true
@@ -61,44 +61,44 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
         }
         return undefined
     }, [gpu])
-
+    useEffect(() => {
+        if (canRender && renderer) {
+            renderer.start()
+        } else if (renderer)
+            renderer.stop()
+    }, [canRender])
     useEffect(() => {
         if (renderer) {
-            if (!canRender)
-                renderer.stop()
-            else {
-                if (centerOnSphere) {
-                    renderer.camera.centerOn = [0, 1, 0]
-                    renderer.camera.updateViewMatrix()
-                }
-
-                renderer.start(entities, materials, meshes, {
-                    fxaa: true,
-                    meshes,
-                    gamma: 2.2,
-                    exposure: 1,
-                    materials: [],
-                    noRSM: true,
-                    shadingModel: SHADING_MODELS.DETAIL,
-                    cameraType: CAMERA_TYPES.SPHERICAL,
-                    bloom: true,
-                    filmGrain: true,
-                    filmGrainStrength: .07,
-                    bloomStrength: .1,
-                    bloomThreshold: .75
-                })
+            if (centerOnSphere) {
+                renderer.camera.centerOn = [0, 1, 0]
+                renderer.camera.updateViewMatrix()
             }
+            renderer.updatePackage(entities, materials, meshes, {
+                fxaa: true,
+                meshes,
+                gamma: 2.2,
+                exposure: 1,
+                materials: [],
+                noRSM: true,
+                shadingModel: SHADING_MODELS.DETAIL,
+                cameraType: CAMERA_TYPES.SPHERICAL,
+                bloom: true,
+                filmGrain: true,
+                filmGrainStrength: .07,
+                bloomStrength: .1,
+                bloomThreshold: .75
+            })
+
         }
         return () => renderer?.stop()
     }, [
         meshes,
         materials,
-
         entities,
         gpu,
         id,
-        canRender,
-        renderer
+        renderer,
+        canRender
     ])
 
 
@@ -112,7 +112,6 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
         toImage: () => new Promise(re => re(gpu.canvas.toDataURL()))
     }
 }
-
 
 
 function initializeLight(dispatch) {

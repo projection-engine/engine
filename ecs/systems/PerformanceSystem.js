@@ -4,18 +4,12 @@ import System from "../basic/System";
 export default class PerformanceSystem extends System {
     _framesRendered = 0
     _times = []
-    _lowest
-    _samplesCounted
     _visible = true
     _entitiesLength = 0
 
     constructor(gpu) {
         super();
         this.gpu = gpu
-        // this.debug = gpu.getExtension('webgl_debug_renderer_info');
-        // this._vendor = gpu.getParameter(this.debug.UNMASKED_VENDOR_WEBGL)
-        // this._renderer = gpu.getParameter(this.debug.UNMASKED_RENDERER_WEBGL)
-        //
 
         const canvas = gpu.canvas
         const targetID = canvas.id.replace('-canvas', '-performance-metrics')
@@ -38,7 +32,6 @@ export default class PerformanceSystem extends System {
         super.execute()
         const  {meshSources} = data
         if (options.performanceMetrics) {
-
             if (this._entitiesLength !== options.entitiesLength) {
 
                 this._triangles = Object.keys(meshSources).map(key => {

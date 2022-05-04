@@ -1,7 +1,7 @@
 import {useEffect, useReducer, useState} from "react";
-import PickComponent from "./ecs/components/PickComponent";
-import COMPONENTS from "./templates/COMPONENTS";
-import ScriptComponent from "./ecs/components/ScriptComponent";
+import PickComponent from "../ecs/components/PickComponent";
+import COMPONENTS from "../templates/COMPONENTS";
+import ScriptComponent from "../ecs/components/ScriptComponent";
 
 export default function useEngineEssentials(renderingTarget) {
     const [meshes, setMeshes] = useState([])

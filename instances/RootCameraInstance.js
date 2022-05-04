@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
 
-export default class RootCamera {
+export default class RootCameraInstance {
     position = [0, 10, 0]
     rotation = [0, 0, 0, 1]
     zNear = .1

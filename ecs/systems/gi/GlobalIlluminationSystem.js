@@ -32,7 +32,7 @@ export default class GlobalIlluminationSystem extends System {
         super.execute()
 
 
-        if(shadowMapSystem.needsGIUpdate && skylight && !noRSM) {
+        if(shadowMapSystem && shadowMapSystem.needsGIUpdate && skylight && !noRSM) {
             this.step = STEPS.LIGHT_INJECTION
             shadowMapSystem.needsGIUpdate = false
         }
