@@ -6,7 +6,7 @@ import cubeMapIcon from "../editor/icons/cubemap.png";
 import TextureInstance from "../instances/TextureInstance";
 import BillboardsInstance from "../instances/BillboardsInstance";
 import * as shaderCode from '../shaders/misc/gizmo.glsl'
-import Shader from "../utils/Shader";
+import ShaderInstance from "../instances/ShaderInstance";
 import COMPONENTS from "../templates/COMPONENTS";
 import MeshInstance from "../instances/MeshInstance";
 import camera from "../editor/assets/Camera.json";
@@ -18,7 +18,7 @@ export default class BillboardSystem extends System {
         super([]);
         this.gpu = gpu
         this.billboardRenderer = new BillboardsInstance(gpu)
-        this.cameraShader = new Shader(shaderCode.shadedVertex, shaderCode.shadedFragment, gpu)
+        this.cameraShader = new ShaderInstance(shaderCode.shadedVertex, shaderCode.shadedFragment, gpu)
         this.cameraMesh = new MeshInstance({
             gpu,
             vertices: camera.vertices,

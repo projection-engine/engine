@@ -1,5 +1,5 @@
 import System from "../../basic/System";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 import {vertex} from '../../shaders/misc/postProcessing.glsl'
 import * as shaderCode from '../../shaders/misc/bloom.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
@@ -13,9 +13,9 @@ export default class PerPixelMotionBlur extends System {
         this.velocityFramebuffer = new FramebufferInstance(gpu, postProcessingResolution.w, postProcessingResolution.h)
         this.velocityFramebuffer.texture()
 
-        this.velocityShader = new Shader(vertex, shaderCode.blurBox, gpu)
-        this.textureCopyShader = new Shader(vertex, shaderCode.blurBox, gpu)
-        this.motionBlurShader = new Shader(vertex, shaderCode.blurBox, gpu)
+        this.velocityShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
+        this.textureCopyShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
+        this.motionBlurShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
 
     }
 

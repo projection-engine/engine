@@ -1,5 +1,6 @@
 export const vertex = `#version 300 es
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 4
+
 layout (location = 0) in vec3 position;
 
 struct DirectionalLightPOV {
@@ -29,10 +30,10 @@ void main() {
 `
 
 export const fragment = `#version 300 es
-
 precision highp float;
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 4
+#define MAX_POINT_LIGHTS 24
 #define CELLSIZE 2.25
 
 #define SH_C0 0.282094791
@@ -42,16 +43,22 @@ in vec2 texCoord;
 flat in int dirLightsQuantity;
 in mat4 dirLightPOV[MAX_LIGHTS];
 
-
-uniform vec3 cameraVec;
+uniform float shadowMapResolution;
+uniform float indirectLightAttenuation;
+uniform int gridSize;
 uniform int noGI; 
-uniform vec2 lightClippingPlane[MAX_LIGHTS];
-uniform vec4 lightPositionAndShadowMap[MAX_LIGHTS];
-uniform vec3 lightColor[MAX_LIGHTS];
-uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
+uniform vec3 cameraVec;
+
+// [
+//    POSITION [0][0] [0][1] [0][2] EMPTY
+//    COLOR [1][0] [1][1] [1][2]  EMPTY
+//    ATTENUATION [2][0] [2][1] [2][2] EMPTY
+//    zFar [3][0] zNear [3][1] hasShadowMap [3][2] EMPTY
+// ] = mat4
+uniform mat4 pointLightData[MAX_POINT_LIGHTS];
 uniform int lightQuantity;
 
-uniform float shadowMapResolution;
+
 uniform samplerCube shadowCube0;
 uniform samplerCube shadowCube1;
 
@@ -66,9 +73,7 @@ uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
 uniform sampler2D blueIndirectSampler;
 
-uniform float indirectLightAttenuation;
 
-uniform int gridSize;
 
 struct DirectionalLight {
     vec3 direction;
@@ -162,6 +167,7 @@ float pointLightShadow(vec3 fragPosition, vec3 lightPos, int index, vec2 shadowC
     }
 }
 
+@import(computePointLight)
 
 void main() {
     ivec2 fragCoord = ivec2(gl_FragCoord.xy);
@@ -196,8 +202,9 @@ void main() {
     
         float shadows = dirLightsQuantity > 0 || lightQuantity > 0?  0. : 1.0;
         float quantityToDivide = float(dirLightsQuantity) + float(lightQuantity);
+
         for (int i = 0; i < dirLightsQuantity; i++){
-            vec4  fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
+            vec4 fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
             vec3 lightDir =  normalize(directionalLights[i].direction);
     
             Lo += computeDirectionalLight(
@@ -213,35 +220,11 @@ void main() {
             );
             shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/quantityToDivide;
         }
-    
+
         for (int i = 0; i < lightQuantity; ++i){
-            vec3 L = normalize(lightPositionAndShadowMap[i].xyz - fragPosition);
-            vec3 H = normalize(V + L);
-            float distance    = length(lightPositionAndShadowMap[i].xyz - fragPosition);
-            float attFactor = 1.0 / (lightAttenuationFactors[i].x + (lightAttenuationFactors[i].y * distance) + (lightAttenuationFactors[i].z * distance * distance));
-            vec3 radiance     = lightColor[i] * attFactor;
-    
-            float NDF = distributionGGX(N, H, roughness);
-            float G   = geometrySmith(N, V, L, roughness);
-            vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-    
-            vec3 kS = F;
-            vec3 kD = vec3(1.0) - kS;
-            kD *= 1.0 - metallic;
-    
-            vec3 numerator    = NDF * G * F;
-            float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-            vec3 specular     = numerator / denominator;
-    
-            float NdotL = max(dot(N, L), 0.0);
-            if(lightPositionAndShadowMap[i].w == 1.){
-                shadows += pointLightShadow(fragPosition, lightPositionAndShadowMap[i].xyz, i, lightClippingPlane[i])/quantityToDivide;
-            } 
-            else
-                shadows += 1./quantityToDivide;
-                   
-               
-            Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+            vec4 currentLightData = computePointLights(pointLightData[i],  fragPosition, V, N, quantityToDivide, roughness, metallic, albedo, F0, i);
+            Lo += currentLightData.rgb;
+            shadows += currentLightData.a;    
         }
       
         Lo = Lo* shadows; 

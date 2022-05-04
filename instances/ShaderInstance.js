@@ -1,5 +1,5 @@
 import Bundler from "./Bundler";
-import {bindTexture} from "./utils";
+import {bindTexture} from "../utils/utils";
 
 const TYPES = {
     'vec2': 'uniform2fv',
@@ -15,7 +15,7 @@ const TYPES = {
     'ivec3': 'uniform3iv',
     'bool': 'uniform1i'
 }
-export default class Shader {
+export default class ShaderInstance {
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     structRegex = (type) => {
@@ -37,7 +37,7 @@ export default class Shader {
 
         const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER, m => alert.push(m))
         const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER, m => alert.push(m))
-console.log(alert)
+        console.log(alert)
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
 
         setMessage({

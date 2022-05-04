@@ -2,11 +2,11 @@ import System from "../basic/System";
 
 import * as shaderCode from '../shaders/mesh/forwardMesh.glsl'
 import * as skyShader from '../shaders/misc/skybox.glsl'
-import Shader from "../utils/Shader";
+import ShaderInstance from "../instances/ShaderInstance";
 import {createVAO} from "../utils/utils";
 import {mat4, vec3} from "gl-matrix";
 import {VIEWS} from "./ShadowMapSystem";
-import VBO from "../utils/VBO";
+import VBO from "../instances/VBO";
 import cube from "../utils/cube.json";
 import {intersectBoundingSphere} from "./PhysicsSystem";
 import COMPONENTS from "../templates/COMPONENTS";
@@ -25,8 +25,8 @@ export default class CubeMapSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.skyShader = new Shader(skyShader.vertex, skyShader.fragment, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.skyShader = new ShaderInstance(skyShader.vertex, skyShader.fragment, gpu)
 
         this.vao = createVAO(gpu)
         this.vbo = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)

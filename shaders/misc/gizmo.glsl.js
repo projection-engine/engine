@@ -216,10 +216,8 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
 
-void main(){
-      
-                
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position + normal * .1,1.0);
+void main(){              
+    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position + normalize(normal) * .1,1.0);
 }
 `
 export const selectedFragment = `#version 300 es

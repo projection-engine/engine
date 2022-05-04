@@ -3,7 +3,7 @@ import {SHADING_MODELS} from "../../pages/project/hooks/useSettings";
 import SYSTEMS from "../templates/SYSTEMS";
 import * as rsmShaders from '../shaders/gi/rsm.glsl'
 import * as smShaders from '../shaders/shadows/shadow.glsl'
-import Shader from "../utils/Shader";
+import ShaderInstance from "../instances/ShaderInstance";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import CubeMapInstance from "../instances/CubeMapInstance";
 import {mat4, vec3} from "gl-matrix";
@@ -54,11 +54,11 @@ export default class ShadowMapSystem extends System {
         this.shadowsFrameBuffer
             .depthTexture()
 
-        this.reflectiveShadowMapShader = new Shader(rsmShaders.vertex, rsmShaders.fragment, gpu)
+        this.reflectiveShadowMapShader = new ShaderInstance(rsmShaders.vertex, rsmShaders.fragment, gpu)
 
 
-        this.shadowMapShader = new Shader(smShaders.vertex, smShaders.fragment, gpu)
-        this.shadowMapOmniShader = new Shader(smShaders.vertex, smShaders.omniFragment, gpu)
+        this.shadowMapShader = new ShaderInstance(smShaders.vertex, smShaders.fragment, gpu)
+        this.shadowMapOmniShader = new ShaderInstance(smShaders.vertex, smShaders.omniFragment, gpu)
     }
 
     set needsGIUpdate(data) {

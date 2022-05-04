@@ -1,5 +1,5 @@
 import COMPONENTS from "./templates/COMPONENTS";
-import Shader from "./utils/Shader";
+import ShaderInstance from "./instances/ShaderInstance";
 import * as shaderCodeSkybox from "./shaders/misc/cubeMap.glsl";
 import * as skyboxCode from "./shaders/misc/skybox.glsl";
 import CubeMapInstance from "./instances/CubeMapInstance";
@@ -56,7 +56,7 @@ export default class RenderingPackager {
         attributes.fallbackMaterial = fallbackMaterial
 
         return {
-            data: {...data, ...this.#getLightsUniforms(data.pointLights, data.directionalLights)},
+            data: {...data, ...this.getLightsUniforms(data.pointLights, data.directionalLights)},
             attributes,
             filteredEntities
         }
@@ -81,16 +81,14 @@ export default class RenderingPackager {
         }
     }
 
-    #getLightsUniforms(pointLights, directionalLights) {
-        let maxTextures = directionalLights.length > 2 ? 2 : directionalLights.length,
-            pointLightsQuantity = (pointLights.length > 4 ? 4 : pointLights.length)
+    getLightsUniforms(pointLights, directionalLights) {
+        let maxTextures =  directionalLights.length,
+            pointLightsQuantity = pointLights.length
 
         let dirLights = [],
             dirLightsPov = [],
             lClip = [],
-            lPosition = [],
-            lColor = [],
-            lAttenuation = []
+            pointLightData = []
 
         RenderingPackager.#getArray(maxTextures, i => {
             const current = directionalLights[i]
@@ -111,10 +109,20 @@ export default class RenderingPackager {
             const current = pointLights[i]
             if (current && current.components[COMPONENTS.POINT_LIGHT]) {
                 lClip[i] = [current.components[COMPONENTS.POINT_LIGHT]?.zNear, current.components[COMPONENTS.POINT_LIGHT]?.zFar]
+                // ,
+                // [
+                //    POSITION [0][0] [0][1] [0][2] EMPTY
+                //    COLOR [1][0] [1][1] [1][2]  EMPTY
+                //    ATTENUATION [2][0] [2][1] [2][2] EMPTY
+                //    zFar [3][0] zNear [3][1] hasShadowMap [3][2] EMPTY
+                // ] = mat4
 
-                lPosition[i] = [...current.components[COMPONENTS.TRANSFORM].position, current.components[COMPONENTS.POINT_LIGHT].shadowMap ? 1 : 0]
-                lColor[i] = current.components[COMPONENTS.POINT_LIGHT]?.fixedColor
-                lAttenuation[i] = current.components[COMPONENTS.POINT_LIGHT]?.attenuation
+                pointLightData[i] = [
+                    [...current.components[COMPONENTS.TRANSFORM].position, 0],
+                    [...current.components[COMPONENTS.POINT_LIGHT]?.fixedColor, 0],
+                    [...current.components[COMPONENTS.POINT_LIGHT]?.attenuation, 0],
+                    [current.components[COMPONENTS.POINT_LIGHT].zFar, current.components[COMPONENTS.POINT_LIGHT].zNear, current.components[COMPONENTS.POINT_LIGHT].shadowMap ? 1 : 0, 0]
+                ].flat()
             }
         })
         return {
@@ -123,15 +131,13 @@ export default class RenderingPackager {
             dirLights,
             dirLightsPov,
             lClip,
-            lPosition,
-            lColor,
-            lAttenuation,
+            pointLightData
         }
     }
 
     #loadSkybox(skyboxElement, gpu) {
         if (skyboxElement && !skyboxElement.ready) {
-            const shader = new Shader(shaderCodeSkybox.vertex, skyboxCode.generationFragment, gpu)
+            const shader = new ShaderInstance(shaderCodeSkybox.vertex, skyboxCode.generationFragment, gpu)
             if (!skyboxElement.cubeMap)
                 skyboxElement.cubeMap = new CubeMapInstance(gpu, skyboxElement.resolution, false)
             if (skyboxElement.blob) {

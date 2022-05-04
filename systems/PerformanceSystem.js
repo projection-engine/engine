@@ -7,11 +7,11 @@ export default class PerformanceSystem extends System {
     _visible = true
     _entitiesLength = 0
 
-    constructor(gpu) {
+    constructor(gpu, canvasID) {
         super();
         this.gpu = gpu
 
-        const canvas = gpu.canvas
+        const canvas = document.getElementById(canvasID)
         const targetID = canvas.id.replace('-canvas', '-performance-metrics')
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)

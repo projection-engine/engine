@@ -1,6 +1,6 @@
 import System from "../basic/System";
 import * as shaderCode from "../shaders/misc/picker.glsl";
-import Shader from "../utils/Shader";
+import ShaderInstance from "../instances/ShaderInstance";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
 import OrthographicCamera from "../editor/camera/ortho/OrthographicCamera";
@@ -20,8 +20,8 @@ export default class PickSystem extends System {
             .depthTest(this.gpu.DEPTH_COMPONENT16)
 
 
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.shaderSameSize = new Shader(shaderCode.sameSizeVertex, shaderCode.fragment, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.shaderSameSize = new ShaderInstance(shaderCode.sameSizeVertex, shaderCode.fragment, gpu)
         this.cameraMesh = new MeshInstance({
             gpu,
             vertices: camera.vertices,

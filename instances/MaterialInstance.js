@@ -1,6 +1,6 @@
 import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../utils/image/ImageProcessor";
-import Shader from "../utils/Shader";
+import ShaderInstance from "./ShaderInstance";
 import {DATA_TYPES} from "../../views/blueprints/components/DATA_TYPES";
 
 export default class MaterialInstance {
@@ -51,7 +51,7 @@ export default class MaterialInstance {
         let message
         if (this._shader)
             this.gpu.deleteProgram(this._shader.program)
-        this._shader = new Shader(vertexShader, shader, this.gpu, m => message= m)
+        this._shader = new ShaderInstance(vertexShader, shader, this.gpu, m => message= m)
 
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {

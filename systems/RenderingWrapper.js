@@ -7,7 +7,7 @@ import FramebufferInstance from "../instances/FramebufferInstance";
 import ForwardSystem from "./ForwardSystem";
 import {copyTexture} from "../utils/utils";
 import PostProcessingWrapper from "./postprocessing/PostProcessingWrapper";
-import Shader from "../utils/Shader";
+import ShaderInstance from "../instances/ShaderInstance";
 import * as shaderCode from "../shaders/misc/postProcessing.glsl";
 
 
@@ -21,7 +21,7 @@ export default class RenderingWrapper extends System {
             .depthTest()
 
         // this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.shader = new Shader(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)

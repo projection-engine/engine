@@ -1,7 +1,7 @@
 import System from "../basic/System";
 import {SHADING_MODELS} from "../../pages/project/hooks/useSettings";
 import SYSTEMS from "../templates/SYSTEMS";
-import Shader from "../utils/Shader";
+import ShaderInstance from "../instances/ShaderInstance";
 import * as shaderCode from '../shaders/mesh/deferred.glsl'
 import * as shaderFlatCode from '../shaders/mesh/deferredFlat.glsl'
 
@@ -9,8 +9,8 @@ export default class DeferredSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.deferredShader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.flatDeferredShader = new Shader(shaderFlatCode.vertex, shaderFlatCode.fragment, gpu)
+        this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.flatDeferredShader = new ShaderInstance(shaderFlatCode.vertex, shaderFlatCode.fragment, gpu)
     }
 
     _getDeferredShader(shadingModel) {
@@ -34,9 +34,7 @@ export default class DeferredSystem extends System {
             dirLights,
             dirLightsPov,
             lClip,
-            lPosition,
-            lColor,
-            lAttenuation,
+            pointLightData,
             skylight,
         } = data
 
@@ -73,10 +71,10 @@ export default class DeferredSystem extends System {
             directionalLightsPOV: dirLightsPov,
 
             lightQuantity: pointLightsQuantity,
+
             lightClippingPlane: lClip,
-            lightPositionAndShadowMap: lPosition,
-            lightColor: lColor,
-            lightAttenuationFactors: lAttenuation,
+
+            pointLightData,
 
 
             shadowMapResolution: shadowMapSystem?.maxResolution,

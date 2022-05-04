@@ -1,12 +1,12 @@
 import System from "../../basic/System";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 import {mat4, quat, vec3} from "gl-matrix";
 import Entity from "../../basic/Entity";
 import TransformComponent from "../../components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
-import Transformation from "../../utils/Transformation";
+import Transformation from "../../instances/Transformation";
 import PickComponent from "../../components/PickComponent";
 import TextureInstance from "../../instances/TextureInstance";
 import circle from "../icons/circle.png";
@@ -30,7 +30,7 @@ export default class RotationGizmo extends System {
         this.renderTarget = renderTarget
         this.gpu = gpu
 
-        this.gizmoShader = new Shader(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot, gpu)
+        this.gizmoShader = new ShaderInstance(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot, gpu)
         this.xGizmo = this._mapEntity(2, 'x')
         this.yGizmo = this._mapEntity(3, 'y')
         this.zGizmo = this._mapEntity(4, 'z')

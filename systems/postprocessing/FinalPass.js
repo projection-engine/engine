@@ -1,5 +1,5 @@
 import System from "../../basic/System";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 
@@ -10,7 +10,7 @@ export default class FinalPass extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
         for (let i=1e6; i> 0; i--) {
             this.lookUpRandom.push(Math.random());
         }

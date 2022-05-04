@@ -1,5 +1,5 @@
 import System from "../../basic/System";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 import {vertex} from '../../shaders/misc/postProcessing.glsl'
 import * as shaderCode from '../../shaders/misc/bloom.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
@@ -43,10 +43,10 @@ export default class CompositPass extends System {
             pH = hH
         }
 
-        this.compositeShader = new Shader(vertex, shaderCode.compositeFragment, gpu)
-        this.upSamplingShader = new Shader(vertex, shaderCode.bilinearUpSampling, gpu)
-        this.brightShader = new Shader(vertex, shaderCode.brightFragment, gpu)
-        this.blurShader = new Shader(vertex, shaderCode.blurBox, gpu)
+        this.compositeShader = new ShaderInstance(vertex, shaderCode.compositeFragment, gpu)
+        this.upSamplingShader = new ShaderInstance(vertex, shaderCode.bilinearUpSampling, gpu)
+        this.brightShader = new ShaderInstance(vertex, shaderCode.brightFragment, gpu)
+        this.blurShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
     }
 
     execute(options, systems, data, entities, entitiesMap, [worker, output]) {

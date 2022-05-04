@@ -6,7 +6,7 @@ import ScaleGizmo from "../gizmo/ScaleGizmo";
 import ROTATION_TYPES from "../gizmo/ROTATION_TYPES";
 import MeshInstance from "../../instances/MeshInstance";
 import cube from "../assets/Cube.json";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 import * as gizmoShaderCode from "../../shaders/misc/gizmo.glsl";
 
 export default class GizmoSystem extends System {
@@ -14,7 +14,7 @@ export default class GizmoSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.gizmoShader = new Shader(gizmoShaderCode.vertex, gizmoShaderCode.fragment, gpu)
+        this.gizmoShader = new ShaderInstance(gizmoShaderCode.vertex, gizmoShaderCode.fragment, gpu)
 
         const canvas = gpu.canvas
         if (gpu.canvas.id) {

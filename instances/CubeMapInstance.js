@@ -1,9 +1,9 @@
 import {mat4} from "gl-matrix";
 import {lookAt} from "../utils/utils";
 import cube from "../utils/cube.json";
-import VBO from "../utils/VBO";
+import VBO from "./VBO";
 import * as  shaderCode from '../shaders/misc/cubeMap.glsl'
-import Shader from "../utils/Shader";
+import ShaderInstance from "./ShaderInstance";
 
 export default class CubeMapInstance {
     texture
@@ -18,8 +18,8 @@ export default class CubeMapInstance {
         if (!asDepth)
             this._vertexBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         this._res = resolution
-        this._prefilteredShader = asDepth ? null : new Shader(shaderCode.vertex, shaderCode.prefiltered, gpu)
-        this._irradianceShader = asDepth ? null : new Shader(shaderCode.vertex, shaderCode.irradiance, gpu)
+        this._prefilteredShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.prefiltered, gpu)
+        this._irradianceShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.irradiance, gpu)
 
         this._asDepth = asDepth
     }

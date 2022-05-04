@@ -1,13 +1,13 @@
 import {createVAO} from "../utils/utils";
-import VBO from "../utils/VBO";
+import VBO from "./VBO";
 import * as shaderCode from '../shaders/misc/billboard.glsl'
-import Shader from "../utils/Shader";
+import ShaderInstance from "./ShaderInstance";
 
 
 export default class BillboardsInstance {
     constructor(gpu) {
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
         this.vao = createVAO(gpu)
         this.vertexVBO = new VBO(gpu, 0, new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0]), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false)
 

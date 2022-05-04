@@ -13,15 +13,17 @@ import FramebufferInstance from "./instances/FramebufferInstance";
 import RenderingPackager from "./RenderingPackager";
 
 export default class Renderer {
-    _currentFrame = 0
+
     rootCamera = new RootCameraInstance()
     viewTarget = this.rootCamera
     packager = new RenderingPackager()
-
+    canRun = true
     data = {}
     params = {}
     #systems = {}
-    constructor(gpu, resolution) {
+
+    constructor(gpu, resolution, canvasID) {
+        this.canvas = document.getElementById(canvasID)
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolution)
         this.GBufferSystem = new GBufferSystem(gpu, resolution)
@@ -51,7 +53,6 @@ export default class Renderer {
 
     callback() {
         const elapsed = performance.now() - this.then
-        this._currentFrame = requestAnimationFrame(() => this.callback());
 
         if (elapsed > this.fpsInterval) {
             const now = performance.now()
@@ -62,19 +63,30 @@ export default class Renderer {
             this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
             for (let s = 0; s < this.sortedSystems.length; s++) {
                 this.#systems[this.sortedSystems[s]]
-                    .execute(this.params, this.#systems, this.data, this.filteredEntities, this.data.entitiesMap)
+                    .execute(
+                        this.params,
+                        this.#systems,
+                        this.data,
+                        this.filteredEntities,
+                        this.data.entitiesMap,
+                        () => this.data =  {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)})
             }
             this.wrapper.execute(this.params, this.#systems, this.data, this.filteredEntities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
         }
+        if (this.canRun)
+            requestAnimationFrame(() => this.callback())
     }
 
     start() {
-        this._currentFrame = requestAnimationFrame(() => this.callback())
+        this.canRun = true
+        requestAnimationFrame(() => this.callback())
     }
+
     stop() {
         this.resizeObs?.disconnect()
-        cancelAnimationFrame(this._currentFrame)
+        this.canRun = false
     }
+
 
     updatePackage(s, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
         this.#systems = {...s, [SYSTEMS.MESH]: this.GBufferSystem}
@@ -91,19 +103,20 @@ export default class Renderer {
             brdf: this.brdf,
             fallbackMaterial: this.fallbackMaterial
         })
+
         this.data = packageData.data
         this.params = packageData.attributes
         this.filteredEntities = packageData.filteredEntities
 
-        const canvasRef = this.gpu.canvas
+
         this.resizeObs = new ResizeObserver(() => {
-            if (canvasRef) {
-                const bBox = canvasRef.getBoundingClientRect()
+            if (this.canvas) {
+                const bBox = this.canvas.getBoundingClientRect()
                 this.params.camera.aspectRatio = bBox.width / bBox.height
                 this.params.camera.updateProjection()
             }
         })
-        this.resizeObs.observe(canvasRef)
+        this.resizeObs.observe(this.canvas)
         this.fpsInterval = 1000 / (this.params.frameRate ? this.params.frameRate : 75);
         this.then = performance.now()
     }

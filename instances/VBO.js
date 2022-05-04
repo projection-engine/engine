@@ -1,4 +1,4 @@
-import {createVBO} from "./utils";
+import {createVBO} from "../utils/utils";
 
 export default class VBO {
     constructor(gpu, index, data, type, size, dataType, normalized=false, renderingType, stride=0) {

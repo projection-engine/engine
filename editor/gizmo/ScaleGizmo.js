@@ -2,7 +2,7 @@ import {vec4} from "gl-matrix";
 import Entity from "../../basic/Entity";
 import TransformComponent from "../../components/TransformComponent";
 import MeshInstance from "../../instances/MeshInstance";
-import Transformation from "../../utils/Transformation";
+import Transformation from "../../instances/Transformation";
 import PickComponent from "../../components/PickComponent";
 import arrow from '../assets/ScaleGizmo.json'
 import COMPONENTS from "../../templates/COMPONENTS";

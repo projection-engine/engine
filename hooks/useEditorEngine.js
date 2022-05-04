@@ -29,10 +29,10 @@ export default function useEditorEngine(id, canExecutePhysicsAnimation, settings
 
     const renderer = useMemo(() => {
         if (gpu && canStart) {
-            const r = new EditorEngine(id, gpu, {w: settings.resolution[0], h: settings.resolution[1]})
+            const r = new EditorEngine(id, gpu, {w: settings.resolution[0], h: settings.resolution[1]}, id+'-canvas')
             r.systems = [
-                new ScriptSystem(gpu),
-                new PerformanceSystem(gpu),
+                new ScriptSystem(gpu, id+'-canvas'),
+                new PerformanceSystem(gpu, id+'-canvas'),
                 new TransformSystem(),
                 new ShadowMapSystem(gpu),
                 new PickSystem(gpu),

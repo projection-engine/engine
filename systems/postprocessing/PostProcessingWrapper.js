@@ -1,5 +1,5 @@
 import System from "../../basic/System";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 
 import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
 import CompositPass from "./CompositPass";
@@ -10,7 +10,7 @@ export default class PostProcessingWrapper extends System {
     constructor(gpu, postProcessingResolution) {
         super([]);
         this.gpu = gpu
-        this.shader = new Shader(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
         this.compositPass = new CompositPass(gpu, postProcessingResolution)
         this.finalPass = new FinalPass(gpu, postProcessingResolution)
     }

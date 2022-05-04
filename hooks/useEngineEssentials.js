@@ -13,6 +13,7 @@ export default function useEngineEssentials(renderingTarget) {
         if (renderingTarget) {
             const target = document.getElementById(renderingTarget)
             if (target) {
+
                 const ctx = target.getContext('webgl2', {
                     antialias: false,
                     preserveDrawingBuffer: true,

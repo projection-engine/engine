@@ -1,5 +1,5 @@
 import System from "../../basic/System";
-import Shader from "../../utils/Shader";
+import ShaderInstance from "../../instances/ShaderInstance";
 import * as gizmoShaderCode from '../../shaders/misc/gizmo.glsl'
 import COMPONENTS from "../../templates/COMPONENTS";
 
@@ -8,7 +8,7 @@ export default class SelectedSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.shader = new Shader(gizmoShaderCode.selectedVertex, gizmoShaderCode.selectedFragment, gpu)
+        this.shader = new ShaderInstance(gizmoShaderCode.selectedVertex, gizmoShaderCode.selectedFragment, gpu)
     }
 
 

@@ -2,7 +2,7 @@ import System from "../basic/System";
 import COMPONENTS from "../templates/COMPONENTS";
 import * as glMatrix from "gl-matrix";
 import {KEYS} from "../../pages/project/hooks/useHotKeys";
-import Transformation from "../utils/Transformation";
+import Transformation from "../instances/Transformation";
 import PickSystem from "./PickSystem";
 import SYSTEMS from "../templates/SYSTEMS";
 
@@ -11,11 +11,12 @@ export default class ScriptSystem extends System {
     eventSet = false
     mousePosition = {x: 0, y: 0}
 
-    constructor(gpu) {
+    constructor(gpu, canvasID) {
         super([]);
         this.gpu = gpu
-        this.id = gpu.canvas.id.replace('-canvas', '')
-        const targetID = gpu.canvas.id.replace('-canvas', '-scripting')
+        const canvas = document.getElementById(canvasID)
+        this.id = canvas.id.replace('-canvas', '')
+        const targetID =canvasID + '-scripting'
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
         else {
@@ -28,7 +29,7 @@ export default class ScriptSystem extends System {
                 maxWidth: '15vw', display: 'none',
                 maxHeight: '50vh', overflow: 'hidden'
             });
-            gpu.canvas.parentNode.appendChild(this.renderTarget)
+            canvas.parentNode.appendChild(this.renderTarget)
         }
 
         document.addKey = (key) => {
@@ -43,14 +44,13 @@ export default class ScriptSystem extends System {
 
     }
 
-    execute(options, systems, data, entities, entitiesMap) {
+    execute(options, systems, data, entities, entitiesMap, updateAllLights) {
         super.execute()
         const {
             scriptedEntities,
             scripts,
             meshSources
         } = data
-
         const {
             canExecutePhysicsAnimation,
             lockCamera,
@@ -74,19 +74,19 @@ export default class ScriptSystem extends System {
             for (let i = 0; i < keys.length; i++) {
                 const embeddedScript = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID]
                 if(embeddedScript)
-                    this.executeLoop(embeddedScript.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
+                    this.executeLoop(embeddedScript.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
                 else {
                     const entityScripts =  scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].scripts
                     for (let j = 0; j < entityScripts.length; j++) {
                         const currentS = scripts[entityScripts[j]]
                         if (currentS)
-                            this.executeLoop(currentS.executor, elapsed, {[scriptedEntities[keys[i]].id]: scriptedEntities[keys[i]]}, camera, meshSources, systems[SYSTEMS.PICK], entities)
+                            this.executeLoop(currentS.executor, elapsed, {[scriptedEntities[keys[i]].id]: scriptedEntities[keys[i]]}, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
                     }
                 }
             }
             // LEVEL BLUEPRINT
             if (scripts[this.id])
-                this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities)
+                this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
         } else if (this.eventSet) {
             lockCamera(false)
 
@@ -101,7 +101,8 @@ export default class ScriptSystem extends System {
         }
     }
 
-    executeLoop(executor, elapsed, entities, camera, meshSources, pickSystem, entitiesArr) {
+    executeLoop(executor, elapsed, entities, camera, meshSources, pickSystem,entitiesArr, updateAllLights) {
+
         executor.execute({
             elapsed,
             entities,
@@ -124,7 +125,8 @@ export default class ScriptSystem extends System {
                         return entitiesArr.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)
                     }
                     return undefined
-                }
+                },
+                updateAllLights
             }
         })
     }

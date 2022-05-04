@@ -1,5 +1,5 @@
 import {createVAO, createVBO} from "../utils/utils";
-import VBO from "../utils/VBO";
+import VBO from "./VBO";
 import {v4 as uuidv4} from 'uuid';
 
 export default class MeshInstance {

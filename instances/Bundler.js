@@ -13,7 +13,8 @@ export const METHODS = {
     sampleShadowMap: '@import(sampleShadowMap)',
     sampleShadowMapLinear: '@import(sampleShadowMapLinear)',
     sampleSoftShadows: '@import(sampleSoftShadows)',
-    calculateShadows: '@import(calculateShadows)'
+    calculateShadows: '@import(calculateShadows)',
+    computePointLight: '@import(computePointLight)',
 }
 
 
