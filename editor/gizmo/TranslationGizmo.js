@@ -132,7 +132,7 @@ export default class TranslationGizmo extends TranslateScaleGizmo {
         if (this.typeRot === ROTATION_TYPES.GLOBAL || !this.target[0].components[COMPONENTS.TRANSFORM] || this.target.length > 1)
             toApply = vec
         else
-            toApply = vec4.transformQuat([], vec, this.target.components[COMPONENTS.TRANSFORM].rotationQuat)
+            toApply = vec4.transformQuat([], vec, this.target[0].components[COMPONENTS.TRANSFORM].rotationQuat)
 
         for (let i = 0; i < this.target.length; i++) {
             const target = this.target[i]

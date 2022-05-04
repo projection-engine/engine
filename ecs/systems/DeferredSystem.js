@@ -74,7 +74,7 @@ export default class DeferredSystem extends System {
 
             lightQuantity: pointLightsQuantity,
             lightClippingPlane: lClip,
-            lightPosition: lPosition,
+            lightPositionAndShadowMap: lPosition,
             lightColor: lColor,
             lightAttenuationFactors: lAttenuation,
 

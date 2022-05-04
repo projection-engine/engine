@@ -142,7 +142,6 @@ export default class ForwardSystem extends System {
 
         if (material && material.settings?.isForwardShaded) {
 
-            const gpu = this.gpu
             mesh.use()
 
             material.use(this.lastMaterial !== material.id, {
@@ -165,7 +164,7 @@ export default class ForwardSystem extends System {
 
                 lightQuantity: pointLightsQuantity,
                 lightClippingPlane: lClip,
-                lightPosition: lPosition,
+                lightPosition: lPosition.slice(0,3),
                 lightColor: lColor,
                 lightAttenuationFactors: lAttenuation,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})

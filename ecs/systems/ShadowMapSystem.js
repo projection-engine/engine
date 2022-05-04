@@ -101,6 +101,7 @@ export default class ShadowMapSystem extends System {
         }
         for (let i = 0; i < pointLights.length; i++) {
             const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
+
             if ((current.changed || transformChanged) && current.shadowMap) {
                 lights3D.push({...current, translation: pointLights[i].components[COMPONENTS.TRANSFORM].position})
                 current.changed = false
@@ -116,6 +117,7 @@ export default class ShadowMapSystem extends System {
 
 
         if (shadingModel === SHADING_MODELS.DETAIL && (lights2D.length > 0 || lights3D.length > 0)) {
+            console.log(lights3D, lights2D)
             this.gpu.cullFace(this.gpu.FRONT)
             if (dataChanged)
                 setDataChanged()

@@ -16,6 +16,8 @@ export default class MaterialInstance {
         this.gpu = gpu
         this.id = id
         this._initializeSettings(settings)
+
+
         this.shader = [shader, vertexShader, uniformData, onCompiled]
     }
     _initializeSettings(settings){

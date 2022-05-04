@@ -209,25 +209,17 @@ void main(){
 
 export const selectedVertex = `#version 300 es
 
-layout (location = 1) in vec3 position;
- 
+layout (location = 1) in vec3 position; 
+layout (location = 2) in vec3 normal;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
 
 void main(){
-    mat4 sc;
-    for ( int x = 0; x < 4; x++ )
-        for ( int y = 0; y < 4; y++ )
-            if ( x == y && x <= 2 )
-                sc[x][y] = 1.01;
-            else if ( x == y )
-                sc[x][y] = 1.;
-            else
-                sc[x][y] = 0.;  
+      
                 
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * sc * vec4(position,1.0);
+    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position + normal * .1,1.0);
 }
 `
 export const selectedFragment = `#version 300 es
@@ -238,7 +230,7 @@ out vec4 fragColor;
 
 void main(){
     if(index == 0)
-        fragColor = vec4(1., 1., 0., .55);
+        fragColor = vec4(1., 1., 0., .25);
     else
         fragColor = vec4(1., 0.2, 0., 1.);
 }

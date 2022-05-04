@@ -108,7 +108,7 @@ export default class Renderer {
             if (current && current.components[COMPONENTS.POINT_LIGHT]) {
                 lClip[i] = [current.components[COMPONENTS.POINT_LIGHT]?.zNear, current.components[COMPONENTS.POINT_LIGHT]?.zFar]
 
-                lPosition[i] = current.components[COMPONENTS.TRANSFORM].position
+                lPosition[i] = [...current.components[COMPONENTS.TRANSFORM].position, current.components[COMPONENTS.POINT_LIGHT].shadowMap ? 1 : 0]
                 lColor[i] = current.components[COMPONENTS.POINT_LIGHT]?.fixedColor
                 lAttenuation[i] = current.components[COMPONENTS.POINT_LIGHT]?.attenuation
             }

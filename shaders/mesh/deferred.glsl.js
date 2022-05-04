@@ -46,7 +46,7 @@ in mat4 dirLightPOV[MAX_LIGHTS];
 uniform vec3 cameraVec;
 uniform int noGI; 
 uniform vec2 lightClippingPlane[MAX_LIGHTS];
-uniform vec3 lightPosition[MAX_LIGHTS];
+uniform vec4 lightPositionAndShadowMap[MAX_LIGHTS];
 uniform vec3 lightColor[MAX_LIGHTS];
 uniform vec3 lightAttenuationFactors[MAX_LIGHTS];
 uniform int lightQuantity;
@@ -215,9 +215,9 @@ void main() {
         }
     
         for (int i = 0; i < lightQuantity; ++i){
-            vec3 L = normalize(lightPosition[i] - fragPosition);
+            vec3 L = normalize(lightPositionAndShadowMap[i].xyz - fragPosition);
             vec3 H = normalize(V + L);
-            float distance    = length(lightPosition[i] - fragPosition);
+            float distance    = length(lightPositionAndShadowMap[i].xyz - fragPosition);
             float attFactor = 1.0 / (lightAttenuationFactors[i].x + (lightAttenuationFactors[i].y * distance) + (lightAttenuationFactors[i].z * distance * distance));
             vec3 radiance     = lightColor[i] * attFactor;
     
@@ -234,8 +234,13 @@ void main() {
             vec3 specular     = numerator / denominator;
     
             float NdotL = max(dot(N, L), 0.0);
-    
-            shadows += pointLightShadow(fragPosition, lightPosition[i], i, lightClippingPlane[i])/quantityToDivide;
+            if(lightPositionAndShadowMap[i].w == 1.){
+                shadows += pointLightShadow(fragPosition, lightPositionAndShadowMap[i].xyz, i, lightClippingPlane[i])/quantityToDivide;
+            } 
+            else
+                shadows += 1./quantityToDivide;
+                   
+               
             Lo += (kD * albedo / PI + specular) * radiance * NdotL;
         }
       

@@ -37,9 +37,9 @@ export default class Shader {
 
         const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER, m => alert.push(m))
         const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER, m => alert.push(m))
-
+console.log(alert)
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)]
-        console.log(alert)
+
         setMessage({
             error: gpu.getError(),
             messages: alert,
