@@ -1,6 +1,6 @@
 import System from "../basic/System";
 
-import * as shaderCode from '../shaders/mesh/forwardMesh.glsl'
+
 import * as skyShader from '../shaders/misc/skybox.glsl'
 import ShaderInstance from "../instances/ShaderInstance";
 import {createVAO} from "../utils/utils";
@@ -25,9 +25,7 @@ export default class CubeMapSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
         this.skyShader = new ShaderInstance(skyShader.vertex, skyShader.fragment, gpu)
-
         this.vao = createVAO(gpu)
         this.vbo = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         gpu.bindVertexArray(null)
@@ -105,14 +103,14 @@ export default class CubeMapSystem extends System {
             meshSources,
             cubeMaps,
             translucentMeshes,
-            pointLightsQuantity,
+
             maxTextures,
+
             dirLights,
-            dirLightsPov,
-            lClip,
-            lPosition,
-            lColor,
-            lAttenuation,
+            dirLightPOV,
+
+            pointLightsQuantity,
+            pointLightData,
         } = data
 
         const  {
@@ -159,15 +157,11 @@ export default class CubeMapSystem extends System {
                         translucentMeshes,
                         meshSources,
                         meshes,
-
-                        pointLightsQuantity,
                         maxTextures,
                         dirLights,
-                        dirLightsPov,
-                        lClip,
-                        lPosition,
-                        lColor,
-                        lAttenuation
+                        dirLightPOV,
+                        pointLightsQuantity,
+                        pointLightData,
                     )
                 },
                 false,
@@ -187,14 +181,12 @@ export default class CubeMapSystem extends System {
         translucentMeshes,
         meshSources,
         meshes,
-        pointLightsQuantity,
+
         maxTextures,
         dirLights,
-        dirLightsPov,
-        lClip,
-        lPosition,
-        lColor,
-        lAttenuation
+        dirLightPOV,
+        pointLightsQuantity,
+        pointLightData,
     ) {
         for (let m = 0; m < meshes.length; m++) {
             const current = meshes[m]
@@ -217,15 +209,11 @@ export default class CubeMapSystem extends System {
                     current.components[COMPONENTS.MESH].normalMatrix,
                     current.components[COMPONENTS.MATERIAL],
                     brdf,
-
-                    pointLightsQuantity,
                     maxTextures,
                     dirLights,
-                    dirLightsPov,
-                    lClip,
-                    lPosition,
-                    lColor,
-                    lAttenuation
+                    dirLightPOV,
+                    pointLightsQuantity,
+                    pointLightData,
                 )
             }
         }
@@ -242,14 +230,11 @@ export default class CubeMapSystem extends System {
         normalMatrix,
         materialComponent,
         brdf,
-        pointLightsQuantity,
         maxTextures,
         dirLights,
-        dirLightsPov,
-        lClip,
-        lPosition,
-        lColor,
-        lAttenuation
+        dirLightPOV,
+        pointLightsQuantity,
+        pointLightData,
     ) {
 
         const gpu = this.gpu
@@ -283,13 +268,11 @@ export default class CubeMapSystem extends System {
 
             dirLightQuantity: maxTextures,
             directionalLights: dirLights,
-            directionalLightsPOV: dirLightsPov,
+            dirLightPOV,
 
             lightQuantity: pointLightsQuantity,
-            lightClippingPlane: lClip,
-            lightPosition: lPosition,
-            lightColor: lColor,
-            lightAttenuationFactors: lAttenuation
+            pointLightsQuantity,
+            pointLightData,
 
         })
 

@@ -31,37 +31,32 @@ export const PBR = {
     `,
     computeDirectionalLight: `
         vec3 computeDirectionalLight(vec3 V, vec3 F0, vec3 lightDir, vec3 ambient, vec3 fragPosition, float roughness, float metallic, vec3 N, vec3 albedo){
-            vec3 L = lightDir;
-            vec3 H = normalize(V + L);
+            vec3 H = normalize(V + lightDir);
             float distance    = length(lightDir - fragPosition);
-        
+       
             float NDF = distributionGGX(N, H, roughness);
-            float G   = geometrySmith(N, V, L, roughness);
+            float G   = geometrySmith(N, V, lightDir, roughness);
             vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-        
-            vec3 kS = F;
-            vec3 kD = vec3(1.0) - kS;
+            vec3 kD = vec3(1.0) - F;
             kD *= 1.0 - metallic;
         
             vec3 numerator    = NDF * G * F;
-            float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+            float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, lightDir), 0.0) + 0.0001;
             vec3 specular     = numerator / denominator;
         
-            float NdotL = max(dot(N, L), 0.0);
+            float NdotL = max(dot(N, lightDir), 0.0);
         
             return (kD * albedo / PI + specular) * ambient * NdotL;
         }`,
     computePointLight: `
+      
         vec4 computePointLights (in mat4 pointLight, vec3 fragPosition, vec3 V, vec3 N, float quantityToDivide, float roughness, float metallic, vec3 albedo, vec3 F0, int index) {
             vec3 Lo = vec3(0.);    
-            float shadows = 1.;
-            
+ 
             vec3 positionPLight = vec3(pointLight[0][0], pointLight[0][1], pointLight[0][2]);
             vec3 colorPLight = vec3(pointLight[1][0], pointLight[1][1], pointLight[1][2]);
             vec3 attenuationPLight = vec3(pointLight[2][0], pointLight[2][1], pointLight[2][2]);
-            float zNear = pointLight[3][0];
-            float zFar = pointLight[3][1];
-            bool hasShadowMap = pointLight[3][2] == 1.; 
+ 
               
             vec3 L = normalize(positionPLight - fragPosition);
             vec3 H = normalize(V + L);
@@ -82,13 +77,10 @@ export const PBR = {
             vec3 specular     = numerator / denominator;
         
             float NdotL = max(dot(N, L), 0.0);
-            if(hasShadowMap && index <= 2)
-                shadows = pointLightShadow(fragPosition, positionPLight, index, vec2(zNear, zFar))/quantityToDivide;
-            else
-                shadows = 1./quantityToDivide;
+
                    
-               
+             
             Lo = (kD * albedo / PI + specular) * radiance * NdotL;
-            return  vec4(Lo, shadows);   
+            return  vec4(Lo, pointLight[3][2]);   
         }`
 }

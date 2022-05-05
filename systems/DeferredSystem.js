@@ -31,9 +31,8 @@ export default class DeferredSystem extends System {
         const {
             pointLightsQuantity,
             maxTextures,
-            dirLights,
-            dirLightsPov,
-            lClip,
+            directionalLightsData,
+            dirLightPOV,
             pointLightData,
             skylight,
         } = data
@@ -52,8 +51,8 @@ export default class DeferredSystem extends System {
 
         const deferred = this._getDeferredShader(shadingModel)
 
-        if(skylight)
-            dirLights.push(skylight)
+        if (skylight)
+            directionalLightsData.push(skylight)
 
         deferred.use()
         deferred.bindForUse({
@@ -67,8 +66,8 @@ export default class DeferredSystem extends System {
             cameraVec: camera.position,
 
             dirLightQuantity: maxTextures,
-            directionalLights: dirLights,
-            directionalLightsPOV: dirLightsPov,
+            directionalLightsData,
+            dirLightPOV,
 
             lightQuantity: pointLightsQuantity,
             pointLightData,

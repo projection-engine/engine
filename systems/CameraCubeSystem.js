@@ -1,9 +1,9 @@
 import System from "../basic/System";
 
 export default class CameraCubeSystem extends System {
-    constructor(renderTarget) {
+    constructor(id) {
         super([]);
-        this.renderTarget = document.getElementById(renderTarget)
+        this.renderTarget = document.getElementById(id.replace('-canvas',  '-camera'))
     }
 
     execute(options) {

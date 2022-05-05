@@ -54,3 +54,14 @@ it can be used by multiple systems. `MaterialInstance` is another abstraction fo
 //    zFar [3][0] zNear [3][1] hasShadowMap [3][2] EMPTY
 // ] = mat4
 ```
+
+- Directional lights
+```
+// [
+//    DIRECTION [0][0]     [0][1] [0][2] 
+//    COLOR     [1][0]     [1][1] [1][2] 
+//    atlasX  [2][0] atlasY [2][1] hasShadowMap [2][2]  
+// ] = mat3
+```
+
+

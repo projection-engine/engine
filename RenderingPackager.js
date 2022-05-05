@@ -86,7 +86,7 @@ export default class RenderingPackager {
         let maxTextures =  directionalLights.length,
             pointLightsQuantity = pointLights.length
 
-        let dirLights = [],
+        let directionalLightsData = [],
             dirLightPOV = [],
             lClip = [],
             pointLightData = []
@@ -95,11 +95,11 @@ export default class RenderingPackager {
             const current = directionalLights[i]
             if (current && current.components[COMPONENTS.DIRECTIONAL_LIGHT]) {
                 const l = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
-                dirLights[i] = {
-                    direction: l.direction,
-                    ambient: l.fixedColor,
-                    atlasFace: l.atlasFace
-                }
+                directionalLightsData[i] = [
+                    l.direction,
+                    l.fixedColor,
+                    [...l.atlasFace, l.shadowMap ? 1 : 0]
+                ].flat()
 
                 dirLightPOV[i] = mat4.multiply([], l.lightProjection, l.lightView)
             }
@@ -109,14 +109,6 @@ export default class RenderingPackager {
             const current = pointLights[i]
             if (current && current.components[COMPONENTS.POINT_LIGHT]) {
                 lClip[i] = [current.components[COMPONENTS.POINT_LIGHT]?.zNear, current.components[COMPONENTS.POINT_LIGHT]?.zFar]
-                // ,
-                // [
-                //    POSITION [0][0] [0][1] [0][2] EMPTY
-                //    COLOR [1][0] [1][1] [1][2]  EMPTY
-                //    ATTENUATION [2][0] [2][1] [2][2] EMPTY
-                //    zFar [3][0] zNear [3][1] hasShadowMap [3][2] EMPTY
-                // ] = mat4
-
                 pointLightData[i] = [
                     [...current.components[COMPONENTS.TRANSFORM].position, 0],
                     [...current.components[COMPONENTS.POINT_LIGHT]?.fixedColor, 0],
@@ -127,11 +119,11 @@ export default class RenderingPackager {
         })
         return {
             pointLightsQuantity,
+            pointLightData,
             maxTextures,
-            dirLights,
+            directionalLightsData,
             dirLightPOV,
-            lClip,
-            pointLightData
+            lClip
         }
     }
 

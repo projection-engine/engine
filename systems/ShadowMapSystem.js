@@ -91,7 +91,7 @@ export default class ShadowMapSystem extends System {
         } = options
 
 
-        let lights2D = [], sky = false, lights3D = [], transformChanged = systems[SYSTEMS.TRANSFORMATION].changed
+        let lights2D = [], sky = false, lights3D = [], transformChanged = systems[SYSTEMS.TRANSFORMATION]?.changed
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
             if ((current.changed || transformChanged || skylight?.changed) && current.shadowMap) {

@@ -20,8 +20,8 @@ export default class ForwardSystem extends System {
             cubeMapsSources,
             pointLightsQuantity,
             maxTextures,
-            dirLights,
-            dirLightsPov,
+            directionalLightsData,
+            dirLightPOV,
             pointLightData,
 
         } = data
@@ -76,8 +76,8 @@ export default class ForwardSystem extends System {
 
 
                     maxTextures,
-                    dirLights,
-                    dirLightsPov,
+                    directionalLightsData,
+                    dirLightPOV,
 
                     pointLightsQuantity,
                     pointLightData,
@@ -103,8 +103,8 @@ export default class ForwardSystem extends System {
         materialComponent,
         brdf,
 
-        maxTextures,
-        dirLights,
+        directionalLightsQuantity,
+        directionalLightsData,
         dirLightPOV,
         pointLightsQuantity,
         pointLightData,
@@ -132,8 +132,10 @@ export default class ForwardSystem extends System {
                 prefilteredMapSampler: closestPrefiltered,
                 ambientLODSamples: prefilteredLod,
 
-                dirLightQuantity: maxTextures,
-                directionalLights: dirLights,
+
+                directionalLightsData,
+                directionalLightsQuantity,
+
                 dirLightPOV,
 
                 lightQuantity: pointLightsQuantity,

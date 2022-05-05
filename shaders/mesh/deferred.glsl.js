@@ -26,28 +26,21 @@ precision highp float;
 #define SH_C1 0.488602512
 
 in vec2 texCoord;
+
 uniform int dirLightQuantity;
+uniform mat3 directionalLightsData[MAX_LIGHTS];
 uniform mat4 dirLightPOV[MAX_LIGHTS];
+
 
 uniform float shadowMapResolution;
 uniform float indirectLightAttenuation;
 uniform int gridSize;
 uniform int noGI; 
 uniform vec3 cameraVec;
-
-// [
-//    POSITION [0][0] [0][1] [0][2] EMPTY
-//    COLOR [1][0] [1][1] [1][2]  EMPTY
-//    ATTENUATION [2][0] [2][1] [2][2] EMPTY
-//    zFar [3][0] zNear [3][1] hasShadowMap [3][2] EMPTY
-// ] = mat4
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
 uniform int lightQuantity;
-
-
 uniform samplerCube shadowCube0;
 uniform samplerCube shadowCube1;
-
 uniform sampler2D positionSampler;
 uniform sampler2D normalSampler;
 uniform sampler2D albedoSampler;
@@ -59,12 +52,7 @@ uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
 uniform sampler2D blueIndirectSampler;
 
-struct DirectionalLight {
-    vec3 direction;
-    vec3 ambient;
-    vec2 atlasFace;
-};
-uniform DirectionalLight directionalLights[MAX_LIGHTS];
+
 
 uniform sampler2D shadowMapTexture;
 //uniform sampler2D previousFrameSampler;
@@ -183,28 +171,39 @@ void main() {
         float shadows = dirLightQuantity > 0 || lightQuantity > 0?  0. : 1.0;
         float quantityToDivide = float(dirLightQuantity) + float(lightQuantity);
 
-        for (int i = 0; i < dirLightQuantity; i++){
+         for (int i = 0; i < dirLightQuantity; i++){
             vec4 fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
-            vec3 lightDir =  normalize(directionalLights[i].direction);
-    
+            vec3 lightDir =  normalize(vec3(directionalLightsData[i][0][0], directionalLightsData[i][0][1],directionalLightsData[i][0][2]));
+            vec3 lightColor =  vec3(directionalLightsData[i][1][0], directionalLightsData[i][1][1],directionalLightsData[i][1][2]);
+            vec2 atlasFace = vec2(directionalLightsData[i][2][0], directionalLightsData[i][2][1]);    
+            
             Lo += computeDirectionalLight(
                 V,
                 F0,
                 lightDir,
-                directionalLights[i].ambient,
+                lightColor,
                 fragPosition,
                 roughness,
                 metallic,
                 N,
                 albedo
             );
-            shadows += calculateShadows(fragPosLightSpace, directionalLights[i].atlasFace, shadowMapTexture)/quantityToDivide;
+            if(directionalLightsData[i][2][2] == 1.)
+                shadows += calculateShadows(fragPosLightSpace, atlasFace, shadowMapTexture)/quantityToDivide;
+            else
+                shadows += 1./quantityToDivide;            
         }
-
+       
         for (int i = 0; i < lightQuantity; ++i){
             vec4 currentLightData = computePointLights(pointLightData[i],  fragPosition, V, N, quantityToDivide, roughness, metallic, albedo, F0, i);
             Lo += currentLightData.rgb;
-            shadows += currentLightData.a;    
+            float zNear = pointLightData[i][3][0];
+            float zFar = pointLightData[i][3][1];
+            vec3 positionPLight = vec3(pointLightData[i][0][0], pointLightData[i][0][1], pointLightData[i][0][2]);
+            if(currentLightData.a == 1. && i <= 2)
+                shadows += pointLightShadow(fragPosition, positionPLight, i, vec2(zNear, zFar))/quantityToDivide;
+            else
+                shadows += 1./quantityToDivide;            
         }
       
         Lo = Lo* shadows; 
