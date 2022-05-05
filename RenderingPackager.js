@@ -8,6 +8,7 @@ import cloneClass from "./utils/cloneClass";
 import toObject from "./utils/toObject";
 import ScriptSystem from "./systems/ScriptSystem";
 import RootCameraInstance from "./instances/RootCameraInstance";
+import {mat4} from "gl-matrix";
 
 export default class RenderingPackager {
     rootCamera = new RootCameraInstance()
@@ -86,22 +87,21 @@ export default class RenderingPackager {
             pointLightsQuantity = pointLights.length
 
         let dirLights = [],
-            dirLightsPov = [],
+            dirLightPOV = [],
             lClip = [],
             pointLightData = []
 
         RenderingPackager.#getArray(maxTextures, i => {
             const current = directionalLights[i]
             if (current && current.components[COMPONENTS.DIRECTIONAL_LIGHT]) {
+                const l = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
                 dirLights[i] = {
-                    direction: current.components[COMPONENTS.DIRECTIONAL_LIGHT].direction,
-                    ambient: current.components[COMPONENTS.DIRECTIONAL_LIGHT].fixedColor,
-                    atlasFace: current.components[COMPONENTS.DIRECTIONAL_LIGHT].atlasFace
+                    direction: l.direction,
+                    ambient: l.fixedColor,
+                    atlasFace: l.atlasFace
                 }
-                dirLightsPov[i] = {
-                    lightViewMatrix: current.components[COMPONENTS.DIRECTIONAL_LIGHT].lightView,
-                    lightProjectionMatrix: current.components[COMPONENTS.DIRECTIONAL_LIGHT].lightProjection
-                }
+
+                dirLightPOV[i] = mat4.multiply([], l.lightProjection, l.lightView)
             }
         })
 
@@ -129,7 +129,7 @@ export default class RenderingPackager {
             pointLightsQuantity,
             maxTextures,
             dirLights,
-            dirLightsPov,
+            dirLightPOV,
             lClip,
             pointLightData
         }

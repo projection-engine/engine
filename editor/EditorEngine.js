@@ -6,23 +6,20 @@ import SYSTEMS from "../templates/SYSTEMS";
 import {STEPS_CUBE_MAP} from "../systems/CubeMapSystem";
 import COMPONENTS from "../templates/COMPONENTS";
 import EditorCameras from "./EditorCameras";
-import getSystemKey from "../utils/getSystemKey";
 import EditorWrapper from "./EditorWrapper";
 
 export default class EditorEngine extends Renderer {
-    _systems = {}
+
     recompiled = false
-
-
     gizmo
     cameraData = {}
 
-    constructor(id, gpu, resolution, canvasID) {
-        super(gpu, resolution, canvasID);
+    constructor(id, gpu, resolution, systems) {
+        super(gpu, resolution, systems);
         this.id = id
-        this.cameraData = new EditorCameras(id, CAMERA_TYPES.SPHERICAL, document.getElementById(canvasID))
+        this.cameraData = new EditorCameras(id, CAMERA_TYPES.SPHERICAL, gpu.canvas)
         this.initialized = true
-        this.editorSystem = new EditorWrapper(gpu,)
+        this.editorSystem = new EditorWrapper(gpu)
     }
 
     get camera() {
@@ -33,23 +30,9 @@ export default class EditorEngine extends Renderer {
         this.cameraData.camera = data
     }
 
-    set systems(data) {
-        let newSystems = {}
-        data.forEach(s => {
-            let key = getSystemKey(s)
-
-            if (key)
-                newSystems[key] = s
-        })
-        this._systems = newSystems
-    }
-
-    get systems() {
-        return this._systems
-    }
 
     refreshCubemaps() {
-        this._systems[SYSTEMS.CUBE_MAP].step = STEPS_CUBE_MAP.BASE
+        this.systems[SYSTEMS.CUBE_MAP].step = STEPS_CUBE_MAP.BASE
     }
 
     updatePackage(entities, materials, meshes, params, scripts = [], onGizmoStart, onGizmoEnd) {
@@ -62,65 +45,41 @@ export default class EditorEngine extends Renderer {
         const camera = params.canExecutePhysicsAnimation ? this.rootCamera : this.camera
 
         const meshSources = toObject(meshes)
-        if (typeof params.setSelected === 'function')
-            this.cameraData.onClick = (currentCoords, ctrlKey) => {
-                const p = this._systems[SYSTEMS.PICK]
-                const index = p.pickElement((shader, proj) => {
-                    for (let m = 0; m < entities.length; m++) {
-                        const currentInstance = entities[m]
-                        if (entities[m].active) {
-                            const t = currentInstance.components[COMPONENTS.TRANSFORM]
-                            if (currentInstance.components[COMPONENTS.MESH]) {
-                                const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
-                                if (mesh !== undefined)
-                                    PickSystem.drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
-                            } else if (t)
-                                PickSystem.drawMesh(currentInstance.components[COMPONENTS.CAMERA] ? p.cameraMesh : p.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
-                        }
+        if (typeof params.setSelected === 'function') this.cameraData.onClick = (currentCoords, ctrlKey) => {
+            const p = this.systems[SYSTEMS.PICK]
+            const index = p.pickElement((shader, proj) => {
+                for (let m = 0; m < entities.length; m++) {
+                    const currentInstance = entities[m]
+                    if (entities[m].active) {
+                        const t = currentInstance.components[COMPONENTS.TRANSFORM]
+                        if (currentInstance.components[COMPONENTS.MESH]) {
+                            const mesh = meshSources[currentInstance.components[COMPONENTS.MESH]?.meshID]
+                            if (mesh !== undefined) PickSystem.drawMesh(mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
+                        } else if (t) PickSystem.drawMesh(currentInstance.components[COMPONENTS.CAMERA] ? p.cameraMesh : p.mesh, currentInstance, camera.viewMatrix, proj, t.transformationMatrix, shader, this.gpu)
                     }
-                }, currentCoords, camera)
-                if (index > 0) {
-                    const entity = entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)
-                    if (entity)
-                        params.setSelected(prev => {
-                            const i = prev.findIndex(e => e === entity.id)
-                            if (i > -1) {
-                                prev.splice(i, 1)
-                                return prev
-                            }
-                            if (ctrlKey)
-                                return [...prev, entity.id]
-                            else
-                                return [entity.id]
-                        })
-                } else
-                    params.setSelected([])
-            }
+                }
+            }, currentCoords, camera)
+            if (index > 0) {
+                const entity = entities.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)
+                if (entity) params.setSelected(prev => {
+                    const i = prev.findIndex(e => e === entity.id)
+                    if (i > -1) {
+                        prev.splice(i, 1)
+                        return prev
+                    }
+                    if (ctrlKey) return [...prev, entity.id]
+                    else return [entity.id]
+                })
+            } else params.setSelected([])
+        }
 
-        super.updatePackage(
-            this._systems,
-            entities,
-            materials,
-            meshes,
-            {
-                ...params,
-                onGizmoStart,
-                onGizmoEnd,
-                camera,
-                lockCamera: (lock) => {
-                    if (lock) {
-                        this.cameraData.cameraEvents.stopTracking()
-                    } else
-                        this.cameraData.cameraEvents.startTracking()
-                },
-                dataChanged: this._changed,
-                setDataChanged: () => this._changed = false,
-                gizmo: this.gizmo
-            },
-            scripts,
-            () => this.camera.updatePlacement(),
-            this.editorSystem
-        )
+        super.updatePackage(entities, materials, meshes, {
+            ...params, onGizmoStart, onGizmoEnd, camera, lockCamera: (lock) => {
+                if (lock) {
+                    this.cameraData.cameraEvents.stopTracking()
+                } else this.cameraData.cameraEvents.startTracking()
+            }, dataChanged: this._changed, setDataChanged: () => this._changed = false, gizmo: this.gizmo
+        }, scripts, () => this.camera.updatePlacement(), this.editorSystem)
 
         this.start()
 

@@ -2,27 +2,13 @@ export const vertex = `#version 300 es
 #define MAX_LIGHTS 4
 
 layout (location = 0) in vec3 position;
-
-struct DirectionalLightPOV {
-    mat4 lightProjectionMatrix;
-    mat4 lightViewMatrix;
-};
-uniform DirectionalLightPOV directionalLightsPOV[MAX_LIGHTS];
-uniform int dirLightQuantity;
-out vec2 texCoord;
-out mat4 dirLightPOV[MAX_LIGHTS];
-flat out int dirLightsQuantity;
-
+ 
+ 
+out vec2 texCoord; 
+ 
 void main() {
-    dirLightsQuantity = dirLightQuantity;
-    for (int i = 0; i< dirLightQuantity; i++){
-        dirLightPOV[i] = directionalLightsPOV[i].lightProjectionMatrix * directionalLightsPOV[i].lightViewMatrix;
-    }
 
-
-    texCoord = (position.xy) * 0.5 + 0.5;
-
-
+    texCoord = position.xy * 0.5 + 0.5;
     gl_Position = vec4(position, 1);
 }    
 
@@ -40,8 +26,8 @@ precision highp float;
 #define SH_C1 0.488602512
 
 in vec2 texCoord;
-flat in int dirLightsQuantity;
-in mat4 dirLightPOV[MAX_LIGHTS];
+uniform int dirLightQuantity;
+uniform mat4 dirLightPOV[MAX_LIGHTS];
 
 uniform float shadowMapResolution;
 uniform float indirectLightAttenuation;
@@ -73,8 +59,6 @@ uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
 uniform sampler2D blueIndirectSampler;
 
-
-
 struct DirectionalLight {
     vec3 direction;
     vec3 ambient;
@@ -85,10 +69,6 @@ uniform DirectionalLight directionalLights[MAX_LIGHTS];
 uniform sampler2D shadowMapTexture;
 //uniform sampler2D previousFrameSampler;
 uniform float shadowMapsQuantity;
-
-
-
-
 out vec4 finalColor;
 
 @import(sampleShadowMap)
@@ -200,10 +180,10 @@ void main() {
             GI = (lpvRadiance * albedo * ao) * indirectLightAttenuation;
         }
     
-        float shadows = dirLightsQuantity > 0 || lightQuantity > 0?  0. : 1.0;
-        float quantityToDivide = float(dirLightsQuantity) + float(lightQuantity);
+        float shadows = dirLightQuantity > 0 || lightQuantity > 0?  0. : 1.0;
+        float quantityToDivide = float(dirLightQuantity) + float(lightQuantity);
 
-        for (int i = 0; i < dirLightsQuantity; i++){
+        for (int i = 0; i < dirLightQuantity; i++){
             vec4 fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
             vec3 lightDir =  normalize(directionalLights[i].direction);
     

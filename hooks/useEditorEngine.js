@@ -1,16 +1,10 @@
 import {useEffect, useMemo, useState} from "react";
-import TransformSystem from "../systems/TransformSystem";
-import ShadowMapSystem from "../systems/ShadowMapSystem";
-import PickSystem from "../systems/PickSystem";
 import EditorEngine from "../editor/EditorEngine";
-import PerformanceSystem from "../systems/PerformanceSystem";
-import CubeMapSystem from "../systems/CubeMapSystem";
 import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
 import useHistory from "../../pages/project/hooks/useHistory";
 import {HISTORY_ACTIONS} from "../../pages/project/hooks/historyReducer";
 import COMPONENTS from "../templates/COMPONENTS";
-import CameraCubeSystem from "../systems/CameraCubeSystem";
-import ScriptSystem from "../systems/ScriptSystem";
+import SYSTEMS from "../templates/SYSTEMS";
 
 
 export default function useEditorEngine(id, canExecutePhysicsAnimation, settings, load, canStart, setAlert) {
@@ -29,17 +23,10 @@ export default function useEditorEngine(id, canExecutePhysicsAnimation, settings
 
     const renderer = useMemo(() => {
         if (gpu && canStart) {
-            const r = new EditorEngine(id, gpu, {w: settings.resolution[0], h: settings.resolution[1]}, id+'-canvas')
-            r.systems = [
-                new ScriptSystem(gpu, id+'-canvas'),
-                new PerformanceSystem(gpu, id+'-canvas'),
-                new TransformSystem(),
-                new ShadowMapSystem(gpu),
-                new PickSystem(gpu),
-                new CameraCubeSystem(id + '-camera'),
-                new CubeMapSystem(gpu),
-            ]
-            return r
+            return new EditorEngine(id, gpu, {
+                w: settings.resolution[0],
+                h: settings.resolution[1]
+            }, [SYSTEMS.SCRIPT, SYSTEMS.PERF, SYSTEMS.TRANSFORMATION, SYSTEMS.SHADOWS, SYSTEMS.PICK, SYSTEMS.CAMERA_CUBE, SYSTEMS.CUBE_MAP])
         }
         return undefined
     }, [gpu, canStart])
@@ -76,7 +63,6 @@ export default function useEditorEngine(id, canExecutePhysicsAnimation, settings
             renderer.gizmo = settings.gizmo
             renderer.camera.fov = settings.fov
             renderer?.updatePackage(
-
                 entities,
                 materials,
                 meshes,

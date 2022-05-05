@@ -205,7 +205,7 @@ export default class ShaderInstance {
                 try {
                     this.gpu[TYPES[type]](uLocation, data)
                 } catch (e) {
-                    console.trace(e, uLocation, data, type, key)
+
                 }
                 break
             case 'mat3':

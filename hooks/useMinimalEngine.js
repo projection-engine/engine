@@ -2,11 +2,9 @@ import {useContext, useEffect, useMemo, useState} from "react";
 
 import useEngineEssentials, {ENTITY_ACTIONS} from "./useEngineEssentials";
 import Entity from "../basic/Entity";
-import sphereMesh from '../editor/assets/Sphere.json'
+
 
 import EditorEngine from "../editor/EditorEngine";
-import TransformSystem from "../systems/TransformSystem";
-import ShadowMapSystem from "../systems/ShadowMapSystem";
 import DirectionalLightComponent from "../components/DirectionalLightComponent";
 
 import MeshComponent from "../components/MeshComponent";
@@ -21,6 +19,7 @@ import {v4 as uuidv4} from 'uuid';
 import COMPONENTS from "../templates/COMPONENTS";
 import LoaderProvider from "../../components/loader/LoaderProvider";
 import QuickAccessProvider from "../../pages/project/hooks/QuickAccessProvider";
+import SYSTEMS from "../templates/SYSTEMS";
 
 const id = uuidv4().toString()
 export default function useMinimalEngine(initializeSphere, centerOnSphere, loadAllMeshes) {
@@ -36,7 +35,7 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
 
     const renderer = useMemo(() => {
         if (gpu) {
-            const r = new EditorEngine(id, gpu, {w: window.screen.width, h: window.screen.height})
+            const r = new EditorEngine(id, gpu, {w: window.screen.width, h: window.screen.height}, SYSTEMS.MESH)
             if (quickAccess.sampleSkybox)
                 dispatchEntities({
                     type: ENTITY_ACTIONS.ADD,
@@ -45,18 +44,13 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
             initializeLight(dispatchEntities)
 
             if (initializeSphere)
-                initializeMesh(sphereMesh, gpu, IDS.SPHERE, 'Sphere', dispatchEntities, setMeshes)
-
+                import('../editor/assets/Sphere.json').then(sphereMesh => {
+                    initializeMesh(sphereMesh.value, gpu, IDS.SPHERE, 'Sphere', dispatchEntities, setMeshes)
+                })
             if (loadAllMeshes)
                 import('../editor/assets/Cube.json')
                     .then(cubeData => initializeMesh(cubeData, gpu, IDS.CUBE, 'Sphere', dispatchEntities, setMeshes, undefined, true))
 
-            r.camera.notChangableRadius = true
-            r.systems = [
-                new TransformSystem(),
-                new ShadowMapSystem(gpu)
-            ]
-            r.camera.radius = 2.5
             return r
         }
         return undefined
@@ -69,10 +63,7 @@ export default function useMinimalEngine(initializeSphere, centerOnSphere, loadA
     }, [canRender])
     useEffect(() => {
         if (renderer) {
-            if (centerOnSphere) {
-                renderer.camera.centerOn = [0, 1, 0]
-                renderer.camera.updateViewMatrix()
-            }
+
             renderer.updatePackage(entities, materials, meshes, {
                 fxaa: true,
                 meshes,

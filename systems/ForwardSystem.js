@@ -1,11 +1,4 @@
 import System from "../basic/System";
-
-import * as shaderCode from '../shaders/mesh/forwardMesh.glsl'
-import * as skyShader from '../shaders/misc/skybox.glsl'
-import ShaderInstance from "../instances/ShaderInstance";
-import {createVAO} from "../utils/utils";
-import VBO from "../instances/VBO";
-import cube from "../utils/cube.json";
 import COMPONENTS from "../templates/COMPONENTS";
 import SYSTEMS from "../templates/SYSTEMS";
 
@@ -16,15 +9,7 @@ export default class ForwardSystem extends System {
     constructor(gpu) {
         super([]);
         this.gpu = gpu
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.skyShader = new ShaderInstance(skyShader.vertex, skyShader.fragment, gpu)
-
-        this.vao = createVAO(gpu)
-        this.vbo = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
-        gpu.bindVertexArray(null)
     }
-
-
     execute(options, systems, data, sceneColor) {
         super.execute()
         const {
@@ -37,10 +22,8 @@ export default class ForwardSystem extends System {
             maxTextures,
             dirLights,
             dirLightsPov,
-            lClip,
-            lPosition,
-            lColor,
-            lAttenuation,
+            pointLightData,
+
         } = data
 
         const {
@@ -80,8 +63,6 @@ export default class ForwardSystem extends System {
                     ambient.prefilteredLod = 6
                 }
 
-
-
                 this.drawMesh(
                     mesh,
                     camera.position,
@@ -93,16 +74,13 @@ export default class ForwardSystem extends System {
                     current.components[COMPONENTS.MATERIAL],
                     brdf,
 
-                    pointLightsQuantity,
+
                     maxTextures,
                     dirLights,
                     dirLightsPov,
-                    lClip,
-                    lPosition,
-                    lColor,
-                    lAttenuation,
 
-
+                    pointLightsQuantity,
+                    pointLightData,
 
                     elapsed,
                     ambient.irradianceMap,
@@ -124,14 +102,12 @@ export default class ForwardSystem extends System {
         normalMatrix,
         materialComponent,
         brdf,
-        pointLightsQuantity,
+
         maxTextures,
         dirLights,
-        dirLightsPov,
-        lClip,
-        lPosition,
-        lColor,
-        lAttenuation,
+        dirLightPOV,
+        pointLightsQuantity,
+        pointLightData,
 
         elapsed,
         closestIrradiance,
@@ -141,9 +117,7 @@ export default class ForwardSystem extends System {
     ) {
 
         if (material && material.settings?.isForwardShaded) {
-
             mesh.use()
-
             material.use(this.lastMaterial !== material.id, {
                 projectionMatrix,
                 transformMatrix,
@@ -160,13 +134,10 @@ export default class ForwardSystem extends System {
 
                 dirLightQuantity: maxTextures,
                 directionalLights: dirLights,
-                directionalLightsPOV: dirLightsPov,
+                dirLightPOV,
 
                 lightQuantity: pointLightsQuantity,
-                lightClippingPlane: lClip,
-                lightPosition: lPosition.slice(0,3),
-                lightColor: lColor,
-                lightAttenuationFactors: lAttenuation,
+                pointLightData,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
 

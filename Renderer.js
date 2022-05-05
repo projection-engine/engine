@@ -7,10 +7,10 @@ import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "../views/blueprints/components/DATA_TYPES";
 import ImageProcessor from "./utils/image/ImageProcessor";
 import {v4} from "uuid";
-import GBufferSystem from "./systems/GBufferSystem";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
 import RenderingPackager from "./RenderingPackager";
+import getSystemKey from "./utils/getSystemKey";
 
 export default class Renderer {
 
@@ -22,11 +22,10 @@ export default class Renderer {
     params = {}
     #systems = {}
 
-    constructor(gpu, resolution, canvasID) {
-        this.canvas = document.getElementById(canvasID)
+    constructor(gpu, resolution, systems) {
+        this.canvas = gpu.canvas
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolution)
-        this.GBufferSystem = new GBufferSystem(gpu, resolution)
 
         const brdf = new Image()
 
@@ -48,7 +47,24 @@ export default class Renderer {
         a.texture().depthTest()
         b.texture()
 
-        this.postProcessingFramebuffers = [a, b]
+
+        this.postProcessingFramebuffers = {
+            a: a,
+            b: b
+        }
+
+        const sys = [...systems, SYSTEMS.MESH]
+        sys.forEach(s => {
+            let system = getSystemKey(s, gpu, resolution)
+            if (system)
+                this.#systems[s] = system
+        })
+        this.sortedSystems = Object.keys(this.#systems).sort()
+    }
+
+
+    get systems() {
+        return this.#systems
     }
 
     callback() {
@@ -69,7 +85,7 @@ export default class Renderer {
                         this.data,
                         this.filteredEntities,
                         this.data.entitiesMap,
-                        () => this.data =  {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)})
+                        () => this.data = {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)})
             }
             this.wrapper.execute(this.params, this.#systems, this.data, this.filteredEntities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
         }
@@ -88,9 +104,8 @@ export default class Renderer {
     }
 
 
-    updatePackage(s, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
-        this.#systems = {...s, [SYSTEMS.MESH]: this.GBufferSystem}
-        this.sortedSystems = Object.keys(this.#systems).sort()
+    updatePackage(entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
+
         const packageData = this.packager.makePackage({
             entities,
             materials,

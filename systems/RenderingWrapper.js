@@ -31,14 +31,11 @@ export default class RenderingWrapper extends System {
         this.postProcessingWrapper = new PostProcessingWrapper(gpu, resolution)
     }
 
-    execute(options, systems, data, entities, entitiesMap, onWrap, [a, b]) {
+    execute(options, systems, data, entities, entitiesMap, onWrap, {a, b}) {
+
         super.execute()
-        const {
-            pointLights,
-            spotLights,
+        const { 
             skybox,
-            directionalLights,
-            cubeMaps,
             skylight,
         } = data
         const {

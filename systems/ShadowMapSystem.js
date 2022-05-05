@@ -117,7 +117,7 @@ export default class ShadowMapSystem extends System {
 
 
         if (shadingModel === SHADING_MODELS.DETAIL && (lights2D.length > 0 || lights3D.length > 0)) {
-            console.log(lights3D, lights2D)
+
             this.gpu.cullFace(this.gpu.FRONT)
             if (dataChanged)
                 setDataChanged()

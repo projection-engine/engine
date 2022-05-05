@@ -71,9 +71,6 @@ export default class DeferredSystem extends System {
             directionalLightsPOV: dirLightsPov,
 
             lightQuantity: pointLightsQuantity,
-
-            lightClippingPlane: lClip,
-
             pointLightData,
 
 
