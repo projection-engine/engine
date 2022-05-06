@@ -43,16 +43,24 @@ export default class DeferredSystem extends System {
             exposure,
             shadingModel
         } = options
-
         super.execute()
-
         const shadowMapSystem = systems[SYSTEMS.SHADOWS],
             deferredSystem = systems[SYSTEMS.MESH]
 
+        const mutableData = {shadowMapResolution: 1, shadowMapsQuantity: 1,  indirectLightAttenuation: 1}
+        if (shadowMapSystem) {
+            mutableData.shadowMapResolution = shadowMapSystem.maxResolution
+            mutableData.shadowMapsQuantity = shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture
+        }
+
+
         const deferred = this._getDeferredShader(shadingModel)
 
-        if (skylight)
+        if (skylight) {
             directionalLightsData.push(skylight)
+            mutableData.indirectLightAttenuation = skylight?.attenuation
+        }
+
 
         deferred.use()
         deferred.bindForUse({
@@ -62,34 +70,22 @@ export default class DeferredSystem extends System {
             behaviourSampler: deferredSystem.frameBuffer.colors[3],
             ambientSampler: deferredSystem.frameBuffer.colors[4],
             emissiveSampler: deferredSystem.frameBuffer.colors[5],
-
-            cameraVec: camera.position,
-
-            dirLightQuantity: maxTextures,
-            directionalLightsData,
-            dirLightPOV,
-
-            lightQuantity: pointLightsQuantity,
-            pointLightData,
-
-
-            shadowMapResolution: shadowMapSystem?.maxResolution,
             shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,
-            shadowMapsQuantity: shadowMapSystem ? (shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture) : undefined,
-
             redIndirectSampler: giFBO?.colors[0],
             greenIndirectSampler: giFBO?.colors[1],
             blueIndirectSampler: giFBO?.colors[2],
-
-            indirectLightAttenuation: skylight?.attenuation,
-            gridSize: giGridSize,
-            noGI: giFBO !== undefined ? 0 : 1,
-
             shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
             shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,
 
-            gamma: gamma ? gamma : 1,
-            exposure: exposure ? exposure : 2,
+            cameraVec: camera.position,
+            settings: [
+                maxTextures, mutableData.shadowMapResolution, mutableData.indirectLightAttenuation,
+                giGridSize ? giGridSize : 1,  giFBO ? 0 : 1, pointLightsQuantity,
+                shadowMapSystem ? 0 : 1, mutableData.shadowMapsQuantity, 0
+            ],
+            directionalLightsData,
+            dirLightPOV,
+            pointLightData
         })
         deferredSystem.frameBuffer.draw()
     }

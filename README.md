@@ -64,4 +64,11 @@ it can be used by multiple systems. `MaterialInstance` is another abstraction fo
 // ] = mat3
 ```
 
-
+- Shader Settings
+```
+// [
+//     dirLightQuantity,   shadowMapResolution, indirectLightAttenuation,
+//     gridSize,           noGI,                lightQuantity,
+//     noShadowProcessing, shadowMapsQuantity,  0
+// ] 
+```

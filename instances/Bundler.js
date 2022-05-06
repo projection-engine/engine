@@ -1,5 +1,6 @@
-import {PBR} from '../shaders/mesh/PBR'
-import {SHADOWS} from "../shaders/shadows/Shadows";
+import {PBR} from '../shaders/methods/PBR'
+import Shadows from "../shaders/methods/Shadows";
+import GI from "../shaders/methods/GI";
 
 export const METHODS = {
     distributionGGX: '@import(distributionGGX)',
@@ -8,13 +9,11 @@ export const METHODS = {
     fresnelSchlick: '@import(fresnelSchlick)',
     fresnelSchlickRoughness: '@import(fresnelSchlickRoughness)',
     computeDirectionalLight: '@import(computeDirectionalLight)',
-
-
-    sampleShadowMap: '@import(sampleShadowMap)',
-    sampleShadowMapLinear: '@import(sampleShadowMapLinear)',
-    sampleSoftShadows: '@import(sampleSoftShadows)',
-    calculateShadows: '@import(calculateShadows)',
     computePointLight: '@import(computePointLight)',
+
+
+    calculateShadows: '@import(calculateShadows)',
+    gi: '@import(GI)',
 }
 
 
@@ -23,8 +22,10 @@ export default class Bundler {
         let response = shaderCode
 
         Object.keys(METHODS).forEach(key => {
-            if(SHADOWS[key])
-                response = response.replaceAll(METHODS[key], SHADOWS[key])
+            if(key === 'gi')
+                response = response.replaceAll(METHODS[key], GI)
+            if(key === 'calculateShadows')
+                response = response.replaceAll(METHODS[key], Shadows)
             if(PBR[key])
                 response = response.replaceAll(METHODS[key], PBR[key])
         })
