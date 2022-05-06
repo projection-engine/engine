@@ -4,7 +4,7 @@ import * as shaderCode from "../shaders/misc/skybox.glsl";
 import ShaderInstance from "../instances/ShaderInstance";
 import {createVAO} from "../utils/utils";
 import VBO from "../instances/VBO";
-import cube from "../utils/cube.json";
+import cube from "../templates/CUBE.js";
 
 
 export default class SkyboxSystem extends System {

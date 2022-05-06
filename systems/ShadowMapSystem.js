@@ -1,5 +1,5 @@
 import System from "../basic/System";
-import {SHADING_MODELS} from "../../pages/project/hooks/useSettings";
+
 import SYSTEMS from "../templates/SYSTEMS";
 import * as rsmShaders from '../shaders/gi/rsm.glsl'
 import * as smShaders from '../shaders/shadows/shadow.glsl'
@@ -8,6 +8,7 @@ import FramebufferInstance from "../instances/FramebufferInstance";
 import CubeMapInstance from "../instances/CubeMapInstance";
 import {mat4, vec3} from "gl-matrix";
 import COMPONENTS from "../templates/COMPONENTS";
+import SHADING_MODELS from "../templates/SHADING_MODELS";
 
 export const VIEWS = {
     target: [

@@ -1,7 +1,7 @@
 import {linearAlgebraMath, Vector} from "pj-math";
 import FreeCamera from "./FreeCamera";
 import SphericalCamera from "./SphericalCamera";
-import {KEYS} from "../../../../pages/project/hooks/useHotKeys";
+import KEYS from "../../../templates/KEYS";
 
 export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     let target = document.getElementById(canvasID),
@@ -46,7 +46,7 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
     function handleInput(event) {
         switch (event.type) {
             case 'wheel': {
-                if(!camera.notChangableRadius) {
+                if (!camera.notChangableRadius) {
                     const forward = event.deltaY < 0
                     const distance = (forward ? 1 : -1) * .5
                     if (camera instanceof FreeCamera) {
@@ -122,52 +122,48 @@ export default function perspectiveCameraEvents(camera, canvasID, onClick) {
                 isFocused = false
                 positionChanged = false
                 document.exitPointerLock()
-
-
                 break
             }
             case 'keyup':
             case 'keydown': {
-                if(!camera.notChangableRadius) {
-                    if (isFocused || event.type === 'keyup') {
-                        if (camera instanceof FreeCamera) {
-                            switch (event.code) {
-                                case KEYS.KeyW : {
-                                    updateZ(true, event.type === 'keydown')
-                                    break
-                                }
-                                case KEYS.KeyS: {
-                                    updateZ(false, event.type === 'keydown')
-                                    break
-                                }
-                                case KEYS.ArrowUp: {
-                                    updateY(true, event.type === 'keydown')
-                                    break
-                                }
-                                case KEYS.ArrowDown: {
-                                    updateY(false, event.type === 'keydown')
-                                    break
-                                }
-                                case KEYS.KeyA: {
-                                    updateX(false, event.type === 'keydown')
-                                    break
-                                }
-                                case KEYS.KeyD: {
-                                    updateX(true, event.type === 'keydown')
-                                    break
-                                }
-                                default:
-                                    break
+                if (isFocused || event.type === 'keyup') {
+                    if (camera instanceof FreeCamera) {
+                        switch (event.code) {
+                            case KEYS.KeyW : {
+                                updateZ(true, event.type === 'keydown')
+                                break
                             }
-                        } else if (isFocused && (event.code === KEYS.KeyW || event.code === KEYS.KeyS)) {
-                            const distance = .5
-
-                            let way = -1
-                            if (event.code === KEYS.KeyS) {
-                                way = 1
+                            case KEYS.KeyS: {
+                                updateZ(false, event.type === 'keydown')
+                                break
                             }
-                            camera.radius += distance * way
+                            case KEYS.ArrowUp: {
+                                updateY(true, event.type === 'keydown')
+                                break
+                            }
+                            case KEYS.ArrowDown: {
+                                updateY(false, event.type === 'keydown')
+                                break
+                            }
+                            case KEYS.KeyA: {
+                                updateX(false, event.type === 'keydown')
+                                break
+                            }
+                            case KEYS.KeyD: {
+                                updateX(true, event.type === 'keydown')
+                                break
+                            }
+                            default:
+                                break
                         }
+                    } else if (isFocused && (event.code === KEYS.KeyW || event.code === KEYS.KeyS)) {
+                        const distance = .5
+
+                        let way = -1
+                        if (event.code === KEYS.KeyS) {
+                            way = 1
+                        }
+                        camera.radius += distance * way
                     }
                 }
                 break

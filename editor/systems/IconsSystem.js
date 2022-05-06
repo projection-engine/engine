@@ -11,7 +11,7 @@ import COMPONENTS from "../../templates/COMPONENTS";
 import MeshInstance from "../../instances/MeshInstance";
 import camera from "../assets/Camera.json";
 
-export default class BillboardSystem extends System {
+export default class IconsSystem extends System {
     _ready = false
 
     constructor(gpu) {

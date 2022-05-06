@@ -1,6 +1,6 @@
 import System from "../basic/System";
 import GridSystem from "./systems/GridSystem";
-import BillboardSystem from "./systems/BillboardSystem";
+import IconsSystem from "./systems/IconsSystem";
 import SYSTEMS from "../templates/SYSTEMS";
 import GizmoSystem from "./systems/GizmoSystem";
 import SelectedSystem from "./systems/SelectedSystem";
@@ -12,7 +12,7 @@ export default class EditorWrapper extends System {
         this.gpu = gpu
 
         this.gridSystem = new GridSystem(gpu)
-        this.billboardSystem = new BillboardSystem(gpu)
+        this.billboardSystem = new IconsSystem(gpu)
         this.billboardSystem.initializeTextures().catch()
         this.gizmoSystem = new GizmoSystem(gpu)
         this.selectedSystem = new SelectedSystem(gpu)

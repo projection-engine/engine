@@ -7,7 +7,7 @@ import {createVAO} from "../utils/utils";
 import {mat4, vec3} from "gl-matrix";
 import {VIEWS} from "./ShadowMapSystem";
 import VBO from "../instances/VBO";
-import cube from "../utils/cube.json";
+import cube from "../templates/CUBE.js";
 import {intersectBoundingSphere} from "./PhysicsSystem";
 import COMPONENTS from "../templates/COMPONENTS";
 

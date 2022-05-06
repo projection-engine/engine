@@ -21,14 +21,7 @@ export default class PickSystem extends System {
 
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
         this.shaderSameSize = new ShaderInstance(shaderCode.sameSizeVertex, shaderCode.fragment, gpu)
-        this.cameraMesh = new MeshInstance({
-            gpu,
-            vertices: camera.vertices,
-            indices: camera.indices,
-            normals: [],
-            uvs: [],
-            tangents: [],
-        })
+
         this.mesh = new MeshInstance({
             gpu,
             vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
