@@ -32,35 +32,26 @@ it can be used by multiple systems. `MaterialInstance` is another abstraction fo
 > - **params**: Object holding rendering settings, camera information and callbacks
 
 
-#### Hooks
-
-- **useEditorEngine**: Hook for the full editor window.
-- **useMinimalEngine**: Minimal wrapper for the renderer to work with only the primordial systems to work.
-- **useEngineEssentials**: Hook offering states for meshes, materials, entities, scripts. On startup it will prepare the context and store it inside the `gpu` state.
-
-
-
 #### Rendering observations:
+> Singular float/int/bool/vec3/vec4 uniforms are usually grouped together into matrices to reduce the number of API calls. 
 
-- Point lights uniforms and light limit
-> Point light uniforms are structure all inside a mat4 matrix per light, this means that all data necessary for it to work is present inside this single matrix.
-  the shader will receive an array of this matrix to perform the calculations.
+- Point lights
 
 ```
 // [
-//    POSITION [0][0] [0][1] [0][2] EMPTY
-//    COLOR [1][0] [1][1] [1][2]  EMPTY
-//    ATTENUATION [2][0] [2][1] [2][2] EMPTY
-//    zFar [3][0] zNear [3][1] hasShadowMap [3][2] EMPTY
+//    positionX,    positionY,    positionZ,    0
+//    colorR,       colorG,       colorB,       0
+//    attenuationX, attenuationY, attenuationZ, 0
+//    zFar,         zNear,        hasShadowMap, 0
 // ] = mat4
 ```
 
 - Directional lights
 ```
 // [
-//    DIRECTION [0][0]     [0][1] [0][2] 
-//    COLOR     [1][0]     [1][1] [1][2] 
-//    atlasX  [2][0] atlasY [2][1] hasShadowMap [2][2]  
+//    directionX, directionY, directionZ
+//    colorR,     colorG,     colorB
+//    atlasX,     atlasY,     hasShadowMap
 // ] = mat3
 ```
 

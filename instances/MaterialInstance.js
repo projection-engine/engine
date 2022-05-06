@@ -1,7 +1,7 @@
 import TextureInstance from "./TextureInstance";
 import ImageProcessor from "../utils/image/ImageProcessor";
 import ShaderInstance from "./ShaderInstance";
-import {DATA_TYPES} from "../../views/blueprints/components/DATA_TYPES";
+import {DATA_TYPES} from "../templates/DATA_TYPES";
 
 export default class MaterialInstance {
     ready = false
