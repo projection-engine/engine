@@ -7,6 +7,7 @@ import {STEPS_CUBE_MAP} from "../systems/CubeMapSystem";
 import COMPONENTS from "../templates/COMPONENTS";
 import EditorCameras from "./EditorCameras";
 import EditorWrapper from "./EditorWrapper";
+import OrthographicCamera from "./camera/ortho/OrthographicCamera";
 
 export default class EditorEngine extends Renderer {
 
@@ -73,13 +74,25 @@ export default class EditorEngine extends Renderer {
             } else params.setSelected([])
         }
 
-        super.updatePackage(entities, materials, meshes, {
-            ...params, onGizmoStart, onGizmoEnd, camera, lockCamera: (lock) => {
-                if (lock) {
-                    this.cameraData.cameraEvents.stopTracking()
-                } else this.cameraData.cameraEvents.startTracking()
-            }, dataChanged: this._changed, setDataChanged: () => this._changed = false, gizmo: this.gizmo
-        }, scripts, () => this.camera.updatePlacement(), this.editorSystem)
+        super.updatePackage(
+            entities,
+            materials,
+            meshes,
+            {
+                ...params,
+                onGizmoStart,
+                onGizmoEnd,
+                camera,
+                lockCamera: (lock) => {
+                    if (lock) {
+                        this.cameraData.cameraEvents.stopTracking()
+                    } else this.cameraData.cameraEvents.startTracking()
+                },
+                dataChanged: this._changed,
+                setDataChanged: () => this._changed = false,
+                gizmo: this.gizmo,
+                isOrtho: camera instanceof OrthographicCamera
+            }, scripts, () => this.camera.updatePlacement(), this.editorSystem)
 
         this.start()
 

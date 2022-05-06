@@ -20,7 +20,6 @@ export default class RenderingWrapper extends System {
             .texture()
             .depthTest()
 
-        // this.shader = new Shader(shaderCode.vertex, shaderCode.fragment, gpu)
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
@@ -45,7 +44,7 @@ export default class RenderingWrapper extends System {
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
         this.frameBuffer.startMapping()
-        this.skyboxSystem.execute(skybox, camera)
+        this.skyboxSystem.execute(data, options)
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size

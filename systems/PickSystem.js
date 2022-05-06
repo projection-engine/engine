@@ -3,7 +3,6 @@ import * as shaderCode from "../shaders/misc/picker.glsl";
 import ShaderInstance from "../instances/ShaderInstance";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
-import OrthographicCamera from "../editor/camera/ortho/OrthographicCamera";
 import MeshInstance from "../instances/MeshInstance";
 import camera from "../editor/assets/Camera.json";
 import COMPONENTS from "../templates/COMPONENTS";
@@ -38,26 +37,12 @@ export default class PickSystem extends System {
 
     }
 
-    execute(options, systems, {meshes, meshSources}, entities) {
-        super.execute()
-        const {
-            setSelected,
-            currentCoords,
-            clicked,
-            camera,
-            setClicked,
-            canExecutePhysicsAnimation
-        } = options
-
-
-    }
-
-    pickElement(drawCallback, pickCoords, camera, sameSize) {
+    pickElement(drawCallback, pickCoords, camera, sameSize, isOrtho) {
 
         this.shader.use()
         this.frameBuffer.startMapping()
 
-        const pickerProjection = this._getProjection(pickCoords, camera)
+        const pickerProjection = this._getProjection(pickCoords, camera, isOrtho)
         drawCallback(sameSize ? this.shaderSameSize : this.shader, pickerProjection)
         let data = new Uint8Array(4)
         this.gpu.readPixels(
@@ -74,11 +59,11 @@ export default class PickSystem extends System {
         return data[0] + data[1] + data[2];
     }
 
-    _getProjection({x, y}, camera) {
+    _getProjection({x, y}, camera, isOrtho) {
         let m = mat4.create()
 
 
-        if (camera instanceof OrthographicCamera)
+        if (isOrtho)
             m = camera.projectionMatrix
         else {
             const aspect = camera.aspectRatio

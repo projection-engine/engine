@@ -1,6 +1,6 @@
 import System from "../basic/System";
 import GridSystem from "./systems/GridSystem";
-import BillboardSystem from "../systems/BillboardSystem";
+import BillboardSystem from "./systems/BillboardSystem";
 import SYSTEMS from "../templates/SYSTEMS";
 import GizmoSystem from "./systems/GizmoSystem";
 import SelectedSystem from "./systems/SelectedSystem";

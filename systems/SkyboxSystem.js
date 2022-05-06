@@ -17,20 +17,27 @@ export default class SkyboxSystem extends System {
 
     }
 
-    execute(skyboxElement, camera) {
+    execute(data, options) {
         super.execute()
-        if (skyboxElement && skyboxElement.ready && !(camera instanceof OrthographicCamera)) {
+        const {
+            skybox
+        } = data
+        const {
+            camera,
+            isOrtho
+        } = options
+        if (skybox && skybox.ready && !isOrtho) {
             this.gpu.depthMask(false)
             this.shader.use()
             this.gpu.bindVertexArray(this.vao)
             this._vertexBuffer.enable()
 
             this.shader.bindForUse({
-                uTexture: skyboxElement.cubeMap.texture,
+                uTexture: skybox.cubeMap.texture,
                 projectionMatrix: camera.projectionMatrix,
                 viewMatrix: camera.viewMatrix,
-                gamma: skyboxElement.gamma,
-                exposure: skyboxElement.exposure
+                gamma: skybox.gamma,
+                exposure: skybox.exposure
             })
 
             this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
