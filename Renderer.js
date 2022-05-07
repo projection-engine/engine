@@ -17,7 +17,7 @@ export default class Renderer {
     rootCamera = new RootCameraInstance()
     viewTarget = this.rootCamera
     packager = new RenderingPackager()
-    canRun = true
+    frameID = undefined
     data = {}
     params = {}
     #systems = {}
@@ -70,37 +70,37 @@ export default class Renderer {
     callback() {
         const elapsed = performance.now() - this.then
 
-        if (elapsed > this.fpsInterval) {
-            const now = performance.now()
-            this.then = now - (elapsed % this.fpsInterval);
-            this.params.onBeforeRender()
-            this.params.elapsed = elapsed
+        // if (elapsed > this.fpsInterval) {
+        const now = performance.now()
+        this.then = now - (elapsed % this.fpsInterval);
+        this.params.onBeforeRender()
+        this.params.elapsed = elapsed
 
-            this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-            for (let s = 0; s < this.sortedSystems.length; s++) {
-                this.#systems[this.sortedSystems[s]]
-                    .execute(
-                        this.params,
-                        this.#systems,
-                        this.data,
-                        this.filteredEntities,
-                        this.data.entitiesMap,
-                        () => this.data = {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)})
-            }
-            this.wrapper.execute(this.params, this.#systems, this.data, this.filteredEntities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
+        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+        for (let s = 0; s < this.sortedSystems.length; s++) {
+            this.#systems[this.sortedSystems[s]]
+                .execute(
+                    this.params,
+                    this.#systems,
+                    this.data,
+                    this.filteredEntities,
+                    this.data.entitiesMap,
+                    () => this.data = {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)})
         }
-        if (this.canRun)
-            requestAnimationFrame(() => this.callback())
+        this.wrapper.execute(this.params, this.#systems, this.data, this.filteredEntities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
+
+        this.frameID = requestAnimationFrame(() => this.callback())
     }
 
     start() {
-        this.canRun = true
-        requestAnimationFrame(() => this.callback())
+        if(!this.frameID)
+            this.frameID = requestAnimationFrame(() => this.callback())
     }
 
     stop() {
         this.resizeObs?.disconnect()
-        this.canRun = false
+        cancelAnimationFrame(this.frameID)
+        this.frameID = undefined
     }
 
 

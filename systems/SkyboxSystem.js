@@ -1,5 +1,4 @@
 import System from "../basic/System";
-import OrthographicCamera from "../editor/camera/ortho/OrthographicCamera";
 import * as shaderCode from "../shaders/misc/skybox.glsl";
 import ShaderInstance from "../instances/ShaderInstance";
 import {createVAO} from "../utils/utils";

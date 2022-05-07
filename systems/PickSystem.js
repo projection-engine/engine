@@ -4,7 +4,6 @@ import ShaderInstance from "../instances/ShaderInstance";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
 import MeshInstance from "../instances/MeshInstance";
-import camera from "../editor/assets/Camera.json";
 import COMPONENTS from "../templates/COMPONENTS";
 
 
