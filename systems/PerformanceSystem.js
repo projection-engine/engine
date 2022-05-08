@@ -12,7 +12,7 @@ export default class PerformanceSystem extends System {
         this.gpu = gpu
 
         const canvas = document.getElementById(canvasID)
-        const targetID = canvas.id.replace('-canvas', '-performance-metrics')
+        const targetID = canvas.id + '-performance-metrics'
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
         else {

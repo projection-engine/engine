@@ -95,8 +95,7 @@ export default class TransformComponent extends Component {
         this._scaling = data
     }
 
-    set transformationMatrix(data) {
-        console.log(this._baseTransformationMatrix)
+    set transformationMatrix(data) { 
         this._transformationMatrix = mat4.multiply([], this._baseTransformationMatrix, data)
 
         this.__changed = false

@@ -1,4 +1,4 @@
-import CameraCubeSystem from "../systems/CameraCubeSystem";
+import CameraCubeSystem from "../../engine-editor/systems/CameraCubeSystem";
 import SYSTEMS from "../templates/SYSTEMS";
 import CullingSystem from "../systems/CullingSystem";
 import GBufferSystem from "../systems/GBufferSystem";
