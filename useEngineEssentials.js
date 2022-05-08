@@ -122,7 +122,7 @@ function entityReducer(state, {type, payload}) {
                 return []
             case ENTITY_ACTIONS.ADD: {
                 const entity = payload
-                entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + 1)
+                entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + 2)
                 entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                 return [...state, entity]
             }
@@ -130,7 +130,7 @@ function entityReducer(state, {type, payload}) {
                 const block = payload
                 if (Array.isArray(block))
                     return block.map((entity, i) => {
-                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + 1)
+                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + i + 1)
                         if (!entity.components[COMPONENTS.SCRIPT])
                             entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                         return entity
@@ -151,7 +151,7 @@ function entityReducer(state, {type, payload}) {
                 if (Array.isArray(block))
                     return [...stateCopy, ...block.map((e, i) => {
                         const entity = e
-                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + state.length + 1)
+                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + state.length + 2)
                         if (!entity.components[COMPONENTS.SCRIPT])
                             entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                         return entity

@@ -10,10 +10,10 @@ export default class TransformComponent extends Component {
     __changed = false
     _transformationMatrix = mat4.create()
     _rotationUpdated = false
- 
+    _baseTransformationMatrix = mat4.create()
     __initializedEuler = false
 
-    lockedRotation= false
+    lockedRotation = false
     lockedScaling = false
 
     updateQuatOnEulerChange = true
@@ -23,12 +23,18 @@ export default class TransformComponent extends Component {
         super(id, name);
     }
 
-    get changed (){
+    set baseTransformationMatrix(data) {
+        this._baseTransformationMatrix = data
+    }
+
+    get changed() {
         return this.__changed
     }
-    set changed(data){
+
+    set changed(data) {
         this.__changed = data
     }
+
     get position() {
         return [...this._translation]
     }
@@ -74,7 +80,7 @@ export default class TransformComponent extends Component {
         const toDeg = 57.29
 
         this._rotationUpdated = true
-        if(this.updateQuatOnEulerChange)
+        if (this.updateQuatOnEulerChange)
             this._rotationQuat = quat.fromEuler([], this.__rotation[0] * toDeg, this.__rotation[1] * toDeg, this.__rotation[2] * toDeg)
     }
 
@@ -90,7 +96,8 @@ export default class TransformComponent extends Component {
     }
 
     set transformationMatrix(data) {
-        this._transformationMatrix = data
+        console.log(this._baseTransformationMatrix)
+        this._transformationMatrix = mat4.multiply([], this._baseTransformationMatrix, data)
 
         this.__changed = false
     }

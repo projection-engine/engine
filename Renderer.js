@@ -105,7 +105,6 @@ export default class Renderer {
 
 
     updatePackage(entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
-
         const packageData = this.packager.makePackage({
             entities,
             materials,
