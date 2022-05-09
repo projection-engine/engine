@@ -16,7 +16,6 @@ export default class GBufferSystem extends System {
             .texture({attachment: 2})
             .texture({attachment: 3})
             .texture({attachment: 4})
-            .texture({attachment: 5})
             .depthTest()
     }
 

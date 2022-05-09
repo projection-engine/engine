@@ -58,7 +58,7 @@ layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour;
 layout (location = 4) out vec4 gAmbient;
-layout (location = 5) out vec4 gEmissive;
+// layout (location = 5) out vec4 gEmissive;
 const float PI = 3.14159265359;
 
 
@@ -126,7 +126,7 @@ void main(){
     specular = prefilteredColor * (F * brdf.r + brdf.g);
 
     gAmbient = vec4((diffuse + specular), 1.);
-    gEmissive = vec4(.0, 0., 0., 1.);
+    // gEmissive = vec4(.0, 0., 0., 1.);
 }
 `
 

@@ -45,7 +45,6 @@ uniform sampler2D normalSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D behaviourSampler;
 uniform sampler2D ambientSampler;
-uniform sampler2D emissiveSampler;
 uniform sampler2D redIndirectSampler;
 uniform sampler2D greenIndirectSampler;
 uniform sampler2D blueIndirectSampler;
@@ -87,11 +86,11 @@ void main() {
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
         discard;
 
-    vec3 emissive = texture(emissiveSampler, texCoord).rgb;
+    vec3 albedo = texture(albedoSampler, texCoord).rgb;
     vec3 color;
-    if(length(emissive) <= 1.){
+    if(albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){
         vec3 V = normalize(cameraVec - fragPosition);
-        vec3 albedo = texture(albedoSampler, texCoord).rgb;
+        
         vec3 N = texture(normalSampler, texCoord).rgb;
         vec3 ambient = texture(ambientSampler, texCoord).rgb;
         float ao = texture(behaviourSampler, texCoord).r;
@@ -151,10 +150,10 @@ void main() {
         }
       
         Lo = Lo* shadows; 
-        color = (ambient  + Lo +  GI + emissive);
+        color = (ambient  + Lo +  GI);
     }
     else
-        color = emissive ;
+        color = albedo ;
  
     if(noShadowProcessing == true)
         finalColor = vec4(1., 0., 0., 1.0);

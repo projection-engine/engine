@@ -40,8 +40,6 @@ export default class DeferredSystem extends System {
 
         const {
             camera,
-            gamma,
-            exposure,
             shadingModel
         } = options
         super.execute()
@@ -70,11 +68,11 @@ export default class DeferredSystem extends System {
             albedoSampler: deferredSystem.frameBuffer.colors[2],
             behaviourSampler: deferredSystem.frameBuffer.colors[3],
             ambientSampler: deferredSystem.frameBuffer.colors[4],
-            emissiveSampler: deferredSystem.frameBuffer.colors[5],
             shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,
             redIndirectSampler: giFBO?.colors[0],
             greenIndirectSampler: giFBO?.colors[1],
             blueIndirectSampler: giFBO?.colors[2],
+
             shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
             shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,
 
