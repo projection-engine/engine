@@ -1,7 +1,7 @@
 import RootCameraInstance from "./instances/RootCameraInstance";
 import RenderingWrapper from "./systems/RenderingWrapper";
 import brdfImg from "./utils/brdf_lut.jpg";
-import {createTexture} from "./utils/utils";
+import {createTexture, createVAO} from "./utils/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "./templates/DATA_TYPES";
@@ -11,18 +11,23 @@ import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
 import RenderingPackager from "./RenderingPackager";
 import getSystemKey from "./utils/getSystemKey";
+import VBO from "./instances/VBO";
+import cube from "./templates/CUBE";
 
 export default class Renderer {
 
     rootCamera = new RootCameraInstance()
     viewTarget = this.rootCamera
-    packager = new RenderingPackager()
+
     frameID = undefined
     data = {}
     params = {}
     #systems = {}
 
     constructor(gpu, resolution, systems) {
+
+        this.cubeBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        this.packager = new RenderingPackager(gpu)
         this.canvas = gpu.canvas
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolution)
@@ -60,6 +65,16 @@ export default class Renderer {
                 this.#systems[s] = system
         })
         this.sortedSystems = Object.keys(this.#systems).sort()
+        this.resizeObs = new ResizeObserver(() => {
+            if (this.canvas) {
+                const bBox = this.canvas.getBoundingClientRect()
+                if (this.params.camera) {
+                    this.params.camera.aspectRatio = bBox.width / bBox.height
+                    this.params.camera.updateProjection()
+                }
+            }
+        })
+        this.resizeObs.observe(this.canvas)
     }
 
 
@@ -85,7 +100,8 @@ export default class Renderer {
                     this.data,
                     this.filteredEntities,
                     this.data.entitiesMap,
-                    () => this.data = {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)})
+                    () => this.data = {...this.data, ...this.packager.getLightsUniforms(this.data.pointLights, this.data.directionalLights)}
+                )
         }
         this.wrapper.execute(this.params, this.#systems, this.data, this.filteredEntities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
 
@@ -93,12 +109,11 @@ export default class Renderer {
     }
 
     start() {
-        if(!this.frameID)
+        if (!this.frameID)
             this.frameID = requestAnimationFrame(() => this.callback())
     }
 
     stop() {
-        this.resizeObs?.disconnect()
         cancelAnimationFrame(this.frameID)
         this.frameID = undefined
     }
@@ -115,23 +130,17 @@ export default class Renderer {
             onWrap,
             gpu: this.gpu,
             brdf: this.brdf,
-            fallbackMaterial: this.fallbackMaterial
+            fallbackMaterial: this.fallbackMaterial,
+            cubeBuffer: this.cubeBuffer
         })
 
-        this.data = packageData.data
+        this.data = {...packageData.data, cubeBuffer: this.cubeBuffer}
         this.params = packageData.attributes
         this.filteredEntities = packageData.filteredEntities
 
 
-        this.resizeObs = new ResizeObserver(() => {
-            if (this.canvas) {
-                const bBox = this.canvas.getBoundingClientRect()
-                this.params.camera.aspectRatio = bBox.width / bBox.height
-                this.params.camera.updateProjection()
-            }
-        })
-        this.resizeObs.observe(this.canvas)
         this.fpsInterval = 1000 / (this.params.frameRate ? this.params.frameRate : 75);
         this.then = performance.now()
+
     }
 }

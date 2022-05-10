@@ -7,18 +7,16 @@ export default class SkyboxComponent extends Component {
     _gamma = 1
     _exposure = 1
     imageID = undefined
-    _prefilteredMipmaps = 6
+    _prefilteredMipmaps = 5
 
     constructor(id) {
         super(id, 'SkyboxComponent');
-
     }
     get blob (){
         return this.__blob
     }
     set blob(data){
         this.__blob = data
-
         this.__initialized = false
     }
 

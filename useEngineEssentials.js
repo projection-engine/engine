@@ -2,6 +2,7 @@ import {useReducer, useState} from "react";
 import PickComponent from "./components/PickComponent";
 import COMPONENTS from "./templates/COMPONENTS";
 import ScriptComponent from "./components/ScriptComponent";
+import {mat4} from "gl-matrix";
 
 export default function useEngineEssentials() {
     const [meshes, setMeshes] = useState([])
@@ -54,20 +55,29 @@ function entityReducer(state, {type, payload}) {
                     key,
                     data,
                 } = payload
-                if (key === 'name')
-                    entity.name = data
-                else if (key === 'active')
-                    entity.active = data
-                else if (key === 'linkedTo')
-                    entity.linkedTo = data
 
+                if (key === 'linkedTo') {
+
+                    // const transformComp = entity.components[COMPONENTS.TRANSFORM]
+                    //
+                    // if (transformComp) {
+                    //     let parentTransform = state.find(n => n.id === data)
+                    //     if (parentTransform) {
+                    //         parentTransform = parentTransform.components[COMPONENTS.TRANSFORM]
+                    //         transformComp.baseTransformationMatrix = mat4.multiply([], transformComp.baseTransformationMatrix, mat4.invert([], parentTransform.transformationMatrix))
+                    //         transformComp.changed = true
+                    //     }
+                    // }
+                    //
+
+                }
+                entity[key] = data
                 stateCopy[entityIndex] = entity
                 return stateCopy
             }
-            case ENTITY_ACTIONS.REMOVE: {
-
+            case ENTITY_ACTIONS.REMOVE:
                 return deleteEntity(stateCopy[entityIndex], stateCopy)
-            }
+
 
             case ENTITY_ACTIONS.UPDATE_COMPONENT: {
                 const {

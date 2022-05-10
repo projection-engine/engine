@@ -12,18 +12,21 @@ export default class MaterialInstance {
     rsmAlbedo
 
 
-    constructor(gpu, vertexShader, shader, uniformData = [], settings={}, onCompiled = () => null, id) {
+    constructor(gpu, vertexShader, shader, uniformData = [], settings = {}, onCompiled = () => null, id, cubeMapShaderCode) {
         this.gpu = gpu
         this.id = id
         this._initializeSettings(settings)
 
+        if (cubeMapShaderCode)
+            this.cubeMapShader = new ShaderInstance(vertexShader, cubeMapShaderCode, this.gpu, m => null)
 
         this.shader = [shader, vertexShader, uniformData, onCompiled]
     }
-    _initializeSettings(settings){
+
+    _initializeSettings(settings) {
         this.settings = settings
-        if(settings.rsmAlbedo) {
-            if(this.rsmAlbedo)
+        if (settings.rsmAlbedo) {
+            if (this.rsmAlbedo)
                 this.gpu.deleteTexture(this.rsmAlbedo.texture)
             this.rsmAlbedo = new TextureInstance(
                 settings.rsmAlbedo,
@@ -43,22 +46,23 @@ export default class MaterialInstance {
             delete this.settings.rsmAlbedo
         }
     }
+
     set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
         this.ready = false
-        if(settings) {
+        if (settings) {
             this._initializeSettings(settings)
         }
         let message
         if (this._shader)
             this.gpu.deleteProgram(this._shader.program)
-        this._shader = new ShaderInstance(vertexShader, shader, this.gpu, m => message= m)
+        this._shader = new ShaderInstance(vertexShader, shader, this.gpu, m => message = m)
 
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {
                 switch (k.type) {
                     case DATA_TYPES.COLOR:
                     case DATA_TYPES.TEXTURE:
-                        const img = k.type === DATA_TYPES.TEXTURE ? k.data: await ImageProcessor.colorToImage(k.data, 32)
+                        const img = k.type === DATA_TYPES.TEXTURE ? k.data : await ImageProcessor.colorToImage(k.data, 32)
                         let texture
                         await new Promise(r => {
                             texture = new TextureInstance(
@@ -92,18 +96,14 @@ export default class MaterialInstance {
                     onCompiled(message)
                 this.ready = true
             })
-
-
-
-
     }
 
-    use(bind = true, additionalUniforms = {}) {
-
+    use(bind = true, additionalUniforms = {}, isCubeMap=false) {
+        const shader = isCubeMap ? this.cubeMapShader : this._shader
         if (bind)
-            this._shader.use()
+            shader.use()
         const data = {...this.uniformData, ...additionalUniforms}
-        this._shader.bindForUse(data)
+        shader.bindForUse(data)
     }
 
 

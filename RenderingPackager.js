@@ -13,6 +13,10 @@ import {mat4} from "gl-matrix";
 export default class RenderingPackager {
     rootCamera = new RootCameraInstance()
 
+    constructor(gpu) {
+        this.skyShader = new ShaderInstance(shaderCodeSkybox.vertex, skyboxCode.generationFragment, gpu)
+    }
+
     makePackage({
                     entities,
                     materials,
@@ -23,7 +27,8 @@ export default class RenderingPackager {
                     onWrap,
                     gpu,
                     brdf,
-                    fallbackMaterial
+                    fallbackMaterial,
+                    cubeBuffer
                 }) {
         const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
         const attributes = {...params}
@@ -45,7 +50,7 @@ export default class RenderingPackager {
             entitiesMap: toObject(entities),
         }
 
-        this.#loadSkybox(data.skybox, gpu)
+        this.#loadSkybox(data.skybox, gpu, cubeBuffer)
 
         data.cubeMapsSources = toObject(data.cubeMaps)
         attributes.camera = params.camera ? params.camera : this.rootCamera
@@ -83,7 +88,7 @@ export default class RenderingPackager {
     }
 
     getLightsUniforms(pointLights, directionalLights) {
-        let maxTextures =  directionalLights.length,
+        let maxTextures = directionalLights.length,
             pointLightsQuantity = pointLights.length
 
         let directionalLightsData = [],
@@ -127,16 +132,18 @@ export default class RenderingPackager {
         }
     }
 
-    #loadSkybox(skyboxElement, gpu) {
+    #loadSkybox(skyboxElement, gpu, cubeBuffer) {
+        const noTexture = !(skyboxElement?.texture instanceof WebGLTexture)
         if (skyboxElement && !skyboxElement.ready) {
-            const shader = new ShaderInstance(shaderCodeSkybox.vertex, skyboxCode.generationFragment, gpu)
             if (!skyboxElement.cubeMap)
                 skyboxElement.cubeMap = new CubeMapInstance(gpu, skyboxElement.resolution, false)
-            if (skyboxElement.blob) {
+            if (noTexture || skyboxElement.blob) {
+                if (!noTexture)
+                    gpu.deleteTexture(skyboxElement.texture)
                 skyboxElement.texture = createTexture(
                     gpu,
-                    skyboxElement.blob.width,
-                    skyboxElement.blob.height,
+                    skyboxElement.blob?.width,
+                    skyboxElement.blob?.height,
                     gpu.RGB16F,
                     0,
                     gpu.RGB,
@@ -147,23 +154,27 @@ export default class RenderingPackager {
                     gpu.CLAMP_TO_EDGE,
                     gpu.CLAMP_TO_EDGE
                 )
-
-                shader.use()
+                skyboxElement.blob = null
+            }
+            if(skyboxElement.texture instanceof WebGLTexture) {
+                this.skyShader.use()
                 skyboxElement.cubeMap.resolution = skyboxElement.resolution
                 skyboxElement.cubeMap.draw((yaw, pitch, perspective) => {
-                    shader.bindForUse({
+                    this.skyShader.use()
+                    this.skyShader.bindForUse({
                         projectionMatrix: perspective,
                         viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
                         uSampler: skyboxElement.texture
                     })
                     gpu.drawArrays(gpu.TRIANGLES, 0, 36)
-                }, true)
+                }, cubeBuffer)
 
-                skyboxElement.cubeMap.generateIrradiance()
-                skyboxElement.cubeMap.generatePrefiltered(skyboxElement.prefilteredMipmaps, skyboxElement.resolution / skyboxElement.prefilteredMipmaps)
+                skyboxElement.cubeMap.generateIrradiance(cubeBuffer)
+                skyboxElement.cubeMap.generatePrefiltered(skyboxElement.prefilteredMipmaps + 1, skyboxElement.resolution / skyboxElement.prefilteredMipmaps, cubeBuffer)
+
                 skyboxElement.ready = true
             }
-            gpu.deleteProgram(shader.program)
         }
     }
+
 }

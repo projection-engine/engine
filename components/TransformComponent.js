@@ -10,7 +10,7 @@ export default class TransformComponent extends Component {
     __changed = false
     _transformationMatrix = mat4.create()
     _rotationUpdated = false
-    _baseTransformationMatrix = mat4.create()
+    baseTransformationMatrix = mat4.create()
     __initializedEuler = false
 
     lockedRotation = false
@@ -23,9 +23,6 @@ export default class TransformComponent extends Component {
         super(id, name);
     }
 
-    set baseTransformationMatrix(data) {
-        this._baseTransformationMatrix = data
-    }
 
     get changed() {
         return this.__changed
@@ -95,8 +92,8 @@ export default class TransformComponent extends Component {
         this._scaling = data
     }
 
-    set transformationMatrix(data) { 
-        this._transformationMatrix = mat4.multiply([], this._baseTransformationMatrix, data)
+    set transformationMatrix(data) {
+        this._transformationMatrix = mat4.multiply([], this.baseTransformationMatrix, data)
 
         this.__changed = false
     }

@@ -40,12 +40,12 @@ export default class CubeMapSystem extends System {
         } = data
 
         // RADIUS 10
-        if (this.lastCallLength !== cubeMaps.length) {
-            this.step = STEPS_CUBE_MAP.BASE
-            this.lastCallLength = cubeMaps.length
-        }
-        if (this.step !== STEPS_CUBE_MAP.DONE && (skybox && skybox.cubeMap || !skybox))
-            this.regenerate(data, options, systems)
+        // if (this.lastCallLength !== cubeMaps.length) {
+        //     this.step = STEPS_CUBE_MAP.BASE
+        //     this.lastCallLength = cubeMaps.length
+        // }
+        // if (this.step !== STEPS_CUBE_MAP.DONE && (skybox && skybox.cubeMap || !skybox))
+        //     this.regenerate(data, options, systems)
     }
 
     regenerate(data, options, systems) {

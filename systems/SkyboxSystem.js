@@ -11,15 +11,13 @@ export default class SkyboxSystem extends System {
         super([]);
         this.gpu = gpu
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.vao = createVAO(gpu)
-        this._vertexBuffer = new VBO(gpu, 0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
-
     }
 
     execute(data, options) {
         super.execute()
         const {
-            skybox
+            skybox,
+            cubeBuffer
         } = data
         const {
             camera,
@@ -28,9 +26,8 @@ export default class SkyboxSystem extends System {
         if (skybox && skybox.ready && !isOrtho) {
             this.gpu.depthMask(false)
             this.shader.use()
-            this.gpu.bindVertexArray(this.vao)
-            this._vertexBuffer.enable()
 
+            cubeBuffer.enable()
             this.shader.bindForUse({
                 uTexture: skybox.cubeMap.texture,
                 projectionMatrix: camera.projectionMatrix,
@@ -40,7 +37,7 @@ export default class SkyboxSystem extends System {
             })
 
             this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
-            this._vertexBuffer.disable()
+            cubeBuffer.disable()
 
             this.gpu.depthMask(true)
         }

@@ -117,10 +117,10 @@ void main() {
     
   
   
-
+   
     finalColor.rgb = vec3(1.0) - exp(-finalColor.rgb * exposure * .75);
-    finalColor.rgb = pow(finalColor.rgb, vec3(1.0/(gamma * .15)));
+    finalColor.rgb = pow(finalColor.rgb, vec3(1.0/(gamma * .25)));
     
-    finalColor.a *= fading;
+    finalColor.a *= min(fading, .4);
 }
 `

@@ -55,13 +55,13 @@ export default class GBufferSystem extends System {
                     cubeMapToApply = cubeMapsSources[c]
                 if (cubeMapToApply) {
                     const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
-                    ambient.irradianceMap = cube.irradiance ? cube.irradianceMap : skybox?.cubeMap.irradianceTexture
+                    ambient.irradianceMap = cube.irradianceMap
                     ambient.prefilteredMap = cube.prefilteredMap
                     ambient.prefilteredLod = cube.prefilteredMipmaps
                 } else if (skybox && skybox.cubeMap !== undefined) {
-                    ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
-                    ambient.prefilteredMap = skybox?.cubeMap.prefiltered
-                    ambient.prefilteredLod = 6
+                    ambient.irradianceMap = skybox.cubeMap.irradianceTexture
+                    ambient.prefilteredMap = skybox.cubeMap.prefiltered
+                    ambient.prefilteredLod = skybox.prefilteredMipmaps
                 }
 
                 this.drawMesh(
@@ -83,6 +83,7 @@ export default class GBufferSystem extends System {
                 )
             }
         }
+        this.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
     }
 

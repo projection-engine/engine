@@ -90,6 +90,7 @@ export default class ForwardSystem extends System {
                 )
             }
         }
+        this.gpu.bindVertexArray(null)
     }
 
     drawMesh(

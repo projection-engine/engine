@@ -82,7 +82,8 @@ export default class ShadowMapSystem extends System {
             materials,
             meshSources,
             cubeMaps,
-            skylight
+            skylight,
+
         } = data
 
         let {
