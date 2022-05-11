@@ -34,14 +34,14 @@ export default class CubeMapInstance {
         return this._res
     }
 
-    generateIrradiance(cubeBuffer) {
+    generateIrradiance(cubeBuffer, sampler=this.texture) {
         if (!this._asDepth) {
             this._irradianceShader.use()
             this.draw((yaw, pitch, perspective) => {
                 this._irradianceShader.bindForUse({
                     projectionMatrix: perspective,
                     viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
-                    uSampler: this.texture
+                    uSampler: sampler
                 })
                 this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 36)
             }, cubeBuffer, undefined, undefined, true)
@@ -65,7 +65,6 @@ export default class CubeMapInstance {
             gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
             gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
             gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
-
 
             this._prefilteredShader.use()
             cubeBuffer.enable()

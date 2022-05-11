@@ -41,7 +41,7 @@ void main(){
 
 export const fragment = `#version 300 es
 precision highp float;
-// IN
+
 in vec4 vPosition;
 in vec3 normalVec;
 in mat3 toTangentSpace;
@@ -52,56 +52,16 @@ uniform samplerCube prefilteredMapSampler;
 uniform float ambientLODSamples;
 uniform vec3 cameraVec;
 
-// OUTPUTS
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour;
 layout (location = 4) out vec4 gAmbient;
-// layout (location = 5) out vec4 gEmissive;
 const float PI = 3.14159265359;
 
 
 @import(fresnelSchlickRoughness)
 
-//vec2 parallaxMapping (vec2 texCoord, vec3 viewDir, sampler2D heightMap )
-//{
-//    if(settings.x == 1){
-//            float layer_depth = 1.0 / layers;
-//            float currentLayerDepth = 0.0;
-//            vec2 delta_uv = viewDir.xy * heightScale / (viewDir.z * layers);
-//            vec2 cur_uv = texCoord;
-//    
-//            float depth_from_tex = 1.-texture(heightMap, cur_uv).r;
-//    
-//            for (int i = 0; i < 32; i++) {
-//                currentLayerDepth += layer_depth;
-//                cur_uv -= delta_uv;
-//                depth_from_tex = 1.-texture(heightMap, cur_uv).r;
-//                if (depth_from_tex < currentLayerDepth) {
-//                    break;
-//                }
-//            }
-//            vec2 prev_uv = cur_uv + delta_uv;
-//            float next = depth_from_tex - currentLayerDepth;
-//            float prev = texture(heightMap, prev_uv).r - currentLayerDepth
-//                         + layer_depth;
-//            float weight = next / (next - prev);
-//            vec2 UVs = mix(cur_uv, prev_uv, weight);
-//            if (settings.y == 1 && ( UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0))
-//                discard;
-//            return UVs;
-//    }
-//    else{
-//            return texCoord ;  
-//    }
-//}
-
-//settings = [
-//    parallaxEnabled,
-//    discardOffPixels,
-//    generateAmbient
-//]
 
 void main(){  
     gPosition = vPosition;
@@ -126,47 +86,15 @@ void main(){
     specular = prefilteredColor * (F * brdf.r + brdf.g);
 
     gAmbient = vec4((diffuse + specular), 1.);
-    // gEmissive = vec4(.0, 0., 0., 1.);
+
 }
 `
+ export const cubeMapShader = `#version 300 es
+precision lowp float;
 
+out vec4 finalColor;
 
-export const wireframeVertex = `#version 300 es
-
-// IN
-layout (location = 5) in vec3 position;
-
-
-// UNIFORM
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
-
-out vec4 vPosition;
-void main(){
-    vPosition =  transformMatrix *   vec4(position, 1.0);
-    
-    gl_Position = projectionMatrix * viewMatrix * vPosition;
+void main(){  
+  finalColor = vec4(1.);
 }
-`
-
-export const wireframeFragment = `#version 300 es
-precision highp float;
- in vec4 vPosition;
- 
-// OUTPUTS
-layout (location = 0) out vec4 gPosition;
-layout (location = 1) out vec4 gNormal;
-layout (location = 2) out vec4 gAlbedo;
-layout (location = 3) out vec4 gBehaviour;
-
-
- 
-
-void main(){
-    gPosition = vPosition;
-    gNormal = vec4(0.0);
-    gAlbedo = vec4(1.0, 0.0, 0.0, 1.0);
-    gBehaviour = vec4(0.0);
-}
-`
+ `

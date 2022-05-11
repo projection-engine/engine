@@ -47,6 +47,7 @@ export default class ForwardSystem extends System {
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
+
                 const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
                 let cubeMapToApply, ambient = {}
 
@@ -56,7 +57,7 @@ export default class ForwardSystem extends System {
                     const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
                     ambient.irradianceMap = cube.irradiance ? cube.irradianceMap : skybox?.cubeMap.irradianceTexture
                     ambient.prefilteredMap = cube.prefilteredMap
-                    ambient.prefilteredLod = cube.prefilteredMipmaps
+                    ambient.prefilteredLod = cube.prefilteredMipmaps - 1
                 } else if (skybox && skybox.cubeMap !== undefined) {
                     ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
                     ambient.prefilteredMap = skybox?.cubeMap.prefiltered
@@ -95,6 +96,7 @@ export default class ForwardSystem extends System {
     }
 
     static drawMesh({
+                        useCubeMapShader,
                         mesh,
                         camPosition,
                         viewMatrix,
@@ -119,7 +121,8 @@ export default class ForwardSystem extends System {
                         gpu
                     }) {
 
-        if (material && material.settings?.isForwardShaded) {
+        if (material && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap )) {
+
             mesh.use()
             material.use(lastMaterial !== material.id, {
                 projectionMatrix,
@@ -144,7 +147,7 @@ export default class ForwardSystem extends System {
                 lightQuantity: pointLightsQuantity,
                 pointLightData,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
-            })
+            }, useCubeMapShader)
 
             if (material.settings.doubleSided)
                 gpu.disable(gpu.CULL_FACE)

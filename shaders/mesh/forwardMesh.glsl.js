@@ -45,9 +45,6 @@ void main(){
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 
 
-    
-
-
     dirLightsQuantity = dirLightQuantity;
     for (int i = 0; i< dirLightQuantity; i++){
         dirLightPOV[i] = directionalLightsPOV[i].lightProjectionMatrix * directionalLightsPOV[i].lightViewMatrix;

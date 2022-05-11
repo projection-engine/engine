@@ -10,20 +10,26 @@ export default class MaterialInstance {
 
     settings = {}
     rsmAlbedo
-
+    hasCubeMap = false
 
     constructor(gpu, vertexShader, shader, uniformData = [], settings = {}, onCompiled = () => null, id, cubeMapShaderCode) {
         this.gpu = gpu
         this.id = id
         this._initializeSettings(settings)
 
-        if (cubeMapShaderCode)
-            this.cubeMapShader = [cubeMapShaderCode, vertexShader]
         this.shader = [shader, vertexShader, uniformData, onCompiled]
+        if (cubeMapShaderCode !== undefined && cubeMapShaderCode !== null )
+            this.cubeMapShader = [cubeMapShaderCode, vertexShader]
+        else
+            this.hasCubeMap = false
     }
 
     set cubeMapShader([shader, vertexShader]) {
-        this._cubeMapShader = new ShaderInstance(vertexShader, shader, this.gpu, m => null)
+        const v = shader !== undefined && shader !== null
+        if(v) {
+            this._cubeMapShader = new ShaderInstance(vertexShader, shader, this.gpu, m => null)
+            this.hasCubeMap = v
+        }
     }
 
     _initializeSettings(settings) {
@@ -52,9 +58,8 @@ export default class MaterialInstance {
 
     set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
         this.ready = false
-        if (settings) {
+        if (settings)
             this._initializeSettings(settings)
-        }
         let message
         if (this._shader)
             this.gpu.deleteProgram(this._shader.program)
@@ -102,7 +107,7 @@ export default class MaterialInstance {
     }
 
     use(bind = true, additionalUniforms = {}, isCubeMap = false) {
-        const shader = isCubeMap ? this.cubeMapShader : this._shader
+        const shader = isCubeMap ? this._cubeMapShader : this._shader
         if (bind)
             shader.use()
         const data = {...this.uniformData, ...additionalUniforms}

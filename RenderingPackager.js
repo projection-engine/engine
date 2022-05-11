@@ -40,7 +40,7 @@ export default class RenderingPackager {
             skybox: filteredEntities.filter(e => e.components[COMPONENTS.SKYBOX] && e.active)[0]?.components[COMPONENTS.SKYBOX],
             directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
             skylight: filteredEntities.filter(e => e.components[COMPONENTS.SKYLIGHT] && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
-            cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP]),
+            cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP] && !e.components[COMPONENTS.CUBE_MAP].asLightProbe),
             cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA]),
 
             scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
@@ -48,6 +48,7 @@ export default class RenderingPackager {
             meshSources: toObject(meshes),
             scripts: toObject(RenderingPackager.parseScripts(scripts)),
             entitiesMap: toObject(entities),
+            lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP] && e.components[COMPONENTS.CUBE_MAP].asLightProbe)
         }
 
         this.#loadSkybox(data.skybox, gpu, cubeBuffer)

@@ -2,14 +2,13 @@ import Component from "../basic/Component";
 import {mat4} from "gl-matrix";
 
 export default class CubeMapComponent extends Component {
-
     _res = 128
     __cubeMap
     _transformationMatrix = Array.from(mat4.create())
-
     _irradiance = true
     _prefilteredMipmaps = 6
     radius = 50
+    asLightProbe = false
 
     constructor(id, resolution, position) {
         super(id, CubeMapComponent.constructor.name);

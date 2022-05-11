@@ -4,6 +4,7 @@ import brdfImg from "./utils/brdf_lut.jpg";
 import {createTexture} from "./utils/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
+import * as skyboxShaderCode from "./shaders/misc/skybox.glsl";
 import {DATA_TYPES} from "./templates/DATA_TYPES";
 import ImageProcessor from "./utils/image/ImageProcessor";
 import {v4} from "uuid";
@@ -13,6 +14,7 @@ import RenderingPackager from "./RenderingPackager";
 import getSystemKey from "./utils/getSystemKey";
 import VBO from "./instances/VBO";
 import cube from "./templates/CUBE";
+import ShaderInstance from "./instances/ShaderInstance";
 
 export default class Renderer {
 
@@ -25,7 +27,7 @@ export default class Renderer {
     #systems = {}
 
     constructor(gpu, resolution, systems) {
-
+        this.skyboxShader = new ShaderInstance(skyboxShaderCode.vertex, skyboxShaderCode.fragment, gpu)
         this.cubeBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         this.packager = new RenderingPackager(gpu)
         this.canvas = gpu.canvas
@@ -39,13 +41,14 @@ export default class Renderer {
             this.brdf = createTexture(gpu, 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, brdf, gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
             this.params.brdf = this.brdf
             this.fallbackMaterial = new MaterialInstance(this.gpu, shaderCode.vertex, shaderCode.fragment, [{
-                key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED
-            }], {
-                isForward: false,
-                rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
-                doubledSided: true
-            }, () => this._ready = true, v4())
-
+                    key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED
+                }], {
+                    isForward: false,
+                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
+                    doubledSided: true
+                },
+                () => this._ready = true, v4(),
+                shaderCode.cubeMapShader)
             this.params.fallbackMaterial = this.fallbackMaterial
         })
         const a = new FramebufferInstance(gpu), b = new FramebufferInstance(gpu)
@@ -134,7 +137,7 @@ export default class Renderer {
             cubeBuffer: this.cubeBuffer
         })
 
-        this.data = {...packageData.data, cubeBuffer: this.cubeBuffer}
+        this.data = {...packageData.data, cubeBuffer: this.cubeBuffer, skyboxShader: this.skyboxShader}
         this.params = packageData.attributes
         this.filteredEntities = packageData.filteredEntities
 
