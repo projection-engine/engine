@@ -130,10 +130,8 @@ export default class ShadowMapSystem extends System {
             this.gpu.clearDepth(1);
 
             if (lights2D.length > 0) {
-
                 this.shadowsFrameBuffer.startMapping()
                 this.gpu.enable(this.gpu.SCISSOR_TEST);
-
                 for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
                     if (face < lights2D.length) {
                         this.gpu.viewport(

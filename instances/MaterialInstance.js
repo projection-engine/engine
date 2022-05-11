@@ -18,9 +18,12 @@ export default class MaterialInstance {
         this._initializeSettings(settings)
 
         if (cubeMapShaderCode)
-            this.cubeMapShader = new ShaderInstance(vertexShader, cubeMapShaderCode, this.gpu, m => null)
-
+            this.cubeMapShader = [cubeMapShaderCode, vertexShader]
         this.shader = [shader, vertexShader, uniformData, onCompiled]
+    }
+
+    set cubeMapShader([shader, vertexShader]) {
+        this._cubeMapShader = new ShaderInstance(vertexShader, shader, this.gpu, m => null)
     }
 
     _initializeSettings(settings) {
@@ -98,7 +101,7 @@ export default class MaterialInstance {
             })
     }
 
-    use(bind = true, additionalUniforms = {}, isCubeMap=false) {
+    use(bind = true, additionalUniforms = {}, isCubeMap = false) {
         const shader = isCubeMap ? this.cubeMapShader : this._shader
         if (bind)
             shader.use()

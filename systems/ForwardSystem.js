@@ -10,6 +10,7 @@ export default class ForwardSystem extends System {
         super([]);
         this.gpu = gpu
     }
+
     execute(options, systems, data, sceneColor) {
         super.execute()
         const {
@@ -36,7 +37,6 @@ export default class ForwardSystem extends System {
         this.lastMaterial = undefined
 
 
-
         for (let m = 0; m < meshes.length; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
@@ -60,66 +60,68 @@ export default class ForwardSystem extends System {
                 } else if (skybox && skybox.cubeMap !== undefined) {
                     ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
                     ambient.prefilteredMap = skybox?.cubeMap.prefiltered
-                    ambient.prefilteredLod = 6
+                    ambient.prefilteredLod = skybox?.prefilteredMipmaps
                 }
 
-                this.drawMesh(
+                ForwardSystem.drawMesh({
                     mesh,
-                    camera.position,
-                    camera.viewMatrix,
-                    camera.projectionMatrix,
-                    t.transformationMatrix,
-                    mat,
-                    current.components[COMPONENTS.MESH].normalMatrix,
-                    current.components[COMPONENTS.MATERIAL],
+                    camPosition: camera.position,
+                    viewMatrix: camera.viewMatrix,
+                    projectionMatrix: camera.projectionMatrix,
+                    transformMatrix: t.transformationMatrix,
+                    material: mat,
+                    normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
+                    materialComponent: current.components[COMPONENTS.MATERIAL],
                     brdf,
 
-
-                    maxTextures,
+                    directionalLightsQuantity: maxTextures,
                     directionalLightsData,
                     dirLightPOV,
-
                     pointLightsQuantity,
                     pointLightData,
 
                     elapsed,
-                    ambient.irradianceMap,
-                    ambient.prefilteredMap,
-                    ambient.prefilteredLod,
-                    sceneColor
-                )
+                    closestIrradiance: ambient.irradianceMap,
+                    closestPrefiltered: ambient.prefilteredMap,
+                    prefilteredLod: ambient.prefilteredLod,
+                    sceneColor,
+                    lastMaterial: this.lastMaterial,
+                    gpu: this.gpu
+                })
+                this.lastMaterial = mat?.id
             }
         }
         this.gpu.bindVertexArray(null)
     }
 
-    drawMesh(
-        mesh,
-        camPosition,
-        viewMatrix,
-        projectionMatrix,
-        transformMatrix,
-        material,
-        normalMatrix,
-        materialComponent,
-        brdf,
+    static drawMesh({
+                        mesh,
+                        camPosition,
+                        viewMatrix,
+                        projectionMatrix,
+                        transformMatrix,
+                        material,
+                        normalMatrix,
+                        materialComponent,
+                        brdf,
+                        directionalLightsQuantity,
+                        directionalLightsData,
+                        dirLightPOV,
+                        pointLightsQuantity,
+                        pointLightData,
+                        elapsed,
+                        closestIrradiance,
+                        closestPrefiltered,
+                        prefilteredLod,
+                        sceneColor,
+                        lastMaterial,
 
-        directionalLightsQuantity,
-        directionalLightsData,
-        dirLightPOV,
-        pointLightsQuantity,
-        pointLightData,
-
-        elapsed,
-        closestIrradiance,
-        closestPrefiltered,
-        prefilteredLod,
-        sceneColor
-    ) {
+                        gpu
+                    }) {
 
         if (material && material.settings?.isForwardShaded) {
             mesh.use()
-            material.use(this.lastMaterial !== material.id, {
+            material.use(lastMaterial !== material.id, {
                 projectionMatrix,
                 transformMatrix,
                 viewMatrix,
@@ -144,31 +146,29 @@ export default class ForwardSystem extends System {
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             })
 
+            if (material.settings.doubleSided)
+                gpu.disable(gpu.CULL_FACE)
+            else if (material.settings.cullFace)
+                gpu.cullFace(gpu[material.settings?.cullFace])
+            if (!material.settings.depthMask)
+                gpu.depthMask(false)
+            if (!material.settings.depthTest)
+                gpu.disable(gpu.DEPTH_TEST)
+            if (!material.settings.blend)
+                gpu.disable(gpu.BLEND)
+            else if (material.settings.blendFunc)
+                gpu.blendFunc(gpu[material.settings.blendFuncSource], gpu[material.settings?.blendFuncTarget])
 
-            this.lastMaterial = material.id
-            if (material.settings?.doubleSided)
-                this.gpu.disable(this.gpu.CULL_FACE)
-            else if(material.settings?.cullFace)
-                this.gpu.cullFace(this.gpu[material.settings?.cullFace])
-            if (!material.settings?.depthMask)
-                this.gpu.depthMask(false)
-            if (!material.settings?.depthTest)
-                this.gpu.disable(this.gpu.DEPTH_TEST)
-            if (!material.settings?.blend)
-                this.gpu.disable(this.gpu.BLEND)
-            else if(material.settings?.blendFunc)
-                this.gpu.blendFunc(this.gpu[material.settings?.blendFuncSource], this.gpu[material.settings?.blendFuncTarget])
-
-            this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
+            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 
             if (material.settings?.doubleSided)
-                this.gpu.enable(this.gpu.CULL_FACE)
+                gpu.enable(gpu.CULL_FACE)
             if (!material.settings?.depthMask)
-                this.gpu.depthMask(true)
+                gpu.depthMask(true)
             if (!material.settings?.depthTest)
-                this.gpu.enable(this.gpu.DEPTH_TEST)
+                gpu.enable(gpu.DEPTH_TEST)
             if (!material.settings?.blend)
-                this.gpu.enable(this.gpu.BLEND)
+                gpu.enable(gpu.BLEND)
             mesh.finish()
         }
     }
