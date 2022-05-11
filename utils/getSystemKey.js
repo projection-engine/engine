@@ -9,6 +9,7 @@ import ShadowMapSystem from "../systems/ShadowMapSystem";
 import TransformSystem from "../systems/TransformSystem";
 import CubeMapSystem from "../systems/CubeMapSystem";
 import ScriptSystem from "../systems/ScriptSystem";
+import DepthSystem from "../systems/DepthSystem";
 
 export default function getSystemKey(s, gpu, resolution) {
     switch (true) {
@@ -34,6 +35,9 @@ export default function getSystemKey(s, gpu, resolution) {
             return new CubeMapSystem(gpu)
         case s  === SYSTEMS.SCRIPT:
             return new ScriptSystem(gpu, gpu.canvas.id)
+
+        case s  === SYSTEMS.DEPTH_PRE_PASS:
+            return new DepthSystem(gpu, resolution)
         default:
             return undefined
     }

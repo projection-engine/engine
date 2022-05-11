@@ -10,7 +10,6 @@ out vec4 vPosition;
 void main() { 
     vPosition = transformMatrix * vec4(position , 1.) ;
     gl_Position = projectionMatrix * viewMatrix * vPosition;
-
 }
 `
 
@@ -18,7 +17,6 @@ export const fragment = `#version 300 es
 precision mediump  float;
 
 void main(void){
- 
 }
 `
 
