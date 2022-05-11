@@ -1,7 +1,5 @@
 import {mat4} from "gl-matrix";
 import {lookAt} from "../utils/utils";
-import cube from "../templates/CUBE.js";
-import VBO from "./VBO";
 import * as  shaderCode from '../shaders/misc/cubeMap.glsl'
 import ShaderInstance from "./ShaderInstance";
 

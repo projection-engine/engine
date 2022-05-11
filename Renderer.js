@@ -1,7 +1,7 @@
 import RootCameraInstance from "./instances/RootCameraInstance";
 import RenderingWrapper from "./systems/RenderingWrapper";
 import brdfImg from "./utils/brdf_lut.jpg";
-import {createTexture, createVAO} from "./utils/utils";
+import {createTexture} from "./utils/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/meshDeferred.glsl";
 import {DATA_TYPES} from "./templates/DATA_TYPES";

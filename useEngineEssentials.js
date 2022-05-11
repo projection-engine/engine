@@ -2,7 +2,6 @@ import {useReducer, useState} from "react";
 import PickComponent from "./components/PickComponent";
 import COMPONENTS from "./templates/COMPONENTS";
 import ScriptComponent from "./components/ScriptComponent";
-import {mat4} from "gl-matrix";
 
 export default function useEngineEssentials() {
     const [meshes, setMeshes] = useState([])
