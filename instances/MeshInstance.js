@@ -38,9 +38,9 @@ export default class MeshInstance {
         this.material = material
         this.maxBoundingBox = maxBoundingBox
         this.minBoundingBox = minBoundingBox
-
-        this.trianglesQuantity = indices.length / 3
-        this.verticesQuantity = indices.length
+        const l = indices.length
+        this.trianglesQuantity = l / 3
+        this.verticesQuantity = l
 
         this.VAO = createVAO(gpu)
 

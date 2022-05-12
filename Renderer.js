@@ -95,7 +95,8 @@ export default class Renderer {
         this.params.elapsed = elapsed
 
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
-        for (let s = 0; s < this.sortedSystems.length; s++) {
+        const l = this.sortedSystems.length
+        for (let s = 0; s < l; s++) {
             this.#systems[this.sortedSystems[s]]
                 .execute(
                     this.params,

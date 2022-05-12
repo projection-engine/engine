@@ -28,7 +28,7 @@ export default class ShaderInstance {
     regexArray = (global) => {
         return new RegExp('uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$', global ? 'gm' : 'm')
     }
-
+    length = 0
     constructor(vertex, fragment, gpu, setMessage = () => null) {
         let alert = []
         this.program = gpu.createProgram()
@@ -46,6 +46,8 @@ export default class ShaderInstance {
         this.uniforms = this.uniforms.filter(u => {
             return typeof u.uLocation === "object" || typeof u.uLocations === "object"
         })
+
+        this.length = this.uniforms.length
     }
 
     _compileShader(shaderCode, shaderType, pushMessage) {
@@ -165,18 +167,20 @@ export default class ShaderInstance {
     bindForUse(data) {
         let currentSamplerIndex = 0
 
-        for (let v = 0; v < this.uniforms.length; v++) {
+        for (let v = 0; v < this.length; v++) {
             const current = this.uniforms[v]
 
             if (current.arraySize !== undefined) {
                 const dataAttr = current.parent !== undefined ? data[current.parent] : data[current.name]
-                if (dataAttr)
-                    for (let i = 0; i < (current.arraySize < dataAttr.length ? current.arraySize : dataAttr.length); i++) {
+                if (dataAttr) {
+                    const l = (current.arraySize < dataAttr.length ? current.arraySize : dataAttr.length)
+                    for (let i = 0; i < l; i++) {
                         if (current.parent)
                             this._bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                         else
                             this._bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                     }
+                }
             } else {
                 const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
                 this._bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)

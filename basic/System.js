@@ -5,7 +5,8 @@ export default class System {
     execute() {}
     _find(elements, compare) {
         let found = []
-        for (let i = 0; i < elements.length; i++) {
+        const l = elements.length
+        for (let i = 0; i < l; i++) {
             if (compare(elements[i]))
                 found.push(elements[i])
         }

@@ -21,7 +21,8 @@ export default class TransformSystem extends System {
         super.execute()
         this._changed = false
         this._changedMeshes = []
-        for (let i = 0; i < entities.length; i++) {
+        const l = entities.length
+        for (let i = 0; i < l; i++) {
             const current = entities[i]
             if (current !== undefined && (current.components[COMPONENTS.TRANSFORM]?.changed)) {
                 this._changedMeshes.push(current)
@@ -57,8 +58,8 @@ export default class TransformSystem extends System {
                     )
                 else
                     current.components[COMPONENTS.TRANSFORM].transformationMatrix = transformationMatrix
-
-                for (let j = 0; j < entities.length; j++) {
+                const lT= entities.length
+                for (let j = 0; j < lT; j++) {
                     if (entities[j].components[COMPONENTS.TRANSFORM] && entities[j].linkedTo === current.id)
                         entities[j].components[COMPONENTS.TRANSFORM].changed = true
                 }

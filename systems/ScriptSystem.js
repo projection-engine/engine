@@ -17,7 +17,7 @@ export default class ScriptSystem extends System {
         this.gpu = gpu
         const canvas = document.getElementById(canvasID)
         this.id = canvas.id.replace('-canvas', '')
-        const targetID =canvasID + '-scripting'
+        const targetID = canvasID + '-scripting'
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
         else {
@@ -72,20 +72,23 @@ export default class ScriptSystem extends System {
 
             this.renderTarget.style.display = 'block'
             const keys = Object.keys(scriptedEntities)
-            for (let i = 0; i < keys.length; i++) {
+            const kL = keys.length
+            for (let i = 0; i < kL; i++) {
                 const embeddedScript = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID]
-                if(embeddedScript)
+                if (embeddedScript)
                     this.executeLoop(embeddedScript.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
                 else {
-                    const entityScripts =  scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].scripts
-                    for (let j = 0; j < entityScripts.length; j++) {
+
+                    const entityScripts = scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].scripts
+                    const sL = entityScripts.length
+                    for (let j = 0; j < sL; j++) {
                         const currentS = scripts[entityScripts[j]]
                         if (currentS)
                             this.executeLoop(currentS.executor, elapsed, {[scriptedEntities[keys[i]].id]: scriptedEntities[keys[i]]}, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
                     }
                 }
             }
-            // LEVEL BLUEPRINT
+
             if (scripts[this.id])
                 this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
         } else if (this.eventSet) {
@@ -102,7 +105,7 @@ export default class ScriptSystem extends System {
         }
     }
 
-    executeLoop(executor, elapsed, entities, camera, meshSources, pickSystem,entitiesArr, updateAllLights) {
+    executeLoop(executor, elapsed, entities, camera, meshSources, pickSystem, entitiesArr, updateAllLights) {
 
         executor.execute({
             elapsed,

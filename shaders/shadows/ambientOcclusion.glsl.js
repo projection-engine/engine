@@ -1,65 +1,72 @@
 export const vertex = `#version 300 es
-layout (location = 0) in vec3 position;
-out vec2 texCoord;
+
+layout (location = 0) in vec3 Position;
+
+uniform float gAspectRatio;
+uniform float gTanHalfFOV;
+
+out vec2 TexCoord;
+out vec2 ViewRay;
 
 void main()
 {
-    texCoord = (position.xy) * 0.5 + 0.5;
-    gl_Position = vec4(position, 1);
+    gl_Position = vec4(Position, 1.0);
+    TexCoord = (Position.xy + vec2(1.0)) / 2.0;
+    ViewRay.x = Position.x * gAspectRatio * gTanHalfFOV;
+    ViewRay.y = Position.y * gTanHalfFOV;
 }
 `
 export const fragment = `#version 300 es
 
-precision highp float;
+in vec2 TexCoord;
+in vec2 ViewRay;
 
-out float fragColor;
+out vec4 FragColor;
 
-in vec2 texCoords;
+uniform sampler2D gDepthMap;
+uniform float gSampleRad;
+uniform mat4 gProj;
 
-uniform sampler2D positionSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D noiseSampler;
-
-uniform vec3 samples[64];
+const int MAX_KERNEL_SIZE = 64;
+uniform vec3 gKernel[MAX_KERNEL_SIZE];
 
 
-int kernelSize = 64;
-float radius = 0.5;
-float bias = 0.025;
+float CalcViewZ(vec2 Coords)
+{
+    float Depth = texture(gDepthMap, Coords).x;
+    float ViewZ = gProj[3][2] / (2 * Depth -1 - gProj[2][2]);
+    return ViewZ;
+}
 
-// tile noise texture over screen based on screen dimensions divided by noise size
-const vec2 noiseScale = vec2(1920.0/4.0, 1080.0/4.0); 
-
-uniform mat4 projectionMatrix;
 
 void main()
 {
-    vec3 fragPos = texture(positionSampler, texCoords).xyz;
-    vec3 normal = normalize(texture(normalSampler, texCoords).rgb);
-    vec3 randomVec = normalize(texture(noiseSampler, texCoords * noiseScale).xyz);
-    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
-    vec3 bitangent = cross(normal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, normal);
-    float occlusion = 0.0;
-    
-    for(int i = 0; i < kernelSize; ++i)
-    {
-        vec3 samplePos = TBN * samples[i];
-        samplePos = fragPos + samplePos * radius; 
-       
+    float ViewZ = CalcViewZ(TexCoord);
+
+    float ViewX = ViewRay.x * ViewZ;
+    float ViewY = ViewRay.y * ViewZ;
+
+    vec3 Pos = vec3(ViewX, ViewY, ViewZ);
+
+    float AO = 0.0;
+
+    for (int i = 0 ; i < MAX_KERNEL_SIZE ; i++) {
+        vec3 samplePos = Pos + gKernel[i];
         vec4 offset = vec4(samplePos, 1.0);
-        offset = projectionMatrix * offset;
-        offset.xyz /= offset.w; 
-        offset.xyz = offset.xyz * 0.5 + 0.5;
-        
-        float sampleDepth = texture(positionSampler, offset.xy).z;
-        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
-        
-        occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;           
+        offset = gProj * offset;
+        offset.xy /= offset.w;
+        offset.xy = offset.xy * 0.5 + vec2(0.5);
+
+        float sampleDepth = CalcViewZ(offset.xy);
+
+        if (abs(Pos.z - sampleDepth) < gSampleRad) {
+            AO += step(sampleDepth,samplePos.z);
+        }
     }
-    occlusion = 1.0 - (occlusion / float(kernelSize));
-    
-    fragColor = 1.;
+
+    AO = 1.0 - AO/64.0;
+
+    FragColor = vec4(pow(AO, 2.0));
 }
 `
 

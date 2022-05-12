@@ -94,14 +94,16 @@ export default class ShadowMapSystem extends System {
 
 
         let lights2D = [], sky = false, lights3D = [], transformChanged = systems[SYSTEMS.TRANSFORMATION]?.changed
-        for (let i = 0; i < directionalLights.length; i++) {
+        const dirL = directionalLights.length
+        for (let i = 0; i < dirL; i++) {
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
             if ((current.changed || transformChanged || skylight?.changed) && current.shadowMap) {
                 lights2D.push(current)
                 current.changed = false
             }
         }
-        for (let i = 0; i < pointLights.length; i++) {
+        const pL = pointLights.length
+        for (let i = 0; i < pL; i++) {
             const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
 
             if ((current.changed || transformChanged) && current.shadowMap) {
@@ -214,7 +216,8 @@ export default class ShadowMapSystem extends System {
     }
 
     _loopMeshes(meshes, meshSources, meshSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
-        for (let m = 0; m < meshes.length; m++) {
+        const l = meshes.length
+        for (let m = 0; m < l; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined) {

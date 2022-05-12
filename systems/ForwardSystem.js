@@ -36,8 +36,8 @@ export default class ForwardSystem extends System {
         const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
         this.lastMaterial = undefined
 
-
-        for (let m = 0; m < meshes.length; m++) {
+        const l = meshes.length
+        for (let m = 0; m < l; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined) {

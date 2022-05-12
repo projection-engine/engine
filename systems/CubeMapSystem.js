@@ -45,14 +45,14 @@ export default class CubeMapSystem extends System {
                 this.step = STEPS_CUBE_MAP.IRRADIANCE
                 break
             case STEPS_CUBE_MAP.IRRADIANCE:
-                for (let i = 0; i < cubeMaps.length; i++) {
+                for (let i = 0; i < this.lastCallLength; i++) {
                     const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
                     current.cubeMap.generateIrradiance(cubeBuffer)
                 }
                 this.step = STEPS_CUBE_MAP.PRE_FILTERED
                 break
             case STEPS_CUBE_MAP.PRE_FILTERED:
-                for (let i = 0; i < cubeMaps.length; i++) {
+                for (let i = 0; i < this.lastCallLength; i++) {
                     const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
                     current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution, cubeBuffer)
                 }
@@ -70,12 +70,14 @@ export default class CubeMapSystem extends System {
     static sort(meshes, cubeMaps){
         const changedMeshes = meshes
         let newCubeMaps = {}
-        for (let i = 0; i < cubeMaps.length; i++) {
+        const l = cubeMaps.length
+        const lm = changedMeshes.length
+        for (let i = 0; i < l; i++) {
             const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
                 pos = cubeMaps[i].components[COMPONENTS.TRANSFORM].position,
                 radius = current.radius
 
-            for (let m = 0; m < changedMeshes.length; m++) {
+            for (let m = 0; m < lm; m++) {
                 const currentMesh = changedMeshes[m].components
                 if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos))
                     newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
@@ -91,7 +93,7 @@ export default class CubeMapSystem extends System {
             cubeBuffer,
             skyboxShader
         } = data
-        for (let i = 0; i < cubeMaps.length; i++) {
+        for (let i = 0; i < this.lastCallLength; i++) {
             const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
             current.cubeMap.resolution = current.resolution
             current.cubeMap.draw((yaw, pitch, projection, index) => {
@@ -134,8 +136,8 @@ export default class CubeMapSystem extends System {
         } = data
 
         const {fallbackMaterial, brdf, elapsed} = options
-
-        for (let m = 0; m < meshes.length; m++) {
+        const l = meshes.length
+        for (let m = 0; m < l; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined) {

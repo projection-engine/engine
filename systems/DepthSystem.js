@@ -25,6 +25,7 @@ export default class DepthSystem extends System {
         const {camera} = options
 
         this.shader.use()
+        this.frameBuffer.startMapping()
         for(let i in meshes){
             const mesh = meshes[i]
             this.shader.bindForUse({
@@ -33,5 +34,6 @@ export default class DepthSystem extends System {
                 projectionMatrix: camera.projectionMatrix
             })
         }
+        this.frameBuffer.stopMapping()
     }
 }
