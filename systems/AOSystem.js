@@ -1,10 +1,8 @@
 import System from "../basic/System";
-import {vec3} from "gl-matrix";
 import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from '../shaders/shadows/ambientOcclusion.glsl'
+import * as shaderCode from '../shaders/shadows/AO.glsl'
 import FramebufferInstance from "../instances/FramebufferInstance";
 import SYSTEMS from "../templates/SYSTEMS";
-import {fragment} from "../shaders/shadows/ambientOcclusion.glsl";
 
 export default class AOSystem extends System {
     _ready = false

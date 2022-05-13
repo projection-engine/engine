@@ -1,8 +1,8 @@
 import System from "../../basic/System";
 import ShaderInstance from "../../instances/ShaderInstance";
 
-import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
-import CompositPass from "./CompositPass";
+import * as shaderCode from '../../shaders/FXAA.glsl'
+import CompositePass from "./CompositePass";
 import FinalPass from "./FinalPass";
 
 
@@ -10,16 +10,14 @@ export default class PostProcessingWrapper extends System {
     constructor(gpu, postProcessingResolution) {
         super([]);
         this.gpu = gpu
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.AMDFSR1, gpu)
-        this.compositPass = new CompositPass(gpu, postProcessingResolution)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
+        this.compositPass = new CompositePass(gpu, postProcessingResolution)
         this.finalPass = new FinalPass(gpu, postProcessingResolution)
     }
 
     execute(options, systems, data, entities, entitiesMap, [a, b]) {
         super.execute()
         const {fsr} = options
-
-
         let worker = a, output = b
 
         this.compositPass.execute(options, systems, data, entities, entitiesMap, [worker, output])

@@ -1,10 +1,10 @@
 import System from "../../basic/System";
 import ShaderInstance from "../../instances/ShaderInstance";
-import {vertex} from '../../shaders/misc/postProcessing.glsl'
-import * as shaderCode from '../../shaders/misc/bloom.glsl'
+import {vertex} from '../../shaders/FXAA.glsl'
+import * as shaderCode from '../../shaders/EFFECTS.glsl'
 import FramebufferInstance from "../../instances/FramebufferInstance";
 
-export default class CompositPass extends System {
+export default class CompositePass extends System {
     constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
         super([]);
         this.gpu = gpu
@@ -58,8 +58,9 @@ export default class CompositPass extends System {
             distortion,
             chromaticAberration,
             bloom,
-            distortionStrength, chromaticAberrationStrength
-        } = options
+            distortionStrength,
+            chromaticAberrationStrength
+        } = options.camera
 
         if(bloom){
             output.startMapping()

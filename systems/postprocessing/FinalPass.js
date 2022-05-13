@@ -1,37 +1,37 @@
 import System from "../../basic/System";
 import ShaderInstance from "../../instances/ShaderInstance";
 
-import * as shaderCode from '../../shaders/misc/postProcessing.glsl'
+import * as shaderCode from '../../shaders/FXAA.glsl'
 
 
 export default class FinalPass extends System {
     lookUpRandom = []
     lookUpIndex = 0
+
     constructor(gpu) {
         super([]);
         this.gpu = gpu
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-        for (let i=1e6; i> 0; i--) {
+        for (let i = 1e6; i > 0; i--) {
             this.lookUpRandom.push(Math.random());
         }
     }
 
     lookup() {
-        return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex=0] : this.lookUpRandom[this.lookUpIndex];
+        return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex = 0] : this.lookUpRandom[this.lookUpIndex];
     }
+
     execute(options, [worker, output]) {
         super.execute()
         const {
-            gamma,
-            exposure,
             fxaa,
-
-            filmGrain,
             FXAASpanMax,
             FXAAReduceMin,
             FXAAReduceMul,
-            filmGrainStrength
         } = options
+        const {filmGrain, filmGrainStrength, gamma, exposure} = options.camera
+
+        console.log(filmGrain, filmGrainStrength)
         this.shader.use()
         output.startMapping()
         this.shader.bindForUse({

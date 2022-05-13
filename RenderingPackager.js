@@ -1,7 +1,7 @@
 import COMPONENTS from "./templates/COMPONENTS";
 import ShaderInstance from "./instances/ShaderInstance";
-import * as shaderCodeSkybox from "./shaders/misc/cubeMap.glsl";
-import * as skyboxCode from "./shaders/misc/skybox.glsl";
+import * as shaderCodeSkybox from "./shaders/CUBE_MAP.glsl";
+import * as skyboxCode from "./shaders/SKYBOX.glsl";
 import CubeMapInstance from "./instances/CubeMapInstance";
 import {createTexture, lookAt} from "./utils/utils";
 import cloneClass from "./utils/cloneClass";

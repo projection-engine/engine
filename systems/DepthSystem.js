@@ -1,9 +1,8 @@
 import System from "../basic/System";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from '../shaders/shadows/shadow.glsl'
+import * as shaderCode from '../shaders/shadows/SHADOW_MAP.glsl'
 import COMPONENTS from "../templates/COMPONENTS";
-import {vertexDepth} from "../shaders/shadows/shadow.glsl";
 
 export default class DepthSystem extends System {
     _ready = false

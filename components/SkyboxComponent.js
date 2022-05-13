@@ -4,8 +4,8 @@ export default class SkyboxComponent extends Component {
     __cubeMap
     __initialized = false
     _resolution = 512
-    _gamma = 1
-    _exposure = 1
+    // _gamma = 1
+    // _exposure = 1
     imageID = undefined
     _prefilteredMipmaps = 5
 

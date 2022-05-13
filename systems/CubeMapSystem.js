@@ -29,7 +29,6 @@ export default class CubeMapSystem extends System {
         super.execute()
         const {
             cubeMaps,
-            skybox,
             meshes,
             cubeBuffer
         } = data

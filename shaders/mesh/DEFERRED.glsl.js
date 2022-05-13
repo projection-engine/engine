@@ -1,13 +1,7 @@
 export const vertex = `#version 300 es
-#define MAX_LIGHTS 4
-
 layout (location = 0) in vec3 position;
- 
- 
 out vec2 texCoord; 
- 
 void main() {
-
     texCoord = position.xy * 0.5 + 0.5;
     gl_Position = vec4(position, 1);
 }    
@@ -31,11 +25,12 @@ uniform mat3 directionalLightsData[MAX_LIGHTS];
 uniform mat4 dirLightPOV[MAX_LIGHTS];
 uniform vec3 cameraVec;
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
-uniform mat3 settings;
+uniform mat4 settings;
 //[
-//    dirLightQuantity, shadowMapResolution, indirectLightAttenuation,
-//    gridSize, noGI, lightQuantity,
-//    noShadowProcessing, shadowMapsQuantity, hasAO
+//    dirLightQuantity, shadowMapResolution, indirectLightAttenuation, pcfSamples
+//    gridSize, noGI, lightQuantity, 0
+//    noShadowProcessing, shadowMapsQuantity, hasAO, 0
+// 0 0 0 0
 //] 
 
 uniform sampler2D aoSampler;
@@ -73,6 +68,7 @@ out vec4 finalColor;
 @import(computePointLight)
 
 void main() {
+    float pcfSamples = settings[0][3]; 
     bool hasAO = settings[2][2] == 1.;
     float shadowMapsQuantity = settings[2][1];
     int dirLightQuantity = int(settings[0][0]);
@@ -136,7 +132,7 @@ void main() {
                 albedo
             );
             if(directionalLightsData[i][2][2] == 1. && noShadowProcessing == false)
-                shadows += calculateShadows(fragPosLightSpace, atlasFace, shadowMapTexture, shadowMapsQuantity, shadowMapResolution)/quantityToDivide;
+                shadows += calculateShadows(fragPosLightSpace, atlasFace, shadowMapTexture, shadowMapsQuantity, shadowMapResolution, pcfSamples)/quantityToDivide;
             else
                 shadows += 1./quantityToDivide;            
         }
@@ -155,7 +151,6 @@ void main() {
       
         Lo = Lo* shadows; 
         color = (ambient  + Lo +  GI) * ao;
-        color = vec3(ao);
     }
     else
         color = albedo ;

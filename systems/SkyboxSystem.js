@@ -1,5 +1,5 @@
 import System from "../basic/System";
-import * as shaderCode from "../shaders/misc/skybox.glsl";
+import * as shaderCode from "../shaders/SKYBOX.glsl";
 import ShaderInstance from "../instances/ShaderInstance";
 
 export default class SkyboxSystem extends System {
@@ -33,8 +33,8 @@ export default class SkyboxSystem extends System {
                 uTexture: skybox.cubeMap.texture,
                 projectionMatrix: projection,
                 viewMatrix: view,
-                gamma: skybox.gamma,
-                exposure: skybox.exposure
+                // gamma: skybox.gamma,
+                // exposure: skybox.exposure
             })
 
             gpu.drawArrays(gpu.TRIANGLES, 0, 36)

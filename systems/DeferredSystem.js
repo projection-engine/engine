@@ -2,8 +2,8 @@ import System from "../basic/System";
 
 import SYSTEMS from "../templates/SYSTEMS";
 import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from '../shaders/mesh/deferred.glsl'
-import * as shaderFlatCode from '../shaders/mesh/deferredFlat.glsl'
+import * as shaderCode from '../shaders/mesh/DEFERRED.glsl'
+import * as shaderFlatCode from '../shaders/mesh/FLAT.glsl'
 import SHADING_MODELS from "../templates/SHADING_MODELS";
 
 export default class DeferredSystem extends System {
@@ -30,7 +30,7 @@ export default class DeferredSystem extends System {
 
     execute(options, systems, data, giGridSize, giFBO) {
         super.execute()
-        if(this.aoTexture === undefined && systems[SYSTEMS.AO])
+        if (this.aoTexture === undefined && systems[SYSTEMS.AO])
             this.aoTexture = systems[SYSTEMS.AO].texture
         const {
             pointLightsQuantity,
@@ -44,13 +44,14 @@ export default class DeferredSystem extends System {
         const {
             ao,
             camera,
-            shadingModel
+            shadingModel,
+            pcfSamples
         } = options
         super.execute()
         const shadowMapSystem = systems[SYSTEMS.SHADOWS],
             deferredSystem = systems[SYSTEMS.MESH]
 
-        const mutableData = {shadowMapResolution: 1, shadowMapsQuantity: 1,  indirectLightAttenuation: 1}
+        const mutableData = {shadowMapResolution: 1, shadowMapsQuantity: 1, indirectLightAttenuation: 1}
         if (shadowMapSystem) {
             mutableData.shadowMapResolution = shadowMapSystem.maxResolution
             mutableData.shadowMapsQuantity = shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture
@@ -83,9 +84,10 @@ export default class DeferredSystem extends System {
 
             cameraVec: camera.position,
             settings: [
-                maxTextures, mutableData.shadowMapResolution, mutableData.indirectLightAttenuation,
-                giGridSize ? giGridSize : 1,  giFBO ? 0 : 1, pointLightsQuantity,
-                shadowMapSystem ? 0 : 1, mutableData.shadowMapsQuantity, ao
+                maxTextures, mutableData.shadowMapResolution, mutableData.indirectLightAttenuation, pcfSamples,
+                giGridSize ? giGridSize : 1, giFBO ? 0 : 1, pointLightsQuantity, 0,
+                shadowMapSystem ? 0 : 1, mutableData.shadowMapsQuantity, ao ? 1 : 0, 0,
+                0, 0, 0, 0
             ],
             directionalLightsData,
             dirLightPOV,

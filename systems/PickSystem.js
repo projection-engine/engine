@@ -1,5 +1,5 @@
 import System from "../basic/System";
-import * as shaderCode from "../shaders/misc/picker.glsl";
+import * as shaderCode from "../shaders/PICK.glsl";
 import ShaderInstance from "../instances/ShaderInstance";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import {mat4} from "gl-matrix";
@@ -26,7 +26,6 @@ export default class PickSystem extends System {
             vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
             indices: [0, 3, 9, 0, 9, 6, 8, 10, 21, 8, 21, 19, 20, 23, 17, 20, 17, 14, 13, 15, 4, 13, 4, 2, 7, 18, 12, 7, 12, 1, 22, 11, 5, 22, 5, 16]
         })
-
     }
 
     pickElement(drawCallback, pickCoords, camera, sameSize, isOrtho) {

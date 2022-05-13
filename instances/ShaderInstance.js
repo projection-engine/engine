@@ -1,7 +1,6 @@
-
 import {bindTexture} from "../utils/utils";
 import GI from "../shaders/templates/GI";
-import Shadows from "../shaders/templates/Shadows";
+import Shadows from "../shaders/templates/SHADOWS";
 import * as PROBES from "../shaders/templates/PROBES";
 import {PBR} from "../shaders/templates/PBR";
 

@@ -29,10 +29,7 @@ flat out int dirLightsQuantity;
  
 
 void main(){
-
-
-    vPosition =  transformMatrix *   vec4(position, 1.0);
-    
+    vPosition =  transformMatrix *   vec4(position, 1.0);    
     vec3 T = normalize( normalMatrix  * normalize(tangentVec));
     vec3 N =  normalize(normalMatrix * normal);
     vec3 biTangent = cross(N, tangentVec); 

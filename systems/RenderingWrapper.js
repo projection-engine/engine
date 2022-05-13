@@ -8,7 +8,7 @@ import ForwardSystem from "./ForwardSystem";
 import {copyTexture} from "../utils/utils";
 import PostProcessingWrapper from "./postprocessing/PostProcessingWrapper";
 import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from "../shaders/misc/postProcessing.glsl";
+import * as shaderCode from "../shaders/FXAA.glsl";
 
 
 export default class RenderingWrapper extends System {
