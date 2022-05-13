@@ -4,10 +4,10 @@ import {VIEWS} from "./ShadowMapSystem";
 import COMPONENTS from "../templates/COMPONENTS";
 import CubeMapSystem from "./CubeMapSystem";
 import CubeMapInstance from "../instances/CubeMapInstance";
+import {WebWorker} from "../utils/WebWorker";
 
 export const STEPS_LIGHT_PROBE = {
     GENERATION: 0,
-
 
     DONE: 3,
     CALCULATE: 4
@@ -21,6 +21,8 @@ export default class LightProbeSystem extends System {
         super([]);
         this.gpu = gpu
         this.baseCubeMap = new CubeMapInstance(gpu, 128, false)
+        this.worker = new WebWorker()
+
     }
 
     execute(options, systems, data) {
@@ -63,7 +65,9 @@ export default class LightProbeSystem extends System {
                 this.step = STEPS_LIGHT_PROBE.CALCULATE
                 break
             case STEPS_LIGHT_PROBE.CALCULATE:
-                this.lightProbeConsumption = CubeMapSystem.sort(meshes, lightProbes)
+                this.worker.createExecution({probes: lightProbes, meshes, COMPONENTS}, sort.toString())
+                    .then(res => this.lightProbeConsumption = res)
+
                 this.step = STEPS_LIGHT_PROBE.DONE
                 break
             default:
@@ -72,4 +76,61 @@ export default class LightProbeSystem extends System {
         }
     }
 
+
+}
+
+async function sort() {
+    self.addEventListener('message', (event) => {
+        const len = (a)  => {
+            let x = a[0];
+            let y = a[1];
+            let z = a[2];
+            return Math.hypot(x, y, z);
+        }
+         const subtract = (a, b) => {
+            const out = []
+            out[0] = a[0] - b[0];
+            out[1] = a[1] - b[1];
+            out[2] = a[2] - b[2];
+            return out;
+        }
+
+        const {
+            probes,
+            meshes,
+            COMPONENTS
+        } = event.data
+        const MAX_PROBES = 3
+        const sorted = {}
+        const l = probes.length
+        const lm = meshes.length
+        for (let meshIndex = 0; meshIndex < lm; meshIndex++) {
+            const intersecting = []
+            const cm = meshes[meshIndex]
+            for (let probeIndex = 0; probeIndex < l; probeIndex++) {
+                const current = probes[probeIndex].components
+                const probePosition = current[COMPONENTS.TRANSFORM].translation
+                const mPosition = cm.components[COMPONENTS.TRANSFORM].translation
+                if (intersecting.length > MAX_PROBES) {
+                    intersecting.push({
+                        id: probes[probeIndex].id,
+                        distance: len(subtract(probePosition, mPosition))
+                    })
+                } else {
+                    const currentDistance = len(subtract(probePosition, mPosition))
+                    for (let intIndex in intersecting) {
+                        if (currentDistance < intersecting[intIndex].distance) {
+                            intersecting[intIndex] = {
+                                id: probes[probeIndex].id,
+                                distance: currentDistance
+                            }
+                            break
+                        }
+                    }
+                }
+            }
+            sorted[cm.id] = intersecting
+        }
+        self.postMessage(sorted)
+    })
 }
