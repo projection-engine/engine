@@ -58,8 +58,17 @@ it can be used by multiple systems. `MaterialInstance` is another abstraction fo
 - Shader Settings
 ```
 // [
-//     dirLightQuantity,   shadowMapResolution, indirectLightAttenuation,
-//     gridSize,           noGI,                lightQuantity,
-//     noShadowProcessing, shadowMapsQuantity,  0
+//     dirLightQuantity,   shadowMapResolution, indirectLightAttenuation, pcfSamples, 
+//     gridSize,           noGI,                lightQuantity,            0
+//     noShadowProcessing, shadowMapsQuantity,  hasAO,                    0
+// ] 
+```
+
+- AO settings
+```
+// [
+//     total_strength, base,   area,
+//     falloff,        radius, samples,
+//     0,              0,      0
 // ] 
 ```

@@ -54,14 +54,23 @@ export default class AOSystem extends System {
     execute(options, systems, data) {
         super.execute()
         const depth = systems[SYSTEMS.DEPTH_PRE_PASS]
-
+        const {
+            total_strength, base, area,
+            falloff, radius, samples
+        } = options
         if (depth) {
+
 
             this.frameBuffer.startMapping()
             this.shader.use()
             this.shader.bindForUse({
                 randomSampler: this.noiseTexture,
                 depthSampler: depth.depth,
+                settings: [
+                    total_strength, base, area,
+                    falloff, radius, samples,
+                    0, 0, 0
+                ]
             })
             this.frameBuffer.draw(this.shader)
             this.frameBuffer.stopMapping()
@@ -83,25 +92,26 @@ export default class AOSystem extends System {
         const RAND_MAX = 1.,
             KERNEL_SIZE = 64
 
-        for (let i = 0 ; i < KERNEL_SIZE  ; i++ ) {
-            const scale = i / KERNEL_SIZE ;
-            const m= (0.1 + 0.9 * scale * scale)
+        for (let i = 0; i < KERNEL_SIZE; i++) {
+            const scale = i / KERNEL_SIZE;
+            const m = (0.1 + 0.9 * scale * scale)
             const v = []
-            v[0] = (2.0 * Math.random()/RAND_MAX - 1.0) * m
-            v[1] = (2.0 * Math.random()/RAND_MAX - 1.0) * m
-            v[2] = (2.0 * Math.random()/RAND_MAX - 1.0) * m
+            v[0] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
+            v[1] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
+            v[2] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
 
             this.kernels[i] = v;
         }
     }
 }
-function generateNoise({w, h}){
+
+function generateNoise({w, h}) {
     let p = w * h
     let noiseTextureData = new Float32Array(p * 2);
 
     for (let i = 0; i < p; ++i) {
         let index = i * 2;
-        noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
+        noiseTextureData[index] = Math.random() * 2.0 - 1.0;
         noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
     }
 

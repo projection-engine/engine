@@ -31,7 +31,6 @@ export default class FinalPass extends System {
         } = options
         const {filmGrain, filmGrainStrength, gamma, exposure} = options.camera
 
-        console.log(filmGrain, filmGrainStrength)
         this.shader.use()
         output.startMapping()
         this.shader.bindForUse({

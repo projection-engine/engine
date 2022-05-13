@@ -16,16 +16,16 @@ export const fragment = `#version 300 es
 
 precision highp float;
 
-#define total_strength  1.
-#define base  0.2
-#define area  0.0075
-#define falloff  0.000001
-#define radius  0.0002
-#define samples  16
+#define T  1.
+#define B  0.2
+#define A  0.0075
+#define F  0.000001
+#define R  0.0002
 
 in vec2 texCoords;
 uniform sampler2D depthSampler;
 uniform sampler2D randomSampler;
+uniform mat3 settings;
 
 out vec4 outColor;
 
@@ -49,6 +49,14 @@ vec3 normal_from_depth(float depth, vec2 texcoords) {
 
 void main()
 {
+  float total_strength = T * settings[0][0];
+  float base  = B * settings[0][1];
+  float area  =A *  settings[0][2];
+  float falloff  =F *  settings[1][0];
+  float radius  = R * settings[1][2];
+  const int samples = 16;
+  
+  
   vec3 sample_sphere[samples] = vec3[samples](
       vec3( 0.5381, 0.1856,-0.4319), vec3( 0.1379, 0.2486, 0.4430),
       vec3( 0.3371, 0.5679,-0.0057), vec3(-0.6999,-0.0451,-0.0019),
