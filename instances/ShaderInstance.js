@@ -1,5 +1,9 @@
-import Bundler from "./Bundler";
+
 import {bindTexture} from "../utils/utils";
+import GI from "../shaders/templates/GI";
+import Shadows from "../shaders/templates/Shadows";
+import * as PROBES from "../shaders/templates/PROBES";
+import {PBR} from "../shaders/templates/PBR";
 
 const TYPES = {
     'vec2': 'uniform2fv',
@@ -15,6 +19,48 @@ const TYPES = {
     'ivec3': 'uniform3iv',
     'bool': 'uniform1i'
 }
+
+export const METHODS = {
+    distributionGGX: '@import(distributionGGX)',
+    geometrySchlickGGX: '@import(geometrySchlickGGX)',
+    geometrySmith: '@import(geometrySmith)',
+    fresnelSchlick: '@import(fresnelSchlick)',
+    fresnelSchlickRoughness: '@import(fresnelSchlickRoughness)',
+    computeDirectionalLight: '@import(computeDirectionalLight)',
+    computePointLight: '@import(computePointLight)',
+
+
+    calculateShadows: '@import(calculateShadows)',
+    gi: '@import(GI)',
+
+    ambient: '@import(ambient)',
+    forwardAmbient: "@import(forwardAmbient)",
+    ambientUniforms: "@import(ambientUniforms)"
+}
+
+
+function applyMethods(shaderCode) {
+    let response = shaderCode
+
+    Object.keys(METHODS).forEach(key => {
+        if (key === 'gi')
+            response = response.replaceAll(METHODS[key], GI)
+        if (key === 'calculateShadows')
+            response = response.replaceAll(METHODS[key], Shadows)
+        if (key === 'ambient')
+            response = response.replaceAll(METHODS[key], PROBES.deferredAmbient)
+        if (key === 'forwardAmbient')
+            response = response.replaceAll(METHODS[key], PROBES.forwardAmbient)
+
+        if (key === 'ambientUniforms')
+            response = response.replaceAll(METHODS[key], PROBES.UNIFORMS)
+        if (PBR[key])
+            response = response.replaceAll(METHODS[key], PBR[key])
+    })
+
+    return response
+}
+
 export default class ShaderInstance {
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
@@ -29,6 +75,7 @@ export default class ShaderInstance {
         return new RegExp('uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$', global ? 'gm' : 'm')
     }
     length = 0
+
     constructor(vertex, fragment, gpu, setMessage = () => null) {
         let alert = []
         this.program = gpu.createProgram()
@@ -51,7 +98,7 @@ export default class ShaderInstance {
     }
 
     _compileShader(shaderCode, shaderType, pushMessage) {
-        const bundledCode = Bundler.applyMethods(shaderCode)
+        const bundledCode = applyMethods(shaderCode)
 
         const shader = this.gpu.createShader(shaderType)
 

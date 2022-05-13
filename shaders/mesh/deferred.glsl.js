@@ -35,9 +35,10 @@ uniform mat3 settings;
 //[
 //    dirLightQuantity, shadowMapResolution, indirectLightAttenuation,
 //    gridSize, noGI, lightQuantity,
-//    noShadowProcessing, shadowMapsQuantity, 0
+//    noShadowProcessing, shadowMapsQuantity, hasAO
 //] 
 
+uniform sampler2D aoSampler;
 uniform samplerCube shadowCube0;
 uniform samplerCube shadowCube1;
 uniform sampler2D positionSampler;
@@ -72,6 +73,7 @@ out vec4 finalColor;
 @import(computePointLight)
 
 void main() {
+    bool hasAO = settings[2][2] == 1.;
     float shadowMapsQuantity = settings[2][1];
     int dirLightQuantity = int(settings[0][0]);
     float shadowMapResolution = settings[0][1];
@@ -94,7 +96,9 @@ void main() {
         vec3 N = texture(normalSampler, texCoord).rgb;
         vec3 ambient = texture(ambientSampler, texCoord).rgb;
         float ao = texture(behaviourSampler, texCoord).r;
-     
+        if(hasAO == true)
+             ao *= texture(aoSampler, texCoord).r;
+            
         float roughness = texture(behaviourSampler, texCoord).g;
         float metallic =texture(behaviourSampler, texCoord).b;
         
@@ -108,7 +112,7 @@ void main() {
         if(noGI == false){
             vec3 lpvIntensity = computeGIIntensity(fragPosition, N, gridSize);
             vec3 lpvRadiance = vec3(max(0.0, lpvIntensity.r), max(0.0, lpvIntensity.g), max(0.0, lpvIntensity.b)) / PI;
-            GI = (lpvRadiance * albedo * ao) * indirectLightAttenuation;
+            GI = (lpvRadiance * albedo) * indirectLightAttenuation;
         }
     
         float shadows = dirLightQuantity > 0 || lightQuantity > 0?  0. : 1.0;
@@ -150,14 +154,15 @@ void main() {
         }
       
         Lo = Lo* shadows; 
-        color = (ambient  + Lo +  GI);
+        color = (ambient  + Lo +  GI) * ao;
+        color = vec3(ao);
     }
     else
         color = albedo ;
  
-    if(noShadowProcessing == true)
-        finalColor = vec4(1., 0., 0., 1.0);
-    else
+//    if(hasAO == true)
+//        finalColor = vec4(vec3(texture(aoSampler, texCoord).r), 1.0);
+//    else
         finalColor = vec4(color, 1.0);
 }
 `

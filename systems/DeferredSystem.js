@@ -7,6 +7,7 @@ import * as shaderFlatCode from '../shaders/mesh/deferredFlat.glsl'
 import SHADING_MODELS from "../templates/SHADING_MODELS";
 
 export default class DeferredSystem extends System {
+
     constructor(gpu) {
         super([]);
         this.gpu = gpu
@@ -29,6 +30,8 @@ export default class DeferredSystem extends System {
 
     execute(options, systems, data, giGridSize, giFBO) {
         super.execute()
+        if(this.aoTexture === undefined && systems[SYSTEMS.AO])
+            this.aoTexture = systems[SYSTEMS.AO].texture
         const {
             pointLightsQuantity,
             maxTextures,
@@ -39,6 +42,7 @@ export default class DeferredSystem extends System {
         } = data
 
         const {
+            ao,
             camera,
             shadingModel
         } = options
@@ -60,7 +64,6 @@ export default class DeferredSystem extends System {
             mutableData.indirectLightAttenuation = skylight?.attenuation
         }
 
-
         deferred.use()
         deferred.bindForUse({
             positionSampler: deferredSystem.frameBuffer.colors[0],
@@ -73,6 +76,8 @@ export default class DeferredSystem extends System {
             greenIndirectSampler: giFBO?.colors[1],
             blueIndirectSampler: giFBO?.colors[2],
 
+            aoSampler: this.aoTexture,
+
             shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
             shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,
 
@@ -80,7 +85,7 @@ export default class DeferredSystem extends System {
             settings: [
                 maxTextures, mutableData.shadowMapResolution, mutableData.indirectLightAttenuation,
                 giGridSize ? giGridSize : 1,  giFBO ? 0 : 1, pointLightsQuantity,
-                shadowMapSystem ? 0 : 1, mutableData.shadowMapsQuantity, 0
+                shadowMapSystem ? 0 : 1, mutableData.shadowMapsQuantity, ao
             ],
             directionalLightsData,
             dirLightPOV,

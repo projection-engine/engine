@@ -10,13 +10,14 @@ import TransformSystem from "../systems/TransformSystem";
 import CubeMapSystem from "../systems/CubeMapSystem";
 import ScriptSystem from "../systems/ScriptSystem";
 import DepthSystem from "../systems/DepthSystem";
+import AOSystem from "../systems/AOSystem";
 
 export default function getSystemKey(s, gpu, resolution) {
     switch (true) {
         case s  === SYSTEMS.CAMERA_CUBE:
             return  new CameraCubeSystem(gpu.canvas.id)
         case s  === SYSTEMS.AO:
-            return undefined
+            return new AOSystem(gpu, resolution)
         case s  === SYSTEMS.CULLING:
             return new CullingSystem(gpu)
         case s  === SYSTEMS.MESH:

@@ -14,12 +14,34 @@ void main() {
 `
 
 export const fragment = `#version 300 es
-precision mediump  float;
+precision highp  float;
 
 void main(void){
 }
 `
+export const vertexDepth = `#version 300 es
 
+layout (location = 1) in vec3 position;
+
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 projectionMatrix;
+out vec4 vPosition;
+ 
+void main() { 
+    vPosition = projectionMatrix * viewMatrix * transformMatrix * vec4(position , 1.) ;
+    gl_Position = vPosition;
+}
+`
+export const depth = `#version 300 es
+precision highp  float;
+
+in vec4 vPosition;
+out vec4 fragDepth;
+void main(void){
+    fragDepth = vec4(vec3(vPosition.b/vPosition.w), 1.);
+}
+`
 export const omniFragment = `#version 300 es
 precision mediump  float;
 
@@ -36,8 +58,6 @@ void main(void){
     gl_FragDepth = lightFragDist;
 }
 `
-
-
 
 
 export const debugVertex = `#version 300 es
@@ -65,3 +85,4 @@ void main(void){
     fragColor = vec4(texture(uSampler, texCoord).rgb, 1.);
 }
 `
+
