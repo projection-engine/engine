@@ -63,6 +63,11 @@ export default class ShadowMapSystem extends System {
     updateFBOResolution() {
         super.updateFBOResolution();
 
+        if(this.shadowsFrameBuffer){
+            this.gpu.deleteTexture(this.shadowsFrameBuffer.depthSampler)
+            this.gpu.deleteFramebuffer(this.shadowsFrameBuffer.FBO)
+        }
+
         this.shadowsFrameBuffer = new FramebufferInstance(this.gpu, this.maxResolution, this.maxResolution)
         this.shadowsFrameBuffer
             .depthTexture()
@@ -120,7 +125,7 @@ export default class ShadowMapSystem extends System {
         const dirL = directionalLights.length
         for (let i = 0; i < dirL; i++) {
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
-            if ((current.changed || transformChanged || skylight?.changed) && current.shadowMap) {
+            if ((current.changed || transformChanged || skylight?.changed) && current.shadowMap || this.changed) {
                 lights2D.push(current)
                 current.changed = false
                 this.changed = true
@@ -138,7 +143,7 @@ export default class ShadowMapSystem extends System {
         }
         if (skylight && (skylight.changed || lights2D.length > 0)) {
             sky = skylight.changed || transformChanged
-            if (skylight.shadowMap && (lights2D.length > 0 || skylight.changed))
+            if (skylight.shadowMap && (lights2D.length > 0 || skylight.changed)|| this.changed)
                 lights2D.push(skylight)
 
             skylight.changed = false
