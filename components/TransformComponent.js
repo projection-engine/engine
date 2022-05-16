@@ -99,7 +99,7 @@ export default class TransformComponent extends Component {
     }
 
     set transformationMatrix(data) {
-        this._transformationMatrix = mat4.multiply([], this._baseTransformationMatrix, data)
+        this._transformationMatrix = mat4.multiply([], data, this._baseTransformationMatrix)
 
         this.__changed = false
     }
