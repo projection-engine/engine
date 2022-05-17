@@ -16,7 +16,7 @@ export default class AOSystem extends System {
                 precision: this.gpu.R32F,
                 format: this.gpu.RED,
                 type: this.gpu.FLOAT,
-                linear: true,
+                linear: false,
                 repeat: false
             })
 

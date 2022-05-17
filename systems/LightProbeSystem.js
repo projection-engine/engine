@@ -21,7 +21,6 @@ export default class LightProbeSystem extends System {
         super([]);
         this.gpu = gpu
         this.baseCubeMap = new CubeMapInstance(gpu, 128, false)
-        this.worker = new WebWorker()
 
     }
 
@@ -65,9 +64,7 @@ export default class LightProbeSystem extends System {
                 this.step = STEPS_LIGHT_PROBE.CALCULATE
                 break
             case STEPS_LIGHT_PROBE.CALCULATE:
-                this.worker.createExecution({probes: lightProbes, meshes, COMPONENTS}, sort.toString())
-                    .then(res => this.lightProbeConsumption = res)
-
+                this.sort( lightProbes, meshes)
                 this.step = STEPS_LIGHT_PROBE.DONE
                 break
             default:
@@ -76,32 +73,12 @@ export default class LightProbeSystem extends System {
         }
     }
 
-
-}
-
-async function sort() {
-    self.addEventListener('message', (event) => {
-        const len = (a)  => {
-            let x = a[0];
-            let y = a[1];
-            let z = a[2];
-            return Math.hypot(x, y, z);
-        }
-         const subtract = (a, b) => {
-            const out = []
-            out[0] = a[0] - b[0];
-            out[1] = a[1] - b[1];
-            out[2] = a[2] - b[2];
-            return out;
-        }
-
-        const {
-            probes,
-            meshes,
-            COMPONENTS
-        } = event.data
+    sort(
+        probes,
+        meshes
+    ) {
         const MAX_PROBES = 3
-        const sorted = {}
+
         const l = probes.length
         const lm = meshes.length
         for (let meshIndex = 0; meshIndex < lm; meshIndex++) {
@@ -114,10 +91,10 @@ async function sort() {
                 if (intersecting.length > MAX_PROBES) {
                     intersecting.push({
                         id: probes[probeIndex].id,
-                        distance: len(subtract(probePosition, mPosition))
+                        distance: vec3.len(vec3.subtract(probePosition, mPosition))
                     })
                 } else {
-                    const currentDistance = len(subtract(probePosition, mPosition))
+                    const currentDistance = vec3.len(vec3.subtract(probePosition, mPosition))
                     for (let intIndex in intersecting) {
                         if (currentDistance < intersecting[intIndex].distance) {
                             intersecting[intIndex] = {
@@ -129,8 +106,9 @@ async function sort() {
                     }
                 }
             }
-            sorted[cm.id] = intersecting
+            this.lightProbeConsumption[cm.id] = intersecting
         }
-        self.postMessage(sorted)
-    })
+    }
 }
+
+

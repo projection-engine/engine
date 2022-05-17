@@ -2,11 +2,12 @@ import System from "../basic/System";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import SYSTEMS from "../templates/SYSTEMS";
 import COMPONENTS from "../templates/COMPONENTS";
+import Renderer from "../Renderer";
 
 export default class GBufferSystem extends System {
     lastMaterial
 
-    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
+    constructor(gpu, resolution = {w: window.screen.width, h: window.screen.height}) {
         super([]);
         this.gpu = gpu
         this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
@@ -36,7 +37,6 @@ export default class GBufferSystem extends System {
             brdf
         } = options
         this.frameBuffer.startMapping()
-        const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
         this.lastMaterial = undefined
         const l = meshes.length
         for (let m = 0; m < l; m++) {
@@ -49,21 +49,7 @@ export default class GBufferSystem extends System {
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
-                const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
-                let cubeMapToApply, ambient = {}
-
-                if (c)
-                    cubeMapToApply = cubeMapsSources[c]
-                if (cubeMapToApply) {
-                    const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
-                    ambient.irradianceMap = cube.irradianceMap
-                    ambient.prefilteredMap = cube.prefilteredMap
-                    ambient.prefilteredLod = cube.prefilteredMipmaps
-                } else if (skybox && skybox.cubeMap !== undefined) {
-                    ambient.irradianceMap = skybox.cubeMap.irradianceTexture
-                    ambient.prefilteredMap = skybox.cubeMap.prefiltered
-                    ambient.prefilteredLod = skybox.prefilteredMipmaps
-                }
+                const ambient = Renderer.getEnvironment(current, skybox)
 
                 this.drawMesh(
                     mesh,
@@ -127,31 +113,7 @@ export default class GBufferSystem extends System {
             })
             this.lastMaterial = material.id
 
-            if (material.settings?.doubleSided)
-                this.gpu.disable(this.gpu.CULL_FACE)
-            else if(material.settings?.cullFace)
-                this.gpu.cullFace(this.gpu[material.settings?.cullFace])
-            if (material.settings?.depthMask === false)
-                this.gpu.depthMask(false)
-            if (material.settings?.depthTest === false)
-                this.gpu.disable(this.gpu.DEPTH_TEST)
-            if (material.settings?.blend === false)
-                this.gpu.disable(this.gpu.BLEND)
-            else if(material.settings?.blendFunc)
-                this.gpu.blendFunc(this.gpu[material.settings?.blendFuncSource], this.gpu[material.settings?.blendFuncTarget])
-
-            this.gpu.drawElements(this.gpu.TRIANGLES, mesh.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
-
-            if (material.settings?.doubleSided)
-                this.gpu.enable(this.gpu.CULL_FACE)
-            if (material.settings?.depthMask === false)
-                this.gpu.depthMask(true)
-            if (material.settings?.depthTest === false)
-                this.gpu.enable(this.gpu.DEPTH_TEST)
-            if (material.settings?.blend === false)
-                this.gpu.enable(this.gpu.BLEND)
-
-            mesh.finish()
+            Renderer.drawMaterial(mesh, material, this.gpu)
         }
     }
 }

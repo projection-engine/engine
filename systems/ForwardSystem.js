@@ -1,6 +1,7 @@
 import System from "../basic/System";
 import COMPONENTS from "../templates/COMPONENTS";
 import SYSTEMS from "../templates/SYSTEMS";
+import Renderer from "../Renderer";
 
 export default class ForwardSystem extends System {
     lastMaterial
@@ -29,6 +30,7 @@ export default class ForwardSystem extends System {
 
         } = data
 
+
         const {
             elapsed,
             camera,
@@ -36,7 +38,6 @@ export default class ForwardSystem extends System {
             brdf,
             shadingModel
         } = options
-        const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
         this.lastMaterial = undefined
         let valid = true
         const l = meshes.length
@@ -44,6 +45,7 @@ export default class ForwardSystem extends System {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined) {
+
                 const t = current.components[COMPONENTS.TRANSFORM]
                 const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
@@ -52,23 +54,7 @@ export default class ForwardSystem extends System {
                     valid = false
                     mat = fallbackMaterial
                 }
-
-                const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
-                let cubeMapToApply, ambient = {}
-
-                if (c)
-                    cubeMapToApply = cubeMapsSources[c]
-                if (cubeMapToApply) {
-                    const cube = cubeMapToApply.components[COMPONENTS.CUBE_MAP]
-                    ambient.irradianceMap = cube.irradiance ? cube.irradianceMap : skybox?.cubeMap.irradianceTexture
-                    ambient.prefilteredMap = cube.prefilteredMap
-                    ambient.prefilteredLod = cube.prefilteredMipmaps - 1
-                } else if (skybox && skybox.cubeMap !== undefined) {
-                    ambient.irradianceMap = skybox?.cubeMap.irradianceTexture
-                    ambient.prefilteredMap = skybox?.cubeMap.prefiltered
-                    ambient.prefilteredLod = skybox?.prefilteredMipmaps
-                }
-
+                const ambient = Renderer.getEnvironment(current, skybox)
                 ForwardSystem.drawMesh({
                     mesh,
                     camPosition: camera.position,
@@ -96,7 +82,8 @@ export default class ForwardSystem extends System {
                     ao: this.aoTexture,
                     shadingModel
                 })
-                this.lastMaterial = mat.id
+
+                this.lastMaterial = mat?.id
             }
         }
         this.gpu.bindVertexArray(null)
@@ -128,7 +115,9 @@ export default class ForwardSystem extends System {
                         gpu,
                         shadingModel
                     }) {
-        if (material && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)) {
+
+
+        if (mesh && material && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)) {
 
             mesh.use()
             material.use(lastMaterial !== material.id, {
@@ -156,30 +145,7 @@ export default class ForwardSystem extends System {
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             }, useCubeMapShader)
 
-            if (material.settings.doubleSided)
-                gpu.disable(gpu.CULL_FACE)
-            else if (material.settings.cullFace)
-                gpu.cullFace(gpu[material.settings?.cullFace])
-            if (!material.settings.depthMask)
-                gpu.depthMask(false)
-            if (!material.settings.depthTest)
-                gpu.disable(gpu.DEPTH_TEST)
-            if (!material.settings.blend)
-                gpu.disable(gpu.BLEND)
-            else if (material.settings.blendFunc)
-                gpu.blendFunc(gpu[material.settings.blendFuncSource], gpu[material.settings?.blendFuncTarget])
-
-            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-
-            if (material.settings?.doubleSided)
-                gpu.enable(gpu.CULL_FACE)
-            if (!material.settings?.depthMask)
-                gpu.depthMask(true)
-            if (!material.settings?.depthTest)
-                gpu.enable(gpu.DEPTH_TEST)
-            if (!material.settings?.blend)
-                gpu.enable(gpu.BLEND)
-            mesh.finish()
+          Renderer.drawMaterial(mesh, material, gpu)
         }
     }
 }

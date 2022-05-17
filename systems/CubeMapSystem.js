@@ -17,7 +17,6 @@ export const STEPS_CUBE_MAP = {
 export default class CubeMapSystem extends System {
     step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
-    cubeMapsConsumeMap = {}
 
     constructor(gpu) {
         super([]);
@@ -58,7 +57,7 @@ export default class CubeMapSystem extends System {
                 this.step = STEPS_CUBE_MAP.CALCULATE
                 break
             case STEPS_CUBE_MAP.CALCULATE:
-                this.cubeMapsConsumeMap = CubeMapSystem.sort(meshes, cubeMaps)
+                this.sort(meshes, cubeMaps)
                 this.step = STEPS_CUBE_MAP.DONE
                 break
             default:
@@ -66,23 +65,26 @@ export default class CubeMapSystem extends System {
                 break
         }
     }
-    static sort(meshes, cubeMaps){
-        const changedMeshes = meshes
-        let newCubeMaps = {}
+    sort(meshes, cubeMaps){
         const l = cubeMaps.length
-        const lm = changedMeshes.length
+        const lm = meshes.length
         for (let i = 0; i < l; i++) {
             const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
                 pos = cubeMaps[i].components[COMPONENTS.TRANSFORM].position,
                 radius = current.radius
 
             for (let m = 0; m < lm; m++) {
-                const currentMesh = changedMeshes[m].components
-                if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos))
-                    newCubeMaps[changedMeshes[m].id] = cubeMaps[i].id
+                const currentMesh = meshes[m].components
+                if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos)){
+                    const cube = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
+
+                    meshes[m].cubeMap = {}
+                    meshes[m].cubeMap.irradianceMap = cube.irradianceMap
+                    meshes[m].cubeMap.prefilteredMap = cube.prefilteredMap
+                    meshes[m].cubeMap.prefilteredLod = cube.prefilteredMipmaps -1
+                }
             }
         }
-        return newCubeMaps
     }
 
     #generateBaseTexture(options, systems, data) {
@@ -135,6 +137,7 @@ export default class CubeMapSystem extends System {
         } = data
 
         const {fallbackMaterial, brdf, elapsed} = options
+
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
