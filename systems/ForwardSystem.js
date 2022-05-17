@@ -13,6 +13,8 @@ export default class ForwardSystem extends System {
 
     execute(options, systems, data, sceneColor) {
         super.execute()
+        if (this.aoTexture === undefined && systems[SYSTEMS.AO])
+            this.aoTexture = systems[SYSTEMS.AO].texture
         const {
             meshes,
             skybox,
@@ -31,11 +33,12 @@ export default class ForwardSystem extends System {
             elapsed,
             camera,
             fallbackMaterial,
-            brdf
+            brdf,
+            shadingModel
         } = options
         const toConsumeCubeMaps = systems[SYSTEMS.CUBE_MAP]?.cubeMapsConsumeMap
         this.lastMaterial = undefined
-
+        let valid = true
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
@@ -45,8 +48,10 @@ export default class ForwardSystem extends System {
                 const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
 
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
-                if (!mat || !mat.ready)
+                if (!mat || !mat.ready) {
+                    valid = false
                     mat = fallbackMaterial
+                }
 
                 const c = toConsumeCubeMaps ? toConsumeCubeMaps[current.id] : undefined
                 let cubeMapToApply, ambient = {}
@@ -87,9 +92,11 @@ export default class ForwardSystem extends System {
                     prefilteredLod: ambient.prefilteredLod,
                     sceneColor,
                     lastMaterial: this.lastMaterial,
-                    gpu: this.gpu
+                    gpu: this.gpu,
+                    ao: this.aoTexture,
+                    shadingModel
                 })
-                this.lastMaterial = mat?.id
+                this.lastMaterial = mat.id
             }
         }
         this.gpu.bindVertexArray(null)
@@ -117,11 +124,11 @@ export default class ForwardSystem extends System {
                         prefilteredLod,
                         sceneColor,
                         lastMaterial,
-
-                        gpu
+                        ao,
+                        gpu,
+                        shadingModel
                     }) {
-
-        if (material && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap )) {
+        if (material && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)) {
 
             mesh.use()
             material.use(lastMaterial !== material.id, {
@@ -138,12 +145,12 @@ export default class ForwardSystem extends System {
                 prefilteredMapSampler: closestPrefiltered,
                 ambientLODSamples: prefilteredLod,
 
-
+                shadingModel,
                 directionalLightsData,
                 directionalLightsQuantity,
 
                 dirLightPOV,
-
+                aoSampler: ao,
                 lightQuantity: pointLightsQuantity,
                 pointLightData,
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})

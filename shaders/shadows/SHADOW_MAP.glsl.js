@@ -38,8 +38,9 @@ precision highp  float;
 
 in vec4 vPosition;
 out vec4 fragDepth;
+
 void main(void){
-    fragDepth = vec4(vec3(vPosition.b/vPosition.w), 1.);
+    fragDepth = vec4(vec3(vPosition.z/vPosition.w), 1.);
 }
 `
 export const omniFragment = `#version 300 es

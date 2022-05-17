@@ -17,12 +17,10 @@ export default class DeferredSystem extends System {
 
     _getDeferredShader(shadingModel) {
         switch (shadingModel) {
-            case SHADING_MODELS.FLAT:
+            case SHADING_MODELS.ALBEDO:
                 return this.flatDeferredShader
             case SHADING_MODELS.DETAIL:
                 return this.deferredShader
-            case SHADING_MODELS.WIREFRAME:
-                return this.flatDeferredShader
             default:
                 return this.deferredShader
         }

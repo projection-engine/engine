@@ -10,12 +10,13 @@ uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
 uniform vec3 cameraVec;
 
+out vec3 normalVec;
+out vec3 tangent;
+out vec3 bitangent;
 
 out vec4 vPosition;
 out vec2 texCoord;
 out mat3 toTangentSpace;
-out vec3 normalVec;
-
 out vec3 viewDirection;
  
 
@@ -28,11 +29,14 @@ void main(){
     vec3 B =  normalize(mat3(transformMatrix) * biTangent);
     B = dot(biTangent, B)  > 0. ? -B : B;
     
+    bitangent = B;
+    tangent = T;
+    
     toTangentSpace = mat3(T, B, N);
     
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
     texCoord = uvTexture;
-    normalVec = normal;
+    normalVec = normal; // TODO - Why not N ?
 
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
