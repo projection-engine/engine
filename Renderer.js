@@ -11,7 +11,7 @@ import {v4} from "uuid";
 import SYSTEMS from "./templates/SYSTEMS";
 import FramebufferInstance from "./instances/FramebufferInstance";
 import RenderingPackager from "./RenderingPackager";
-import getSystemKey from "./utils/getSystemKey";
+import systemInstance from "./utils/systemInstance";
 import VBO from "./instances/VBO";
 import cube from "./templates/CUBE";
 import ShaderInstance from "./instances/ShaderInstance";
@@ -64,7 +64,7 @@ export default class Renderer {
 
         const sys = [...systems, SYSTEMS.MESH]
         sys.forEach(s => {
-            let system = getSystemKey(s, gpu, resolution)
+            let system = systemInstance(s, gpu, resolution)
             if (system)
                 this.#systems[s] = system
         })
@@ -173,21 +173,24 @@ export default class Renderer {
             gpu.enable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
             gpu.enable(gpu.BLEND)
-        mesh.finish()
+
     }
 
     static getEnvironment(entity, skybox){
-        const fallback = skybox.cubeMap ? skybox.cubeMap : {}
+        const fallback = skybox?.cubeMap ? skybox.cubeMap : {}
         const comp = entity.components[COMPONENTS.MATERIAL]
+        const irradiance0 = comp.irradiance[0]?.ref
+        const cube = comp.cubeMap
 
         return {
-            irradianceMultiplier: [1, 1, 1], // TODO - Uniforms
-            irradiance0: comp.irradiance[0]?.ref,
+            irradianceMultiplier: comp.irradianceMultiplier,
+
+            irradiance0: irradiance0 ? irradiance0 : fallback.irradianceTexture,//fallback.irradianceTexture,
             irradiance1: comp.irradiance[1]?.ref,
             irradiance2: comp.irradiance[2]?.ref,
 
-            prefilteredMap: comp.cubeMap.prefilteredMap,
-            prefilteredLod: comp.cubeMap.prefilteredLod
+            prefilteredMap: cube? cube.prefiltered : fallback.prefiltered,
+            ambientLODSamples: cube? cube.prefilteredLod : skybox?.prefilteredMipmaps
         }
     }
 }

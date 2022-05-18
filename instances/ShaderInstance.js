@@ -81,6 +81,7 @@ export default class ShaderInstance {
         this.gpu = gpu
         const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER, m => alert.push(m))
         const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER, m => alert.push(m))
+
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)].flat()
         if (alert.length > 0)
             console.log(alert)

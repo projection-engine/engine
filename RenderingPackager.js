@@ -50,7 +50,6 @@ export default class RenderingPackager {
             entitiesMap: toObject(entities),
             lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP] && e.components[COMPONENTS.CUBE_MAP].asLightProbe)
         }
-
         this.#loadSkybox(data.skybox, gpu, cubeBuffer)
 
         data.cubeMapsSources = toObject(data.cubeMaps)
@@ -134,6 +133,7 @@ export default class RenderingPackager {
     }
 
     #loadSkybox(skyboxElement, gpu, cubeBuffer) {
+        gpu.bindVertexArray(null)
         const noTexture = !(skyboxElement?.texture instanceof WebGLTexture)
         if (skyboxElement && !skyboxElement.ready) {
             if (!skyboxElement.cubeMap)

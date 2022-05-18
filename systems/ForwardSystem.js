@@ -38,6 +38,7 @@ export default class ForwardSystem extends System {
             brdf,
             shadingModel
         } = options
+
         this.lastMaterial = undefined
         let valid = true
         const l = meshes.length
@@ -73,14 +74,13 @@ export default class ForwardSystem extends System {
                     pointLightData,
 
                     elapsed,
-                    closestIrradiance: ambient.irradianceMap,
-                    closestPrefiltered: ambient.prefilteredMap,
-                    prefilteredLod: ambient.prefilteredLod,
+                    ambient,
                     sceneColor,
                     lastMaterial: this.lastMaterial,
                     gpu: this.gpu,
                     ao: this.aoTexture,
-                    shadingModel
+                    shadingModel,
+                    onlyForward: true
                 })
 
                 this.lastMaterial = mat?.id
@@ -106,21 +106,20 @@ export default class ForwardSystem extends System {
                         pointLightsQuantity,
                         pointLightData,
                         elapsed,
-                        closestIrradiance,
-                        closestPrefiltered,
-                        prefilteredLod,
+                        ambient,
                         sceneColor,
                         lastMaterial,
                         ao,
                         gpu,
-                        shadingModel
+                        shadingModel,
+                        onlyForward
                     }) {
 
 
-        if (mesh && material && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)) {
-
+        if (mesh && material && (!onlyForward || (onlyForward && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)))) {
             mesh.use()
             material.use(lastMaterial !== material.id, {
+                ...ambient,
                 projectionMatrix,
                 transformMatrix,
                 viewMatrix,
@@ -130,9 +129,6 @@ export default class ForwardSystem extends System {
                 brdfSampler: brdf,
                 elapsedTime: elapsed,
                 cameraVec: camPosition,
-                irradianceMap: closestIrradiance,
-                prefilteredMapSampler: closestPrefiltered,
-                ambientLODSamples: prefilteredLod,
 
                 shadingModel,
                 directionalLightsData,

@@ -9,7 +9,7 @@ export default class CubeMapComponent extends Component {
     _prefilteredMipmaps = 6
     radius = 50
     asLightProbe = false
-
+    irradianceMultiplier = [ 1, 1, 1]
     constructor(id, resolution, position) {
         super(id, CubeMapComponent.constructor.name);
         if (resolution)

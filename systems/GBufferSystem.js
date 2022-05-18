@@ -3,6 +3,7 @@ import FramebufferInstance from "../instances/FramebufferInstance";
 import SYSTEMS from "../templates/SYSTEMS";
 import COMPONENTS from "../templates/COMPONENTS";
 import Renderer from "../Renderer";
+import ForwardSystem from "./ForwardSystem";
 
 export default class GBufferSystem extends System {
     lastMaterial
@@ -50,70 +51,26 @@ export default class GBufferSystem extends System {
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
                 const ambient = Renderer.getEnvironment(current, skybox)
-
-                this.drawMesh(
+                ForwardSystem.drawMesh({
                     mesh,
-                    camera.position,
-                    camera.viewMatrix,
-                    camera.projectionMatrix,
-                    t.transformationMatrix,
-                    mat,
-                    current.components[COMPONENTS.MESH].normalMatrix,
-                    undefined,
-                    current.components[COMPONENTS.MATERIAL],
+                    camPosition: camera.position,
+                    viewMatrix: camera.viewMatrix,
+                    projectionMatrix: camera.projectionMatrix,
+                    transformMatrix: t.transformationMatrix,
+                    material: mat,
+                    normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
+                    materialComponent: current.components[COMPONENTS.MATERIAL],
+                    brdf,
 
-                    ambient.irradianceMap,
-                    ambient.prefilteredMap,
-                    ambient.prefilteredLod,
                     elapsed,
-                    brdf
-                )
+                    ambient,
+                    lastMaterial: this.lastMaterial,
+                    gpu: this.gpu,
+                    onlyForward: false
+                })
             }
         }
         this.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
-    }
-
-    drawMesh(
-        mesh,
-        camPosition,
-        viewMatrix,
-        projectionMatrix,
-        transformMatrix,
-        material,
-        normalMatrix,
-        indexSelected,
-        materialComponent,
-        closestIrradiance,
-        closestPrefiltered,
-        prefilteredLod,
-        elapsed,
-        brdf
-    ) {
-
-
-        if (material && !material.settings?.isForwardShaded) {
-
-            mesh.use()
-            material.use(this.lastMaterial !== material.id, {
-                projectionMatrix,
-                transformMatrix,
-                viewMatrix,
-
-                normalMatrix,
-                indexSelected,
-
-                brdfSampler: brdf,
-                elapsedTime: elapsed,
-                cameraVec: camPosition,
-                irradianceMap: closestIrradiance,
-                prefilteredMapSampler: closestPrefiltered,
-                ambientLODSamples: prefilteredLod,
-                ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
-            })
-            this.lastMaterial = material.id
-
-            Renderer.drawMaterial(mesh, material, this.gpu)
-        }
     }
 }

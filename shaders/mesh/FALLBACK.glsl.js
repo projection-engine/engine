@@ -36,7 +36,7 @@ void main(){
     
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
     texCoord = uvTexture;
-    normalVec = normal; // TODO - Why not N ?
+    normalVec = N; // It was N, Normal matrix 
 
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
@@ -49,11 +49,9 @@ precision highp float;
 in vec4 vPosition;
 in vec3 normalVec;
 in mat3 toTangentSpace;
+ 
+@import(ambientUniforms)
 
-uniform sampler2D brdfSampler;
-uniform samplerCube irradianceMap;
-uniform samplerCube prefilteredMapSampler;
-uniform float ambientLODSamples;
 uniform vec3 cameraVec;
 
 layout (location = 0) out vec4 gPosition;
@@ -66,6 +64,7 @@ const float PI = 3.14159265359;
 
 @import(fresnelSchlickRoughness)
 
+@import(ambient)
 
 void main(){  
     gPosition = vPosition;
@@ -76,20 +75,9 @@ void main(){
     
     vec3 diffuse = vec3(0.);
     vec3 specular = vec3(0.);
-    
-    vec3 V = normalize(cameraVec - vPosition.xyz);
-    float NdotV    = max(dot(gNormal.rgb, V), 0.000001);
-    vec3 F0 = mix(vec3(0.04), gAlbedo.rgb, gBehaviour.b);
-    
-    vec3 F    = fresnelSchlickRoughness(NdotV, F0, gBehaviour.g);
-    vec3 kD = (1.0 - F) * (1.0 - gBehaviour.b);
-    diffuse = texture(irradianceMap, vec3(gNormal.r, -gNormal.g, gNormal.b)).rgb * gAlbedo.rgb * kD;
+   
 
-    vec3 prefilteredColor = textureLod(prefilteredMapSampler, reflect(-V, gNormal.rgb), gBehaviour.g * ambientLODSamples).rgb;
-    vec2 brdf = texture(brdfSampler, vec2(NdotV, gBehaviour.g)).rg;
-    specular = prefilteredColor * (F * brdf.r + brdf.g);
-
-    gAmbient = vec4((diffuse + specular), 1.);
+    gAmbient = vec4( computeAmbient(cameraVec, gAlbedo.rgb,  vPosition.rgb, gNormal.rgb, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, vPosition.rgb), 1.);
 
 }
 `

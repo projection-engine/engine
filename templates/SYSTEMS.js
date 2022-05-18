@@ -11,5 +11,6 @@ export default {
     MESH: '9',
     FORWARD: '10',
     CAMERA_CUBE: '11',
-    PICK: '12'
+    PICK: '12',
+    PROBE: '13'
 }

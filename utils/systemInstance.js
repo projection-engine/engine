@@ -11,8 +11,9 @@ import CubeMapSystem from "../systems/CubeMapSystem";
 import ScriptSystem from "../systems/ScriptSystem";
 import DepthSystem from "../systems/DepthSystem";
 import AOSystem from "../systems/AOSystem";
+import LightProbeSystem from "../systems/LightProbeSystem";
 
-export default function getSystemKey(s, gpu, resolution) {
+export default function systemInstance(s, gpu, resolution) {
     switch (true) {
         case s  === SYSTEMS.CAMERA_CUBE:
             return  new CameraCubeSystem(gpu.canvas.id)
@@ -34,6 +35,8 @@ export default function getSystemKey(s, gpu, resolution) {
             return new TransformSystem()
         case s  === SYSTEMS.CUBE_MAP:
             return new CubeMapSystem(gpu)
+        case s  === SYSTEMS.PROBE:
+            return new LightProbeSystem(gpu)
         case s  === SYSTEMS.SCRIPT:
             return new ScriptSystem(gpu, gpu.canvas.id)
 
