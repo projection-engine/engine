@@ -28,7 +28,6 @@ export default class MeshInstance {
 
                     maxBoundingBox,
                     minBoundingBox,
-                    wireframeBuffer,
                     material
                 }) {
 

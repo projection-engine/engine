@@ -15,7 +15,7 @@ export default class MaterialInstance {
     constructor(gpu, vertexShader, shader, uniformData = [], settings = {}, onCompiled = () => null, id, cubeMapShaderCode) {
         this.gpu = gpu
         this.id = id
-        this._initializeSettings(settings)
+        this.#initializeSettings(settings)
 
         this.shader = [shader, vertexShader, uniformData, onCompiled]
         if (cubeMapShaderCode !== undefined && cubeMapShaderCode !== null )
@@ -32,7 +32,7 @@ export default class MaterialInstance {
         }
     }
 
-    _initializeSettings(settings) {
+    #initializeSettings(settings) {
         this.settings = settings
         if (settings.rsmAlbedo) {
             if (this.rsmAlbedo)
@@ -59,7 +59,7 @@ export default class MaterialInstance {
     set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
         this.ready = false
         if (settings)
-            this._initializeSettings(settings)
+            this.#initializeSettings(settings)
         let message
         if (this._shader)
             this.gpu.deleteProgram(this._shader.program)

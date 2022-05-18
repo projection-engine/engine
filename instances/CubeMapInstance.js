@@ -8,37 +8,37 @@ export default class CubeMapInstance {
     prefiltered
     irradianceTexture
     gpu
-    _prefilteredShader
-    _res
-    __resChanged
+    #res
+    #asDepth = false
+    #resChanged
+    #irradianceShader
+    #frameBuffer
+    #prefilteredShader
     constructor(gpu, resolution, asDepth) {
         this.gpu = gpu
 
-        this._res = resolution
-        this._prefilteredShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.prefiltered, gpu)
-        this._irradianceShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.irradiance, gpu)
+        this.#res = resolution
+        this.#prefilteredShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.prefiltered, gpu)
+        this.#irradianceShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.irradiance, gpu)
 
-        this._frameBuffer =  gpu.createFramebuffer()
-        this._asDepth = asDepth
-    }
-
-    set vbo(_) {
+        this.#frameBuffer =  gpu.createFramebuffer()
+        this.#asDepth = asDepth
     }
 
     set resolution(data) {
-        this._res = data
-        this.__resChanged = true
+        this.#res = data
+        this.#resChanged = true
     }
 
     get resolution() {
-        return this._res
+        return this.#res
     }
 
     generateIrradiance(cubeBuffer, sampler=this.texture) {
-        if (!this._asDepth) {
-            this._irradianceShader.use()
+        if (!this.#asDepth) {
+            this.#irradianceShader.use()
             this.draw((yaw, pitch, perspective) => {
-                this._irradianceShader.bindForUse({
+                this.#irradianceShader.bindForUse({
                     projectionMatrix: perspective,
                     viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
                     uSampler: sampler
@@ -50,23 +50,23 @@ export default class CubeMapInstance {
 
     generatePrefiltered(mipLevels = 6, resolution = 128, cubeBuffer) {
 
-        if (!this._asDepth) {
+        if (!this.#asDepth) {
             const perspective = mat4.perspective([], 1.57, 1, .1, 10),
                 gpu = this.gpu
 
             gpu.bindVertexArray(null)
             gpu.viewport(0, 0, resolution, resolution)
-            this.prefiltered = this._initializeTexture(resolution, true);
+            this.prefiltered = this.#initializeTexture(resolution, true);
             gpu.generateMipmap(gpu.TEXTURE_CUBE_MAP)
 
-            gpu.bindFramebuffer(gpu.FRAMEBUFFER, this._frameBuffer)
+            gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.#frameBuffer)
 
             const rbo = gpu.createRenderbuffer();
             gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
             gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
             gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
 
-            this._prefilteredShader.use()
+            this.#prefilteredShader.use()
             cubeBuffer.enable()
 
             for (let i = 0; i < mipLevels; i++) {
@@ -84,7 +84,7 @@ export default class CubeMapInstance {
                         i
                     );
 
-                    this._prefilteredShader.bindForUse({
+                    this.#prefilteredShader.bindForUse({
                         projectionMatrix: perspective,
                         viewMatrix: lookAt(rotations.yaw, rotations.pitch, [0, 0, 0]),
                         roughness: roughness,
@@ -110,13 +110,13 @@ export default class CubeMapInstance {
     }
 
     draw(callback, cubeBuffer, zFar = 10, zNear = .1, asIrradiance) {
-        let resolution = asIrradiance ? 32 : this._res, texture
+        let resolution = asIrradiance ? 32 : this.#res, texture
 
         const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar),
             gpu = this.gpu
 
         gpu.bindVertexArray(null)
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, this._frameBuffer)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.#frameBuffer)
         gpu.viewport(0, 0, resolution, resolution)
 
         const rbo = gpu.createRenderbuffer();
@@ -126,26 +126,26 @@ export default class CubeMapInstance {
 
 
         if (!asIrradiance) {
-            if (!this.texture || this.__resChanged)
-                this.texture = this._initializeTexture(resolution);
+            if (!this.texture || this.#resChanged)
+                this.texture = this.#initializeTexture(resolution);
 
-            this.__resChanged = false
+            this.#resChanged = false
             texture = this.texture
         } else {
             if (!this.irradianceTexture)
-                this.irradianceTexture = this._initializeTexture(resolution);
+                this.irradianceTexture = this.#initializeTexture(resolution);
 
             texture = this.irradianceTexture
         }
 
-        if (cubeBuffer && !this._asDepth)
+        if (cubeBuffer && !this.#asDepth)
             cubeBuffer.enable()
 
         for (let i = 0; i < 6; i++) {
             const rotations = getRotation(i)
             gpu.framebufferTexture2D(
                 gpu.FRAMEBUFFER,
-                this._asDepth ? gpu.DEPTH_ATTACHMENT : gpu.COLOR_ATTACHMENT0,
+                this.#asDepth ? gpu.DEPTH_ATTACHMENT : gpu.COLOR_ATTACHMENT0,
                 gpu.TEXTURE_CUBE_MAP_POSITIVE_X + i,
                 texture,
                 0
@@ -153,21 +153,21 @@ export default class CubeMapInstance {
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT);
             callback(rotations.yaw, rotations.pitch, perspective, i)
         }
-        if (cubeBuffer && !this._asDepth)
+        if (cubeBuffer && !this.#asDepth)
             cubeBuffer.disable()
 
         gpu.deleteRenderbuffer(rbo)
         return this
     }
 
-    _initializeTexture(resolution, mipmap) {
+    #initializeTexture(resolution, mipmap) {
         const gpu = this.gpu
         gpu.viewport(0, 0, resolution, resolution)
         let texture = gpu.createTexture();
         gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, texture);
 
-        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MAG_FILTER, this._asDepth ? gpu.NEAREST : gpu.LINEAR);
-        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MIN_FILTER, this._asDepth ? gpu.NEAREST : (mipmap ? gpu.LINEAR_MIPMAP_LINEAR : gpu.LINEAR));
+        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MAG_FILTER, this.#asDepth ? gpu.NEAREST : gpu.LINEAR);
+        gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MIN_FILTER, this.#asDepth ? gpu.NEAREST : (mipmap ? gpu.LINEAR_MIPMAP_LINEAR : gpu.LINEAR));
 
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_S, gpu.CLAMP_TO_EDGE);
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_WRAP_T, gpu.CLAMP_TO_EDGE);
@@ -184,11 +184,11 @@ export default class CubeMapInstance {
             gpu.texImage2D(
                 d[i].access,
                 0,
-                this._asDepth ? gpu.DEPTH_COMPONENT32F : gpu.RGBA16F,
+                this.#asDepth ? gpu.DEPTH_COMPONENT32F : gpu.RGBA16F,
                 resolution,
                 resolution,
                 0,
-                this._asDepth ? gpu.DEPTH_COMPONENT : gpu.RGBA,
+                this.#asDepth ? gpu.DEPTH_COMPONENT : gpu.RGBA,
                 gpu.FLOAT,
                 null);
         }

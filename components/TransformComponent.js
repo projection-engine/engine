@@ -1,6 +1,7 @@
 import Component from "../basic/Component";
 import {mat4, quat} from "gl-matrix";
 import Transformation from "../instances/Transformation";
+const toDeg = 57.29
 
 export default class TransformComponent extends Component {
     __rotation = [0, 0, 0]
@@ -80,7 +81,6 @@ export default class TransformComponent extends Component {
     set rotation(data) {
         this.__changed = true
         this.__rotation = data
-        const toDeg = 57.29
 
         this._rotationUpdated = true
         if (this.updateQuatOnEulerChange)
