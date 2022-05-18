@@ -8,11 +8,10 @@ import SkyboxSystem from "./SkyboxSystem";
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
-    IRRADIANCE: 1,
-    PRE_FILTERED: 2,
+    PRE_FILTERED: 1,
 
-    DONE: 3,
-    CALCULATE: 4
+    DONE: 2,
+    CALCULATE: 3
 }
 export default class CubeMapSystem extends System {
     step = STEPS_CUBE_MAP.BASE
@@ -36,17 +35,10 @@ export default class CubeMapSystem extends System {
             this.step = STEPS_CUBE_MAP.BASE
             this.lastCallLength = cubeMaps.length
         }
-
+        // TODO - use single base texture
         switch (this.step) {
             case STEPS_CUBE_MAP.BASE:
                 this.#generateBaseTexture(options, systems, data)
-                this.step = STEPS_CUBE_MAP.IRRADIANCE
-                break
-            case STEPS_CUBE_MAP.IRRADIANCE:
-                for (let i = 0; i < this.lastCallLength; i++) {
-                    const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-                    current.cubeMap.generateIrradiance(cubeBuffer)
-                }
                 this.step = STEPS_CUBE_MAP.PRE_FILTERED
                 break
             case STEPS_CUBE_MAP.PRE_FILTERED:
@@ -65,7 +57,8 @@ export default class CubeMapSystem extends System {
                 break
         }
     }
-    sort(meshes, cubeMaps){
+
+    sort(meshes, cubeMaps) {
         const l = cubeMaps.length
         const lm = meshes.length
         for (let i = 0; i < l; i++) {
@@ -75,13 +68,13 @@ export default class CubeMapSystem extends System {
 
             for (let m = 0; m < lm; m++) {
                 const currentMesh = meshes[m].components
-                if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos)){
+                if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos)) {
                     const cube = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
 
-                    meshes[m].cubeMap = {}
-                    meshes[m].cubeMap.irradianceMap = cube.irradianceMap
-                    meshes[m].cubeMap.prefilteredMap = cube.prefilteredMap
-                    meshes[m].cubeMap.prefilteredLod = cube.prefilteredMipmaps -1
+                    const target = meshes[m].components[COMPONENTS.MATERIAL].cubeMap
+
+                    target.prefilteredMap = cube.prefilteredMap
+                    target.prefilteredLod = cube.prefilteredMipmaps - 1
                 }
             }
         }
@@ -128,7 +121,7 @@ export default class CubeMapSystem extends System {
                     skybox,
                     cubeBuffer,
                     skyboxShader,
-        gpu
+                    gpu
                 }) {
         const {
             meshes, materials, meshSources, directionalLightsData,

@@ -7,6 +7,8 @@ export default class MaterialComponent extends Component{
     radius = 50
     doubleSided = true
 
+    irradiance = []
+    cubeMap = {}
 
      uniforms = []
     uniformValues = {}

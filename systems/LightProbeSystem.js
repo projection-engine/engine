@@ -64,7 +64,7 @@ export default class LightProbeSystem extends System {
                 this.step = STEPS_LIGHT_PROBE.CALCULATE
                 break
             case STEPS_LIGHT_PROBE.CALCULATE:
-                this.sort( lightProbes, meshes)
+                this.sort(lightProbes, meshes)
                 this.step = STEPS_LIGHT_PROBE.DONE
                 break
             default:
@@ -98,15 +98,15 @@ export default class LightProbeSystem extends System {
                     for (let intIndex in intersecting) {
                         if (currentDistance < intersecting[intIndex].distance) {
                             intersecting[intIndex] = {
-                                id: probes[probeIndex].id,
-                                distance: currentDistance
+                                ref: probes[probeIndex].irradianceTexture,
+                                distance: currentDistance,
                             }
                             break
                         }
                     }
                 }
             }
-            this.lightProbeConsumption[cm.id] = intersecting
+            cm.components[COMPONENTS.MATERIAL].irradiance = intersecting.sort((a, b) => a.distance - b.distance)
         }
     }
 }

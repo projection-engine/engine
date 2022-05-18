@@ -15,6 +15,7 @@ import getSystemKey from "./utils/getSystemKey";
 import VBO from "./instances/VBO";
 import cube from "./templates/CUBE";
 import ShaderInstance from "./instances/ShaderInstance";
+import COMPONENTS from "./templates/COMPONENTS";
 
 export default class Renderer {
 
@@ -176,16 +177,17 @@ export default class Renderer {
     }
 
     static getEnvironment(entity, skybox){
-        const ambient = {}
-        if (entity.cubeMap) {
-            ambient.irradianceMap = entity.cubeMap.irradianceMap
-            ambient.prefilteredMap = entity.cubeMap.prefilteredMap
-            ambient.prefilteredLod = entity.cubeMap.prefilteredLod
-        } else if (skybox && skybox.cubeMap !== undefined) {
-            ambient.irradianceMap = skybox.cubeMap.irradianceTexture
-            ambient.prefilteredMap = skybox.cubeMap.prefiltered
-            ambient.prefilteredLod = skybox.prefilteredMipmaps
+        const fallback = skybox.cubeMap ? skybox.cubeMap : {}
+        const comp = entity.components[COMPONENTS.MATERIAL]
+
+        return {
+            irradianceMultiplier: [1, 1, 1], // TODO - Uniforms
+            irradiance0: comp.irradiance[0]?.ref,
+            irradiance1: comp.irradiance[1]?.ref,
+            irradiance2: comp.irradiance[2]?.ref,
+
+            prefilteredMap: comp.cubeMap.prefilteredMap,
+            prefilteredLod: comp.cubeMap.prefilteredLod
         }
-        return ambient
     }
 }
