@@ -36,6 +36,7 @@ void main(){
     
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
     texCoord = uvTexture;
+    
     normalVec = N; // It was N, Normal matrix 
 
    
