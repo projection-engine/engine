@@ -37,7 +37,7 @@ void main(){
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
     texCoord = uvTexture;
     
-    normalVec = N; // It was N, Normal matrix 
+    normalVec = N; 
 
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
@@ -54,7 +54,6 @@ in mat3 toTangentSpace;
 @import(ambientUniforms)
 
 uniform vec3 cameraVec;
-
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
@@ -70,24 +69,24 @@ const float PI = 3.14159265359;
 void main(){  
     gPosition = vPosition;
 
-    gAlbedo = vec4(.5, .5, .5, 1.);
+    gAlbedo = vec4(vec3(.5), 1.);
     gBehaviour = vec4(1.,1.,0.,1.);
-    gNormal = vec4(normalize(toTangentSpace * ((vec3(.5, .5, 1.) * 2.0)- 1.0)), 1.0);
+    gNormal = vec4(normalVec, 1.);
     
     vec3 diffuse = vec3(0.);
     vec3 specular = vec3(0.);
    
 
-    gAmbient = vec4( computeAmbient(cameraVec, gAlbedo.rgb,  vPosition.rgb, gNormal.rgb, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, vPosition.rgb), 1.);
+    gAmbient = vec4(computeAmbient(cameraVec, gAlbedo.rgb,  vPosition.rgb, normalVec, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, vPosition.rgb), 1.);
 
 }
 `
  export const cubeMapShader = `#version 300 es
-precision lowp float;
+precision highp float;
 
 out vec4 finalColor;
 
 void main(){  
-  finalColor = vec4(1.);
+  finalColor = vec4(vec3(.5), 1.);
 }
  `

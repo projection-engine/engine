@@ -98,10 +98,6 @@ export default class CubeMapInstance {
 
             this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
             this.gpu.bindRenderbuffer(this.gpu.RENDERBUFFER, null)
-            this.gpu.bindTexture(this.gpu.TEXTURE_2D, null)
-            this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, null)
-
-
             this.gpu.deleteRenderbuffer(rbo)
 
             return this

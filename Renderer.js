@@ -124,7 +124,7 @@ export default class Renderer {
     }
 
 
-    updatePackage(fallbackMaterial=this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
+    updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
         const packageData = this.packager.makePackage({
             entities,
             materials,
@@ -149,7 +149,7 @@ export default class Renderer {
 
     }
 
-    static drawMaterial(mesh, material, gpu){
+    static drawMaterial(mesh, material, gpu) {
         if (material.settings.doubleSided)
             gpu.disable(gpu.CULL_FACE)
         else if (material.settings.cullFace)
@@ -176,7 +176,7 @@ export default class Renderer {
 
     }
 
-    static getEnvironment(entity, skybox){
+    static getEnvironment(entity, skybox) {
         const fallback = skybox?.cubeMap ? skybox.cubeMap : {}
         const comp = entity.components[COMPONENTS.MATERIAL]
         const irradiance0 = comp.irradiance[0]?.ref
@@ -189,8 +189,8 @@ export default class Renderer {
             irradiance1: comp.irradiance[1]?.ref,
             irradiance2: comp.irradiance[2]?.ref,
 
-            prefilteredMap: cube? cube.prefiltered : fallback.prefiltered,
-            ambientLODSamples: cube? cube.prefilteredLod : skybox?.prefilteredMipmaps
+            prefilteredMap: cube ? cube.prefiltered : fallback.prefiltered,
+            ambientLODSamples: cube ? cube.prefilteredLod : skybox?.prefilteredMipmaps
         }
     }
 }
