@@ -50,7 +50,7 @@ export default class CubeMapInstance {
 
     generatePrefiltered(mipLevels = 6, resolution = 128, cubeBuffer) {
 
-        if (!this.#asDepth) {
+        if (!this.#asDepth && cubeBuffer) {
             const perspective = mat4.perspective([], 1.57, 1, .1, 10),
                 gpu = this.gpu
 

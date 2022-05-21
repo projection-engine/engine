@@ -40,28 +40,4 @@ export default class Transformation {
         return angles
     }
 
-    static updateTransform(axis, data, key, engine, entityID, setAlert) {
-
-        const entity = engine.entities.find(e => e.id === entityID)
-
-        const component = entity.components[COMPONENTS.TRANSFORM]
-        const prev = component[key]
-        component[key] = [
-            axis === 'x' ? data : prev[0],
-            axis === 'y' ? data : prev[1],
-            axis === 'z' ? data : prev[2]
-        ]
-
-        if (entity.components[COMPONENTS.POINT_LIGHT])
-            entity.components[COMPONENTS.POINT_LIGHT].changed = true
-        if (entity.components[COMPONENTS.CUBE_MAP])
-            setAlert({message: 'Reflection captures need to be rebuilt', type: 'alert'})
-        engine.dispatchEntities({
-            type: ENTITY_ACTIONS.UPDATE_COMPONENT, payload: {
-                entityID,
-                key: COMPONENTS.TRANSFORM,
-                data: component
-            }
-        })
-    }
 }

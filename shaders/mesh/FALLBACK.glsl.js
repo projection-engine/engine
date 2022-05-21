@@ -43,7 +43,47 @@ void main(){
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 }
 `
+export const fragmentForward = `#version 300 es
+  
+precision highp float;
 
+#define PI  3.14159265359 
+
+in vec4 vPosition;
+uniform vec3 cameraVec;
+in vec3 normalVec;
+@import(ambientUniforms)
+
+out vec4 finalColor;
+
+@import(fresnelSchlickRoughness)
+@import(forwardAmbient)
+
+@import(fresnelSchlick)
+@import(geometrySchlickGGX)
+@import(distributionGGX)
+@import(geometrySmith)
+
+void main(){
+
+    vec3 fragPosition = vPosition.xyz;  
+    vec3 albedo = vec3(1.);
+           
+    float roughness = .5;
+    float metallic = .5;
+    vec3 N = normalVec; 
+    
+    
+    vec3 V = normalize(cameraVec - fragPosition);
+    float NdotV    = max(dot(N, V), 0.000001);
+    vec3 F0 = vec3(0.04);
+    vec3 Lo = vec3(0.0);
+    F0 = mix(F0, albedo, metallic);
+    Lo += computeAmbient(NdotV, metallic, roughness, albedo, F0, V, N, ambientLODSamples, brdfSampler, vPosition.rgb);
+    finalColor = vec4(Lo , 1.);
+
+}
+        `
 export const fragment = `#version 300 es
 precision highp float;
 
@@ -81,6 +121,7 @@ void main(){
 
 }
 `
+
  export const cubeMapShader = `#version 300 es
 precision highp float;
 

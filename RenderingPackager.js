@@ -40,17 +40,17 @@ export default class RenderingPackager {
             skybox: filteredEntities.filter(e => e.components[COMPONENTS.SKYBOX] && e.active)[0]?.components[COMPONENTS.SKYBOX],
             directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
             skylight: filteredEntities.filter(e => e.components[COMPONENTS.SKYLIGHT] && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
-            cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP] && !e.components[COMPONENTS.CUBE_MAP].asLightProbe),
+            cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP]),
             cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA]),
-
+            lines: filteredEntities.filter(e => e.components[COMPONENTS.LINE]),
             scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
             materials: toObject(materials),
             meshSources: toObject(meshes),
             scripts: toObject(RenderingPackager.parseScripts(scripts)),
             entitiesMap: toObject(entities),
-            lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP] && e.components[COMPONENTS.CUBE_MAP].asLightProbe)
+            lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.PROBE])
         }
-        this.#loadSkybox(data.skybox, gpu, cubeBuffer)
+        RenderingPackager.loadSkybox(data.skybox, gpu, cubeBuffer, this.skyShader)
 
         data.cubeMapsSources = toObject(data.cubeMaps)
         attributes.camera = params.camera ? params.camera : this.rootCamera
@@ -132,7 +132,7 @@ export default class RenderingPackager {
         }
     }
 
-    #loadSkybox(skyboxElement, gpu, cubeBuffer) {
+    static loadSkybox(skyboxElement, gpu, cubeBuffer, skyShader) {
         gpu.bindVertexArray(null)
         const noTexture = !(skyboxElement?.texture instanceof WebGLTexture)
         if (skyboxElement && !skyboxElement.ready) {
@@ -158,11 +158,11 @@ export default class RenderingPackager {
                 skyboxElement.blob = null
             }
             if(skyboxElement.texture instanceof WebGLTexture) {
-                this.skyShader.use()
+                skyShader.use()
                 skyboxElement.cubeMap.resolution = skyboxElement.resolution
                 skyboxElement.cubeMap.draw((yaw, pitch, perspective) => {
-                    this.skyShader.use()
-                    this.skyShader.bindForUse({
+                    skyShader.use()
+                    skyShader.bindForUse({
                         projectionMatrix: perspective,
                         viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
                         uSampler: skyboxElement.texture

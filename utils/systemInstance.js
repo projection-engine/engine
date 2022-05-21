@@ -1,8 +1,8 @@
-import CameraCubeSystem from "../../utils/extension/systems/CameraCubeSystem";
+import CameraCubeSystem from "../../extension/systems/CameraCubeSystem";
 import SYSTEMS from "../templates/SYSTEMS";
 import CullingSystem from "../systems/CullingSystem";
 import GBufferSystem from "../systems/GBufferSystem";
-import PerformanceSystem from "../systems/PerformanceSystem";
+import MetricsSystem from "../systems/MetricsSystem";
 import PickSystem from "../systems/PickSystem";
 
 import ShadowMapSystem from "../systems/ShadowMapSystem";
@@ -12,6 +12,7 @@ import ScriptSystem from "../systems/ScriptSystem";
 import DepthSystem from "../systems/DepthSystem";
 import AOSystem from "../systems/AOSystem";
 import LightProbeSystem from "../systems/LightProbeSystem";
+import LineSystem from "../systems/LineSystem";
 
 export default function systemInstance(s, gpu, resolution) {
     switch (true) {
@@ -24,7 +25,7 @@ export default function systemInstance(s, gpu, resolution) {
         case s  === SYSTEMS.MESH:
             return new GBufferSystem(gpu, resolution)
         case s  === SYSTEMS.PERF:
-            return new PerformanceSystem(gpu, gpu.canvas.id)
+            return new MetricsSystem(gpu, gpu.canvas.id)
         case s  === SYSTEMS.PHYSICS:
             return undefined
         case s  === SYSTEMS.PICK:
@@ -42,6 +43,8 @@ export default function systemInstance(s, gpu, resolution) {
 
         case s  === SYSTEMS.DEPTH_PRE_PASS:
             return new DepthSystem(gpu, resolution)
+        case s  === SYSTEMS.LINE:
+            return new LineSystem(gpu)
         default:
             return undefined
     }

@@ -28,7 +28,9 @@ export default class CubeMapSystem extends System {
         const {
             cubeMaps,
             meshes,
-            cubeBuffer
+            cubeBuffer,
+            skybox,
+            skyboxShader
         } = data
         // RADIUS 10
         if (this.lastCallLength !== cubeMaps.length) {
@@ -38,12 +40,37 @@ export default class CubeMapSystem extends System {
         // TODO - use single base texture
         switch (this.step) {
             case STEPS_CUBE_MAP.BASE:
-                this.#generateBaseTexture(options, systems, data)
+                for (let i = 0; i < this.lastCallLength; i++) {
+                    const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
+                    current.cubeMap.resolution = current.resolution
+                    const translation = cubeMaps[i].components[COMPONENTS.TRANSFORM].translation
+                    current.cubeMap.draw((yaw, pitch, projection, index) => {
+                            const target = vec3.add([], translation, VIEWS.target[index])
+                            const view = mat4.lookAt([], translation, target, VIEWS.up[index])
+                            CubeMapSystem.draw({
+                                view,
+                                projection,
+                                data,
+                                options,
+                                cubeMapPosition: translation,
+                                skybox,
+                                cubeBuffer,
+                                skyboxShader,
+                                gpu: this.gpu
+                            })
+                        },
+                        undefined,
+                        10000,
+                        1
+                    )
+                }
+                this.gpu.bindVertexArray(null)
                 this.step = STEPS_CUBE_MAP.PRE_FILTERED
                 break
             case STEPS_CUBE_MAP.PRE_FILTERED:
                 for (let i = 0; i < this.lastCallLength; i++) {
                     const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
+                    console.log(cubeBuffer)
                     current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution, cubeBuffer)
                 }
                 this.step = STEPS_CUBE_MAP.CALCULATE
@@ -57,37 +84,7 @@ export default class CubeMapSystem extends System {
                 break
         }
     }
-    static generateBase(options, systems, data, lastCallLength, gpu){
-        const {
-            cubeMaps,
-            skybox,
-            cubeBuffer,
-            skyboxShader
-        } = data
-        for (let i = 0; i < lastCallLength; i++) {
-            const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-            current.cubeMap.resolution = current.resolution
-            current.cubeMap.draw((yaw, pitch, projection, index) => {
-                    const target = vec3.add([], cubeMaps[i].components[COMPONENTS.TRANSFORM].position, VIEWS.target[index])
-                    const view = mat4.lookAt([], cubeMaps[i].components[COMPONENTS.TRANSFORM].position, target, VIEWS.up[index])
-                    CubeMapSystem.draw({
-                        view,
-                        projection,
-                        data,
-                        options,
-                        cubeMapPosition: cubeMaps[i].components[COMPONENTS.TRANSFORM].translation,
-                        skybox,
-                        cubeBuffer,
-                        skyboxShader,
-                        gpu: gpu
-                    })
-                },
-                undefined,
-                10000,
-                1
-            )
-        }
-    }
+
     sort(meshes, cubeMaps) {
         const l = cubeMaps.length
         const lm = meshes.length

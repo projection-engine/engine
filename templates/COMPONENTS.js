@@ -14,5 +14,7 @@ export default {
     TERRAIN: 'TerrainComponent',
     SKYLIGHT: 'SkylightComponent',
     SCRIPT: 'ScriptComponent',
-    CAMERA: 'CameraComponent'
+    CAMERA: 'CameraComponent',
+    LINE: 'LineComponent',
+    PROBE: 'ProbeComponent'
 }

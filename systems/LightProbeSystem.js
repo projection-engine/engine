@@ -19,11 +19,12 @@ export default class LightProbeSystem extends System {
     lightProbeConsumption = {}
 
     constructor(gpu) {
-        super([]);
+        super();
         this.gpu = gpu
         this.baseCubeMap = new CubeMapInstance(gpu, 128, false)
 
     }
+
     execute(options, systems, data, sceneColor) {
         super.execute()
         const {
@@ -43,30 +44,34 @@ export default class LightProbeSystem extends System {
 
             case STEPS_LIGHT_PROBE.GENERATION:
                 for (let i = 0; i < lightProbes.length; i++) {
-                    const current = lightProbes[i].components[COMPONENTS.CUBE_MAP]
-                    const transformation = lightProbes[i].components[COMPONENTS.TRANSFORM]
+                    const current = lightProbes[i].components[COMPONENTS.PROBE]
+                    for(let p in current.probes){
+                        const currentProbe = current.probes[p]
+                        this.baseCubeMap.draw((yaw, pitch, projection, index) => {
+                                const target = vec3.add([], currentProbe.translation, VIEWS.target[index])
+                                const view = mat4.lookAt([], currentProbe.translation, target, VIEWS.up[index])
+                                CubeMapSystem.draw({
+                                    view,
+                                    projection,
+                                    data,
+                                    options,
+                                    cubeMapPosition: currentProbe.translation,
+                                    skybox,
+                                    cubeBuffer,
+                                    skyboxShader,
+                                    gpu: this.gpu
+                                })
 
-                    this.baseCubeMap.draw((yaw, pitch, projection, index) => {
-                            const target = vec3.add([], transformation.position, VIEWS.target[index])
-                            const view = mat4.lookAt([], transformation.position, target, VIEWS.up[index])
-                            CubeMapSystem.draw({
-                                view,
-                                projection,
-                                data,
-                                options,
-                                cubeMapPosition: transformation.position,
-                                skybox,
-                                cubeBuffer,
-                                skyboxShader,
-                                gpu: this.gpu
-                            })
-
-                        },
-                        undefined,
-                        10000,
-                        1
-                    )
-                    current.cubeMap.generateIrradiance(cubeBuffer, this.baseCubeMap.texture)
+                            },
+                            undefined,
+                            10000,
+                            1
+                        )
+                        if(!currentProbe.cubeMap)
+                            currentProbe.cubeMap = new CubeMapInstance(this.gpu, 32)
+                        console.log(currentProbe.cubeMap)
+                        currentProbe.cubeMap.generateIrradiance(cubeBuffer, this.baseCubeMap.texture)
+                    }
                 }
 
                 this.step = STEPS_LIGHT_PROBE.CALCULATE
@@ -85,20 +90,21 @@ export default class LightProbeSystem extends System {
         probes,
         meshes
     ) {
-        const MAX_PROBES = 3
+        const MAX_PROBES = 4
+        const mappedProbes = probes.map(p => p.components[COMPONENTS.PROBE].probes).flat(Number.POSITIVE_INFINITY)
 
         for (let meshIndex in meshes) {
             const intersecting = []
             const currentMesh = meshes[meshIndex]
-            for (let probeIndex in probes) {
-                const probePosition = probes[probeIndex].components[COMPONENTS.TRANSFORM].translation
-                const texture = probes[probeIndex].components[COMPONENTS.CUBE_MAP].cubeMap.irradianceTexture
+            for (let probeIndex in mappedProbes) {
+                const probePosition = mappedProbes[probeIndex].translation
+                const texture = mappedProbes[probeIndex].cubeMap.irradianceTexture
                 const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
                 if (intersecting.length < MAX_PROBES) {
                     intersecting.push({
                         ref: texture,
                         distance: vec3.len(vec3.subtract([], probePosition, mPosition)),
-                        irradianceMultiplier: probes[probeIndex].components[COMPONENTS.CUBE_MAP].irradianceMultiplier
+                        irradianceMultiplier: [1, 1, 1]
                     })
                 } else {
                     const currentDistance = vec3.len(vec3.subtract([], probePosition, mPosition))
@@ -107,18 +113,17 @@ export default class LightProbeSystem extends System {
                             intersecting[intIndex] = {
                                 ref: texture,
                                 distance: currentDistance,
-                                irradianceMultiplier: probes[probeIndex].components[COMPONENTS.CUBE_MAP].irradianceMultiplier
+                                irradianceMultiplier: [1, 1, 1]
                             }
                             break
                         }
                     }
                 }
             }
-            if(intersecting.length > 0) {
+            if (intersecting.length > 0) {
                 currentMesh.components[COMPONENTS.MATERIAL].irradiance = intersecting.sort((a, b) => a.distance - b.distance)
                 currentMesh.components[COMPONENTS.MATERIAL].irradianceMultiplier = intersecting[0].irradianceMultiplier
             }
-
         }
     }
 }

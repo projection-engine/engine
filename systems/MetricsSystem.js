@@ -1,7 +1,7 @@
 import System from "../basic/System";
 
 const SAMPLES = 25
-export default class PerformanceSystem extends System {
+export default class MetricsSystem extends System {
     #framesRendered = 0
     #times = []
     _visible = true
@@ -24,7 +24,7 @@ export default class PerformanceSystem extends System {
             Object.assign(this.renderTarget.style, {
                 backdropFilter: "blur(10px) brightness(70%)", borderRadius: "3px", width: "fit-content",
                 height: 'fit-content', position: 'absolute', bottom: '4px', left: '4px', zIndex: '10',
-                color: 'white', padding: '4px', fontSize: '.75rem'
+                color: 'white', padding: '4px', fontSize: '.75rem', display: 'none'
             });
             canvas.parentNode.appendChild(this.renderTarget)
             this.  #bindComponents()

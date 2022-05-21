@@ -9,8 +9,10 @@ export default {
     PERF: '7',
     PHYSICS: '8',
     MESH: '9',
-    FORWARD: '10',
-    CAMERA_CUBE: '11',
-    PICK: '12',
-    PROBE: '13'
+    LINE: '10',
+    FORWARD: '11',
+    CAMERA_CUBE: '12',
+    PICK: '13',
+    PROBE: '14',
+
 }

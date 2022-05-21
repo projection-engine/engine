@@ -28,8 +28,13 @@ export default class TransformSystem extends System {
                 this._changedMeshes.push(current)
                 this._changed = true
                 let parent
-                if (current.linkedTo)
-                    parent = this._find(entities, (e) => e.id === current.linkedTo)[0]?.components[COMPONENTS.TRANSFORM]?.transformationMatrix
+                if (current.linkedTo) {
+                    parent = entities.find((e) => e.id === current.linkedTo)
+                    if(parent && parent.components[COMPONENTS.TRANSFORM])
+                        parent = parent.components[COMPONENTS.TRANSFORM].transformationMatrix
+                    else
+                        parent =undefined
+                }
                 const component = current.components[COMPONENTS.TRANSFORM]
                 const transformationMatrix = Transformation.transform(component.translation, component.rotationQuat, component.scaling, options.rotationType, component.transformationMatrix)
 
@@ -58,6 +63,19 @@ export default class TransformSystem extends System {
                     )
                 else
                     current.components[COMPONENTS.TRANSFORM].transformationMatrix = transformationMatrix
+
+
+                // TODO - PUT THIS SOMEWHERE ELSE (DEV)
+                const isProbe =current.components[COMPONENTS.PROBE]
+                if(isProbe){
+                    for(let k in isProbe.probes){
+                        isProbe.probes[k].transformedMatrix = mat4.multiply(
+                            [],
+                            transformationMatrix,
+                            isProbe.probes[k].transformationMatrix
+                        )
+                    }
+                }
                 const lT= entities.length
                 for (let j = 0; j < lT; j++) {
                     if (entities[j].components[COMPONENTS.TRANSFORM] && entities[j].linkedTo === current.id)

@@ -9,6 +9,7 @@ import {copyTexture} from "../utils/utils";
 import PostProcessingWrapper from "./postprocessing/PostProcessingWrapper";
 import ShaderInstance from "../instances/ShaderInstance";
 import * as shaderCode from "../shaders/FXAA.glsl";
+import LineSystem from "./LineSystem";
 
 
 export default class RenderingWrapper extends System {
@@ -24,6 +25,7 @@ export default class RenderingWrapper extends System {
         this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
         this.skyboxSystem = new SkyboxSystem(gpu)
+        this.lineSystem = new LineSystem(gpu)
         this.deferredSystem = new DeferredSystem(gpu)
 
 
@@ -66,6 +68,7 @@ export default class RenderingWrapper extends System {
         copyTexture(a, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
         this.forwardSystem.execute(options, systems, data, this.frameBuffer.colors[0])
+        this.lineSystem.execute(options, data)
         if (onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, true)
         a.stopMapping()

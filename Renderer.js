@@ -1,6 +1,6 @@
 import RootCameraInstance from "./instances/RootCameraInstance";
 import RenderingWrapper from "./systems/RenderingWrapper";
-import brdfImg from "./utils/brdf_lut.jpg";
+
 import {createTexture} from "./utils/utils";
 import MaterialInstance from "./instances/MaterialInstance";
 import * as shaderCode from "./shaders/mesh/FALLBACK.glsl";
@@ -13,45 +13,52 @@ import FramebufferInstance from "./instances/FramebufferInstance";
 import RenderingPackager from "./RenderingPackager";
 import systemInstance from "./utils/systemInstance";
 import VBO from "./instances/VBO";
-import cube from "./templates/CUBE";
 import ShaderInstance from "./instances/ShaderInstance";
 import COMPONENTS from "./templates/COMPONENTS";
+import {getImageBitmap} from "./utils/image/functions/misc";
 
 export default class Renderer {
 
     rootCamera = new RootCameraInstance()
     viewTarget = this.rootCamera
-
+    tried = false
     frameID = undefined
     data = {}
     params = {}
     #systems = {}
-
+    #ready =  false
     constructor(gpu, resolution, systems) {
         this.skyboxShader = new ShaderInstance(skyboxShaderCode.vertex, skyboxShaderCode.fragment, gpu)
-        this.cubeBuffer = new VBO(gpu, 1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        Promise.all([import('./templates/CUBE'), import('./templates/BRDF.json')])
+            .then(async res => {
+                const [cube, BRDF] = res
+                this.brdf = createTexture(gpu, 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, await ImageProcessor.getImageBitmap(BRDF.data), gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
+
+                this.fallbackMaterial = new MaterialInstance(this.gpu, shaderCode.vertex, shaderCode.fragment, [{
+                        key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED
+                    }], {
+                        isForward: false,
+                        rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
+                        doubledSided: true
+                    },
+                    () => this._ready = true, v4(),
+                    shaderCode.cubeMapShader)
+
+                this.params.fallbackMaterial = this.fallbackMaterial
+                this.params.brdf = this.brdf
+                this.cubeBuffer = new VBO(gpu, 1, new Float32Array(cube.default), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+                this.data.cubeBuffer = this.cubeBuffer
+                this.#ready = true
+                if (this.tried) {
+                    this.start()
+                }
+            }).catch(err => console.log(err))
+
         this.packager = new RenderingPackager(gpu)
         this.canvas = gpu.canvas
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolution)
 
-        const brdf = new Image()
-
-        brdf.src = brdfImg
-        brdf.decode().then(async () => {
-            this.brdf = createTexture(gpu, 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, brdf, gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
-            this.params.brdf = this.brdf
-            this.fallbackMaterial = new MaterialInstance(this.gpu, shaderCode.vertex, shaderCode.fragment, [{
-                    key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED
-                }], {
-                    isForward: false,
-                    rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
-                    doubledSided: true
-                },
-                () => this._ready = true, v4(),
-                shaderCode.cubeMapShader)
-            this.params.fallbackMaterial = this.fallbackMaterial
-        })
         const a = new FramebufferInstance(gpu), b = new FramebufferInstance(gpu)
         a.texture().depthTest()
         b.texture()
@@ -114,8 +121,12 @@ export default class Renderer {
     }
 
     start() {
-        if (!this.frameID)
+        console.log(this.cubeBuffer)
+        if ( this.#ready && !this.frameID)
             this.frameID = requestAnimationFrame(() => this.callback())
+        else
+            this.tried = true
+
     }
 
     stop() {
