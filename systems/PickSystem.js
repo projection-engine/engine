@@ -28,6 +28,21 @@ export default class PickSystem extends System {
         })
     }
 
+    depthPick(depthFBO, coords) {
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO);
+        let dd = new Float32Array(4)
+        this.gpu.readPixels(
+            coords.x,
+            coords.y,
+            1,
+            1,
+            this.gpu.RGBA,
+            this.gpu.FLOAT,
+            dd
+        );
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
+        return dd;
+    }
     pickElement(drawCallback, pickCoords, camera, sameSize, isOrtho) {
 
         this.shader.use()

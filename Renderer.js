@@ -26,7 +26,8 @@ export default class Renderer {
     data = {}
     params = {}
     #systems = {}
-    #ready =  false
+    #ready = false
+
     constructor(gpu, resolution, systems) {
         this.skyboxShader = new ShaderInstance(skyboxShaderCode.vertex, skyboxShaderCode.fragment, gpu)
         Promise.all([import('./templates/CUBE'), import('./templates/BRDF.json')])
@@ -120,9 +121,10 @@ export default class Renderer {
         this.frameID = requestAnimationFrame(() => this.callback())
     }
 
+
     start() {
         console.log(this.cubeBuffer)
-        if ( this.#ready && !this.frameID)
+        if (this.#ready && !this.frameID)
             this.frameID = requestAnimationFrame(() => this.callback())
         else
             this.tried = true
@@ -136,6 +138,8 @@ export default class Renderer {
 
 
     updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
+
+
         const packageData = this.packager.makePackage({
             entities,
             materials,
