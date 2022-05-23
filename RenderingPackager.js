@@ -23,7 +23,6 @@ export default class RenderingPackager {
                     meshes,
                     params,
                     scripts = [],
-                    onBeforeRender,
                     onWrap,
                     gpu,
                     brdf,
@@ -57,7 +56,6 @@ export default class RenderingPackager {
         attributes.entitiesLength = filteredEntities.length
 
         attributes.onWrap = onWrap ? onWrap : () => null
-        attributes.onBeforeRender = onBeforeRender ? onBeforeRender : () => null
         attributes.brdf = brdf
         attributes.fallbackMaterial = fallbackMaterial
 

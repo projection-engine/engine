@@ -1,6 +1,7 @@
 import Component from "../basic/Component";
 import {mat4, quat} from "gl-matrix";
 import Transformation from "../instances/Transformation";
+
 const toDeg = 57.29
 
 export default class TransformComponent extends Component {

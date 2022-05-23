@@ -1,6 +1,5 @@
 import Component from "../basic/Component";
 import {mat4} from "gl-matrix";
-import CubeMapInstance from "../instances/CubeMapInstance";
 import {v4} from "uuid";
 
 const identity = mat4.create()

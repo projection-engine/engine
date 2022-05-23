@@ -1,8 +1,8 @@
 import System from "../basic/System";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from '../shaders/shadows/SHADOW_MAP.glsl'
 import COMPONENTS from "../templates/COMPONENTS";
+
 const vertex = `#version 300 es
 
 layout (location = 1) in vec3 position;

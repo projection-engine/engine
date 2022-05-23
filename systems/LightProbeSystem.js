@@ -4,8 +4,6 @@ import {VIEWS} from "./ShadowMapSystem";
 import COMPONENTS from "../templates/COMPONENTS";
 import CubeMapSystem from "./CubeMapSystem";
 import CubeMapInstance from "../instances/CubeMapInstance";
-import {WebWorker} from "../utils/WebWorker";
-import {irradiance} from "../shaders/CUBE_MAP.glsl";
 
 export const STEPS_LIGHT_PROBE = {
     GENERATION: 0,

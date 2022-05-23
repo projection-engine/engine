@@ -1,8 +1,5 @@
 import {mat4, quat} from "gl-matrix";
 
-import COMPONENTS from "../templates/COMPONENTS";
-import {ENTITY_ACTIONS} from "../useEngineEssentials";
-
 const toDeg = 57.2957795131
 
 export default class Transformation {

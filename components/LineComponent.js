@@ -1,6 +1,5 @@
 import Component from "../basic/Component";
 import {mat4, quat, vec3} from "gl-matrix";
-import CubeMapInstance from "../instances/CubeMapInstance";
 
 export default class LineComponent extends Component {
     position = [0, 0, 0]

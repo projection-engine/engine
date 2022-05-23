@@ -1,6 +1,5 @@
 import System from "../basic/System";
 import FramebufferInstance from "../instances/FramebufferInstance";
-import SYSTEMS from "../templates/SYSTEMS";
 import COMPONENTS from "../templates/COMPONENTS";
 import Renderer from "../Renderer";
 import ForwardSystem from "./ForwardSystem";

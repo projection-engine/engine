@@ -15,7 +15,6 @@ import systemInstance from "./utils/systemInstance";
 import VBO from "./instances/VBO";
 import ShaderInstance from "./instances/ShaderInstance";
 import COMPONENTS from "./templates/COMPONENTS";
-import {getImageBitmap} from "./utils/image/functions/misc";
 
 export default class Renderer {
 
@@ -100,7 +99,7 @@ export default class Renderer {
         // if (elapsed > this.fpsInterval) {
         const now = performance.now()
         this.then = now - (elapsed % this.fpsInterval);
-        this.params.onBeforeRender()
+
         this.params.elapsed = elapsed
 
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
@@ -137,7 +136,7 @@ export default class Renderer {
     }
 
 
-    updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onBeforeRender = () => null, onWrap) {
+    updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onWrap) {
 
 
         const packageData = this.packager.makePackage({
@@ -146,7 +145,7 @@ export default class Renderer {
             meshes,
             params,
             scripts,
-            onBeforeRender,
+
             onWrap,
             gpu: this.gpu,
             brdf: this.brdf,
