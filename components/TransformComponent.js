@@ -3,18 +3,17 @@ import {mat4, quat} from "gl-matrix";
 import Transformation from "../instances/Transformation";
 
 const toDeg = 57.29
-
+const identity  = mat4.create()
 export default class TransformComponent extends Component {
     __rotation = [0, 0, 0]
     _rotationQuat = [0, 0, 0, 1]
     _translation = [0, 0, 0]
     _scaling = [1, 1, 1]
     __changed = false
-    _transformationMatrix = mat4.create()
+    _transformationMatrix = identity
     _rotationUpdated = false
-    _baseTransformationMatrix = mat4.create()
+    _baseTransformationMatrix = identity
     __initializedEuler = false
-
     lockedRotation = false
     lockedScaling = false
 
@@ -25,13 +24,15 @@ export default class TransformComponent extends Component {
         super(id, name);
     }
 
-    set baseTransformationMatrix(data){
-        if(data)
+    set baseTransformationMatrix(data) {
+        if (data)
             this._baseTransformationMatrix = data
     }
-    get baseTransformationMatrix (){
+
+    get baseTransformationMatrix() {
         return this._baseTransformationMatrix
     }
+
     get changed() {
         return this.__changed
     }

@@ -122,9 +122,9 @@ function entityReducer(state, {type, payload}) {
             }
             case ENTITY_ACTIONS.REMOVE_BLOCK: {
                 const block = payload
-                if (Array.isArray(block)) {
+                if (Array.isArray(block))
                     return stateCopy.filter(e => !block.includes(e.id) && !block.includes(e.linkedTo))
-                } else
+                else
                     return stateCopy
             }
             case ENTITY_ACTIONS.PUSH_BLOCK: {

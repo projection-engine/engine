@@ -122,7 +122,6 @@ export default class Renderer {
 
 
     start() {
-        console.log(this.cubeBuffer)
         if (this.#ready && !this.frameID)
             this.frameID = requestAnimationFrame(() => this.callback())
         else
