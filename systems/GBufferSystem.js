@@ -26,8 +26,7 @@ export default class GBufferSystem extends System {
             meshes,
             skybox,
             materials,
-            meshSources,
-            cubeMapsSources,
+            meshSources
         } = data
 
         const {

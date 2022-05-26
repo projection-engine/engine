@@ -50,7 +50,7 @@ export default class FramebufferInstance extends Quad {
     }
 
 
-    draw(shader) {
+    draw() {
         super.draw()
     }
 
