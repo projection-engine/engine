@@ -2,6 +2,7 @@ import {useReducer, useState} from "react";
 import PickComponent from "./components/PickComponent";
 import COMPONENTS from "./templates/COMPONENTS";
 import ScriptComponent from "./components/ScriptComponent";
+import Entity from "./basic/Entity";
 
 export default function useEngineEssentials() {
     const [meshes, setMeshes] = useState([])
@@ -112,11 +113,13 @@ function entityReducer(state, {type, payload}) {
                 const block = payload
                 if (Array.isArray(block))
                     return block.map((entity, i) => {
-                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + i + 1)
-                        if (!entity.components[COMPONENTS.SCRIPT])
-                            entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
-                        return entity
-                    })
+                        if(entity instanceof Entity) {
+                            entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + i + 1)
+                            if (!entity.components[COMPONENTS.SCRIPT])
+                                entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
+                            return entity
+                        }
+                    }).filter(e => e)
                 else
                     return stateCopy
             }

@@ -35,7 +35,7 @@ void main(void){
 // in vec4 vPosition;
 // out vec4 fragDepth;
 //
-// void main(void){
+// void editor(void){
 //     fragDepth = vec4(vec3(vPosition.z/vPosition.w), 1.);
 // }
 // `
