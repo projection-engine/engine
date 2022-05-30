@@ -85,56 +85,34 @@ export default class CubeMapSystem extends System {
         }
     }
 
-    sort(meshes, cubeMaps) {
-        const l = cubeMaps.length
-        const lm = meshes.length
-        for (let i = 0; i < l; i++) {
-            const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP],
-                pos = cubeMaps[i].components[COMPONENTS.TRANSFORM].position,
-                radius = current.radius
-
-            for (let m = 0; m < lm; m++) {
-                const currentMesh = meshes[m].components
-                if (intersectBoundingSphere(currentMesh[COMPONENTS.MATERIAL].radius, radius, currentMesh[COMPONENTS.TRANSFORM].position.slice(0, 3), pos)) {
-                    const cube = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-                    const target = meshes[m].components[COMPONENTS.MATERIAL].cubeMap
-                    target.ready = true
-                    target.prefiltered = cube.prefilteredMap
-                    target.prefilteredLod = cube.prefilteredMipmaps - 1
-                }
+    sort(
+        meshes,
+        cubeMaps
+    ) {
+        for (let meshIndex in meshes) {
+            let intersecting
+            const currentMesh = meshes[meshIndex]
+            for (let index in cubeMaps) {
+                const probePosition = cubeMaps[index].components[COMPONENTS.TRANSFORM].translation
+                const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
+                const distance = vec3.len(vec3.subtract([], probePosition, mPosition))
+                if (!intersecting || distance < intersecting.distance)
+                    intersecting = {
+                        prefilteredMipmaps: cubeMaps[index].components[COMPONENTS.CUBE_MAP].prefilteredMipmaps - 1,
+                        prefilteredMap: cubeMaps[index].components[COMPONENTS.CUBE_MAP].prefilteredMap,
+                        distance,
+                        irradianceMultiplier: [1, 1, 1]
+                    }
             }
-        }
-    }
 
-    #generateBaseTexture(options, systems, data) {
-        const {
-            cubeMaps,
-            skybox,
-            cubeBuffer,
-            skyboxShader
-        } = data
-        for (let i = 0; i < this.lastCallLength; i++) {
-            const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-            current.cubeMap.resolution = current.resolution
-            current.cubeMap.draw((yaw, pitch, projection, index) => {
-                    const target = vec3.add([], cubeMaps[i].components[COMPONENTS.TRANSFORM].position, VIEWS.target[index])
-                    const view = mat4.lookAt([], cubeMaps[i].components[COMPONENTS.TRANSFORM].position, target, VIEWS.up[index])
-                    CubeMapSystem.draw({
-                        view,
-                        projection,
-                        data,
-                        options,
-                        cubeMapPosition: cubeMaps[i].components[COMPONENTS.TRANSFORM].translation,
-                        skybox,
-                        cubeBuffer,
-                        skyboxShader,
-                        gpu: this.gpu
-                    })
-                },
-                undefined,
-                10000,
-                1
-            )
+            if (intersecting) {
+                const target = currentMesh.components[COMPONENTS.MATERIAL].cubeMap
+
+                target.ready = true
+                target.prefiltered = intersecting.prefilteredMap
+                target.prefilteredLod = intersecting.prefilteredMipmaps
+                console.log(target, intersecting)
+            }
         }
     }
 
@@ -150,15 +128,12 @@ export default class CubeMapSystem extends System {
                     gpu
                 }) {
         const {
-            meshes, materials, meshSources, directionalLightsData,
-            dirLightPOV, pointLightsQuantity, pointLightData,
-            maxTextures
-        } = data
-        // let lastMat = undefined
-
-        const {fallbackMaterial, brdf, elapsed} = options
-
-        const l = meshes.length
+                meshes, materials, meshSources, directionalLightsData,
+                dirLightPOV, pointLightsQuantity, pointLightData,
+                maxTextures
+            } = data,
+            {fallbackMaterial, brdf, elapsed} = options,
+            l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
             const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
@@ -181,20 +156,16 @@ export default class CubeMapSystem extends System {
                     normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
                     materialComponent: current.components[COMPONENTS.MATERIAL],
                     brdf,
-
                     directionalLightsQuantity: maxTextures,
                     directionalLightsData,
                     dirLightPOV,
                     pointLightsQuantity,
                     pointLightData,
-                    // lastMaterial: lastMat,
                     elapsed,
                     gpu: gpu,
-
                     useCubeMapShader: true,
                     onlyForward: true
                 })
-                // lastMat = mat?.id
             }
         }
         gpu.bindVertexArray(null)
