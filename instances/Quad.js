@@ -1,5 +1,5 @@
-import {createVAO} from "../utils/utils";
-import VBO from "./VBO";
+import {createVAO} from "../utils/utils"
+import VBO from "./VBO"
 
 export default class Quad {
     constructor(gpu) {

@@ -1,5 +1,5 @@
-import {createRBO, createTexture} from "../utils/utils";
-import Quad from "./Quad";
+import {createRBO, createTexture} from "../utils/utils"
+import Quad from "./Quad"
 
 export default class FramebufferInstance extends Quad {
     FBO

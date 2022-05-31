@@ -1,4 +1,4 @@
-import Component from "../basic/Component";
+import Component from "../basic/Component"
 
 export default class CameraComponent extends Component {
     fov = 1.57

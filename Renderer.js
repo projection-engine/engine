@@ -1,20 +1,20 @@
-import RootCameraInstance from "./instances/RootCameraInstance";
-import RenderingWrapper from "./systems/RenderingWrapper";
+import RootCameraInstance from "./instances/RootCameraInstance"
+import RenderingWrapper from "./systems/RenderingWrapper"
 
-import {createTexture} from "./utils/utils";
-import MaterialInstance from "./instances/MaterialInstance";
-import * as shaderCode from "./shaders/mesh/FALLBACK.glsl";
-import * as skyboxShaderCode from "./shaders/SKYBOX.glsl";
-import {DATA_TYPES} from "./templates/DATA_TYPES";
-import ImageProcessor from "./utils/image/ImageProcessor";
-import {v4} from "uuid";
-import SYSTEMS from "./templates/SYSTEMS";
-import FramebufferInstance from "./instances/FramebufferInstance";
-import RenderingPackager from "./RenderingPackager";
-import systemInstance from "./utils/systemInstance";
-import VBO from "./instances/VBO";
-import ShaderInstance from "./instances/ShaderInstance";
-import COMPONENTS from "./templates/COMPONENTS";
+import {createTexture} from "./utils/utils"
+import MaterialInstance from "./instances/MaterialInstance"
+import * as shaderCode from "./shaders/mesh/FALLBACK.glsl"
+import * as skyboxShaderCode from "./shaders/SKYBOX.glsl"
+import {DATA_TYPES} from "./templates/DATA_TYPES"
+import ImageProcessor from "./utils/image/ImageProcessor"
+import {v4} from "uuid"
+import SYSTEMS from "./templates/SYSTEMS"
+import FramebufferInstance from "./instances/FramebufferInstance"
+import RenderingPackager from "./RenderingPackager"
+import systemInstance from "./utils/systemInstance"
+import VBO from "./instances/VBO"
+import ShaderInstance from "./instances/ShaderInstance"
+import COMPONENTS from "./templates/COMPONENTS"
 
 export default class Renderer {
 

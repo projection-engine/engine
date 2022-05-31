@@ -1,7 +1,7 @@
-import System from "../../basic/System";
-import ShaderInstance from "../../instances/ShaderInstance";
+import System from "../../basic/System"
+import ShaderInstance from "../../instances/ShaderInstance"
 
-import * as shaderCode from '../../shaders/FXAA.glsl'
+import * as shaderCode from "../../shaders/FXAA.glsl"
 
 
 export default class FinalPass extends System {

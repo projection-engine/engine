@@ -1,4 +1,4 @@
-import Component from "../basic/Component";
+import Component from "../basic/Component"
 
 export default class ColliderComponent extends Component {
     _radius = 10

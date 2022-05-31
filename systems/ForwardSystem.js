@@ -1,7 +1,7 @@
-import System from "../basic/System";
-import COMPONENTS from "../templates/COMPONENTS";
-import SYSTEMS from "../templates/SYSTEMS";
-import Renderer from "../Renderer";
+import System from "../basic/System"
+import COMPONENTS from "../templates/COMPONENTS"
+import SYSTEMS from "../templates/SYSTEMS"
+import Renderer from "../Renderer"
 
 export default class ForwardSystem extends System {
     lastMaterial

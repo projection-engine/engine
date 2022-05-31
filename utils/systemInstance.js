@@ -1,18 +1,18 @@
-import CameraCubeSystem from "../../extension/systems/CameraCubeSystem";
-import SYSTEMS from "../templates/SYSTEMS";
-import CullingSystem from "../systems/CullingSystem";
-import GBufferSystem from "../systems/GBufferSystem";
-import MetricsSystem from "../systems/MetricsSystem";
-import PickSystem from "../systems/PickSystem";
+import CameraCubeSystem from "../../extension/systems/CameraCubeSystem"
+import SYSTEMS from "../templates/SYSTEMS"
+import CullingSystem from "../systems/CullingSystem"
+import GBufferSystem from "../systems/GBufferSystem"
+import MetricsSystem from "../systems/MetricsSystem"
+import PickSystem from "../systems/PickSystem"
 
-import ShadowMapSystem from "../systems/ShadowMapSystem";
-import TransformSystem from "../systems/TransformSystem";
-import CubeMapSystem from "../systems/CubeMapSystem";
-import ScriptSystem from "../systems/ScriptSystem";
-import DepthSystem from "../systems/DepthSystem";
-import AOSystem from "../systems/AOSystem";
-import LightProbeSystem from "../systems/LightProbeSystem";
-import LineSystem from "../systems/LineSystem";
+import ShadowMapSystem from "../systems/ShadowMapSystem"
+import TransformSystem from "../systems/TransformSystem"
+import CubeMapSystem from "../systems/CubeMapSystem"
+import ScriptSystem from "../systems/ScriptSystem"
+import DepthSystem from "../systems/DepthSystem"
+import AOSystem from "../systems/AOSystem"
+import LightProbeSystem from "../systems/LightProbeSystem"
+import LineSystem from "../systems/LineSystem"
 
 export default function systemInstance(s, gpu, resolution) {
     switch (true) {

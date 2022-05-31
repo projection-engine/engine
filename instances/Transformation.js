@@ -1,4 +1,4 @@
-import {mat4, quat} from "gl-matrix";
+import {mat4, quat} from "gl-matrix"
 
 const toDeg = 57.2957795131
 

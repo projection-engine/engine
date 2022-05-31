@@ -1,4 +1,4 @@
-import Component from "../basic/Component";
+import Component from "../basic/Component"
 
 export default class PhysicsBodyComponent extends Component {
     _mass = 1

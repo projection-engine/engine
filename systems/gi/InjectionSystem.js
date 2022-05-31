@@ -1,9 +1,9 @@
-import System from "../../basic/System";
-import {fragment, vertex} from '../../shaders/gi/lightInjection.glsl'
-import ShaderInstance from "../../instances/ShaderInstance";
-import * as geometryShader from '../../shaders/gi/geometryInjection.glsl'
-import GlobalIlluminationSystem, {STEPS} from "./GlobalIlluminationSystem";
-import FramebufferInstance from "../../instances/FramebufferInstance";
+import System from "../../basic/System"
+import {fragment, vertex} from "../../shaders/gi/lightInjection.glsl"
+import ShaderInstance from "../../instances/ShaderInstance"
+import * as geometryShader from "../../shaders/gi/geometryInjection.glsl"
+import GlobalIlluminationSystem, {STEPS} from "./GlobalIlluminationSystem"
+import FramebufferInstance from "../../instances/FramebufferInstance"
 
 export default class InjectionSystem extends System {
     size = 512;

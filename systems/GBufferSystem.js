@@ -1,8 +1,8 @@
-import System from "../basic/System";
-import FramebufferInstance from "../instances/FramebufferInstance";
-import COMPONENTS from "../templates/COMPONENTS";
-import Renderer from "../Renderer";
-import ForwardSystem from "./ForwardSystem";
+import System from "../basic/System"
+import FramebufferInstance from "../instances/FramebufferInstance"
+import COMPONENTS from "../templates/COMPONENTS"
+import Renderer from "../Renderer"
+import ForwardSystem from "./ForwardSystem"
 
 export default class GBufferSystem extends System {
     lastMaterial

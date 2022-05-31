@@ -1,4 +1,4 @@
-import {vec3} from "gl-matrix";
+import {vec3} from "gl-matrix"
 
 function isArrayBufferV(value) {
     return value && value.buffer instanceof ArrayBuffer && value.byteLength !== undefined;

@@ -1,10 +1,10 @@
-import System from "../basic/System";
-import MeshInstance from "../instances/MeshInstance";
-import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from '../shaders/LINE.glsl'
-import COMPONENTS from "../templates/COMPONENTS";
-import Entity from "../basic/Entity";
-import LineComponent from "../components/LineComponent";
+import System from "../basic/System"
+import MeshInstance from "../instances/MeshInstance"
+import ShaderInstance from "../instances/ShaderInstance"
+import * as shaderCode from "../shaders/LINE.glsl"
+import COMPONENTS from "../templates/COMPONENTS"
+import Entity from "../basic/Entity"
+import LineComponent from "../components/LineComponent"
 
 export default class LineSystem extends System {
     ready = false

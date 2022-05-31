@@ -1,5 +1,5 @@
-import Component from "../basic/Component";
-import {mat4} from "gl-matrix";
+import Component from "../basic/Component"
+import {mat4} from "gl-matrix"
 
 export default class SpotLightComponent extends Component{
     color = [255, 255, 255]

@@ -1,9 +1,9 @@
-import System from "../basic/System";
-import {mat4, vec3} from "gl-matrix";
-import {VIEWS} from "./ShadowMapSystem";
-import COMPONENTS from "../templates/COMPONENTS";
-import CubeMapSystem from "./CubeMapSystem";
-import CubeMapInstance from "../instances/CubeMapInstance";
+import System from "../basic/System"
+import {mat4, vec3} from "gl-matrix"
+import {VIEWS} from "./ShadowMapSystem"
+import COMPONENTS from "../templates/COMPONENTS"
+import CubeMapSystem from "./CubeMapSystem"
+import CubeMapInstance from "../instances/CubeMapInstance"
 
 export const STEPS_LIGHT_PROBE = {
     GENERATION: 0,

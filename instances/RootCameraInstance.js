@@ -1,4 +1,4 @@
-import {mat4} from "gl-matrix";
+import {mat4} from "gl-matrix"
 
 export default class RootCameraInstance {
     position = [0, 10, 0]

@@ -1,4 +1,4 @@
-import Component from "../basic/Component";
+import Component from "../basic/Component"
 
 export default class PointLightComponent extends Component {
     _color = [255, 255, 255]

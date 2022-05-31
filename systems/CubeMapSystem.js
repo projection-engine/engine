@@ -1,10 +1,9 @@
-import System from "../basic/System";
-import {mat4, vec3} from "gl-matrix";
-import {VIEWS} from "./ShadowMapSystem";
-import {intersectBoundingSphere} from "./PhysicsSystem";
-import COMPONENTS from "../templates/COMPONENTS";
-import ForwardSystem from "./ForwardSystem";
-import SkyboxSystem from "./SkyboxSystem";
+import System from "../basic/System"
+import {mat4, vec3} from "gl-matrix"
+import {VIEWS} from "./ShadowMapSystem"
+import COMPONENTS from "../templates/COMPONENTS"
+import ForwardSystem from "./ForwardSystem"
+import SkyboxSystem from "./SkyboxSystem"
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,

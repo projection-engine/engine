@@ -1,8 +1,8 @@
-import System from "../../basic/System";
-import GlobalIlluminationSystem from "./GlobalIlluminationSystem";
-import {fragment, vertex} from '../../shaders/gi/lightPropagation.glsl'
-import ShaderInstance from "../../instances/ShaderInstance";
-import FramebufferInstance from "../../instances/FramebufferInstance";
+import System from "../../basic/System"
+import GlobalIlluminationSystem from "./GlobalIlluminationSystem"
+import {fragment, vertex} from "../../shaders/gi/lightPropagation.glsl"
+import ShaderInstance from "../../instances/ShaderInstance"
+import FramebufferInstance from "../../instances/FramebufferInstance"
 
 export default class PropagationSystem extends System {
     size =  512;

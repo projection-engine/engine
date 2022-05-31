@@ -1,5 +1,5 @@
-import Component from "../basic/Component";
-import {mat4} from "gl-matrix";
+import Component from "../basic/Component"
+import {mat4} from "gl-matrix"
 
 export default class CubeMapComponent extends Component {
     _res = 128

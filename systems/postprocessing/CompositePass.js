@@ -1,8 +1,8 @@
-import System from "../../basic/System";
-import ShaderInstance from "../../instances/ShaderInstance";
-import {vertex} from '../../shaders/FXAA.glsl'
-import * as shaderCode from '../../shaders/EFFECTS.glsl'
-import FramebufferInstance from "../../instances/FramebufferInstance";
+import System from "../../basic/System"
+import ShaderInstance from "../../instances/ShaderInstance"
+import {vertex} from "../../shaders/FXAA.glsl"
+import * as shaderCode from "../../shaders/EFFECTS.glsl"
+import FramebufferInstance from "../../instances/FramebufferInstance"
 
 export default class CompositePass extends System {
     constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {

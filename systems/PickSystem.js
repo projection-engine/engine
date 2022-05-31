@@ -1,10 +1,10 @@
-import System from "../basic/System";
-import * as shaderCode from "../shaders/PICK.glsl";
-import ShaderInstance from "../instances/ShaderInstance";
-import FramebufferInstance from "../instances/FramebufferInstance";
-import {mat4} from "gl-matrix";
-import MeshInstance from "../instances/MeshInstance";
-import COMPONENTS from "../templates/COMPONENTS";
+import System from "../basic/System"
+import * as shaderCode from "../shaders/PICK.glsl"
+import ShaderInstance from "../instances/ShaderInstance"
+import FramebufferInstance from "../instances/FramebufferInstance"
+import {mat4} from "gl-matrix"
+import MeshInstance from "../instances/MeshInstance"
+import COMPONENTS from "../templates/COMPONENTS"
 
 
 export default class PickSystem extends System {

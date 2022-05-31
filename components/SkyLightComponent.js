@@ -1,4 +1,4 @@
-import DirectionalLightComponent from "./DirectionalLightComponent";
+import DirectionalLightComponent from "./DirectionalLightComponent"
 
 export default class SkylightComponent extends DirectionalLightComponent {
     rsmResolution = 512

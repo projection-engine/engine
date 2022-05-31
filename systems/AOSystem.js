@@ -1,8 +1,8 @@
-import System from "../basic/System";
-import ShaderInstance from "../instances/ShaderInstance";
-import * as shaderCode from '../shaders/shadows/AO.glsl'
-import FramebufferInstance from "../instances/FramebufferInstance";
-import SYSTEMS from "../templates/SYSTEMS";
+import System from "../basic/System"
+import ShaderInstance from "../instances/ShaderInstance"
+import * as shaderCode from "../shaders/shadows/AO.glsl"
+import FramebufferInstance from "../instances/FramebufferInstance"
+import SYSTEMS from "../templates/SYSTEMS"
 
 export default class AOSystem extends System {
     _ready = false

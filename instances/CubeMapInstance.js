@@ -1,7 +1,7 @@
-import {mat4} from "gl-matrix";
-import {lookAt} from "../utils/utils";
-import * as  shaderCode from '../shaders/CUBE_MAP.glsl'
-import ShaderInstance from "./ShaderInstance";
+import {mat4} from "gl-matrix"
+import {lookAt} from "../utils/utils"
+import * as  shaderCode from "../shaders/CUBE_MAP.glsl"
+import ShaderInstance from "./ShaderInstance"
 
 export default class CubeMapInstance {
     texture

@@ -1,6 +1,6 @@
-import System from "../basic/System";
-import * as shaderCode from "../shaders/SKYBOX.glsl";
-import ShaderInstance from "../instances/ShaderInstance";
+import System from "../basic/System"
+import * as shaderCode from "../shaders/SKYBOX.glsl"
+import ShaderInstance from "../instances/ShaderInstance"
 
 export default class SkyboxSystem extends System {
     constructor(gpu) {

@@ -1,9 +1,9 @@
-import System from "../../basic/System";
-import ShaderInstance from "../../instances/ShaderInstance";
-import {vertex} from '../../shaders/FXAA.glsl'
-import * as shaderCode from '../../shaders/EFFECTS.glsl'
-import FramebufferInstance from "../../instances/FramebufferInstance";
-import SYSTEMS from "../../templates/SYSTEMS";
+import System from "../../basic/System"
+import ShaderInstance from "../../instances/ShaderInstance"
+import {vertex} from "../../shaders/FXAA.glsl"
+import * as shaderCode from "../../shaders/EFFECTS.glsl"
+import FramebufferInstance from "../../instances/FramebufferInstance"
+import SYSTEMS from "../../templates/SYSTEMS"
 
 export default class PerPixelMotionBlur extends System {
     constructor(gpu, postProcessingResolution = {w: window.screen.width, h: window.screen.height}) {

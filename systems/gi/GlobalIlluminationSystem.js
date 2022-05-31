@@ -1,6 +1,6 @@
-import System from "../../basic/System";
-import PropagationSystem from "./PropagationSystem";
-import InjectionSystem from "./InjectionSystem";
+import System from "../../basic/System"
+import PropagationSystem from "./PropagationSystem"
+import InjectionSystem from "./InjectionSystem"
 
 export const STEPS = {
     LIGHT_INJECTION: 0,

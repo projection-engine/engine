@@ -1,5 +1,5 @@
-import Component from "../basic/Component";
-import generateNextID from "../utils/generateNextID";
+import Component from "../basic/Component"
+import generateNextID from "../utils/generateNextID"
 
 export default class PickComponent extends Component {
     __pickID = [0, 0, 0]

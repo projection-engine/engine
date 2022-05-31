@@ -1,4 +1,4 @@
-import System from "../basic/System";
+import System from "../basic/System"
 
 export default class CullingSystem extends System {
     _ready = false

@@ -1,4 +1,4 @@
-import ImageProcessor from "../utils/image/ImageProcessor";
+import ImageProcessor from "../utils/image/ImageProcessor"
 
 export default class TextureInstance {
     loaded = false

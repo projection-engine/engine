@@ -1,5 +1,5 @@
-import Component from "../basic/Component";
-import {mat4, quat, vec3} from "gl-matrix";
+import Component from "../basic/Component"
+import {mat4, quat, vec3} from "gl-matrix"
 
 export default class LineComponent extends Component {
     position = [0, 0, 0]

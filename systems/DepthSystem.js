@@ -1,7 +1,7 @@
-import System from "../basic/System";
-import FramebufferInstance from "../instances/FramebufferInstance";
-import ShaderInstance from "../instances/ShaderInstance";
-import COMPONENTS from "../templates/COMPONENTS";
+import System from "../basic/System"
+import FramebufferInstance from "../instances/FramebufferInstance"
+import ShaderInstance from "../instances/ShaderInstance"
+import COMPONENTS from "../templates/COMPONENTS"
 
 const vertex = `#version 300 es
 

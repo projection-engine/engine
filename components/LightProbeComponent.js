@@ -1,6 +1,6 @@
-import Component from "../basic/Component";
-import {mat4} from "gl-matrix";
-import {v4} from "uuid";
+import Component from "../basic/Component"
+import {mat4} from "gl-matrix"
+import {v4} from "uuid"
 
 const identity = mat4.create()
 export default class LightProbeComponent extends Component {
