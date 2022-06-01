@@ -5,10 +5,9 @@ import Renderer from "../Renderer"
 
 export default class ForwardSystem extends System {
     lastMaterial
-    cubeMapsConsumeMap = {}
 
     constructor(gpu) {
-        super([]);
+        super()
         this.gpu = gpu
     }
 
@@ -21,7 +20,6 @@ export default class ForwardSystem extends System {
             skybox,
             materials,
             meshSources,
-            cubeMapsSources,
             pointLightsQuantity,
             maxTextures,
             directionalLightsData,
@@ -40,7 +38,6 @@ export default class ForwardSystem extends System {
         } = options
 
         this.lastMaterial = undefined
-        let valid = true
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
@@ -52,7 +49,6 @@ export default class ForwardSystem extends System {
 
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready) {
-                    valid = false
                     mat = fallbackMaterial
                 }
                 const ambient = Renderer.getEnvironment(current, skybox)
@@ -90,30 +86,30 @@ export default class ForwardSystem extends System {
     }
 
     static drawMesh({
-                        useCubeMapShader,
-                        mesh,
-                        camPosition,
-                        viewMatrix,
-                        projectionMatrix,
-                        transformMatrix,
-                        material,
-                        normalMatrix,
-                        materialComponent,
-                        brdf,
-                        directionalLightsQuantity,
-                        directionalLightsData,
-                        dirLightPOV,
-                        pointLightsQuantity,
-                        pointLightData,
-                        elapsed,
-                        ambient,
-                        sceneColor,
-                        lastMaterial,
-                        ao,
-                        gpu,
-                        shadingModel,
-                        onlyForward
-                    }) {
+        useCubeMapShader,
+        mesh,
+        camPosition,
+        viewMatrix,
+        projectionMatrix,
+        transformMatrix,
+        material,
+        normalMatrix,
+        materialComponent,
+        brdf,
+        directionalLightsQuantity,
+        directionalLightsData,
+        dirLightPOV,
+        pointLightsQuantity,
+        pointLightData,
+        elapsed,
+        ambient,
+        sceneColor,
+        lastMaterial,
+        ao,
+        gpu,
+        shadingModel,
+        onlyForward
+    }) {
 
 
         if (mesh && material && (!onlyForward || (onlyForward && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)))) {
@@ -141,7 +137,7 @@ export default class ForwardSystem extends System {
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             }, useCubeMapShader)
 
-          Renderer.drawMaterial(mesh, material, gpu)
+            Renderer.drawMaterial(mesh, material, gpu)
         }
     }
 }

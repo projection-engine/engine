@@ -6,7 +6,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 
 export default class CompositePass extends System {
     constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
-        super([]);
+        super()
         this.gpu = gpu
         this.w = postProcessingResolution.w
         this.h = postProcessingResolution.h

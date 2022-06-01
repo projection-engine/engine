@@ -8,7 +8,7 @@ import FinalPass from "./FinalPass"
 
 export default class PostProcessingWrapper extends System {
     constructor(gpu, postProcessingResolution) {
-        super([]);
+        super()
         this.gpu = gpu
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.compositPass = new CompositePass(gpu, postProcessingResolution)

@@ -8,7 +8,7 @@ export default class GBufferSystem extends System {
     lastMaterial
 
     constructor(gpu, resolution = {w: window.screen.width, h: window.screen.height}) {
-        super([]);
+        super([])
         this.gpu = gpu
         this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
         this.frameBuffer

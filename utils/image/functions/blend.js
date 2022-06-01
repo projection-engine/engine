@@ -1,7 +1,7 @@
 export default function blendWithColor() {
     const COLOR_BLEND_OPERATIONS = {ADD: 0, MULTIPLY: 1, POWER: 2, LERP: 3}
 
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         new Promise(async resolve => {
             const {
                 src,
@@ -18,33 +18,33 @@ export default function blendWithColor() {
 
             self.postMessage(
                 await new Promise(resolve => {
-                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height);
-                    let ctx = c.getContext("2d");
+                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height)
+                    let ctx = c.getContext("2d")
                     ctx.drawImage(imageToLoad, 0, 0)
 
-                    const imgData = ctx.getImageData(0, 0, imageToLoad.width, imageToLoad.height);
-                    const data = imgData.data;
+                    const imgData = ctx.getImageData(0, 0, imageToLoad.width, imageToLoad.height)
+                    const data = imgData.data
                     let newImage = new Array(data.length)
                     for (let i = 0; i < data.length; i += 4) {
                         switch (operation) {
-                            case COLOR_BLEND_OPERATIONS.POWER:
-                                newImage[i] = data[i] ** r
-                                newImage[i + 1] = data[i + 1] ** g
-                                newImage[i + 2] = data[i + 2] ** b
-                                newImage[i + 3] = data[i + 3]
-                                break
-                            case COLOR_BLEND_OPERATIONS.ADD:
-                                newImage[i] = data[i] + r
-                                newImage[i + 1] = data[i + 1] + g
-                                newImage[i + 2] = data[i + 2] + b
-                                newImage[i + 3] = data[i + 3]
-                                break
-                            default:
-                                newImage[i] = data[i] * r
-                                newImage[i + 1] = data[i + 1] * g
-                                newImage[i + 2] = data[i + 2] * b
-                                newImage[i + 3] = data[i + 3]
-                                break
+                        case COLOR_BLEND_OPERATIONS.POWER:
+                            newImage[i] = data[i] ** r
+                            newImage[i + 1] = data[i + 1] ** g
+                            newImage[i + 2] = data[i + 2] ** b
+                            newImage[i + 3] = data[i + 3]
+                            break
+                        case COLOR_BLEND_OPERATIONS.ADD:
+                            newImage[i] = data[i] + r
+                            newImage[i + 1] = data[i + 1] + g
+                            newImage[i + 2] = data[i + 2] + b
+                            newImage[i + 3] = data[i + 3]
+                            break
+                        default:
+                            newImage[i] = data[i] * r
+                            newImage[i + 1] = data[i + 1] * g
+                            newImage[i + 2] = data[i + 2] * b
+                            newImage[i + 3] = data[i + 3]
+                            break
                         }
                     }
                     imgData.data.set(newImage)
@@ -55,9 +55,9 @@ export default function blendWithColor() {
                         quality: 1
                     }).then(blob => {
 
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
+                        const reader = new FileReader()
+                        reader.onloadend = () => resolve(reader.result)
+                        reader.readAsDataURL(blob)
                     })
                 })
             )
@@ -67,29 +67,29 @@ export default function blendWithColor() {
 }
 
 export function colorToImage() {
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         const {
             color,
             resolution
         } = event.data
-        const c = new OffscreenCanvas(resolution, resolution);
-        let ctx = c.getContext("2d");
-        ctx.fillStyle = typeof color === 'string' ? color : `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
+        const c = new OffscreenCanvas(resolution, resolution)
+        let ctx = c.getContext("2d")
+        ctx.fillStyle = typeof color === "string" ? color : `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
         ctx.fillRect(0, 0, resolution, resolution)
         c.convertToBlob({
             type: "image/png",
             quality: .1
         }).then(blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => self.postMessage(reader.result);
-            reader.readAsDataURL(blob);
+            const reader = new FileReader()
+            reader.onloadend = () => self.postMessage(reader.result)
+            reader.readAsDataURL(blob)
         })
     })
 }
 
 export function linearInterpolate() {
 
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         new Promise(async resolve => {
             const {
                 img, img0, factor
@@ -130,9 +130,9 @@ export function linearInterpolate() {
                         quality: 1
                     }).then(blob => {
 
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
+                        const reader = new FileReader()
+                        reader.onloadend = () => resolve(reader.result)
+                        reader.readAsDataURL(blob)
                     })
                 })
             )
@@ -144,7 +144,7 @@ export function linearInterpolate() {
 
 export function heightBasedLinearInterpolate() {
 
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         new Promise(async resolve => {
             const {
                 img, img0, heightImg, f
@@ -201,9 +201,9 @@ export function heightBasedLinearInterpolate() {
                         quality: 1
                     }).then(blob => {
 
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
+                        const reader = new FileReader()
+                        reader.onloadend = () => resolve(reader.result)
+                        reader.readAsDataURL(blob)
                     })
                 })
             )

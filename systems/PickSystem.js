@@ -9,7 +9,7 @@ import COMPONENTS from "../templates/COMPONENTS"
 
 export default class PickSystem extends System {
     constructor(gpu) {
-        super([]);
+        super([])
         this.gpu = gpu
 
         this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
@@ -29,7 +29,7 @@ export default class PickSystem extends System {
     }
 
     depthPick(depthFBO, coords) {
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO);
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(4)
         this.gpu.readPixels(
             coords.x,
@@ -39,9 +39,9 @@ export default class PickSystem extends System {
             this.gpu.RGBA,
             this.gpu.FLOAT,
             dd
-        );
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null);
-        return dd;
+        )
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
+        return dd
     }
     pickElement(drawCallback, pickCoords, camera, sameSize, isOrtho) {
 
@@ -59,10 +59,10 @@ export default class PickSystem extends System {
             this.gpu.RGBA,
             this.gpu.UNSIGNED_BYTE,
             data
-        );
+        )
 
-        this.frameBuffer.stopMapping();
-        return data[0] + data[1] + data[2];
+        this.frameBuffer.stopMapping()
+        return data[0] + data[1] + data[2]
     }
 
     _getProjection({x, y}, camera, isOrtho) {
@@ -78,16 +78,16 @@ export default class PickSystem extends System {
                 left = aspect * bottom,
                 right = aspect * top
 
-            const width = Math.abs(right - left);
-            const height = Math.abs(top - bottom);
+            const width = Math.abs(right - left)
+            const height = Math.abs(top - bottom)
 
-            const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth;
-            const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1;
+            const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth
+            const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1
 
-            const subLeft = left + pixelX * width / this.gpu.canvas.width;
-            const subBottom = bottom + pixelY * height / this.gpu.canvas.height;
-            const subWidth = 1 / this.gpu.canvas.width;
-            const subHeight = 1 / this.gpu.canvas.height;
+            const subLeft = left + pixelX * width / this.gpu.canvas.width
+            const subBottom = bottom + pixelY * height / this.gpu.canvas.height
+            const subWidth = 1 / this.gpu.canvas.width
+            const subHeight = 1 / this.gpu.canvas.height
 
             mat4.frustum(
                 m,
@@ -96,7 +96,7 @@ export default class PickSystem extends System {
                 subBottom,
                 subBottom + subHeight,
                 camera.zNear,
-                camera.zFar);
+                camera.zFar)
         }
 
 

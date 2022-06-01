@@ -5,10 +5,8 @@ import FramebufferInstance from "../instances/FramebufferInstance"
 import SYSTEMS from "../templates/SYSTEMS"
 
 export default class AOSystem extends System {
-    _ready = false
-
     constructor(gpu, resolution = {w: window.screen.width, h: window.screen.height}) {
-        super([]);
+        super()
         this.gpu = gpu
         this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
         this.frameBuffer
@@ -37,21 +35,21 @@ export default class AOSystem extends System {
         this.#generateSamplePoints()
 
         this.noiseTexture = gpu.createTexture()
-        gpu.bindTexture(gpu.TEXTURE_2D, this.noiseTexture);
+        gpu.bindTexture(gpu.TEXTURE_2D, this.noiseTexture)
 
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST);
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST);
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT);
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT);
-        gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, resolution.w, resolution.h);
-        gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, resolution.w, resolution.h, gpu.RG, gpu.FLOAT, generateNoise(resolution));
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
+        gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, resolution.w, resolution.h)
+        gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, resolution.w, resolution.h, gpu.RG, gpu.FLOAT, generateNoise(resolution))
     }
 
     get texture() {
         return this.blurredFrameBuffer.colors[0]
     }
 
-    execute(options, systems, data) {
+    execute(options, systems) {
         super.execute()
         const depth = systems[SYSTEMS.DEPTH_PRE_PASS]
         const {
@@ -93,26 +91,26 @@ export default class AOSystem extends System {
             KERNEL_SIZE = 64
 
         for (let i = 0; i < KERNEL_SIZE; i++) {
-            const scale = i / KERNEL_SIZE;
+            const scale = i / KERNEL_SIZE
             const m = (0.1 + 0.9 * scale * scale)
             const v = []
             v[0] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
             v[1] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
             v[2] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
 
-            this.kernels[i] = v;
+            this.kernels[i] = v
         }
     }
 }
 
 function generateNoise({w, h}) {
     let p = w * h
-    let noiseTextureData = new Float32Array(p * 2);
+    let noiseTextureData = new Float32Array(p * 2)
 
     for (let i = 0; i < p; ++i) {
-        let index = i * 2;
-        noiseTextureData[index] = Math.random() * 2.0 - 1.0;
-        noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
+        let index = i * 2
+        noiseTextureData[index] = Math.random() * 2.0 - 1.0
+        noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0
     }
 
     return noiseTextureData

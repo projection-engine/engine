@@ -9,7 +9,7 @@ import SHADING_MODELS from "../templates/SHADING_MODELS"
 export default class DeferredSystem extends System {
 
     constructor(gpu) {
-        super([]);
+        super([])
         this.gpu = gpu
         this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
         this.flatDeferredShader = new ShaderInstance(shaderFlatCode.vertex, shaderFlatCode.fragment, gpu)
@@ -17,12 +17,12 @@ export default class DeferredSystem extends System {
 
     _getDeferredShader(shadingModel) {
         switch (shadingModel) {
-            case SHADING_MODELS.ALBEDO:
-                return this.flatDeferredShader
-            case SHADING_MODELS.DETAIL:
-                return this.deferredShader
-            default:
-                return this.deferredShader
+        case SHADING_MODELS.ALBEDO:
+            return this.flatDeferredShader
+        case SHADING_MODELS.DETAIL:
+            return this.deferredShader
+        default:
+            return this.deferredShader
         }
     }
 

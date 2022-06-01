@@ -5,34 +5,34 @@ import * as PROBES from "../shaders/templates/PROBES"
 import {PBR} from "../shaders/templates/PBR"
 
 const TYPES = {
-    'vec2': 'uniform2fv',
-    'vec3': 'uniform3fv',
-    'vec4': 'uniform4fv',
-    'mat3': 'uniformMatrix3fv',
-    'mat4': 'uniformMatrix4fv',
-    'float': 'uniform1f',
-    'int': 'uniform1i',
-    'sampler2D': 'sampler2D',
-    'samplerCube': 'cubemap',
-    'ivec2': 'uniform2iv',
-    'ivec3': 'uniform3iv',
-    'bool': 'uniform1i'
+    "vec2": "uniform2fv",
+    "vec3": "uniform3fv",
+    "vec4": "uniform4fv",
+    "mat3": "uniformMatrix3fv",
+    "mat4": "uniformMatrix4fv",
+    "float": "uniform1f",
+    "int": "uniform1i",
+    "sampler2D": "sampler2D",
+    "samplerCube": "cubemap",
+    "ivec2": "uniform2iv",
+    "ivec3": "uniform3iv",
+    "bool": "uniform1i"
 }
 
 export const METHODS = {
-    distributionGGX: '@import(distributionGGX)',
-    geometrySchlickGGX: '@import(geometrySchlickGGX)',
-    geometrySmith: '@import(geometrySmith)',
-    fresnelSchlick: '@import(fresnelSchlick)',
-    fresnelSchlickRoughness: '@import(fresnelSchlickRoughness)',
-    computeDirectionalLight: '@import(computeDirectionalLight)',
-    computePointLight: '@import(computePointLight)',
+    distributionGGX: "@import(distributionGGX)",
+    geometrySchlickGGX: "@import(geometrySchlickGGX)",
+    geometrySmith: "@import(geometrySmith)",
+    fresnelSchlick: "@import(fresnelSchlick)",
+    fresnelSchlickRoughness: "@import(fresnelSchlickRoughness)",
+    computeDirectionalLight: "@import(computeDirectionalLight)",
+    computePointLight: "@import(computePointLight)",
 
 
-    calculateShadows: '@import(calculateShadows)',
-    gi: '@import(GI)',
+    calculateShadows: "@import(calculateShadows)",
+    gi: "@import(GI)",
 
-    ambient: '@import(ambient)',
+    ambient: "@import(ambient)",
     forwardAmbient: "@import(forwardAmbient)",
     ambientUniforms: "@import(ambientUniforms)"
 }
@@ -42,16 +42,16 @@ function applyMethods(shaderCode) {
     let response = shaderCode
 
     Object.keys(METHODS).forEach(key => {
-        if (key === 'gi')
+        if (key === "gi")
             response = response.replaceAll(METHODS[key], GI)
-        if (key === 'calculateShadows')
+        if (key === "calculateShadows")
             response = response.replaceAll(METHODS[key], Shadows)
-        if (key === 'ambient')
+        if (key === "ambient")
             response = response.replaceAll(METHODS[key], PROBES.deferredAmbient)
-        if (key === 'forwardAmbient')
+        if (key === "forwardAmbient")
             response = response.replaceAll(METHODS[key], PROBES.forwardAmbient)
 
-        if (key === 'ambientUniforms')
+        if (key === "ambientUniforms")
             response = response.replaceAll(METHODS[key], PROBES.UNIFORMS)
         if (PBR[key])
             response = response.replaceAll(METHODS[key], PBR[key])
@@ -64,14 +64,14 @@ export default class ShaderInstance {
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     structRegex = (type) => {
-        return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, 'gs')
+        return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, "gs")
     }
     defineRegex = (global) => {
-        return new RegExp(`#define(\\s+)((\\w|_)+)(\\s+)(.+)`, global ? 'gmi' : 'mi')
+        return new RegExp("#define(\\s+)((\\w|_)+)(\\s+)(.+)", global ? "gmi" : "mi")
     }
     regexMatch = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/m
     regexArray = (global) => {
-        return new RegExp('uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$', global ? 'gm' : 'm')
+        return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
     }
     length = 0
 
@@ -104,7 +104,7 @@ export default class ShaderInstance {
 
         this.gpu.shaderSource(shader, bundledCode)
         this.gpu.compileShader(shader)
-        let compiled = this.gpu.getShaderParameter(shader, this.gpu.COMPILE_STATUS);
+        let compiled = this.gpu.getShaderParameter(shader, this.gpu.COMPILE_STATUS)
 
 
         if (!compiled) {
@@ -128,7 +128,7 @@ export default class ShaderInstance {
                 const match = u.match(this.regexMatch)
                 if (match) {
                     const type = match[4]
-                    const name = match[6].replace(' ', '').trim()
+                    const name = match[6].replace(" ", "").trim()
 
                     if (TYPES[type] !== undefined) {
                         uniformObjects.push({
@@ -141,7 +141,7 @@ export default class ShaderInstance {
                         const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
 
                         if (struct) {
-                            struct = struct[0].split('\n').filter(e => Object.keys(TYPES).some(v => e.includes(v)))
+                            struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
                             uniformObjects.push(
                                 ...struct.map(s => {
                                     const current = s.match(reg)
@@ -150,7 +150,7 @@ export default class ShaderInstance {
                                             type: current[2],
                                             name: current[4],
                                             parent: name,
-                                            uLocation: this.gpu.getUniformLocation(this.program, name + '.' + current[4])
+                                            uLocation: this.gpu.getUniformLocation(this.program, name + "." + current[4])
                                         }
                                     }
                                 }).filter(e => e !== undefined)
@@ -169,7 +169,7 @@ export default class ShaderInstance {
 
                 if (match) {
                     const type = match[4]
-                    const name = match[6].replace(' ', '')
+                    const name = match[6].replace(" ", "")
                     const define = definitions.find(d => d.includes(match[8]))?.match(this.defineRegex(false))
 
                     if (define !== undefined) {
@@ -186,7 +186,7 @@ export default class ShaderInstance {
                             const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
 
                             if (struct) {
-                                struct = struct[0].split('\n').filter(e => Object.keys(TYPES).some(v => e.includes(v)))
+                                struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
                                 uniformObjects.push(
                                     ...struct.map(s => {
                                         const current = s.match(reg)
@@ -197,7 +197,7 @@ export default class ShaderInstance {
                                                 name: current[4],
                                                 parent: name,
                                                 arraySize,
-                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => this.gpu.getUniformLocation(this.program, name + `[${i}]` + '.' + current[4]))
+                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => this.gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
                                             }
                                         }
                                     }).filter(e => e !== undefined)
@@ -223,52 +223,57 @@ export default class ShaderInstance {
                     const l = (current.arraySize < dataAttr.length ? current.arraySize : dataAttr.length)
                     for (let i = 0; i < l; i++) {
                         if (current.parent)
-                            this._bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                            this.#bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                         else
-                            this._bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                            this.#bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                     }
                 }
             } else {
                 const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
-                this._bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                this.#bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
             }
         }
 
     }
 
-    _bind(uLocation, data, type, currentSamplerIndex, increaseIndex, key) {
-        switch (type) {
-            case 'float':
-            case 'int':
-            case 'vec2':
-            case 'vec3':
-            case 'vec4':
-            case 'ivec2':
-            case 'ivec3':
-            case 'bool':
-
-                try {
-                    this.gpu[TYPES[type]](uLocation, data)
-                } catch (e) {
-
-                }
+    #bind(uLocation, data, type, currentSamplerIndex, increaseIndex, c) {
+        try{
+            switch (type) {
+            case "float":
+            case "int":
+            case "vec2":
+            case "vec3":
+            case "vec4":
+            case "ivec2":
+            case "ivec3":
+            case "bool":
+                this.gpu[TYPES[type]](uLocation, data)
                 break
-            case 'mat3':
-            case 'mat4':
+            case "mat3":
+            case "mat4":
                 this.gpu[TYPES[type]](uLocation, false, data)
                 break
-            case 'samplerCube':
+            case "samplerCube":
                 this.gpu.activeTexture(this.gpu.TEXTURE0 + currentSamplerIndex)
                 this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, data)
                 this.gpu.uniform1i(uLocation, currentSamplerIndex)
                 increaseIndex()
                 break
-            case 'sampler2D':
+            case "sampler2D":
                 bindTexture(currentSamplerIndex, data, uLocation, this.gpu)
                 increaseIndex()
                 break
             default:
                 break
+            }
+        }catch (err){
+            console.error({
+                error: err,
+                uniform: uLocation,
+                type,
+                data,
+                c
+            })
         }
     }
 
@@ -278,5 +283,5 @@ export default class ShaderInstance {
 }
 
 export function trimString(str) {
-    return str.replaceAll(/^(\s*)/gm, '').replaceAll(/^\s*\n/gm, '')
+    return str.replaceAll(/^(\s*)/gm, "").replaceAll(/^\s*\n/gm, "")
 }

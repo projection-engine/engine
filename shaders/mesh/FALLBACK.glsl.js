@@ -122,7 +122,7 @@ void main(){
 }
 `
 
- export const cubeMapShader = `#version 300 es
+export const cubeMapShader = `#version 300 es
 precision highp float;
 
 out vec4 finalColor;

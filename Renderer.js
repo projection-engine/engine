@@ -17,9 +17,8 @@ import ShaderInstance from "./instances/ShaderInstance"
 import COMPONENTS from "./templates/COMPONENTS"
 
 export default class Renderer {
-
+    static VECTOR3 = [1,1,1]
     rootCamera = new RootCameraInstance()
-    viewTarget = this.rootCamera
     tried = false
     frameID = undefined
     data = {}
@@ -187,10 +186,8 @@ export default class Renderer {
         const comp = entity.components[COMPONENTS.MATERIAL]
         const irradiance0 = comp.irradiance[0]?.ref
         const cube = comp.cubeMap
-
         return {
-            irradianceMultiplier: comp.irradianceMultiplier,
-
+            irradianceMultiplier: comp.irradianceMultiplier ? comp.irradianceMultiplier :Renderer.VECTOR3,
             irradiance0: irradiance0 ? irradiance0 : fallback.irradianceTexture,//fallback.irradianceTexture,
             irradiance1: comp.irradiance[1]?.ref,
             irradiance2: comp.irradiance[2]?.ref,
