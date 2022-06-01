@@ -17,19 +17,19 @@ export default class MeshInstance {
     tangentVBO
 
     constructor({
-                    id = uuidv4(),
-                    gpu,
+        id = uuidv4(),
+        gpu,
 
-                    vertices,
-                    indices,
-                    normals,
-                    uvs,
-                    tangents,
+        vertices,
+        indices,
+        normals,
+        uvs,
+        tangents,
 
-                    maxBoundingBox,
-                    minBoundingBox,
-                    material
-                }) {
+        maxBoundingBox,
+        minBoundingBox,
+        material
+    }) {
 
 
         this.id = id
