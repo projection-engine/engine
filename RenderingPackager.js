@@ -18,17 +18,17 @@ export default class RenderingPackager {
     }
 
     makePackage({
-                    entities,
-                    materials,
-                    meshes,
-                    params,
-                    scripts = [],
-                    onWrap,
-                    gpu,
-                    brdf,
-                    fallbackMaterial,
-                    cubeBuffer
-                }) {
+        entities,
+        materials,
+        meshes,
+        params,
+        scripts = [],
+        onWrap,
+        gpu,
+        brdf,
+        fallbackMaterial,
+        cubeBuffer
+    }) {
         const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
         const attributes = {...params}
         const data = {
@@ -49,6 +49,7 @@ export default class RenderingPackager {
             entitiesMap: toObject(entities),
             lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.PROBE])
         }
+
         RenderingPackager.loadSkybox(data.skybox, gpu, cubeBuffer, this.skyShader)
 
         data.cubeMapsSources = toObject(data.cubeMaps)

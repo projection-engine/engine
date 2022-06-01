@@ -27,22 +27,22 @@ export default class Renderer {
     #systems = {}
     #ready = false
 
-    constructor(gpu, resolution, systems) {
+    constructor(gpu, resolution, systems, projectID) {
         this.skyboxShader = new ShaderInstance(skyboxShaderCode.vertex, skyboxShaderCode.fragment, gpu)
-        Promise.all([import('./templates/CUBE'), import('./templates/BRDF.json')])
+        Promise.all([import("./templates/CUBE"), import("./templates/BRDF.json")])
             .then(async res => {
                 const [cube, BRDF] = res
                 this.brdf = createTexture(gpu, 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, await ImageProcessor.getImageBitmap(BRDF.data), gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
 
                 this.fallbackMaterial = new MaterialInstance(this.gpu, shaderCode.vertex, shaderCode.fragment, [{
-                        key: 'brdfSampler', data: this.brdf, type: DATA_TYPES.UNDEFINED
-                    }], {
-                        isForward: false,
-                        rsmAlbedo: await ImageProcessor.colorToImage('rgba(128, 128, 128, 1)'),
-                        doubledSided: true
-                    },
-                    () => this._ready = true, v4(),
-                    shaderCode.cubeMapShader)
+                    key: "brdfSampler", data: this.brdf, type: DATA_TYPES.UNDEFINED
+                }], {
+                    isForward: false,
+                    rsmAlbedo: await ImageProcessor.colorToImage("rgba(128, 128, 128, 1)"),
+                    doubledSided: true
+                },
+                () => this._ready = true, v4(),
+                shaderCode.cubeMapShader)
 
                 this.params.fallbackMaterial = this.fallbackMaterial
                 this.params.brdf = this.brdf
@@ -71,7 +71,7 @@ export default class Renderer {
 
         const sys = [...systems, SYSTEMS.MESH]
         sys.forEach(s => {
-            let system = systemInstance(s, gpu, resolution)
+            let system = systemInstance(s, gpu, resolution, projectID)
             if (system)
                 this.#systems[s] = system
         })
@@ -94,14 +94,7 @@ export default class Renderer {
     }
 
     callback() {
-        const elapsed = performance.now() - this.then
-
-        // if (elapsed > this.fpsInterval) {
-        const now = performance.now()
-        this.then = now - (elapsed % this.fpsInterval);
-
-        this.params.elapsed = elapsed
-
+        this.params.elapsed = performance.now() - this.then
         this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
         const l = this.sortedSystems.length
         for (let s = 0; s < l; s++) {
@@ -137,7 +130,6 @@ export default class Renderer {
 
     updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onWrap) {
 
-
         const packageData = this.packager.makePackage({
             entities,
             materials,
@@ -151,15 +143,16 @@ export default class Renderer {
             fallbackMaterial: fallbackMaterial,
             cubeBuffer: this.cubeBuffer
         })
-
         this.data = {...packageData.data, cubeBuffer: this.cubeBuffer, skyboxShader: this.skyboxShader}
         this.params = packageData.attributes
         this.filteredEntities = packageData.filteredEntities
-
-
-        this.fpsInterval = 1000 / (this.params.frameRate ? this.params.frameRate : 75);
         this.then = performance.now()
 
+        const bBox = this.canvas.getBoundingClientRect()
+        if (this.params.camera) {
+            this.params.camera.aspectRatio = bBox.width / bBox.height
+            this.params.camera.updateProjection()
+        }
     }
 
     static drawMaterial(mesh, material, gpu) {

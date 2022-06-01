@@ -12,24 +12,24 @@ export default class ScriptSystem extends System {
     eventSet = false
     mousePosition = {x: 0, y: 0}
 
-    constructor(gpu, canvasID) {
-        super([]);
+    constructor(gpu, canvasID, projectID) {
+        super()
         this.gpu = gpu
+        this.projectID = projectID
         const canvas = document.getElementById(canvasID)
-        this.id = canvas.id.replace('-canvas', '')
-        const targetID = canvasID + '-scripting'
+        const targetID = canvasID + "-scripting"
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
         else {
-            this.renderTarget = document.createElement('code')
+            this.renderTarget = document.createElement("code")
             this.renderTarget.id = targetID
             Object.assign(this.renderTarget.style, {
                 backdropFilter: "blur(10px) brightness(70%)", borderRadius: "5px", width: "fit-content",
-                height: 'fit-content', position: 'absolute', bottom: '4px', left: '4px', zIndex: '10',
-                color: 'white', padding: '8px', fontSize: '.75rem',
-                maxWidth: '15vw', display: 'none',
-                maxHeight: '50vh', overflow: 'hidden'
-            });
+                height: "fit-content", position: "absolute", bottom: "4px", left: "4px", zIndex: "10",
+                color: "white", padding: "8px", fontSize: ".75rem",
+                maxWidth: "15vw", display: "none",
+                maxHeight: "50vh", overflow: "hidden"
+            })
             canvas.parentNode.appendChild(this.renderTarget)
         }
 
@@ -63,14 +63,14 @@ export default class ScriptSystem extends System {
             if (!this.eventSet) {
                 lockCamera(true)
                 this.eventSet = true
-                document.addEventListener('mouseup', handler)
-                document.addEventListener('keydown', handler)
-                document.addEventListener('keyup', handler)
-                document.addEventListener('mousemove', handler)
-                document.addEventListener('mousedown', handler)
+                document.addEventListener("mouseup", handler)
+                document.addEventListener("keydown", handler)
+                document.addEventListener("keyup", handler)
+                document.addEventListener("mousemove", handler)
+                document.addEventListener("mousedown", handler)
             }
 
-            this.renderTarget.style.display = 'block'
+            this.renderTarget.style.display = "block"
             const keys = Object.keys(scriptedEntities)
             const kL = keys.length
             for (let i = 0; i < kL; i++) {
@@ -78,7 +78,6 @@ export default class ScriptSystem extends System {
                 if (embeddedScript)
                     this.executeLoop(embeddedScript.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
                 else {
-
                     const entityScripts = scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].scripts
                     const sL = entityScripts.length
                     for (let j = 0; j < sL; j++) {
@@ -89,19 +88,18 @@ export default class ScriptSystem extends System {
                 }
             }
 
-            if (scripts[this.id])
-                this.executeLoop(scripts[this.id].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
+            if (scripts[this.projectID])
+                this.executeLoop(scripts[this.projectID].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
         } else if (this.eventSet) {
             lockCamera(false)
-
             this.eventSet = false
-            this.renderTarget.style.display = 'none'
-            this.renderTarget.innerText = ''
-            document.removeEventListener('mouseup', handler)
-            document.removeEventListener('mousedown', handler)
-            document.removeEventListener('keydown', handler)
-            document.removeEventListener('keyup', handler)
-            document.removeEventListener('mousemove', handler)
+            this.renderTarget.style.display = "none"
+            this.renderTarget.innerText = ""
+            document.removeEventListener("mouseup", handler)
+            document.removeEventListener("mousedown", handler)
+            document.removeEventListener("keydown", handler)
+            document.removeEventListener("keyup", handler)
+            document.removeEventListener("mousemove", handler)
         }
     }
 
@@ -136,14 +134,14 @@ export default class ScriptSystem extends System {
     }
 
     static parseScript(code) {
-        const className = code.name ? prepareName(code.name) : 'Script'
+        const className = code.name ? prepareName(code.name) : "Script"
         const hasName = code.match(/class(\s+)(\w+)/gm)
 
         const body = `
             ${hasName !== null ? code : `class ${className} ${code}`}            
-            return new ${hasName !== null ? hasName[0].replace('class', '') : className}()
-        `;
-        const executionLine = new Function('', body);
+            return new ${hasName !== null ? hasName[0].replace("class", "") : className}()
+        `
+        const executionLine = new Function("", body)
         return executionLine([])
 
     }
@@ -151,8 +149,8 @@ export default class ScriptSystem extends System {
 
 function prepareName(name) {
 
-    const word = name.trim().replaceAll(/\s/g, "").replaceAll('-', '').replaceAll('_', '').replaceAll('.', '').replaceAll(',', '')
-    return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    const word = name.trim().replaceAll(/\s/g, "").replaceAll("-", "").replaceAll("_", "").replaceAll(".", "").replaceAll(",", "")
+    return word[0].toUpperCase() + word.substring(1).toLowerCase()
 }
 
 function handler(event) {
@@ -160,22 +158,22 @@ function handler(event) {
     const removeKey = event.currentTarget.removeKey
     const setMouse = event.currentTarget.setMouse
     switch (event.type) {
-        case 'keydown':
-            addKey(event.code)
-            break
-        case 'keyup':
-            removeKey(event.code)
-            break
-        case 'mousemove':
-            setMouse({x: event.clientX, y: event.clientY})
-            break
-        case 'mousedown':
-            addKey('Mouse' + event.button)
-            break
-        case 'mouseup':
-            removeKey('Mouse' + event.button)
-            break
-        default:
-            break
+    case "keydown":
+        addKey(event.code)
+        break
+    case "keyup":
+        removeKey(event.code)
+        break
+    case "mousemove":
+        setMouse({x: event.clientX, y: event.clientY})
+        break
+    case "mousedown":
+        addKey("Mouse" + event.button)
+        break
+    case "mouseup":
+        removeKey("Mouse" + event.button)
+        break
+    default:
+        break
     }
 }
