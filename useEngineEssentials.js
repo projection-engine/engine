@@ -49,103 +49,103 @@ function entityReducer(state, {type, payload}) {
     if (entityIndex > -1) {
         const entity = stateCopy[entityIndex]
         switch (type) {
-            // ENTITY
-            case ENTITY_ACTIONS.UPDATE: {
-                const {
-                    key,
-                    data,
-                } = payload
+        // ENTITY
+        case ENTITY_ACTIONS.UPDATE: {
+            const {
+                key,
+                data,
+            } = payload
 
-                if (key === 'linkedTo') {
+            if (key === "linkedTo") {
 
-                    // const transformComp = entity.components[COMPONENTS.TRANSFORM]
-                    //
-                    // if (transformComp) {
-                    //     let parentTransform = state.find(n => n.id === data)
-                    //     if (parentTransform) {
-                    //         parentTransform = parentTransform.components[COMPONENTS.TRANSFORM]
-                    //         transformComp.baseTransformationMatrix = mat4.multiply([], transformComp.baseTransformationMatrix, mat4.invert([], parentTransform.transformationMatrix))
-                    //         transformComp.changed = true
-                    //     }
-                    // }
-                    //
+                // const transformComp = entity.components[COMPONENTS.TRANSFORM]
+                //
+                // if (transformComp) {
+                //     let parentTransform = state.find(n => n.id === data)
+                //     if (parentTransform) {
+                //         parentTransform = parentTransform.components[COMPONENTS.TRANSFORM]
+                //         transformComp.baseTransformationMatrix = mat4.multiply([], transformComp.baseTransformationMatrix, mat4.invert([], parentTransform.transformationMatrix))
+                //         transformComp.changed = true
+                //     }
+                // }
+                //
 
-                }
-                entity[key] = data
-                stateCopy[entityIndex] = entity
-                return stateCopy
             }
-            case ENTITY_ACTIONS.REMOVE:
-                return deleteEntity(stateCopy[entityIndex], stateCopy)
+            entity[key] = data
+            stateCopy[entityIndex] = entity
+            return stateCopy
+        }
+        case ENTITY_ACTIONS.REMOVE:
+            return deleteEntity(stateCopy[entityIndex], stateCopy)
 
 
-            case ENTITY_ACTIONS.UPDATE_COMPONENT: {
-                const {
-                    key,
-                    data,
-                } = payload
-                entity.components[key] = data
+        case ENTITY_ACTIONS.UPDATE_COMPONENT: {
+            const {
+                key,
+                data,
+            } = payload
+            entity.components[key] = data
 
-                stateCopy[entityIndex] = entity
-                return stateCopy
-            }
-            default:
-                return stateCopy
+            stateCopy[entityIndex] = entity
+            return stateCopy
+        }
+        default:
+            return stateCopy
         }
     } else
         switch (type) {
-            case ENTITY_ACTIONS.LINK_MULTIPLE:
-                return state.map(s => {
-                    if (payload.indexOf(s.id) > 0) {
-                        s.linkedTo = payload[0]
-                    }
-                    return s
-                })
-            case ENTITY_ACTIONS.CLEAR:
-                return []
-            case ENTITY_ACTIONS.ADD: {
-                const entity = payload
-                entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + 2)
-                entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
-                return [...state, entity]
-            }
-            case ENTITY_ACTIONS.DISPATCH_BLOCK: {
-                const block = payload
-                if (Array.isArray(block))
-                    return block.map((entity, i) => {
-                        if(entity instanceof Entity) {
-                            entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + i + 1)
-                            if (!entity.components[COMPONENTS.SCRIPT])
-                                entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
-                            return entity
-                        }
-                    }).filter(e => e)
-                else
-                    return stateCopy
-            }
-            case ENTITY_ACTIONS.REMOVE_BLOCK: {
-                const block = payload
-                if (Array.isArray(block))
-                    return stateCopy.filter(e => !block.includes(e.id) && !block.includes(e.linkedTo))
-                else
-                    return stateCopy
-            }
-            case ENTITY_ACTIONS.PUSH_BLOCK: {
-                const block = payload
-
-                if (Array.isArray(block))
-                    return [...stateCopy, ...block.map((e, i) => {
-                        const entity = e
-                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + state.length + 2)
+        case ENTITY_ACTIONS.LINK_MULTIPLE:
+            return state.map(s => {
+                if (payload.indexOf(s.id) > 0) {
+                    s.linkedTo = payload[0]
+                }
+                return s
+            })
+        case ENTITY_ACTIONS.CLEAR:
+            return []
+        case ENTITY_ACTIONS.ADD: {
+            const entity = payload
+            entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + 2)
+            entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
+            return [...state, entity]
+        }
+        case ENTITY_ACTIONS.DISPATCH_BLOCK: {
+            const block = payload
+            if (Array.isArray(block))
+                return block.map((entity, i) => {
+                    if(entity instanceof Entity) {
+                        entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + i + 1)
                         if (!entity.components[COMPONENTS.SCRIPT])
                             entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                         return entity
-                    })]
-                else
-                    return stateCopy
-            }
-            default:
+                    }
+                }).filter(e => e)
+            else
                 return stateCopy
+        }
+        case ENTITY_ACTIONS.REMOVE_BLOCK: {
+            const block = payload
+            if (Array.isArray(block))
+                return stateCopy.filter(e => !block.includes(e.id) && !block.includes(e.linkedTo))
+            else
+                return stateCopy
+        }
+        case ENTITY_ACTIONS.PUSH_BLOCK: {
+            const block = payload
+
+            if (Array.isArray(block))
+                return [...stateCopy, ...block.map((e, i) => {
+                    const entity = e
+                    entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + state.length + 2)
+                    if (!entity.components[COMPONENTS.SCRIPT])
+                        entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
+                    return entity
+                })]
+            else
+                return stateCopy
+        }
+        default:
+            return stateCopy
         }
 
 }
