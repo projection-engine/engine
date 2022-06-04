@@ -68,33 +68,33 @@ export default class MaterialInstance {
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {
                 switch (k.type) {
-                    case DATA_TYPES.COLOR:
-                    case DATA_TYPES.TEXTURE:
-                        const img = k.type === DATA_TYPES.TEXTURE ? k.data : await ImageProcessor.colorToImage(k.data, 32)
-                        let texture
-                        await new Promise(r => {
-                            texture = new TextureInstance(
-                                img,
-                                k.yFlip,
-                                this.gpu,
-                                this.gpu[k.format?.internalFormat],
-                                this.gpu[k.format?.format],
-                                true,
-                                false,
-                                this.gpu.UNSIGNED_BYTE,
-                                undefined,
-                                undefined,
-                                0,
-                                () => {
-                                    r()
-                                }
-                            )
-                        })
-                        this.uniformData[k.key] = texture.texture
-                        break
-                    default:
-                        this.uniformData[k.key] = k.data
-                        break
+                case DATA_TYPES.COLOR:
+                case DATA_TYPES.TEXTURE:
+                    const img = k.type === DATA_TYPES.TEXTURE ? k.data : await ImageProcessor.colorToImage(k.data, 32)
+                    let texture
+                    await new Promise(r => {
+                        texture = new TextureInstance(
+                            img,
+                            k.yFlip,
+                            this.gpu,
+                            this.gpu[k.format?.internalFormat],
+                            this.gpu[k.format?.format],
+                            true,
+                            false,
+                            this.gpu.UNSIGNED_BYTE,
+                            undefined,
+                            undefined,
+                            0,
+                            () => {
+                                r()
+                            }
+                        )
+                    })
+                    this.uniformData[k.key] = texture.texture
+                    break
+                default:
+                    this.uniformData[k.key] = k.data
+                    break
                 }
                 resolve()
             })
