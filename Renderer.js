@@ -12,7 +12,7 @@ import SYSTEMS from "./templates/SYSTEMS"
 import FramebufferInstance from "./instances/FramebufferInstance"
 import RenderingPackager from "./RenderingPackager"
 import systemInstance from "./utils/systemInstance"
-import VBO from "./instances/VBO"
+import VBOInstance from "./instances/VBOInstance"
 import ShaderInstance from "./instances/ShaderInstance"
 import COMPONENTS from "./templates/COMPONENTS"
 
@@ -45,7 +45,7 @@ export default class Renderer {
 
                 this.params.fallbackMaterial = this.fallbackMaterial
                 this.params.brdf = this.brdf
-                this.cubeBuffer = new VBO(gpu, 1, new Float32Array(cube.default), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+                this.cubeBuffer = new VBOInstance(gpu, 1, new Float32Array(cube.default), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
                 this.data.cubeBuffer = this.cubeBuffer
                 this.#ready = true
                 if (this.tried) {

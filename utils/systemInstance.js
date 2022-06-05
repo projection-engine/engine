@@ -1,4 +1,4 @@
-import CameraCubeSystem from "../../extension/systems/CameraCubeSystem"
+import CameraCubeSystem from "../../engine-extension/systems/CameraCubeSystem"
 import SYSTEMS from "../templates/SYSTEMS"
 import CullingSystem from "../systems/CullingSystem"
 import GBufferSystem from "../systems/GBufferSystem"

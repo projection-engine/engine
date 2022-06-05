@@ -49,28 +49,12 @@ function entityReducer(state, {type, payload}) {
     if (entityIndex > -1) {
         const entity = stateCopy[entityIndex]
         switch (type) {
-        // ENTITY
         case ENTITY_ACTIONS.UPDATE: {
             const {
                 key,
                 data,
             } = payload
 
-            if (key === "linkedTo") {
-
-                // const transformComp = entity.components[COMPONENTS.TRANSFORM]
-                //
-                // if (transformComp) {
-                //     let parentTransform = state.find(n => n.id === data)
-                //     if (parentTransform) {
-                //         parentTransform = parentTransform.components[COMPONENTS.TRANSFORM]
-                //         transformComp.baseTransformationMatrix = mat4.multiply([], transformComp.baseTransformationMatrix, mat4.invert([], parentTransform.transformationMatrix))
-                //         transformComp.changed = true
-                //     }
-                // }
-                //
-
-            }
             entity[key] = data
             stateCopy[entityIndex] = entity
             return stateCopy
@@ -115,7 +99,7 @@ function entityReducer(state, {type, payload}) {
                 return block.map((entity, i) => {
                     if(entity instanceof Entity) {
                         entity.components[COMPONENTS.PICK] = new PickComponent(undefined, state.length + i + 1)
-                        if (!entity.components[COMPONENTS.SCRIPT])
+                        if (!entity.components[COMPONENTS.SCRIPT] && !entity.isFolder)
                             entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                         return entity
                     }
@@ -137,7 +121,7 @@ function entityReducer(state, {type, payload}) {
                 return [...stateCopy, ...block.map((e, i) => {
                     const entity = e
                     entity.components[COMPONENTS.PICK] = new PickComponent(undefined, i + state.length + 2)
-                    if (!entity.components[COMPONENTS.SCRIPT])
+                    if (!entity.components[COMPONENTS.SCRIPT] && !entity.isFolder)
                         entity.components[COMPONENTS.SCRIPT] = new ScriptComponent()
                     return entity
                 })]

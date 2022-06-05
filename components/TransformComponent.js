@@ -1,6 +1,6 @@
 import Component from "../basic/Component"
 import {mat4, quat} from "gl-matrix"
-import Transformation from "../instances/Transformation"
+import Transformation from "../templates/Transformation"
 
 const toDeg = 57.29
 const identity  = mat4.create()

@@ -1,6 +1,6 @@
 import {createVBO} from "../utils/utils"
 
-export default class VBO {
+export default class VBOInstance {
     constructor(gpu, index, data, type, size, dataType, normalized=false, renderingType, stride=0) {
         this.gpu  = gpu
 

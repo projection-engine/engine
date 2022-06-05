@@ -1,11 +1,11 @@
 import {createVAO} from "../utils/utils"
-import VBO from "./VBO"
+import VBOInstance from "./VBOInstance"
 
-export default class Quad {
+export default class QuadInstance {
     constructor(gpu) {
         this.gpu = gpu
         this.vao = createVAO(gpu)
-        this.vbo = new VBO(
+        this.vbo = new VBOInstance(
             gpu,
             0,
             new Float32Array([-1, -1, 0,

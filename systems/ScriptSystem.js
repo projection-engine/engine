@@ -2,7 +2,7 @@ import System from "../basic/System"
 import COMPONENTS from "../templates/COMPONENTS"
 import * as glMatrix from "gl-matrix"
 
-import Transformation from "../instances/Transformation"
+import Transformation from "../templates/Transformation"
 import PickSystem from "./PickSystem"
 import SYSTEMS from "../templates/SYSTEMS"
 import KEYS from "../templates/KEYS"

@@ -1,5 +1,5 @@
 import {createVAO, createVBO} from "../utils/utils"
-import VBO from "./VBO"
+import VBOInstance from "./VBOInstance"
 import {v4 as uuidv4} from "uuid"
 
 export default class MeshInstance {
@@ -46,13 +46,13 @@ export default class MeshInstance {
 
         this.indexVBO = createVBO(gpu, gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
 
-        this.vertexVBO = new VBO(gpu, 1, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        this.vertexVBO = new VBOInstance(gpu, 1, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         if (normals && normals.length > 0)
-            this.normalVBO = new VBO(gpu, 2, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+            this.normalVBO = new VBOInstance(gpu, 2, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         if (uvs && uvs.length > 0)
-            this.uvVBO = new VBO(gpu, 3, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
+            this.uvVBO = new VBOInstance(gpu, 3, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
         if (tangents && tangents.length > 0)
-            this.tangentVBO = new VBO(gpu, 4, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+            this.tangentVBO = new VBOInstance(gpu, 4, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
 
         gpu.bindVertexArray(null)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)

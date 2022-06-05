@@ -8,7 +8,7 @@ export default class MeshComponent extends Component{
     query
     meshType= MESH_TYPES.STATIC
     constructor(id, meshID) {
-        super(id, MeshComponent.constructor.name);
+        super(id, MeshComponent.constructor.name)
         this.meshID=meshID
 
 
