@@ -4,7 +4,7 @@ import ShaderInstance from "../instances/ShaderInstance"
 
 export default class SkyboxSystem extends System {
     constructor(gpu) {
-        super([]);
+        super([])
         this.gpu = gpu
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
     }
@@ -16,11 +16,8 @@ export default class SkyboxSystem extends System {
             cubeBuffer,
             skyboxShader
         } = data
-        const {
-            camera,
-            isOrtho
-        } = options
-        SkyboxSystem.draw(this.gpu, skybox, cubeBuffer, camera.viewMatrix, camera.projectionMatrix, skyboxShader, isOrtho)
+        const {camera} = options
+        SkyboxSystem.draw(this.gpu, skybox, cubeBuffer, camera.viewMatrix, camera.projectionMatrix, skyboxShader, camera.ortho)
     }
 
     static draw(gpu, skybox, cubeBuffer, view, projection, shader, isOrtho) {
@@ -32,9 +29,7 @@ export default class SkyboxSystem extends System {
             shader.bindForUse({
                 uTexture: skybox.cubeMap.texture,
                 projectionMatrix: projection,
-                viewMatrix: view,
-                // gamma: skybox.gamma,
-                // exposure: skybox.exposure
+                viewMatrix: view
             })
 
             gpu.drawArrays(gpu.TRIANGLES, 0, 36)

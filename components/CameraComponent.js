@@ -18,8 +18,11 @@ export default class CameraComponent extends Component {
     bloomThreshold = .75
     gamma = 2.2
     exposure = 1
+    
+    ortho = false
+    size = 100
 
     constructor(id) {
-        super(id);
+        super(id)
     }
 }

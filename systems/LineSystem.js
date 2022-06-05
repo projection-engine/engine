@@ -1,5 +1,4 @@
 import System from "../basic/System"
-import MeshInstance from "../instances/MeshInstance"
 import ShaderInstance from "../instances/ShaderInstance"
 import * as shaderCode from "../shaders/LINE.glsl"
 import COMPONENTS from "../templates/COMPONENTS"

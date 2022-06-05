@@ -24,15 +24,20 @@ export default class RootCameraInstance {
     bloomThreshold = .75
     gamma = 2.2
     exposure = 1
-
+    ortho = false
+    size = 100
 
     constructor() {
         this.updateProjection()
         this.updateViewMatrix()
     }
 
+
     updateProjection() {
-        mat4.perspective(this.projectionMatrix, this.fov, this.aspectRatio, this.zNear, this.zFar)
+        if (this.ortho)
+            mat4.ortho(this.projectionMatrix, -this.size, this.size, -this.radius / this.aspectRatio, this.size / this.aspectRatio, this.zNear, this.zFar)
+        else
+            mat4.perspective(this.projectionMatrix, this.fov, this.aspectRatio, this.zNear, this.zFar)
     }
 
     getNotTranslatedViewMatrix() {
@@ -42,8 +47,36 @@ export default class RootCameraInstance {
     }
 
     updateViewMatrix() {
-        mat4.fromRotationTranslation(this.viewMatrix, this.rotation, this.position);
-        mat4.invert(this.viewMatrix, this.viewMatrix);
+        mat4.fromRotationTranslation(this.viewMatrix, this.rotation, this.position)
+        mat4.invert(this.viewMatrix, this.viewMatrix)
+    }
+
+    updateViewTarget(cameraObj, transformation){
+        this.position = transformation.translation
+        this.rotation = transformation.rotationQuat
+
+        this.zFar = cameraObj.zFar
+        this.zNear = cameraObj.zNear
+
+        this.fov = cameraObj.fov
+        this.aspectRatio = cameraObj.aspectRatio
+        this.distortion =   cameraObj.distortion
+        this.distortionStrength = cameraObj.distortionStrength
+        this.chromaticAberration = cameraObj.chromaticAberration
+        this.chromaticAberrationStrength = cameraObj.chromaticAberrationStrength
+
+        this.filmGrain = cameraObj.filmGrain
+        this.filmGrainStrength = cameraObj.filmGrainStrength
+        this.bloom = cameraObj.bloom
+        this.bloomStrength = cameraObj.bloomStrength
+        this.bloomThreshold = cameraObj.bloomThreshold
+        this.gamma = cameraObj.gamma
+        this.exposure = cameraObj.exposure
+        this.ortho = cameraObj.ortho
+        this.size = cameraObj.size
+
+        this.updateViewMatrix()
+        this.updateProjection()
     }
 }
 
