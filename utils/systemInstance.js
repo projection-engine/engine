@@ -1,4 +1,4 @@
-import CameraCubeSystem from "../../engine-extension/systems/CameraCubeSystem"
+
 import SYSTEMS from "../templates/SYSTEMS"
 import CullingSystem from "../systems/CullingSystem"
 import GBufferSystem from "../systems/GBufferSystem"
@@ -16,8 +16,7 @@ import LineSystem from "../systems/LineSystem"
 
 export default function systemInstance(s, gpu, resolution, projectID) {
     switch (true) {
-    case s  === SYSTEMS.CAMERA_CUBE:
-        return  new CameraCubeSystem(gpu.canvas.id)
+
     case s  === SYSTEMS.AO:
         return new AOSystem(gpu, resolution)
     case s  === SYSTEMS.CULLING:
