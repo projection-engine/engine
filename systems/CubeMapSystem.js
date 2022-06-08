@@ -68,7 +68,7 @@ export default class CubeMapSystem extends System {
         case STEPS_CUBE_MAP.PRE_FILTERED:
             for (let i = 0; i < this.lastCallLength; i++) {
                 const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-                console.log(cubeBuffer)
+
                 current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution, cubeBuffer)
             }
             this.step = STEPS_CUBE_MAP.CALCULATE
@@ -109,7 +109,7 @@ export default class CubeMapSystem extends System {
                 target.ready = true
                 target.prefiltered = intersecting.prefilteredMap
                 target.prefilteredLod = intersecting.prefilteredMipmaps
-                console.log(target, intersecting)
+
             }
         }
     }

@@ -21,9 +21,11 @@ export default class QuadInstance {
 
 
     draw() {
+        this.gpu.disable(this.gpu.CULL_FACE)
         this.gpu.bindVertexArray(this.vao)
         this.vbo.enable()
-        this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 6);
+        this.gpu.drawArrays(this.gpu.TRIANGLES, 0, 6)
+        this.gpu.enable(this.gpu.CULL_FACE)
     }
 
 }

@@ -110,14 +110,14 @@ export default class RenderingPackager {
         })
 
         RenderingPackager.#getArray(pointLightsQuantity, i => {
-            const current = pointLights[i]
-            if (current && current.components[COMPONENTS.POINT_LIGHT]) {
-                lClip[i] = [current.components[COMPONENTS.POINT_LIGHT]?.zNear, current.components[COMPONENTS.POINT_LIGHT]?.zFar]
+            const component = pointLights[i] ? pointLights[i].components : undefined
+            if (component) {
+                lClip[i] = [component[COMPONENTS.POINT_LIGHT].zNear, component[COMPONENTS.POINT_LIGHT]?.zFar]
                 pointLightData[i] = [
-                    [...current.components[COMPONENTS.TRANSFORM].position, 0],
-                    [...current.components[COMPONENTS.POINT_LIGHT]?.fixedColor, 0],
-                    [...current.components[COMPONENTS.POINT_LIGHT]?.attenuation, 0],
-                    [current.components[COMPONENTS.POINT_LIGHT].zFar, current.components[COMPONENTS.POINT_LIGHT].zNear, current.components[COMPONENTS.POINT_LIGHT].shadowMap ? 1 : 0, 0]
+                    [...component[COMPONENTS.TRANSFORM].position, 0],
+                    [...component[COMPONENTS.POINT_LIGHT].fixedColor, 0],
+                    [...component[COMPONENTS.POINT_LIGHT].attenuation, 0],
+                    [component[COMPONENTS.POINT_LIGHT].zFar, component[COMPONENTS.POINT_LIGHT].zNear, component[COMPONENTS.POINT_LIGHT].shadowMap ? 1 : 0, 0]
                 ].flat()
             }
         })

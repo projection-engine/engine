@@ -38,7 +38,8 @@ export default class Renderer {
                 }], {
                     isForward: false,
                     rsmAlbedo: await ImageProcessor.colorToImage("rgba(128, 128, 128, 1)"),
-                    doubledSided: true
+                    faceCulling: true,
+                    cullBackFace: true
                 },
                 () => this._ready = true, v4(),
                 shaderCode.cubeMapShader)
@@ -51,7 +52,7 @@ export default class Renderer {
                 if (this.tried) {
                     this.start()
                 }
-            }).catch(err => console.log(err))
+            }).catch(err => console.error(err))
 
         this.packager = new RenderingPackager(gpu)
         this.canvas = gpu.canvas
@@ -155,10 +156,16 @@ export default class Renderer {
     }
 
     static drawMaterial(mesh, material, gpu) {
-        if (material.settings.doubleSided)
+        if (material.settings.faceCulling === false)
             gpu.disable(gpu.CULL_FACE)
-        else if (material.settings.cullFace)
-            gpu.cullFace(gpu[material.settings?.cullFace])
+        else {
+            gpu.enable(gpu.CULL_FACE)
+            if(material.settings.cullBackFace)
+                gpu.cullFace(gpu.BACK)
+            else
+                gpu.cullFace(gpu.FRONT)
+        }
+
         if (material.settings.depthMask === false)
             gpu.depthMask(false)
         if (material.settings.depthTest === false)
@@ -170,8 +177,6 @@ export default class Renderer {
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 
-        if (material.settings.doubleSided)
-            gpu.enable(gpu.CULL_FACE)
         if (material.settings.depthMask === false)
             gpu.depthMask(true)
         if (material.settings.depthTest === false)

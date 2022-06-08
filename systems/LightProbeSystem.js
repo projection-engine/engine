@@ -17,13 +17,13 @@ export default class LightProbeSystem extends System {
     lightProbeConsumption = {}
 
     constructor(gpu) {
-        super();
+        super()
         this.gpu = gpu
         this.baseCubeMap = new CubeMapInstance(gpu, 128, false)
 
     }
 
-    execute(options, systems, data, sceneColor) {
+    execute(options, systems, data) {
         super.execute()
         const {
             lightProbes,
@@ -40,47 +40,46 @@ export default class LightProbeSystem extends System {
         }
         switch (this.step) {
 
-            case STEPS_LIGHT_PROBE.GENERATION:
-                for (let i = 0; i < lightProbes.length; i++) {
-                    const current = lightProbes[i].components[COMPONENTS.PROBE]
-                    for(let p in current.probes){
-                        const currentProbe = current.probes[p]
-                        this.baseCubeMap.draw((yaw, pitch, projection, index) => {
-                                const target = vec3.add([], currentProbe.translation, VIEWS.target[index])
-                                const view = mat4.lookAt([], currentProbe.translation, target, VIEWS.up[index])
-                                CubeMapSystem.draw({
-                                    view,
-                                    projection,
-                                    data,
-                                    options,
-                                    cubeMapPosition: currentProbe.translation,
-                                    skybox,
-                                    cubeBuffer,
-                                    skyboxShader,
-                                    gpu: this.gpu
-                                })
+        case STEPS_LIGHT_PROBE.GENERATION:
+            for (let i = 0; i < lightProbes.length; i++) {
+                const current = lightProbes[i].components[COMPONENTS.PROBE]
+                for(let p in current.probes){
+                    const currentProbe = current.probes[p]
+                    this.baseCubeMap.draw((yaw, pitch, projection, index) => {
+                        const target = vec3.add([], currentProbe.translation, VIEWS.target[index])
+                        const view = mat4.lookAt([], currentProbe.translation, target, VIEWS.up[index])
+                        CubeMapSystem.draw({
+                            view,
+                            projection,
+                            data,
+                            options,
+                            cubeMapPosition: currentProbe.translation,
+                            skybox,
+                            cubeBuffer,
+                            skyboxShader,
+                            gpu: this.gpu
+                        })
 
-                            },
-                            undefined,
-                            10000,
-                            1
-                        )
-                        if(!currentProbe.cubeMap)
-                            currentProbe.cubeMap = new CubeMapInstance(this.gpu, 32)
-                        console.log(currentProbe.cubeMap)
-                        currentProbe.cubeMap.generateIrradiance(cubeBuffer, this.baseCubeMap.texture)
-                    }
+                    },
+                    undefined,
+                    10000,
+                    1
+                    )
+                    if(!currentProbe.cubeMap)
+                        currentProbe.cubeMap = new CubeMapInstance(this.gpu, 32)
+                    currentProbe.cubeMap.generateIrradiance(cubeBuffer, this.baseCubeMap.texture)
                 }
+            }
 
-                this.step = STEPS_LIGHT_PROBE.CALCULATE
-                break
-            case STEPS_LIGHT_PROBE.CALCULATE:
-                this.sort(lightProbes, meshes)
-                this.step = STEPS_LIGHT_PROBE.DONE
-                break
-            default:
-                this.step = STEPS_LIGHT_PROBE.DONE
-                break
+            this.step = STEPS_LIGHT_PROBE.CALCULATE
+            break
+        case STEPS_LIGHT_PROBE.CALCULATE:
+            this.sort(lightProbes, meshes)
+            this.step = STEPS_LIGHT_PROBE.DONE
+            break
+        default:
+            this.step = STEPS_LIGHT_PROBE.DONE
+            break
         }
     }
 
