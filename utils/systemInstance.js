@@ -1,4 +1,3 @@
-
 import SYSTEMS from "../templates/SYSTEMS"
 import CullingSystem from "../systems/CullingSystem"
 import GBufferSystem from "../systems/GBufferSystem"
