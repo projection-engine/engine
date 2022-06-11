@@ -42,13 +42,13 @@ void main(void){
 export default class DepthSystem extends System {
 
     constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
-        super();
+        super()
         this.gpu = gpu
         this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
         this.frameBuffer
             .texture({
-                precision: this.gpu.R32F,
-                format: this.gpu.RED,
+                precision: this.gpu.RGBA16F,
+                format: this.gpu.RGBA,
                 type: this.gpu.FLOAT,
                 linear: true,
                 repeat: true
@@ -71,7 +71,6 @@ export default class DepthSystem extends System {
             const mesh = meshes[i]
             const meshRef = meshSources[mesh.components[COMPONENTS.MESH].meshID]
             if(meshRef) {
-
                 meshRef.use()
                 this.shader.bindForUse({
                     viewMatrix: camera.viewMatrix,

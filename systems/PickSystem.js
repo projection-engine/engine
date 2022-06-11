@@ -9,7 +9,7 @@ import COMPONENTS from "../templates/COMPONENTS"
 
 export default class PickSystem extends System {
     constructor(gpu) {
-        super([])
+        super()
         this.gpu = gpu
 
         this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
@@ -28,6 +28,27 @@ export default class PickSystem extends System {
         })
     }
 
+    readBlock(depthFBO, start, end){
+        const s = performance.now()
+        const w = Math.round(Math.abs(start.x - end.x))
+        const h = Math.round(Math.abs(start.y - end.y))
+
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO)
+        let dd = new Float32Array(w * h * 4)
+
+        this.gpu.readPixels(
+            end.x > start.x ? start.x : end.x,
+            end.y > start.y ? start.y : end.y,
+            w,
+            h,
+            this.gpu.RGBA,
+            this.gpu.FLOAT,
+            dd
+        )
+        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
+
+        return dd
+    }
     depthPick(depthFBO, coords) {
         this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(4)

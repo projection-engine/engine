@@ -5,28 +5,28 @@ import Transformation from "../templates/Transformation"
 import COMPONENTS from "../templates/COMPONENTS"
 
 export default class TransformSystem extends System {
-    _changed = false
-    _changedMeshes = []
+    #changed = false
 
 
     constructor() {
-        super([]);
+        super()
     }
 
     get changed() {
-        return this._changed
+        return this.#changed
     }
 
     execute(options, systems, data, entities) {
         super.execute()
-        this._changed = false
-        this._changedMeshes = []
+        this.#changed = false
         const l = entities.length
         for (let i = 0; i < l; i++) {
             const current = entities[i]
+            if(current?.transformationChanged)
+                current.transformationChanged = false
             if (current !== undefined && (current.components[COMPONENTS.TRANSFORM]?.changed)) {
-                this._changedMeshes.push(current)
-                this._changed = true
+                current.transformationChanged = true
+                this.#changed = true
                 let parent
                 if (current.linkedTo) {
                     parent = entities.find((e) => e.id === current.linkedTo)
@@ -40,18 +40,18 @@ export default class TransformSystem extends System {
 
                 if (current.components[COMPONENTS.COLLIDER]) {
                     switch (current.components[COMPONENTS.COLLIDER].axis) {
-                        case 'x':
-                            if (current.components[COMPONENTS.TRANSFORM].scaling[0] > 1)
-                                current.components[COMPONENTS.COLLIDER].radius *= component.scaling[0]
-                            break
-                        case 'y':
-                            if (current.components[COMPONENTS.TRANSFORM].scaling[1] > 1)
-                                current.components[COMPONENTS.COLLIDER].radius *= component.scaling[1]
-                            break
-                        case 'z':
-                            if (current.components[COMPONENTS.TRANSFORM].scaling[2] > 1)
-                                current.components[COMPONENTS.COLLIDER].radius *= component.scaling[2]
-                            break
+                    case "x":
+                        if (current.components[COMPONENTS.TRANSFORM].scaling[0] > 1)
+                            current.components[COMPONENTS.COLLIDER].radius *= component.scaling[0]
+                        break
+                    case "y":
+                        if (current.components[COMPONENTS.TRANSFORM].scaling[1] > 1)
+                            current.components[COMPONENTS.COLLIDER].radius *= component.scaling[1]
+                        break
+                    case "z":
+                        if (current.components[COMPONENTS.TRANSFORM].scaling[2] > 1)
+                            current.components[COMPONENTS.COLLIDER].radius *= component.scaling[2]
+                        break
                     }
                 }
 
@@ -86,9 +86,9 @@ export default class TransformSystem extends System {
                     current.components[COMPONENTS.MESH].normalMatrix = this._updateNormalMatrix(current.components[COMPONENTS.TRANSFORM].transformationMatrix)
             }
         }
-}
+    }
 
-_updateNormalMatrix(transformationMatrix) {
-    return linearAlgebraMath.normalMatrix(Array.from(transformationMatrix))
-}
+    _updateNormalMatrix(transformationMatrix) {
+        return linearAlgebraMath.normalMatrix(Array.from(transformationMatrix))
+    }
 }

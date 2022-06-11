@@ -21,7 +21,7 @@ export default class TransformComponent extends Component {
 
     constructor(id) {
         const name = TransformComponent.constructor.name
-        super(id, name);
+        super(id, name)
     }
 
     set baseTransformationMatrix(data) {
@@ -90,6 +90,20 @@ export default class TransformComponent extends Component {
     }
 
 
+    clone(){
+        const newComponent = new TransformComponent()
+        newComponent.rotation = [...this.rotation]
+        newComponent.rotationQuat = [...this.rotationQuat]
+        newComponent.translation = [...this.translation]
+        newComponent.scaling = [...this.scaling]
+        newComponent._transformationMatrix = [...this._transformationMatrix]
+        newComponent.baseTransformationMatrix = this.baseTransformationMatrix
+        newComponent.lockedRotation = this.lockedRotation
+        newComponent.lockedScaling = this.lockedScaling
+        newComponent.updateQuatOnEulerChange = this.updateQuatOnEulerChange
+
+        return newComponent
+    }
     set translation(data) {
         this.__changed = true
         this._translation = data

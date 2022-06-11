@@ -5,12 +5,16 @@ export default class PickComponent extends Component {
     __pickID = [0, 0, 0]
 
     constructor(id, quantity) {
-        super(id, PickComponent.constructor.name);
+        super(id, PickComponent.constructor.name)
 
-        this.__pickID = generateNextID(quantity+4)
+        this.__pickID = generateNextID(quantity)
     }
     get pickID (){
         return this.__pickID
     }
-    set pickID (_){}
+    get pickIndex (){
+        return this.__pickID.reduce((previousValue, currentValue) => {
+            return previousValue + currentValue * 255
+        }, 0)
+    }
 }
