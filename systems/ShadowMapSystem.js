@@ -34,7 +34,7 @@ export default class ShadowMapSystem extends System {
     changed = false
 
     constructor(gpu) {
-        super([]);
+        super([])
         this.gpu = gpu
         this.maxCubeMaps = 2
         this.cubeMaps = [
@@ -61,7 +61,7 @@ export default class ShadowMapSystem extends System {
     }
 
     updateFBOResolution() {
-        super.updateFBOResolution();
+        super.updateFBOResolution()
 
         if(this.shadowsFrameBuffer){
             this.gpu.deleteTexture(this.shadowsFrameBuffer.depthSampler)
@@ -108,9 +108,6 @@ export default class ShadowMapSystem extends System {
             skylight,
         } = data
         const {
-            dataChanged,
-            setDataChanged,
-
             shadowAtlasQuantity,
             shadowMapResolution
         } = options
@@ -153,15 +150,13 @@ export default class ShadowMapSystem extends System {
         if (this.changed) {
             this.changed = false
             this.gpu.cullFace(this.gpu.FRONT)
-            if (dataChanged)
-                setDataChanged()
             this.shadowMapShader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
-            this.gpu.clearDepth(1);
+            this.gpu.clearDepth(1)
             if (lights2D.length > 0) {
                 this.shadowsFrameBuffer.startMapping()
-                this.gpu.enable(this.gpu.SCISSOR_TEST);
+                this.gpu.enable(this.gpu.SCISSOR_TEST)
                 for (let face = 0; face < (this.maxResolution / this.resolutionPerTexture) ** 2; face++) {
                     if (face < lights2D.length) {
                         this.gpu.viewport(
@@ -190,7 +185,7 @@ export default class ShadowMapSystem extends System {
                     } else
                         currentColumn += 1
                 }
-                this.gpu.disable(this.gpu.SCISSOR_TEST);
+                this.gpu.disable(this.gpu.SCISSOR_TEST)
                 this.shadowsFrameBuffer.stopMapping()
 
             }
@@ -212,22 +207,22 @@ export default class ShadowMapSystem extends System {
                     if (current)
                         this.cubeMaps[i]
                             .draw((yaw, pitch, perspective, index) => {
-                                    const target = vec3.add([], current.translation, VIEWS.target[index])
-                                    this.#loopMeshes(
-                                        meshes,
-                                        meshSources,
-                                        meshSystem,
-                                        materials,
-                                        this.shadowMapOmniShader,
-                                        mat4.lookAt([], current.translation, target, VIEWS.up[index]),
-                                        perspective,
-                                        undefined,
-                                        current.translation,
-                                        [current.zNear, current.zFar])
-                                },
-                                false,
-                                current.zFar,
-                                current.zNear)
+                                const target = vec3.add([], current.translation, VIEWS.target[index])
+                                this.#loopMeshes(
+                                    meshes,
+                                    meshSources,
+                                    meshSystem,
+                                    materials,
+                                    this.shadowMapOmniShader,
+                                    mat4.lookAt([], current.translation, target, VIEWS.up[index]),
+                                    perspective,
+                                    undefined,
+                                    current.translation,
+                                    [current.zNear, current.zFar])
+                            },
+                            false,
+                            current.zFar,
+                            current.zNear)
                 }
             }
             this.gpu.cullFace(this.gpu.BACK)

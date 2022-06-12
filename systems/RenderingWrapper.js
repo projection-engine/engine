@@ -14,7 +14,7 @@ import LineSystem from "./LineSystem"
 
 export default class RenderingWrapper extends System {
     constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
-        super([]);
+        super()
         this.gpu = gpu
         this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
         this.frameBuffer
@@ -33,20 +33,19 @@ export default class RenderingWrapper extends System {
     }
 
     execute(options, systems, data, entities, entitiesMap, onWrap, {a, b}) {
-
         super.execute()
-        const { 
-            skybox,
+        const {
             skylight,
         } = data
         const {
-            camera,
             noRSM
         } = options
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
         this.frameBuffer.startMapping()
+
         this.skyboxSystem.execute(data, options)
+
         let giFBO, giGridSize
         if (!noRSM && skylight) {
             giGridSize = this.GISystem.size

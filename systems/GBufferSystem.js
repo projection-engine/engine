@@ -68,6 +68,8 @@ export default class GBufferSystem extends System {
                 })
             }
         }
+
+        this.gpu.cullFace(this.gpu.BACK)
         this.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
     }

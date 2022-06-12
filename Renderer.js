@@ -156,15 +156,15 @@ export default class Renderer {
     }
 
     static drawMaterial(mesh, material, gpu) {
-        if (material.settings.faceCulling === false)
-            gpu.disable(gpu.CULL_FACE)
-        else {
-            gpu.enable(gpu.CULL_FACE)
-            if(material.settings.cullBackFace)
-                gpu.cullFace(gpu.BACK)
-            else
-                gpu.cullFace(gpu.FRONT)
-        }
+        // if (material.settings.faceCulling === false)
+        //     gpu.disable(gpu.CULL_FACE)
+        // else {
+        //     gpu.enable(gpu.CULL_FACE)
+        //     if(material.settings.cullBackFace)
+        //         gpu.cullFace(gpu.BACK)
+        //     else
+        //         gpu.cullFace(gpu.FRONT)
+        // }
 
         if (material.settings.depthMask === false)
             gpu.depthMask(false)
