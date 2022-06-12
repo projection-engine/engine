@@ -20,9 +20,9 @@ export default class TextureInstance {
         this.attributes = {yFlip, internalFormat, format, repeat, noMipMapping, type, width, height, border,}
 
         const init = (res) => this._init(res, yFlip, gpu, internalFormat, format, repeat, noMipMapping, type, width, height, border, onLoad)
-        if (typeof img === 'string') {
+        if (typeof img === "string") {
 
-            if (img.includes('data:image/'))
+            if (img.includes("data:image/"))
                 ImageProcessor.getImageBitmap(img).then(res => {
                     res.naturalHeight = res.height
                     res.naturalWidth = res.width
@@ -52,27 +52,27 @@ export default class TextureInstance {
         onLoad=()=>null
     ) {
 
-        const anisotropicEXT = gpu.getExtension('EXT_texture_filter_anisotropic')
+        const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
         let newTexture = gpu.createTexture()
-        if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true);
+        if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
 
-        gpu.bindTexture(gpu.TEXTURE_2D, newTexture);
+        gpu.bindTexture(gpu.TEXTURE_2D, newTexture)
         gpu.texImage2D(
             gpu.TEXTURE_2D,
             0, internalFormat, width ? width : img.naturalWidth, height ? height : img.naturalHeight, border, format, type, img)
 
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR);
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR_MIPMAP_LINEAR);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR_MIPMAP_LINEAR)
 
         if (anisotropicEXT && !noMipMapping) {
             const anisotropicAmountMin = 8
             const anisotropicAmount = Math.min(anisotropicAmountMin, gpu.getParameter(anisotropicEXT.MAX_TEXTURE_MAX_ANISOTROPY_EXT))
-            gpu.texParameterf(gpu.TEXTURE_2D, anisotropicEXT.TEXTURE_MAX_ANISOTROPY_EXT, anisotropicAmount);
+            gpu.texParameterf(gpu.TEXTURE_2D, anisotropicEXT.TEXTURE_MAX_ANISOTROPY_EXT, anisotropicAmount)
         }
         if (!noMipMapping)
-            gpu.generateMipmap(gpu.TEXTURE_2D);
+            gpu.generateMipmap(gpu.TEXTURE_2D)
 
-        gpu.bindTexture(gpu.TEXTURE_2D, null);
+        gpu.bindTexture(gpu.TEXTURE_2D, null)
 
         this.texture = newTexture
 

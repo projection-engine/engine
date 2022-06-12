@@ -14,18 +14,67 @@ export default class ImageProcessor {
         const w = new WebWorker()
         return await w.createExecution(base64, getImageBitmap.toString())
     }
+    static checkerBoardTexture(){
+        const SIZE = 1024,
+            canvas = document.createElement("canvas"),
+            ctx = canvas.getContext("2d")
 
+        const QUANTITY = 12
+        let lastRadius = 0
+
+        canvas.width = SIZE
+        canvas.height = SIZE
+
+        ctx.lineWidth = 75
+        for(let i = 0; i < QUANTITY; i++){
+            const section = Math.PI * 2/QUANTITY
+            ctx.strokeStyle = i%2 ?  "white" : "red"
+            ctx.beginPath()
+            ctx.arc(SIZE/2, SIZE/2 , SIZE/4, lastRadius, lastRadius + section)
+            ctx.stroke()
+            ctx.closePath()
+            lastRadius += section
+        }
+
+        ctx.strokeStyle = "black"
+        ctx.lineWidth = 25
+
+        ctx.beginPath()
+        ctx.moveTo(0,SIZE/2)
+        ctx.lineTo( SIZE, SIZE/2)
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.beginPath()
+        ctx.moveTo(SIZE/2, 0)
+        ctx.lineTo( SIZE/2 , SIZE)
+        ctx.stroke()
+        ctx.closePath()
+
+        ctx.strokeStyle = "orange"
+        ctx.fillStyle = "orange"
+
+        ctx.beginPath()
+        ctx.arc(SIZE/2, SIZE/2 , SIZE * .05, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+
+        console.log(canvas.toDataURL())
+
+        return canvas.toDataURL()
+    }
     static noise(size) {
-        let canvas = document.createElement("canvas");
-        let w = canvas.width = size;
-        let h = canvas.height = size;
-        let context = canvas.getContext("2d");
+        let canvas = document.createElement("canvas")
+        let w = canvas.width = size
+        let h = canvas.height = size
+        let context = canvas.getContext("2d")
 
         for (let i = 0; i < w; i++) {
             for (let j = 0; j < h; j++) {
                 let num = Math.floor(Math.random() * 2)
-                context.fillStyle = "rgb(" + num + "," + num + "," + num + ")";
-                context.fillRect(i, j, 1, 1);
+                context.fillStyle = "rgb(" + num + "," + num + "," + num + ")"
+                context.fillRect(i, j, 1, 1)
             }
         }
 
@@ -33,16 +82,16 @@ export default class ImageProcessor {
     }
 
     static getPixel(ctx, x, y) {
-        const imgData = ctx.getImageData(x, y, 1, 1);
-        return imgData.data;
+        const imgData = ctx.getImageData(x, y, 1, 1)
+        return imgData.data
     }
 
     static getContext(image) {
-        const c = document.createElement("canvas");
+        const c = document.createElement("canvas")
         c.width = image.naturalWidth
         c.height = image.naturalHeight
 
-        let ctx = c.getContext("2d");
+        let ctx = c.getContext("2d")
         ctx.drawImage(image, 0, 0)
 
         return ctx

@@ -2,6 +2,7 @@ import {v4 as uuidv4} from "uuid"
 import COMPONENTS from "../templates/COMPONENTS"
 import FolderComponent from "../components/FolderComponent"
 import cloneClass from "../utils/cloneClass"
+import MeshComponent from "../components/MeshComponent"
 
 export default class Entity {
     id
@@ -20,7 +21,9 @@ export default class Entity {
     get isFolder(){
         return this.components[COMPONENTS.FOLDER] instanceof FolderComponent
     }
-
+    get isMesh(){
+        return this.components[COMPONENTS.MESH] instanceof MeshComponent
+    }
     clone(){
         let clone = new Entity()
         clone.name = "_" + this.name
@@ -45,4 +48,5 @@ export default class Entity {
             pickID: Math.round((this.components[COMPONENTS.PICK].pickID[0] + this.components[COMPONENTS.PICK].pickID[1] + this.components[COMPONENTS.PICK].pickID[2]) * 255)
         }
     }
+    
 }

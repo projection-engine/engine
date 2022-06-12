@@ -22,10 +22,9 @@ export default class TransformSystem extends System {
         const l = entities.length
         for (let i = 0; i < l; i++) {
             const current = entities[i]
-            if(current?.transformationChanged)
-                current.transformationChanged = false
             if (current !== undefined && (current.components[COMPONENTS.TRANSFORM]?.changed)) {
                 current.transformationChanged = true
+
                 this.#changed = true
                 let parent
                 if (current.linkedTo) {
@@ -36,7 +35,7 @@ export default class TransformSystem extends System {
                         parent =undefined
                 }
                 const component = current.components[COMPONENTS.TRANSFORM]
-                const transformationMatrix = Transformation.transform(component.translation, component.rotationQuat, component.scaling, options.rotationType, component.transformationMatrix)
+                const transformationMatrix = Transformation.transform(component.translation, component.rotationQuat, component.scaling)
 
                 if (current.components[COMPONENTS.COLLIDER]) {
                     switch (current.components[COMPONENTS.COLLIDER].axis) {
@@ -85,6 +84,8 @@ export default class TransformSystem extends System {
                 if (current.components[COMPONENTS.MESH] !== undefined)
                     current.components[COMPONENTS.MESH].normalMatrix = this._updateNormalMatrix(current.components[COMPONENTS.TRANSFORM].transformationMatrix)
             }
+            else if(current?.transformationChanged)
+                current.transformationChanged = false
         }
     }
 
