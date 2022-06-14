@@ -60,8 +60,6 @@ export default class ImageProcessor {
         ctx.fill()
         ctx.closePath()
 
-        console.log(canvas.toDataURL())
-
         return canvas.toDataURL()
     }
     static noise(size) {

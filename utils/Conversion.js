@@ -1,5 +1,4 @@
 import {mat4, vec4} from "gl-matrix"
-import {rotateY} from "../../components/viewport/transformCamera"
 
 export default class Conversion {
     static toQuadCoord(coords, quadSize, canvas) {
