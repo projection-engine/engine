@@ -1,5 +1,5 @@
 import Component from "../basic/Component"
-import {mat4, quat} from "gl-matrix"
+import {mat4, quat, vec3} from "gl-matrix"
 import Transformation from "../templates/Transformation"
 
 const toDeg = 57.29
@@ -9,14 +9,14 @@ export default class TransformComponent extends Component {
     _rotationQuat = [0, 0, 0, 1]
     _translation = [0, 0, 0]
     _scaling = [1, 1, 1]
-    __changed = false
+    pivotPoint = [0,0,0]
+    changed = false
     _transformationMatrix = identity
     _rotationUpdated = false
-    _baseTransformationMatrix = identity
+    baseTransformationMatrix = identity
     __initializedEuler = false
     lockedRotation = false
     lockedScaling = false
-
     updateQuatOnEulerChange = true
 
     constructor(id) {
@@ -24,37 +24,23 @@ export default class TransformComponent extends Component {
         super(id, name)
     }
 
-    set baseTransformationMatrix(data) {
-        if (data)
-            this._baseTransformationMatrix = data
+    get centerOrigin(){
+        return vec3.add([], this._translation, this.pivotPoint)
     }
-
-    get baseTransformationMatrix() {
-        return this._baseTransformationMatrix
-    }
-
-    get changed() {
-        return this.__changed
-    }
-
-    set changed(data) {
-        this.__changed = data
-    }
-
     get position() {
-        return [...this._translation]
+        return this._translation
     }
 
     get rotation() {
-        return [...this.__rotation]
+        return this.__rotation
     }
 
     get scaling() {
-        return [...this._scaling]
+        return this._scaling
     }
 
     get translation() {
-        return [...this._translation]
+        return this._translation
     }
 
     get transformationMatrix() {
@@ -62,8 +48,7 @@ export default class TransformComponent extends Component {
     }
 
     get rotationQuat() {
-
-        return [...this._rotationQuat]
+        return this._rotationQuat
     }
 
     get rotationUpdated() {
@@ -71,7 +56,7 @@ export default class TransformComponent extends Component {
     }
 
     set rotationQuat(q) {
-        this.__changed = true
+        this.changed = true
         this._rotationUpdated = false
         quat.normalize(this._rotationQuat, q)
         if (this.__initializedEuler) {
@@ -81,7 +66,7 @@ export default class TransformComponent extends Component {
     }
 
     set rotation(data) {
-        this.__changed = true
+        this.changed = true
         this.__rotation = data
 
         this._rotationUpdated = true
@@ -105,18 +90,18 @@ export default class TransformComponent extends Component {
         return newComponent
     }
     set translation(data) {
-        this.__changed = true
+        this.changed = true
         this._translation = data
     }
 
     set scaling(data) {
-        this.__changed = true
+        this.changed = true
         this._scaling = data
     }
 
     set transformationMatrix(data) {
-        this._transformationMatrix = mat4.multiply([], data, this._baseTransformationMatrix)
+        this._transformationMatrix = mat4.multiply([], data, this.baseTransformationMatrix)
 
-        this.__changed = false
+        this.changed = false
     }
 }
