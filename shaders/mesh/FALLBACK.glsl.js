@@ -16,6 +16,7 @@ out vec3 bitangent;
 
 out vec4 vPosition;
 out vec2 texCoord;
+ 
 out mat3 toTangentSpace;
 out vec3 viewDirection;
  

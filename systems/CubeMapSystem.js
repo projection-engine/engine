@@ -3,7 +3,6 @@ import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapSystem"
 import COMPONENTS from "../templates/COMPONENTS"
 import ForwardSystem from "./ForwardSystem"
-import SkyboxSystem from "./SkyboxSystem"
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
@@ -27,9 +26,7 @@ export default class CubeMapSystem extends System {
         const {
             cubeMaps,
             meshes,
-            cubeBuffer,
-            skybox,
-            skyboxShader
+            cubeBuffer
         } = data
 
         if (this.lastCallLength !== cubeMaps.length) {
@@ -51,9 +48,6 @@ export default class CubeMapSystem extends System {
                         data,
                         options,
                         cubeMapPosition: translation,
-                        skybox,
-                        cubeBuffer,
-                        skyboxShader,
                         gpu: this.gpu
                     })
                 },
@@ -120,9 +114,6 @@ export default class CubeMapSystem extends System {
         cubeMapPosition,
         data,
         options,
-        skybox,
-        cubeBuffer,
-        skyboxShader,
         gpu
     }) {
         const {
@@ -143,7 +134,6 @@ export default class CubeMapSystem extends System {
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
 
-                SkyboxSystem.draw(gpu, skybox, cubeBuffer, view, projection, skyboxShader)
                 ForwardSystem.drawMesh({
                     mesh,
                     camPosition: cubeMapPosition,

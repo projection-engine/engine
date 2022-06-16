@@ -3,27 +3,13 @@ import System from "../basic/System"
 import SYSTEMS from "../templates/SYSTEMS"
 import ShaderInstance from "../instances/ShaderInstance"
 import * as shaderCode from "../shaders/mesh/DEFERRED.glsl"
-import * as shaderFlatCode from "../shaders/debug/FLAT.glsl"
-import SHADING_MODELS from "../templates/SHADING_MODELS"
 
 export default class DeferredSystem extends System {
 
     constructor(gpu) {
-        super([])
+        super()
         this.gpu = gpu
         this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.flatDeferredShader = new ShaderInstance(shaderFlatCode.vertex, shaderFlatCode.fragment, gpu)
-    }
-
-    _getDeferredShader(shadingModel) {
-        switch (shadingModel) {
-        case SHADING_MODELS.ALBEDO:
-            return this.flatDeferredShader
-        case SHADING_MODELS.DETAIL:
-            return this.deferredShader
-        default:
-            return this.deferredShader
-        }
     }
 
     execute(options, systems, data, giGridSize, giFBO) {
@@ -42,7 +28,6 @@ export default class DeferredSystem extends System {
         const {
             ao,
             camera,
-            shadingModel,
             pcfSamples
         } = options
         super.execute()
@@ -56,15 +41,15 @@ export default class DeferredSystem extends System {
         }
 
 
-        const deferred = this._getDeferredShader(shadingModel)
+
 
         if (skylight) {
             directionalLightsData.push(skylight)
             mutableData.indirectLightAttenuation = skylight?.attenuation
         }
 
-        deferred.use()
-        deferred.bindForUse({
+        this.deferredShader.use()
+        this.deferredShader.bindForUse({
             positionSampler: deferredSystem.frameBuffer.colors[0],
             normalSampler: deferredSystem.frameBuffer.colors[1],
             albedoSampler: deferredSystem.frameBuffer.colors[2],

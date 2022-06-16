@@ -54,14 +54,12 @@ export default class ScriptSystem extends System {
         } = data
         const {
             canExecutePhysicsAnimation,
-            lockCamera,
             elapsed,
             camera
         } = options
 
         if (canExecutePhysicsAnimation) {
             if (!this.eventSet) {
-                lockCamera(true)
                 this.eventSet = true
                 document.addEventListener("mouseup", handler)
                 document.addEventListener("keydown", handler)
@@ -91,7 +89,6 @@ export default class ScriptSystem extends System {
             if (scripts[this.projectID])
                 this.executeLoop(scripts[this.projectID].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
         } else if (this.eventSet) {
-            lockCamera(false)
             this.eventSet = false
             this.renderTarget.style.display = "none"
             this.renderTarget.innerText = ""

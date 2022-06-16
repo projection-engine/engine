@@ -10,8 +10,6 @@ export default {
     MATERIAL: "MaterialComponent",
     MESH: "MeshComponent",
     PHYSICS: "PhysicsBodyComponent",
-    SKYBOX: "SkyboxComponent",
-    TERRAIN: "TerrainComponent",
     SKYLIGHT: "SkylightComponent",
     SCRIPT: "ScriptComponent",
     CAMERA: "CameraComponent",

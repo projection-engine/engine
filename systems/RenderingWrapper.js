@@ -1,6 +1,5 @@
 import System from "../basic/System"
 import DeferredSystem from "./DeferredSystem"
-import SkyboxSystem from "./SkyboxSystem"
 import GlobalIlluminationSystem from "./gi/GlobalIlluminationSystem"
 import SYSTEMS from "../templates/SYSTEMS"
 import FramebufferInstance from "../instances/FramebufferInstance"
@@ -24,7 +23,6 @@ export default class RenderingWrapper extends System {
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
         this.forwardSystem = new ForwardSystem(gpu)
         this.GISystem = new GlobalIlluminationSystem(gpu)
-        this.skyboxSystem = new SkyboxSystem(gpu)
         this.lineSystem = new LineSystem(gpu)
         this.deferredSystem = new DeferredSystem(gpu)
 
@@ -43,8 +41,6 @@ export default class RenderingWrapper extends System {
 
         this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
         this.frameBuffer.startMapping()
-
-        this.skyboxSystem.execute(data, options)
 
         let giFBO, giGridSize
         if (!noRSM && skylight) {

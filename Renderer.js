@@ -37,11 +37,11 @@ export default class Renderer {
                     key: "brdfSampler", data: this.brdf, type: DATA_TYPES.UNDEFINED
                 }], {
                     isForward: false,
-                    rsmAlbedo: await ImageProcessor.colorToImage("rgba(128, 128, 128, 1)"),
                     faceCulling: true,
                     cullBackFace: true
-                },
-                () => this._ready = true, v4(),
+                }, 
+                undefined,
+                v4(),
                 shaderCode.cubeMapShader)
 
                 this.params.fallbackMaterial = this.fallbackMaterial
