@@ -2,8 +2,6 @@ import COMPONENTS from "./templates/COMPONENTS"
 import ShaderInstance from "./instances/ShaderInstance"
 import * as shaderCodeSkybox from "./shaders/CUBE_MAP.glsl"
 import * as skyboxCode from "./shaders/SKYBOX.glsl"
-import CubeMapInstance from "./instances/CubeMapInstance"
-import {createTexture, lookAt} from "./utils/utils"
 import cloneClass from "./utils/cloneClass"
 import toObject from "./utils/toObject"
 import ScriptSystem from "./systems/ScriptSystem"
@@ -24,19 +22,19 @@ export default class RenderingPackager {
         params,
         scripts = [],
         onWrap,
-        gpu,
+
         brdf,
         fallbackMaterial,
-        cubeBuffer
+
     }) {
         const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
         const attributes = {...params}
         const data = {
             pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
             spotLights: filteredEntities.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
-            terrains: filteredEntities.filter(e => e.components[COMPONENTS.TERRAIN]),
+
             meshes: filteredEntities.filter(e => e.components[COMPONENTS.MESH]),
-            skybox: filteredEntities.filter(e => e.components[COMPONENTS.SKYBOX] && e.active)[0]?.components[COMPONENTS.SKYBOX],
+
             directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
             skylight: filteredEntities.filter(e => e.components[COMPONENTS.SKYLIGHT] && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
             cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP]),
@@ -50,7 +48,7 @@ export default class RenderingPackager {
             lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.PROBE])
         }
 
-        RenderingPackager.loadSkybox(data.skybox, gpu, cubeBuffer, this.skyShader)
+
 
         data.cubeMapsSources = toObject(data.cubeMaps)
         attributes.camera = params.camera ? params.camera : this.rootCamera
@@ -130,51 +128,4 @@ export default class RenderingPackager {
             lClip
         }
     }
-
-    static loadSkybox(skyboxElement, gpu, cubeBuffer, skyShader) {
-        gpu.bindVertexArray(null)
-        const noTexture = !(skyboxElement?.texture instanceof WebGLTexture)
-        if (skyboxElement && !skyboxElement.ready) {
-            if (!skyboxElement.cubeMap)
-                skyboxElement.cubeMap = new CubeMapInstance(gpu, skyboxElement.resolution, false)
-            if (noTexture || skyboxElement.blob) {
-                if (!noTexture)
-                    gpu.deleteTexture(skyboxElement.texture)
-                skyboxElement.texture = createTexture(
-                    gpu,
-                    skyboxElement.blob?.width,
-                    skyboxElement.blob?.height,
-                    gpu.RGB16F,
-                    0,
-                    gpu.RGB,
-                    gpu.FLOAT,
-                    skyboxElement.blob,
-                    gpu.LINEAR,
-                    gpu.LINEAR,
-                    gpu.CLAMP_TO_EDGE,
-                    gpu.CLAMP_TO_EDGE
-                )
-                skyboxElement.blob = null
-            }
-            if(skyboxElement.texture instanceof WebGLTexture) {
-                skyShader.use()
-                skyboxElement.cubeMap.resolution = skyboxElement.resolution
-                skyboxElement.cubeMap.draw((yaw, pitch, perspective) => {
-                    skyShader.use()
-                    skyShader.bindForUse({
-                        projectionMatrix: perspective,
-                        viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
-                        uSampler: skyboxElement.texture
-                    })
-                    gpu.drawArrays(gpu.TRIANGLES, 0, 36)
-                }, cubeBuffer)
-
-                skyboxElement.cubeMap.generateIrradiance(cubeBuffer)
-                skyboxElement.cubeMap.generatePrefiltered(skyboxElement.prefilteredMipmaps + 1, skyboxElement.resolution / skyboxElement.prefilteredMipmaps, cubeBuffer)
-
-                skyboxElement.ready = true
-            }
-        }
-    }
-
 }
