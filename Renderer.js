@@ -4,7 +4,6 @@ import RenderingWrapper from "./systems/RenderingWrapper"
 import {createTexture} from "./utils/utils"
 import MaterialInstance from "./instances/MaterialInstance"
 import * as shaderCode from "./shaders/mesh/FALLBACK.glsl"
-import * as skyboxShaderCode from "./shaders/SKYBOX.glsl"
 import {DATA_TYPES} from "./templates/DATA_TYPES"
 import ImageProcessor from "./utils/image/ImageProcessor"
 import {v4} from "uuid"
@@ -13,7 +12,6 @@ import FramebufferInstance from "./instances/FramebufferInstance"
 import RenderingPackager from "./RenderingPackager"
 import systemInstance from "./utils/systemInstance"
 import VBOInstance from "./instances/VBOInstance"
-import ShaderInstance from "./instances/ShaderInstance"
 import COMPONENTS from "./templates/COMPONENTS"
 
 export default class Renderer {
@@ -27,7 +25,6 @@ export default class Renderer {
     #ready = false
 
     constructor(gpu, resolution, systems, projectID) {
-        this.skyboxShader = new ShaderInstance(skyboxShaderCode.vertex, skyboxShaderCode.fragment, gpu)
         Promise.all([import("./templates/CUBE"), import("./templates/BRDF.json")])
             .then(async res => {
                 const [cube, BRDF] = res
@@ -143,7 +140,7 @@ export default class Renderer {
             fallbackMaterial: fallbackMaterial,
             cubeBuffer: this.cubeBuffer
         })
-        this.data = {...packageData.data, cubeBuffer: this.cubeBuffer, skyboxShader: this.skyboxShader}
+        this.data = {...packageData.data, cubeBuffer: this.cubeBuffer}
         this.params = packageData.attributes
         this.filteredEntities = packageData.filteredEntities
         this.then = performance.now()

@@ -1,7 +1,4 @@
 import COMPONENTS from "./templates/COMPONENTS"
-import ShaderInstance from "./instances/ShaderInstance"
-import * as shaderCodeSkybox from "./shaders/CUBE_MAP.glsl"
-import * as skyboxCode from "./shaders/SKYBOX.glsl"
 import cloneClass from "./utils/cloneClass"
 import toObject from "./utils/toObject"
 import ScriptSystem from "./systems/ScriptSystem"
@@ -10,11 +7,6 @@ import {mat4} from "gl-matrix"
 
 export default class RenderingPackager {
     rootCamera = new RootCameraInstance()
-
-    constructor(gpu) {
-        this.skyShader = new ShaderInstance(shaderCodeSkybox.vertex, skyboxCode.generationFragment, gpu)
-    }
-
     makePackage({
         entities,
         materials,
