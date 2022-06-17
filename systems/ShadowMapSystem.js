@@ -189,16 +189,14 @@ export default class ShadowMapSystem extends System {
                 this.shadowsFrameBuffer.stopMapping()
 
             }
-
-            if (sky) {
-                this.needsGIUpdate = true
-                this.reflectiveShadowMapShader.use()
-                this.rsmFramebuffer.startMapping()
-
-                // TODO - USE MESH MATERIAL SHADER
-                this.#loopMeshes(meshes, meshSources, meshSystem, materials, this.reflectiveShadowMapShader, skylight.lightView, skylight.lightProjection, skylight.fixedColor)
-                this.rsmFramebuffer.stopMapping()
-            }
+            //
+            // if (sky) {
+            //     this.needsGIUpdate = true
+            //     this.reflectiveShadowMapShader.use()
+            //     this.rsmFramebuffer.startMapping()
+            //     this.#loopMeshes(meshes, meshSources, meshSystem, materials, this.reflectiveShadowMapShader, skylight.lightView, skylight.lightProjection, skylight.fixedColor)
+            //     this.rsmFramebuffer.stopMapping()
+            // }
             if (lights3D.length > 0) {
                 this.shadowMapOmniShader.use()
                 this.gpu.viewport(0, 0, 512, 512)
