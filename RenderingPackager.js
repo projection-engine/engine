@@ -1,5 +1,4 @@
 import COMPONENTS from "./templates/COMPONENTS"
-import cloneClass from "./utils/cloneClass"
 import toObject from "./utils/toObject"
 import ScriptSystem from "./systems/ScriptSystem"
 import RootCameraInstance from "./instances/RootCameraInstance"
@@ -12,39 +11,41 @@ export default class RenderingPackager {
         materials,
         meshes,
         params,
-        scripts = [],
         onWrap,
 
         brdf,
         fallbackMaterial,
-
+        levelScript
     }) {
-        const filteredEntities = (params.canExecutePhysicsAnimation ? entities.map(e => cloneClass(e)) : entities).filter(e => e.active)
+        const active = entities.filter(e => e.active)
         const attributes = {...params}
         const data = {
-            pointLights: filteredEntities.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
-            spotLights: filteredEntities.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
-
-            meshes: filteredEntities.filter(e => e.components[COMPONENTS.MESH]),
-
-            directionalLights: filteredEntities.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
-            skylight: filteredEntities.filter(e => e.components[COMPONENTS.SKYLIGHT] && e.active)[0]?.components[COMPONENTS.SKYLIGHT],
-            cubeMaps: filteredEntities.filter(e => e.components[COMPONENTS.CUBE_MAP]),
-            cameras: filteredEntities.filter(e => e.components[COMPONENTS.CAMERA]),
-            lines: filteredEntities.filter(e => e.components[COMPONENTS.LINE]),
-            scriptedEntities: toObject(filteredEntities.filter(e => e.components[COMPONENTS.SCRIPT])),
+            pointLights: active.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
+            spotLights: active.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
+            meshes: active.filter(e => e.components[COMPONENTS.MESH]),
+            directionalLights: active.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
+            cubeMaps: active.filter(e => e.components[COMPONENTS.CUBE_MAP]),
+            cameras: active.filter(e => e.components[COMPONENTS.CAMERA]),
+            lines: active.filter(e => e.components[COMPONENTS.LINE]),
             materials: toObject(materials),
             meshSources: toObject(meshes),
-            scripts: toObject(RenderingPackager.parseScripts(scripts)),
             entitiesMap: toObject(entities),
-            lightProbes: filteredEntities.filter(e => e.components[COMPONENTS.PROBE])
+            lightProbes: active.filter(e => e.components[COMPONENTS.PROBE]),
+            levelScript: typeof levelScript === "string"? ScriptSystem.parseScript(levelScript) : undefined
         }
-
+        active.forEach(entity => {
+            console.log(entity)
+            entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
+                if(typeof s === "string")
+                    return ScriptSystem.parseScript(s)
+                return s
+            })
+        })
 
 
         data.cubeMapsSources = toObject(data.cubeMaps)
         attributes.camera = params.camera ? params.camera : this.rootCamera
-        attributes.entitiesLength = filteredEntities.length
+        attributes.entitiesLength = active.length
 
         attributes.onWrap = onWrap ? onWrap : () => null
         attributes.brdf = brdf
@@ -53,22 +54,10 @@ export default class RenderingPackager {
         return {
             data: {...data, ...this.getLightsUniforms(data.pointLights, data.directionalLights)},
             attributes,
-            filteredEntities
+            filteredEntities: active
         }
     }
 
-    static parseScripts(scripts) {
-        return scripts.map(s => {
-            try {
-                return {
-                    id: s.id,
-                    executor: ScriptSystem.parseScript(s.executors)
-                }
-            } catch (e) {
-                return undefined
-            }
-        }).filter(e => e !== undefined)
-    }
 
     static #getArray(size, onIndex) {
         for (let i = 0; i < size; i++) {

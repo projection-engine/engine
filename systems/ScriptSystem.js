@@ -47,11 +47,7 @@ export default class ScriptSystem extends System {
 
     execute(options, systems, data, entities, entitiesMap, updateAllLights) {
         super.execute()
-        const {
-            scriptedEntities,
-            scripts,
-            meshSources
-        } = data
+        const {meshSources, levelScript} = data
         const {
             canExecutePhysicsAnimation,
             elapsed,
@@ -69,25 +65,17 @@ export default class ScriptSystem extends System {
             }
 
             this.renderTarget.style.display = "block"
-            const keys = Object.keys(scriptedEntities)
-            const kL = keys.length
-            for (let i = 0; i < kL; i++) {
-                const embeddedScript = scripts[scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].registryID]
-                if (embeddedScript)
-                    this.executeLoop(embeddedScript.executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
-                else {
-                    const entityScripts = scriptedEntities[keys[i]].components[COMPONENTS.SCRIPT].scripts
-                    const sL = entityScripts.length
-                    for (let j = 0; j < sL; j++) {
-                        const currentS = scripts[entityScripts[j]]
-                        if (currentS)
-                            this.executeLoop(currentS.executor, elapsed, {[scriptedEntities[keys[i]].id]: scriptedEntities[keys[i]]}, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
-                    }
+            const eLength= entities.length
+            for (let i = 0; i < eLength; i++) {
+                const scripts =  entities[i].scripts
+                const sLength = scripts.length
+                for(let s = 0; s < sLength; s++){
+                    this.executeLoop(scripts[s], elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
                 }
             }
 
-            if (scripts[this.projectID])
-                this.executeLoop(scripts[this.projectID].executor, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
+            if (levelScript)
+                this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
         } else if (this.eventSet) {
             this.eventSet = false
             this.renderTarget.style.display = "none"

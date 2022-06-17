@@ -125,20 +125,19 @@ export default class Renderer {
     }
 
 
-    updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params, scripts = [], onWrap) {
+    updatePackage(fallbackMaterial = this.fallbackMaterial, entities, materials, meshes, params,  onWrap, levelScript) {
 
         const packageData = this.packager.makePackage({
             entities,
             materials,
             meshes,
             params,
-            scripts,
-
             onWrap,
             gpu: this.gpu,
             brdf: this.brdf,
             fallbackMaterial: fallbackMaterial,
-            cubeBuffer: this.cubeBuffer
+            cubeBuffer: this.cubeBuffer,
+            levelScript
         })
         this.data = {...packageData.data, cubeBuffer: this.cubeBuffer}
         this.params = packageData.attributes

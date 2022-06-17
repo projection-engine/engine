@@ -12,6 +12,11 @@ export default class Entity {
     linkedTo
     transformationChanged = false
 
+
+    scriptsMap = []
+    scripts = []
+
+
     constructor(id = uuidv4(), name = "Empty entity", active=true, linkedTo) {
         this.id = id
         this.name = name
