@@ -15,21 +15,17 @@ precision highp float;
 #define PI 3.14159265359
 #define SH_C0 0.282094791
 #define SH_C1 0.488602512
-
 in vec2 texCoord;
-
 uniform mat3 directionalLightsData[MAX_LIGHTS];
 uniform mat4 dirLightPOV[MAX_LIGHTS];
 uniform vec3 cameraVec;
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
-uniform mat4 settings;
-//[
-//    dirLightQuantity, shadowMapResolution, indirectLightAttenuation, pcfSamples
-//    gridSize, noGI, lightQuantity, 0
-//    noShadowProcessing, shadowMapsQuantity, hasAO, 0
-// 0 0 0 0
-//] 
+uniform mat3 settings;
 
+// dirLightQuantity,   shadowMapResolution, noShadowProcessing,
+// shadowMapsQuantity, lightQuantity,       hasAO
+// pcfSamples,         0,                   0
+ 
 uniform sampler2D aoSampler;
 uniform samplerCube shadowCube0;
 uniform samplerCube shadowCube1;
@@ -38,13 +34,10 @@ uniform sampler2D normalSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D behaviourSampler;
 uniform sampler2D ambientSampler;
-uniform sampler2D redIndirectSampler;
-uniform sampler2D greenIndirectSampler;
-uniform sampler2D blueIndirectSampler;
+uniform sampler2D depthSampler;
 uniform sampler2D shadowMapTexture;
+uniform sampler2D screenSpaceReflections;
 out vec4 finalColor;
-
-
 
 @import(distributionGGX)
 
@@ -57,24 +50,19 @@ out vec4 finalColor;
 @import(fresnelSchlickRoughness)
 
 @import(computeDirectionalLight)
-
-@import(GI)
-
+ 
 @import(calculateShadows)
 
 @import(computePointLight)
 
 void main() {
-    float pcfSamples = settings[0][3]; 
-    bool hasAO = settings[2][2] == 1.;
-    float shadowMapsQuantity = settings[2][1];
+    float pcfSamples = settings[2][0]; 
+    bool hasAO = settings[1][2] == 1.;
+    float shadowMapsQuantity = settings[1][0];
     int dirLightQuantity = int(settings[0][0]);
-    float shadowMapResolution = settings[0][1];
-    float indirectLightAttenuation = settings[0][2];
-    int gridSize = int(settings[1][0]);
-    bool noGI = settings[1][1] == 1.;
-    bool noShadowProcessing = settings[2][0] == 1.; 
-    int lightQuantity = int(settings[1][2]);
+    float shadowMapResolution = settings[0][1]; 
+    bool noShadowProcessing = settings[0][2] == 1.; 
+    int lightQuantity = int(settings[1][1]);
 
     ivec2 fragCoord = ivec2(gl_FragCoord.xy);
     vec3 fragPosition = texture(positionSampler, texCoord).rgb;
@@ -102,11 +90,7 @@ void main() {
         
         F0 = mix(F0, albedo, metallic);
         
-        if(noGI == false){
-            vec3 lpvIntensity = computeGIIntensity(fragPosition, N, gridSize);
-            vec3 lpvRadiance = vec3(max(0.0, lpvIntensity.r), max(0.0, lpvIntensity.g), max(0.0, lpvIntensity.b)) / PI;
-            GI = (lpvRadiance * albedo) * indirectLightAttenuation;
-        }
+  
     
         float shadows = dirLightQuantity > 0 || lightQuantity > 0?  0. : 1.0;
         float quantityToDivide = float(dirLightQuantity) + float(lightQuantity);
@@ -147,14 +131,11 @@ void main() {
         }
       
         Lo = Lo* shadows; 
-        color = (ambient  + Lo +  GI) * ao;
+        color = (ambient  + Lo +  GI) * ao + texture(screenSpaceReflections, texCoord).rgb;
     }
     else
         color = albedo ;
- 
-//    if(hasAO == true)
-//        finalColor = vec4(vec3(texture(aoSampler, texCoord).r), 1.0);
-//    else
-        finalColor = vec4(color, 1.0);
+
+	finalColor = vec4(color, 1.0);
 }
 `

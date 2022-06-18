@@ -149,6 +149,7 @@ export default class Renderer {
             this.params.camera.aspectRatio = bBox.width / bBox.height
             this.params.camera.updateProjection()
         }
+        this.params.lastFrame = this.wrapper.frameBuffer.colors[0]
     }
 
     static drawMaterial(mesh, material, gpu) {
@@ -182,19 +183,16 @@ export default class Renderer {
 
     }
 
-    static getEnvironment(entity, skybox) {
-        const fallback = skybox?.cubeMap ? skybox.cubeMap : {}
+    static getEnvironment(entity) {
         const comp = entity.components[COMPONENTS.MATERIAL]
-        const irradiance0 = comp.irradiance[0]?.ref
         const cube = comp.cubeMap
         return {
-            irradianceMultiplier: comp.irradianceMultiplier ? comp.irradianceMultiplier :Renderer.VECTOR3,
-            irradiance0: irradiance0 ? irradiance0 : fallback.irradianceTexture,//fallback.irradianceTexture,
+            irradianceMultiplier: comp.irradianceMultiplier,
+            irradiance0: comp.irradiance[0]?.ref,
             irradiance1: comp.irradiance[1]?.ref,
             irradiance2: comp.irradiance[2]?.ref,
-
-            prefilteredMap: cube ? cube.prefiltered : fallback.prefiltered,
-            ambientLODSamples: cube ? cube.prefilteredLod : skybox?.prefilteredMipmaps
+            prefilteredMap: cube?.prefiltered,
+            ambientLODSamples: cube?.prefilteredLod
         }
     }
 }

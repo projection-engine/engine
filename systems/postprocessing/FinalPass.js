@@ -9,16 +9,16 @@ export default class FinalPass extends System {
     lookUpIndex = 0
 
     constructor(gpu) {
-        super([]);
+        super([])
         this.gpu = gpu
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
         for (let i = 1e6; i > 0; i--) {
-            this.lookUpRandom.push(Math.random());
+            this.lookUpRandom.push(Math.random())
         }
     }
 
     lookup() {
-        return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex = 0] : this.lookUpRandom[this.lookUpIndex];
+        return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex = 0] : this.lookUpRandom[this.lookUpIndex]
     }
 
     execute(options, [worker, output]) {
@@ -32,7 +32,6 @@ export default class FinalPass extends System {
         const {filmGrain, filmGrainStrength, gamma, exposure} = options.camera
 
         this.shader.use()
-        output.startMapping()
         this.shader.bindForUse({
             uSampler: worker.colors[0],
             enabled: [fxaa ? 1 : 0, filmGrain ? 1 : 0],
@@ -45,6 +44,6 @@ export default class FinalPass extends System {
             FXAAReduceMul: 1 / 8
         })
         output.draw()
-        output.stopMapping()
+
     }
 }

@@ -39,7 +39,6 @@ void main(){
     texCoord = uvTexture;
     
     normalVec = N; 
-
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 }
@@ -73,7 +72,6 @@ void main(){
     float roughness = .5;
     float metallic = .5;
     vec3 N = normalVec; 
-    
     
     vec3 V = normalize(cameraVec - fragPosition);
     float NdotV    = max(dot(N, V), 0.000001);

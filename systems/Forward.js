@@ -3,7 +3,7 @@ import COMPONENTS from "../templates/COMPONENTS"
 import SYSTEMS from "../templates/SYSTEMS"
 import Renderer from "../Renderer"
 
-export default class ForwardSystem extends System {
+export default class Forward extends System {
     lastMaterial
 
     constructor(gpu) {
@@ -17,7 +17,6 @@ export default class ForwardSystem extends System {
             this.aoTexture = systems[SYSTEMS.AO].texture
         const {
             meshes,
-            skybox,
             materials,
             meshSources,
             pointLightsQuantity,
@@ -51,8 +50,8 @@ export default class ForwardSystem extends System {
                 if (!mat || !mat.ready) {
                     mat = fallbackMaterial
                 }
-                const ambient = Renderer.getEnvironment(current, skybox)
-                ForwardSystem.drawMesh({
+                const ambient = Renderer.getEnvironment(current)
+                Forward.drawMesh({
                     mesh,
                     camPosition: camera.position,
                     viewMatrix: camera.viewMatrix,

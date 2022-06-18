@@ -2,7 +2,8 @@ import System from "../basic/System"
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapSystem"
 import COMPONENTS from "../templates/COMPONENTS"
-import ForwardSystem from "./ForwardSystem"
+import Forward from "./Forward"
+import Renderer from "../Renderer"
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
@@ -133,8 +134,10 @@ export default class CubeMapSystem extends System {
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
-
-                ForwardSystem.drawMesh({
+                const ambient = Renderer.getEnvironment(current)
+                console.log(ambient)
+                Forward.drawMesh({
+                    ambient,
                     mesh,
                     camPosition: cubeMapPosition,
                     viewMatrix: view,

@@ -98,15 +98,12 @@ export default class ShaderInstance {
 
     _compileShader(shaderCode, shaderType, pushMessage) {
         const bundledCode = applyMethods(shaderCode)
-
         const shader = this.gpu.createShader(shaderType)
-
         this.gpu.shaderSource(shader, bundledCode)
         this.gpu.compileShader(shader)
         let compiled = this.gpu.getShaderParameter(shader, this.gpu.COMPILE_STATUS)
-
-
         if (!compiled) {
+            console.error(this.gpu.getShaderInfoLog(shader))
             pushMessage(this.gpu.getShaderInfoLog(shader))
             this.available = false
         } else {
@@ -115,7 +112,6 @@ export default class ShaderInstance {
 
             this.available = true
         }
-
         return bundledCode
     }
 

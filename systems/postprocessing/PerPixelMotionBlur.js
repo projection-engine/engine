@@ -7,7 +7,7 @@ import SYSTEMS from "../../templates/SYSTEMS"
 
 export default class PerPixelMotionBlur extends System {
     constructor(gpu, postProcessingResolution = {w: window.screen.width, h: window.screen.height}) {
-        super([]);
+        super([])
         this.gpu = gpu
 
         this.velocityFramebuffer = new FramebufferInstance(gpu, postProcessingResolution.w, postProcessingResolution.h)

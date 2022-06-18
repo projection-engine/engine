@@ -9,6 +9,7 @@ export default class RootCameraInstance {
     aspectRatio = 1
     viewMatrix = mat4.create()
     projectionMatrix = mat4.create()
+    invViewMatrix= mat4.create()
     centerOn = [0, 0, 0]
 
 
@@ -32,7 +33,6 @@ export default class RootCameraInstance {
         this.updateViewMatrix()
     }
 
-
     updateProjection() {
         if (this.ortho)
             mat4.ortho(this.projectionMatrix, -this.size, this.size, -this.radius / this.aspectRatio, this.size / this.aspectRatio, this.zNear, this.zFar)
@@ -48,6 +48,7 @@ export default class RootCameraInstance {
 
     updateViewMatrix() {
         mat4.fromRotationTranslation(this.viewMatrix, this.rotation, this.position)
+        this.invViewMatrix = mat4.clone(this.viewMatrix)
         mat4.invert(this.viewMatrix, this.viewMatrix)
     }
 

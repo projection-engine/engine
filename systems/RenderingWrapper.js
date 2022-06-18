@@ -1,9 +1,7 @@
 import System from "../basic/System"
-import DeferredSystem from "./DeferredSystem"
-import GlobalIlluminationSystem from "./gi/GlobalIlluminationSystem"
 import SYSTEMS from "../templates/SYSTEMS"
 import FramebufferInstance from "../instances/FramebufferInstance"
-import ForwardSystem from "./ForwardSystem"
+import Forward from "./Forward"
 import {copyTexture} from "../utils/utils"
 import PostProcessingWrapper from "./postprocessing/PostProcessingWrapper"
 import ShaderInstance from "../instances/ShaderInstance"
@@ -21,36 +19,18 @@ export default class RenderingWrapper extends System {
             .depthTest()
 
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
-        this.forwardSystem = new ForwardSystem(gpu)
-        this.GISystem = new GlobalIlluminationSystem(gpu)
+        this.forwardSystem = new Forward(gpu)
         this.lineSystem = new LineSystem(gpu)
-        this.deferredSystem = new DeferredSystem(gpu)
-
-
         this.postProcessingWrapper = new PostProcessingWrapper(gpu, resolution)
     }
 
     execute(options, systems, data, entities, entitiesMap, onWrap, {a, b}) {
         super.execute()
-        const {
-            skylight,
-        } = data
-        const {
-            noRSM
-        } = options
 
-        this.GISystem.execute(systems[SYSTEMS.SHADOWS], skylight, noRSM)
         this.frameBuffer.startMapping()
-
-        let giFBO, giGridSize
-        if (!noRSM && skylight) {
-            giGridSize = this.GISystem.size
-            giFBO = this.GISystem.accumulatedBuffer
-        }
-
         if (onWrap)
             onWrap.execute(options, systems, data, entities, entitiesMap, false)
-        this.deferredSystem.execute(options, systems, data, giGridSize, giFBO)
+        systems[SYSTEMS.MESH].drawBuffer(options, systems, data)
         this.frameBuffer.stopMapping()
 
         a.startMapping()
@@ -58,7 +38,7 @@ export default class RenderingWrapper extends System {
         this.shader.bindForUse({
             uSampler: this.frameBuffer.colors[0]
         })
-        b.draw()
+        a.draw()
 
         copyTexture(a, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
 
