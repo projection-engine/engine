@@ -29,7 +29,6 @@ export default class PickSystem extends System {
     }
 
     readBlock(depthFBO, start, end){
-        const s = performance.now()
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
 

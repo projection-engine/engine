@@ -130,8 +130,8 @@ void main() {
                 shadows += 1./quantityToDivide;            
         }
       
-        Lo = Lo* shadows; 
-        color = (ambient  + Lo +  GI) * ao + texture(screenSpaceReflections, texCoord).rgb;
+        Lo = (Lo  + texture(screenSpaceReflections, texCoord).rgb)* shadows; 
+        color = (ambient  + Lo +  GI) * ao;
     }
     else
         color = albedo ;

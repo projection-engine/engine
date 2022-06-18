@@ -1,10 +1,6 @@
 import System from "../../basic/System"
-import ShaderInstance from "../../instances/ShaderInstance"
-
-import * as shaderCode from "../../shaders/FXAA.glsl"
 import CompositePass from "./CompositePass"
 import FinalPass from "./FinalPass"
-import SYSTEMS from "../../templates/SYSTEMS"
 
 
 export default class PostProcessingWrapper extends System {

@@ -9,7 +9,7 @@ import ImageProcessor from "./utils/image/ImageProcessor"
 import {v4} from "uuid"
 import SYSTEMS from "./templates/SYSTEMS"
 import FramebufferInstance from "./instances/FramebufferInstance"
-import RenderingPackager from "./RenderingPackager"
+import Packager from "./Packager"
 import systemInstance from "./utils/systemInstance"
 import VBOInstance from "./instances/VBOInstance"
 import COMPONENTS from "./templates/COMPONENTS"
@@ -51,7 +51,7 @@ export default class Renderer {
                 }
             }).catch(err => console.error(err))
 
-        this.packager = new RenderingPackager(gpu)
+        this.packager = new Packager(gpu)
         this.canvas = gpu.canvas
         this.gpu = gpu
         this.wrapper = new RenderingWrapper(gpu, resolution)

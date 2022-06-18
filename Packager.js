@@ -4,7 +4,7 @@ import ScriptSystem from "./systems/ScriptSystem"
 import RootCameraInstance from "./instances/RootCameraInstance"
 import {mat4} from "gl-matrix"
 
-export default class RenderingPackager {
+export default class Packager {
     rootCamera = new RootCameraInstance()
     makePackage({
         entities,
@@ -34,7 +34,6 @@ export default class RenderingPackager {
             levelScript: typeof levelScript === "string"? ScriptSystem.parseScript(levelScript) : undefined
         }
         active.forEach(entity => {
-            console.log(entity)
             entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
                 if(typeof s === "string")
                     return ScriptSystem.parseScript(s)
@@ -74,7 +73,7 @@ export default class RenderingPackager {
             lClip = [],
             pointLightData = []
 
-        RenderingPackager.#getArray(maxTextures, i => {
+        Packager.#getArray(maxTextures, i => {
             const current = directionalLights[i]
             if (current && current.components[COMPONENTS.DIRECTIONAL_LIGHT]) {
                 const l = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
@@ -88,7 +87,7 @@ export default class RenderingPackager {
             }
         })
 
-        RenderingPackager.#getArray(pointLightsQuantity, i => {
+        Packager.#getArray(pointLightsQuantity, i => {
             const component = pointLights[i] ? pointLights[i].components : undefined
             if (component) {
                 lClip[i] = [component[COMPONENTS.POINT_LIGHT].zNear, component[COMPONENTS.POINT_LIGHT]?.zFar]

@@ -92,14 +92,15 @@ export default class Deferred extends System {
         const {
             ao,
             camera,
-            pcfSamples
+            pcfSamples,
+            ssr
         } = options
         const shadowMapSystem = systems[SYSTEMS.SHADOWS]
 
 
         this.deferredShader.use()
         this.deferredShader.bindForUse({
-            screenSpaceReflections:  systems[SYSTEMS.SSGI].ssColor,
+            screenSpaceReflections:ssr ?   systems[SYSTEMS.SSGI].ssColor : undefined,
             positionSampler: this.frameBuffer.colors[0],
             normalSampler: this.frameBuffer.colors[1],
             albedoSampler: this.frameBuffer.colors[2],

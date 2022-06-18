@@ -20,22 +20,25 @@ export default class SSR extends System {
         super.execute()
         const {
             camera,
-            lastFrame
+            lastFrame,
+            ssr
         } = options
-        this.gpu.bindVertexArray(null)
-        const deferredSystem = systems[SYSTEMS.MESH]
-        this.frameBuffer.startMapping()
-        this.shader.use()
-        this.shader.bindForUse({
-            previousFrame: lastFrame, // ALBEDO
-            gPosition: deferredSystem.frameBuffer.colors[0],
-            gNormal: deferredSystem.frameBuffer.colors[1],
-            gBehaviour: deferredSystem.frameBuffer.colors[3],
-            projection:camera.projectionMatrix,
-            viewMatrix: camera.viewMatrix,
-            invViewMatrix: camera.invViewMatrix
-        })
-        this.frameBuffer.draw()
-        this.frameBuffer.stopMapping()
+        if(ssr) {
+            this.gpu.bindVertexArray(null)
+            const deferredSystem = systems[SYSTEMS.MESH]
+            this.frameBuffer.startMapping()
+            this.shader.use()
+            this.shader.bindForUse({
+                previousFrame: lastFrame, // ALBEDO
+                gPosition: deferredSystem.frameBuffer.colors[0],
+                gNormal: deferredSystem.frameBuffer.colors[1],
+                gBehaviour: deferredSystem.frameBuffer.colors[3],
+                projection: camera.projectionMatrix,
+                viewMatrix: camera.viewMatrix,
+                invViewMatrix: camera.invViewMatrix
+            })
+            this.frameBuffer.draw()
+            this.frameBuffer.stopMapping()
+        }
     }
 }
