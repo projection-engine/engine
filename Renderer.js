@@ -25,6 +25,7 @@ export default class Renderer {
     #ready = false
 
     constructor(gpu, resolution, systems, projectID) {
+
         Promise.all([import("./templates/CUBE"), import("./templates/BRDF.json")])
             .then(async res => {
                 const [cube, BRDF] = res
