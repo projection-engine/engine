@@ -37,29 +37,29 @@ void main(void){
 `
 
 
-export const debugVertex = `#version 300 es
-
-in vec3 position;
-out vec2 texCoord;
-
-void main() {
-    texCoord = (position.xy) * 0.5 + 0.5;
-    gl_Position = vec4(position, 1.0);
-}
-
-`
-export const debugFragment = `#version 300 es
-precision highp float;
-
-in vec2 texCoord;
-
-uniform sampler2D uSampler;
-
-out vec4 fragColor;
-
-void main(void){
-    
-    fragColor = vec4(texture(uSampler, texCoord).rgb, 1.);
-}
-`
+// export const debugVertex = `#version 300 es
+//
+// in vec3 position;
+// out vec2 texCoord;
+//
+// void main() {
+//     texCoord = (position.xy) * 0.5 + 0.5;
+//     gl_Position = vec4(position, 1.0);
+// }
+//
+// `
+// export const debugFragment = `#version 300 es
+// precision highp float;
+//
+// in vec2 texCoord;
+//
+// uniform sampler2D uSampler;
+//
+// out vec4 fragColor;
+//
+// void main(void){
+//
+//     fragColor = vec4(texture(uSampler, texCoord).rgb, 1.);
+// }
+// `
 

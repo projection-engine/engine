@@ -10,18 +10,17 @@ import LineSystem from "./LineSystem"
 
 
 export default class RenderingWrapper extends System {
-    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
+    constructor(resolution={w: window.screen.width, h: window.screen.height}) {
         super()
-        this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        this.frameBuffer = new FramebufferInstance(resolution.w, resolution.h)
         this.frameBuffer
             .texture()
             .depthTest()
 
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment, gpu)
-        this.forwardSystem = new Forward(gpu)
-        this.lineSystem = new LineSystem(gpu)
-        this.postProcessingWrapper = new PostProcessingWrapper(gpu, resolution)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment)
+        this.forwardSystem = new Forward()
+        this.lineSystem = new LineSystem()
+        this.postProcessingWrapper = new PostProcessingWrapper( resolution)
     }
 
     execute(options, systems, data, entities, entitiesMap, onWrap, {a, b}) {
@@ -40,7 +39,7 @@ export default class RenderingWrapper extends System {
         })
         a.draw()
 
-        copyTexture(a, systems[SYSTEMS.MESH].frameBuffer, this.gpu, this.gpu.DEPTH_BUFFER_BIT)
+        copyTexture(a, systems[SYSTEMS.MESH].frameBuffer,  window.gpu.DEPTH_BUFFER_BIT)
 
         this.forwardSystem.execute(options, systems, data, this.frameBuffer.colors[0])
         this.lineSystem.execute(options, data)

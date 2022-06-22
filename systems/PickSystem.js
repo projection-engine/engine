@@ -8,21 +8,18 @@ import COMPONENTS from "../templates/COMPONENTS"
 
 
 export default class PickSystem extends System {
-    constructor(gpu) {
+    constructor() {
         super()
-        this.gpu = gpu
-
-        this.frameBuffer = new FramebufferInstance(gpu, 1, 1)
+        this.frameBuffer = new FramebufferInstance(1, 1)
         this.frameBuffer
-            .texture({attachment: 0, linear: true, repeat: true, storage: false, precision: this.gpu.RGBA, format: this.gpu.RGBA, type: this.gpu.UNSIGNED_BYTE})
-            .depthTest(this.gpu.DEPTH_COMPONENT16)
+            .texture({attachment: 0, linear: true, repeat: true, storage: false, precision: window.gpu.RGBA, format: window.gpu.RGBA, type: window.gpu.UNSIGNED_BYTE})
+            .depthTest(window.gpu.DEPTH_COMPONENT16)
 
 
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.shaderSameSize = new ShaderInstance(shaderCode.sameSizeVertex, shaderCode.fragment, gpu)
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
+        this.shaderSameSize = new ShaderInstance(shaderCode.sameSizeVertex, shaderCode.fragment)
 
         this.mesh = new MeshInstance({
-            gpu,
             vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
             indices: [0, 3, 9, 0, 9, 6, 8, 10, 21, 8, 21, 19, 20, 23, 17, 20, 17, 14, 13, 15, 4, 13, 4, 2, 7, 18, 12, 7, 12, 1, 22, 11, 5, 22, 5, 16]
         })
@@ -32,35 +29,35 @@ export default class PickSystem extends System {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
 
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO)
+        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(w * h * 4)
 
-        this.gpu.readPixels(
+        window.gpu.readPixels(
             end.x > start.x ? start.x : end.x,
             end.y > start.y ? start.y : end.y,
             w,
             h,
-            this.gpu.RGBA,
-            this.gpu.FLOAT,
+            window.gpu.RGBA,
+            window.gpu.FLOAT,
             dd
         )
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
+        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, null)
 
         return dd
     }
     depthPick(depthFBO, coords) {
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, depthFBO.FBO)
+        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(4)
-        this.gpu.readPixels(
+        window.gpu.readPixels(
             coords.x,
             coords.y,
             1,
             1,
-            this.gpu.RGBA,
-            this.gpu.FLOAT,
+            window.gpu.RGBA,
+            window.gpu.FLOAT,
             dd
         )
-        this.gpu.bindFramebuffer(this.gpu.FRAMEBUFFER, null)
+        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, null)
         return dd
     }
     pickElement(drawCallback, pickCoords, camera, sameSize, isOrtho) {
@@ -71,13 +68,13 @@ export default class PickSystem extends System {
         const pickerProjection = this._getProjection(pickCoords, camera, isOrtho)
         drawCallback(sameSize ? this.shaderSameSize : this.shader, pickerProjection)
         let data = new Uint8Array(4)
-        this.gpu.readPixels(
+        window.gpu.readPixels(
             0,
             0,
             1,
             1,
-            this.gpu.RGBA,
-            this.gpu.UNSIGNED_BYTE,
+            window.gpu.RGBA,
+            window.gpu.UNSIGNED_BYTE,
             data
         )
 
@@ -87,8 +84,6 @@ export default class PickSystem extends System {
 
     _getProjection({x, y}, camera, isOrtho) {
         let m = mat4.create()
-
-
         if (isOrtho)
             m = camera.projectionMatrix
         else {
@@ -101,13 +96,13 @@ export default class PickSystem extends System {
             const width = Math.abs(right - left)
             const height = Math.abs(top - bottom)
 
-            const pixelX = x * this.gpu.canvas.width / this.gpu.canvas.clientWidth
-            const pixelY = this.gpu.canvas.height - y * this.gpu.canvas.height / this.gpu.canvas.clientHeight - 1
+            const pixelX = x * window.gpu.canvas.width / window.gpu.canvas.clientWidth
+            const pixelY = window.gpu.canvas.height - y * window.gpu.canvas.height / window.gpu.canvas.clientHeight - 1
 
-            const subLeft = left + pixelX * width / this.gpu.canvas.width
-            const subBottom = bottom + pixelY * height / this.gpu.canvas.height
-            const subWidth = 1 / this.gpu.canvas.width
-            const subHeight = 1 / this.gpu.canvas.height
+            const subLeft = left + pixelX * width / window.gpu.canvas.width
+            const subBottom = bottom + pixelY * height / window.gpu.canvas.height
+            const subWidth = 1 / window.gpu.canvas.width
+            const subHeight = 1 / window.gpu.canvas.height
 
             mat4.frustum(
                 m,
@@ -118,19 +113,17 @@ export default class PickSystem extends System {
                 camera.zNear,
                 camera.zFar)
         }
-
-
         return m
-
     }
 
-    static drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix, shader, gpu) {
+    static drawMesh(mesh, instance, viewMatrix, projectionMatrix, transformMatrix, shader) {
         shader.bindForUse({
             uID: [...instance.components[COMPONENTS.PICK].pickID, 1],
             projectionMatrix,
             transformMatrix,
             viewMatrix
         })
+        const gpu = window.gpu
 
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)

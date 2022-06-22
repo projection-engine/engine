@@ -14,13 +14,10 @@ export const STEPS_LIGHT_PROBE = {
 export default class LightProbeSystem extends System {
     step = STEPS_LIGHT_PROBE.GENERATION
     lastCallLength = -1
-    lightProbeConsumption = {}
 
-    constructor(gpu) {
+    constructor() {
         super()
-        this.gpu = gpu
-        this.baseCubeMap = new CubeMapInstance(gpu, 128, false)
-
+        this.baseCubeMap = new CubeMapInstance(128, false)
     }
 
     execute(options, systems, data) {
@@ -56,8 +53,7 @@ export default class LightProbeSystem extends System {
                             cubeMapPosition: currentProbe.translation,
                             skybox,
                             cubeBuffer,
-                            skyboxShader,
-                            gpu: this.gpu
+                            skyboxShader
                         })
 
                     },
@@ -66,7 +62,7 @@ export default class LightProbeSystem extends System {
                     1
                     )
                     if(!currentProbe.cubeMap)
-                        currentProbe.cubeMap = new CubeMapInstance(this.gpu, 32)
+                        currentProbe.cubeMap = new CubeMapInstance( 32)
                     currentProbe.cubeMap.generateIrradiance(cubeBuffer, this.baseCubeMap.texture)
                 }
             }

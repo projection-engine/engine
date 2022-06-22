@@ -8,22 +8,15 @@ import LineComponent from "../components/LineComponent"
 export default class LineSystem extends System {
     ready = false
 
-    constructor(gpu) {
+    constructor() {
         super()
-        this.gpu = gpu
-        // import("../templates/CUBE_MESH.json")
-        //     .then(res => {
-        //         this.cube = new MeshInstance({...res, gpu})
-        //         this.ready = true
-        //     })
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
         this.actor = new Entity(undefined, "Line")
         this.actor.components[COMPONENTS.LINE] = new LineComponent()
         this.actor.components[COMPONENTS.LINE].placement = {origin: [0,0,0], destination: [10, 10, 0]}
     }
 
-    execute(options, data) {
+    execute() {
         // super.execute()
         //
         // const lines = [this.actor]
@@ -39,10 +32,10 @@ export default class LineSystem extends System {
         //             projectionMatrix: camera.projectionMatrix,
         //             transformMatrix: lines[i].components[COMPONENTS.LINE].transformationMatrix
         //         })
-        //         this.gpu.drawElements(this.gpu.TRIANGLES, this.cube.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
+        //         window.gpu.drawElements(window.gpu.TRIANGLES, this.cube.verticesQuantity, window.gpu.UNSIGNED_INT, 0)
         //     }
         //     this.cube.finish()
-        //     this.gpu.bindVertexArray(null)
+        //     window.gpu.bindVertexArray(null)
         // }
     }
 }

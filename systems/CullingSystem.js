@@ -3,28 +3,27 @@ import System from "../basic/System"
 export default class CullingSystem extends System {
     _ready = false
 
-    constructor(gpu) {
-        super([]);
-        this.gpu = gpu
+    constructor() {
+        super()
     }
 
-    execute(options, systems, data) {
+    execute() {
         super.execute()
 
-         // TODO - REMOVE NOT VISIBLE - REMOVE FRUSTUM CULLED - REMOVE GPU OCCLUSION CULLED
+        // TODO - REMOVE NOT VISIBLE - REMOVE FRUSTUM CULLED - REMOVE GPU OCCLUSION CULLED
         // const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
         // filteredMeshes.forEach(m => {
         //     if(!m.query)
-        //         m.query = this.gpu.createQuery()
+        //         m.query = window.gpu.createQuery()
         //
-        //     if (m.queryInProgress && this.gpu.getQueryParameter(m.query, this.gpu.QUERY_RESULT_AVAILABLE)) {
-        //         m.occluded = !this.gpu.getQueryParameter(m.query, this.gpu.QUERY_RESULT);
+        //     if (m.queryInProgress && window.gpu.getQueryParameter(m.query, window.gpu.QUERY_RESULT_AVAILABLE)) {
+        //         m.occluded = !window.gpu.getQueryParameter(m.query, window.gpu.QUERY_RESULT);
         //         m.queryInProgress = false;
         //     }
         //     if (!m.queryInProgress) {
-        //         this.gpu.beginQuery(this.gpu.ANY_SAMPLES_PASSED_CONSERVATIVE, m.query);
-        //         this.gpu.drawArrays(this.gpu.TRIANGLES, 0, m.boundingBoxNumVertices);
-        //         this.gpu.endQuery(this.gpu.ANY_SAMPLES_PASSED_CONSERVATIVE);
+        //         window.gpu.beginQuery(window.gpu.ANY_SAMPLES_PASSED_CONSERVATIVE, m.query);
+        //         window.gpu.drawArrays(window.gpu.TRIANGLES, 0, m.boundingBoxNumVertices);
+        //         window.gpu.endQuery(window.gpu.ANY_SAMPLES_PASSED_CONSERVATIVE);
         //         m.queryInProgress = true;
         //     }
         // })

@@ -5,12 +5,11 @@ import ShaderInstance from "../instances/ShaderInstance"
 import * as ssGI from "../shaders/SSGI.glsl"
 
 export default class SSR extends System {
-    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
+    constructor(resolution={w: window.screen.width, h: window.screen.height}) {
         super()
-        this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        this.frameBuffer = new FramebufferInstance(resolution.w, resolution.h)
         this.frameBuffer.texture()
-        this.shader = new ShaderInstance(ssGI.vShader, ssGI.fragment, gpu)
+        this.shader = new ShaderInstance(ssGI.vShader, ssGI.fragment)
     }
 
     get ssColor(){
@@ -24,7 +23,7 @@ export default class SSR extends System {
             ssr
         } = options
         if(ssr) {
-            this.gpu.bindVertexArray(null)
+            window.gpu.bindVertexArray(null)
             const deferredSystem = systems[SYSTEMS.MESH]
             this.frameBuffer.startMapping()
             this.shader.use()

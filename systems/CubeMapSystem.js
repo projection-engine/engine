@@ -16,11 +16,9 @@ export default class CubeMapSystem extends System {
     step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
 
-    constructor(gpu) {
+    constructor() {
         super()
-        this.gpu = gpu
     }
-
 
     execute(options, systems, data) {
         super.execute()
@@ -49,7 +47,6 @@ export default class CubeMapSystem extends System {
                         data,
                         options,
                         cubeMapPosition: translation,
-                        gpu: this.gpu
                     })
                 },
                 undefined,
@@ -57,7 +54,7 @@ export default class CubeMapSystem extends System {
                 1
                 )
             }
-            this.gpu.bindVertexArray(null)
+            window.gpu.bindVertexArray(null)
             this.step = STEPS_CUBE_MAP.PRE_FILTERED
             break
         case STEPS_CUBE_MAP.PRE_FILTERED:
@@ -115,7 +112,6 @@ export default class CubeMapSystem extends System {
         cubeMapPosition,
         data,
         options,
-        gpu
     }) {
         const {
                 meshes, materials, meshSources, directionalLightsData,
@@ -135,7 +131,6 @@ export default class CubeMapSystem extends System {
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
                 const ambient = Renderer.getEnvironment(current)
-                console.log(ambient)
                 Forward.drawMesh({
                     ambient,
                     mesh,
@@ -153,12 +148,11 @@ export default class CubeMapSystem extends System {
                     pointLightsQuantity,
                     pointLightData,
                     elapsed,
-                    gpu: gpu,
                     useCubeMapShader: true,
                     onlyForward: true
                 })
             }
         }
-        gpu.bindVertexArray(null)
+        window.gpu.bindVertexArray(null)
     }
 }

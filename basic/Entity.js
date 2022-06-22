@@ -10,9 +10,6 @@ export default class Entity {
     active
     components = {}
     linkedTo
-    transformationChanged = false
-
-
     scriptsMap = []
     scripts = []
 

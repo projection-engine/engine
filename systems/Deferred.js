@@ -10,19 +10,18 @@ import * as shaderCode from "../shaders/mesh/DEFERRED.glsl"
 export default class Deferred extends System {
     lastMaterial
 
-    constructor(gpu, resolution = {w: window.screen.width, h: window.screen.height}) {
+    constructor( resolution = {w: window.screen.width, h: window.screen.height}) {
         super()
-        this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
         this.frameBuffer
-            .texture({attachment: 0, precision: this.gpu.RGBA32F, format: this.gpu.RGBA, type: this.gpu.FLOAT})
+            .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
             .texture({attachment: 1})
             .texture({attachment: 2})
             .texture({attachment: 3})
             .texture({attachment: 4})
             .depthTest()
 
-        this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
+        this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
     }
 
     execute(options, systems, data) {
@@ -64,18 +63,16 @@ export default class Deferred extends System {
                     normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
                     materialComponent: current.components[COMPONENTS.MATERIAL],
                     brdf,
-
                     elapsed,
                     ambient,
                     lastMaterial: this.lastMaterial,
-                    gpu: this.gpu,
                     onlyForward: false
                 })
             }
         }
 
-        this.gpu.cullFace(this.gpu.BACK)
-        this.gpu.bindVertexArray(null)
+        window.gpu.cullFace(window.gpu.BACK)
+        window.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
     }
 
@@ -96,8 +93,6 @@ export default class Deferred extends System {
             ssr
         } = options
         const shadowMapSystem = systems[SYSTEMS.SHADOWS]
-
-
         this.deferredShader.use()
         this.deferredShader.bindForUse({
             screenSpaceReflections:ssr ?   systems[SYSTEMS.SSGI].ssColor : undefined,

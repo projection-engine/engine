@@ -5,38 +5,34 @@ import FramebufferInstance from "../instances/FramebufferInstance"
 import SYSTEMS from "../templates/SYSTEMS"
 
 export default class AOSystem extends System {
-    constructor(gpu, resolution = {w: window.screen.width, h: window.screen.height}) {
+    constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
         super()
-        this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        const gpu = window.gpu
+        this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
         this.frameBuffer
             .texture({
-                precision: this.gpu.R32F,
-                format: this.gpu.RED,
-                type: this.gpu.FLOAT,
+                precision: gpu.R32F,
+                format: gpu.RED,
+                type: gpu.FLOAT,
                 linear: false,
                 repeat: false
             })
 
-        this.blurredFrameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        this.blurredFrameBuffer = new FramebufferInstance( resolution.w, resolution.h)
         this.blurredFrameBuffer
             .texture({
-                precision: this.gpu.R32F,
-                format: this.gpu.RED,
-                type: this.gpu.FLOAT,
+                precision: gpu.R32F,
+                format: gpu.RED,
+                type: gpu.FLOAT,
                 linear: false,
                 repeat: false
             })
 
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
-        this.blurShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragmentBlur, gpu)
-
-
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
+        this.blurShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragmentBlur)
         this.#generateSamplePoints()
-
         this.noiseTexture = gpu.createTexture()
         gpu.bindTexture(gpu.TEXTURE_2D, this.noiseTexture)
-
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)

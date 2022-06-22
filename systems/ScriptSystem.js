@@ -12,12 +12,9 @@ export default class ScriptSystem extends System {
     eventSet = false
     mousePosition = {x: 0, y: 0}
 
-    constructor(gpu, canvasID, projectID) {
+    constructor() {
         super()
-        this.gpu = gpu
-        this.projectID = projectID
-        const canvas = document.getElementById(canvasID)
-        const targetID = canvasID + "-scripting"
+        const targetID = window.gpu.canvas.id + "-scripting"
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
         else {
@@ -30,7 +27,7 @@ export default class ScriptSystem extends System {
                 maxWidth: "15vw", display: "none",
                 maxHeight: "50vh", overflow: "hidden"
             })
-            canvas.parentNode.appendChild(this.renderTarget)
+            window.gpu.canvas.parentNode.appendChild(this.renderTarget)
         }
 
         document.addKey = (key) => {
@@ -106,7 +103,7 @@ export default class ScriptSystem extends System {
                     if (entity.components[COMPONENTS.MESH]) {
                         const index = pickSystem.pickElement((shader, proj) => {
                             const mesh = meshSources[entity.components[COMPONENTS.MESH]?.meshID]
-                            PickSystem.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader, this.gpu)
+                            PickSystem.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader)
                         }, coords, camera)
 
                         return entitiesArr.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)

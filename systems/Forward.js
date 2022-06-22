@@ -6,9 +6,8 @@ import Renderer from "../Renderer"
 export default class Forward extends System {
     lastMaterial
 
-    constructor(gpu) {
+    constructor() {
         super()
-        this.gpu = gpu
     }
 
     execute(options, systems, data, sceneColor) {
@@ -72,7 +71,6 @@ export default class Forward extends System {
                     ambient,
                     sceneColor,
                     lastMaterial: this.lastMaterial,
-                    gpu: this.gpu,
                     ao: this.aoTexture,
                     shadingModel,
                     onlyForward: true
@@ -81,7 +79,7 @@ export default class Forward extends System {
                 this.lastMaterial = mat?.id
             }
         }
-        this.gpu.bindVertexArray(null)
+        window.gpu.bindVertexArray(null)
     }
 
     static drawMesh({
@@ -105,12 +103,9 @@ export default class Forward extends System {
         sceneColor,
         lastMaterial,
         ao,
-        gpu,
         shadingModel,
         onlyForward
     }) {
-
-
         if (mesh && material && (!onlyForward || (onlyForward && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)))) {
             mesh.use()
             material.use(lastMaterial !== material.id, {
@@ -136,7 +131,7 @@ export default class Forward extends System {
                 ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
             }, useCubeMapShader)
 
-            Renderer.drawMaterial(mesh, material, gpu)
+            Renderer.drawMaterial(mesh, material)
         }
     }
 }

@@ -3,14 +3,14 @@ import {mat4} from "gl-matrix"
 
 export default class SpotLightComponent extends Component{
     color = [255, 255, 255]
-    cutoff = 0
+    // cutoff = 0
     direction = [0, 0, 0]
 
     _transformationMatrix = Array.from(mat4.create())
     _position = [0, 0, 0]
 
     constructor(id) {
-        super(id, SpotLightComponent.constructor.name);
+        super(id, SpotLightComponent.constructor.name)
     }
 
 

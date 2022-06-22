@@ -1,35 +1,13 @@
 import System from "../basic/System"
-import {vec3, vec4} from "gl-matrix"
 
-const GRAVITY = .1
+// const GRAVITY = .1
 export default class PhysicsSystem extends System {
     constructor() {
-        super([]);
+        super()
     }
 
-    execute(options, systems, data) {
+    execute() {
         super.execute()
-        const {
-            pointLights,
-            spotLights,
-            terrains,
-            meshes,
-            skybox,
-            directionalLights,
-            materials,
-            meshSources,
-            cubeMaps
-        } = data
-
-        const {
-            canExecutePhysicsAnimation,
-            selectedElement,
-            setSelectedElement,
-            currentCoords,
-            clicked,
-            camera,
-            elapsed
-        } = options
 
         // TODO
         // if (canExecutePhysicsAnimation) {
@@ -68,36 +46,36 @@ export default class PhysicsSystem extends System {
         // }
     }
 }
-
-export function intersectBoundingSphere(currentRadius, targetRadius, currentPosition, targetPosition) {
-    let radiusDistance = currentRadius + targetRadius
-    if (targetPosition.length === 3 || currentPosition === 3) {
-        let centerDistance = [0, 0, 0]
-        vec3.subtract(centerDistance, targetPosition, currentPosition)
-        centerDistance = vec3.length(centerDistance)
-
-        return (centerDistance - radiusDistance) <= .1;
-    } else {
-        let centerDistance = [0, 0, 0, 1]
-        vec4.subtract(centerDistance, targetPosition, currentPosition)
-        centerDistance = vec4.length(centerDistance)
-
-        return (centerDistance - radiusDistance) <= .1;
-    }
-}
-
-function calculateDisplacement(u, t, a) {
-    return u * t + 0.5 * a * (t ** 2)
-}
-
-function divideArray(array, scalar) {
-    return array.map(v => {
-        return v / scalar
-    })
-}
-
-function sumArrays(array1, array2) {
-    return array1.map((v, i) => {
-        return v + array2[i];
-    })
-}
+//
+// export function intersectBoundingSphere(currentRadius, targetRadius, currentPosition, targetPosition) {
+//     let radiusDistance = currentRadius + targetRadius
+//     if (targetPosition.length === 3 || currentPosition === 3) {
+//         let centerDistance = [0, 0, 0]
+//         vec3.subtract(centerDistance, targetPosition, currentPosition)
+//         centerDistance = vec3.length(centerDistance)
+//
+//         return (centerDistance - radiusDistance) <= .1
+//     } else {
+//         let centerDistance = [0, 0, 0, 1]
+//         vec4.subtract(centerDistance, targetPosition, currentPosition)
+//         centerDistance = vec4.length(centerDistance)
+//
+//         return (centerDistance - radiusDistance) <= .1
+//     }
+// }
+//
+// function calculateDisplacement(u, t, a) {
+//     return u * t + 0.5 * a * (t ** 2)
+// }
+//
+// function divideArray(array, scalar) {
+//     return array.map(v => {
+//         return v / scalar
+//     })
+// }
+//
+// function sumArrays(array1, array2) {
+//     return array1.map((v, i) => {
+//         return v + array2[i]
+//     })
+// }

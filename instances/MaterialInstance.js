@@ -12,8 +12,7 @@ export default class MaterialInstance {
     rsmAlbedo
     hasCubeMap = false
 
-    constructor(gpu, vertexShader, shader, uniformData = [], settings = {}, onCompiled = () => null, id, cubeMapShaderCode) {
-        this.gpu = gpu
+    constructor( vertexShader, shader, uniformData = [], settings = {}, onCompiled = () => null, id, cubeMapShaderCode) {
         this.id = id
         this.#initializeSettings(settings)
 
@@ -27,7 +26,7 @@ export default class MaterialInstance {
     set cubeMapShader([shader, vertexShader]) {
         const v = shader !== undefined && shader !== null
         if(v) {
-            this._cubeMapShader = new ShaderInstance(vertexShader, shader, this.gpu, m => null)
+            this._cubeMapShader = new ShaderInstance(vertexShader, shader)
             this.hasCubeMap = v
         }
     }
@@ -36,16 +35,15 @@ export default class MaterialInstance {
         this.settings = settings
         if (settings.rsmAlbedo) {
             if (this.rsmAlbedo)
-                this.gpu.deleteTexture(this.rsmAlbedo.texture)
+                window.gpu.deleteTexture(this.rsmAlbedo.texture)
             this.rsmAlbedo = new TextureInstance(
                 settings.rsmAlbedo,
                 false,
-                this.gpu,
-                this.gpu.SRGB8_ALPHA8,
-                this.gpu.RGBA,
+                window.gpu.SRGB8_ALPHA8,
+                window.gpu.RGBA,
                 true,
                 false,
-                this.gpu.UNSIGNED_BYTE,
+                window.gpu.UNSIGNED_BYTE,
                 undefined,
                 undefined,
                 0,
@@ -62,8 +60,8 @@ export default class MaterialInstance {
             this.#initializeSettings(settings)
         let message
         if (this._shader)
-            this.gpu.deleteProgram(this._shader.program)
-        this._shader = new ShaderInstance(vertexShader, shader, this.gpu, m => message = m)
+            window.gpu.deleteProgram(this._shader.program)
+        this._shader = new ShaderInstance(vertexShader, shader)
 
         Promise.all(uniformData.map(k => {
             return new Promise(async resolve => {
@@ -76,12 +74,11 @@ export default class MaterialInstance {
                         texture = new TextureInstance(
                             img,
                             k.yFlip,
-                            this.gpu,
-                            this.gpu[k.format?.internalFormat],
-                            this.gpu[k.format?.format],
+                            window.gpu[k.format?.internalFormat],
+                            window.gpu[k.format?.format],
                             true,
                             false,
-                            this.gpu.UNSIGNED_BYTE,
+                            window.gpu.UNSIGNED_BYTE,
                             undefined,
                             undefined,
                             0,

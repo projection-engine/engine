@@ -8,10 +8,9 @@ export default class FinalPass extends System {
     lookUpRandom = []
     lookUpIndex = 0
 
-    constructor(gpu) {
-        super([])
-        this.gpu = gpu
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment, gpu)
+    constructor() {
+        super()
+        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
         for (let i = 1e6; i > 0; i--) {
             this.lookUpRandom.push(Math.random())
         }
@@ -40,7 +39,7 @@ export default class FinalPass extends System {
 
             FXAASpanMax: 8,
             FXAAReduceMin: 1 / 128,
-            inverseFilterTextureSize: [1 / this.gpu.drawingBufferWidth, 1 / this.gpu.drawingBufferHeight, 0],
+            inverseFilterTextureSize: [1 / window.gpu.drawingBufferWidth, 1 / window.gpu.drawingBufferHeight, 0],
             FXAAReduceMul: 1 / 8
         })
         output.draw()

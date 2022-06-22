@@ -15,49 +15,45 @@ import VBOInstance from "./instances/VBOInstance"
 import COMPONENTS from "./templates/COMPONENTS"
 
 export default class Renderer {
-    static VECTOR3 = [1,1,1]
     rootCamera = new RootCameraInstance()
-    tried = false
     frameID = undefined
     data = {}
     params = {}
     #systems = {}
     #ready = false
 
-    constructor(gpu, resolution, systems, projectID) {
-
+    constructor( resolution, systems) {
+        console.trace(resolution, systems)
+        const gpu = window.gpu
         Promise.all([import("./templates/CUBE"), import("./templates/BRDF.json")])
             .then(async res => {
                 const [cube, BRDF] = res
-                this.brdf = createTexture(gpu, 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, await ImageProcessor.getImageBitmap(BRDF.data), gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
+                this.brdf = createTexture( 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, await ImageProcessor.getImageBitmap(BRDF.data), gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
 
-                this.fallbackMaterial = new MaterialInstance(this.gpu, shaderCode.vertex, shaderCode.fragment, [{
-                    key: "brdfSampler", data: this.brdf, type: DATA_TYPES.UNDEFINED
-                }], {
-                    isForward: false,
-                    faceCulling: true,
-                    cullBackFace: true
-                }, 
-                undefined,
-                v4(),
-                shaderCode.cubeMapShader)
+                this.fallbackMaterial = new MaterialInstance( 
+                    shaderCode.vertex, 
+                    shaderCode.fragment, 
+                    [{key: "brdfSampler", data: this.brdf, type: DATA_TYPES.UNDEFINED}],
+                    {
+                        isForward: false,
+                        faceCulling: true,
+                        cullBackFace: true
+                    }, 
+                    undefined,
+                    v4(),
+                    shaderCode.cubeMapShader)
 
                 this.params.fallbackMaterial = this.fallbackMaterial
                 this.params.brdf = this.brdf
-                this.cubeBuffer = new VBOInstance(gpu, 1, new Float32Array(cube.default), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+                this.cubeBuffer = new VBOInstance(1, new Float32Array(cube.default), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
                 this.data.cubeBuffer = this.cubeBuffer
                 this.#ready = true
-                if (this.tried) {
-                    this.start()
-                }
+                this.start()
             }).catch(err => console.error(err))
 
-        this.packager = new Packager(gpu)
-        this.canvas = gpu.canvas
-        this.gpu = gpu
-        this.wrapper = new RenderingWrapper(gpu, resolution)
-
-        const a = new FramebufferInstance(gpu), b = new FramebufferInstance(gpu)
+        this.packager = new Packager()
+        this.wrapper = new RenderingWrapper(resolution)
+        const a = new FramebufferInstance(), b = new FramebufferInstance()
         a.texture().depthTest()
         b.texture()
 
@@ -69,31 +65,28 @@ export default class Renderer {
 
         const sys = [...systems, SYSTEMS.MESH]
         sys.forEach(s => {
-            let system = systemInstance(s, gpu, resolution, projectID)
+            let system = systemInstance(s, resolution)
             if (system)
                 this.#systems[s] = system
         })
         this.sortedSystems = Object.keys(this.#systems).sort()
         this.resizeObs = new ResizeObserver(() => {
-            if (this.canvas) {
-                const bBox = this.canvas.getBoundingClientRect()
-                if (this.params.camera) {
-                    this.params.camera.aspectRatio = bBox.width / bBox.height
-                    this.params.camera.updateProjection()
-                }
+            const bBox = window.gpu.canvas.getBoundingClientRect()
+            if (this.params.camera) {
+                this.params.camera.aspectRatio = bBox.width / bBox.height
+                this.params.camera.updateProjection()
             }
         })
-        this.resizeObs.observe(this.canvas)
+        this.resizeObs.observe(window.gpu.canvas)
     }
-
-
+    
     get systems() {
         return this.#systems
     }
 
     callback() {
         this.params.elapsed = performance.now() - this.then
-        this.gpu.clear(this.gpu.COLOR_BUFFER_BIT | this.gpu.DEPTH_BUFFER_BIT)
+        window.gpu.clear(window.gpu.COLOR_BUFFER_BIT | window.gpu.DEPTH_BUFFER_BIT)
         const l = this.sortedSystems.length
         for (let s = 0; s < l; s++) {
             this.#systems[this.sortedSystems[s]]
@@ -115,9 +108,6 @@ export default class Renderer {
     start() {
         if (this.#ready && !this.frameID)
             this.frameID = requestAnimationFrame(() => this.callback())
-        else
-            this.tried = true
-
     }
 
     stop() {
@@ -133,8 +123,7 @@ export default class Renderer {
             materials,
             meshes,
             params,
-            onWrap,
-            gpu: this.gpu,
+            onWrap, 
             brdf: this.brdf,
             fallbackMaterial: fallbackMaterial,
             cubeBuffer: this.cubeBuffer,
@@ -145,7 +134,7 @@ export default class Renderer {
         this.filteredEntities = packageData.filteredEntities
         this.then = performance.now()
 
-        const bBox = this.canvas.getBoundingClientRect()
+        const bBox = window.gpu.canvas.getBoundingClientRect()
         if (this.params.camera) {
             this.params.camera.aspectRatio = bBox.width / bBox.height
             this.params.camera.updateProjection()
@@ -153,7 +142,8 @@ export default class Renderer {
         this.params.lastFrame = this.wrapper.frameBuffer.colors[0]
     }
 
-    static drawMaterial(mesh, material, gpu) {
+    static drawMaterial(mesh, material) {
+        const gpu = window.gpu
         // if (material.settings.faceCulling === false)
         //     gpu.disable(gpu.CULL_FACE)
         // else {
@@ -163,7 +153,6 @@ export default class Renderer {
         //     else
         //         gpu.cullFace(gpu.FRONT)
         // }
-
         if (material.settings.depthMask === false)
             gpu.depthMask(false)
         if (material.settings.depthTest === false)

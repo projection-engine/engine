@@ -6,7 +6,7 @@ export default class TextureInstance {
     constructor(
         img,
         yFlip,
-        gpu,
+    
         internalFormat,
         format,
         repeat,
@@ -19,7 +19,7 @@ export default class TextureInstance {
     ) {
         this.attributes = {yFlip, internalFormat, format, repeat, noMipMapping, type, width, height, border,}
 
-        const init = (res) => this._init(res, yFlip, gpu, internalFormat, format, repeat, noMipMapping, type, width, height, border, onLoad)
+        const init = (res) => this.#init(res, yFlip,  internalFormat, format, repeat, noMipMapping, type, width, height, border, onLoad)
         if (typeof img === "string") {
 
             if (img.includes("data:image/"))
@@ -37,21 +37,20 @@ export default class TextureInstance {
             init(img)
     }
 
-    _init(
+    #init(
         img,
         yFlip,
-        gpu,
-        internalFormat = gpu.SRGB8_ALPHA8,
-        format = gpu.RGBA,
+        internalFormat = window.gpu.SRGB8_ALPHA8,
+        format = window.gpu.RGBA,
         repeat = false,
         noMipMapping = false,
-        type = gpu.UNSIGNED_BYTE,
+        type = window.gpu.UNSIGNED_BYTE,
         width,
         height,
         border = 0,
         onLoad=()=>null
     ) {
-
+        const gpu = window.gpu
         const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
         let newTexture = gpu.createTexture()
         if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
@@ -80,14 +79,13 @@ export default class TextureInstance {
         onLoad()
     }
 
-    update(newImage, gpu) {
+    update(newImage) {
         if (this.loaded) {
-            gpu.deleteTexture(this.texture)
+            window.gpu.deleteTexture(this.texture)
             ImageProcessor.getImageBitmap(newImage).then(res => {
-                this._init(
+                this.#init(
                     res,
                     this.attributes.yFlip,
-                    gpu,
                     this.attributes.internalFormat,
                     this.attributes.format,
                     this.attributes.repeat,

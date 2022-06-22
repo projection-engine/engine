@@ -1,19 +1,17 @@
 import {createVBO} from "../utils/utils"
 
 export default class VBOInstance {
-    constructor(gpu, index, data, type, size, dataType, normalized=false, renderingType, stride=0) {
-        this.gpu  = gpu
+    constructor(  index, data, type, size, dataType, normalized=false, renderingType, stride=0) {
+        this.id = createVBO( type, data, renderingType)
 
-        this.id = createVBO(this.gpu, type, data, renderingType)
-
-        this.gpu.vertexAttribPointer(
+        window.gpu.vertexAttribPointer(
             index,
             size,
             dataType,
             normalized,
             stride,
             0)
-        this.gpu.bindBuffer(type, null)
+        window.gpu.bindBuffer(type, null)
 
         this.stride= stride
         this.index =index
@@ -24,12 +22,12 @@ export default class VBOInstance {
         this.length = data.length
     }
     enable(){
-        this.gpu.enableVertexAttribArray(this.index)
-        this.gpu.bindBuffer(this.type, this.id)
-        this.gpu.vertexAttribPointer(this.index, this.size, this.type, this.normalized, this.stride, 0)
+        window.gpu.enableVertexAttribArray(this.index)
+        window.gpu.bindBuffer(this.type, this.id)
+        window.gpu.vertexAttribPointer(this.index, this.size, this.type, this.normalized, this.stride, 0)
     }
     disable(){
-        this.gpu.disableVertexAttribArray(this.index)
-        this.gpu.bindBuffer(this.type, null)
+        window.gpu.disableVertexAttribArray(this.index)
+        window.gpu.bindBuffer(this.type, null)
     }
 }

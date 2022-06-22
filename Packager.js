@@ -12,7 +12,6 @@ export default class Packager {
         meshes,
         params,
         onWrap,
-
         brdf,
         fallbackMaterial,
         levelScript

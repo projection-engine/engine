@@ -4,11 +4,10 @@ import FinalPass from "./FinalPass"
 
 
 export default class PostProcessingWrapper extends System {
-    constructor(gpu, postProcessingResolution) {
+    constructor( postProcessingResolution) {
         super()
-        this.gpu = gpu
-        this.compositPass = new CompositePass(gpu, postProcessingResolution)
-        this.finalPass = new FinalPass(gpu, postProcessingResolution)
+        this.compositPass = new CompositePass(postProcessingResolution)
+        this.finalPass = new FinalPass( postProcessingResolution)
     }
 
     execute(options, systems, data, entities, entitiesMap, [a, b]) {

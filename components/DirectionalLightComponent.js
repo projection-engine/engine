@@ -106,7 +106,6 @@ export default class DirectionalLightComponent extends Component {
         this._size = data
         this._update()
     }
-    set lightProjection(data){}
     get lightProjection(){
         return this._lightProjection
     }

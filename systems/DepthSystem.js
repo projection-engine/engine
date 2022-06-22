@@ -41,21 +41,21 @@ void main(void){
 // `
 export default class DepthSystem extends System {
 
-    constructor(gpu, resolution={w: window.screen.width, h: window.screen.height}) {
+    constructor(resolution={w: window.screen.width, h: window.screen.height}) {
         super()
-        this.gpu = gpu
-        this.frameBuffer = new FramebufferInstance(gpu, resolution.w, resolution.h)
+        this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
         this.frameBuffer
             .texture({
-                precision: this.gpu.RGBA16F,
-                format: this.gpu.RGBA,
-                type: this.gpu.FLOAT,
+                precision: window.gpu.RGBA16F,
+                format: window.gpu.RGBA,
+                type: window.gpu.FLOAT,
                 linear: true,
                 repeat: true
             })
             .depthTest()
 
-        this.shader = new ShaderInstance(vertex, frag, gpu)
+        this.shader = new ShaderInstance(vertex, frag)
+        console.trace(this.shader)
     }
     get depth(){
         return this.frameBuffer.colors[0]
@@ -79,12 +79,12 @@ export default class DepthSystem extends System {
                     meshID: mesh.components[COMPONENTS.PICK].pickID
                 })
 
-                this.gpu.drawElements(this.gpu.TRIANGLES, meshRef.verticesQuantity, this.gpu.UNSIGNED_INT, 0)
+                window.gpu.drawElements(window.gpu.TRIANGLES, meshRef.verticesQuantity, window.gpu.UNSIGNED_INT, 0)
                 meshRef.finish()
             }
         }
 
         this.frameBuffer.stopMapping()
-        this.gpu.bindVertexArray(null)
+        window.gpu.bindVertexArray(null)
     }
 }

@@ -5,9 +5,8 @@ import * as shaderCode from "../../shaders/EFFECTS.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 
 export default class CompositePass extends System {
-    constructor(gpu, postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
+    constructor( postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
         super()
-        this.gpu = gpu
         this.w = postProcessingResolution.w
         this.h = postProcessingResolution.h
 
@@ -17,10 +16,10 @@ export default class CompositePass extends System {
         let pW = this.w, pH = this.h
         for (let i = 0; i < 4; i++) {
             const [wW, hH] = [pW / 2, pH / 2]
-            const wBlurFrameBuffer = new FramebufferInstance(gpu, wW, hH)
+            const wBlurFrameBuffer = new FramebufferInstance( wW, hH)
             wBlurFrameBuffer
                 .texture({linear: true})
-            const hBlurFrameBuffer = new FramebufferInstance(gpu, wW, hH)
+            const hBlurFrameBuffer = new FramebufferInstance( wW, hH)
             hBlurFrameBuffer
                 .texture({linear: true})
             this.blurBuffers.push({
@@ -35,7 +34,7 @@ export default class CompositePass extends System {
 
         for (let i = 0; i < 4; i++) {
             const [wW, hH] = [pW * 2, pH * 2]
-            const b = new FramebufferInstance(gpu, wW, hH)
+            const b = new FramebufferInstance(wW, hH)
                 .texture({linear: true})
             this.upSampledBuffers.push(b)
 
@@ -43,10 +42,10 @@ export default class CompositePass extends System {
             pH = hH
         }
 
-        this.compositeShader = new ShaderInstance(vertex, shaderCode.compositeFragment, gpu)
-        this.upSamplingShader = new ShaderInstance(vertex, shaderCode.bilinearUpSampling, gpu)
-        this.brightShader = new ShaderInstance(vertex, shaderCode.brightFragment, gpu)
-        this.blurShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
+        this.compositeShader = new ShaderInstance(vertex, shaderCode.compositeFragment,)
+        this.upSamplingShader = new ShaderInstance(vertex, shaderCode.bilinearUpSampling,)
+        this.brightShader = new ShaderInstance(vertex, shaderCode.brightFragment,)
+        this.blurShader = new ShaderInstance(vertex, shaderCode.blurBox)
     }
 
     execute(options, systems, data, entities, entitiesMap, [worker, output]) {

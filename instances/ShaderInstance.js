@@ -75,20 +75,21 @@ export default class ShaderInstance {
     }
     length = 0
 
-    constructor(vertex, fragment, gpu, setMessage = () => null) {
+    constructor(vertex, fragment,  setMessage) {
         let alert = []
+        const gpu = window.gpu
         this.program = gpu.createProgram()
-        this.gpu = gpu
-        const vCode = this._compileShader(trimString(vertex), gpu?.VERTEX_SHADER, m => alert.push(m))
-        const fCode = this._compileShader(trimString(fragment), gpu?.FRAGMENT_SHADER, m => alert.push(m))
+        window.gpu = gpu
+        const vCode = this._compileShader(trimString(vertex), gpu.VERTEX_SHADER, m => alert.push(m))
+        const fCode = this._compileShader(trimString(fragment), gpu.FRAGMENT_SHADER, m => alert.push(m))
 
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)].flat()
-
-        setMessage({
-            error: gpu.getError(),
-            messages: alert,
-            hasError: alert.length > 0
-        })
+        if(typeof setMessage === "function")
+            setMessage({
+                error: gpu.getError(),
+                messages: alert,
+                hasError: alert.length > 0
+            })
         this.uniforms = this.uniforms.filter(u => {
             return typeof u.uLocation === "object" || typeof u.uLocations === "object"
         })
@@ -98,17 +99,17 @@ export default class ShaderInstance {
 
     _compileShader(shaderCode, shaderType, pushMessage) {
         const bundledCode = applyMethods(shaderCode)
-        const shader = this.gpu.createShader(shaderType)
-        this.gpu.shaderSource(shader, bundledCode)
-        this.gpu.compileShader(shader)
-        let compiled = this.gpu.getShaderParameter(shader, this.gpu.COMPILE_STATUS)
+        const shader = window.gpu.createShader(shaderType)
+        window.gpu.shaderSource(shader, bundledCode)
+        window.gpu.compileShader(shader)
+        let compiled = window.gpu.getShaderParameter(shader, window.gpu.COMPILE_STATUS)
         if (!compiled) {
-            console.error(this.gpu.getShaderInfoLog(shader))
-            pushMessage(this.gpu.getShaderInfoLog(shader))
+            console.error(window.gpu.getShaderInfoLog(shader))
+            pushMessage(window.gpu.getShaderInfoLog(shader))
             this.available = false
         } else {
-            this.gpu.attachShader(this.program, shader)
-            this.gpu.linkProgram(this.program)
+            window.gpu.attachShader(this.program, shader)
+            window.gpu.linkProgram(this.program)
 
             this.available = true
         }
@@ -129,7 +130,7 @@ export default class ShaderInstance {
                         uniformObjects.push({
                             type,
                             name,
-                            uLocation: this.gpu.getUniformLocation(this.program, name)
+                            uLocation: window.gpu.getUniformLocation(this.program, name)
                         })
                     } else {
                         let struct = code.match(this.structRegex(type))
@@ -145,7 +146,7 @@ export default class ShaderInstance {
                                             type: current[2],
                                             name: current[4],
                                             parent: name,
-                                            uLocation: this.gpu.getUniformLocation(this.program, name + "." + current[4])
+                                            uLocation: window.gpu.getUniformLocation(this.program, name + "." + current[4])
                                         }
                                     }
                                 }).filter(e => e !== undefined)
@@ -174,7 +175,7 @@ export default class ShaderInstance {
                                 type,
                                 name,
                                 arraySize,
-                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => this.gpu.getUniformLocation(this.program, name + `[${i}]`))
+                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => window.gpu.getUniformLocation(this.program, name + `[${i}]`))
                             })
                         } else {
                             let struct = code.match(this.structRegex(type))
@@ -192,7 +193,7 @@ export default class ShaderInstance {
                                                 name: current[4],
                                                 parent: name,
                                                 arraySize,
-                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => this.gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
+                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => window.gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
                                             }
                                         }
                                     }).filter(e => e !== undefined)
@@ -218,20 +219,20 @@ export default class ShaderInstance {
                     const l = (current.arraySize < dataAttr.length ? current.arraySize : dataAttr.length)
                     for (let i = 0; i < l; i++) {
                         if (current.parent)
-                            this.#bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                            ShaderInstance.bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                         else
-                            this.#bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                            ShaderInstance.bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
                     }
                 }
             } else {
                 const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
-                this.#bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                ShaderInstance.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
             }
         }
 
     }
 
-    #bind(uLocation, data, type, currentSamplerIndex, increaseIndex, c) {
+    static bind(uLocation, data, type, currentSamplerIndex, increaseIndex, c) {
         try{
             switch (type) {
             case "float":
@@ -242,20 +243,20 @@ export default class ShaderInstance {
             case "ivec2":
             case "ivec3":
             case "bool":
-                this.gpu[TYPES[type]](uLocation, data)
+                window.gpu[TYPES[type]](uLocation, data)
                 break
             case "mat3":
             case "mat4":
-                this.gpu[TYPES[type]](uLocation, false, data)
+                window.gpu[TYPES[type]](uLocation, false, data)
                 break
             case "samplerCube":
-                this.gpu.activeTexture(this.gpu.TEXTURE0 + currentSamplerIndex)
-                this.gpu.bindTexture(this.gpu.TEXTURE_CUBE_MAP, data)
-                this.gpu.uniform1i(uLocation, currentSamplerIndex)
+                window.gpu.activeTexture(window.gpu.TEXTURE0 + currentSamplerIndex)
+                window.gpu.bindTexture(window.gpu.TEXTURE_CUBE_MAP, data)
+                window.gpu.uniform1i(uLocation, currentSamplerIndex)
                 increaseIndex()
                 break
             case "sampler2D":
-                bindTexture(currentSamplerIndex, data, uLocation, this.gpu)
+                bindTexture(currentSamplerIndex, data, uLocation, window.gpu)
                 increaseIndex()
                 break
             default:
@@ -273,7 +274,7 @@ export default class ShaderInstance {
     }
 
     use() {
-        this.gpu.useProgram(this.program)
+        window.gpu.useProgram(this.program)
     }
 }
 

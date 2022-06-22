@@ -6,25 +6,22 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import SYSTEMS from "../../templates/SYSTEMS"
 
 export default class PerPixelMotionBlur extends System {
-    constructor(gpu, postProcessingResolution = {w: window.screen.width, h: window.screen.height}) {
-        super([])
-        this.gpu = gpu
+    constructor(postProcessingResolution = {w: window.screen.width, h: window.screen.height}) {
+        super()
 
-        this.velocityFramebuffer = new FramebufferInstance(gpu, postProcessingResolution.w, postProcessingResolution.h)
+        this.velocityFramebuffer = new FramebufferInstance(postProcessingResolution.w, postProcessingResolution.h)
         this.velocityFramebuffer.texture()
 
 
         // TODO - SHADERS
-        this.velocityShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
-        this.textureCopyShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
-        this.motionBlurShader = new ShaderInstance(vertex, shaderCode.blurBox, gpu)
+        this.velocityShader = new ShaderInstance(vertex, shaderCode.blurBox)
+        this.textureCopyShader = new ShaderInstance(vertex, shaderCode.blurBox,)
+        this.motionBlurShader = new ShaderInstance(vertex, shaderCode.blurBox,)
 
     }
 
     execute(options, systems, data, entities, entitiesMap, [worker, output]) {
         super.execute()
-        const {} = options
-
 
         // DRAW DIFFERENCE
         worker.startMapping()

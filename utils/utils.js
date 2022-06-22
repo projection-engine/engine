@@ -1,33 +1,34 @@
 import {vec3} from "gl-matrix"
 
 function isArrayBufferV(value) {
-    return value && value.buffer instanceof ArrayBuffer && value.byteLength !== undefined;
+    return value && value.buffer instanceof ArrayBuffer && value.byteLength !== undefined
 }
 
-export function createVAO(gpu) {
-    const vao = gpu.createVertexArray()
-    gpu.bindVertexArray(vao)
+export function createVAO() {
+    const vao = window.gpu.createVertexArray()
+    window.gpu.bindVertexArray(vao)
     return vao
 }
 
 
-export function createVBO(gpu, type, data, renderingType = gpu.STATIC_DRAW) {
+export function createVBO(type, data, renderingType = window.gpu.STATIC_DRAW) {
     if (data.length === 0)
-        return null;
+        return null
 
     if (!isArrayBufferV(data)) {
-        return null;
+        return null
     }
-    let buffer = gpu.createBuffer();
-    gpu.bindBuffer(type, buffer);
-    gpu.bufferData(type, data, renderingType);
+    let buffer = window.gpu.createBuffer()
+    window.gpu.bindBuffer(type, buffer)
+    window.gpu.bufferData(type, data, renderingType)
 
-    return buffer;
+    return buffer
 }
 
 
-export function createRBO(gpu, width, height, typeStorage = gpu.DEPTH24_STENCIL8, type = gpu.DEPTH_STENCIL_ATTACHMENT) {
-    let rbo = gpu.createRenderbuffer();
+export function createRBO( width, height, typeStorage =window.gpu.DEPTH24_STENCIL8, type = window.gpu.DEPTH_STENCIL_ATTACHMENT) {
+    const gpu = window.gpu
+    const rbo = gpu.createRenderbuffer()
     gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
     gpu.renderbufferStorage(gpu.RENDERBUFFER, typeStorage, width, height)
     gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, type, gpu.RENDERBUFFER, rbo)
@@ -35,44 +36,28 @@ export function createRBO(gpu, width, height, typeStorage = gpu.DEPTH24_STENCIL8
     if (gpu.checkFramebufferStatus(gpu.FRAMEBUFFER) !== gpu.FRAMEBUFFER_COMPLETE)
         return null
 
-    return rbo;
+    return rbo
 }
 
-export function createFBO(gpu, attachmentPoint, texture, autoUnbind=true) {
-    let fbo = gpu.createFramebuffer();
-    gpu.bindFramebuffer(gpu.FRAMEBUFFER, fbo);
-    gpu.framebufferTexture2D(
-        gpu.FRAMEBUFFER,
-        attachmentPoint,
-        gpu.TEXTURE_2D, texture,
-        0);
 
-    if (gpu.checkFramebufferStatus(gpu.FRAMEBUFFER) !== gpu.FRAMEBUFFER_COMPLETE)
-        return null
+export function createTexture( width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind = true) {
+    const gpu = window.gpu
+    let texture = gpu.createTexture()
 
-    if(autoUnbind)
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null);
-
-    return fbo;
-}
-
-export function createTexture(gpu, width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind = true) {
-    let texture = gpu.createTexture();
-
-    gpu.bindTexture(gpu.TEXTURE_2D, texture);
-    gpu.texImage2D(gpu.TEXTURE_2D, 0, internalFormat, width, height, border, format, type, data);
-    gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, magFilter);
-    gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, minFilter);
+    gpu.bindTexture(gpu.TEXTURE_2D, texture)
+    gpu.texImage2D(gpu.TEXTURE_2D, 0, internalFormat, width, height, border, format, type, data)
+    gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, magFilter)
+    gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, minFilter)
 
     if (wrapS !== undefined)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, wrapS);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, wrapS)
     if (wrapT !== undefined)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, wrapT);
-    if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, false);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, wrapT)
+    if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, false)
     if (autoUnbind)
-        gpu.bindTexture(gpu.TEXTURE_2D, null);
+        gpu.bindTexture(gpu.TEXTURE_2D, null)
 
-    return texture;
+    return texture
 }
 
 export function bindTexture(index, texture, location, gpu) {
@@ -84,10 +69,10 @@ export function bindTexture(index, texture, location, gpu) {
 
 
 export function lookAt(yaw, pitch, position) {
-    const cosPitch = Math.cos(pitch);
-    const sinPitch = Math.sin(pitch);
-    const cosYaw = Math.cos(yaw);
-    const sinYaw = Math.sin(yaw);
+    const cosPitch = Math.cos(pitch)
+    const sinPitch = Math.sin(pitch)
+    const cosYaw = Math.cos(yaw)
+    const sinYaw = Math.sin(yaw)
 
     let xAxis = [cosYaw, 0, -sinYaw],
         yAxis = [sinYaw * sinPitch, cosPitch, cosYaw * sinPitch],
@@ -106,7 +91,8 @@ export function lookAt(yaw, pitch, position) {
     ]
 }
 
-export function copyTexture(target, source, gpu, type = gpu.DEPTH_BUFFER_BIT) {
+export function copyTexture(target, source,  type =window.gpu.DEPTH_BUFFER_BIT) {
+    const gpu = window.gpu
     gpu.bindFramebuffer(gpu.READ_FRAMEBUFFER, source.FBO)
     gpu.bindFramebuffer(gpu.DRAW_FRAMEBUFFER, target.FBO)
 

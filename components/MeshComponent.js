@@ -10,9 +10,5 @@ export default class MeshComponent extends Component{
     constructor(id, meshID) {
         super(id, MeshComponent.constructor.name)
         this.meshID=meshID
-
-
-        this.queryInProgress = false
-        this.occluded = false
     }
 }

@@ -14,37 +14,36 @@ import LightProbeSystem from "../systems/LightProbeSystem"
 import LineSystem from "../systems/LineSystem"
 import SSR from "../systems/SSR"
 
-export default function systemInstance(s, gpu, resolution, projectID) {
+export default function systemInstance(s, resolution) {
     switch (true) {
 
     case s  === SYSTEMS.AO:
-        return new AOSystem(gpu, resolution)
+        return new AOSystem( resolution)
     case s  === SYSTEMS.CULLING:
-        return new CullingSystem(gpu)
+        return new CullingSystem(resolution)
     case s  === SYSTEMS.MESH:
-        return new Deferred(gpu, resolution)
+        return new Deferred(resolution)
     case s  === SYSTEMS.PERF:
-        return new MetricsSystem(gpu, gpu.canvas.id)
-    case s  === SYSTEMS.PHYSICS:
-        return undefined
+        return new MetricsSystem(resolution)
+
     case s  === SYSTEMS.PICK:
-        return new PickSystem(gpu)
+        return new PickSystem(resolution)
     case s  === SYSTEMS.SHADOWS:
-        return new ShadowMapSystem(gpu)
+        return new ShadowMapSystem(resolution)
     case s  === SYSTEMS.TRANSFORMATION:
-        return new TransformSystem()
+        return new TransformSystem(resolution)
     case s  === SYSTEMS.CUBE_MAP:
-        return new CubeMapSystem(gpu)
+        return new CubeMapSystem(resolution)
     case s  === SYSTEMS.PROBE:
-        return new LightProbeSystem(gpu)
+        return new LightProbeSystem(resolution)
     case s  === SYSTEMS.SCRIPT:
-        return new ScriptSystem(gpu, gpu.canvas.id, projectID)
+        return new ScriptSystem(resolution)
     case s  === SYSTEMS.DEPTH_PRE_PASS:
-        return new DepthSystem(gpu, resolution)
+        return new DepthSystem(resolution)
     case s  === SYSTEMS.LINE:
-        return new LineSystem(gpu)
+        return new LineSystem(resolution)
     case s  === SYSTEMS.SSGI:
-        return new SSR(gpu, resolution)
+        return new SSR(resolution)
     default:
         return undefined
     }
