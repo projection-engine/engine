@@ -1,6 +1,6 @@
 import SYSTEMS from "./templates/SYSTEMS"
 
-export default function RendererConstructor(canvas, resolution, Renderer){
+export default function Constructor(canvas, resolution, Renderer){
     const ctx = canvas.getContext("webgl2", {
         antialias: false,
         preserveDrawingBuffer: true,

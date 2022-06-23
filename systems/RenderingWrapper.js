@@ -7,6 +7,7 @@ import PostProcessingWrapper from "./postprocessing/PostProcessingWrapper"
 import ShaderInstance from "../instances/ShaderInstance"
 import * as shaderCode from "../shaders/FXAA.glsl"
 import LineSystem from "./LineSystem"
+import ENVIRONMENT from "../ENVIRONMENT"
 
 
 export default class RenderingWrapper extends System {
@@ -25,10 +26,12 @@ export default class RenderingWrapper extends System {
 
     execute(options, systems, data, entities, entitiesMap, onWrap, {a, b}) {
         super.execute()
-
+        const isProd = window.renderer.environment === ENVIRONMENT.PROD
         this.frameBuffer.startMapping()
-        if (onWrap)
+
+        if (onWrap && !isProd)
             onWrap.execute(options, systems, data, entities, entitiesMap, false)
+
         systems[SYSTEMS.MESH].drawBuffer(options, systems, data)
         this.frameBuffer.stopMapping()
 
@@ -43,8 +46,10 @@ export default class RenderingWrapper extends System {
 
         this.forwardSystem.execute(options, systems, data, this.frameBuffer.colors[0])
         this.lineSystem.execute(options, data)
-        if (onWrap)
+
+        if (onWrap && !isProd)
             onWrap.execute(options, systems, data, entities, entitiesMap, true)
+
         a.stopMapping()
 
         this.postProcessingWrapper.execute(options, systems, data, entities, entitiesMap, [a, b])

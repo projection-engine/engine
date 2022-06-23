@@ -2,6 +2,7 @@ import TextureInstance from "./TextureInstance"
 import ImageProcessor from "../utils/image/ImageProcessor"
 import ShaderInstance from "./ShaderInstance"
 import {DATA_TYPES} from "../templates/DATA_TYPES"
+import {v4} from "uuid"
 
 export default class MaterialInstance {
     ready = false
@@ -12,13 +13,21 @@ export default class MaterialInstance {
     rsmAlbedo
     hasCubeMap = false
 
-    constructor( vertexShader, shader, uniformData = [], settings = {}, onCompiled = () => null, id, cubeMapShaderCode) {
-        this.id = id
+    constructor({
+        vertex,
+        fragment,
+        uniformData,
+        settings,
+        id,
+        onCompiled,
+        cubeMapShaderCode
+    } ) {
+        this.id = id ? id : v4().toString()
         this.#initializeSettings(settings)
 
-        this.shader = [shader, vertexShader, uniformData, onCompiled]
+        this.shader = [fragment, vertex, uniformData, onCompiled]
         if (cubeMapShaderCode !== undefined && cubeMapShaderCode !== null )
-            this.cubeMapShader = [cubeMapShaderCode, vertexShader]
+            this.cubeMapShader = [cubeMapShaderCode, vertex]
         else
             this.hasCubeMap = false
     }
@@ -32,25 +41,27 @@ export default class MaterialInstance {
     }
 
     #initializeSettings(settings) {
-        this.settings = settings
-        if (settings.rsmAlbedo) {
-            if (this.rsmAlbedo)
-                window.gpu.deleteTexture(this.rsmAlbedo.texture)
-            this.rsmAlbedo = new TextureInstance(
-                settings.rsmAlbedo,
-                false,
-                window.gpu.SRGB8_ALPHA8,
-                window.gpu.RGBA,
-                true,
-                false,
-                window.gpu.UNSIGNED_BYTE,
-                undefined,
-                undefined,
-                0,
-                () => null
-            )
+        if(settings) {
+            this.settings = settings
+            if (settings.rsmAlbedo) {
+                if (this.rsmAlbedo)
+                    window.gpu.deleteTexture(this.rsmAlbedo.texture)
+                this.rsmAlbedo = new TextureInstance(
+                    settings.rsmAlbedo,
+                    false,
+                    window.gpu.SRGB8_ALPHA8,
+                    window.gpu.RGBA,
+                    true,
+                    false,
+                    window.gpu.UNSIGNED_BYTE,
+                    undefined,
+                    undefined,
+                    0,
+                    () => null
+                )
 
-            delete this.settings.rsmAlbedo
+                delete this.settings.rsmAlbedo
+            }
         }
     }
 
@@ -63,7 +74,7 @@ export default class MaterialInstance {
             window.gpu.deleteProgram(this._shader.program)
         this._shader = new ShaderInstance(vertexShader, shader)
 
-        Promise.all(uniformData.map(k => {
+        Promise.all(uniformData?.map(k => {
             return new Promise(async resolve => {
                 switch (k.type) {
                 case DATA_TYPES.COLOR:

@@ -6,11 +6,10 @@ import Transformation from "../templates/Transformation"
 import PickSystem from "./PickSystem"
 import SYSTEMS from "../templates/SYSTEMS"
 import KEYS from "../templates/KEYS"
+import ENVIRONMENT from "../ENVIRONMENT"
 
 export default class ScriptSystem extends System {
     pressedKeys = {}
-    eventSet = false
-    mousePosition = {x: 0, y: 0}
 
     constructor() {
         super()
@@ -29,38 +28,17 @@ export default class ScriptSystem extends System {
             })
             window.gpu.canvas.parentNode.appendChild(this.renderTarget)
         }
-
-        document.addKey = (key) => {
-            this.pressedKeys[key] = true
-        }
-        document.removeKey = (key) => {
-            delete this.pressedKeys[key]
-        }
-        document.setMouse = (position) => {
-            this.mousePosition = position
-        }
-
     }
 
     execute(options, systems, data, entities, entitiesMap, updateAllLights) {
         super.execute()
         const {meshSources, levelScript} = data
         const {
-            canExecutePhysicsAnimation,
             elapsed,
             camera
         } = options
 
-        if (canExecutePhysicsAnimation) {
-            if (!this.eventSet) {
-                this.eventSet = true
-                document.addEventListener("mouseup", handler)
-                document.addEventListener("keydown", handler)
-                document.addEventListener("keyup", handler)
-                document.addEventListener("mousemove", handler)
-                document.addEventListener("mousedown", handler)
-            }
-
+        if (window.renderer.environment === ENVIRONMENT.PROD) {
             this.renderTarget.style.display = "block"
             const eLength= entities.length
             for (let i = 0; i < eLength; i++) {
@@ -73,15 +51,6 @@ export default class ScriptSystem extends System {
 
             if (levelScript)
                 this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
-        } else if (this.eventSet) {
-            this.eventSet = false
-            this.renderTarget.style.display = "none"
-            this.renderTarget.innerText = ""
-            document.removeEventListener("mouseup", handler)
-            document.removeEventListener("mousedown", handler)
-            document.removeEventListener("keydown", handler)
-            document.removeEventListener("keyup", handler)
-            document.removeEventListener("mousemove", handler)
         }
     }
 
@@ -93,13 +62,12 @@ export default class ScriptSystem extends System {
             renderTarget: this.renderTarget,
             pressedKeys: this.pressedKeys,
             KEYS,
-            mousePosition: this.mousePosition,
             camera,
             glMatrix,
             COMPONENTS,
             utils: {
                 toEuler: Transformation.getEuler,
-                pick: (entity, coords = this.mousePosition) => {
+                pick: (entity, coords) => {
                     if (entity.components[COMPONENTS.MESH]) {
                         const index = pickSystem.pickElement((shader, proj) => {
                             const mesh = meshSources[entity.components[COMPONENTS.MESH]?.meshID]
@@ -130,32 +98,6 @@ export default class ScriptSystem extends System {
 }
 
 function prepareName(name) {
-
     const word = name.trim().replaceAll(/\s/g, "").replaceAll("-", "").replaceAll("_", "").replaceAll(".", "").replaceAll(",", "")
     return word[0].toUpperCase() + word.substring(1).toLowerCase()
-}
-
-function handler(event) {
-    const addKey = event.currentTarget.addKey
-    const removeKey = event.currentTarget.removeKey
-    const setMouse = event.currentTarget.setMouse
-    switch (event.type) {
-    case "keydown":
-        addKey(event.code)
-        break
-    case "keyup":
-        removeKey(event.code)
-        break
-    case "mousemove":
-        setMouse({x: event.clientX, y: event.clientY})
-        break
-    case "mousedown":
-        addKey("Mouse" + event.button)
-        break
-    case "mouseup":
-        removeKey("Mouse" + event.button)
-        break
-    default:
-        break
-    }
 }

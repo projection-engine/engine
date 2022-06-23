@@ -30,7 +30,6 @@ export default class LightProbeSystem extends System {
             skyboxShader
         } = data
 
-
         if (this.lastCallLength !== lightProbes.length) {
             this.step = STEPS_LIGHT_PROBE.GENERATION
             this.lastCallLength = lightProbes.length
