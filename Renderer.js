@@ -13,6 +13,7 @@ import systemInstance from "./utils/systemInstance"
 import VBOInstance from "./instances/VBOInstance"
 import COMPONENTS from "./templates/COMPONENTS"
 import ENVIRONMENT from "./ENVIRONMENT"
+import PostProcessingWrapper from "./systems/postprocessing/PostProcessingWrapper"
 
 export default class Renderer {
     environment = ENVIRONMENT.PROD
@@ -78,6 +79,7 @@ export default class Renderer {
             }
         })
         this.resizeObs.observe(window.gpu.canvas)
+        this.postProcessingWrapper = new PostProcessingWrapper( resolution)
     }
     
     get systems() {

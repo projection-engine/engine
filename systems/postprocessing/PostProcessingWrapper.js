@@ -1,6 +1,7 @@
 import System from "../../basic/System"
 import CompositePass from "./CompositePass"
 import FinalPass from "./FinalPass"
+import SYSTEMS from "../../templates/SYSTEMS"
 
 
 export default class PostProcessingWrapper extends System {
@@ -18,7 +19,7 @@ export default class PostProcessingWrapper extends System {
         worker = b
         output = a
 
-        this.finalPass.execute(options, [worker, output])
+        this.finalPass.execute(options, worker, output, systems[SYSTEMS.SSGI].SSR)
 
 
     }

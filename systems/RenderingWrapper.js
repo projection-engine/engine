@@ -21,7 +21,7 @@ export default class RenderingWrapper extends System {
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.noFxaaFragment)
         this.forwardSystem = new Forward()
         this.lineSystem = new LineSystem()
-        this.postProcessingWrapper = new PostProcessingWrapper( resolution)
+
     }
 
     execute(options, systems, data, entities, entitiesMap, onWrap, {a, b}) {
@@ -52,6 +52,6 @@ export default class RenderingWrapper extends System {
 
         a.stopMapping()
 
-        this.postProcessingWrapper.execute(options, systems, data, entities, entitiesMap, [a, b])
+        window.renderer.postProcessingWrapper.execute(options, systems, data, entities, entitiesMap, [a, b])
     }
 }

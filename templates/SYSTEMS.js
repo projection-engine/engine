@@ -9,10 +9,9 @@ export default {
     PERF: "7",
     PHYSICS: "8",
     MESH: "9",
-    SSGI: "10",
+    FORWARD: "10",
     LINE: "11",
-    FORWARD: "12",
-    CAMERA_CUBE: "13",
+    SSGI: "12",
     PICK: "14",
     PROBE: "15",
 }

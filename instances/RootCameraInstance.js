@@ -10,6 +10,7 @@ export default class RootCameraInstance {
     viewMatrix = mat4.create()
     projectionMatrix = mat4.create()
     invViewMatrix= mat4.create()
+    invProjectionMatrix = mat4.create()
     centerOn = [0, 0, 0]
 
 
@@ -35,9 +36,11 @@ export default class RootCameraInstance {
 
     updateProjection() {
         if (this.ortho)
-            mat4.ortho(this.projectionMatrix, -this.size, this.size, -this.radius / this.aspectRatio, this.size / this.aspectRatio, this.zNear, this.zFar)
+            mat4.ortho(this.projectionMatrix, -this.size, this.size, -this.size / this.aspectRatio, this.size / this.aspectRatio, this.zNear, this.zFar)
         else
             mat4.perspective(this.projectionMatrix, this.fov, this.aspectRatio, this.zNear, this.zFar)
+
+        mat4.invert(this.invProjectionMatrix, this.projectionMatrix)
     }
 
     getNotTranslatedViewMatrix() {

@@ -20,7 +20,7 @@ export default class FinalPass extends System {
         return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex = 0] : this.lookUpRandom[this.lookUpIndex]
     }
 
-    execute(options, [worker, output]) {
+    execute(options, worker, output) {
         super.execute()
         const {
             fxaa,

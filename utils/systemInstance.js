@@ -8,11 +8,11 @@ import ShadowMapSystem from "../systems/ShadowMapSystem"
 import TransformSystem from "../systems/TransformSystem"
 import CubeMapSystem from "../systems/CubeMapSystem"
 import ScriptSystem from "../systems/ScriptSystem"
-import DepthSystem from "../systems/DepthSystem"
+import PrePass from "../systems/PrePass"
 import AOSystem from "../systems/AOSystem"
 import LightProbeSystem from "../systems/LightProbeSystem"
 import LineSystem from "../systems/LineSystem"
-import SSR from "../systems/SSR"
+import ScreenSpaceSystem from "../systems/ScreenSpaceSystem"
 
 export default function systemInstance(s, resolution) {
     switch (true) {
@@ -39,11 +39,11 @@ export default function systemInstance(s, resolution) {
     case s  === SYSTEMS.SCRIPT:
         return new ScriptSystem(resolution)
     case s  === SYSTEMS.DEPTH_PRE_PASS:
-        return new DepthSystem(resolution)
+        return new PrePass(resolution)
     case s  === SYSTEMS.LINE:
         return new LineSystem(resolution)
     case s  === SYSTEMS.SSGI:
-        return new SSR(resolution)
+        return new ScreenSpaceSystem(resolution)
     default:
         return undefined
     }

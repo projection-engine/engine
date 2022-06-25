@@ -64,7 +64,8 @@ export default class AOSystem extends System {
                     total_strength, base, area,
                     falloff, radius, samples,
                     0, 0, 0
-                ]
+                ],
+                normalSampler: systems[SYSTEMS.DEPTH_PRE_PASS].normal
             })
             this.frameBuffer.draw(this.shader)
             this.frameBuffer.stopMapping()

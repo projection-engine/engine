@@ -12,8 +12,6 @@ void main()
 `
 // THANKS TO https://theorangeduck.com/page/pure-depth-ssao
 export const fragment = `#version 300 es
-
-
 precision highp float;
 
 #define T  1.
@@ -24,27 +22,10 @@ precision highp float;
 
 in vec2 texCoords;
 uniform sampler2D depthSampler;
+uniform sampler2D normalSampler;
 uniform sampler2D randomSampler;
 uniform mat3 settings;
-
 out vec4 outColor;
-
-vec3 normal_from_depth(float depth, vec2 texcoords) {
-  
-  const vec2 offset1 = vec2(0.0,0.001);
-  const vec2 offset2 = vec2(0.001,0.0);
-  
-  float depth1 = texture(depthSampler, texcoords + offset1).r;
-  float depth2 = texture(depthSampler, texcoords + offset2).r;
-  
-  vec3 p1 = vec3(offset1, depth1 - depth);
-  vec3 p2 = vec3(offset2, depth2 - depth);
-  
-  vec3 normal = cross(p1, p2);
-  normal.z = -normal.z;
-  
-  return normalize(normal);
-}
 
 
 void main()
@@ -73,7 +54,7 @@ void main()
   float depth = texture(depthSampler, texCoords).r;
  
   vec3 position = vec3(texCoords, depth);
-  vec3 normal = normal_from_depth(depth, texCoords);
+  vec3 normal = texture(normalSampler, texCoords).rgb;
   
   float radius_depth = radius/depth;
   float occlusion = 0.0;

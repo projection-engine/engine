@@ -41,6 +41,7 @@ export default class Deferred extends System {
         } = options
         this.frameBuffer.startMapping()
         this.lastMaterial = undefined
+
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
@@ -90,12 +91,14 @@ export default class Deferred extends System {
             ao,
             camera,
             pcfSamples,
-            ssr
+            ssr,
+            ssgi
         } = options
         const shadowMapSystem = systems[SYSTEMS.SHADOWS]
         this.deferredShader.use()
         this.deferredShader.bindForUse({
-            screenSpaceReflections:ssr ?   systems[SYSTEMS.SSGI].ssColor : undefined,
+            screenSpaceGI: ssgi ? systems[SYSTEMS.SSGI].SSGI : undefined,
+            screenSpaceReflections:ssr ? systems[SYSTEMS.SSGI].ssColor : undefined,
             positionSampler: this.frameBuffer.colors[0],
             normalSampler: this.frameBuffer.colors[1],
             albedoSampler: this.frameBuffer.colors[2],

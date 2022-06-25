@@ -37,6 +37,8 @@ uniform sampler2D ambientSampler;
 uniform sampler2D depthSampler;
 uniform sampler2D shadowMapTexture;
 uniform sampler2D screenSpaceReflections;
+uniform sampler2D screenSpaceGI;
+
 out vec4 finalColor;
 
 @import(distributionGGX)
@@ -85,8 +87,7 @@ void main() {
         
         float NdotV    = max(dot(N, V), 0.000001);
         vec3 F0 = vec3(0.04);
-        vec3 Lo = vec3(0.0);
-        vec3 GI = vec3(0.);
+        vec3 Lo = vec3(0.0); 
         
         F0 = mix(F0, albedo, metallic);
         
@@ -131,7 +132,10 @@ void main() {
         }
       
         Lo = (Lo  + texture(screenSpaceReflections, texCoord).rgb)* shadows; 
-        color = (ambient  + Lo +  GI) * ao;
+        vec3 GI = albedo * texture(screenSpaceGI, texCoord).rgb;
+ 
+		color = (ambient  + Lo + GI) * ao ;
+   
     }
     else
         color = albedo ;
