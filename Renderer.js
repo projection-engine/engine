@@ -15,6 +15,7 @@ import COMPONENTS from "./templates/COMPONENTS"
 import ENVIRONMENT from "./ENVIRONMENT"
 import PostProcessingWrapper from "./systems/postprocessing/PostProcessingWrapper"
 
+let gpu
 export default class Renderer {
     environment = ENVIRONMENT.PROD
     rootCamera = new RootCameraInstance()
@@ -27,7 +28,7 @@ export default class Renderer {
     entities = []
 
     constructor( resolution, systems) {
-        const gpu = window.gpu
+        gpu = window.gpu
         Promise.all([import("./templates/CUBE"), import("./templates/BRDF.json")])
             .then(async res => {
                 const [cube, BRDF] = res
@@ -58,11 +59,7 @@ export default class Renderer {
         a.texture().depthTest()
         b.texture()
 
-
-        this.postProcessingFramebuffers = {
-            a: a,
-            b: b
-        }
+        this.postProcessingFramebuffers = {a: a, b: b}
 
         const sys = [...systems, SYSTEMS.MESH]
         sys.forEach(s => {
@@ -71,14 +68,13 @@ export default class Renderer {
                 this.#systems[s] = system
         })
         this.sortedSystems = Object.keys(this.#systems).sort()
-        this.resizeObs = new ResizeObserver(() => {
-            const bBox = window.gpu.canvas.getBoundingClientRect()
+        new ResizeObserver(() => {
+            const bBox = gpu.canvas.getBoundingClientRect()
             if (this.params.camera) {
                 this.params.camera.aspectRatio = bBox.width / bBox.height
                 this.params.camera.updateProjection()
             }
-        })
-        this.resizeObs.observe(window.gpu.canvas)
+        }).observe(gpu.canvas)
         this.postProcessingWrapper = new PostProcessingWrapper( resolution)
     }
     
@@ -88,7 +84,7 @@ export default class Renderer {
 
     callback() {
         this.params.elapsed = performance.now() - this.then
-        window.gpu.clear(window.gpu.COLOR_BUFFER_BIT | window.gpu.DEPTH_BUFFER_BIT)
+        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
         const l = this.sortedSystems.length
         for (let s = 0; s < l; s++) {
             this.#systems[this.sortedSystems[s]]
@@ -98,7 +94,9 @@ export default class Renderer {
                     this.data,
                     this.entities,
                     this.data.entitiesMap,
-                    () => this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
+                    () => {
+                        this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
+                    }
                 )
         }
         this.wrapper.execute(this.params, this.#systems, this.data, this.entities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
@@ -117,7 +115,7 @@ export default class Renderer {
     }
 
     static drawMaterial(mesh, material) {
-        const gpu = window.gpu
+
         // if (material.settings.faceCulling === false)
         //     gpu.disable(gpu.CULL_FACE)
         // else {

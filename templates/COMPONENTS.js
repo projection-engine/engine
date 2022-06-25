@@ -10,7 +10,6 @@ export default {
     MATERIAL: "MaterialComponent",
     MESH: "MeshComponent",
     PHYSICS: "PhysicsBodyComponent",
-    SKYLIGHT: "SkylightComponent",
     SCRIPT: "ScriptComponent",
     CAMERA: "CameraComponent",
     LINE: "LineComponent",

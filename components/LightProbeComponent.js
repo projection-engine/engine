@@ -7,7 +7,7 @@ export default class LightProbeComponent extends Component {
     probes = []
 
     constructor(id) {
-        super(id);
+        super(id)
     }
 
     addProbe(translation = [10, 10, 10]) {

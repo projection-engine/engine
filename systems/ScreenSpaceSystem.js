@@ -66,7 +66,8 @@ export default class ScreenSpaceSystem extends System {
             ssr,
             ssgi,
             ssgiQuality,
-            ssgiBrightness
+            ssgiBrightness,
+            ssgiStepSize
         } = options
 
         const deferredSystem = systems[SYSTEMS.MESH]
@@ -97,8 +98,7 @@ export default class ScreenSpaceSystem extends System {
                 projection: camera.projectionMatrix,
                 viewMatrix: camera.viewMatrix,
                 invViewMatrix: camera.invViewMatrix,
-                depthSampler: systems[SYSTEMS.DEPTH_PRE_PASS].depth,
-                stepSize: .5,
+                stepSize:ssgiStepSize,
                 maxSteps: ssgiQuality,
                 intensity: ssgiBrightness
             })

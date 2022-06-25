@@ -11,7 +11,7 @@ export default class CubeMapComponent extends Component {
     asLightProbe = false
     irradianceMultiplier = [ 1, 1, 1]
     constructor(id, resolution, position) {
-        super(id, CubeMapComponent.constructor.name);
+        super(id, CubeMapComponent.constructor.name)
         if (resolution)
             this._resolution = resolution
         if (position)

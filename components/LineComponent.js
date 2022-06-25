@@ -10,7 +10,7 @@ export default class LineComponent extends Component {
     destination = [1, 1, 1]
 
     constructor(id) {
-        super(id);
+        super(id)
     }
 
     get thickness() {

@@ -1,5 +1,5 @@
 export default function resize() {
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         const {
             src, w, h, sizePercent, quality
         } = event.data
@@ -18,14 +18,14 @@ export default function resize() {
 
                                 else {
                                     const canvas = new OffscreenCanvas(width, height),
-                                        ctx = canvas.getContext("2d");
-                                    ctx.drawImage(imageToLoad, 0, 0, width, height);
+                                        ctx = canvas.getContext("2d")
+                                    ctx.drawImage(imageToLoad, 0, 0, width, height)
                                     canvas.convertToBlob({
                                         type: "image/png",
                                         quality: quality
                                     }).then(b => {
-                                        const reader = new FileReader();
-                                        reader.readAsDataURL(b);
+                                        const reader = new FileReader()
+                                        reader.readAsDataURL(b)
                                         reader.onloadend = () => self.postMessage(reader.result)
                                     })
                                 }
@@ -45,11 +45,11 @@ export function getImageBitmap() {
                 })
             })
     }
-    self.addEventListener('message', (event) => doIt(event))
+    self.addEventListener("message", (event) => doIt(event))
 }
 
 export function extractChannel() {
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         new Promise(async resolve => {
             const {
                 channels,
@@ -62,12 +62,12 @@ export function extractChannel() {
 
             self.postMessage(
                 await new Promise(resolve => {
-                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height);
-                    let ctx = c.getContext("2d");
+                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height)
+                    let ctx = c.getContext("2d")
                     ctx.drawImage(imageToLoad, 0, 0)
 
-                    const imgData = ctx.getImageData(0, 0, imageToLoad.width, imageToLoad.height);
-                    const data = imgData.data;
+                    const imgData = ctx.getImageData(0, 0, imageToLoad.width, imageToLoad.height)
+                    const data = imgData.data
 
                     let newImage = new Uint8Array(data.length)
 
@@ -85,9 +85,9 @@ export function extractChannel() {
                         type: "image/png",
                         quality: 1
                     }).then(blob => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
+                        const reader = new FileReader()
+                        reader.onloadend = () => resolve(reader.result)
+                        reader.readAsDataURL(blob)
                     })
                 })
             )
@@ -98,7 +98,7 @@ export function extractChannel() {
 
 
 export function invert() {
-    self.addEventListener('message', (event) => {
+    self.addEventListener("message", (event) => {
         new Promise(async resolve => {
             const {
                 img
@@ -110,21 +110,21 @@ export function invert() {
 
             self.postMessage(
                 await new Promise(resolve => {
-                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height);
-                    let ctx = c.getContext("2d");
-                    ctx.drawImage(imageToLoad, 0, 0);
-                    ctx.globalCompositeOperation = 'difference';
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, imageToLoad.width, imageToLoad.height);
+                    const c = new OffscreenCanvas(imageToLoad.width, imageToLoad.height)
+                    let ctx = c.getContext("2d")
+                    ctx.drawImage(imageToLoad, 0, 0)
+                    ctx.globalCompositeOperation = "difference"
+                    ctx.fillStyle = "white"
+                    ctx.fillRect(0, 0, imageToLoad.width, imageToLoad.height)
 
 
                     c.convertToBlob({
                         type: "image/png",
                         quality: 1
                     }).then(blob => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
+                        const reader = new FileReader()
+                        reader.onloadend = () => resolve(reader.result)
+                        reader.readAsDataURL(blob)
                     })
                 })
             )

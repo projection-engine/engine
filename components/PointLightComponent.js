@@ -13,7 +13,7 @@ export default class PointLightComponent extends Component {
 
 
     constructor(id) {
-        super(id, PointLightComponent.constructor.name);
+        super(id, PointLightComponent.constructor.name)
     }
 
     get zNear() {

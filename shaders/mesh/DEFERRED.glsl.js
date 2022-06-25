@@ -132,10 +132,11 @@ void main() {
         }
       
         Lo = (Lo  + texture(screenSpaceReflections, texCoord).rgb)* shadows; 
-        vec3 GI = albedo * texture(screenSpaceGI, texCoord).rgb;
- 
-		color = (ambient  + Lo + GI) * ao ;
-   
+        vec4 GI = texture(screenSpaceGI, texCoord);
+		if(length(GI) >= 0.1 && GI.a > 0.) 
+			color = (ambient  + Lo + albedo*(GI.rgb)) * ao ;
+		else
+   			color = (ambient  + Lo) * ao ;
     }
     else
         color = albedo ;

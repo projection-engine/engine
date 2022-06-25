@@ -1,82 +1,58 @@
 import Component from "../basic/Component"
 import {mat4} from "gl-matrix"
 
+const M = mat4.create()
 export default class DirectionalLightComponent extends Component {
     _color = [255, 255, 255]
     _direction = [0, 0, 0]
     _zNear = -1
     _zFar = 10000
-    _transformationMatrix = Array.from(mat4.create())
-    _lightView = mat4.create()
-    _lightProjection = mat4.create()
+    transformationMatrix =  [...M]
+    lightView = [...M]
+    lightProjection = [...M]
     _size = 35
-    _atlasFace = [0,0]
+    atlasFace = [0,0]
+    changed = true
+    shadowMap = true
+    center = [0, 0, 0]
+    _intensity = 1
+    fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
 
-    _changed = true
-    _shadowMap = true
-    _center = [0, 0, 0]
-    intensity = 1
     constructor(id) {
-        super(id, "DirectionalLightComponent")
-        this._update()
-
-    }
-    get shadowMap(){
-        return this._shadowMap
-    }
-    set shadowMap(data){
-        this._shadowMap = data
+        super(id)
+        this.update()
     }
 
-    get lightView(){
-        return this._lightView
+    get intensity(){
+        return this._intensity
     }
-    set lightView(data){
-        this._lightView = data
-    }
-
-    get changed(){
-        return this._changed
-    }
-    set changed(_){
-        this._changed = false
-    }
-
-
-    get fixedColor() {
-        return [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
+    set intensity(data){
+        this._intensity= data
+        this.fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
     get color(){
         return this._color
     }
     set color(data){
         this._color = data
-
+        this.fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
 
-    set atlasFace(data){
-        this._atlasFace = data
-    }
-    get atlasFace(){
-        return this._atlasFace
-    }
     get zNear() {
         return this._zNear
     }
-
     set zNear(data) {
         this._zNear = data
-        this._update()
+        this.update()
     }
 
 
     get zFar() {
         return this._zFar
     }
-
     set zFar(data) {
         this._zFar = data
-        this._update()
+        this.update()
     }
 
 
@@ -86,17 +62,13 @@ export default class DirectionalLightComponent extends Component {
 
     set direction(data) {
         this._direction = data
-        this._update()
+        this.transformationMatrix[12] = this._direction[0]
+        this.transformationMatrix[13] = this._direction[1]
+        this.transformationMatrix[14] = this._direction[2]
 
-
-        this._transformationMatrix[12] = data[0]
-        this._transformationMatrix[13] = data[1]
-        this._transformationMatrix[14] = data[2]
+        this.update()
     }
 
-    get transformationMatrix() {
-        return this._transformationMatrix
-    }
 
     get size() {
         return this._size
@@ -104,26 +76,14 @@ export default class DirectionalLightComponent extends Component {
 
     set size(data) {
         this._size = data
-        this._update()
-    }
-    get lightProjection(){
-        return this._lightProjection
+        this.update()
     }
 
-    get center(){
-        return this._center
-    }
-    set center(data){
-        this._center = data
-    }
-    _update() {
-        this._lightView = []
-        mat4.lookAt(this._lightView, this._direction, this._center, [0, 1, 0])
+    update() {
+        mat4.lookAt(this.lightView, this._direction, this.center, [0, 1, 0])
+        mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar)
 
-        this._lightProjection = []
-        mat4.ortho(this._lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar)
-
-        this._changed = true
+        this.changed = true
     }
 
 }

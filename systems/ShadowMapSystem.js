@@ -76,7 +76,7 @@ export default class ShadowMapSystem extends System {
 
     }
 
-    execute(options, systems, data) {
+    execute(options, systems, data, entities, entitiesMap, updateAllLights) {
         super.execute()
         const gpu = window.gpu
         const {
@@ -101,7 +101,8 @@ export default class ShadowMapSystem extends System {
         const dirL = directionalLights.length
         for (let i = 0; i < dirL; i++) {
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
-            if ((current.changed || transformChanged) && current.shadowMap || this.changed) {
+            if ((current.changed && current.shadowMap) || this.changed) {
+
                 lights2D.push(current)
                 current.changed = false
                 this.changed = true
@@ -111,7 +112,7 @@ export default class ShadowMapSystem extends System {
         for (let i = 0; i < pL; i++) {
             const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
 
-            if ((current.changed || transformChanged) && current.shadowMap) {
+            if (current.changed && current.shadowMap) {
                 lights3D.push({...current, translation: pointLights[i].components[COMPONENTS.TRANSFORM].position})
                 current.changed = false
                 this.changed = true
@@ -119,13 +120,15 @@ export default class ShadowMapSystem extends System {
         }
 
 
-        if (this.changed) {
+
+        if (this.changed || transformChanged) {
+            updateAllLights()
             this.changed = false
             gpu.cullFace(gpu.FRONT)
             this.shadowMapShader.use()
             const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
-            gpu.clearDepth(1)
+
             if (lights2D.length > 0) {
                 this.shadowsFrameBuffer.startMapping()
                 gpu.enable(gpu.SCISSOR_TEST)

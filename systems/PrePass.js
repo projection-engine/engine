@@ -3,6 +3,7 @@ import FramebufferInstance from "../instances/FramebufferInstance"
 import ShaderInstance from "../instances/ShaderInstance"
 import COMPONENTS from "../templates/COMPONENTS"
 import * as shaderCode from "../shaders/mesh/DEFERRED.glsl"
+
 const vertex = `#version 300 es
 
 layout (location = 1) in vec3 position;
@@ -82,7 +83,6 @@ export default class PrePass extends System {
         super.execute()
         const {meshes, meshSources} = data
         const {camera} = options
-
         // DEPTH && ID
         this.frameBuffer.startMapping()
         this.shader.use()

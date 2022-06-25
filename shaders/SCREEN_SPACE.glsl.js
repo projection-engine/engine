@@ -1,7 +1,6 @@
 import {vertex as quadVertex} from "./mesh/DEFERRED.glsl"
 
 
-
 const METHODS = `
 uniform float stepSize; 
 uniform float maxSteps; 
@@ -100,7 +99,7 @@ uniform sampler2D gNormal;
 in vec2 texCoord;
  
 out vec4 outColor;
-const float noiseScale = .5;
+const float noiseScale = 1.5;
 
 float interleavedGradientNoise(vec2 n) {
     float f = 0.06711056 * n.x + 0.00583715 * n.y;
@@ -133,8 +132,7 @@ precision highp float;
 
 uniform sampler2D previousFrame;
 uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D depthSampler;
+uniform sampler2D gNormal; 
 
 uniform float intensity;
 uniform mat4 projection;
@@ -146,9 +144,7 @@ in vec2 texCoord;
 ${METHODS}
  
 void main(){
-	if(texture(depthSampler, texCoord).r <= .1)
-		discard; 
-		 
+ 
  	vec3 normal = normalize(texture(gNormal, texCoord).rgb);
 	vec3 viewPos = getViewPosition(texCoord); 
 	// vec3 reflected = normalize(reflect(normalize(viewPos), normal));
@@ -157,8 +153,11 @@ void main(){
     vec3 hitPos = viewPos;
     float dDepth;  
  	vec4 coords = RayMarch(normal, hitPos, dDepth);
- 
-    outColor = vec4(texture(previousFrame, coords.xy).rgb * .3 * intensity, 1.);
+	vec3 albedo = texture(previousFrame, coords.xy).rgb;
+	
+	if(length(albedo) <= 0.)
+		discard; 
+    outColor = vec4(albedo * .3 * intensity, 1.);
 }
 `
 
@@ -169,7 +168,7 @@ precision highp float;
 uniform sampler2D previousFrame;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
-uniform sampler2D gBehaviour; 
+uniform sampler2D gBehaviour;  
 
 uniform mat4 projection;
 uniform mat4 viewMatrix;  
@@ -181,6 +180,7 @@ ${METHODS}
 
 
 void main(){
+ 
     vec3 behaviour = texture(gBehaviour, texCoord).rgb;
     Metallic = behaviour.b;
 	float roughness = behaviour.g;

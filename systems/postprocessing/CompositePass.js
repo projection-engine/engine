@@ -3,7 +3,6 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../shaders/FXAA.glsl"
 import * as shaderCode from "../../shaders/EFFECTS.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
-import {blurBox} from "../../shaders/EFFECTS.glsl"
 
 export default class CompositePass extends System {
     constructor( postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
@@ -90,14 +89,14 @@ export default class CompositePass extends System {
     }
     blur(fbo, bloomIntensity, blurBuffers=this.blurBuffers, upSampledBuffers=this.upSampledBuffers){
         const q = blurBuffers.length
-        let blurred
+
         this.blurShader.use()
         for (let index = 0; index < q; index++)
             this.blurSample(index, fbo, blurBuffers)
+        this.upSamplingShader.use()
         for (let index = 0; index < q-1; index++) {
             const current = upSampledBuffers[index]
             current.startMapping()
-            this.upSamplingShader.use()
             this.upSamplingShader.bindForUse({
                 blurred: blurBuffers[index].height.colors[0],
                 nextSampler: blurBuffers[index + 1].height.colors[0],
@@ -106,9 +105,8 @@ export default class CompositePass extends System {
             })
             current.draw()
             current.stopMapping()
-            blurred = upSampledBuffers[index].colors[0]
         }
-        return blurred
+        return upSampledBuffers[q-2].colors[0]
     }
     blurSample(level, framebuffer, blurBuffers=this.blurBuffers) {
         const shader = this.blurShader
