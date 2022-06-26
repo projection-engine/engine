@@ -9,8 +9,6 @@ import SpecularProbePass from "./passes/SpecularProbePass"
 import DiffuseProbePass from "./passes/DiffuseProbePass"
 import FramebufferInstance from "../instances/FramebufferInstance"
 import ENVIRONMENT from "../ENVIRONMENT"
-import ShaderInstance from "../instances/ShaderInstance"
-import * as shaderCode from "../shaders/FXAA.glsl"
 import {copyTexture} from "../utils/utils"
 
 export default class RenderingPass{
