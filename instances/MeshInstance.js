@@ -78,4 +78,9 @@ export default class MeshInstance {
         if (this.tangentVBO)
             this.tangentVBO.disable()
     }
+
+    delete(){
+        window.gpu.deleteVertexArray(this.VAO)
+        window.gpu.deleteBuffer(this.indexVBO)
+    }
 }

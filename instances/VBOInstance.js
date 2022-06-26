@@ -30,4 +30,8 @@ export default class VBOInstance {
         window.gpu.disableVertexAttribArray(this.index)
         window.gpu.bindBuffer(this.type, null)
     }
+
+    delete(){
+        window.gpu.deleteBuffer(this.id)
+    }
 }

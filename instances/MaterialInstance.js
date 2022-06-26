@@ -123,6 +123,11 @@ export default class MaterialInstance {
             shader.bindForUse(data)
         }
     }
-
-
+    delete(){
+        window.gpu.deleteProgram(this._shader.program)
+        Object.values(this.uniformData).map(d => {
+            if(d instanceof WebGLTexture)
+                window.gpu.deleteTexture(d)
+        })
+    }
 }
