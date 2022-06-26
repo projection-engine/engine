@@ -5,7 +5,7 @@ import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../utils/generateBlurBuffers"
 
 
-let normalSampler, deferredSystem, aoSystem, composite, lastFrame
+let normalSampler, deferredSystem, aoSystem, composite
 export default class SSGIPass extends System {
     SSGI
     then = performance.now()
@@ -36,9 +36,7 @@ export default class SSGIPass extends System {
         this.normalsFBO.stopMapping()
     }
 
-    execute(options) {
-        if(!lastFrame)
-            lastFrame = window.renderer.postProcessingPass.lastFrame
+    execute(options, lastFrame) {
         const {
             camera,
             ssgi,

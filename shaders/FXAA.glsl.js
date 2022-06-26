@@ -96,7 +96,7 @@ void main() {
 
 `
 
-export const noFxaaFragment = `#version 300 es
+export const toScreen = `#version 300 es
 precision mediump float;
 
 in vec2 vTexcoord;

@@ -14,7 +14,6 @@ uniform mat4 projectionMatrix;
 out vec4 vPosition; 
 void main() { 
     vPosition = projectionMatrix * viewMatrix * transformMatrix * vec4(position , 1.) ;
- 
     gl_Position = vPosition;
 }
 `
@@ -32,14 +31,14 @@ void main(void){
 const normal = `#version 300 es
 precision highp  float;
  
-#define THRESHOLD .1
+#define THRESHOLD .001
 in vec2 texCoord;  
 uniform sampler2D depthSampler;
 uniform mat4 projectionInverse;
 uniform mat4 viewInverse; 
 out vec4 fragNormal;
 
-
+ 
 vec3 reconstructPosition(vec2 uv, float z, mat4 InvVP)
 {
   float x = uv.x * 2. - 1.;
@@ -54,10 +53,10 @@ void main(void){
     float depth = texture(depthSampler, texCoord).r;
     if(depth <= THRESHOLD)
         discard;
-    vec3 P0 = reconstructPosition(texCoord, depth, viewInverse * projectionInverse );   
+    vec3 P0 = reconstructPosition(texCoord, depth, viewInverse * projectionInverse);   
     vec3 normal = normalize(cross(dFdx(P0), dFdy(P0)));
  
-    fragNormal = vec4(normalize(vec4(normal, 1.) * viewInverse).rgb, 1.);
+    fragNormal = vec4(normalize(vec4(normal, 1.)).rgb, 1.);
 }`
 export default class DepthPrePass extends System {
 

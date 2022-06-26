@@ -187,8 +187,6 @@ in vec2 texCoord;
 uniform float stepSize;
 ${METHODS}
 
-
-
 void main(){
  
     vec3 behaviour = texture(gBehaviour, texCoord).rgb;

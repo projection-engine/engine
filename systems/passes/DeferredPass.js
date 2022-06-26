@@ -5,6 +5,7 @@ import Renderer from "../../Renderer"
 import ForwardPass from "./ForwardPass"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
+import ENVIRONMENT from "../../ENVIRONMENT"
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass extends System {
@@ -21,8 +22,17 @@ export default class DeferredPass extends System {
             .depthTest()
 
         this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
+        this.deferredFBO = (new FramebufferInstance(resolution.w, resolution.h)).texture()
+        this.toScreenShader = new ShaderInstance(shaderCode.vertex, shaderCode.toScreen)
     }
 
+    drawFrame(){
+        this.toScreenShader.use()
+        this.toScreenShader.bindForUse({
+            uSampler: this.deferredFBO.colors[0]
+        })
+        this.deferredFBO.draw()
+    }
     execute(options, data) {
         super.execute()
         const {
@@ -72,9 +82,10 @@ export default class DeferredPass extends System {
         }
         window.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
+
     }
 
-    drawBuffer(options, data){
+    drawBuffer(options, data, entities, entitiesMap, onWrap){
         if (aoTexture === undefined) {
             aoTexture = window.renderer.renderingPass.ao.texture
             ssGISystem = window.renderer.renderingPass.ssGI
@@ -95,6 +106,11 @@ export default class DeferredPass extends System {
             ssr,
             ssgi
         } = options
+
+        
+        this.deferredFBO.startMapping()
+        if (onWrap && window.renderer.environment !== ENVIRONMENT.PROD)
+            onWrap.execute(options, data, entities, entitiesMap, false)
 
         this.deferredShader.use()
         this.deferredShader.bindForUse({
@@ -121,6 +137,8 @@ export default class DeferredPass extends System {
             dirLightPOV,
             pointLightData
         })
-        this.frameBuffer.draw()
+
+        this.deferredFBO.draw()
+        this.deferredFBO.stopMapping()
     }
 }

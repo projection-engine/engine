@@ -144,3 +144,19 @@ void main() {
 	finalColor = vec4(color, 1.0);
 }
 `
+
+
+export const toScreen = `#version 300 es
+precision mediump float;
+
+in vec2 texCoord;
+
+uniform sampler2D uSampler;
+out vec4 finalColor;
+
+void main() {
+    vec3 fragment = texture(uSampler, texCoord).rgb;   
+    finalColor = vec4(fragment, 1.0);
+}
+
+`

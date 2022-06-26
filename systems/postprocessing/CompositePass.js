@@ -20,7 +20,7 @@ export default class CompositePass extends System {
         this.blurShader = new ShaderInstance(vertex, shaderCode.blurBox)
     }
 
-    execute(options, data, entities, entitiesMap, [worker, output]) {
+    execute(options, data, entities, entitiesMap, worker, output) {
         super.execute()
         const {
             bloomStrength,

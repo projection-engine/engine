@@ -92,7 +92,8 @@ export default class Renderer {
             this.data.entitiesMap,
             () => {
                 this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
-            }
+            },
+            this.params.onWrap
         )
         this.postProcessingPass.execute(
             this.params,

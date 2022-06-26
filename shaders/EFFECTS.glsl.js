@@ -116,7 +116,7 @@ void main(void){
     fragColor += texture(sceneColor, blurTextureCoords[10]) * 0.0093;
 
 }
-//     `
+`
 
 export const bilinearUpSampling = `#version 300 es
 
