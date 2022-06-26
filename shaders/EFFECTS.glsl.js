@@ -27,15 +27,16 @@ precision mediump float;
 in vec2 vTexcoord;
 uniform sampler2D sceneColor;
 uniform vec2 resolution;
-out vec4 fragColor;
-const float kernel = 7.0;
-const float weight = 1.0;
-uniform bool isWidth; 
+const float kernel = 5.;
 
+out vec4 fragColor;
+ 
+const float weight = 1.;
+uniform bool isWidth; 
 
 void main( )
 {
- 
+
     vec3 sum = vec3(0);
     float pixelSize = 1.0 / resolution.x; 
     
@@ -58,63 +59,63 @@ void main( )
     fragColor = vec4(sum, 1.0);
 }
 `
-// export const blurVertex = `#version 300 es
-// layout (location = 0) in vec3 position;
-//
-//
-// uniform vec2 resolution;
-// uniform bool isWidth;
-//
-// out vec2 blurTextureCoords[11];
-//
-// void main() {
-//     vec2 texCoord = (position.xy) * 0.5 + 0.5;
-//     float pixelSize;
-//
-//     if(isWidth == true)
-//         pixelSize = 1./resolution.x;
-//     else
-//         pixelSize = 1./resolution.y;
-//
-//     vec2 vector;
-//     for(int i = -5; i <= 5; i++){
-//
-//         if(isWidth == true)
-//             vector = vec2(pixelSize * float(i), 0.);
-//         else
-//             vector = vec2(0., pixelSize * float(i));
-//         blurTextureCoords[i + 5] =   texCoord + vector;
-//      }
-//
-//     gl_Position = vec4(position, 1.0);
-// }
-// `
-// export const blur = `#version 300 es
-//
-// precision mediump float;
-//
-// out vec4 fragColor;
-//
-// in vec2 blurTextureCoords[11];
-//
-// uniform sampler2D sceneColor;
-//
-// void main(void){
-//
-//     fragColor = vec4(0.0);
-//     fragColor += texture(sceneColor, blurTextureCoords[0]) * 0.0093;
-//     fragColor += texture(sceneColor, blurTextureCoords[1]) * 0.028002;
-//     fragColor += texture(sceneColor, blurTextureCoords[2]) * 0.065984;
-//     fragColor += texture(sceneColor, blurTextureCoords[3]) * 0.121703;
-//     fragColor += texture(sceneColor, blurTextureCoords[4]) * 0.175713;
-//     fragColor += texture(sceneColor, blurTextureCoords[5]) * 0.198596;
-//     fragColor += texture(sceneColor, blurTextureCoords[6]) * 0.175713;
-//     fragColor += texture(sceneColor, blurTextureCoords[7]) * 0.121703;
-//     fragColor += texture(sceneColor, blurTextureCoords[8]) * 0.065984;
-//     fragColor += texture(sceneColor, blurTextureCoords[9]) * 0.028002;
-//     fragColor += texture(sceneColor, blurTextureCoords[10]) * 0.0093;
-//
-// }
+export const gaussianVertex = `#version 300 es
+layout (location = 0) in vec3 position;
+
+
+uniform vec2 resolution;
+uniform bool isWidth;
+
+out vec2 blurTextureCoords[11];
+
+void main() {
+    vec2 texCoord = (position.xy) * 0.5 + 0.5;
+    float pixelSize;
+
+    if(isWidth == true)
+        pixelSize = 1./resolution.x;
+    else
+        pixelSize = 1./resolution.y;
+
+    vec2 vector;
+    for(int i = -5; i <= 5; i++){
+
+        if(isWidth == true)
+            vector = vec2(pixelSize * float(i), 0.);
+        else
+            vector = vec2(0., pixelSize * float(i));
+        blurTextureCoords[i + 5] =   texCoord + vector;
+     }
+
+    gl_Position = vec4(position, 1.0);
+}
+`
+export const gaussianFragment = `#version 300 es
+
+precision highp float;
+
+out vec4 fragColor;
+
+in vec2 blurTextureCoords[11];
+
+uniform sampler2D sceneColor;
+
+void main(void){
+
+    fragColor = vec4(0.0);
+    fragColor += texture(sceneColor, blurTextureCoords[0]) * 0.0093;
+    fragColor += texture(sceneColor, blurTextureCoords[1]) * 0.028002;
+    fragColor += texture(sceneColor, blurTextureCoords[2]) * 0.065984;
+    fragColor += texture(sceneColor, blurTextureCoords[3]) * 0.121703;
+    fragColor += texture(sceneColor, blurTextureCoords[4]) * 0.175713;
+    fragColor += texture(sceneColor, blurTextureCoords[5]) * 0.198596;
+    fragColor += texture(sceneColor, blurTextureCoords[6]) * 0.175713;
+    fragColor += texture(sceneColor, blurTextureCoords[7]) * 0.121703;
+    fragColor += texture(sceneColor, blurTextureCoords[8]) * 0.065984;
+    fragColor += texture(sceneColor, blurTextureCoords[9]) * 0.028002;
+    fragColor += texture(sceneColor, blurTextureCoords[10]) * 0.0093;
+
+}
 //     `
 
 export const bilinearUpSampling = `#version 300 es

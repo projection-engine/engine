@@ -2,45 +2,17 @@ import System from "../../basic/System"
 import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../shaders/FXAA.glsl"
 import * as shaderCode from "../../shaders/EFFECTS.glsl"
-import FramebufferInstance from "../../instances/FramebufferInstance"
+import generateBlurBuffers from "../../utils/generateBlurBuffers"
 
 export default class CompositePass extends System {
-    constructor( postProcessingResolution={w:window.screen.width, h: window.screen.height }) {
+    constructor( resolution={w:window.screen.width, h: window.screen.height }) {
         super()
-        this.w = postProcessingResolution.w
-        this.h = postProcessingResolution.h
+        this.w = resolution.w
+        this.h = resolution.h
 
-        this.blurBuffers = []
-        this.upSampledBuffers = []
-
-        let pW = this.w, pH = this.h
-        for (let i = 0; i < 4; i++) {
-            const [wW, hH] = [pW / 2, pH / 2]
-            const wBlurFrameBuffer = new FramebufferInstance( wW, hH)
-            wBlurFrameBuffer
-                .texture({linear: true})
-            const hBlurFrameBuffer = new FramebufferInstance( wW, hH)
-            hBlurFrameBuffer
-                .texture({linear: true})
-            this.blurBuffers.push({
-                height: hBlurFrameBuffer,
-                width: wBlurFrameBuffer
-            })
-
-
-            pW = wW
-            pH = hH
-        }
-
-        for (let i = 0; i < 4; i++) {
-            const [wW, hH] = [pW * 2, pH * 2]
-            const b = new FramebufferInstance(wW, hH)
-                .texture({linear: true})
-            this.upSampledBuffers.push(b)
-
-            pW = wW
-            pH = hH
-        }
+        const [blurBuffers,  upSampledBuffers] = generateBlurBuffers(4, resolution.w, resolution.h)
+        this.blurBuffers = blurBuffers
+        this.upSampledBuffers = upSampledBuffers
 
         this.compositeShader = new ShaderInstance(vertex, shaderCode.compositeFragment,)
         this.upSamplingShader = new ShaderInstance(vertex, shaderCode.bilinearUpSampling,)
@@ -48,7 +20,7 @@ export default class CompositePass extends System {
         this.blurShader = new ShaderInstance(vertex, shaderCode.blurBox)
     }
 
-    execute(options, systems, data, entities, entitiesMap, [worker, output]) {
+    execute(options, data, entities, entitiesMap, [worker, output]) {
         super.execute()
         const {
             bloomStrength,
@@ -71,10 +43,8 @@ export default class CompositePass extends System {
             output.draw()
             output.stopMapping()
 
-
             this.blurred = this.blur(output, bloomStrength)
         }
-
         output.startMapping()
         this.compositeShader.use()
         this.compositeShader.bindForUse({
@@ -87,12 +57,33 @@ export default class CompositePass extends System {
         output.draw()
         output.stopMapping()
     }
-    blur(fbo, bloomIntensity, blurBuffers=this.blurBuffers, upSampledBuffers=this.upSampledBuffers){
+    blur(fbo, bloomIntensity, blurBuffers=this.blurBuffers, upSampledBuffers=this.upSampledBuffers, kernel=7){
         const q = blurBuffers.length
 
         this.blurShader.use()
-        for (let index = 0; index < q; index++)
-            this.blurSample(index, fbo, blurBuffers)
+        for (let level = 0; level < q; level++) {
+            const {width, height} = blurBuffers[level]
+            const previousColor = level > 0 ? blurBuffers[level - 1].height.colors[0] : fbo.colors[0]
+            width.startMapping()
+            this.blurShader.bindForUse({
+                sceneColor: previousColor,
+                resolution: [width.width, width.height],
+                isWidth: true,
+                kernel
+            })
+            width.draw()
+            width.stopMapping()
+
+            height.startMapping()
+            this.blurShader.bindForUse({
+                sceneColor: width.colors[0],
+                resolution: [height.width, height.height],
+                isWidth: false
+            })
+            height.draw()
+            height.stopMapping()
+        }
+
         this.upSamplingShader.use()
         for (let index = 0; index < q-1; index++) {
             const current = upSampledBuffers[index]
@@ -107,28 +98,5 @@ export default class CompositePass extends System {
             current.stopMapping()
         }
         return upSampledBuffers[q-2].colors[0]
-    }
-    blurSample(level, framebuffer, blurBuffers=this.blurBuffers) {
-        const shader = this.blurShader
-        const {width, height} = blurBuffers[level]
-        const previousColor = level > 0 ? blurBuffers[level - 1].height.colors[0] : framebuffer.colors[0]
-        width.startMapping()
-        shader.bindForUse({
-            sceneColor: previousColor,
-            resolution: [width.width, width.height],
-            isWidth: true
-        })
-        width.draw()
-        width.stopMapping()
-
-        height.startMapping()
-        shader.bindForUse({
-            sceneColor: width.colors[0],
-            resolution: [height.width, height.height],
-            isWidth: false
-        })
-
-        height.draw()
-        height.stopMapping()
     }
 }

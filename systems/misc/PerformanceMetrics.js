@@ -1,7 +1,7 @@
-import System from "../basic/System"
+import System from "../../basic/System"
 
 const SAMPLES = 25
-export default class MetricsSystem extends System {
+export default class PerformanceMetrics extends System {
     #framesRendered = 0
     #times = []
     _visible = true

@@ -1,9 +1,9 @@
-import System from "../basic/System"
+import System from "../../basic/System"
 import {mat4, vec3} from "gl-matrix"
-import {VIEWS} from "./ShadowMapSystem"
-import COMPONENTS from "../templates/COMPONENTS"
-import Forward from "./Forward"
-import Renderer from "../Renderer"
+import {VIEWS} from "./ShadowMapPass"
+import COMPONENTS from "../../templates/COMPONENTS"
+import ForwardPass from "./ForwardPass"
+import Renderer from "../../Renderer"
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
@@ -12,7 +12,7 @@ export const STEPS_CUBE_MAP = {
     DONE: 2,
     CALCULATE: 3
 }
-export default class CubeMapSystem extends System {
+export default class SpecularProbePass extends System {
     step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
 
@@ -20,7 +20,7 @@ export default class CubeMapSystem extends System {
         super()
     }
 
-    execute(options, systems, data) {
+    execute(options, data) {
         super.execute()
         const {
             cubeMaps,
@@ -41,7 +41,7 @@ export default class CubeMapSystem extends System {
                 current.cubeMap.draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], translation, VIEWS.target[index])
                     const view = mat4.lookAt([], translation, target, VIEWS.up[index])
-                    CubeMapSystem.draw({
+                    SpecularProbePass.draw({
                         view,
                         projection,
                         data,
@@ -131,7 +131,7 @@ export default class CubeMapSystem extends System {
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
                 const ambient = Renderer.getEnvironment(current)
-                Forward.drawMesh({
+                ForwardPass.drawMesh({
                     ambient,
                     mesh,
                     camPosition: cubeMapPosition,

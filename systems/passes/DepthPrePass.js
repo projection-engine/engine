@@ -1,8 +1,8 @@
-import System from "../basic/System"
-import FramebufferInstance from "../instances/FramebufferInstance"
-import ShaderInstance from "../instances/ShaderInstance"
-import COMPONENTS from "../templates/COMPONENTS"
-import * as shaderCode from "../shaders/mesh/DEFERRED.glsl"
+import System from "../../basic/System"
+import FramebufferInstance from "../../instances/FramebufferInstance"
+import ShaderInstance from "../../instances/ShaderInstance"
+import COMPONENTS from "../../templates/COMPONENTS"
+import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
 
 const vertex = `#version 300 es
 
@@ -59,7 +59,7 @@ void main(void){
  
     fragNormal = vec4(normalize(vec4(normal, 1.) * viewInverse).rgb, 1.);
 }`
-export default class PrePass extends System {
+export default class DepthPrePass extends System {
 
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
         super()
@@ -79,7 +79,7 @@ export default class PrePass extends System {
     get normal(){
         return this.normalFrameBuffer.colors[0]
     }
-    execute(options, systems, data) {
+    execute(options, data) {
         super.execute()
         const {meshes, meshSources} = data
         const {camera} = options

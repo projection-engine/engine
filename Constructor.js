@@ -1,4 +1,3 @@
-import SYSTEMS from "./templates/SYSTEMS"
 
 export default function Constructor(canvas, resolution, Renderer){
     const ctx = canvas.getContext("webgl2", {
@@ -18,20 +17,5 @@ export default function Constructor(canvas, resolution, Renderer){
     ctx.frontFace(ctx.CCW)
 
     window.gpu = ctx
-    window.renderer = new Renderer(
-        {w: resolution[0], h:resolution[1]},
-        [
-            SYSTEMS.SCRIPT,
-            SYSTEMS.PERF,
-            SYSTEMS.TRANSFORMATION,
-            SYSTEMS.SHADOWS,
-            SYSTEMS.PICK,
-            SYSTEMS.CAMERA_CUBE,
-            SYSTEMS.CUBE_MAP,
-            SYSTEMS.AO,
-            SYSTEMS.DEPTH_PRE_PASS,
-            SYSTEMS.PROBE,
-            SYSTEMS.SSGI
-        ]
-    )
+    window.renderer = new Renderer({w: resolution[0], h:resolution[1]})
 }

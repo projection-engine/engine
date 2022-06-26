@@ -1,9 +1,9 @@
-import System from "../basic/System"
+import System from "../../basic/System"
 import {mat4, vec3} from "gl-matrix"
-import {VIEWS} from "./ShadowMapSystem"
-import COMPONENTS from "../templates/COMPONENTS"
-import CubeMapSystem from "./CubeMapSystem"
-import CubeMapInstance from "../instances/CubeMapInstance"
+import {VIEWS} from "./ShadowMapPass"
+import COMPONENTS from "../../templates/COMPONENTS"
+import SpecularProbePass from "./SpecularProbePass"
+import CubeMapInstance from "../../instances/CubeMapInstance"
 
 export const STEPS_LIGHT_PROBE = {
     GENERATION: 0,
@@ -11,7 +11,7 @@ export const STEPS_LIGHT_PROBE = {
     DONE: 3,
     CALCULATE: 4
 }
-export default class LightProbeSystem extends System {
+export default class DiffuseProbePass extends System {
     step = STEPS_LIGHT_PROBE.GENERATION
     lastCallLength = -1
 
@@ -20,7 +20,7 @@ export default class LightProbeSystem extends System {
         this.baseCubeMap = new CubeMapInstance(128, false)
     }
 
-    execute(options, systems, data) {
+    execute(options, data) {
         super.execute()
         const {
             lightProbes,
@@ -44,7 +44,7 @@ export default class LightProbeSystem extends System {
                     this.baseCubeMap.draw((yaw, pitch, projection, index) => {
                         const target = vec3.add([], currentProbe.translation, VIEWS.target[index])
                         const view = mat4.lookAt([], currentProbe.translation, target, VIEWS.up[index])
-                        CubeMapSystem.draw({
+                        SpecularProbePass.draw({
                             view,
                             projection,
                             data,

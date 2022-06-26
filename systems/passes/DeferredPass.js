@@ -1,15 +1,14 @@
-import System from "../basic/System"
-import FramebufferInstance from "../instances/FramebufferInstance"
-import COMPONENTS from "../templates/COMPONENTS"
-import Renderer from "../Renderer"
-import Forward from "./Forward"
-import SYSTEMS from "../templates/SYSTEMS"
-import ShaderInstance from "../instances/ShaderInstance"
-import * as shaderCode from "../shaders/mesh/DEFERRED.glsl"
+import System from "../../basic/System"
+import FramebufferInstance from "../../instances/FramebufferInstance"
+import COMPONENTS from "../../templates/COMPONENTS"
+import Renderer from "../../Renderer"
+import ForwardPass from "./ForwardPass"
+import ShaderInstance from "../../instances/ShaderInstance"
+import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
 
-export default class Deferred extends System {
+let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
+export default class DeferredPass extends System {
     lastMaterial
-
     constructor( resolution = {w: window.screen.width, h: window.screen.height}) {
         super()
         this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
@@ -24,7 +23,7 @@ export default class Deferred extends System {
         this.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
     }
 
-    execute(options, systems, data) {
+    execute(options, data) {
         super.execute()
         const {
             meshes,
@@ -54,7 +53,7 @@ export default class Deferred extends System {
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
                 const ambient = Renderer.getEnvironment(current, skybox)
-                Forward.drawMesh({
+                ForwardPass.drawMesh({
                     mesh,
                     camPosition: camera.position,
                     viewMatrix: camera.viewMatrix,
@@ -71,15 +70,17 @@ export default class Deferred extends System {
                 })
             }
         }
-
-        window.gpu.cullFace(window.gpu.BACK)
         window.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
     }
 
-    drawBuffer(options, systems, data){
-        if (this.aoTexture === undefined && systems[SYSTEMS.AO])
-            this.aoTexture = systems[SYSTEMS.AO].texture
+    drawBuffer(options, data){
+        if (aoTexture === undefined) {
+            aoTexture = window.renderer.renderingPass.ao.texture
+            ssGISystem = window.renderer.renderingPass.ssGI
+            ssrSystem = window.renderer.renderingPass.ssr
+            shadowMapSystem = window.renderer.renderingPass.shadowMap
+        }
         const {
             pointLightsQuantity,
             maxTextures,
@@ -94,18 +95,18 @@ export default class Deferred extends System {
             ssr,
             ssgi
         } = options
-        const shadowMapSystem = systems[SYSTEMS.SHADOWS]
+
         this.deferredShader.use()
         this.deferredShader.bindForUse({
-            screenSpaceGI: ssgi ? systems[SYSTEMS.SSGI].SSGI : undefined,
-            screenSpaceReflections:ssr ? systems[SYSTEMS.SSGI].ssColor : undefined,
+            screenSpaceGI: ssgi ? ssGISystem.color : undefined,
+            screenSpaceReflections:ssr ? ssrSystem.color : undefined,
             positionSampler: this.frameBuffer.colors[0],
             normalSampler: this.frameBuffer.colors[1],
             albedoSampler: this.frameBuffer.colors[2],
             behaviourSampler: this.frameBuffer.colors[3],
             ambientSampler: this.frameBuffer.colors[4],
             shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,
-            aoSampler: this.aoTexture,
+            aoSampler: aoTexture,
 
             shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
             shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,

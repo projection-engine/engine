@@ -1,14 +1,14 @@
-import System from "../basic/System"
-import COMPONENTS from "../templates/COMPONENTS"
+import System from "../../basic/System"
+import COMPONENTS from "../../templates/COMPONENTS"
 import * as glMatrix from "gl-matrix"
 
-import Transformation from "../templates/Transformation"
-import PickSystem from "./PickSystem"
-import SYSTEMS from "../templates/SYSTEMS"
-import KEYS from "../templates/KEYS"
-import ENVIRONMENT from "../ENVIRONMENT"
+import Transformation from "../../templates/Transformation"
+import Picking from "./Picking"
 
-export default class ScriptSystem extends System {
+import KEYS from "../../templates/KEYS"
+import ENVIRONMENT from "../../ENVIRONMENT"
+
+export default class Scripting extends System {
     pressedKeys = {}
 
     constructor() {
@@ -30,7 +30,7 @@ export default class ScriptSystem extends System {
         }
     }
 
-    execute(options, systems, data, entities, entitiesMap, updateAllLights) {
+    execute(options, data, entities, entitiesMap, updateAllLights) {
         super.execute()
         const {meshSources, levelScript} = data
         const {
@@ -45,16 +45,16 @@ export default class ScriptSystem extends System {
                 const scripts =  entities[i].scripts
                 const sLength = scripts.length
                 for(let s = 0; s < sLength; s++){
-                    this.executeLoop(scripts[s], elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
+                    this.executeLoop(scripts[s], elapsed, entitiesMap, camera, meshSources,  entities, updateAllLights)
                 }
             }
 
             if (levelScript)
-                this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshSources, systems[SYSTEMS.PICK], entities, updateAllLights)
+                this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshSources,  entities, updateAllLights)
         }
     }
 
-    executeLoop(executor, elapsed, entities, camera, meshSources, pickSystem, entitiesArr, updateAllLights) {
+    executeLoop(executor, elapsed, entities, camera, meshSources, entitiesArr, updateAllLights) {
 
         executor.execute({
             elapsed,
@@ -69,9 +69,9 @@ export default class ScriptSystem extends System {
                 toEuler: Transformation.getEuler,
                 pick: (entity, coords) => {
                     if (entity.components[COMPONENTS.MESH]) {
-                        const index = pickSystem.pickElement((shader, proj) => {
+                        const index = window.renderer.picking.pickElement((shader, proj) => {
                             const mesh = meshSources[entity.components[COMPONENTS.MESH]?.meshID]
-                            PickSystem.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader)
+                            Picking.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader)
                         }, coords, camera)
 
                         return entitiesArr.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)

@@ -1,7 +1,7 @@
-import System from "../basic/System"
+import System from "../../basic/System"
 
 // const GRAVITY = .1
-export default class PhysicsSystem extends System {
+export default class Physics extends System {
     constructor() {
         super()
     }

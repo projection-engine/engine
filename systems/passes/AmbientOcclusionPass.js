@@ -1,10 +1,9 @@
-import System from "../basic/System"
-import ShaderInstance from "../instances/ShaderInstance"
-import * as shaderCode from "../shaders/shadows/AO.glsl"
-import FramebufferInstance from "../instances/FramebufferInstance"
-import SYSTEMS from "../templates/SYSTEMS"
+import System from "../../basic/System"
+import ShaderInstance from "../../instances/ShaderInstance"
+import * as shaderCode from "../../shaders/shadows/AO.glsl"
+import FramebufferInstance from "../../instances/FramebufferInstance"
 
-export default class AOSystem extends System {
+export default class AmbientOcclusionPass extends System {
     constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
         super()
         const gpu = window.gpu
@@ -45,9 +44,9 @@ export default class AOSystem extends System {
         return this.blurredFrameBuffer.colors[0]
     }
 
-    execute(options, systems) {
+    execute(options) {
         super.execute()
-        const depth = systems[SYSTEMS.DEPTH_PRE_PASS]
+        const depth = window.renderer.renderingPass.depthPrePass
         const {
             total_strength, base, area,
             falloff, radius, samples
@@ -65,7 +64,7 @@ export default class AOSystem extends System {
                     falloff, radius, samples,
                     0, 0, 0
                 ],
-                normalSampler: systems[SYSTEMS.DEPTH_PRE_PASS].normal
+                normalSampler: depth.normal
             })
             this.frameBuffer.draw(this.shader)
             this.frameBuffer.stopMapping()

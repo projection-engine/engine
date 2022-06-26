@@ -1,19 +1,19 @@
 import RootCameraInstance from "./instances/RootCameraInstance"
-import RenderingWrapper from "./systems/RenderingWrapper"
+
 
 import {createTexture} from "./utils/utils"
 import MaterialInstance from "./instances/MaterialInstance"
 import * as shaderCode from "./shaders/mesh/FALLBACK.glsl"
 import {DATA_TYPES} from "./templates/DATA_TYPES"
 import ImageProcessor from "./utils/image/ImageProcessor"
-import SYSTEMS from "./templates/SYSTEMS"
-import FramebufferInstance from "./instances/FramebufferInstance"
 import Packager from "./Packager"
-import systemInstance from "./utils/systemInstance"
 import VBOInstance from "./instances/VBOInstance"
 import COMPONENTS from "./templates/COMPONENTS"
 import ENVIRONMENT from "./ENVIRONMENT"
-import PostProcessingWrapper from "./systems/postprocessing/PostProcessingWrapper"
+import Picking from "./systems/misc/Picking"
+import MiscellaneousPass from "./systems/MiscellaneousPass"
+import RenderingPass from "./systems/RenderingPass"
+import PostProcessingPass from "./systems/PostProcessingPass"
 
 let gpu
 export default class Renderer {
@@ -22,12 +22,12 @@ export default class Renderer {
     frameID = undefined
     data = {}
     params = {}
-    #systems = {}
     #ready = false
     then = 0
     entities = []
 
-    constructor( resolution, systems) {
+    constructor( resolution) {
+
         gpu = window.gpu
         Promise.all([import("./templates/CUBE"), import("./templates/BRDF.json")])
             .then(async res => {
@@ -54,20 +54,15 @@ export default class Renderer {
                 this.start()
             }).catch(err => console.error(err))
 
-        this.wrapper = new RenderingWrapper(resolution)
-        const a = new FramebufferInstance(), b = new FramebufferInstance()
-        a.texture().depthTest()
-        b.texture()
 
-        this.postProcessingFramebuffers = {a: a, b: b}
+        this.picking = new Picking()
 
-        const sys = [...systems, SYSTEMS.MESH]
-        sys.forEach(s => {
-            let system = systemInstance(s, resolution)
-            if (system)
-                this.#systems[s] = system
-        })
-        this.sortedSystems = Object.keys(this.#systems).sort()
+        this.miscellaneousPass = new MiscellaneousPass(resolution)
+        this.renderingPass = new RenderingPass(resolution)
+        this.postProcessingPass = new PostProcessingPass(resolution)
+
+
+        // CAMERA ASPECT RATIO OBSERVER
         new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
             if (this.params.camera) {
@@ -75,31 +70,37 @@ export default class Renderer {
                 this.params.camera.updateProjection()
             }
         }).observe(gpu.canvas)
-        this.postProcessingWrapper = new PostProcessingWrapper( resolution)
-    }
-    
-    get systems() {
-        return this.#systems
     }
 
     callback() {
         this.params.elapsed = performance.now() - this.then
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-        const l = this.sortedSystems.length
-        for (let s = 0; s < l; s++) {
-            this.#systems[this.sortedSystems[s]]
-                .execute(
-                    this.params,
-                    this.#systems,
-                    this.data,
-                    this.entities,
-                    this.data.entitiesMap,
-                    () => {
-                        this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
-                    }
-                )
-        }
-        this.wrapper.execute(this.params, this.#systems, this.data, this.entities, this.data.entitiesMap, this.params.onWrap, this.postProcessingFramebuffers)
+
+        this.miscellaneousPass.execute(
+            this.params,
+            this.data,
+            this.entities,
+            this.data.entitiesMap,
+            () => {
+                this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
+            }
+        )
+        this.renderingPass.execute(
+            this.params,
+            this.data,
+            this.entities,
+            this.data.entitiesMap,
+            () => {
+                this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
+            }
+        )
+        this.postProcessingPass.execute(
+            this.params,
+            this.data,
+            this.entities,
+            this.data.entitiesMap,
+            this.params.onWrap
+        )
 
         this.frameID = requestAnimationFrame(() => this.callback())
     }

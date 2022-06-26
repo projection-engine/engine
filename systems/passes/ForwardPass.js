@@ -1,19 +1,17 @@
-import System from "../basic/System"
-import COMPONENTS from "../templates/COMPONENTS"
-import SYSTEMS from "../templates/SYSTEMS"
-import Renderer from "../Renderer"
+import System from "../../basic/System"
+import COMPONENTS from "../../templates/COMPONENTS"
+import Renderer from "../../Renderer"
 
-export default class Forward extends System {
+let  aoTexture
+export default class ForwardPass extends System {
     lastMaterial
-
     constructor() {
         super()
     }
+    execute(options, data, sceneColor) {
+        if (aoTexture === undefined)
+            aoTexture = window.renderer.renderingPass.ao.texture
 
-    execute(options, systems, data, sceneColor) {
-        super.execute()
-        if (this.aoTexture === undefined && systems[SYSTEMS.AO])
-            this.aoTexture = systems[SYSTEMS.AO].texture
         const {
             meshes,
             materials,
@@ -50,7 +48,7 @@ export default class Forward extends System {
                     mat = fallbackMaterial
                 }
                 const ambient = Renderer.getEnvironment(current)
-                Forward.drawMesh({
+                ForwardPass.drawMesh({
                     mesh,
                     camPosition: camera.position,
                     viewMatrix: camera.viewMatrix,
@@ -71,7 +69,7 @@ export default class Forward extends System {
                     ambient,
                     sceneColor,
                     lastMaterial: this.lastMaterial,
-                    ao: this.aoTexture,
+                    ao: aoTexture,
                     shadingModel,
                     onlyForward: true
                 })

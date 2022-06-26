@@ -1,6 +1,6 @@
 import COMPONENTS from "./templates/COMPONENTS"
 import toObject from "./utils/toObject"
-import ScriptSystem from "./systems/ScriptSystem"
+import Scripting from "./systems/misc/Scripting"
 import {mat4} from "gl-matrix"
 
 export default function Packager (
@@ -31,12 +31,12 @@ export default function Packager (
         meshSources: toObject(meshes),
         entitiesMap: toObject(entities),
         lightProbes: active.filter(e => e.components[COMPONENTS.PROBE]),
-        levelScript: typeof levelScript === "string"? ScriptSystem.parseScript(levelScript) : undefined
+        levelScript: typeof levelScript === "string"? Scripting.parseScript(levelScript) : undefined
     }
     active.forEach(entity => {
         entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
             if(typeof s === "string")
-                return ScriptSystem.parseScript(s)
+                return Scripting.parseScript(s)
             return s
         })
     })
@@ -62,7 +62,6 @@ export default function Packager (
         renderer.params.camera.aspectRatio = bBox.width / bBox.height
         renderer.params.camera.updateProjection()
     }
-    renderer.params.lastFrame = renderer.wrapper.frameBuffer.colors[0]
 }
 
 function lights(pointLights, directionalLights) {

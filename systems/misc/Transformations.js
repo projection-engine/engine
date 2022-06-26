@@ -1,10 +1,10 @@
-import System from "../basic/System"
+import System from "../../basic/System"
 import {mat4} from "gl-matrix"
 import {linearAlgebraMath} from "pj-math"
-import Transformation from "../templates/Transformation"
-import COMPONENTS from "../templates/COMPONENTS"
+import Transformation from "../../templates/Transformation"
+import COMPONENTS from "../../templates/COMPONENTS"
 
-export default class TransformSystem extends System {
+export default class Transformations extends System {
     #changed = false
 
 
@@ -16,7 +16,7 @@ export default class TransformSystem extends System {
         return this.#changed
     }
 
-    execute(options, systems, data, entities) {
+    execute(options, data, entities) {
         super.execute()
         this.#changed = false
         const l = entities.length

@@ -1,12 +1,10 @@
-import System from "../basic/System"
-
-import SYSTEMS from "../templates/SYSTEMS"
-import * as smShaders from "../shaders/shadows/SHADOW_MAP.glsl"
-import ShaderInstance from "../instances/ShaderInstance"
-import FramebufferInstance from "../instances/FramebufferInstance"
-import CubeMapInstance from "../instances/CubeMapInstance"
+import System from "../../basic/System"
+import * as smShaders from "../../shaders/shadows/SHADOW_MAP.glsl"
+import ShaderInstance from "../../instances/ShaderInstance"
+import FramebufferInstance from "../../instances/FramebufferInstance"
+import CubeMapInstance from "../../instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"
-import COMPONENTS from "../templates/COMPONENTS"
+import COMPONENTS from "../../templates/COMPONENTS"
 
 export const VIEWS = {
     target: [
@@ -27,8 +25,8 @@ export const VIEWS = {
     ]
 }
 
-
-export default class ShadowMapSystem extends System {
+let transformationSystem, deferredSystem
+export default class ShadowMapPass extends System {
     changed = false
 
     constructor() {
@@ -76,7 +74,7 @@ export default class ShadowMapSystem extends System {
 
     }
 
-    execute(options, systems, data, entities, entitiesMap, updateAllLights) {
+    execute(options, data, entities, entitiesMap, updateAllLights) {
         super.execute()
         const gpu = window.gpu
         const {
@@ -95,14 +93,15 @@ export default class ShadowMapSystem extends System {
             shadowAtlasQuantity,
             shadowMapResolution
         )
-
-
-        let lights2D = [], lights3D = [], transformChanged = systems[SYSTEMS.TRANSFORMATION]?.changed
+        if(!transformationSystem) {
+            deferredSystem =window.renderer.renderingPass.deferred
+            transformationSystem = window.renderer.miscellaneousPass.transformations
+        }
+        let lights2D = [], lights3D = [], transformChanged = transformationSystem.changed
         const dirL = directionalLights.length
         for (let i = 0; i < dirL; i++) {
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
             if ((current.changed && current.shadowMap) || this.changed) {
-
                 lights2D.push(current)
                 current.changed = false
                 this.changed = true
@@ -126,9 +125,7 @@ export default class ShadowMapSystem extends System {
             this.changed = false
             gpu.cullFace(gpu.FRONT)
             this.shadowMapShader.use()
-            const meshSystem = systems[SYSTEMS.MESH]
             let currentColumn = 0, currentRow = 0
-
             if (lights2D.length > 0) {
                 this.shadowsFrameBuffer.startMapping()
                 gpu.enable(gpu.SCISSOR_TEST)
@@ -152,7 +149,7 @@ export default class ShadowMapSystem extends System {
                         let currentLight = lights2D[face]
                         currentLight.atlasFace = [currentColumn, 0]
 
-                        ShadowMapSystem.loopMeshes(meshes, meshSources, meshSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
+                        ShadowMapPass.loopMeshes(meshes, meshSources, deferredSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
                     }
                     if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
                         currentColumn = 0
@@ -174,10 +171,10 @@ export default class ShadowMapSystem extends System {
                         this.cubeMaps[i]
                             .draw((yaw, pitch, perspective, index) => {
                                 const target = vec3.add([], current.translation, VIEWS.target[index])
-                                ShadowMapSystem.loopMeshes(
+                                ShadowMapPass.loopMeshes(
                                     meshes,
                                     meshSources,
-                                    meshSystem,
+                                    deferredSystem,
                                     materials,
                                     this.shadowMapOmniShader,
                                     mat4.lookAt([], current.translation, target, VIEWS.up[index]),
@@ -196,7 +193,7 @@ export default class ShadowMapSystem extends System {
 
     }
 
-    static loopMeshes(meshes, meshSources, meshSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
+    static loopMeshes(meshes, meshSources, deferredSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
@@ -205,10 +202,10 @@ export default class ShadowMapSystem extends System {
                 const currentMaterialID = current.components[COMPONENTS.MATERIAL].materialID
                 let mat = materials[currentMaterialID] ? materials[currentMaterialID] : undefined
                 if (!mat || !mat.ready)
-                    mat = meshSystem.fallbackMaterial
+                    mat = deferredSystem.fallbackMaterial
                 const t = current.components[COMPONENTS.TRANSFORM]
 
-                ShadowMapSystem.drawMesh(mesh, view, projection, t.transformationMatrix, mat, color, shader, lightPosition, shadowClipNearFar)
+                ShadowMapPass.drawMesh(mesh, view, projection, t.transformationMatrix, mat, color, shader, lightPosition, shadowClipNearFar)
             }
         }
     }

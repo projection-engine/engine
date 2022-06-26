@@ -1,6 +1,6 @@
-import System from "../basic/System"
+import System from "../../basic/System"
 
-export default class CullingSystem extends System {
+export default class Culling extends System {
     _ready = false
 
     constructor() {

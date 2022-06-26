@@ -1,8 +1,7 @@
 import {vertex as quadVertex} from "./mesh/DEFERRED.glsl"
 
 
-const METHODS = `
-uniform float stepSize; 
+const METHODS = ` 
 uniform float maxSteps; 
 
 const float minRayStep = 0.1; 
@@ -45,7 +44,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
     return vec3(projectedCoord.xy, depth);
 }
 
-vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth){
+vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth, float stepSize){
     dir *= stepSize;
     float depth;
     int steps;
@@ -103,7 +102,7 @@ const float noiseScale = 1.5;
 
 float interleavedGradientNoise(vec2 n) {
     float f = 0.06711056 * n.x + 0.00583715 * n.y;
-    return fract(10000000. * fract(f));
+    return fract(10000000.  * fract(f));
 }
 vec3 cosHemisphereSample(vec2 randVal, vec3 hitNorm)
 { 
@@ -138,6 +137,9 @@ uniform float intensity;
 uniform mat4 projection;
 uniform mat4 viewMatrix;  
 uniform mat4 invViewMatrix;
+uniform float step;
+uniform sampler2D noiseSampler;
+
 in vec2 texCoord;
 
  
@@ -152,7 +154,14 @@ void main(){
 
     vec3 hitPos = viewPos;
     float dDepth;  
- 	vec4 coords = RayMarch(normal, hitPos, dDepth);
+    vec2 jitter = texture(noiseSampler, texCoord).rg;
+    jitter.x = clamp(jitter.x, 0., 1.);
+    jitter.y = clamp(jitter.y, 0., 1.); 
+	jitter += .5;
+	float stepSize = 10.0 * step ;
+	stepSize = stepSize * (jitter.x + jitter.y) + stepSize;
+
+ 	vec4 coords = RayMarch(normal, hitPos, dDepth, stepSize);
 	vec3 albedo = texture(previousFrame, coords.xy).rgb;
 	
 	if(length(albedo) <= 0.)
@@ -175,6 +184,7 @@ uniform mat4 viewMatrix;
 uniform mat4 invViewMatrix;
 in vec2 texCoord;
  
+uniform float stepSize;
 ${METHODS}
 
 
@@ -195,7 +205,7 @@ void main(){
     vec3 hitPos = viewPos;
     float dDepth;
      vec3 jitt = mix(vec3(0.0), vec3(hash(viewPos)), roughness);
- 	vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth);
+ 	vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth, stepSize);
     vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float ReflectionMultiplier = pow(Metallic, falloff) * 
