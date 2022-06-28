@@ -35,6 +35,7 @@ export default function resize() {
     })
 }
 
+
 export function getImageBitmap() {
     const doIt = (event) => {
         fetch(event.data)
@@ -42,8 +43,8 @@ export function getImageBitmap() {
                 res.blob().then(blob => {
                     createImageBitmap(blob)
                         .then(result => self.postMessage(result))
-                })
-            })
+                }).catch(error => console.error(error))
+            }).catch(() => console.error("Error loading image"))
     }
     self.addEventListener("message", (event) => doIt(event))
 }
