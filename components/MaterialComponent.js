@@ -12,7 +12,6 @@ export default class MaterialComponent extends Component{
 
     uniforms = []
     uniformValues = {}
-    irradianceMultiplier = [1, 1, 1]
     constructor(id, materialID) {
         super(id, MaterialComponent.name)
         this.materialID = materialID

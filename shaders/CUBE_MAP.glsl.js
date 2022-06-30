@@ -20,6 +20,7 @@ precision highp float;
 out vec4 fragColor;
 in vec3 vPosition;
 
+uniform vec3 multiplier;
 uniform samplerCube uSampler;
 
 const float PI = 3.14159265359;
@@ -46,7 +47,7 @@ void main(){
     }
     irradiance = PI * irradiance * (1.0 / float(nrSamples));
 
-    fragColor = vec4(irradiance, 1.0);
+    fragColor = vec4(irradiance * multiplier, 1.0);
 }
 `
 
@@ -59,7 +60,7 @@ in vec3 vPosition;
 
 uniform samplerCube environmentMap;
 uniform float roughness;
-
+uniform vec3 multiplier;
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -157,6 +158,6 @@ void main()
 
     prefilteredColor = prefilteredColor / totalWeight;
    
-    FragColor = vec4(prefilteredColor, 1.0);
+    FragColor = vec4(prefilteredColor * multiplier, 1.0);
 }
 `

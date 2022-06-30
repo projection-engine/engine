@@ -1,7 +1,6 @@
 import System from "../../basic/System"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import COMPONENTS from "../../templates/COMPONENTS"
-import Renderer from "../../Renderer"
 import ForwardPass from "./ForwardPass"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
@@ -62,7 +61,7 @@ export default class DeferredPass extends System {
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
-                const ambient = Renderer.getEnvironment(current, skybox)
+                const ambient = window.renderer.getEnvironment(current, skybox)
                 ForwardPass.drawMesh({
                     mesh,
                     camPosition: camera.position,

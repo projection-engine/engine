@@ -47,7 +47,7 @@ export default class ForwardPass extends System {
                 if (!mat || !mat.ready) {
                     mat = fallbackMaterial
                 }
-                const ambient = Renderer.getEnvironment(current)
+                const ambient = window.renderer.getEnvironment(current)
                 ForwardPass.drawMesh({
                     mesh,
                     camPosition: camera.position,

@@ -8,14 +8,13 @@ import {DATA_TYPES} from "./templates/DATA_TYPES"
 import ImageProcessor from "./utils/image/ImageProcessor"
 import Packager from "./Packager"
 import VBOInstance from "./instances/VBOInstance"
-import COMPONENTS from "./templates/COMPONENTS"
 import ENVIRONMENT from "./ENVIRONMENT"
 import Picking from "./systems/misc/Picking"
 import MiscellaneousPass from "./systems/MiscellaneousPass"
 import RenderingPass from "./systems/RenderingPass"
 import PostProcessingPass from "./systems/PostProcessingPass"
 
-let gpu
+let gpu, specularProbes = {}, diffuseProbes = {}
 export default class Renderer {
     environment = ENVIRONMENT.PROD
     rootCamera = new RootCameraInstance()
@@ -54,14 +53,12 @@ export default class Renderer {
                 this.start()
             }).catch(err => console.error(err))
 
-
         this.picking = new Picking()
-
         this.miscellaneousPass = new MiscellaneousPass(resolution)
         this.renderingPass = new RenderingPass(resolution)
         this.postProcessingPass = new PostProcessingPass(resolution)
-
-
+        specularProbes = this.renderingPass.specularProbe.probes
+        diffuseProbes = this.renderingPass.diffuseProbe.probes
         // CAMERA ASPECT RATIO OBSERVER
         new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
@@ -147,16 +144,22 @@ export default class Renderer {
 
     }
 
-    static getEnvironment(entity) {
-        const comp = entity.components[COMPONENTS.MATERIAL]
-        const cube = comp.cubeMap
+    getEnvironment(entity) {
+        const specular = specularProbes[entity.id]
+        const diffuse = diffuseProbes[entity.id]
+
+        if(diffuse)
+            return {
+                irradiance0: diffuse[0]?.texture,
+                irradiance1: diffuse[1]?.texture,
+                irradiance2: diffuse[2]?.texture,
+                
+                prefilteredMap: specular?.texture,
+                ambientLODSamples:  specular?.mipmaps
+            }
         return {
-            irradianceMultiplier: comp.irradianceMultiplier,
-            irradiance0: comp.irradiance[0]?.ref,
-            irradiance1: comp.irradiance[1]?.ref,
-            irradiance2: comp.irradiance[2]?.ref,
-            prefilteredMap: cube?.prefiltered,
-            ambientLODSamples: cube?.prefilteredLod
+            prefilteredMap: specular?.texture,
+            ambientLODSamples:  specular?.mipmaps
         }
     }
 }

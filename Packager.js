@@ -12,10 +12,9 @@ export default function Packager (
         onWrap,
         fallbackMaterial,
         levelScript
-    },
-    renderer
+    }
 ) {
-
+    const renderer = window.renderer
     const active = entities.filter(e => e.active)
     const attributes = {...params}
     const data = {
@@ -24,13 +23,13 @@ export default function Packager (
         spotLights: active.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
         meshes: active.filter(e => e.components[COMPONENTS.MESH]),
         directionalLights: active.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
-        cubeMaps: active.filter(e => e.components[COMPONENTS.CUBE_MAP]),
+        cubeMaps: active.filter(e => e.components[COMPONENTS.PROBE] && e.components[COMPONENTS.PROBE].specularProbe),
         cameras: active.filter(e => e.components[COMPONENTS.CAMERA]),
         lines: active.filter(e => e.components[COMPONENTS.LINE]),
         materials: toObject(materials),
         meshSources: toObject(meshes),
         entitiesMap: toObject(entities),
-        lightProbes: active.filter(e => e.components[COMPONENTS.PROBE]),
+        lightProbes: active.filter(e => e.components[COMPONENTS.PROBE] && !e.components[COMPONENTS.PROBE].specularProbe),
         levelScript: typeof levelScript === "string"? Scripting.parseScript(levelScript) : undefined
     }
     active.forEach(entity => {
@@ -40,17 +39,38 @@ export default function Packager (
             return s
         })
     })
-
-
-    data.cubeMapsSources = toObject(data.cubeMaps)
+    const sP =  toObject(data.cubeMaps), dP =  toObject(data.lightProbes)
+    const specularProbes = renderer.renderingPass.specularProbe.cubeMaps
+    const diffuseProbes = renderer.renderingPass.diffuseProbe.cubeMaps
+    const s = renderer.renderingPass.specularProbe.probes
+    const d = renderer.renderingPass.diffuseProbe.probes
+    
+    Object.keys(specularProbes).forEach(k => {
+        if(!sP[k]) {
+            const entity = entities.find(e => e.id === k)
+            if(!entity) {
+                specularProbes[k].delete()
+                delete specularProbes[k]
+            }
+            delete s[k]
+        }
+    })
+    Object.keys(diffuseProbes).forEach(k => {
+        if(!dP[k]) {
+            const entity = entities.find(e => e.id === k)
+            if(!entity) {
+                diffuseProbes[k].delete()
+                delete diffuseProbes[k]
+            }
+            delete d[k]
+        }
+    })
     attributes.camera = params.camera ? params.camera : renderer.rootCamera
     attributes.entitiesLength = active.length
 
     attributes.onWrap = onWrap ? onWrap : () => null
     attributes.brdf = renderer.brdf
     attributes.fallbackMaterial = fallbackMaterial
-
-
 
 
     renderer.data = {...data, ...lights(data.pointLights, data.directionalLights)}

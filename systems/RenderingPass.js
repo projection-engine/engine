@@ -10,6 +10,8 @@ import DiffuseProbePass from "./passes/DiffuseProbePass"
 import FramebufferInstance from "../instances/FramebufferInstance"
 import ENVIRONMENT from "../ENVIRONMENT"
 import {copyTexture} from "../utils/utils"
+import ShaderInstance from "../instances/ShaderInstance"
+import * as shaderCode from "../shaders/CUBE_MAP.glsl"
 
 export default class RenderingPass{
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
@@ -24,7 +26,8 @@ export default class RenderingPass{
         this.diffuseProbe = new DiffuseProbePass(resolution)
         
         this.currentFrameFBO = (new FramebufferInstance(resolution.w, resolution.h)).texture().depthTest()
-        
+        this.prefilteredShader =  new ShaderInstance(shaderCode.vertex, shaderCode.prefiltered)
+        this.irradianceShader =   new ShaderInstance(shaderCode.vertex, shaderCode.irradiance)
     }
 
     prepareFrame(options, data, entities, entitiesMap, onWrap){

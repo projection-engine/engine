@@ -1,7 +1,6 @@
 import {mat4} from "gl-matrix"
 import {lookAt} from "../utils/utils"
-import * as  shaderCode from "../shaders/CUBE_MAP.glsl"
-import ShaderInstance from "./ShaderInstance"
+
 
 export default class CubeMapInstance {
     texture
@@ -10,14 +9,17 @@ export default class CubeMapInstance {
     #res
     #asDepth = false
     #resChanged
-    #irradianceShader
     #frameBuffer
-    #prefilteredShader
+
+    get irradianceShader(){
+        return window.renderer.renderingPass.irradianceShader
+    }
+    get prefilteredShader(){
+        return window.renderer.renderingPass.prefilteredShader
+    }
+
     constructor(resolution, asDepth) {
         this.#res = resolution
-        this.#prefilteredShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.prefiltered)
-        this.#irradianceShader = asDepth ? null : new ShaderInstance(shaderCode.vertex, shaderCode.irradiance)
-
         this.#frameBuffer =  window.gpu.createFramebuffer()
         this.#asDepth = asDepth
     }
@@ -31,21 +33,22 @@ export default class CubeMapInstance {
         return this.#res
     }
 
-    generateIrradiance(cubeBuffer, sampler=this.texture) {
+    generateIrradiance(cubeBuffer, sampler=this.texture, multiplier=[1,1,1]) {
         if (!this.#asDepth) {
-            this.#irradianceShader.use()
+            this.irradianceShader.use()
             this.draw((yaw, pitch, perspective) => {
-                this.#irradianceShader.bindForUse({
+                this.irradianceShader.bindForUse({
                     projectionMatrix: perspective,
                     viewMatrix: lookAt(yaw, pitch, [0, 0, 0]),
-                    uSampler: sampler
+                    uSampler: sampler,
+                    multiplier
                 })
                 window.gpu.drawArrays(window.gpu.TRIANGLES, 0, 36)
             }, cubeBuffer, undefined, undefined, true)
         }
     }
 
-    generatePrefiltered(mipLevels = 6, resolution = 128, cubeBuffer) {
+    generatePrefiltered(mipLevels = 6, resolution = 128, cubeBuffer, multiplier=[1,1,1]) {
 
         if (!this.#asDepth && cubeBuffer) {
             const perspective = mat4.perspective([], 1.57, 1, .1, 10),
@@ -63,7 +66,7 @@ export default class CubeMapInstance {
             gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
             gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
 
-            this.#prefilteredShader.use()
+            this.prefilteredShader.use()
             cubeBuffer.enable()
 
             for (let i = 0; i < mipLevels; i++) {
@@ -81,11 +84,12 @@ export default class CubeMapInstance {
                         i
                     )
 
-                    this.#prefilteredShader.bindForUse({
+                    this.prefilteredShader.bindForUse({
                         projectionMatrix: perspective,
                         viewMatrix: lookAt(rotations.yaw, rotations.pitch, [0, 0, 0]),
                         roughness: roughness,
-                        environmentMap: this.texture
+                        environmentMap: this.texture,
+                        multiplier
                     })
 
                     gpu.drawArrays(gpu.TRIANGLES, 0, 36)
@@ -188,7 +192,14 @@ export default class CubeMapInstance {
 
         return texture
     }
-
+    delete(){
+        if(this.texture)
+            window.gpu.deleteTexture(this.texture)
+        if(this.irradianceTexture)
+            window.gpu.deleteTexture(this.irradianceTexture)
+        if(this.prefiltered)
+            window.gpu.deleteTexture(this.prefiltered)
+    }
 }
 
 

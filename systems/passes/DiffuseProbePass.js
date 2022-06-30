@@ -14,14 +14,15 @@ export const STEPS_LIGHT_PROBE = {
 export default class DiffuseProbePass extends System {
     step = STEPS_LIGHT_PROBE.GENERATION
     lastCallLength = -1
-
+    probes = {}
+    cubeMaps = {}
     constructor() {
         super()
-        this.baseCubeMap = new CubeMapInstance(128, false)
+        this.baseCubeMap = new CubeMapInstance(128)
     }
 
     execute(options, data) {
-        super.execute()
+
         const {
             lightProbes,
             meshes,
@@ -38,32 +39,32 @@ export default class DiffuseProbePass extends System {
 
         case STEPS_LIGHT_PROBE.GENERATION:
             for (let i = 0; i < lightProbes.length; i++) {
-                const current = lightProbes[i].components[COMPONENTS.PROBE]
-                for(let p in current.probes){
-                    const currentProbe = current.probes[p]
-                    this.baseCubeMap.draw((yaw, pitch, projection, index) => {
-                        const target = vec3.add([], currentProbe.translation, VIEWS.target[index])
-                        const view = mat4.lookAt([], currentProbe.translation, target, VIEWS.up[index])
-                        SpecularProbePass.draw({
-                            view,
-                            projection,
-                            data,
-                            options,
-                            cubeMapPosition: currentProbe.translation,
-                            skybox,
-                            cubeBuffer,
-                            skyboxShader
-                        })
+                const current = lightProbes[i]
+                const transformation = lightProbes[i].components[COMPONENTS.TRANSFORM]
+                this.baseCubeMap.draw((yaw, pitch, projection, index) => {
+                    const target = vec3.add([], transformation.translation, VIEWS.target[index])
+                    const view = mat4.lookAt([], transformation.translation, target, VIEWS.up[index])
+                    SpecularProbePass.draw({
+                        view,
+                        projection,
+                        data,
+                        options,
+                        cubeMapPosition: transformation.translation,
+                        skybox,
+                        cubeBuffer,
+                        skyboxShader
+                    })
 
-                    },
-                    undefined,
-                    10000,
-                    1
-                    )
-                    if(!currentProbe.cubeMap)
-                        currentProbe.cubeMap = new CubeMapInstance( 32)
-                    currentProbe.cubeMap.generateIrradiance(cubeBuffer, this.baseCubeMap.texture)
+                },
+                undefined,
+                10000,
+                1
+                )
+                if(!this.cubeMaps[current.id]) {
+                    this.cubeMaps[current.id]
+                    this.cubeMaps[current.id] = new CubeMapInstance(32)
                 }
+                this.cubeMaps[current.id].generateIrradiance(cubeBuffer, this.baseCubeMap.texture, current.components[COMPONENTS.PROBE].multiplier)
             }
 
             this.step = STEPS_LIGHT_PROBE.CALCULATE
@@ -83,20 +84,21 @@ export default class DiffuseProbePass extends System {
         meshes
     ) {
         const MAX_PROBES = 4
-        const mappedProbes = probes.map(p => p.components[COMPONENTS.PROBE].probes).flat(Number.POSITIVE_INFINITY)
-
         for (let meshIndex in meshes) {
             const intersecting = []
             const currentMesh = meshes[meshIndex]
-            for (let probeIndex in mappedProbes) {
-                const probePosition = mappedProbes[probeIndex].translation
-                const texture = mappedProbes[probeIndex].cubeMap.irradianceTexture
-                const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
+            const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
+            for (let probeIndex in probes) {
+                const current = probes[probeIndex]
+                const component = probes[probeIndex].components[COMPONENTS.PROBE]
+                const probePosition = current.components[COMPONENTS.TRANSFORM].translation
+                const texture = this.cubeMaps[current.id].irradianceTexture
+
                 if (intersecting.length < MAX_PROBES) {
                     intersecting.push({
                         ref: texture,
                         distance: vec3.len(vec3.subtract([], probePosition, mPosition)),
-                        irradianceMultiplier: [1, 1, 1]
+                        multiplier: component.multiplier
                     })
                 } else {
                     const currentDistance = vec3.len(vec3.subtract([], probePosition, mPosition))
@@ -105,7 +107,7 @@ export default class DiffuseProbePass extends System {
                             intersecting[intIndex] = {
                                 ref: texture,
                                 distance: currentDistance,
-                                irradianceMultiplier: [1, 1, 1]
+                                multiplier: component.multiplier
                             }
                             break
                         }
@@ -113,8 +115,13 @@ export default class DiffuseProbePass extends System {
                 }
             }
             if (intersecting.length > 0) {
-                currentMesh.components[COMPONENTS.MATERIAL].irradiance = intersecting.sort((a, b) => a.distance - b.distance)
-                currentMesh.components[COMPONENTS.MATERIAL].irradianceMultiplier = intersecting[0].irradianceMultiplier
+                const sorted = intersecting.sort((a, b) => a.distance - b.distance)
+                this.probes[currentMesh.id] = []
+                for(let i = 0; i < sorted.length; i++){
+                    this.probes[currentMesh.id][i] = {}
+                    this.probes[currentMesh.id][i].texture = sorted[i].ref
+                    this.probes[currentMesh.id][i].multiplier = sorted[i].multiplier
+                }
             }
         }
     }

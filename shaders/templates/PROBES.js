@@ -3,7 +3,7 @@ vec3 computeDiffuseIrradiance(vec3 N, vec3 albedo, vec3 kD){
     vec3 diffuse = texture(irradiance0, N).rgb * albedo * kD ;
     // diffuse += texture(irradiance1, N).rgb * albedo * kD * .75;    
     // diffuse += texture(irradiance2, N).rgb * albedo * kD * .25 ;       
-    return vec3(diffuse.r * irradianceMultiplier.x, diffuse.g * irradianceMultiplier.y, diffuse.b *irradianceMultiplier.z);
+    return vec3(diffuse.r, diffuse.g, diffuse.b );
 }
 `
 
@@ -48,7 +48,6 @@ uniform samplerCube prefilteredMap;
 uniform float ambientLODSamples;
  
  
-uniform vec3 irradianceMultiplier;
 uniform samplerCube irradiance0;
 uniform samplerCube irradiance1;
 uniform samplerCube irradiance2;

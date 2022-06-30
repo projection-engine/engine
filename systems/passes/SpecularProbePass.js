@@ -3,7 +3,7 @@ import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../templates/COMPONENTS"
 import ForwardPass from "./ForwardPass"
-import Renderer from "../../Renderer"
+import CubeMapInstance from "../../instances/CubeMapInstance"
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
@@ -15,6 +15,8 @@ export const STEPS_CUBE_MAP = {
 export default class SpecularProbePass extends System {
     step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
+    probes = {}
+    cubeMaps = {}
 
     constructor() {
         super()
@@ -35,10 +37,14 @@ export default class SpecularProbePass extends System {
         switch (this.step) {
         case STEPS_CUBE_MAP.BASE:
             for (let i = 0; i < this.lastCallLength; i++) {
-                const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-                current.cubeMap.resolution = current.resolution
+                const current = cubeMaps[i]
+                const component = current.components[COMPONENTS.PROBE]
+                if(!this.cubeMaps[current.id])
+                    this.cubeMaps[current.id] = new CubeMapInstance(component.resolution, false)
+                else
+                    this.cubeMaps[current.id].resolution = component.resolution
                 const translation = cubeMaps[i].components[COMPONENTS.TRANSFORM].translation
-                current.cubeMap.draw((yaw, pitch, projection, index) => {
+                this.cubeMaps[current.id].draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], translation, VIEWS.target[index])
                     const view = mat4.lookAt([], translation, target, VIEWS.up[index])
                     SpecularProbePass.draw({
@@ -46,7 +52,7 @@ export default class SpecularProbePass extends System {
                         projection,
                         data,
                         options,
-                        cubeMapPosition: translation,
+                        cubeMapPosition: translation
                     })
                 },
                 undefined,
@@ -59,9 +65,8 @@ export default class SpecularProbePass extends System {
             break
         case STEPS_CUBE_MAP.PRE_FILTERED:
             for (let i = 0; i < this.lastCallLength; i++) {
-                const current = cubeMaps[i].components[COMPONENTS.CUBE_MAP]
-
-                current.cubeMap.generatePrefiltered(current.prefilteredMipmaps, current.resolution, cubeBuffer)
+                const current = cubeMaps[i].components[COMPONENTS.PROBE]
+                this.cubeMaps[cubeMaps[i].id].generatePrefiltered(current.mipmaps, current.resolution, cubeBuffer, current.multiplier)
             }
             this.step = STEPS_CUBE_MAP.CALCULATE
             break
@@ -75,10 +80,7 @@ export default class SpecularProbePass extends System {
         }
     }
 
-    sort(
-        meshes,
-        cubeMaps
-    ) {
+    sort(meshes, cubeMaps) {
         for (let meshIndex in meshes) {
             let intersecting
             const currentMesh = meshes[meshIndex]
@@ -86,22 +88,20 @@ export default class SpecularProbePass extends System {
                 const probePosition = cubeMaps[index].components[COMPONENTS.TRANSFORM].translation
                 const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
                 const distance = vec3.len(vec3.subtract([], probePosition, mPosition))
+                const component = cubeMaps[index].components[COMPONENTS.PROBE]
                 if (!intersecting || distance < intersecting.distance)
                     intersecting = {
-                        prefilteredMipmaps: cubeMaps[index].components[COMPONENTS.CUBE_MAP].prefilteredMipmaps - 1,
-                        prefilteredMap: cubeMaps[index].components[COMPONENTS.CUBE_MAP].prefilteredMap,
+                        mipmaps: component.mipmaps - 1,
+                        texture: this.cubeMaps[cubeMaps[index].id].prefiltered,
                         distance,
-                        irradianceMultiplier: [1, 1, 1]
+                        multiplier: component.multiplier
                     }
             }
 
             if (intersecting) {
-                const target = currentMesh.components[COMPONENTS.MATERIAL].cubeMap
-
-                target.ready = true
-                target.prefiltered = intersecting.prefilteredMap
-                target.prefilteredLod = intersecting.prefilteredMipmaps
-
+                this.probes[currentMesh.id] = {}
+                this.probes[currentMesh.id].texture = intersecting.texture
+                this.probes[currentMesh.id].mipmaps = intersecting.mipmaps
             }
         }
     }
@@ -130,7 +130,7 @@ export default class SpecularProbePass extends System {
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
-                const ambient = Renderer.getEnvironment(current)
+                const ambient = window.renderer.getEnvironment(current)
                 ForwardPass.drawMesh({
                     ambient,
                     mesh,
