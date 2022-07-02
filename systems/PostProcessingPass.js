@@ -5,23 +5,20 @@ import CompositePass from "./postprocessing/CompositePass"
 import FinalPass from "./postprocessing/FinalPass"
 
 
-let shader, workerFBO
+let shader
 export default class PostProcessingPass extends System {
-    constructor(resolution={w: window.screen.width, h: window.screen.height}) {
+    constructor(cache, resolution={w: window.screen.width, h: window.screen.height}) {
         super()
-
-        this.cacheFBO = (new FramebufferInstance(resolution.w, resolution.h)).texture()
+        this.worker = (new FramebufferInstance(resolution.w, resolution.h)).texture()
         this.compositPass = new CompositePass(resolution)
-        this.finalPass = new FinalPass(resolution)
+        this.finalPass = new FinalPass(this.worker.colors[0], cache)
+        this.cache = cache
     }
 
     execute(options,  data, entities, entitiesMap) {
-        if(!shader) {
+        if(!shader)
             shader = window.renderer.renderingPass.deferred.toScreenShader
-            workerFBO = window.renderer.renderingPass.currentFrameFBO
-        }
-
-        this.compositPass.execute(options, data, entities, entitiesMap, workerFBO, this.cacheFBO)
-        this.finalPass.execute(options, this.cacheFBO, workerFBO)
+        this.compositPass.execute(options, data, entities, entitiesMap, this.cache, this.worker)
+        this.finalPass.execute(options)
     }
 }

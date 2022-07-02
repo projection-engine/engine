@@ -3,6 +3,7 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/shadows/AO.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 
+let depth
 export default class AmbientOcclusionPass extends System {
     constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
         super()
@@ -45,15 +46,14 @@ export default class AmbientOcclusionPass extends System {
     }
 
     execute(options) {
-        super.execute()
-        const depth = window.renderer.renderingPass.depthPrePass
         const {
             total_strength, base, area,
-            falloff, radius, samples
+            falloff, radius, samples,
+            ao
         } = options
-        if (depth) {
-
-
+        if(ao) {
+            if(!depth)
+                depth = window.renderer.renderingPass.depthPrePass
             this.frameBuffer.startMapping()
             this.shader.use()
             this.shader.bindForUse({
@@ -78,7 +78,6 @@ export default class AmbientOcclusionPass extends System {
             this.blurredFrameBuffer.draw(this.blurShader)
             this.blurredFrameBuffer.stopMapping()
         }
-
     }
 
     #generateSamplePoints() {

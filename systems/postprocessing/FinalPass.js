@@ -7,20 +7,24 @@ import * as shaderCode from "../../shaders/FXAA.glsl"
 export default class FinalPass extends System {
     lookUpRandom = []
     lookUpIndex = 0
+    workerTexture
+    output
 
-    constructor() {
+    constructor(workerTexture, output) {
         super()
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
         for (let i = 1e6; i > 0; i--) {
             this.lookUpRandom.push(Math.random())
         }
+        this.workerTexture = workerTexture
+        this.output = output
     }
 
     lookup() {
         return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex = 0] : this.lookUpRandom[this.lookUpIndex]
     }
 
-    execute(options, worker, output) {
+    execute(options) {
         super.execute()
         const {
             fxaa,
@@ -32,7 +36,7 @@ export default class FinalPass extends System {
 
         this.shader.use()
         this.shader.bindForUse({
-            uSampler: worker.colors[0],
+            uSampler: this.workerTexture,
             enabled: [fxaa ? 1 : 0, filmGrain ? 1 : 0],
             settings: [FXAASpanMax, FXAAReduceMin, FXAAReduceMul, filmGrainStrength],
             colorGrading: [gamma, exposure, this.lookup()],
@@ -42,7 +46,7 @@ export default class FinalPass extends System {
             inverseFilterTextureSize: [1 / window.gpu.drawingBufferWidth, 1 / window.gpu.drawingBufferHeight, 0],
             FXAAReduceMul: 1 / 8
         })
-        output.draw()
+        this.output.draw()
 
     }
 }

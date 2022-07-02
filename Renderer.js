@@ -43,7 +43,7 @@ export default class Renderer {
         this.picking = new Picking()
         this.miscellaneousPass = new MiscellaneousPass(resolution)
         this.renderingPass = new RenderingPass(resolution)
-        this.postProcessingPass = new PostProcessingPass(resolution)
+        this.postProcessingPass = new PostProcessingPass(this.renderingPass.currentFrameFBO, resolution)
         specularProbes = this.renderingPass.specularProbe.probes
         diffuseProbes = this.renderingPass.diffuseProbe.probes
         // CAMERA ASPECT RATIO OBSERVER
