@@ -14,23 +14,25 @@ export default function Packager (
         levelScript
     }
 ) {
+    const materialsWithFallback = [...materials, fallbackMaterial]
     const renderer = window.renderer
     const active = entities.filter(e => e.active)
     const attributes = {...params}
     const data = {
         cubeBuffer: renderer.cubeBuffer,
         pointLights: active.filter(e => e.components[COMPONENTS.POINT_LIGHT]),
-        spotLights: active.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
+        // spotLights: active.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
         meshes: active.filter(e => e.components[COMPONENTS.MESH]),
         directionalLights: active.filter(e => e.components[COMPONENTS.DIRECTIONAL_LIGHT]),
-        cubeMaps: active.filter(e => e.components[COMPONENTS.PROBE] && e.components[COMPONENTS.PROBE].specularProbe),
+        specularProbes: active.filter(e => e.components[COMPONENTS.PROBE] && e.components[COMPONENTS.PROBE].specularProbe),
         cameras: active.filter(e => e.components[COMPONENTS.CAMERA]),
-        lines: active.filter(e => e.components[COMPONENTS.LINE]),
-        materials: toObject(materials),
-        meshSources: toObject(meshes),
-        entitiesMap: toObject(entities),
-        lightProbes: active.filter(e => e.components[COMPONENTS.PROBE] && !e.components[COMPONENTS.PROBE].specularProbe),
-        levelScript: typeof levelScript === "string"? Scripting.parseScript(levelScript) : undefined
+        // lines: active.filter(e => e.components[COMPONENTS.LINE]),
+        materials: toObject(materialsWithFallback),
+        materialEntityMap: getMaterialEntityMap(active, materialsWithFallback),
+        meshesMap: toObject(meshes),
+        entitiesMap: toObject(active),
+        diffuseProbes: active.filter(e => e.components[COMPONENTS.PROBE] && !e.components[COMPONENTS.PROBE].specularProbe),
+        levelScript: typeof levelScript === "string"? Scripting.parseScript(levelScript) : undefined,
     }
     active.forEach(entity => {
         entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
@@ -39,12 +41,42 @@ export default function Packager (
             return s
         })
     })
-    const sP =  toObject(data.cubeMaps), dP =  toObject(data.lightProbes)
-    const specularProbes = renderer.renderingPass.specularProbe.cubeMaps
-    const diffuseProbes = renderer.renderingPass.diffuseProbe.cubeMaps
+    cleanUpProbes(data, renderer, entities)
+
+    attributes.camera = params.camera ? params.camera : renderer.rootCamera
+    attributes.entitiesLength = active.length
+
+    attributes.onWrap = onWrap ? onWrap : () => null
+    attributes.brdf = renderer.brdf
+
+
+    lights(data)
+    renderer.data = data
+    renderer.params = attributes
+    renderer.entities = active
+    renderer.then = performance.now()
+}
+
+function getMaterialEntityMap(entities, materials){
+    const result = []
+    for(let i in materials){
+        const current = []
+        for(let j in entities){
+            if(entities[j].materialUsed === materials[i].id)
+                current.push(entities[j])
+        }
+        result.push(current)
+    }
+    return result
+}
+
+function cleanUpProbes(data, renderer, entities){
+    const sP =  toObject(data.specularProbes), dP =  toObject(data.diffuseProbes)
+    const specularProbes = renderer.renderingPass.specularProbe.specularProbes
+    const diffuseProbes = renderer.renderingPass.diffuseProbe.specularProbes
     const s = renderer.renderingPass.specularProbe.probes
     const d = renderer.renderingPass.diffuseProbe.probes
-    
+
     Object.keys(specularProbes).forEach(k => {
         if(!sP[k]) {
             const entity = entities.find(e => e.id === k)
@@ -65,26 +97,9 @@ export default function Packager (
             delete d[k]
         }
     })
-    attributes.camera = params.camera ? params.camera : renderer.rootCamera
-    attributes.entitiesLength = active.length
-
-    attributes.onWrap = onWrap ? onWrap : () => null
-    attributes.brdf = renderer.brdf
-    attributes.fallbackMaterial = fallbackMaterial
-
-
-    renderer.data = {...data, ...lights(data.pointLights, data.directionalLights)}
-    renderer.params = attributes
-    renderer.entities = active
-    renderer.then = performance.now()
-    const bBox = window.gpu.canvas.getBoundingClientRect()
-    if (renderer.params.camera) {
-        renderer.params.camera.aspectRatio = bBox.width / bBox.height
-        renderer.params.camera.updateProjection()
-    }
 }
-
-function lights(pointLights, directionalLights) {
+function lights(data) {
+    const pointLights= data.pointLights, directionalLights= data.directionalLights
     let maxTextures = directionalLights.length,
         pointLightsQuantity = pointLights.length,
         directionalLightsData = [],
@@ -118,15 +133,14 @@ function lights(pointLights, directionalLights) {
             ].flat()
         }
     }
-    
-    return {
-        pointLightsQuantity,
-        pointLightData,
-        maxTextures,
-        directionalLightsData,
-        dirLightPOV,
-        lClip
-    }
+
+
+    data.pointLightsQuantity = pointLightsQuantity
+    data.pointLightData = pointLightData
+    data.maxTextures = maxTextures
+    data.directionalLightsData = directionalLightsData
+    data.dirLightPOV = dirLightPOV
+    data.lClip = lClip
 }
 
 Packager.lights = lights

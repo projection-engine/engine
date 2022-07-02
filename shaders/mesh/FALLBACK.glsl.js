@@ -83,12 +83,31 @@ void main(){
 
 }
 `
+
+export const fallbackVertex = `#version 300 es
+
+layout (location = 1) in vec3 position;
+layout (location = 2) in vec3 normal; 
+
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 projectionMatrix; 
+
+out vec3 normalVec;  
+out vec4 vPosition; 
+
+void main(){
+    vPosition =  transformMatrix *   vec4(position, 1.0);
+    vec3 N =  normalize(mat3(transformMatrix) * normal);
+    normalVec = N; 
+    gl_Position = projectionMatrix * viewMatrix * vPosition;
+}
+`
 export const fragment = `#version 300 es
 precision highp float;
 
 in vec4 vPosition;
-in vec3 normalVec;
-in mat3 toTangentSpace;
+in vec3 normalVec; 
  
 @import(ambientUniforms)
 

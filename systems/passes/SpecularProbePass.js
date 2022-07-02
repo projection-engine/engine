@@ -16,7 +16,7 @@ export default class SpecularProbePass extends System {
     step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
     probes = {}
-    cubeMaps = {}
+    specularProbes = {}
 
     constructor() {
         super()
@@ -25,26 +25,26 @@ export default class SpecularProbePass extends System {
     execute(options, data) {
         super.execute()
         const {
-            cubeMaps,
+            specularProbes,
             meshes,
             cubeBuffer
         } = data
 
-        if (this.lastCallLength !== cubeMaps.length) {
+        if (this.lastCallLength !== specularProbes.length) {
             this.step = STEPS_CUBE_MAP.BASE
-            this.lastCallLength = cubeMaps.length
+            this.lastCallLength = specularProbes.length
         }
         switch (this.step) {
         case STEPS_CUBE_MAP.BASE:
             for (let i = 0; i < this.lastCallLength; i++) {
-                const current = cubeMaps[i]
+                const current = specularProbes[i]
                 const component = current.components[COMPONENTS.PROBE]
-                if(!this.cubeMaps[current.id])
-                    this.cubeMaps[current.id] = new CubeMapInstance(component.resolution, false)
+                if(!this.specularProbes[current.id])
+                    this.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
                 else
-                    this.cubeMaps[current.id].resolution = component.resolution
-                const translation = cubeMaps[i].components[COMPONENTS.TRANSFORM].translation
-                this.cubeMaps[current.id].draw((yaw, pitch, projection, index) => {
+                    this.specularProbes[current.id].resolution = component.resolution
+                const translation = specularProbes[i].components[COMPONENTS.TRANSFORM].translation
+                this.specularProbes[current.id].draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], translation, VIEWS.target[index])
                     const view = mat4.lookAt([], translation, target, VIEWS.up[index])
                     SpecularProbePass.draw({
@@ -65,13 +65,13 @@ export default class SpecularProbePass extends System {
             break
         case STEPS_CUBE_MAP.PRE_FILTERED:
             for (let i = 0; i < this.lastCallLength; i++) {
-                const current = cubeMaps[i].components[COMPONENTS.PROBE]
-                this.cubeMaps[cubeMaps[i].id].generatePrefiltered(current.mipmaps, current.resolution, cubeBuffer, current.multiplier)
+                const current = specularProbes[i].components[COMPONENTS.PROBE]
+                this.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, cubeBuffer, current.multiplier)
             }
             this.step = STEPS_CUBE_MAP.CALCULATE
             break
         case STEPS_CUBE_MAP.CALCULATE:
-            this.sort(meshes, cubeMaps)
+            this.sort(meshes, specularProbes)
             this.step = STEPS_CUBE_MAP.DONE
             break
         default:
@@ -80,19 +80,19 @@ export default class SpecularProbePass extends System {
         }
     }
 
-    sort(meshes, cubeMaps) {
+    sort(meshes, specularProbes) {
         for (let meshIndex in meshes) {
             let intersecting
             const currentMesh = meshes[meshIndex]
-            for (let index in cubeMaps) {
-                const probePosition = cubeMaps[index].components[COMPONENTS.TRANSFORM].translation
+            for (let index in specularProbes) {
+                const probePosition = specularProbes[index].components[COMPONENTS.TRANSFORM].translation
                 const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
                 const distance = vec3.len(vec3.subtract([], probePosition, mPosition))
-                const component = cubeMaps[index].components[COMPONENTS.PROBE]
+                const component = specularProbes[index].components[COMPONENTS.PROBE]
                 if (!intersecting || distance < intersecting.distance)
                     intersecting = {
                         mipmaps: component.mipmaps - 1,
-                        texture: this.cubeMaps[cubeMaps[index].id].prefiltered,
+                        texture: this.specularProbes[specularProbes[index].id].prefiltered,
                         distance,
                         multiplier: component.multiplier
                     }
@@ -114,7 +114,7 @@ export default class SpecularProbePass extends System {
         options,
     }) {
         const {
-                meshes, materials, meshSources, directionalLightsData,
+                meshes, materials, meshesMap, directionalLightsData,
                 dirLightPOV, pointLightsQuantity, pointLightData,
                 maxTextures
             } = data,
@@ -122,7 +122,7 @@ export default class SpecularProbePass extends System {
             l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
+            const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
             if (mesh !== undefined) {
                 const t = current.components[COMPONENTS.TRANSFORM]
                 const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]

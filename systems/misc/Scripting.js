@@ -32,7 +32,7 @@ export default class Scripting extends System {
 
     execute(options, data, entities, entitiesMap, updateAllLights) {
         super.execute()
-        const {meshSources, levelScript} = data
+        const {meshesMap, levelScript} = data
         const {
             elapsed,
             camera
@@ -45,16 +45,16 @@ export default class Scripting extends System {
                 const scripts =  entities[i].scripts
                 const sLength = scripts.length
                 for(let s = 0; s < sLength; s++){
-                    this.executeLoop(scripts[s], elapsed, entitiesMap, camera, meshSources,  entities, updateAllLights)
+                    this.executeLoop(scripts[s], elapsed, entitiesMap, camera, meshesMap,  entities, updateAllLights)
                 }
             }
 
             if (levelScript)
-                this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshSources,  entities, updateAllLights)
+                this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshesMap,  entities, updateAllLights)
         }
     }
 
-    executeLoop(executor, elapsed, entities, camera, meshSources, entitiesArr, updateAllLights) {
+    executeLoop(executor, elapsed, entities, camera, meshesMap, entitiesArr, updateAllLights) {
 
         executor.execute({
             elapsed,
@@ -70,7 +70,7 @@ export default class Scripting extends System {
                 pick: (entity, coords) => {
                     if (entity.components[COMPONENTS.MESH]) {
                         const index = window.renderer.picking.pickElement((shader, proj) => {
-                            const mesh = meshSources[entity.components[COMPONENTS.MESH]?.meshID]
+                            const mesh = meshesMap[entity.components[COMPONENTS.MESH]?.meshID]
                             Picking.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader)
                         }, coords, camera)
 

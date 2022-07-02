@@ -13,6 +13,7 @@ import Picking from "./systems/misc/Picking"
 import MiscellaneousPass from "./systems/MiscellaneousPass"
 import RenderingPass from "./systems/RenderingPass"
 import PostProcessingPass from "./systems/PostProcessingPass"
+import FALLBACK_MATERIAL from "../../static/misc/FALLBACK_MATERIAL"
 
 let gpu, specularProbes = {}, diffuseProbes = {}
 export default class Renderer {
@@ -32,20 +33,6 @@ export default class Renderer {
             .then(async res => {
                 const [cube, BRDF] = res
                 this.brdf = createTexture( 512, 512, gpu.RGBA32F, 0, gpu.RGBA, gpu.FLOAT, await ImageProcessor.getImageBitmap(BRDF.data), gpu.LINEAR, gpu.LINEAR, gpu.CLAMP_TO_EDGE, gpu.CLAMP_TO_EDGE)
-
-                this.fallbackMaterial = new MaterialInstance( {
-                    vertex: shaderCode.vertex,
-                    fragment: shaderCode.fragment,
-                    uniformData: [{key: "brdfSampler", data: this.brdf, type: DATA_TYPES.UNDEFINED}],
-                    settings:{
-                        isForward: false,
-                        faceCulling: true,
-                        cullBackFace: true
-                    },
-                    cubeMapShaderCode:  shaderCode.cubeMapShader
-                })
-                
-                this.params.fallbackMaterial = this.fallbackMaterial
                 this.params.brdf = this.brdf
                 this.cubeBuffer = new VBOInstance(1, new Float32Array(cube.default), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
                 this.data.cubeBuffer = this.cubeBuffer
@@ -78,18 +65,14 @@ export default class Renderer {
             this.data,
             this.entities,
             this.data.entitiesMap,
-            () => {
-                this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
-            }
+            () => Packager.lights(this.data)
         )
         this.renderingPass.execute(
             this.params,
             this.data,
             this.entities,
             this.data.entitiesMap,
-            () => {
-                this.data = {...this.data, ...Packager.lights(this.data.pointLights, this.data.directionalLights)}
-            },
+            () => Packager.lights(this.data),
             this.params.onWrap
         )
         this.postProcessingPass.execute(

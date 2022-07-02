@@ -15,7 +15,7 @@ export default class ForwardPass extends System {
         const {
             meshes,
             materials,
-            meshSources,
+            meshesMap,
             pointLightsQuantity,
             maxTextures,
             directionalLightsData,
@@ -27,8 +27,7 @@ export default class ForwardPass extends System {
 
         const {
             elapsed,
-            camera,
-            fallbackMaterial,
+            camera, 
             brdf,
             shadingModel
         } = options
@@ -37,45 +36,43 @@ export default class ForwardPass extends System {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
-            if (mesh !== undefined) {
+            const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
+            if(!mesh)
+                continue
+            const transformationComponent = current.components[COMPONENTS.TRANSFORM]
+            const materialComponent = current.components[COMPONENTS.MATERIAL]
+            const mat = materials[materialComponent.materialID]
+            if (!mat || !mat.ready) 
+                continue
+            const ambient = window.renderer.getEnvironment(current)
+            ForwardPass.drawMesh({
+                mesh,
+                camPosition: camera.position,
+                viewMatrix: camera.viewMatrix,
+                projectionMatrix: camera.projectionMatrix,
+                transformMatrix: transformationComponent.transformationMatrix,
+                material: mat,
+                normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
+                materialComponent,
+                brdf,
 
-                const t = current.components[COMPONENTS.TRANSFORM]
-                const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
+                directionalLightsQuantity: maxTextures,
+                directionalLightsData,
+                dirLightPOV,
+                pointLightsQuantity,
+                pointLightData,
 
-                let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
-                if (!mat || !mat.ready) {
-                    mat = fallbackMaterial
-                }
-                const ambient = window.renderer.getEnvironment(current)
-                ForwardPass.drawMesh({
-                    mesh,
-                    camPosition: camera.position,
-                    viewMatrix: camera.viewMatrix,
-                    projectionMatrix: camera.projectionMatrix,
-                    transformMatrix: t.transformationMatrix,
-                    material: mat,
-                    normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
-                    materialComponent: current.components[COMPONENTS.MATERIAL],
-                    brdf,
+                elapsed,
+                ambient,
+                sceneColor,
+                lastMaterial: this.lastMaterial,
+                ao: aoTexture,
+                shadingModel,
+                onlyForward: true
+            })
 
-                    directionalLightsQuantity: maxTextures,
-                    directionalLightsData,
-                    dirLightPOV,
-                    pointLightsQuantity,
-                    pointLightData,
-
-                    elapsed,
-                    ambient,
-                    sceneColor,
-                    lastMaterial: this.lastMaterial,
-                    ao: aoTexture,
-                    shadingModel,
-                    onlyForward: true
-                })
-
-                this.lastMaterial = mat?.id
-            }
+            this.lastMaterial = mat?.id
+      
         }
         window.gpu.bindVertexArray(null)
     }

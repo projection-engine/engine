@@ -32,7 +32,7 @@ export default class ShadowMapPass extends System {
     constructor() {
         super()
         this.maxCubeMaps = 2
-        this.cubeMaps = [
+        this.specularProbes = [
             new CubeMapInstance( 512, true),
             new CubeMapInstance(512, true)
         ]
@@ -82,7 +82,7 @@ export default class ShadowMapPass extends System {
             meshes,
             directionalLights,
             materials,
-            meshSources
+            meshesMap
         } = data
         const {
             shadowAtlasQuantity,
@@ -149,7 +149,7 @@ export default class ShadowMapPass extends System {
                         let currentLight = lights2D[face]
                         currentLight.atlasFace = [currentColumn, 0]
 
-                        ShadowMapPass.loopMeshes(meshes, meshSources, deferredSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
+                        ShadowMapPass.loopMeshes(meshes, meshesMap, deferredSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
                     }
                     if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
                         currentColumn = 0
@@ -167,25 +167,27 @@ export default class ShadowMapPass extends System {
                 gpu.viewport(0, 0, 512, 512)
                 for (let i = 0; i < this.maxCubeMaps; i++) {
                     const current = lights3D[i]
-                    if (current)
-                        this.cubeMaps[i]
-                            .draw((yaw, pitch, perspective, index) => {
-                                const target = vec3.add([], current.translation, VIEWS.target[index])
-                                ShadowMapPass.loopMeshes(
-                                    meshes,
-                                    meshSources,
-                                    deferredSystem,
-                                    materials,
-                                    this.shadowMapOmniShader,
-                                    mat4.lookAt([], current.translation, target, VIEWS.up[index]),
-                                    perspective,
-                                    undefined,
-                                    current.translation,
-                                    [current.zNear, current.zFar])
-                            },
-                            false,
-                            current.zFar,
-                            current.zNear)
+                    if (!current)
+                        continue
+                    this.specularProbes[i]
+                        .draw((yaw, pitch, perspective, index) => {
+                            const target = vec3.add([], current.translation, VIEWS.target[index])
+                            ShadowMapPass.loopMeshes(
+                                meshes,
+                                meshesMap,
+                                deferredSystem,
+                                materials,
+                                this.shadowMapOmniShader,
+                                mat4.lookAt([], current.translation, target, VIEWS.up[index]),
+                                perspective,
+                                undefined,
+                                current.translation,
+                                [current.zNear, current.zFar])
+                        },
+                        false,
+                        current.zFar,
+                        current.zNear
+                        )
                 }
             }
             gpu.cullFace(gpu.BACK)
@@ -193,24 +195,18 @@ export default class ShadowMapPass extends System {
 
     }
 
-    static loopMeshes(meshes, meshSources, deferredSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
+    static loopMeshes(meshes, meshesMap, deferredSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
-            if (mesh !== undefined) {
-                const currentMaterialID = current.components[COMPONENTS.MATERIAL].materialID
-                let mat = materials[currentMaterialID] ? materials[currentMaterialID] : undefined
-                if (!mat || !mat.ready)
-                    mat = deferredSystem.fallbackMaterial
-                const t = current.components[COMPONENTS.TRANSFORM]
-
-                ShadowMapPass.drawMesh(mesh, view, projection, t.transformationMatrix, mat, color, shader, lightPosition, shadowClipNearFar)
-            }
+            const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
+            if(!mesh)
+                continue
+            ShadowMapPass.drawMesh(mesh, view, projection, current.components[COMPONENTS.TRANSFORM].transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
         }
     }
 
-    static drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, mat, lightColor, shader, lightPosition, shadowClipNearFar) {
+    static drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, lightColor, shader, lightPosition, shadowClipNearFar) {
         const gpu = window.gpu
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
@@ -221,8 +217,6 @@ export default class ShadowMapPass extends System {
             transformMatrix,
             projectionMatrix,
             lightColor,
-            albedoSampler: mat?.rsmAlbedo,
-
             lightPosition
         })
 

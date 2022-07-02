@@ -15,7 +15,7 @@ export default class DiffuseProbePass extends System {
     step = STEPS_LIGHT_PROBE.GENERATION
     lastCallLength = -1
     probes = {}
-    cubeMaps = {}
+    specularProbes = {}
     constructor() {
         super()
         this.baseCubeMap = new CubeMapInstance(128)
@@ -24,23 +24,23 @@ export default class DiffuseProbePass extends System {
     execute(options, data) {
 
         const {
-            lightProbes,
+            diffuseProbes,
             meshes,
             skybox,
             cubeBuffer,
             skyboxShader
         } = data
 
-        if (this.lastCallLength !== lightProbes.length) {
+        if (this.lastCallLength !== diffuseProbes.length) {
             this.step = STEPS_LIGHT_PROBE.GENERATION
-            this.lastCallLength = lightProbes.length
+            this.lastCallLength = diffuseProbes.length
         }
         switch (this.step) {
 
         case STEPS_LIGHT_PROBE.GENERATION:
-            for (let i = 0; i < lightProbes.length; i++) {
-                const current = lightProbes[i]
-                const transformation = lightProbes[i].components[COMPONENTS.TRANSFORM]
+            for (let i = 0; i < diffuseProbes.length; i++) {
+                const current = diffuseProbes[i]
+                const transformation = diffuseProbes[i].components[COMPONENTS.TRANSFORM]
                 this.baseCubeMap.draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], transformation.translation, VIEWS.target[index])
                     const view = mat4.lookAt([], transformation.translation, target, VIEWS.up[index])
@@ -60,17 +60,17 @@ export default class DiffuseProbePass extends System {
                 10000,
                 1
                 )
-                if(!this.cubeMaps[current.id]) {
-                    this.cubeMaps[current.id]
-                    this.cubeMaps[current.id] = new CubeMapInstance(32)
+                if(!this.specularProbes[current.id]) {
+                    this.specularProbes[current.id]
+                    this.specularProbes[current.id] = new CubeMapInstance(32)
                 }
-                this.cubeMaps[current.id].generateIrradiance(cubeBuffer, this.baseCubeMap.texture, current.components[COMPONENTS.PROBE].multiplier)
+                this.specularProbes[current.id].generateIrradiance(cubeBuffer, this.baseCubeMap.texture, current.components[COMPONENTS.PROBE].multiplier)
             }
 
             this.step = STEPS_LIGHT_PROBE.CALCULATE
             break
         case STEPS_LIGHT_PROBE.CALCULATE:
-            this.sort(lightProbes, meshes)
+            this.sort(diffuseProbes, meshes)
             this.step = STEPS_LIGHT_PROBE.DONE
             break
         default:
@@ -92,7 +92,7 @@ export default class DiffuseProbePass extends System {
                 const current = probes[probeIndex]
                 const component = probes[probeIndex].components[COMPONENTS.PROBE]
                 const probePosition = current.components[COMPONENTS.TRANSFORM].translation
-                const texture = this.cubeMaps[current.id].irradianceTexture
+                const texture = this.specularProbes[current.id].irradianceTexture
 
                 if (intersecting.length < MAX_PROBES) {
                     intersecting.push({

@@ -50,5 +50,8 @@ export default class Entity {
             pickID: Math.round((this.components[COMPONENTS.PICK].pickID[0] + this.components[COMPONENTS.PICK].pickID[1] + this.components[COMPONENTS.PICK].pickID[2]) * 255)
         }
     }
-    
+    materialUsed(){
+        return this.components[COMPONENTS.MATERIAL]?.materialID
+    }
+
 }

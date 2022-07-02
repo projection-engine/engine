@@ -23,8 +23,8 @@ export default class MaterialInstance {
         cubeMapShaderCode
     } ) {
         this.id = id ? id : v4().toString()
-        this.#initializeSettings(settings)
-
+        if (settings)
+            this.settings = settings
         this.shader = [fragment, vertex, uniformData, onCompiled]
         if (cubeMapShaderCode !== undefined && cubeMapShaderCode !== null )
             this.cubeMapShader = [cubeMapShaderCode, vertex]
@@ -40,78 +40,58 @@ export default class MaterialInstance {
         }
     }
 
-    #initializeSettings(settings) {
-        if(settings) {
-            this.settings = settings
-            if (settings.rsmAlbedo) {
-                if (this.rsmAlbedo)
-                    window.gpu.deleteTexture(this.rsmAlbedo.texture)
-                this.rsmAlbedo = new TextureInstance(
-                    settings.rsmAlbedo,
-                    false,
-                    window.gpu.SRGB8_ALPHA8,
-                    window.gpu.RGBA,
-                    true,
-                    false,
-                    window.gpu.UNSIGNED_BYTE,
-                    undefined,
-                    undefined,
-                    0,
-                    () => null
-                )
 
-                delete this.settings.rsmAlbedo
-            }
-        }
-    }
 
     set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
         this.ready = false
         if (settings)
-            this.#initializeSettings(settings)
+            this.settings = settings
         let message
         if (this._shader)
             window.gpu.deleteProgram(this._shader.program)
         this._shader = new ShaderInstance(vertexShader, shader)
-
-        Promise.all(uniformData?.map(k => {
-            return new Promise(async resolve => {
-                switch (k.type) {
-                case DATA_TYPES.COLOR:
-                case DATA_TYPES.TEXTURE:
-                    const img = k.type === DATA_TYPES.TEXTURE ? k.data : await ImageProcessor.colorToImage(k.data, 32)
-                    let texture
-                    await new Promise(r => {
-                        texture = new TextureInstance(
-                            img,
-                            k.yFlip,
-                            window.gpu[k.format?.internalFormat],
-                            window.gpu[k.format?.format],
-                            true,
-                            false,
-                            window.gpu.UNSIGNED_BYTE,
-                            undefined,
-                            undefined,
-                            0,
-                            () => {
-                                r()
-                            }
-                        )
-                    })
-                    this.uniformData[k.key] = texture.texture
-                    break
-                default:
-                    this.uniformData[k.key] = k.data
-                    break
-                }
-                resolve()
-            })
-        }))
-            .then(() => {
-                if (onCompiled)
-                    onCompiled(message)
-                this.ready = true
-            })
+        
+        if(uniformData)
+            Promise.all(uniformData.map(k => {
+                return new Promise(async resolve => {
+                    switch (k.type) {
+                    case DATA_TYPES.COLOR:
+                    case DATA_TYPES.TEXTURE:
+                        const img = k.type === DATA_TYPES.TEXTURE ? k.data : await ImageProcessor.colorToImage(k.data, 32)
+                        let texture
+                        await new Promise(r => {
+                            texture = new TextureInstance(
+                                img,
+                                k.yFlip,
+                                window.gpu[k.format?.internalFormat],
+                                window.gpu[k.format?.format],
+                                true,
+                                false,
+                                window.gpu.UNSIGNED_BYTE,
+                                undefined,
+                                undefined,
+                                0,
+                                () => {
+                                    r()
+                                }
+                            )
+                        })
+                        this.uniformData[k.key] = texture.texture
+                        break
+                    default:
+                        this.uniformData[k.key] = k.data
+                        break
+                    }
+                    resolve()
+                })
+            }))
+                .then(() => {
+                    if (onCompiled)
+                        onCompiled(message)
+                    this.ready = true
+                })
+        else
+            this.ready = true
     }
 
     use(bind = true, additionalUniforms = {}, isCubeMap = false) {

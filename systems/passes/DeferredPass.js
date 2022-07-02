@@ -36,15 +36,13 @@ export default class DeferredPass extends System {
         super.execute()
         const {
             meshes,
-            skybox,
             materials,
-            meshSources
+            meshesMap
         } = data
 
         const {
             elapsed,
-            camera,
-            fallbackMaterial,
+            camera, 
             brdf
         } = options
         this.frameBuffer.startMapping()
@@ -53,31 +51,34 @@ export default class DeferredPass extends System {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshSources[current.components[COMPONENTS.MESH].meshID]
-            if (mesh !== undefined) {
-                const t = current.components[COMPONENTS.TRANSFORM]
-                const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
+            const meshComponent = current.components[COMPONENTS.MESH]
+            const mesh = meshesMap[meshComponent.meshID]
+            if(!mesh)
+                continue
+            const transformationComponent = current.components[COMPONENTS.TRANSFORM]
+            const materialComponent = current.components[COMPONENTS.MATERIAL]
 
-                let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
-                if (!mat || !mat.ready)
-                    mat = fallbackMaterial
-                const ambient = window.renderer.getEnvironment(current, skybox)
-                ForwardPass.drawMesh({
-                    mesh,
-                    camPosition: camera.position,
-                    viewMatrix: camera.viewMatrix,
-                    projectionMatrix: camera.projectionMatrix,
-                    transformMatrix: t.transformationMatrix,
-                    material: mat,
-                    normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
-                    materialComponent: current.components[COMPONENTS.MATERIAL],
-                    brdf,
-                    elapsed,
-                    ambient,
-                    lastMaterial: this.lastMaterial,
-                    onlyForward: false
-                })
-            }
+            const mat = materials[materialComponent.materialID]
+            if (!mat || !mat.ready)
+                continue
+
+            const ambient = window.renderer.getEnvironment(current)
+            ForwardPass.drawMesh({
+                mesh,
+                camPosition: camera.position,
+                viewMatrix: camera.viewMatrix,
+                projectionMatrix: camera.projectionMatrix,
+                transformMatrix: transformationComponent.transformationMatrix,
+                material: mat,
+                normalMatrix: meshComponent.normalMatrix,
+                materialComponent: materialComponent,
+                brdf,
+                elapsed,
+                ambient,
+                lastMaterial: this.lastMaterial,
+                onlyForward: false
+            })
+         
         }
         window.gpu.bindVertexArray(null)
         this.frameBuffer.stopMapping()
@@ -123,8 +124,8 @@ export default class DeferredPass extends System {
             shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,
             aoSampler: aoTexture,
 
-            shadowCube0: shadowMapSystem?.cubeMaps[0]?.texture,
-            shadowCube1: shadowMapSystem?.cubeMaps[1]?.texture,
+            shadowCube0: shadowMapSystem?.specularProbes[0]?.texture,
+            shadowCube1: shadowMapSystem?.specularProbes[1]?.texture,
 
             cameraVec: camera.position,
             settings: [
