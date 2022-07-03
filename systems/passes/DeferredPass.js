@@ -4,7 +4,7 @@ import COMPONENTS from "../../templates/COMPONENTS"
 import ForwardPass from "./ForwardPass"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
-import ENVIRONMENT from "../../ENVIRONMENT"
+import ENVIRONMENT from "../../templates/ENVIRONMENT"
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass extends System {

@@ -1,4 +1,4 @@
-import ImageProcessor from "../utils/image/ImageProcessor"
+import IMAGE_WORKER_ACTIONS from "../templates/IMAGE_WORKER_ACTIONS"
 
 export default class TextureInstance {
     loaded = false
@@ -23,11 +23,12 @@ export default class TextureInstance {
         if (typeof img === "string") {
 
             if (img.includes("data:image/"))
-                ImageProcessor.getImageBitmap(img).then(res => {
-                    res.naturalHeight = res.height
-                    res.naturalWidth = res.width
-                    init(res)
-                })
+                window.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
+                    .then(res => {
+                        res.naturalHeight = res.height
+                        res.naturalWidth = res.width
+                        init(res)
+                    })
             else {
                 const i = new Image()
                 i.src = img
@@ -82,7 +83,7 @@ export default class TextureInstance {
     update(newImage) {
         if (this.loaded) {
             window.gpu.deleteTexture(this.texture)
-            ImageProcessor.getImageBitmap(newImage).then(res => {
+            window.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
                 this.#init(
                     res,
                     this.attributes.yFlip,

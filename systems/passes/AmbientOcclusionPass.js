@@ -2,9 +2,11 @@ import System from "../../basic/System"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/shadows/AO.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
+import IMAGE_WORKER_ACTIONS from "../../templates/IMAGE_WORKER_ACTIONS"
 
 let depth
 export default class AmbientOcclusionPass extends System {
+    ready = false
     constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
         super()
         const gpu = window.gpu
@@ -30,15 +32,24 @@ export default class AmbientOcclusionPass extends System {
 
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
         this.blurShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragmentBlur)
-        this.#generateSamplePoints()
-        this.noiseTexture = gpu.createTexture()
-        gpu.bindTexture(gpu.TEXTURE_2D, this.noiseTexture)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
-        gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, resolution.w, resolution.h)
-        gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, resolution.w, resolution.h, gpu.RG, gpu.FLOAT, generateNoise(resolution))
+        
+        
+        
+        window.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, resolution)
+            .then(({kernels, noise}) => {
+                this.kernels = kernels
+                this.noiseTexture = gpu.createTexture()
+                gpu.bindTexture(gpu.TEXTURE_2D, this.noiseTexture)
+                gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
+                gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
+                gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
+                gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
+                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, resolution.w, resolution.h)
+                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, resolution.w, resolution.h, gpu.RG, gpu.FLOAT, noise)
+                this.ready = true
+            })
+        
+    
     }
 
     get texture() {
@@ -51,7 +62,7 @@ export default class AmbientOcclusionPass extends System {
             falloff, radius, samples,
             ao
         } = options
-        if(ao) {
+        if(ao && this.ready) {
             if(!depth)
                 depth = window.renderer.renderingPass.depthPrePass
             this.frameBuffer.startMapping()
@@ -80,33 +91,5 @@ export default class AmbientOcclusionPass extends System {
         }
     }
 
-    #generateSamplePoints() {
-        this.kernels = []
-        const RAND_MAX = 1.,
-            KERNEL_SIZE = 64
-
-        for (let i = 0; i < KERNEL_SIZE; i++) {
-            const scale = i / KERNEL_SIZE
-            const m = (0.1 + 0.9 * scale * scale)
-            const v = []
-            v[0] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
-            v[1] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
-            v[2] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
-
-            this.kernels[i] = v
-        }
-    }
 }
 
-function generateNoise({w, h}) {
-    let p = w * h
-    let noiseTextureData = new Float32Array(p * 2)
-
-    for (let i = 0; i < p; ++i) {
-        let index = i * 2
-        noiseTextureData[index] = Math.random() * 2.0 - 1.0
-        noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0
-    }
-
-    return noiseTextureData
-}

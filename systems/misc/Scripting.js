@@ -2,11 +2,11 @@ import System from "../../basic/System"
 import COMPONENTS from "../../templates/COMPONENTS"
 import * as glMatrix from "gl-matrix"
 
-import Transformation from "../../templates/Transformation"
+import Transformation from "../../utils/Transformation"
 import Picking from "./Picking"
 
 import KEYS from "../../templates/KEYS"
-import ENVIRONMENT from "../../ENVIRONMENT"
+import ENVIRONMENT from "../../templates/ENVIRONMENT"
 
 export default class Scripting extends System {
     pressedKeys = {}

@@ -1,3 +1,4 @@
+import {v4} from "uuid"
 
 export default function Constructor(canvas, resolution, Renderer){
     const ctx = canvas.getContext("webgl2", {
@@ -16,6 +17,27 @@ export default function Constructor(canvas, resolution, Renderer){
     ctx.depthFunc(ctx.LESS)
     ctx.frontFace(ctx.CCW)
 
+    const imageWorker = new Worker(new URL("./ImageWorker", import.meta.url), {type: "module"})
+    const callbacks = []
+    const doWork = (type, data, callback) => {
+        const id = v4()
+        callbacks.push({
+            callback,
+            id
+        })
+        imageWorker.postMessage({data, type, id})
+    }
+    imageWorker.onmessage = ({data: {data, id}}) => {
+        const callback = callbacks.find(c => c.id === id)
+        if(callback)
+            callback.callback(data)
+    }
+
+    window.imageWorker = (type, data) => {
+        return new Promise(resolve => {
+            doWork(type, data, (res) => resolve(res))
+        })
+    }
     window.gpu = ctx
     window.renderer = new Renderer({w: resolution[0], h:resolution[1]})
 }

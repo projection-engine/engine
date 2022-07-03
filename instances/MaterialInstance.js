@@ -1,8 +1,8 @@
 import TextureInstance from "./TextureInstance"
-import ImageProcessor from "../utils/image/ImageProcessor"
 import ShaderInstance from "./ShaderInstance"
 import {DATA_TYPES} from "../templates/DATA_TYPES"
 import {v4} from "uuid"
+import IMAGE_WORKER_ACTIONS from "../templates/IMAGE_WORKER_ACTIONS"
 
 export default class MaterialInstance {
     ready = false
@@ -56,8 +56,8 @@ export default class MaterialInstance {
                 return new Promise(async resolve => {
                     switch (k.type) {
                     case DATA_TYPES.COLOR:
-                    case DATA_TYPES.TEXTURE:
-                        const img = k.type === DATA_TYPES.TEXTURE ? k.data : await ImageProcessor.colorToImage(k.data, 32)
+                    case DATA_TYPES.TEXTURE:{
+                        const img = k.type === DATA_TYPES.TEXTURE ? k.data : (await window.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {color: k.data, resolution: 16}))
                         let texture
                         await new Promise(r => {
                             texture = new TextureInstance(
@@ -78,18 +78,18 @@ export default class MaterialInstance {
                         })
                         this.uniformData[k.key] = texture.texture
                         break
+                    }
                     default:
                         this.uniformData[k.key] = k.data
                         break
                     }
                     resolve()
                 })
-            }))
-                .then(() => {
-                    if (onCompiled)
-                        onCompiled(message)
-                    this.ready = true
-                })
+            })).then(() => {
+                if (onCompiled)
+                    onCompiled(message)
+                this.ready = true
+            })
         else
             this.ready = true
     }
