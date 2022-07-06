@@ -9,16 +9,20 @@ export default class Entity {
     name
     active
     components = {}
-    linkedTo
     scriptsMap = []
     scripts = []
+    children = []
+    parent
 
-
-    constructor(id = uuidv4(), name = "Empty entity", active=true, linkedTo) {
+    constructor(id = uuidv4(), name = "Empty entity", active=true, children, parent) {
         this.id = id
         this.name = name
         this.active = active
-        this.linkedTo = linkedTo
+
+        if(children)
+            this.children = children
+        if(parent)
+            this.parent = parent
     }
     get isFolder(){
         return this.components[COMPONENTS.FOLDER] instanceof FolderComponent
@@ -43,13 +47,7 @@ export default class Entity {
         clone.components = newComponents
         clone.active = this.active
         return clone
-    }
-    pickerInfo(){
-        return {
-            id: this.id,
-            pickID: Math.round((this.components[COMPONENTS.PICK].pickID[0] + this.components[COMPONENTS.PICK].pickID[1] + this.components[COMPONENTS.PICK].pickID[2]) * 255)
-        }
-    }
+    } 
     materialUsed(){
         return this.components[COMPONENTS.MATERIAL]?.materialID
     }

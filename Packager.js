@@ -5,7 +5,7 @@ import {mat4} from "gl-matrix"
 
 export default function Packager (
     {
-        entities,
+        entities: entitiesMap,
         materials,
         meshes,
         params,
@@ -14,6 +14,7 @@ export default function Packager (
         levelScript
     }
 ) {
+    const entities = Array.from(entitiesMap.values())
     const materialsWithFallback = [...materials, fallbackMaterial]
     const renderer = window.renderer
     const active = entities.filter(e => e.active)
@@ -54,6 +55,7 @@ export default function Packager (
     renderer.data = data
     renderer.params = attributes
     renderer.entities = active
+    renderer.allEntities = entities
     renderer.then = performance.now()
 }
 

@@ -27,8 +27,8 @@ export default class Transformations extends System {
 
                 this.#changed = true
                 let parent
-                if (current.linkedTo) {
-                    parent = entities.find((e) => e.id === current.linkedTo)
+                if (current.parent) {
+                    parent = current.parent
                     if(parent && parent.components[COMPONENTS.TRANSFORM])
                         parent = parent.components[COMPONENTS.TRANSFORM].transformationMatrix
                     else
@@ -77,7 +77,7 @@ export default class Transformations extends System {
                 }
                 const lT= entities.length
                 for (let j = 0; j < lT; j++) {
-                    if (entities[j].components[COMPONENTS.TRANSFORM] && entities[j].linkedTo === current.id)
+                    if (entities[j].components[COMPONENTS.TRANSFORM] && entities[j].parent?.id === current.id)
                         entities[j].components[COMPONENTS.TRANSFORM].changed = true
                 }
                 current.components[COMPONENTS.TRANSFORM].changed = false
