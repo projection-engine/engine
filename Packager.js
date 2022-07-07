@@ -3,20 +3,21 @@ import toObject from "./utils/toObject"
 import Scripting from "./systems/misc/Scripting"
 import {mat4} from "gl-matrix"
 
-export default function Packager (
+export default function Packager(
     {
-        entities: entitiesMap,
-        materials,
-        meshes,
+
         params,
         onWrap,
         fallbackMaterial,
         levelScript
     }
 ) {
-    const entities = Array.from(entitiesMap.values())
-    const materialsWithFallback = [...materials, fallbackMaterial]
+
     const renderer = window.renderer
+    const meshes = renderer.meshes,
+        materials = renderer.materials
+    const entities = Array.from(renderer.entitiesMap.values())
+    const materialsWithFallback = [...materials, fallbackMaterial]
     const active = entities.filter(e => e.active)
     const attributes = {...params}
     const data = {
@@ -33,38 +34,38 @@ export default function Packager (
         meshesMap: toObject(meshes),
         entitiesMap: toObject(active),
         diffuseProbes: active.filter(e => e.components[COMPONENTS.PROBE] && !e.components[COMPONENTS.PROBE].specularProbe),
-        levelScript: typeof levelScript === "string"? Scripting.parseScript(levelScript) : undefined,
+        levelScript: typeof levelScript === "string" ? Scripting.parseScript(levelScript) : undefined,
     }
+
     active.forEach(entity => {
         entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
-            if(typeof s === "string")
+            if (typeof s === "string")
                 return Scripting.parseScript(s)
             return s
         })
     })
+
     cleanUpProbes(data, renderer, entities)
 
     attributes.camera = params.camera ? params.camera : renderer.rootCamera
     attributes.entitiesLength = active.length
-
     attributes.onWrap = onWrap ? onWrap : () => null
     attributes.brdf = renderer.brdf
-
-
-    lights(data)
-    renderer.data = data
     renderer.params = attributes
     renderer.entities = active
     renderer.allEntities = entities
     renderer.then = performance.now()
+
+    lights(data)
+    renderer.data = data
 }
 
-function getMaterialEntityMap(entities, materials){
+function getMaterialEntityMap(entities, materials) {
     const result = []
-    for(let i in materials){
+    for (let i in materials) {
         const current = []
-        for(let j in entities){
-            if(entities[j].materialUsed === materials[i].id)
+        for (let j in entities) {
+            if (entities[j].materialUsed === materials[i].id)
                 current.push(entities[j])
         }
         result.push(current)
@@ -72,17 +73,17 @@ function getMaterialEntityMap(entities, materials){
     return result
 }
 
-function cleanUpProbes(data, renderer, entities){
-    const sP =  toObject(data.specularProbes), dP =  toObject(data.diffuseProbes)
+function cleanUpProbes(data, renderer, entities) {
+    const sP = toObject(data.specularProbes), dP = toObject(data.diffuseProbes)
     const specularProbes = renderer.renderingPass.specularProbe.specularProbes
     const diffuseProbes = renderer.renderingPass.diffuseProbe.specularProbes
     const s = renderer.renderingPass.specularProbe.probes
     const d = renderer.renderingPass.diffuseProbe.probes
 
     Object.keys(specularProbes).forEach(k => {
-        if(!sP[k]) {
+        if (!sP[k]) {
             const entity = entities.find(e => e.id === k)
-            if(!entity) {
+            if (!entity) {
                 specularProbes[k].delete()
                 delete specularProbes[k]
             }
@@ -90,9 +91,9 @@ function cleanUpProbes(data, renderer, entities){
         }
     })
     Object.keys(diffuseProbes).forEach(k => {
-        if(!dP[k]) {
+        if (!dP[k]) {
             const entity = entities.find(e => e.id === k)
-            if(!entity) {
+            if (!entity) {
                 diffuseProbes[k].delete()
                 delete diffuseProbes[k]
             }
@@ -100,8 +101,9 @@ function cleanUpProbes(data, renderer, entities){
         }
     })
 }
+
 function lights(data) {
-    const pointLights= data.pointLights, directionalLights= data.directionalLights
+    const pointLights = data.pointLights, directionalLights = data.directionalLights
     let maxTextures = directionalLights.length,
         pointLightsQuantity = pointLights.length,
         directionalLightsData = [],
@@ -122,7 +124,7 @@ function lights(data) {
             dirLightPOV[i] = mat4.multiply([], l.lightProjection, l.lightView)
         }
     }
-        
+
     for (let i = 0; i < pointLightsQuantity; i++) {
         const component = pointLights[i] ? pointLights[i].components : undefined
         if (component) {
