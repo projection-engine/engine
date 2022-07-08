@@ -3,15 +3,12 @@ import toObject from "./utils/toObject"
 import Scripting from "./systems/misc/Scripting"
 import {mat4} from "gl-matrix"
 
-export default function Packager(
-    {
-
+export default function Packager({
         params,
         onWrap,
         fallbackMaterial,
         levelScript
-    }
-) {
+    }) {
 
     const renderer = window.renderer
     const meshes = renderer.meshes,
