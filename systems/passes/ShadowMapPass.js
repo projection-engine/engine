@@ -100,6 +100,8 @@ export default class ShadowMapPass extends System {
         let lights2D = [], lights3D = [], transformChanged = transformationSystem.changed
         const dirL = directionalLights.length
         for (let i = 0; i < dirL; i++) {
+            if(!directionalLights[i].active)
+                continue
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
             if ((current.changed && current.shadowMap) || this.changed) {
                 lights2D.push(current)
@@ -109,8 +111,9 @@ export default class ShadowMapPass extends System {
         }
         const pL = pointLights.length
         for (let i = 0; i < pL; i++) {
+            if(!pointLights[i].active)
+                continue
             const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
-
             if (current.changed && current.shadowMap) {
                 lights3D.push({...current, translation: pointLights[i].components[COMPONENTS.TRANSFORM].position})
                 current.changed = false

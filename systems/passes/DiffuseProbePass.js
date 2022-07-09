@@ -40,6 +40,8 @@ export default class DiffuseProbePass extends System {
         case STEPS_LIGHT_PROBE.GENERATION:
             for (let i = 0; i < diffuseProbes.length; i++) {
                 const current = diffuseProbes[i]
+                if(!current.active)
+                    continue
                 const transformation = diffuseProbes[i].components[COMPONENTS.TRANSFORM]
                 this.baseCubeMap.draw((yaw, pitch, projection, index) => {
                     const target = vec3.add([], transformation.translation, VIEWS.target[index])

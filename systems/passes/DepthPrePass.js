@@ -85,8 +85,10 @@ export default class DepthPrePass extends System {
         // DEPTH && ID
         this.frameBuffer.startMapping()
         this.shader.use()
-        for(let i in meshes){
+        for(let i = 0; i < meshes.length; i++){
             const mesh = meshes[i]
+            if(!mesh.active)
+                continue
             const meshRef = meshesMap[mesh.components[COMPONENTS.MESH].meshID]
             if(meshRef) {
                 meshRef.use()

@@ -36,6 +36,8 @@ export default class ForwardPass extends System {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
+            if(!current.active)
+                continue
             const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
             if(!mesh)
                 continue

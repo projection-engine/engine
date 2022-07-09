@@ -28,7 +28,6 @@ export default class Picking extends System {
     readBlock(depthFBO, start, end){
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
-
         window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(w * h * 4)
 

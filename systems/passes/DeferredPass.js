@@ -51,6 +51,9 @@ export default class DeferredPass extends System {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
+            if(!current.active)
+                continue
+
             const meshComponent = current.components[COMPONENTS.MESH]
             const mesh = meshesMap[meshComponent.meshID]
             if(!mesh)

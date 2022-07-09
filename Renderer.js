@@ -14,7 +14,6 @@ let gpu, specularProbes = {}, diffuseProbes = {}
 export default class Renderer {
     entitiesMap = new Map()
     entities = []
-    allEntities = []
     meshes = []
     materials = []
 

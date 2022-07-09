@@ -13,8 +13,6 @@ export default class PickComponent extends Component {
         return this.__pickID
     }
     get pickIndex (){
-        return this.__pickID.reduce((previousValue, currentValue) => {
-            return previousValue + currentValue * 255
-        }, 0)
+        return this.__pickID[0] * 255 + this.__pickID[1] * 255 + this.__pickID[2] * 255
     }
 }

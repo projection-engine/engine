@@ -38,6 +38,8 @@ export default class SpecularProbePass extends System {
         case STEPS_CUBE_MAP.BASE:
             for (let i = 0; i < this.lastCallLength; i++) {
                 const current = specularProbes[i]
+                if(!current.active)
+                    continue
                 const component = current.components[COMPONENTS.PROBE]
                 if(!this.specularProbes[current.id])
                     this.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
@@ -65,6 +67,8 @@ export default class SpecularProbePass extends System {
             break
         case STEPS_CUBE_MAP.PRE_FILTERED:
             for (let i = 0; i < this.lastCallLength; i++) {
+                if(!specularProbes[i].active)
+                    continue
                 const current = specularProbes[i].components[COMPONENTS.PROBE]
                 this.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, cubeBuffer, current.multiplier)
             }
