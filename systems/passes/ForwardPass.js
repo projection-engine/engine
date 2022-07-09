@@ -105,29 +105,32 @@ export default class ForwardPass extends System {
     }) {
         if (mesh && material && (!onlyForward || (onlyForward && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)))) {
             mesh.use()
-            material.use(lastMaterial !== material.id, {
-                ...ambient,
-                projectionMatrix,
-                transformMatrix,
-                viewMatrix,
+            material.use(
+                lastMaterial !== material.id,
+                {
+                    ...ambient,
+                    projectionMatrix,
+                    transformMatrix,
+                    viewMatrix,
 
-                normalMatrix,
-                sceneColor,
-                brdfSampler: brdf,
-                elapsedTime: elapsed,
-                cameraVec: camPosition,
+                    normalMatrix,
+                    sceneColor,
+                    brdfSampler: brdf,
+                    elapsedTime: elapsed,
+                    cameraVec: camPosition,
 
-                shadingModel,
-                directionalLightsData,
-                directionalLightsQuantity,
+                    shadingModel,
+                    directionalLightsData,
+                    directionalLightsQuantity,
 
-                dirLightPOV,
-                aoSampler: ao,
-                lightQuantity: pointLightsQuantity,
-                pointLightData,
-                ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
-            }, useCubeMapShader)
-
+                    dirLightPOV,
+                    aoSampler: ao,
+                    lightQuantity: pointLightsQuantity,
+                    pointLightData,
+                    ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
+                },
+                useCubeMapShader
+            )
             Renderer.drawMaterial(mesh, material)
         }
     }
