@@ -126,7 +126,7 @@ export default class SpecularProbePass extends System {
             l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
+            const mesh = meshesMap.get(current.components[COMPONENTS.MESH].meshID)
             if (mesh !== undefined) {
                 const t = current.components[COMPONENTS.TRANSFORM]
                 const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]

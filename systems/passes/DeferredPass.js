@@ -55,7 +55,7 @@ export default class DeferredPass extends System {
                 continue
 
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = meshesMap[meshComponent.meshID]
+            const mesh = meshesMap.get(meshComponent.meshID)
             if(!mesh)
                 continue
             const transformationComponent = current.components[COMPONENTS.TRANSFORM]

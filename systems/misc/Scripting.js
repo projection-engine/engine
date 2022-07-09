@@ -70,7 +70,7 @@ export default class Scripting extends System {
                 pick: (entity, coords) => {
                     if (entity.components[COMPONENTS.MESH]) {
                         const index = window.renderer.picking.pickElement((shader, proj) => {
-                            const mesh = meshesMap[entity.components[COMPONENTS.MESH]?.meshID]
+                            const mesh = meshesMap.get(entity.components[COMPONENTS.MESH]?.meshID)
                             Picking.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader)
                         }, coords, camera)
 

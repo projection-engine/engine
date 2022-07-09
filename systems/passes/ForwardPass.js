@@ -38,7 +38,7 @@ export default class ForwardPass extends System {
             const current = meshes[m]
             if(!current.active)
                 continue
-            const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
+            const mesh = meshesMap.get(current.components[COMPONENTS.MESH].meshID)
             if(!mesh)
                 continue
             const transformationComponent = current.components[COMPONENTS.TRANSFORM]

@@ -13,10 +13,10 @@ const BRDF = "/9j/4AAQSkZJRgABAQAAAQABAAD//gAfQ29tcHJlc3NlZCBieSBqcGVnLXJlY29tcH
 let gpu, specularProbes = {}, diffuseProbes = {}
 export default class Renderer {
     entitiesMap = new Map()
-    entities = []
-    meshes = []
-    materials = []
+    meshes = new Map()
 
+    entities = []
+    materials = []
 
     environment = ENVIRONMENT.PROD
     rootCamera = new RootCameraInstance()

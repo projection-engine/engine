@@ -10,28 +10,24 @@ export default function Packager({
     levelScript
 }) {
 
-    const renderer = window.renderer
-    const meshes = renderer.meshes,
+    const renderer = window.renderer,
         materials = renderer.materials
     const entities = Array.from(renderer.entitiesMap.values())
     const materialsWithFallback = [...materials, fallbackMaterial]
     const attributes = {...params}
     const data = {
         cubeBuffer: renderer.cubeBuffer,
-        
-        // spotLights: entities.filter(e => e.components[COMPONENTS.SPOT_LIGHT]),
         pointLights: [],
         meshes: [],
         directionalLights: [],
         specularProbes: [],
         cameras: [],
         diffuseProbes: [],
-        // lines: entities.filter(e => e.components[COMPONENTS.LINE]),
+
         materials: toObject(materialsWithFallback),
         materialEntityMap: getMaterialEntityMap(entities, materialsWithFallback),
-        meshesMap: toObject(meshes),
+        meshesMap: renderer.meshes,
         entitiesMap: renderer.entitiesMap,
-        
         levelScript: typeof levelScript === "string" ? Scripting.parseScript(levelScript) : undefined,
     }
 

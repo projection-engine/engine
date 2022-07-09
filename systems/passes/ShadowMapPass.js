@@ -202,7 +202,7 @@ export default class ShadowMapPass extends System {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshesMap[current.components[COMPONENTS.MESH].meshID]
+            const mesh = meshesMap.get(current.components[COMPONENTS.MESH].meshID)
             if(!mesh)
                 continue
             ShadowMapPass.drawMesh(mesh, view, projection, current.components[COMPONENTS.TRANSFORM].transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
