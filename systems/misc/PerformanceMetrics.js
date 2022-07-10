@@ -1,7 +1,5 @@
-import System from "../../basic/System"
-
 const SAMPLES = 25
-export default class PerformanceMetrics extends System {
+export default class PerformanceMetrics {
     #framesRendered = 0
     #times = []
     _visible = true
@@ -9,7 +7,6 @@ export default class PerformanceMetrics extends System {
     bars = []
     highest = 1
     constructor() {
-        super()
         const targetID = window.gpu.canvas.id + "-performance-metrics"
         if (document.getElementById(targetID) !== null) {
             this.renderTarget = document.getElementById(targetID)
@@ -92,7 +89,6 @@ export default class PerformanceMetrics extends System {
         this.ramRef.innerText = totalMemUsage.toFixed(0)
     }
     execute(options) {
-        super.execute()
         if (options.performanceMetrics) {
             if(this.#framesRendered > this.highest)
                 this.highest = this.#framesRendered

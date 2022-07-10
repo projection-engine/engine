@@ -1,13 +1,11 @@
-import System from "../../basic/System"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
 
 
 let gNormal, deferredSystem, gPosition, gBehaviour
-export default class SSRPass extends System {
+export default class SSRPass {
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
-        super()
         this.FBO = (new FramebufferInstance(resolution.w, resolution.h)).texture()
         this.shader = new ShaderInstance(ssGI.vShader, ssGI.fragment)
 

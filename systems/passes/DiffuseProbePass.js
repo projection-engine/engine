@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../templates/COMPONENTS"
@@ -11,13 +10,12 @@ export const STEPS_LIGHT_PROBE = {
     DONE: 3,
     CALCULATE: 4
 }
-export default class DiffuseProbePass extends System {
+export default class DiffuseProbePass {
     step = STEPS_LIGHT_PROBE.GENERATION
     lastCallLength = -1
     probes = {}
     specularProbes = {}
     constructor() {
-        super()
         this.baseCubeMap = new CubeMapInstance(128)
     }
 

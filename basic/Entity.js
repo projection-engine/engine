@@ -51,5 +51,12 @@ export default class Entity {
     materialUsed(){
         return this.components[COMPONENTS.MATERIAL]?.materialID
     }
+    serializable(){
+        const temp = {...this}
+        delete temp.parent
+        temp.parent = this.parent?.id
+        delete temp.children
 
+        return temp
+    }
 }

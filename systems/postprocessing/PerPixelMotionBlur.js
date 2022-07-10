@@ -1,9 +1,5 @@
-import System from "../../basic/System"
-
-
-export default class PerPixelMotionBlur extends System {
+export default class PerPixelMotionBlur {
     constructor(resolution) {
-        super()
         // this.velocityFramebuffer = new FramebufferInstance(resolution.w, resolution.h)
         // this.velocityFramebuffer.texture()
         //
@@ -16,7 +12,6 @@ export default class PerPixelMotionBlur extends System {
     }
 
     execute(options, data, entities, entitiesMap, [worker, output]) {
-        super.execute()
 
         // // DRAW DIFFERENCE
         // worker.startMapping()

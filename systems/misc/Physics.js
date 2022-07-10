@@ -1,13 +1,6 @@
-import System from "../../basic/System"
-
 // const GRAVITY = .1
-export default class Physics extends System {
-    constructor() {
-        super()
-    }
-
+export default class Physics {
     execute() {
-        super.execute()
 
         // TODO
         // if (canExecutePhysicsAnimation) {

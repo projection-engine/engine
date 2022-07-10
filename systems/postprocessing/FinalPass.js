@@ -1,17 +1,15 @@
-import System from "../../basic/System"
 import ShaderInstance from "../../instances/ShaderInstance"
 
 import * as shaderCode from "../../shaders/FXAA.glsl"
 
 
-export default class FinalPass extends System {
+export default class FinalPass{
     lookUpRandom = []
     lookUpIndex = 0
     workerTexture
     output
 
     constructor(workerTexture, output) {
-        super()
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
         for (let i = 1e6; i > 0; i--) {
             this.lookUpRandom.push(Math.random())
@@ -25,7 +23,6 @@ export default class FinalPass extends System {
     }
 
     execute(options) {
-        super.execute()
         const {
             fxaa,
             FXAASpanMax,

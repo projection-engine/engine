@@ -3,17 +3,19 @@ import {mat4, quat, vec3} from "gl-matrix"
 import Transformation from "../utils/Transformation"
 
 const toDeg = 57.29
-const identity  = mat4.create()
 export default class TransformComponent extends Component {
     __rotation = [0, 0, 0]
-    _rotationQuat = [0, 0, 0, 1]
+    _rotationQuat = quat.create()
     _translation = [0, 0, 0]
     _scaling = [1, 1, 1]
     pivotPoint = [0,0,0]
     changed = false
-    _transformationMatrix = identity
+
+    _transformationMatrix = mat4.create()
+    baseTransformationMatrix = mat4.create()
+
     _rotationUpdated = false
-    baseTransformationMatrix = identity
+
     __initializedEuler = false
     lockedRotation = false
     lockedScaling = false
@@ -71,7 +73,7 @@ export default class TransformComponent extends Component {
 
         this._rotationUpdated = true
         if (this.updateQuatOnEulerChange)
-            this._rotationQuat = quat.fromEuler([], this.__rotation[0] * toDeg, this.__rotation[1] * toDeg, this.__rotation[2] * toDeg)
+            quat.fromEuler(this._rotationQuat , this.__rotation[0] * toDeg, this.__rotation[1] * toDeg, this.__rotation[2] * toDeg)
     }
 
 
@@ -82,7 +84,7 @@ export default class TransformComponent extends Component {
         newComponent.translation = [...this.translation]
         newComponent.scaling = [...this.scaling]
         newComponent._transformationMatrix = [...this._transformationMatrix]
-        newComponent.baseTransformationMatrix = this.baseTransformationMatrix
+        newComponent.baseTransformationMatrix = [...this.baseTransformationMatrix]
         newComponent.lockedRotation = this.lockedRotation
         newComponent.lockedScaling = this.lockedScaling
         newComponent.updateQuatOnEulerChange = this.updateQuatOnEulerChange
@@ -100,8 +102,7 @@ export default class TransformComponent extends Component {
     }
 
     set transformationMatrix(data) {
-        this._transformationMatrix = mat4.multiply([], data, this.baseTransformationMatrix)
-
+        mat4.multiply(this._transformationMatrix, data, this.baseTransformationMatrix)
         this.changed = false
     }
 }

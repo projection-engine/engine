@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import COMPONENTS from "../../templates/COMPONENTS"
 import * as glMatrix from "gl-matrix"
 
@@ -8,11 +7,10 @@ import Picking from "./Picking"
 import KEYS from "../../templates/KEYS"
 import ENVIRONMENT from "../../templates/ENVIRONMENT"
 
-export default class Scripting extends System {
+export default class Scripting{
     pressedKeys = {}
 
     constructor() {
-        super()
         const targetID = window.gpu.canvas.id + "-scripting"
         if (document.getElementById(targetID) !== null)
             this.renderTarget = document.getElementById(targetID)
@@ -31,7 +29,6 @@ export default class Scripting extends System {
     }
 
     execute(options, data, entities, entitiesMap, updateAllLights) {
-        super.execute()
         const {meshesMap, levelScript} = data
         const {
             elapsed,

@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import * as smShaders from "../../shaders/shadows/SHADOW_MAP.glsl"
 import ShaderInstance from "../../instances/ShaderInstance"
 import FramebufferInstance from "../../instances/FramebufferInstance"
@@ -26,11 +25,10 @@ export const VIEWS = {
 }
 
 let transformationSystem, deferredSystem
-export default class ShadowMapPass extends System {
+export default class ShadowMapPass {
     changed = false
 
     constructor() {
-        super()
         this.maxCubeMaps = 2
         this.specularProbes = [
             new CubeMapInstance( 512, true),
@@ -44,8 +42,6 @@ export default class ShadowMapPass extends System {
     }
 
     updateFBOResolution() {
-        super.updateFBOResolution()
-
         if(this.shadowsFrameBuffer){
             window.gpu.deleteTexture(this.shadowsFrameBuffer.depthSampler)
             window.gpu.deleteFramebuffer(this.shadowsFrameBuffer.FBO)
@@ -75,7 +71,6 @@ export default class ShadowMapPass extends System {
     }
 
     execute(options, data, entities, entitiesMap, updateAllLights) {
-        super.execute()
         const gpu = window.gpu
         const {
             pointLights,
@@ -97,7 +92,7 @@ export default class ShadowMapPass extends System {
             deferredSystem =window.renderer.renderingPass.deferred
             transformationSystem = window.renderer.miscellaneousPass.transformations
         }
-        let lights2D = [], lights3D = [], transformChanged = transformationSystem.changed
+        let lights2D = [], lights3D = []
         const dirL = directionalLights.length
         for (let i = 0; i < dirL; i++) {
             if(!directionalLights[i].active)
@@ -123,7 +118,7 @@ export default class ShadowMapPass extends System {
 
 
 
-        if (this.changed || transformChanged) {
+        if (this.changed) {
             updateAllLights()
             this.changed = false
             gpu.cullFace(gpu.FRONT)

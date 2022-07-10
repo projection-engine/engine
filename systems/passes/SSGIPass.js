@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
@@ -6,12 +5,10 @@ import generateBlurBuffers from "../../utils/generateBlurBuffers"
 
 
 let normalSampler, deferredSystem, aoSystem, composite
-export default class SSGIPass extends System {
+export default class SSGIPass{
     SSGI
     then = performance.now()
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
-        super()
-
         const [blurBuffers,  upSampledBuffers] = generateBlurBuffers(3, resolution.w, resolution.h, 4)
         this.blurBuffers = blurBuffers
         this.upSampledBuffers = upSampledBuffers

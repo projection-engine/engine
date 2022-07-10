@@ -3,8 +3,10 @@ import {mat4, quat} from "gl-matrix"
 const toDeg = 57.2957795131
 
 export default class Transformation {
-    static transform(translation, rotate, scale) {
+    static transform(translation, rotate, scale, matrix) {
         const quaternion = rotate.length > 3 ? rotate : quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg)
+        if(matrix)
+            return mat4.fromRotationTranslationScale(matrix, quaternion, translation, scale)
         return mat4.fromRotationTranslationScale([], quaternion, translation, scale)
     }
 

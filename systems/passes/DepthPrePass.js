@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import COMPONENTS from "../../templates/COMPONENTS"
@@ -58,10 +57,9 @@ void main(void){
  
     fragNormal = vec4(normalize(vec4(normal, 1.)).rgb, 1.);
 }`
-export default class DepthPrePass extends System {
+export default class DepthPrePass {
 
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
-        super()
         this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h).texture({
             precision: window.gpu.RGBA32F,
             format: window.gpu.RGBA,
@@ -79,7 +77,6 @@ export default class DepthPrePass extends System {
         return this.normalFrameBuffer.colors[0]
     }
     execute(options, data) {
-        super.execute()
         const {meshes, meshesMap} = data
         const {camera} = options
         // DEPTH && ID

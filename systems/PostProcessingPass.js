@@ -1,14 +1,11 @@
-import System from "../basic/System"
-
 import FramebufferInstance from "../instances/FramebufferInstance"
 import CompositePass from "./postprocessing/CompositePass"
 import FinalPass from "./postprocessing/FinalPass"
 
 
 let shader
-export default class PostProcessingPass extends System {
+export default class PostProcessingPass  {
     constructor(cache, resolution={w: window.screen.width, h: window.screen.height}) {
-        super()
         this.worker = (new FramebufferInstance(resolution.w, resolution.h)).texture()
         this.compositPass = new CompositePass(resolution)
         this.finalPass = new FinalPass(this.worker.colors[0], cache)

@@ -14,7 +14,7 @@ let gpu, specularProbes = {}, diffuseProbes = {}
 export default class Renderer {
     entitiesMap = new Map()
     meshes = new Map()
-
+    activeEntitiesSize = 0 // DEV
     entities = []
     materials = []
 
@@ -77,14 +77,14 @@ export default class Renderer {
             this.data,
             this.entities,
             this.data.entitiesMap,
-            () => Packager.lights(this.data)
+            Packager.lights,
         )
         this.renderingPass.execute(
             this.params,
             this.data,
             this.entities,
             this.data.entitiesMap,
-            () => Packager.lights(this.data),
+            Packager.lights,
             this.params.onWrap
         )
         this.postProcessingPass.execute(

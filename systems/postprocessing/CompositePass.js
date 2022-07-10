@@ -1,12 +1,10 @@
-import System from "../../basic/System"
 import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../shaders/FXAA.glsl"
 import * as shaderCode from "../../shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../../utils/generateBlurBuffers"
 
-export default class CompositePass extends System {
+export default class CompositePass {
     constructor( resolution={w:window.screen.width, h: window.screen.height }) {
-        super()
         this.w = resolution.w
         this.h = resolution.h
 
@@ -21,7 +19,6 @@ export default class CompositePass extends System {
     }
 
     execute(options, data, entities, entitiesMap, worker, output) {
-        super.execute()
         const {
             bloomStrength,
             bloomThreshold,

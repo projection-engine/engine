@@ -30,9 +30,11 @@ export default function Packager({
         entitiesMap: renderer.entitiesMap,
         levelScript: typeof levelScript === "string" ? Scripting.parseScript(levelScript) : undefined,
     }
-
+    let activeEntitiesSize = 0
     for(let i = 0; i < entities.length; i++){
         const entity = entities[i]
+        if(entity.active)
+            activeEntitiesSize++
         entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
             if (typeof s === "string")
                 return Scripting.parseScript(s)
@@ -63,6 +65,7 @@ export default function Packager({
     renderer.then = performance.now()
     renderer.data = data
     lights()
+    renderer.activeEntitiesSize = activeEntitiesSize
 }
 
 function getMaterialEntityMap(entities, materials) {
@@ -113,45 +116,78 @@ function lights() {
         pointLightsQuantity = 0,
         directionalLightsData = [],
         dirLightPOV = [],
-        lClip = [],
-        pointLightData = []
+        pointLightData = [],
+        activeOffset = 0
 
     if(directionalLights)
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i]
-            if(!current.active)
+            if(!current.active) {
+                activeOffset++
                 continue
+            }
             maxTextures++
-            const l = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
-            directionalLightsData[i] = [
-                l.direction,
-                l.fixedColor,
-                [...l.atlasFace, l.shadowMap ? 1 : 0]
-            ].flat()
-            dirLightPOV[i] = mat4.multiply([], l.lightProjection, l.lightView)
+            const component = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
+
+            if(!directionalLightsData[i - activeOffset])
+                directionalLightsData[i - activeOffset] = new Float32Array(9)
+            const currentVector = directionalLightsData[i - activeOffset]
+            const position = component.direction
+            currentVector[0] = position[0]
+            currentVector[1] = position[1]
+            currentVector[2] = position[2]
+
+            const color = component.fixedColor
+            currentVector[3] = color[0]
+            currentVector[4] = color[1]
+            currentVector[5] = color[2]
+ 
+            currentVector[6] = component.atlasFace[0]
+            currentVector[7] = component.atlasFace[1]
+            currentVector[8] = component.shadowMap ? 1 : 0
+            if(!dirLightPOV[i - activeOffset])
+                dirLightPOV[i - activeOffset] = new Float32Array(16)
+            mat4.multiply(dirLightPOV[i - activeOffset], component.lightProjection, component.lightView)
         }
+    console.log(directionalLightsData)
+    activeOffset = 0
     if(pointLights)
         for (let i = 0; i < pointLights.length; i++) {
             const current = pointLights[i]
-            if(!current.active)
+            if(!current.active) {
+                activeOffset++
                 continue
+            }
             pointLightsQuantity++
-            const component = current ? current.components : undefined
-            lClip[i] = [component[COMPONENTS.POINT_LIGHT].zNear, component[COMPONENTS.POINT_LIGHT]?.zFar]
-            pointLightData[i] = [
-                [...component[COMPONENTS.TRANSFORM].position, 0],
-                [...component[COMPONENTS.POINT_LIGHT].fixedColor, 0],
-                [...component[COMPONENTS.POINT_LIGHT].attenuation, 0],
-                [component[COMPONENTS.POINT_LIGHT].zFar, component[COMPONENTS.POINT_LIGHT].zNear, component[COMPONENTS.POINT_LIGHT].shadowMap ? 1 : 0, 0]
-            ].flat()
-        }
+            const component = current.components[COMPONENTS.POINT_LIGHT]
 
+            if(!pointLightData[i - activeOffset])
+                pointLightData[i - activeOffset] = new Float32Array(16)
+            const currentVector = pointLightData[i - activeOffset]
+            const position = current.components[COMPONENTS.TRANSFORM].position
+            currentVector[0] = position[0]
+            currentVector[1] = position[1]
+            currentVector[2] = position[2]
+
+            const color = component.fixedColor
+            currentVector[4] = color[0]
+            currentVector[5] = color[1]
+            currentVector[6] = color[2]
+
+            const attenuation = component.attenuation
+            currentVector[8] = attenuation[0]
+            currentVector[9] = attenuation[1]
+            currentVector[10] = attenuation[2]
+
+            currentVector[11] = component.zFar
+            currentVector[12] = component.zNear
+            currentVector[13] = component.shadowMap ? 1 : 0
+        }
     window.renderer.data.pointLightsQuantity = pointLightsQuantity
     window.renderer.data.pointLightData = pointLightData
     window.renderer.data.maxTextures = maxTextures
     window.renderer.data.directionalLightsData = directionalLightsData
     window.renderer.data.dirLightPOV = dirLightPOV
-    window.renderer.data.lClip = lClip
 }
 
 Packager.lights = lights

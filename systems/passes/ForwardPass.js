@@ -1,13 +1,9 @@
-import System from "../../basic/System"
 import COMPONENTS from "../../templates/COMPONENTS"
 import Renderer from "../../Renderer"
 
 let  aoTexture
-export default class ForwardPass extends System {
+export default class ForwardPass {
     lastMaterial
-    constructor() {
-        super()
-    }
     execute(options, data, sceneColor) {
         if (aoTexture === undefined)
             aoTexture = window.renderer.renderingPass.ao.texture
@@ -20,10 +16,8 @@ export default class ForwardPass extends System {
             maxTextures,
             directionalLightsData,
             dirLightPOV,
-            pointLightData,
-
+            pointLightData
         } = data
-
 
         const {
             elapsed,

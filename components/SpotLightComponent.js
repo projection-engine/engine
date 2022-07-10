@@ -5,8 +5,6 @@ export default class SpotLightComponent extends Component{
     color = [255, 255, 255]
     // cutoff = 0
     direction = [0, 0, 0]
-
-    _transformationMatrix = Array.from(mat4.create())
     _position = [0, 0, 0]
 
     constructor(id) {

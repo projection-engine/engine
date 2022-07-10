@@ -1,14 +1,7 @@
-import System from "../../basic/System"
-
-export default class Culling extends System {
+export default class Culling {
     _ready = false
 
-    constructor() {
-        super()
-    }
-
     execute() {
-        super.execute()
 
         // TODO - REMOVE NOT VISIBLE - REMOVE FRUSTUM CULLED - REMOVE GPU OCCLUSION CULLED
         // const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)

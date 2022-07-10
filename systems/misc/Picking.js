@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import * as shaderCode from "../../shaders/PICK.glsl"
 import ShaderInstance from "../../instances/ShaderInstance"
 import FramebufferInstance from "../../instances/FramebufferInstance"
@@ -7,9 +6,8 @@ import MeshInstance from "../../instances/MeshInstance"
 import COMPONENTS from "../../templates/COMPONENTS"
 
 
-export default class Picking extends System {
+export default class Picking {
     constructor() {
-        super()
         this.frameBuffer = new FramebufferInstance(1, 1)
         this.frameBuffer
             .texture({attachment: 0, linear: true, repeat: true, storage: false, precision: window.gpu.RGBA, format: window.gpu.RGBA, type: window.gpu.UNSIGNED_BYTE})

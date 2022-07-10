@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import COMPONENTS from "../../templates/COMPONENTS"
 import ForwardPass from "./ForwardPass"
@@ -7,10 +6,9 @@ import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
 import ENVIRONMENT from "../../templates/ENVIRONMENT"
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
-export default class DeferredPass extends System {
+export default class DeferredPass {
     lastMaterial
     constructor( resolution = {w: window.screen.width, h: window.screen.height}) {
-        super()
         this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
         this.frameBuffer
             .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
@@ -33,7 +31,6 @@ export default class DeferredPass extends System {
         this.deferredFBO.draw()
     }
     execute(options, data) {
-        super.execute()
         const {
             meshes,
             materials,

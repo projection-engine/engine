@@ -1,4 +1,3 @@
-import System from "../../basic/System"
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../templates/COMPONENTS"
@@ -12,18 +11,13 @@ export const STEPS_CUBE_MAP = {
     DONE: 2,
     CALCULATE: 3
 }
-export default class SpecularProbePass extends System {
+export default class SpecularProbePass {
     step = STEPS_CUBE_MAP.BASE
     lastCallLength = -1
     probes = {}
     specularProbes = {}
 
-    constructor() {
-        super()
-    }
-
     execute(options, data) {
-        super.execute()
         const {
             specularProbes,
             meshes,

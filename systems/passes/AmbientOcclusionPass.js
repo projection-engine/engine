@@ -1,14 +1,12 @@
-import System from "../../basic/System"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/shadows/AO.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import IMAGE_WORKER_ACTIONS from "../../templates/IMAGE_WORKER_ACTIONS"
 
 let depth
-export default class AmbientOcclusionPass extends System {
+export default class AmbientOcclusionPass {
     ready = false
     constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
-        super()
         const gpu = window.gpu
         this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
         this.frameBuffer
