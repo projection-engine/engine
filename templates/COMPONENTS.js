@@ -7,7 +7,6 @@ export default {
     PICK: "PickComponent",
     SPOT_LIGHT: "SpotLightComponent",
     FOLDER: "FolderComponent",
-    MATERIAL: "MaterialComponent",
     MESH: "MeshComponent",
     PHYSICS: "PhysicsBodyComponent",
     SCRIPT: "ScriptComponent",

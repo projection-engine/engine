@@ -49,7 +49,7 @@ export default class Entity {
         return clone
     } 
     materialUsed(){
-        return this.components[COMPONENTS.MATERIAL]?.materialID
+        return this.components[COMPONENTS.MESH]?.materialID
     }
     serializable(){
         const temp = {...this}

@@ -120,11 +120,13 @@ export default class SpecularProbePass {
             l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshesMap.get(current.components[COMPONENTS.MESH].meshID)
-            if (mesh !== undefined) {
-                const t = current.components[COMPONENTS.TRANSFORM]
-                const currentMaterial = materials[current.components[COMPONENTS.MATERIAL].materialID]
+            if(!current.active)
+                continue
+            const meshComponent = current.components[COMPONENTS.MESH]
+            const mesh = meshesMap.get(meshComponent.meshID)
 
+            if (mesh !== undefined) {
+                const currentMaterial = materials[meshComponent.materialID]
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = fallbackMaterial
@@ -135,10 +137,10 @@ export default class SpecularProbePass {
                     camPosition: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,
-                    transformMatrix: t.transformationMatrix,
+                    transformMatrix: current.components[COMPONENTS.TRANSFORM].transformationMatrix,
                     material: mat,
-                    normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
-                    materialComponent: current.components[COMPONENTS.MATERIAL],
+                    normalMatrix: meshComponent.normalMatrix,
+                    materialComponent: meshComponent,
                     brdf,
                     directionalLightsQuantity: maxTextures,
                     directionalLightsData,

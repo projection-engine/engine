@@ -32,12 +32,13 @@ export default class ForwardPass {
             const current = meshes[m]
             if(!current.active)
                 continue
-            const mesh = meshesMap.get(current.components[COMPONENTS.MESH].meshID)
+            const meshComponent = current.components[COMPONENTS.MESH]
+            const mesh = meshesMap.get(meshComponent.meshID)
             if(!mesh)
                 continue
             const transformationComponent = current.components[COMPONENTS.TRANSFORM]
-            const materialComponent = current.components[COMPONENTS.MATERIAL]
-            const mat = materials[materialComponent.materialID]
+
+            const mat = materials[meshComponent.materialID]
             if (!mat || !mat.ready) 
                 continue
             const ambient = window.renderer.getEnvironment(current)
@@ -48,8 +49,8 @@ export default class ForwardPass {
                 projectionMatrix: camera.projectionMatrix,
                 transformMatrix: transformationComponent.transformationMatrix,
                 material: mat,
-                normalMatrix: current.components[COMPONENTS.MESH].normalMatrix,
-                materialComponent,
+                normalMatrix: meshComponent.normalMatrix,
+                materialComponent: meshComponent,
                 brdf,
 
                 directionalLightsQuantity: maxTextures,

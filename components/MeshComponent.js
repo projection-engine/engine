@@ -5,10 +5,21 @@ import MESH_TYPES from "../templates/MESH_TYPES"
 export default class MeshComponent extends Component{
     meshID
     normalMatrix = mat3.create()
-    query
     meshType= MESH_TYPES.STATIC
-    constructor(id, meshID) {
-        super(id, MeshComponent.constructor.name)
+
+
+    materialID
+    overrideMaterial = false
+    radius = 50
+    doubleSided = true
+    irradiance = []
+    cubeMap = {}
+    uniforms = []
+    uniformValues = {}
+
+    constructor(id, meshID, materialID) {
+        super(id)
         this.meshID=meshID
+        this.materialID = materialID
     }
 }

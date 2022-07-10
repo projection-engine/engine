@@ -56,9 +56,7 @@ export default class DeferredPass {
             if(!mesh)
                 continue
             const transformationComponent = current.components[COMPONENTS.TRANSFORM]
-            const materialComponent = current.components[COMPONENTS.MATERIAL]
-
-            const mat = materials[materialComponent.materialID]
+            const mat = materials[meshComponent.materialID]
             if (!mat || !mat.ready)
                 continue
 
@@ -71,7 +69,7 @@ export default class DeferredPass {
                 transformMatrix: transformationComponent.transformationMatrix,
                 material: mat,
                 normalMatrix: meshComponent.normalMatrix,
-                materialComponent: materialComponent,
+                materialComponent: meshComponent,
                 brdf,
                 elapsed,
                 ambient,
