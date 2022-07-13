@@ -18,7 +18,6 @@ export default class Transformation {
         }
     }
 
-
     static getEuler(q) {
         const angles = []
 

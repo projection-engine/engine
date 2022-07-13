@@ -10,7 +10,7 @@ export default class Conversion {
         const multiplierY = h / target.height
 
         return {
-            x: x * multiplierX,
+            x:  x * multiplierX - target.left * multiplierX,
             y: h - y * multiplierY + target.top * multiplierY - 1
         }
     }

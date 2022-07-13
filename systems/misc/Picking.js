@@ -9,21 +9,24 @@ import COMPONENTS from "../../templates/COMPONENTS"
 export default class Picking {
     constructor() {
         this.frameBuffer = new FramebufferInstance(1, 1)
-        this.frameBuffer
-            .texture({attachment: 0, linear: true, repeat: true, storage: false, precision: window.gpu.RGBA, format: window.gpu.RGBA, type: window.gpu.UNSIGNED_BYTE})
+            .texture({
+                attachment: 0,
+                linear: true,
+                repeat: true,
+                storage: false,
+                precision: window.gpu.RGBA,
+                format: window.gpu.RGBA,
+                type: window.gpu.UNSIGNED_BYTE
+            })
             .depthTest(window.gpu.DEPTH_COMPONENT16)
-
-
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
-        this.shaderSameSize = new ShaderInstance(shaderCode.sameSizeVertex, shaderCode.fragment)
-
         this.mesh = new MeshInstance({
             vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
             indices: [0, 3, 9, 0, 9, 6, 8, 10, 21, 8, 21, 19, 20, 23, 17, 20, 17, 14, 13, 15, 4, 13, 4, 2, 7, 18, 12, 7, 12, 1, 22, 11, 5, 22, 5, 16]
         })
     }
 
-    readBlock(depthFBO, start, end){
+    readBlock(depthFBO, start, end) {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
         window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
@@ -42,6 +45,7 @@ export default class Picking {
 
         return dd
     }
+
     depthPick(depthFBO, coords) {
         window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(4)
@@ -57,6 +61,7 @@ export default class Picking {
         window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, null)
         return dd
     }
+
     pickElement(drawCallback, pickCoords, camera, sameSize, isOrtho) {
 
         this.shader.use()

@@ -17,12 +17,12 @@ export default class RenderingPass{
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
         this.ao = new AmbientOcclusionPass(resolution)
         this.deferred = new DeferredPass(resolution)
-        this.forward = new ForwardPass(resolution)
+        this.forward = new ForwardPass()
         this.depthPrePass = new DepthPrePass(resolution)
         this.ssGI = new SSGIPass(resolution)
         this.ssr = new SSRPass(resolution)
         this.shadowMap = new ShadowMapPass(resolution)
-        this.specularProbe = new SpecularProbePass(resolution)
+        this.specularProbe = new SpecularProbePass()
         this.diffuseProbe = new DiffuseProbePass(resolution)
         
         this.currentFrameFBO = (new FramebufferInstance(resolution.w, resolution.h)).texture().depthTest()
