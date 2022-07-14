@@ -1,6 +1,6 @@
 import {v4} from "uuid"
 
-export default function Constructor(canvas, resolution, Renderer){
+export default function windowBuilder(canvas, resolution, Renderer){
     const ctx = canvas.getContext("webgl2", {
         antialias: false,
         preserveDrawingBuffer: true,
