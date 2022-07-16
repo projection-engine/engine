@@ -105,6 +105,7 @@ export default class ShaderInstance {
         let compiled = window.gpu.getShaderParameter(shader, window.gpu.COMPILE_STATUS)
         if (!compiled) {
             console.error(window.gpu.getShaderInfoLog(shader))
+            console.dir(shaderCode)
             pushMessage(window.gpu.getShaderInfoLog(shader))
             this.available = false
         } else {
