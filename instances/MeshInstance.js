@@ -83,4 +83,11 @@ export default class MeshInstance {
         window.gpu.deleteVertexArray(this.VAO)
         window.gpu.deleteBuffer(this.indexVBO)
     }
+
+    useForDepth(){
+        gpu.bindVertexArray(this.VAO)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
+
+        this.vertexVBO.enable()
+    }
 }
