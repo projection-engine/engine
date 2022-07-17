@@ -3,7 +3,7 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import {mat4} from "gl-matrix"
 import MeshInstance from "../../instances/MeshInstance"
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../data/COMPONENTS"
 
 
 export default class Picking {

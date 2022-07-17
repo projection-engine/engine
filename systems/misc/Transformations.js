@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix"
 import Transformation from "../../utils/Transformation"
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../data/COMPONENTS"
 
 export default class Transformations {
     changed = new Map()

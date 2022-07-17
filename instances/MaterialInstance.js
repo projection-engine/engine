@@ -1,8 +1,8 @@
 import TextureInstance from "./TextureInstance"
 import ShaderInstance from "./ShaderInstance"
-import {DATA_TYPES} from "../templates/DATA_TYPES"
+import {DATA_TYPES} from "../data/DATA_TYPES"
 import {v4} from "uuid"
-import IMAGE_WORKER_ACTIONS from "../templates/IMAGE_WORKER_ACTIONS"
+import IMAGE_WORKER_ACTIONS from "../data/IMAGE_WORKER_ACTIONS"
 
 export default class MaterialInstance {
     ready = false

@@ -14,10 +14,6 @@ export const DATA_TYPES = {
 
     ATLAS: 7,
 
-
-
-
-
     EXECUTION: 11,
     CONSTANT: 12,
     ANY: 13,

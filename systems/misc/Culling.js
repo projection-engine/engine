@@ -4,7 +4,7 @@ export default class Culling {
     execute() {
 
         // TODO - REMOVE NOT VISIBLE - REMOVE FRUSTUM CULLED - REMOVE GPU OCCLUSION CULLED
-        // const filteredMeshes = this._find(entities, e => filteredEntities.meshes[e.id] !== undefined)
+        // const filteredMeshes = this._find(entities, e => filteredEntities.data[e.id] !== undefined)
         // filteredMeshes.forEach(m => {
         //     if(!m.query)
         //         m.query = window.gpu.createQuery()

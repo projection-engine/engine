@@ -1,5 +1,5 @@
 import {v4 as uuidv4} from "uuid"
-import COMPONENTS from "../templates/COMPONENTS"
+import COMPONENTS from "../data/COMPONENTS"
 import FolderComponent from "../components/FolderComponent"
 import cloneClass from "../utils/cloneClass"
 import MeshComponent from "../components/MeshComponent"

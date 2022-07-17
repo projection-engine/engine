@@ -1,4 +1,4 @@
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../data/COMPONENTS"
 import Renderer from "../../Renderer"
 
 let  aoTexture

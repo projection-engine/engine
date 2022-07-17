@@ -1,4 +1,4 @@
-import IMAGE_WORKER_ACTIONS from "../templates/IMAGE_WORKER_ACTIONS"
+import IMAGE_WORKER_ACTIONS from "../data/IMAGE_WORKER_ACTIONS"
 
 export default class TextureInstance {
     loaded = false

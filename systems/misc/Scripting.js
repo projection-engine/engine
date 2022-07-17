@@ -1,11 +1,11 @@
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../data/COMPONENTS"
 import * as glMatrix from "gl-matrix"
 
 import Transformation from "../../utils/Transformation"
 import Picking from "./Picking"
 
-import KEYS from "../../templates/KEYS"
-import ENVIRONMENT from "../../templates/ENVIRONMENT"
+import KEYS from "../../data/KEYS"
+import ENVIRONMENT from "../../data/ENVIRONMENT"
 
 export default class Scripting{
     pressedKeys = {}

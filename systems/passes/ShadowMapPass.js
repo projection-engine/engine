@@ -3,7 +3,7 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import CubeMapInstance from "../../instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../data/COMPONENTS"
 
 export const VIEWS = {
     target: [

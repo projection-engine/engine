@@ -1,7 +1,7 @@
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../shaders/shadows/AO.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
-import IMAGE_WORKER_ACTIONS from "../../templates/IMAGE_WORKER_ACTIONS"
+import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS"
 
 let depth
 export default class AmbientOcclusionPass {

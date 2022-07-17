@@ -1,6 +1,6 @@
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../data/COMPONENTS"
 import * as shaderCode from "../../shaders/mesh/DEFERRED.glsl"
 
 const vertex = `#version 300 es
