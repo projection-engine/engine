@@ -149,7 +149,6 @@ function lights() {
                 dirLightPOV[i - activeOffset] = new Float32Array(16)
             mat4.multiply(dirLightPOV[i - activeOffset], component.lightProjection, component.lightView)
         }
-    console.log(directionalLightsData)
     activeOffset = 0
     if(pointLights)
         for (let i = 0; i < pointLights.length; i++) {
