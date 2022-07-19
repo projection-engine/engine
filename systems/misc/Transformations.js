@@ -4,15 +4,17 @@ import COMPONENTS from "../../data/COMPONENTS"
 
 export default class Transformations {
     changed = new Map()
-
+    hasUpdatedItem = false
     execute(options, data, entities) {
         const l = entities.length
+        this.hasUpdatedItem = false
         for (let i = 0; i < l; i++) {
             const current = entities[i]
             if (!current.active || !current.components[COMPONENTS.TRANSFORM]?.changed){
                 this.changed.set(current.id, false)
                 continue
             }
+            this.hasUpdatedItem = true
             this.changed.set(current.id, true)
             this.transform(current, current.components[COMPONENTS.TRANSFORM])
         }

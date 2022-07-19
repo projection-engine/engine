@@ -132,7 +132,7 @@ function lights() {
             if(!directionalLightsData[i - activeOffset])
                 directionalLightsData[i - activeOffset] = new Float32Array(9)
             const currentVector = directionalLightsData[i - activeOffset]
-            const position = component.direction
+            const position = current.components[COMPONENTS.TRANSFORM].translation
             currentVector[0] = position[0]
             currentVector[1] = position[1]
             currentVector[2] = position[2]

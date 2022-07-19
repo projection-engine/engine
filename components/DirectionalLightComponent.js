@@ -1,39 +1,44 @@
 import Component from "../basic/Component"
 import {mat4} from "gl-matrix"
+import COMPONENTS from "../data/COMPONENTS"
 
-const M = mat4.create()
 export default class DirectionalLightComponent extends Component {
     _color = [255, 255, 255]
-    _direction = [0, 0, 0]
+    fixedColor = [1, 1, 1]
+    transformationComponent
     _zNear = -1
     _zFar = 10000
-    transformationMatrix =  [...M]
-    lightView = [...M]
-    lightProjection = [...M]
+    lightView = mat4.create()
+    lightProjection = mat4.create()
     _size = 35
-    atlasFace = [0,0]
+    atlasFace = [0, 0]
     changed = true
     shadowMap = true
     center = [0, 0, 0]
     _intensity = 1
-    fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
 
-    constructor(id) {
+
+    constructor(id, entity) {
         super(id)
-        this.update()
+        if (!entity)
+            throw new Error("Transformation component needed")
+        this.transformationComponent = entity.components[COMPONENTS.TRANSFORM]
     }
 
-    get intensity(){
+    get intensity() {
         return this._intensity
     }
-    set intensity(data){
-        this._intensity= data
+
+    set intensity(data) {
+        this._intensity = data
         this.fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
-    get color(){
+
+    get color() {
         return this._color
     }
-    set color(data){
+
+    set color(data) {
         this._color = data
         this.fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
@@ -41,6 +46,7 @@ export default class DirectionalLightComponent extends Component {
     get zNear() {
         return this._zNear
     }
+
     set zNear(data) {
         this._zNear = data
         this.update()
@@ -50,6 +56,7 @@ export default class DirectionalLightComponent extends Component {
     get zFar() {
         return this._zFar
     }
+
     set zFar(data) {
         this._zFar = data
         this.update()
@@ -57,15 +64,11 @@ export default class DirectionalLightComponent extends Component {
 
 
     get direction() {
-        return this._direction
+        return this.transformationComponent.translation
     }
 
     set direction(data) {
-        this._direction = data
-        this.transformationMatrix[12] = this._direction[0]
-        this.transformationMatrix[13] = this._direction[1]
-        this.transformationMatrix[14] = this._direction[2]
-
+        this.transformationComponent.translation = data
         this.update()
     }
 
@@ -79,11 +82,13 @@ export default class DirectionalLightComponent extends Component {
         this.update()
     }
 
+
     update() {
-        mat4.lookAt(this.lightView, this._direction, this.center, [0, 1, 0])
+        mat4.lookAt(this.lightView, this.transformationComponent.translation, this.center, [0, 1, 0])
         mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar)
 
         this.changed = true
     }
+
 
 }
