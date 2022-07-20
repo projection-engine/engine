@@ -6,11 +6,11 @@ import PerformanceMetrics from "./misc/PerformanceMetrics"
 
 export default class MiscellaneousPass{
     constructor(resolution) {
-        this.culling = new Culling(resolution)
-        this.metrics = new PerformanceMetrics(resolution)
-        this.physics = new Physics(resolution)
+        this.culling = new Culling()
+        this.metrics = new PerformanceMetrics()
+        this.physics = new Physics()
         this.scripting = new Scripting(resolution)
-        this.transformations = new Transformations(resolution)
+        this.transformations = new Transformations()
     }
 
     execute(options,  data, entities, entitiesMap, updateAllLights) {
