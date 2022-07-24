@@ -1,5 +1,5 @@
 import COMPONENTS from "../../data/COMPONENTS"
-import Renderer from "../../Renderer"
+import bindMaterial from "../../bind-material";
 
 let  aoTexture
 export default class ForwardPass {
@@ -126,7 +126,7 @@ export default class ForwardPass {
                 },
                 useCubeMapShader
             )
-            Renderer.drawMaterial(mesh, material)
+            bindMaterial(mesh, material)
         }
     }
 }

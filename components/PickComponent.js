@@ -1,5 +1,5 @@
 import Component from "../basic/Component"
-import generateNextID from "../utils/generateNextID"
+import getPickerId from "../utils/get-picker-id"
 
 export default class PickComponent extends Component {
     __pickID = [0, 0, 0]
@@ -7,7 +7,7 @@ export default class PickComponent extends Component {
     constructor(id, quantity) {
         super(id, PickComponent.constructor.name)
 
-        this.__pickID = generateNextID(quantity)
+        this.__pickID = getPickerId(quantity)
     }
     get pickID (){
         return this.__pickID

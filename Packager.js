@@ -1,5 +1,5 @@
 import COMPONENTS from "./data/COMPONENTS"
-import toObject from "./utils/toObject"
+import toObject from "./utils/to-object"
 import Scripting from "./systems/misc/Scripting"
 import {mat4} from "gl-matrix"
 

@@ -1,7 +1,7 @@
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
-import generateBlurBuffers from "../../utils/generateBlurBuffers"
+import generateBlurBuffers from "../../utils/generate-blur-buffers"
 
 
 let normalSampler, deferredSystem, aoSystem, composite

@@ -1,7 +1,7 @@
 import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../shaders/FXAA.glsl"
 import * as shaderCode from "../../shaders/EFFECTS.glsl"
-import generateBlurBuffers from "../../utils/generateBlurBuffers"
+import generateBlurBuffers from "../../utils/generate-blur-buffers"
 
 export default class CompositePass {
     constructor( resolution={w:window.screen.width, h: window.screen.height }) {
