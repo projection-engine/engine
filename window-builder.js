@@ -1,7 +1,7 @@
 import {v4} from "uuid"
-import ImageWorker from "./image-worker"
+import imageWorker from "../../../../web-workers/image-worker"
+
 export default function windowBuilder(canvas) {
-    console.log(canvas)
     const ctx = canvas.getContext("webgl2", {
         antialias: false,
         preserveDrawingBuffer: true,
@@ -18,7 +18,9 @@ export default function windowBuilder(canvas) {
     ctx.depthFunc(ctx.LESS)
     ctx.frontFace(ctx.CCW)
 
-    let imageWorker = new ImageWorker()
+
+    let worker =  imageWorker()
+
     const callbacks = []
     const doWork = (type, data, callback) => {
         const id = v4()
@@ -27,9 +29,9 @@ export default function windowBuilder(canvas) {
             id
         })
 
-        imageWorker.postMessage({data, type, id})
+        worker.postMessage({data, type, id})
     }
-    imageWorker.onmessage = ({data: {data, id}}) => {
+    worker.onmessage = ({data: {data, id}}) => {
         const callback = callbacks.find(c => c.id === id)
 
         if (callback)

@@ -27,11 +27,10 @@ export default class Renderer {
     #ready = false
     then = 0
 
-    constructor(resolution) {
+    constructor(resolution, whenReady) {
         gpu = window.gpu
         window.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: BRDF, onlyData: true})
             .then(async bitmap => {
-                console.log("AQUI")
                 this.brdf = createTexture(
                     512,
                     512,
@@ -51,7 +50,7 @@ export default class Renderer {
                 this.data.cubeBuffer = this.cubeBuffer
 
                 this.#ready = true
-                this.start()
+                whenReady()
             })
             .catch(err => console.error(err))
 
