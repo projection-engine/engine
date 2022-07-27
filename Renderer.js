@@ -50,7 +50,7 @@ export default class Renderer {
                 this.data.cubeBuffer = this.cubeBuffer
 
                 this.#ready = true
-                whenReady()
+                whenReady(this)
             })
             .catch(err => console.error(err))
 
