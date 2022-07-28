@@ -10,7 +10,7 @@ export default class Physics {
         //     for (let i = 0; i < dynamicMeshes.length; i++) {
         //         const current = dynamicMeshes[i]
         //         let intersecting = false
-        //         const physicsComp = current.components.PhysicsComponent
+        //         const physicsComp = current.views.PhysicsComponent
         //         const time = elapsed / 1000
         //         const acceleration = [
         //             0,
@@ -19,7 +19,7 @@ export default class Physics {
         //         ]
         //
         //         for (let j = 0; j < staticMeshes.length; j++) {
-        //             const res = intersectBoundingSphere(current.components.ColliderComponent.radius, staticMeshes[j].components.ColliderComponent.radius, current.components.ColliderComponent.position, staticMeshes[j].components.ColliderComponent.position)
+        //             const res = intersectBoundingSphere(current.views.ColliderComponent.radius, staticMeshes[j].views.ColliderComponent.radius, current.views.ColliderComponent.position, staticMeshes[j].views.ColliderComponent.position)
         //             intersecting = intersecting || res
         //         }
         //
@@ -32,7 +32,7 @@ export default class Physics {
         //                 calculateDisplacement(physicsComp.velocity[1], time, acceleration[1]),
         //                 calculateDisplacement(physicsComp.velocity[2], time, acceleration[2]),
         //             ]
-        //             current.components.TransformComponent.translation = sumArrays(displacement, current.components.TransformComponent.translation)
+        //             current.views.TransformComponent.translation = sumArrays(displacement, current.views.TransformComponent.translation)
         //         }
         //
         //     }

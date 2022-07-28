@@ -21,7 +21,7 @@ export default class DirectionalLightComponent extends Component {
     constructor(id, entity) {
         super(id)
         if (!entity)
-            throw new Error("Transformation component needed")
+            throw new Error("Transformation component-editor needed")
         this.transformationComponent = entity.components[COMPONENTS.TRANSFORM]
     }
 
