@@ -14,22 +14,19 @@ export default class Entity {
     children = []
     parent
 
-    constructor(id = uuidv4(), name = "Empty entity", active=true, children, parent) {
+    constructor(id = uuidv4(), name = "Empty entity", active=true) {
         this.id = id
         this.name = name
         this.active = active
-
-        if(children)
-            this.children = children
-        if(parent)
-            this.parent = parent
     }
     get isFolder(){
-        return this.components[COMPONENTS.FOLDER] instanceof FolderComponent
+        return this.components[COMPONENTS.FOLDER] !== undefined
     }
     get isMesh(){
         return this.components[COMPONENTS.MESH] instanceof MeshComponent
     }
+
+
     clone(){
         let clone = new Entity()
         clone.name = "_" + this.name
@@ -56,7 +53,7 @@ export default class Entity {
         delete temp.parent
         temp.parent = this.parent?.id
         delete temp.children
-
+        console.log(temp)
         return temp
     }
 }

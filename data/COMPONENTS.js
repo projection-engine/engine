@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     TRANSFORM: "TransformComponent",
     CUBE_MAP: "CubeMapComponent",
     COLLIDER: "ColliderComponent",

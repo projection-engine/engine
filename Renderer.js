@@ -1,4 +1,4 @@
-import RootCameraInstance from "./instances/RootCameraInstance"
+import CameraInstance from "./instances/CameraInstance"
 import {createTexture} from "./utils/utils"
 import Packager from "./Packager"
 import VBOInstance from "./instances/VBOInstance"
@@ -20,7 +20,7 @@ export default class Renderer {
     materials = []
 
     environment = ENVIRONMENT.PROD
-    rootCamera = new RootCameraInstance()
+    rootCamera = new CameraInstance()
     frameID = undefined
     data = {}
     params = {}

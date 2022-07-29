@@ -1,6 +1,7 @@
 import {mat4} from "gl-matrix"
+import CameraPostProcessing from "../basic/CameraPostProcessing";
 
-export default class RootCameraInstance {
+export default class CameraInstance extends CameraPostProcessing{
     position = [0, 10, 0]
     rotation = [0, 0, 0, 1]
     zNear = .1
@@ -30,6 +31,7 @@ export default class RootCameraInstance {
     size = 100
 
     constructor() {
+        super()
         this.updateProjection()
         this.updateViewMatrix()
     }

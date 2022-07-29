@@ -3,12 +3,12 @@ import {vertex} from "../../shaders/FXAA.glsl"
 import * as shaderCode from "../../shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
 
+let shaderState
 export default class CompositePass {
-    constructor( resolution={w:window.screen.width, h: window.screen.height }) {
+    constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
         this.w = resolution.w
         this.h = resolution.h
-
-        const [blurBuffers,  upSampledBuffers] = generateBlurBuffers(4, resolution.w, resolution.h)
+        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, resolution.w, resolution.h)
         this.blurBuffers = blurBuffers
         this.upSampledBuffers = upSampledBuffers
 
@@ -22,15 +22,12 @@ export default class CompositePass {
         const {
             bloomStrength,
             bloomThreshold,
-
-            distortion,
-            chromaticAberration,
-            bloom,
-            distortionStrength,
-            chromaticAberrationStrength
+            bloom
         } = options.camera
 
-        if(bloom){
+
+
+        if (bloom) {
             output.startMapping()
             this.brightShader.use()
             this.brightShader.bindForUse({
@@ -39,22 +36,26 @@ export default class CompositePass {
             })
             output.draw()
             output.stopMapping()
-
             this.blurred = this.blur(output, bloomStrength)
+            if(!shaderState?.blurred)
+                shaderState.blurred = this.blurred
         }
+        if(!shaderState)
+            shaderState = {
+                blurred: this.blurred,
+                resolution:  [this.w, this.h],
+                sceneColor: worker.colors[0],
+                intensity: options.camera.postProcessingStrength,
+                settings: options.camera.postProcessingEffects
+            }
         output.startMapping()
         this.compositeShader.use()
-        this.compositeShader.bindForUse({
-            blurred: this.blurred,
-            sceneColor: worker.colors[0],
-            resolution: [this.w, this.h],
-            intensity: [distortionStrength, chromaticAberrationStrength],
-            settings: [distortion ? 1 : 0, chromaticAberration ? 1 : 0, bloom ? 1 : 0]
-        })
+        this.compositeShader.bindForUse(shaderState)
         output.draw()
         output.stopMapping()
     }
-    blur(fbo, bloomIntensity, blurBuffers=this.blurBuffers, upSampledBuffers=this.upSampledBuffers, kernel=7){
+
+    blur(fbo, bloomIntensity, blurBuffers = this.blurBuffers, upSampledBuffers = this.upSampledBuffers, kernel = 7) {
         const q = blurBuffers.length
 
         this.blurShader.use()
@@ -82,7 +83,7 @@ export default class CompositePass {
         }
 
         this.upSamplingShader.use()
-        for (let index = 0; index < q-1; index++) {
+        for (let index = 0; index < q - 1; index++) {
             const current = upSampledBuffers[index]
             current.startMapping()
             this.upSamplingShader.bindForUse({
@@ -94,6 +95,6 @@ export default class CompositePass {
             current.draw()
             current.stopMapping()
         }
-        return upSampledBuffers[q-2].colors[0]
+        return upSampledBuffers[q - 2].colors[0]
     }
 }

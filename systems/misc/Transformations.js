@@ -40,8 +40,7 @@ export default class Transformations {
             }
         }
 
-
-        if (current.parent && current.parent.components[COMPONENTS.TRANSFORM])
+        if (current.parent !== undefined && current.parent.components[COMPONENTS.TRANSFORM])
             mat4.multiply(
                 component.transformationMatrix,
                 current.parent.components[COMPONENTS.TRANSFORM].transformationMatrix,
