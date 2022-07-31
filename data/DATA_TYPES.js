@@ -1,5 +1,5 @@
 
-export const DATA_TYPES = {
+export default {
     OPTIONS: "OPTIONS",
     CHECKBOX: "CHECKBOX",
 

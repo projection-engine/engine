@@ -1,6 +1,6 @@
 import TextureInstance from "./TextureInstance"
 import ShaderInstance from "./ShaderInstance"
-import {DATA_TYPES} from "../data/DATA_TYPES"
+import DATA_TYPES from "../data/DATA_TYPES"
 import {v4} from "uuid"
 import IMAGE_WORKER_ACTIONS from "../data/IMAGE_WORKER_ACTIONS"
 
