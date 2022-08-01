@@ -1,6 +1,13 @@
 import Component from "../basic/Component"
+import DIRECTIONAL_LIGHT_PROPS from "../component-props/DIRECTIONAL_LIGHT_PROPS";
+import POINT_LIGHT_PROPS from "../component-props/POINT_LIGHT_PROPS";
 
 export default class PointLightComponent extends Component {
+    get isNative(){
+        return true
+    }
+    _props = POINT_LIGHT_PROPS
+
     _color = [255, 255, 255]
 
     attenuation = [1, 0, 0]

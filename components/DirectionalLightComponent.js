@@ -1,8 +1,13 @@
 import Component from "../basic/Component"
 import {mat4} from "gl-matrix"
 import COMPONENTS from "../data/COMPONENTS"
+import DIRECTIONAL_LIGHT_PROPS from "../component-props/DIRECTIONAL_LIGHT_PROPS";
 
 export default class DirectionalLightComponent extends Component {
+    get isNative(){
+        return true
+    }
+    _props = DIRECTIONAL_LIGHT_PROPS
     _color = [255, 255, 255]
     fixedColor = [1, 1, 1]
     transformationComponent

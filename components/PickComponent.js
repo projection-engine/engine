@@ -2,6 +2,9 @@ import Component from "../basic/Component"
 import getPickerId from "../utils/get-picker-id"
 
 export default class PickComponent extends Component {
+    get isNative(){
+        return true
+    }
     __pickID = [0, 0, 0]
 
     constructor(id, quantity) {

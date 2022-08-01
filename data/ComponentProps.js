@@ -7,8 +7,11 @@ export default class ComponentProps {
         }
     }
 
-    static number(label, key, max, min, increment = .1) {
-        return {label, max, min, increment, type: "number", key}
+    static number(label, key, max, min, increment = .1, isAngle, realtime=true, disabledIf) {
+        return {label, max, min, increment, type: "number", key, isAngle, realtime, disabledIf}
+    }
+    static array(labels, key, precision,  increment, max, min, isAngle, disabledIf) {
+        return {labels, max, min, precision, increment, type: "array", key, disabledIf, isAngle}
     }
 
     static string(label, key) {

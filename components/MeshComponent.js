@@ -3,6 +3,9 @@ import {mat3} from "gl-matrix"
 import MESH_TYPES from "../data/MESH_TYPES"
 
 export default class MeshComponent extends Component{
+    get isNative(){
+        return true
+    }
     meshID
     normalMatrix = mat3.create()
     meshType= MESH_TYPES.STATIC

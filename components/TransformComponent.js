@@ -1,9 +1,15 @@
 import Component from "../basic/Component"
 import {mat4, quat, vec3} from "gl-matrix"
 import Transformation from "../utils/Transformation"
+import TRANSFORMATION_PROPS from "../component-props/TRANSFORMATION_PROPS";
 
 const toDeg = 57.29
 export default class TransformComponent extends Component {
+    get isNative(){
+        return true
+    }
+    _props = TRANSFORMATION_PROPS
+
     __rotation = [0, 0, 0]
     _rotationQuat = quat.create()
     _translation = [0, 0, 0]
@@ -34,7 +40,7 @@ export default class TransformComponent extends Component {
     }
 
     get rotation() {
-        return this.__rotation
+        return Transformation.getEuler(this.rotationQuat)
     }
 
     get scaling() {
@@ -56,7 +62,7 @@ export default class TransformComponent extends Component {
     get rotationUpdated() {
         return this._rotationUpdated
     }
-
+ 
     set rotationQuat(q) {
         this.changed = true
         this._rotationUpdated = false
