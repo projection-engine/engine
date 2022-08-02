@@ -7,7 +7,7 @@ export default function Packager({
     params,
     onWrap,
     fallbackMaterial,
-    levelScript
+    scripts
 }) {
 
     const renderer = window.renderer,
@@ -28,18 +28,14 @@ export default function Packager({
         materialEntityMap: getMaterialEntityMap(entities, materialsWithFallback),
         meshesMap: renderer.meshes,
         entitiesMap: renderer.entitiesMap,
-        levelScript: typeof levelScript === "string" ? Scripting.parseScript(levelScript) : undefined,
+        scripts
     }
     let activeEntitiesSize = 0
     for(let i = 0; i < entities.length; i++){
         const entity = entities[i]
         if(entity.active)
             activeEntitiesSize++
-        entity.scripts = (entity.scripts ? entity.scripts : []).map(s => {
-            if (typeof s === "string")
-                return Scripting.parseScript(s)
-            return s
-        })
+
 
         if(entity.components[COMPONENTS.POINT_LIGHT])
             data.pointLights.push(entity)

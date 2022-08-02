@@ -58,8 +58,10 @@ export default class CameraInstance extends CameraPostProcessing{
     }
 
     updateViewTarget(cameraObj, transformation){
-        this.position = transformation.translation
-        this.rotation = transformation.rotationQuat
+        if(transformation) {
+            this.position = transformation.translation
+            this.rotation = transformation.rotationQuat
+        }
 
         this.zFar = cameraObj.zFar
         this.zNear = cameraObj.zNear

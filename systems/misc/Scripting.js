@@ -7,7 +7,8 @@ import Picking from "./Picking"
 import KEYS from "../../data/KEYS"
 import ENVIRONMENT from "../../data/ENVIRONMENT"
 
-export default class Scripting{
+
+export default class Scripting {
     pressedKeys = {}
 
     constructor() {
@@ -29,72 +30,35 @@ export default class Scripting{
     }
 
     execute(options, data, entities, entitiesMap, updateAllLights) {
-        const {meshesMap, levelScript} = data
+        const {meshesMap, scripts} = data
         const {
             elapsed,
             camera
         } = options
 
         if (window.renderer.environment === ENVIRONMENT.PROD) {
-            this.renderTarget.style.display = "block"
-            const eLength= entities.length
-            for (let i = 0; i < eLength; i++) {
-                const scripts =  entities[i].scripts
-                const sLength = scripts.length
-                for(let s = 0; s < sLength; s++){
-                    this.executeLoop(scripts[s], elapsed, entitiesMap, camera, meshesMap,  entities, updateAllLights)
-                }
+            // this.renderTarget.style.display = "block"
+            const size = scripts.length
+            for (let i = 0; i < size; i++) {
+                scripts[i].execute(entities, camera)
+                // this.executeLoop(scripts[i], elapsed, entitiesMap, camera, meshesMap, entities, updateAllLights)
             }
-
-            if (levelScript)
-                this.executeLoop(levelScript, elapsed, entitiesMap, camera, meshesMap,  entities, updateAllLights)
         }
     }
 
-    executeLoop(executor, elapsed, entities, camera, meshesMap, entitiesArr, updateAllLights) {
-
-        executor.execute({
-            elapsed,
-            entities,
-            renderTarget: this.renderTarget,
-            pressedKeys: this.pressedKeys,
+    static parseScript(code) {
+        console.log(code)
+        const data = new Function(code)
+        const systemRef = data()
+        console.log(systemRef)
+        systemRef.props = {
             KEYS,
-            camera,
             glMatrix,
             COMPONENTS,
-            utils: {
-                toEuler: Transformation.getEuler,
-                pick: (entity, coords) => {
-                    if (entity.components[COMPONENTS.MESH]) {
-                        const index = window.renderer.picking.pickElement((shader, proj) => {
-                            const mesh = meshesMap.get(entity.components[COMPONENTS.MESH]?.meshID)
-                            Picking.drawMesh(mesh, entity, camera.viewMatrix, proj, entity.components[COMPONENTS.TRANSFORM].transformationMatrix, shader)
-                        }, coords, camera)
+        }
+        if (systemRef?.constructor)
+            systemRef.constructor()
 
-                        return entitiesArr.find(e => e.components[COMPONENTS.PICK]?.pickID[0] * 255 === index)
-                    }
-                    return undefined
-                },
-                updateAllLights
-            }
-        })
+        return systemRef
     }
-
-    static parseScript(code) {
-        const className = code.name ? prepareName(code.name) : "Script"
-        const hasName = code.match(/class(\s+)(\w+)/gm)
-
-        const body = `
-            ${hasName !== null ? code : `class ${className} ${code}`}            
-            return new ${hasName !== null ? hasName[0].replace("class", "") : className}()
-        `
-        const executionLine = new Function("", body)
-        return executionLine([])
-
-    }
-}
-
-function prepareName(name) {
-    const word = name.trim().replaceAll(/\s/g, "").replaceAll("-", "").replaceAll("_", "").replaceAll(".", "").replaceAll(",", "")
-    return word[0].toUpperCase() + word.substring(1).toLowerCase()
 }
