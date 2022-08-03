@@ -1,9 +1,3 @@
-import * as shaderCode from "../data/shaders/PICK.glsl"
-import ShaderInstance from "../libs/instances/ShaderInstance"
-import FramebufferInstance from "../libs/instances/FramebufferInstance"
-import {mat4} from "gl-matrix"
-
-
 export default class ViewportPicker {
     static readBlock(depthFBO, start, end) {
         const w = Math.round(Math.abs(start.x - end.x))

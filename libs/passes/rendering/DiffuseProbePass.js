@@ -1,7 +1,6 @@
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../../data/COMPONENTS"
-import SpecularProbePass from "./SpecularProbePass"
 import CubeMapInstance from "../../instances/CubeMapInstance"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 
