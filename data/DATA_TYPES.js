@@ -3,8 +3,6 @@ export default {
     OPTIONS: "OPTIONS",
     CHECKBOX: "CHECKBOX",
 
-
-
     NUMBER: 0,
     TEXTURE: "sampler2D",
     COLOR: 2,

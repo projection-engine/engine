@@ -1,6 +1,5 @@
-import Component from "../basic/Component"
-import DIRECTIONAL_LIGHT_PROPS from "../component-props/DIRECTIONAL_LIGHT_PROPS";
-import POINT_LIGHT_PROPS from "../component-props/POINT_LIGHT_PROPS";
+import Component from "../libs/basic/Component"
+import POINT_LIGHT_PROPS from "../data/component-props/POINT_LIGHT_PROPS";
 
 export default class PointLightComponent extends Component {
     get isNative(){

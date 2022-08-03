@@ -1,4 +1,4 @@
-import Component from "../basic/Component"
+import Component from "../libs/basic/Component"
 import {mat3} from "gl-matrix"
 import MESH_TYPES from "../data/MESH_TYPES"
 

@@ -1,7 +1,7 @@
-import Component from "../basic/Component"
+import Component from "../libs/basic/Component"
 import {mat4, quat, vec3} from "gl-matrix"
-import Transformation from "../utils/Transformation"
-import TRANSFORMATION_PROPS from "../component-props/TRANSFORMATION_PROPS";
+import Transformation from "../services/Transformation"
+import TRANSFORMATION_PROPS from "../data/component-props/TRANSFORMATION_PROPS";
 
 const toDeg = 57.29
 export default class TransformComponent extends Component {
