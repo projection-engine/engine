@@ -5,6 +5,7 @@ import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
 import ENVIRONMENT from "../../../data/ENVIRONMENT"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import EngineLoop from "../../loop/EngineLoop";
+import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass {
@@ -43,43 +44,34 @@ export default class DeferredPass {
             camera
         } = options
         this.frameBuffer.startMapping()
+
         this.lastMaterial = undefined
-
-        const l = meshes.length
-        for (let m = 0; m < l; m++) {
-            const current = meshes[m]
-            if(!current.active)
-                continue
-
-            const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = meshesMap.get(meshComponent.meshID)
-            if(!mesh)
-                continue
-            const transformationComponent = current.components[COMPONENTS.TRANSFORM]
-            const mat = materials[meshComponent.materialID]
-
-            if (!mat || !mat.ready)
-                continue
-
-
-            const ambient = MaterialRenderer.getEnvironment(current)
-            MaterialRenderer.drawMesh({
-                mesh,
-                camPosition: camera.position,
-                viewMatrix: camera.viewMatrix,
-                projectionMatrix: camera.projectionMatrix,
-                transformMatrix: transformationComponent.transformationMatrix,
-                material: mat,
-                normalMatrix: meshComponent.normalMatrix,
-                materialComponent: meshComponent,
-                elapsed,
-                ambient,
-                lastMaterial: this.lastMaterial,
-                onlyForward: false
-            })
-         
-        }
-        window.gpu.bindVertexArray(null)
+        MaterialRenderer.loopMeshes(
+            meshesMap,
+            materials,
+            meshes,
+            (mat, mesh, meshComponent, current) => {
+                if (!mat.isDeferredShaded)
+                    return
+                const transformationComponent = current.components[COMPONENTS.TRANSFORM]
+                const ambient = MaterialRenderer.getEnvironment(current)
+                MaterialRenderer.drawMesh({
+                    mesh,
+                    camPosition: camera.position,
+                    viewMatrix: camera.viewMatrix,
+                    projectionMatrix: camera.projectionMatrix,
+                    transformMatrix: transformationComponent.transformationMatrix,
+                    material: mat,
+                    normalMatrix: meshComponent.normalMatrix,
+                    materialComponent: meshComponent,
+                    elapsed,
+                    ambient,
+                    lastMaterial: this.lastMaterial,
+                    onlyForward: false
+                })
+                this.lastMaterial = mat?.id
+            }
+        )
         this.frameBuffer.stopMapping()
 
     }
@@ -106,10 +98,10 @@ export default class DeferredPass {
             ssgi
         } = options
 
-        
+
         this.deferredFBO.startMapping()
-        if (onWrap && window.renderer.environment !== ENVIRONMENT.PROD)
-            onWrap.execute(options, data, entities, entitiesMap, false)
+
+        onWrap()
 
         this.deferredShader.use()
         this.deferredShader.bindForUse({

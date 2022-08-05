@@ -4,7 +4,8 @@ import EngineLoop from "../../loop/EngineLoop";
 import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
 
 let aoTexture
-export default class ForwardPass {
+const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
+export default class SkyboxPass {
     lastMaterial
 
     execute(options, data) {
@@ -15,11 +16,7 @@ export default class ForwardPass {
             meshes,
             materials,
             meshesMap,
-            pointLightsQuantity,
-            maxTextures,
-            directionalLightsData,
-            dirLightPOV,
-            pointLightData
+
         } = data
 
         const {
@@ -28,16 +25,15 @@ export default class ForwardPass {
         } = options
 
         this.lastMaterial = undefined
-
         MaterialRenderer.loopMeshes(
             meshesMap,
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
-                if (!mat.isForwardShaded)
+                // window.gpu.depthMask(false)
+                if (mat.shadingType !== SKYBOX_TYPE)
                     return
                 const transformationComponent = current.components[COMPONENTS.TRANSFORM]
-                const ambient = MaterialRenderer.getEnvironment(current)
                 MaterialRenderer.drawMesh({
                     mesh,
                     camPosition: camera.position,
@@ -47,17 +43,13 @@ export default class ForwardPass {
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,
                     materialComponent: meshComponent,
-                    directionalLightsQuantity: maxTextures,
-                    directionalLightsData,
-                    dirLightPOV,
-                    pointLightsQuantity,
-                    pointLightData,
+
                     elapsed,
-                    ambient,
-                    lastMaterial: this.lastMaterial,
-                    ao: aoTexture
-                })
+                    lastMaterial: this.lastMaterial
+                }, true)
+
                 this.lastMaterial = mat?.id
+                // window.gpu.depthMask(true)
             }
         )
     }

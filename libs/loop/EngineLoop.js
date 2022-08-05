@@ -19,6 +19,7 @@ import Scripting from "../passes/misc/Scripting";
 import Transformations from "../passes/misc/Transformations";
 import CompositePass from "../passes/postprocessing/CompositePass";
 import FinalPass from "../passes/postprocessing/FinalPass";
+import SkyboxPass from "../passes/rendering/SkyboxPass";
 
 export default class EngineLoop {
     static #initialized = false
@@ -33,6 +34,7 @@ export default class EngineLoop {
         const rendererMap = EngineLoop.renderMap
         const miscMap = EngineLoop.miscMap
         const ppMap = EngineLoop.ppMap
+        rendererMap.set("skybox", new SkyboxPass())
         rendererMap.set("ao", new AmbientOcclusionPass(resolution))
         rendererMap.set("deferred", new DeferredPass(resolution))
         rendererMap.set("forward", new ForwardPass())
@@ -67,7 +69,8 @@ export default class EngineLoop {
         const deferred = map.get("deferred")
 
 
-        map.get("depthPrePass").execute(options, data, entities, entitiesMap)
+        map.get("depthPrePass").execute(options, data)
+
         map.get("ao").execute(options, data, entities, entitiesMap,)
         map.get("specularProbe").execute(options, data, entities, entitiesMap)
         map.get("diffuseProbe").execute(options, data, entities, entitiesMap)
@@ -75,7 +78,11 @@ export default class EngineLoop {
 
         map.get("ssGI").execute(options, FBO.colors[0])
         deferred.execute(options, data)
-        deferred.drawBuffer(options, data, entities, entitiesMap, onWrap)
+        deferred.drawBuffer(options, data, entities, entitiesMap, () => {
+            if (onWrap)
+                onWrap.execute(options, data, entities, entitiesMap, false)
+            map.get("skybox").execute(options, data)
+        })
 
         FBO.startMapping()
         deferred.drawFrame()
@@ -111,8 +118,8 @@ export default class EngineLoop {
         const gpu = window.gpu
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
-        EngineLoop.#miscellaneous(options, data, entities, entitiesMap, onWrap)
+        EngineLoop.#miscellaneous(options, data, entities, entitiesMap)
         EngineLoop.#rendering(options, data, entities, entitiesMap, onWrap)
-        EngineLoop.#postProcessing(options, data, entities, entitiesMap, onWrap)
+        EngineLoop.#postProcessing(options, data, entities, entitiesMap)
     }
 }

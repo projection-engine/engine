@@ -2,8 +2,10 @@ import EngineLoop from "../libs/loop/EngineLoop";
 import Renderer from "../Renderer";
 import COMPONENTS from "../data/COMPONENTS";
 
+
 export default class MaterialRenderer {
     static draw(mesh, material) {
+        const gpu = window.gpu
         // if (material.settings.faceCulling === false)
         //     gpu.disable(gpu.CULL_FACE)
         // else {
@@ -19,8 +21,6 @@ export default class MaterialRenderer {
             gpu.disable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
             gpu.disable(gpu.BLEND)
-        else if (material.settings.blendFunc)
-            gpu.blendFunc(gpu[material.settings.blendFuncSource], gpu[material.settings?.blendFuncTarget])
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 
@@ -74,39 +74,40 @@ export default class MaterialRenderer {
                         sceneColor,
                         lastMaterial,
                         ao,
-                        shadingModel,
+
                         onlyForward
-                    }) {
-        if (mesh && material && (!onlyForward || (onlyForward && (material.settings?.isForwardShaded || useCubeMapShader && material.hasCubeMap)))) {
-            mesh.use()
-            material.use(
-                lastMaterial !== material.id,
-                {
-                    ...ambient,
-                    projectionMatrix,
-                    transformMatrix,
-                    viewMatrix,
-
-                    normalMatrix,
-                    sceneColor,
-                    brdfSampler: Renderer.BRDF,
-                    elapsedTime: elapsed,
-                    cameraVec: camPosition,
-
-                    shadingModel,
-                    directionalLightsData,
-                    directionalLightsQuantity,
-
-                    dirLightPOV,
-                    aoSampler: ao,
-                    lightQuantity: pointLightsQuantity,
-                    pointLightData,
-                    ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
-                },
-                useCubeMapShader
-            )
-            MaterialRenderer.draw(mesh, material)
+                    }, directDrawing = false) {
+        if (!mesh || !material)
+            return
+        mesh.use()
+        material.use(
+            lastMaterial !== material.id,
+            {
+                ...ambient,
+                projectionMatrix,
+                transformMatrix,
+                viewMatrix,
+                normalMatrix,
+                sceneColor,
+                brdfSampler: Renderer.BRDF,
+                elapsedTime: elapsed,
+                cameraVec: camPosition,
+                directionalLightsData,
+                directionalLightsQuantity,
+                dirLightPOV,
+                aoSampler: ao,
+                lightQuantity: pointLightsQuantity,
+                pointLightData,
+                ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
+            },
+            useCubeMapShader
+        )
+        if (directDrawing) {
+            const gpu = window.gpu
+            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
         }
+        else
+            MaterialRenderer.draw(mesh, material)
     }
 
     static drawProbe({
@@ -153,12 +154,29 @@ export default class MaterialRenderer {
                     pointLightsQuantity,
                     pointLightData,
                     elapsed,
-                    useCubeMapShader: true,
-                    onlyForward: true
+                    useCubeMapShader: true
                 })
             }
         }
         window.gpu.bindVertexArray(null)
 
+    }
+
+    static loopMeshes(meshes, materials, entities, callback) {
+        const l = entities.length
+        for (let m = 0; m < l; m++) {
+            const current = entities[m]
+            if (!current.active)
+                continue
+            const meshComponent = current.components[COMPONENTS.MESH]
+            const mesh = meshes.get(meshComponent.meshID)
+            if (!mesh)
+                continue
+            const mat = materials[meshComponent.materialID]
+            if (!mat || !mat.ready)
+                continue
+            callback(mat, mesh, meshComponent, current)
+        }
+        window.gpu.bindVertexArray(null)
     }
 }
