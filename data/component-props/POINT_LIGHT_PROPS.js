@@ -1,22 +1,22 @@
-import ComponentProps from "../../services/ComponentProps";
+import Component from "../../libs/basic/Component";
 
 export default  [
 
-    ComponentProps.group("INTENSITY_COLOR", [
-        ComponentProps.color("COLOR", "color"),
-        ComponentProps.number("INTENSITY", "color", undefined, undefined, .01),
+    Component.group("INTENSITY_COLOR", [
+        Component.color("COLOR", "color"),
+        Component.number("INTENSITY", "color", undefined, undefined, .01),
     ]),
 
 
-    ComponentProps.group("SHADOWS", [
-        ComponentProps.boolean("ENABLED", "shadowMap"),
-        ComponentProps.number("SIZE", "size", undefined, 1,1, false, false),
+    Component.group("SHADOWS", [
+        Component.boolean("ENABLED", "shadowMap"),
+        Component.number("SIZE", "size", undefined, 1,1, false, false),
     ]),
-    ComponentProps.group("VIEW_PLANES", [
-        ComponentProps.number("FAR", "zFar"),
-        ComponentProps.number("NEAR", "zNear"),
+    Component.group("VIEW_PLANES", [
+        Component.number("FAR", "zFar"),
+        Component.number("NEAR", "zNear"),
     ]),
-    ComponentProps.group("ATTENUATION", [
-        ComponentProps.array(["X", "Y", "Z"], "attenuation", 2, .01)
+    Component.group("ATTENUATION", [
+        Component.array(["X", "Y", "Z"], "attenuation", 2, .01)
     ]),
 ]

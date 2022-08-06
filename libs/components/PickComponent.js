@@ -1,5 +1,5 @@
-import Component from "../libs/basic/Component"
-import getPickerId from "../utils/get-picker-id"
+import Component from "../basic/Component"
+import getPickerId from "../../utils/get-picker-id"
 
 export default class PickComponent extends Component {
     get isNative(){

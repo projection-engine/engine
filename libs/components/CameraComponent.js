@@ -1,5 +1,5 @@
-import Component from "../libs/basic/Component"
-import CAMERA_PROPS from "../data/component-props/CAMERA_PROPS";
+import Component from "../basic/Component"
+import CAMERA_PROPS from "../../data/component-props/CAMERA_PROPS";
 
 export default class CameraComponent extends Component {
     get isNative() {
@@ -27,7 +27,7 @@ export default class CameraComponent extends Component {
 
     ortho = false
     size = 100
-
+    name = "CAMERA"
     constructor(id) {
         super(id)
     }

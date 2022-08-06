@@ -1,7 +1,6 @@
 import COMPONENTS from "../../../data/COMPONENTS"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import EngineLoop from "../../loop/EngineLoop";
-import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
 
 let aoTexture
 export default class ForwardPass {

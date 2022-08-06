@@ -3,11 +3,61 @@ import {v4 as uuidv4} from "uuid"
 export default class Component {
     id = uuidv4()
     active = true
-    #initializedCustom = false
     _props = []
     _icon = ""
     _name = ""
+    #entity
+    get entity(){
+        return this.#entity
+    }
+    set entity(ref){
+        if(!this.#entity)
+            this.#entity = ref
+    }
+    onUpdate(){}
+    static group(label, children) {
+        return {
+            type: "group",
+            label,
+            children: Array.isArray(children) ? children : []
+        }
+    }
 
+    static number(label, key, max, min, increment = .1, isAngle, realtime=true, disabledIf) {
+        return {label, max, min, increment, type: "number", key, isAngle, realtime, disabledIf}
+    }
+    static array(labels, key, precision,  increment, max, min, isAngle, disabledIf) {
+        return {labels, max, min, precision, increment, type: "array", key, disabledIf, isAngle}
+    }
+
+    static string(label, key) {
+        return {type: "string", label, key}
+    }
+
+    static options(label, key, options) {
+        return {
+            type: "options",
+            label,
+            options,
+            key
+        }
+    }
+
+    static color(label, key) {
+        return {type: "color", label, key}
+    }
+
+    static boolean(label, key) {
+        return {type: "boolean", label, key}
+    }
+
+    static image(label, key) {
+        return {type: "image", label, key}
+    }
+
+    static mesh(label, key) {
+        return {type: "mesh", label, key}
+    }
 
     get props() {
         return this._props
@@ -26,18 +76,7 @@ export default class Component {
             this.id = id
     }
 
-    constructFromCustom(name, icon, props, initial) {
-        if (this.#initializedCustom)
-            return
-        this.#initializedCustom = true
 
-        this._icon = icon
-        this._name = name
-        this._props = props
-        Object.keys(initial).forEach(key => {
-            if (key !== "COMPONENT_NAME" && key !== "COMPONENT_KEY" && key !== "COMPONENT_ICON" && key !== "props")
-                this[key] = initial[key]
-        })
 
-    }
+
 }

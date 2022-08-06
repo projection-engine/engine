@@ -11,7 +11,6 @@ import FramebufferInstance from "../instances/FramebufferInstance";
 import ShaderInstance from "../instances/ShaderInstance";
 import * as shaderCode from "../../data/shaders/CUBE_MAP.glsl";
 import {copyTexture} from "../../utils/utils";
-import ENVIRONMENT from "../../data/ENVIRONMENT";
 import Culling from "../passes/misc/Culling";
 import PerformanceMetrics from "../passes/misc/PerformanceMetrics";
 import Physics from "../passes/misc/Physics";
@@ -79,7 +78,8 @@ export default class EngineLoop {
         map.get("ssGI").execute(options, FBO.colors[0])
         deferred.execute(options, data)
         deferred.drawBuffer(options, data, entities, entitiesMap, () => {
-            if (onWrap)
+
+            if (onWrap != null)
                 onWrap.execute(options, data, entities, entitiesMap, false)
             map.get("skybox").execute(options, data)
         })
@@ -88,7 +88,7 @@ export default class EngineLoop {
         deferred.drawFrame()
         copyTexture(FBO, deferred.frameBuffer, window.gpu.DEPTH_BUFFER_BIT)
         map.get("forward").execute(options, data)
-        if (onWrap && window.renderer.environment !== ENVIRONMENT.PROD)
+        if (onWrap != null)
             onWrap.execute(options, data, entities, entitiesMap, true)
         FBO.stopMapping()
 

@@ -1,7 +1,7 @@
 import {v4 as uuidv4} from "uuid"
 import COMPONENTS from "../../data/COMPONENTS"
 import cloneClass from "../../utils/clone-class"
-import MeshComponent from "../../components/MeshComponent"
+import MeshComponent from "../components/MeshComponent"
 
 export default class Entity {
     id

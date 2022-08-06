@@ -1,40 +1,40 @@
-import ComponentProps from "../../services/ComponentProps";
+import Component from "../../libs/basic/Component";
 
 export default  [
-    ComponentProps.number("FOV", "fov", 175, 1, .1, true),
-    ComponentProps.group("ORTHO_PROJECTION", [
-        ComponentProps.boolean("ORTHO", "ortho"),
-        ComponentProps.number("SIZE", "size", 175, 1)
+    Component.number("FOV", "fov", 175, 1, .1, true),
+    Component.group("ORTHO_PROJECTION", [
+        Component.boolean("ORTHO", "ortho"),
+        Component.number("SIZE", "size", 175, 1)
     ]),
 
-    ComponentProps.group("VIEW_PLANES", [
-        ComponentProps.number("FAR", "zFar"),
-        ComponentProps.number("NEAR", "zNear"),
+    Component.group("VIEW_PLANES", [
+        Component.number("FAR", "zFar"),
+        Component.number("NEAR", "zNear"),
     ]),
 
-    ComponentProps.group("DISTORTION", [
-        ComponentProps.boolean("ENABLED", "distortion"),
-        ComponentProps.number("STRENGTH", "distortionStrength"),
+    Component.group("DISTORTION", [
+        Component.boolean("ENABLED", "distortion"),
+        Component.number("STRENGTH", "distortionStrength"),
     ]),
 
-    ComponentProps.group("CHROMATIC_ABERRATION", [
-        ComponentProps.boolean("ENABLED", "chromaticAberration"),
-        ComponentProps.number("STRENGTH", "chromaticAberrationStrength"),
+    Component.group("CHROMATIC_ABERRATION", [
+        Component.boolean("ENABLED", "chromaticAberration"),
+        Component.number("STRENGTH", "chromaticAberrationStrength"),
     ]),
 
-    ComponentProps.group("FILM_GRAIN", [
-        ComponentProps.boolean("ENABLED", "filmGrain"),
-        ComponentProps.number("STRENGTH", "filmGrainStrength")
+    Component.group("FILM_GRAIN", [
+        Component.boolean("ENABLED", "filmGrain"),
+        Component.number("STRENGTH", "filmGrainStrength")
     ]),
 
-    ComponentProps.group("BLOOM", [
-        ComponentProps.boolean("ENABLED", "bloom"),
-        ComponentProps.number("STRENGTH", "bloomStrength"),
-        ComponentProps.number("THRESHOLD", "bloomThreshold"),
+    Component.group("BLOOM", [
+        Component.boolean("ENABLED", "bloom"),
+        Component.number("STRENGTH", "bloomStrength"),
+        Component.number("THRESHOLD", "bloomThreshold"),
     ]),
 
-    ComponentProps.group("COLOR_CORRECTION", [
-        ComponentProps.number("GAMMA", "gamma", 10, .1),
-        ComponentProps.number("EXPOSURE", "exposure"),
+    Component.group("COLOR_CORRECTION", [
+        Component.number("GAMMA", "gamma", 10, .1),
+        Component.number("EXPOSURE", "exposure"),
     ])
 ]

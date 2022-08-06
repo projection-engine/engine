@@ -1,7 +1,3 @@
-import COMPONENTS from "../../../data/COMPONENTS"
-import * as glMatrix from "gl-matrix"
-
-import KEYS from "../../../data/KEYS"
 import ENVIRONMENT from "../../../data/ENVIRONMENT"
 
 
@@ -16,46 +12,25 @@ export default class Scripting {
             this.renderTarget = document.createElement("code")
             this.renderTarget.id = targetID
             Object.assign(this.renderTarget.style, {
-                backdropFilter: "blur(10px) brightness(70%)", borderRadius: "5px", width: "fit-content",
-                height: "fit-content", position: "absolute", bottom: "4px", left: "4px", zIndex: "10",
-                color: "white", padding: "8px", fontSize: ".75rem",
-                maxWidth: "15vw", display: "none",
-                maxHeight: "50vh", overflow: "hidden"
+                width: "100vw",
+                height: "100vh",
+                position: 'absolute',
+                zIndex: "-1"
             })
             window.gpu.canvas.parentNode.appendChild(this.renderTarget)
         }
     }
 
     execute(options, data, entities, entitiesMap, updateAllLights) {
-        const {meshesMap, scripts} = data
-        const {
-            elapsed,
-            camera
-        } = options
-
+        const {camera} = options
         if (window.renderer.environment === ENVIRONMENT.PROD) {
-            // this.renderTarget.style.display = "block"
-            const size = scripts.length
+            const size = entities.length
             for (let i = 0; i < size; i++) {
-                scripts[i].execute(entities, camera)
-                // this.executeLoop(scripts[i], elapsed, entitiesMap, camera, meshesMap, entities, updateAllLights)
+                const scripts = entities[i].scripts
+                const scriptsSize = scripts.length
+                for (let j = 0; j < scriptsSize; j++)
+                    scripts[j].onUpdate(camera, updateAllLights)
             }
         }
-    }
-
-    static parseScript(code) {
-        console.log(code)
-        const data = new Function(code)
-        const systemRef = data()
-        console.log(systemRef)
-        systemRef.props = {
-            KEYS,
-            glMatrix,
-            COMPONENTS,
-        }
-        if (systemRef?.constructor)
-            systemRef.constructor()
-
-        return systemRef
     }
 }

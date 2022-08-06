@@ -2,10 +2,8 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import COMPONENTS from "../../../data/COMPONENTS"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
-import ENVIRONMENT from "../../../data/ENVIRONMENT"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import EngineLoop from "../../loop/EngineLoop";
-import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass {

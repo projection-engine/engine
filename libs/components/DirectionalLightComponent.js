@@ -1,12 +1,13 @@
-import Component from "../libs/basic/Component"
+import Component from "../basic/Component"
 import {mat4} from "gl-matrix"
-import COMPONENTS from "../data/COMPONENTS"
-import DIRECTIONAL_LIGHT_PROPS from "../data/component-props/DIRECTIONAL_LIGHT_PROPS";
+import COMPONENTS from "../../data/COMPONENTS"
+import DIRECTIONAL_LIGHT_PROPS from "../../data/component-props/DIRECTIONAL_LIGHT_PROPS";
 
 export default class DirectionalLightComponent extends Component {
     get isNative(){
         return true
     }
+    name = "DIRECTIONAL_LIGHT"
     _props = DIRECTIONAL_LIGHT_PROPS
     _color = [255, 255, 255]
     fixedColor = [1, 1, 1]
@@ -26,7 +27,7 @@ export default class DirectionalLightComponent extends Component {
     constructor(id, entity) {
         super(id)
         if (!entity)
-            throw new Error("Transformation component-editor needed")
+            throw new Error("Transformation inspector needed")
         this.transformationComponent = entity.components[COMPONENTS.TRANSFORM]
     }
 

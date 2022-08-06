@@ -1,10 +1,11 @@
-import Component from "../libs/basic/Component"
-import PROBE_PROPS from "../data/component-props/PROBE_PROPS";
+import Component from "../basic/Component"
+import PROBE_PROPS from "../../data/component-props/PROBE_PROPS";
 
 export default class ProbeComponent extends Component {
     get isNative(){
         return true
     }
+    name = "PROBE"
     _props = PROBE_PROPS
     get isDiffuse(){
         return !this.specularProbe

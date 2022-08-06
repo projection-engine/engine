@@ -1,13 +1,14 @@
-import Component from "../libs/basic/Component"
+import Component from "../basic/Component"
 import {mat4, quat, vec3} from "gl-matrix"
-import Transformation from "../services/Transformation"
-import TRANSFORMATION_PROPS from "../data/component-props/TRANSFORMATION_PROPS";
+import Transformation from "../../services/Transformation"
+import TRANSFORMATION_PROPS from "../../data/component-props/TRANSFORMATION_PROPS";
 
 const toDeg = 57.29
 export default class TransformComponent extends Component {
     get isNative(){
         return true
     }
+    name = "TRANSFORMATION"
     _props = TRANSFORMATION_PROPS
 
     __rotation = [0, 0, 0]

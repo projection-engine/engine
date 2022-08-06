@@ -1,11 +1,11 @@
-import ComponentProps from "../../services/ComponentProps";
+import Component from "../../libs/basic/Component";
 
 export default [
 
-    ComponentProps.boolean("SPECULAR_PROBE", "specularProbe"),
-    ComponentProps.number("LOD", "mipmaps", 10, 1, 1, false, true, "isDiffuse"),
+    Component.boolean("SPECULAR_PROBE", "specularProbe"),
+    Component.number("LOD", "mipmaps", 10, 1, 1, false, true, "isDiffuse"),
 
-    ComponentProps.options("RESOLUTION", "resolution", [
+    Component.options("RESOLUTION", "resolution", [
         {
             label: "128p",
             value: 128,
@@ -24,7 +24,7 @@ export default [
         }
     ]),
 
-    ComponentProps.group("MULTIPLIER", [
-        ComponentProps.array(["R", "G", "B"], "multiplier")
+    Component.group("MULTIPLIER", [
+        Component.array(["R", "G", "B"], "multiplier")
     ]),
 ]
