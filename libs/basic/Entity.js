@@ -18,9 +18,7 @@ export default class Entity {
         this.name = name
         this.active = active
     }
-    get isFolder(){
-        return this.components[COMPONENTS.FOLDER] !== undefined
-    }
+
     get isMesh(){
         return this.components[COMPONENTS.MESH] instanceof MeshComponent
     }
