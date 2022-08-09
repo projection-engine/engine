@@ -1,28 +1,29 @@
-import {v4 as uuidv4} from "uuid"
+import {v4 } from "uuid"
 import COMPONENTS from "../../data/COMPONENTS"
 import cloneClass from "../../utils/clone-class"
 import MeshComponent from "../components/MeshComponent"
 
+
 export default class Entity {
     id
+    queryKey
     name
     active
     components = {}
-    scriptsMap = []
     scripts = []
     children = []
     parent
 
-    constructor(id = uuidv4(), name = "Empty entity", active=true) {
+    constructor(id = v4(), name = "Empty entity", active=true) {
         this.id = id
         this.name = name
         this.active = active
+        this.queryKey = id.slice(0, id.length/2);
     }
 
     get isMesh(){
         return this.components[COMPONENTS.MESH] instanceof MeshComponent
     }
-
 
     clone(){
         let clone = new Entity()

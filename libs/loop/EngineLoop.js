@@ -62,7 +62,7 @@ export default class EngineLoop {
         EngineLoop.#initialized = true
     }
 
-    static #rendering(options, data, entities, entitiesMap, onWrap) {
+    static #rendering(options, data, entities, onWrap) {
         const map = EngineLoop.renderMap
         const FBO = map.get("currentFrameFBO")
         const deferred = map.get("deferred")
@@ -70,17 +70,17 @@ export default class EngineLoop {
 
         map.get("depthPrePass").execute(options, data)
 
-        map.get("ao").execute(options, data, entities, entitiesMap,)
-        map.get("specularProbe").execute(options, data, entities, entitiesMap)
-        map.get("diffuseProbe").execute(options, data, entities, entitiesMap)
-        map.get("shadowMap").execute(options, data, entities, entitiesMap)
+        map.get("ao").execute(options, data, entities)
+        map.get("specularProbe").execute(options, data, entities)
+        map.get("diffuseProbe").execute(options, data, entities)
+        map.get("shadowMap").execute(options, data, entities)
 
         map.get("ssGI").execute(options, FBO.colors[0])
         deferred.execute(options, data)
-        deferred.drawBuffer(options, data, entities, entitiesMap, () => {
+        deferred.drawBuffer(options, data, entities, () => {
 
             if (onWrap != null)
-                onWrap.execute(options, data, entities, entitiesMap, false)
+                onWrap.execute(options, data)
             map.get("skybox").execute(options, data)
         })
 
@@ -89,37 +89,37 @@ export default class EngineLoop {
         copyTexture(FBO, deferred.frameBuffer, window.gpu.DEPTH_BUFFER_BIT)
         map.get("forward").execute(options, data)
         if (onWrap != null)
-            onWrap.execute(options, data, entities, entitiesMap, true)
+            onWrap.execute(options, data, true)
         FBO.stopMapping()
 
         map.get("ssr").execute(options, FBO.colors[0])
     }
 
-    static #miscellaneous(options, data, entities, entitiesMap) {
+    static #miscellaneous(options, data, entities) {
         const map = EngineLoop.miscMap
-        map.get("culling").execute(options, data, entities, entitiesMap)
-        map.get("scripting").execute(options, data, entities, entitiesMap)
-        map.get("metrics").execute(options, data, entities, entitiesMap)
-        map.get("physics").execute(options, data, entities, entitiesMap)
-        map.get("transformations").execute(options, data, entities, entitiesMap)
+        map.get("culling").execute(options, data, entities)
+        map.get("scripting").execute(options, data, entities)
+        map.get("metrics").execute(options, data, entities)
+        map.get("physics").execute(options, data, entities)
+        map.get("transformations").execute(options, data, entities)
     }
 
-    static #postProcessing(options, data, entities, entitiesMap) {
+    static #postProcessing(options, data, entities) {
         const ppMap = EngineLoop.ppMap
         const FBO = EngineLoop.renderMap.get("currentFrameFBO")
 
-        ppMap.get("compositePass").execute(options, data, entities, entitiesMap, FBO, EngineLoop.ppMap.get("worker"))
+        ppMap.get("compositePass").execute(options, data, entities, FBO, EngineLoop.ppMap.get("worker"))
         ppMap.get("finalPass").execute(options)
     }
 
-    static loop(options, data, entities, entitiesMap, onWrap) {
+    static loop(options, data, entities, onWrap) {
         if (!EngineLoop.#initialized)
             return
         const gpu = window.gpu
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
-        EngineLoop.#miscellaneous(options, data, entities, entitiesMap)
-        EngineLoop.#rendering(options, data, entities, entitiesMap, onWrap)
-        EngineLoop.#postProcessing(options, data, entities, entitiesMap)
+        EngineLoop.#miscellaneous(options, data, entities)
+        EngineLoop.#rendering(options, data, entities, onWrap)
+        EngineLoop.#postProcessing(options, data, entities)
     }
 }

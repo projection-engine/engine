@@ -1,6 +1,7 @@
 import Component from "../basic/Component"
 import {mat3} from "gl-matrix"
 import MESH_TYPES from "../../data/MESH_TYPES"
+import FALLBACK_MATERIAL from "../../data/FALLBACK_MATERIAL";
 
 export default class MeshComponent extends Component{
     get isNative(){
@@ -11,7 +12,7 @@ export default class MeshComponent extends Component{
     meshType= MESH_TYPES.STATIC
     name = "MESH"
 
-    materialID
+    materialID = FALLBACK_MATERIAL
     overrideMaterial = false
     radius = 50
     doubleSided = true

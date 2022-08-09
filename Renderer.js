@@ -4,7 +4,8 @@ import EngineLoop from "./libs/loop/EngineLoop";
 
 let gpu
 export default class Renderer {
-    entitiesMap = new Map()
+
+    static entitiesMap = new Map()
     meshes = new Map()
     activeEntitiesSize = 0 // DEV
     entities = []
@@ -15,8 +16,9 @@ export default class Renderer {
 
     data = {}
     params = {}
-    then = 0
 
+    static queryMap = new Map()
+    static then = 0
     static cubeBuffer
     static BRDF
     static frameID
@@ -38,13 +40,12 @@ export default class Renderer {
     }
 
     callback() {
-        this.params.elapsed = performance.now() - this.then
+        this.params.elapsed = performance.now() - Renderer.then
 
         EngineLoop.loop(
             this.params,
             this.data,
             this.entities,
-            this.entitiesMap,
             this.params.onWrap
         )
 

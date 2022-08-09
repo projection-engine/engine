@@ -49,6 +49,7 @@ export default class DeferredPass {
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
+
                 if (!mat.isDeferredShaded)
                     return
                 const transformationComponent = current.components[COMPONENTS.TRANSFORM]
@@ -74,7 +75,7 @@ export default class DeferredPass {
 
     }
 
-    drawBuffer(options, data, entities, entitiesMap, onWrap){
+    drawBuffer(options, data, entities, onWrap){
         if (aoTexture === undefined) {
             aoTexture = EngineLoop.renderMap.get("ao").texture
             ssGISystem = EngineLoop.renderMap.get("ssGI")

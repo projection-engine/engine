@@ -21,7 +21,7 @@ export default class Scripting {
         }
     }
 
-    execute(options, data, entities, entitiesMap, updateAllLights) {
+    execute(options, data, entities) {
         const {camera} = options
         if (window.renderer.environment === ENVIRONMENT.PROD) {
             const size = entities.length
@@ -29,7 +29,7 @@ export default class Scripting {
                 const scripts = entities[i].scripts
                 const scriptsSize = scripts.length
                 for (let j = 0; j < scriptsSize; j++)
-                    scripts[j].onUpdate(camera, updateAllLights)
+                    scripts[j].onUpdate(camera)
             }
         }
     }
