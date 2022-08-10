@@ -1,7 +1,8 @@
 import {mat4} from "gl-matrix"
-import CameraPostProcessing from "../basic/CameraPostProcessing";
+import CameraPostProcessing from "../../templates/basic/CameraPostProcessing";
+import COMPONENTS from "../../data/COMPONENTS";
 
-export default class CameraInstance extends CameraPostProcessing{
+export default class CameraInstance extends CameraPostProcessing {
     position = [0, 10, 0]
     rotation = [0, 0, 0, 1]
     zNear = .1
@@ -10,7 +11,7 @@ export default class CameraInstance extends CameraPostProcessing{
     aspectRatio = 1
     viewMatrix = mat4.create()
     projectionMatrix = mat4.create()
-    invViewMatrix= mat4.create()
+    invViewMatrix = mat4.create()
     invProjectionMatrix = mat4.create()
     centerOn = [0, 0, 0]
 
@@ -21,7 +22,7 @@ export default class CameraInstance extends CameraPostProcessing{
     chromaticAberrationStrength = 1
 
     filmGrain = false
-    filmGrainStrength =1
+    filmGrainStrength = 1
     bloom = false
     bloomStrength = 1
     bloomThreshold = .75
@@ -57,8 +58,16 @@ export default class CameraInstance extends CameraPostProcessing{
         mat4.invert(this.viewMatrix, this.viewMatrix)
     }
 
-    updateViewTarget(cameraObj, transformation){
-        if(transformation) {
+    updateViewTarget(entity) {
+        console.trace(entity)
+        if(!entity?.components)
+            return
+        const cameraObj = entity.components[COMPONENTS.CAMERA]
+        const transformation = entity.components[COMPONENTS.TRANSFORM]
+
+        if (!cameraObj)
+            return
+        if (transformation) {
             this.position = transformation.translation
             this.rotation = transformation.rotationQuat
         }
@@ -68,7 +77,7 @@ export default class CameraInstance extends CameraPostProcessing{
 
         this.fov = cameraObj.fov
         this.aspectRatio = cameraObj.aspectRatio
-        this.distortion =   cameraObj.distortion
+        this.distortion = cameraObj.distortion
         this.distortionStrength = cameraObj.distortionStrength
         this.chromaticAberration = cameraObj.chromaticAberration
         this.chromaticAberrationStrength = cameraObj.chromaticAberrationStrength

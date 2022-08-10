@@ -97,10 +97,9 @@ export default class DeferredPass {
             ssgi
         } = options
 
-
+        onWrap(false)
         this.deferredFBO.startMapping()
-
-        onWrap()
+        onWrap(true)
 
         this.deferredShader.use()
         this.deferredShader.bindForUse({

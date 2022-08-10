@@ -1,7 +1,6 @@
 import parseMessage from "./libs/parse-message";
 import ENVIRONMENT from "../../data/ENVIRONMENT";
 import Renderer from "../../Renderer";
-import {v4} from "uuid";
 
 const types = Object.freeze({
     ERROR: "ERROR",

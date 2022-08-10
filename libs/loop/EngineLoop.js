@@ -77,16 +77,21 @@ export default class EngineLoop {
 
         map.get("ssGI").execute(options, FBO.colors[0])
         deferred.execute(options, data)
-        deferred.drawBuffer(options, data, entities, () => {
-
-            if (onWrap != null)
-                onWrap.execute(options, data)
-            map.get("skybox").execute(options, data)
-        })
+        deferred.drawBuffer(
+            options,
+            data,
+            entities,
+            isDuringBinding => {
+                if (onWrap != null)
+                    onWrap.execute(options, data, false, isDuringBinding)
+                if (isDuringBinding)
+                    map.get("skybox").execute(options, data)
+            }
+        )
 
         FBO.startMapping()
         deferred.drawFrame()
-        copyTexture(FBO, deferred.frameBuffer, window.gpu.DEPTH_BUFFER_BIT)
+        copyTexture(FBO, deferred.frameBuffer, gpu.DEPTH_BUFFER_BIT)
         map.get("forward").execute(options, data)
         if (onWrap != null)
             onWrap.execute(options, data, true)
@@ -111,6 +116,7 @@ export default class EngineLoop {
         ppMap.get("compositePass").execute(options, data, entities, FBO, EngineLoop.ppMap.get("worker"))
         ppMap.get("finalPass").execute(options)
     }
+
 
     static loop(options, data, entities, onWrap) {
         if (!EngineLoop.#initialized)

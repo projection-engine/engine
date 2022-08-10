@@ -1,4 +1,3 @@
-import Entity from "../../basic/Entity";
 import {v4} from "uuid";
 
 const isPlainObject = value => value?.constructor === Object;
