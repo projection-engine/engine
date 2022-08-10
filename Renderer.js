@@ -11,7 +11,7 @@ export default class Renderer {
     entities = []
     materials = []
 
-    environment = ENVIRONMENT.PROD
+    static environment = ENVIRONMENT.DEV
     rootCamera = new CameraInstance()
 
     data = {}

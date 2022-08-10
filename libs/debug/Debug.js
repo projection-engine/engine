@@ -1,4 +1,7 @@
 import parseMessage from "./libs/parse-message";
+import ENVIRONMENT from "../../data/ENVIRONMENT";
+import Renderer from "../../Renderer";
+import {v4} from "uuid";
 
 const types = Object.freeze({
     ERROR: "ERROR",
@@ -22,11 +25,10 @@ export default class Debug {
         }
     }
 
-    static #pushMessages(type, messages) {
-        Debug.#messages.push({
-            type,
-            message: parseMessage(messages)
-        })
+    static #pushMessages(type, messages, src) {
+        if(Renderer.environment === ENVIRONMENT.PRODUCTION || Renderer.environment === ENVIRONMENT.DEV)
+            return
+        Debug.#messages.push(...parseMessage(messages, type, src))
 
         Debug.#metadata.errors += type === types.ERROR ? 1 : 0
         Debug.#metadata.logs += type === types.LOG ? 1 : 0
@@ -40,8 +42,7 @@ export default class Debug {
     }
 
     static registerConsole(element, onUpdate) {
-        if (element instanceof HTMLElement)
-            Debug.#registeredConsoles = [...Debug.#registeredConsoles, {element, onUpdate}]
+        Debug.#registeredConsoles = [...Debug.#registeredConsoles, {element, onUpdate}]
     }
 
     static clear() {
@@ -58,15 +59,37 @@ export default class Debug {
     }
 
     static log(...messages) {
-        Debug.#pushMessages(types.LOG, messages)
+        let src;
+        try { throw new Error(); }
+        catch (e) {
+            const stack = e.stack.split("\n")
+            src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
+        }
+
+
+        Debug.#pushMessages(types.LOG, messages, src)
     }
 
     static warn(...messages) {
-        Debug.#pushMessages(types.WARN, messages)
+        let src;
+        try { throw new Error(); }
+        catch (e) {
+            const stack = e.stack.split("\n")
+            src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
+        }
+
+        Debug.#pushMessages(types.WARN, messages, src)
     }
 
     static error(...messages) {
-        Debug.#pushMessages(types.ERROR, messages)
+        let src;
+        try { throw new Error(); }
+        catch (e) {
+            const stack = e.stack.split("\n")
+            src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
+        }
+
+        Debug.#pushMessages(types.ERROR, messages, src)
     }
 
     static get TYPES() {

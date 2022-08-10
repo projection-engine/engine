@@ -1,4 +1,5 @@
 import ENVIRONMENT from "../../../data/ENVIRONMENT"
+import Renderer from "../../../Renderer";
 
 
 export default class Scripting {
@@ -23,14 +24,16 @@ export default class Scripting {
 
     execute(options, data, entities) {
         const {camera} = options
-        if (window.renderer.environment === ENVIRONMENT.PROD) {
-            const size = entities.length
-            for (let i = 0; i < size; i++) {
-                const scripts = entities[i].scripts
-                const scriptsSize = scripts.length
-                for (let j = 0; j < scriptsSize; j++)
-                    scripts[j].onUpdate(camera)
-            }
+
+        if (Renderer.environment === ENVIRONMENT.DEV)
+            return
+        const size = entities.length
+        for (let i = 0; i < size; i++) {
+            const scripts = entities[i].scripts
+            const scriptsSize = scripts.length
+            for (let j = 0; j < scriptsSize; j++)
+                scripts[j].onUpdate(camera)
         }
     }
+
 }

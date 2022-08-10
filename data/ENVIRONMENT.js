@@ -1,4 +1,5 @@
 export default {
-    PROD: 0,
-    DEV: 1
+    EXECUTION: 0,
+    PRODUCTION: 1,
+    DEV: 2
 }
