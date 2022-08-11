@@ -10,7 +10,7 @@ import DiffuseProbePass from "../passes/rendering/DiffuseProbePass";
 import FramebufferInstance from "../instances/FramebufferInstance";
 import ShaderInstance from "../instances/ShaderInstance";
 import * as shaderCode from "../../data/shaders/CUBE_MAP.glsl";
-import {copyTexture} from "../../utils/utils";
+
 import Culling from "../passes/misc/Culling";
 import PerformanceMetrics from "../passes/misc/PerformanceMetrics";
 import Physics from "../passes/misc/Physics";
@@ -19,6 +19,7 @@ import Transformations from "../passes/misc/Transformations";
 import CompositePass from "../passes/postprocessing/CompositePass";
 import FinalPass from "../passes/postprocessing/FinalPass";
 import SkyboxPass from "../passes/rendering/SkyboxPass";
+import copyTexture from "../../services/copy-texture";
 
 export default class EngineLoop {
     static #initialized = false

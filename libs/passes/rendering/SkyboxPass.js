@@ -6,6 +6,7 @@ import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class SkyboxPass {
     lastMaterial
+    isReady = false
 
     execute(options, data) {
         const {
@@ -19,9 +20,7 @@ export default class SkyboxPass {
             camera
         } = options
 
-        window.gpu.depthMask(true)
-        window.gpu.disable(window.gpu.CULL_FACE)
-        window.gpu.disable(window.gpu.DEPTH_TEST)
+
         this.lastMaterial = undefined
         MaterialRenderer.loopMeshes(
             meshesMap,
@@ -31,6 +30,12 @@ export default class SkyboxPass {
 
                 if (mat.shadingType !== SKYBOX_TYPE)
                     return
+                if (!this.isReady) {
+                    this.isReady = true
+                    gpu.depthMask(true)
+                    gpu.disable(gpu.CULL_FACE)
+                    gpu.disable(gpu.DEPTH_TEST)
+                }
                 const transformationComponent = current.components[COMPONENTS.TRANSFORM]
                 MaterialRenderer.drawMesh({
                     mesh,
@@ -49,8 +54,11 @@ export default class SkyboxPass {
                 this.lastMaterial = mat?.id
             }
         )
-        window.gpu.enable(window.gpu.DEPTH_TEST)
-        window.gpu.enable(window.gpu.CULL_FACE)
-        window.gpu.depthMask(false)
+        if (this.isReady) {
+            gpu.enable(gpu.DEPTH_TEST)
+            gpu.enable(gpu.CULL_FACE)
+            gpu.depthMask(false)
+            this.isReady = false
+        }
     }
 }

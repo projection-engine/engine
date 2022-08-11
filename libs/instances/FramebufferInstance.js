@@ -1,4 +1,4 @@
-import {createRBO, createTexture} from "../../utils/utils"
+import {createTexture} from "../../utils/utils"
 import QuadInstance from "./QuadInstance"
 
 export default class FramebufferInstance extends QuadInstance {
@@ -72,14 +72,14 @@ export default class FramebufferInstance extends QuadInstance {
         return this
     }
 
-    depthTest(precision = gpu.DEPTH_COMPONENT24) {
+    depthTest(typeStorage = gpu.DEPTH_COMPONENT24) {
         this.use()
-        this.RBO = createRBO(
-            this.width,
-            this.height,
-            precision,
-            gpu.DEPTH_ATTACHMENT
-        )
+
+        this.RBO = gpu.createRenderbuffer()
+        gpu.bindRenderbuffer(gpu.RENDERBUFFER, this.RBO)
+        gpu.renderbufferStorage(gpu.RENDERBUFFER, typeStorage, this.width, this.height)
+        gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, this.RBO)
+
         return this
     }
 
@@ -134,7 +134,7 @@ export default class FramebufferInstance extends QuadInstance {
     }
 
     clear() {
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
+        this.use()
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT | gpu.STENCIL_BUFFER_BIT)
     }
 }

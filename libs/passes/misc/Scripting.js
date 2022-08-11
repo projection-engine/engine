@@ -31,8 +31,10 @@ export default class Scripting {
         for (let i = 0; i < size; i++) {
             const scripts = entities[i].scripts
             const scriptsSize = scripts.length
-            for (let j = 0; j < scriptsSize; j++)
-                scripts[j].onUpdate(camera)
+            for (let j = 0; j < scriptsSize; j++) {
+                if (scripts[j].onUpdate)
+                    scripts[j].onUpdate(camera)
+            }
         }
     }
 

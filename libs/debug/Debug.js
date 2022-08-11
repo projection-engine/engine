@@ -42,6 +42,7 @@ export default class Debug {
 
     static registerConsole(element, onUpdate) {
         Debug.#registeredConsoles = [...Debug.#registeredConsoles, {element, onUpdate}]
+        Debug.#updateConsoles()
     }
 
     static clear() {

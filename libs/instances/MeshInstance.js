@@ -1,8 +1,7 @@
-import {createVAO, createVBO} from "../../utils/utils"
+import {createVBO} from "../../utils/utils"
 import VBOInstance from "./VBOInstance"
 import {v4 as uuidv4} from "uuid"
 
-let gpu
 export default class MeshInstance {
     verticesQuantity = 0
     trianglesQuantity = 0
@@ -17,31 +16,34 @@ export default class MeshInstance {
     uvVBO
     tangentVBO
 
-    constructor({
-        id = uuidv4(),
+    constructor(attributes) {
+        const {
+            id = uuidv4(),
+            vertices,
+            indices,
+            normals,
+            uvs,
+            tangents,
 
-        vertices,
-        indices,
-        normals,
-        uvs,
-        tangents,
+            maxBoundingBox,
+            minBoundingBox
+        } = attributes
 
-        maxBoundingBox,
-        minBoundingBox
-    }) {
-        gpu = window.gpu
         this.id = id
         this.maxBoundingBox = maxBoundingBox
         this.minBoundingBox = minBoundingBox
         const l = indices.length
         this.trianglesQuantity = l / 3
         this.verticesQuantity = l
-        this.VAO = createVAO()
-        this.indexVBO = createVBO(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
 
-        this.vertexVBO = new VBOInstance( 1, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        this.VAO = gpu.createVertexArray()
+        gpu.bindVertexArray(this.VAO)
+
+        this.indexVBO = createVBO(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
+        this.vertexVBO = new VBOInstance(1, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+
         if (normals && normals.length > 0)
-            this.normalVBO = new VBOInstance( 2, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+            this.normalVBO = new VBOInstance(2, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         if (uvs && uvs.length > 0)
             this.uvVBO = new VBOInstance(3, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
         if (tangents && tangents.length > 0)
@@ -79,12 +81,12 @@ export default class MeshInstance {
             this.tangentVBO.disable()
     }
 
-    delete(){
+    delete() {
         window.gpu.deleteVertexArray(this.VAO)
         window.gpu.deleteBuffer(this.indexVBO)
     }
 
-    useForDepth(){
+    useForDepth() {
         gpu.bindVertexArray(this.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
 

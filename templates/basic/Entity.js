@@ -51,7 +51,6 @@ export default class Entity {
         delete temp.parent
         temp.parent = this.parent?.id
         delete temp.children
-        console.log(temp)
         return temp
     }
 }

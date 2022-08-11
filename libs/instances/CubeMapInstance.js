@@ -1,5 +1,4 @@
-import {mat4} from "gl-matrix"
-import {lookAt} from "../../utils/utils"
+import {mat4, vec3} from "gl-matrix"
 import Renderer from "../../Renderer";
 import EngineLoop from "../loop/EngineLoop";
 
@@ -202,6 +201,7 @@ export default class CubeMapInstance {
         if(this.prefiltered)
             window.gpu.deleteTexture(this.prefiltered)
     }
+
 }
 
 
@@ -248,3 +248,26 @@ function getRotation(index) {
 }
 
 
+
+function lookAt(yaw, pitch, position) {
+    const cosPitch = Math.cos(pitch)
+    const sinPitch = Math.sin(pitch)
+    const cosYaw = Math.cos(yaw)
+    const sinYaw = Math.sin(yaw)
+
+    let xAxis = [cosYaw, 0, -sinYaw],
+        yAxis = [sinYaw * sinPitch, cosPitch, cosYaw * sinPitch],
+        zAxis = [sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw]
+    let p1, p2, p3
+
+    p1 = vec3.dot(position, xAxis)
+    p2 = vec3.dot(position, yAxis)
+    p3 = vec3.dot(position, zAxis)
+
+    return [
+        xAxis[0], yAxis[0], zAxis[0], 0,
+        xAxis[1], yAxis[1], zAxis[1], 0,
+        xAxis[2], yAxis[2], zAxis[2], 0,
+        -p1, -p2, -p3, 1
+    ]
+}

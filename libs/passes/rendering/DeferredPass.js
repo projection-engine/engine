@@ -41,15 +41,14 @@ export default class DeferredPass {
             elapsed,
             camera
         } = options
-        this.frameBuffer.startMapping()
 
+        this.frameBuffer.startMapping()
         this.lastMaterial = undefined
         MaterialRenderer.loopMeshes(
             meshesMap,
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
-
                 if (!mat.isDeferredShaded)
                     return
                 const transformationComponent = current.components[COMPONENTS.TRANSFORM]
@@ -72,7 +71,6 @@ export default class DeferredPass {
             }
         )
         this.frameBuffer.stopMapping()
-
     }
 
     drawBuffer(options, data, entities, onWrap){

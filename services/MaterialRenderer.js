@@ -5,18 +5,6 @@ import COMPONENTS from "../data/COMPONENTS";
 
 export default class MaterialRenderer {
     static draw(mesh, material) {
-        const gpu = window.gpu
-        // if (material.settings.faceCulling === false)
-        //     gpu.disable(gpu.CULL_FACE)
-        // else {
-        //     gpu.enable(gpu.CULL_FACE)
-        //     if(material.settings.cullBackFace)
-        //         gpu.cullFace(gpu.BACK)
-        //     else
-        //         gpu.cullFace(gpu.FRONT)
-        // }
-        if (material.settings.depthMask === false)
-            gpu.depthMask(false)
         if (material.settings.depthTest === false)
             gpu.disable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
@@ -24,13 +12,10 @@ export default class MaterialRenderer {
 
         gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
 
-        if (material.settings.depthMask === false)
-            gpu.depthMask(true)
         if (material.settings.depthTest === false)
             gpu.enable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
             gpu.enable(gpu.BLEND)
-
     }
 
     static getEnvironment(entity) {
@@ -53,30 +38,28 @@ export default class MaterialRenderer {
         }
     }
 
-    static drawMesh({
-                        useCubeMapShader,
-                        mesh,
-                        camPosition,
-                        viewMatrix,
-                        projectionMatrix,
-                        transformMatrix,
-                        material,
-                        normalMatrix,
-                        materialComponent,
+    static drawMesh(attributes, directDrawing = false) {
+        const {
+            useCubeMapShader,
+            mesh,
+            camPosition,
+            viewMatrix,
+            projectionMatrix,
+            transformMatrix,
+            material,
+            normalMatrix,
+            directionalLightsQuantity,
+            directionalLightsData,
+            dirLightPOV,
+            pointLightsQuantity,
+            pointLightData,
+            elapsed,
+            ambient,
+            sceneColor,
+            lastMaterial,
+            ao
+        } = attributes
 
-                        directionalLightsQuantity,
-                        directionalLightsData,
-                        dirLightPOV,
-                        pointLightsQuantity,
-                        pointLightData,
-                        elapsed,
-                        ambient,
-                        sceneColor,
-                        lastMaterial,
-                        ao,
-
-                        onlyForward
-                    }, directDrawing = false) {
         if (!mesh || !material)
             return
         mesh.use()
@@ -97,15 +80,12 @@ export default class MaterialRenderer {
                 dirLightPOV,
                 aoSampler: ao,
                 lightQuantity: pointLightsQuantity,
-                pointLightData,
-                ...(materialComponent.overrideMaterial ? materialComponent.uniformValues : {})
+                pointLightData
             },
             useCubeMapShader
         )
-        if (directDrawing) {
-            const gpu = window.gpu
+        if (directDrawing)
             gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-        }
         else
             MaterialRenderer.draw(mesh, material)
     }
@@ -158,8 +138,7 @@ export default class MaterialRenderer {
                 })
             }
         }
-        window.gpu.bindVertexArray(null)
-
+        gpu.bindVertexArray(null)
     }
 
     static loopMeshes(meshes, materials, entities, callback) {
@@ -177,6 +156,6 @@ export default class MaterialRenderer {
                 continue
             callback(mat, mesh, meshComponent, current)
         }
-        window.gpu.bindVertexArray(null)
+        gpu.bindVertexArray(null)
     }
 }

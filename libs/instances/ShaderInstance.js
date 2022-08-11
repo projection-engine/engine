@@ -1,4 +1,3 @@
-import {bindTexture} from "../../utils/utils"
 import Shadows from "../../data/shaders/templates/SHADOWS"
 import * as PROBES from "../../data/shaders/templates/PROBES"
 import {PBR} from "../../data/shaders/templates/PBR"
@@ -253,7 +252,9 @@ export default class ShaderInstance {
                 increaseIndex()
                 break
             case "sampler2D":
-                bindTexture(currentSamplerIndex, data, uLocation, window.gpu)
+                gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
+                gpu.bindTexture(gpu.TEXTURE_2D, data)
+                gpu.uniform1i(uLocation, currentSamplerIndex)
                 increaseIndex()
                 break
             default:
