@@ -6,6 +6,7 @@ let gpu
 export default class Renderer {
 
     static entitiesMap = new Map()
+
     meshes = new Map()
     activeEntitiesSize = 0 // DEV
     entities = []

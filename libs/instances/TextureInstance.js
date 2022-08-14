@@ -22,7 +22,7 @@ export default class TextureInstance {
         const init = (res) => this.#init(res, yFlip,  internalFormat, format, repeat, noMipMapping, type, width, height, border, onLoad)
         if (typeof img === "string") {
 
-            if (img.includes("data:image/"))
+            if (img.includes("libs:image/"))
                 window.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
                     .then(res => {
                         res.naturalHeight = res.height
