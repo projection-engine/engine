@@ -5,23 +5,6 @@ import Renderer from "../../../Renderer";
 export default class Scripting {
     pressedKeys = {}
 
-    constructor() {
-        const targetID = window.gpu.canvas.id + "-scripting"
-        if (document.getElementById(targetID) !== null)
-            this.renderTarget = document.getElementById(targetID)
-        else {
-            this.renderTarget = document.createElement("code")
-            this.renderTarget.id = targetID
-            Object.assign(this.renderTarget.style, {
-                width: "100vw",
-                height: "100vh",
-                position: 'absolute',
-                zIndex: "-1"
-            })
-            window.gpu.canvas.parentNode.appendChild(this.renderTarget)
-        }
-    }
-
     execute(options, data, entities) {
         const {camera} = options
 
