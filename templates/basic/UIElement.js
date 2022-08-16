@@ -7,10 +7,13 @@ export default class UIElement {
 
     name = "New UI Element"
     id = v4()
-    state = {}
     props = {}
     _element = undefined
     isInitialized = false
+    className
+    styles = {}
+    _tag = "div"
+    _textContent = ""
 
     constructor(id, name, attributes) {
         if (name)
@@ -20,34 +23,44 @@ export default class UIElement {
 
         if (attributes) {
             const {
-                initialState,
-                props,
-                parent
+                parent,
+                styles,
+                className,
+                tag
             } = attributes
-
             this.parent = parent
-            if (Array.isArray(children))
-                this.children = children
-            if (typeof initialState === "object")
-                this.state = initialState
-            if (typeof props === "object")
-                this.props = props
+            if (styles)
+                this.styles = styles
+            if (className)
+                this.className = className
+            if (tag)
+                this.tag = tag
         }
-
     }
 
     set textContent(inner) {
-        const newContent = document.createTextNode(inner)
-        this.parent.removeChild(this._element)
-        this._element = newContent
-        this.parent.appendChild(this._element)
+        this._element.innerText = inner
+        this._textContent = inner
     }
 
-    set element({tag, textContent}) {
-        if (this.isInitialized)
+    get textContent() {
+        return this._textContent
+    }
+
+    set tag(tag) {
+        this._tag = tag
+        let wasUnmounted = false
+        if (this.isInitialized) {
             this.unmount()
-        this._element = !textContent ? document.createElement(tag) : document.createTextNode(textContent)
-        this._textContent = textContent
+            wasUnmounted = true
+        }
+        this._element = this._tag.toLowerCase() === "text" ? document.createTextNode(this._textContent) : document.createElement(tag)
+        if (wasUnmounted)
+            this.mount()
+    }
+
+    get tag() {
+        return this._tag
     }
 
     get element() {
@@ -64,6 +77,8 @@ export default class UIElement {
         this.isInitialized = true
 
         this.parentElement.appendChild(this._element)
+        Object.assign(this._element.style, this.styles)
+        this._element.className = this.className
 
         const elements = this.children
         for (let i = 0; i < elements.length; i++)

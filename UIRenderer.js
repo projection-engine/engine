@@ -6,9 +6,11 @@ export default class UIRenderer {
     static entities = new Map()
 
     static start() {
-        if (!UIRenderer.renderTarget && (Renderer.environment === ENVIRONMENT.EXECUTION || Renderer.environment === ENVIRONMENT.PRODUCTION))
+
+        if (!UIRenderer.renderTarget)
             return
         const components = Array.from(UIRenderer.entities.values())
+        console.trace(components)
         for (let i = 0; i < components.length; i++)
             components[i].mount()
 
@@ -20,5 +22,10 @@ export default class UIRenderer {
         const components = Array.from(UIRenderer.entities.values())
         for (let i = 0; i < components.length; i++)
             components[i].unmount()
+    }
+
+    static restart() {
+        UIRenderer.stop()
+        UIRenderer.start()
     }
 }
