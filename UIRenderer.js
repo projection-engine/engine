@@ -10,7 +10,6 @@ export default class UIRenderer {
         if (!UIRenderer.renderTarget)
             return
         const components = Array.from(UIRenderer.entities.values())
-        console.trace(components)
         for (let i = 0; i < components.length; i++)
             components[i].mount()
 

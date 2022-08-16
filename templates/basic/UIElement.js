@@ -10,8 +10,8 @@ export default class UIElement {
     props = {}
     _element = undefined
     isInitialized = false
-    className
-    styles = {}
+    className = ""
+    _styles = {}
     _tag = "div"
     _textContent = ""
 
@@ -30,7 +30,7 @@ export default class UIElement {
             } = attributes
             this.parent = parent
             if (styles)
-                this.styles = styles
+                this._styles = styles
             if (className)
                 this.className = className
             if (tag)
@@ -39,7 +39,8 @@ export default class UIElement {
     }
 
     set textContent(inner) {
-        this._element.innerText = inner
+        if (this._element)
+            this._element.innerText = inner
         this._textContent = inner
     }
 
@@ -47,16 +48,29 @@ export default class UIElement {
         return this._textContent
     }
 
-    set tag(tag) {
-        this._tag = tag
+    #initializeElement(isMountUnmount) {
         let wasUnmounted = false
-        if (this.isInitialized) {
+        if (this.isInitialized && !isMountUnmount) {
             this.unmount()
             wasUnmounted = true
         }
-        this._element = this._tag.toLowerCase() === "text" ? document.createTextNode(this._textContent) : document.createElement(tag)
-        if (wasUnmounted)
+        if (this._tag.toLowerCase() === "text")
+            this._element = document.createTextNode(this._textContent)
+        else {
+            this._element = document.createElement(this._tag)
+            if (this._textContent)
+                this._element.innerText = this._textContent
+        }
+        Object.assign(this._element.style, this._styles)
+        if (this.className)
+            this._element.className = this.className
+        if (wasUnmounted && !isMountUnmount)
             this.mount()
+    }
+
+    set tag(tag) {
+        this._tag = tag
+        this.#initializeElement()
     }
 
     get tag() {
@@ -71,14 +85,31 @@ export default class UIElement {
         return this.parent ? this.parent.element : UIRenderer.renderTarget
     }
 
+    set styles(data) {
+        this._styles = data
+        this.updateStyles()
+    }
+
+    get styles() {
+        return this._styles
+    }
+
+    updateStyles() {
+        console.log(this._element, this._styles)
+        if (this._element)
+            Object.assign(this._element.style, this._styles)
+    }
+
     mount() {
         if (this.isInitialized)
             return
-        this.isInitialized = true
 
+        if (!this._element)
+            this.#initializeElement(true)
+
+        this.isInitialized = true
         this.parentElement.appendChild(this._element)
-        Object.assign(this._element.style, this.styles)
-        this._element.className = this.className
+
 
         const elements = this.children
         for (let i = 0; i < elements.length; i++)
@@ -88,6 +119,10 @@ export default class UIElement {
     unmount() {
         if (!this.isInitialized)
             return
+
+        if (!this._element)
+            this.#initializeElement(true)
+
         this.isInitialized = false
         this.parentElement.removeChild(this._element)
 
