@@ -82,8 +82,15 @@ export default class MeshInstance {
     }
 
     delete() {
-        window.gpu.deleteVertexArray(this.VAO)
-        window.gpu.deleteBuffer(this.indexVBO)
+        gpu.deleteVertexArray(this.VAO)
+        gpu.deleteBuffer(this.indexVBO)
+
+        if (this.uvVBO)
+            this.uvVBO.delete()
+        if (this.normalVBO)
+            this.normalVBO.delete()
+        if (this.tangentVBO)
+            this.tangentVBO.delete()
     }
 
     useForDepth() {

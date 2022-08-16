@@ -9,26 +9,11 @@ export default class MaterialInstance {
     ready = false
     uniformData = {}
     uniforms = []
-
     #settings = {}
     hasCubeMap = false
     shadingType = MATERIAL_RENDERING_TYPES.DEFERRED
     isForwardShaded = false
     isDeferredShaded = true
-    set settings(settings) {
-        if (settings) {
-            this.#settings = settings
-
-            this.shadingType = settings.shadingType
-            this.isForwardShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.FORWARD || settings.shadingType === MATERIAL_RENDERING_TYPES.UNLIT
-            this.isDeferredShaded= settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED
-            console.log(this.isForwardShaded, this.shadingType)
-        }
-    }
-
-    get settings() {
-        return this.#settings
-    }
 
     constructor({
                     vertex,
@@ -46,6 +31,21 @@ export default class MaterialInstance {
             this.cubeMapShader = [cubeMapShaderCode, vertex]
         else
             this.hasCubeMap = false
+    }
+
+    set settings(settings) {
+        if (settings) {
+            this.#settings = settings
+
+            this.shadingType = settings.shadingType
+            this.isForwardShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.FORWARD || settings.shadingType === MATERIAL_RENDERING_TYPES.UNLIT
+            this.isDeferredShaded= settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED
+            console.log(this.isForwardShaded, this.shadingType)
+        }
+    }
+
+    get settings() {
+        return this.#settings
     }
 
     set cubeMapShader([shader, vertexShader]) {
@@ -122,7 +122,7 @@ export default class MaterialInstance {
     }
 
     delete() {
-        window.gpu.deleteProgram(this._shader.program)
+        gpu.deleteProgram(this._shader.program)
         Object.values(this.uniformData).map(d => {
             if (d instanceof WebGLTexture)
                 window.gpu.deleteTexture(d)
