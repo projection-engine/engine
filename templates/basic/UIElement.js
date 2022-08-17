@@ -127,8 +127,11 @@ export default class UIElement {
     }
 
     updateStyles() {
-        if (this._element)
+        if (this._element) {
+            this._element.removeAttribute("style")
             Object.assign(this._element.style, this._styles)
+
+        }
     }
 
     mount() {
