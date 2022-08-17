@@ -18,63 +18,57 @@ export default class SpecularProbePass {
     probes = {}
     specularProbes = {}
 
-    execute(options, data) {
+    execute() {
         const {
             specularProbes,
             meshes
-        } = data
+        } = Renderer.data
 
         if (this.lastCallLength !== specularProbes.length) {
             this.step = STEPS_CUBE_MAP.BASE
             this.lastCallLength = specularProbes.length
         }
         switch (this.step) {
-        case STEPS_CUBE_MAP.BASE:
-            for (let i = 0; i < this.lastCallLength; i++) {
-                const current = specularProbes[i]
-                if(!current.active)
-                    continue
-                const component = current.components[COMPONENTS.PROBE]
-                if(!this.specularProbes[current.id])
-                    this.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
-                else
-                    this.specularProbes[current.id].resolution = component.resolution
-                const translation = specularProbes[i].components[COMPONENTS.TRANSFORM].translation
-                this.specularProbes[current.id].draw((yaw, pitch, projection, index) => {
-                    const target = vec3.add([], translation, VIEWS.target[index])
-                    const view = mat4.lookAt([], translation, target, VIEWS.up[index])
-                    MaterialRenderer.drawProbe({
-                        view,
-                        projection,
-                        data,
-                        options,
-                        cubeMapPosition: translation
-                    })
-                },
-                undefined,
-                10000,
-                1
-                )
-            }
-            window.gpu.bindVertexArray(null)
-            this.step = STEPS_CUBE_MAP.PRE_FILTERED
-            break
-        case STEPS_CUBE_MAP.PRE_FILTERED:
-            for (let i = 0; i < this.lastCallLength; i++) {
-                if(!specularProbes[i].active)
-                    continue
-                const current = specularProbes[i].components[COMPONENTS.PROBE]
-                this.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, Renderer.cubeBuffer, current.multiplier)
-            }
-            this.step = STEPS_CUBE_MAP.CALCULATE
-            break
-        case STEPS_CUBE_MAP.CALCULATE:
-            this.sort(meshes, specularProbes)
-            this.step = STEPS_CUBE_MAP.DONE
-            break
-        default:
-            this.step = STEPS_CUBE_MAP.DONE
-            break
+            case STEPS_CUBE_MAP.BASE:
+                for (let i = 0; i < this.lastCallLength; i++) {
+                    const current = specularProbes[i]
+                    if (!current.active)
+                        continue
+                    const component = current.components[COMPONENTS.PROBE]
+                    if (!this.specularProbes[current.id])
+                        this.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
+                    else
+                        this.specularProbes[current.id].resolution = component.resolution
+                    const translation = specularProbes[i].components[COMPONENTS.TRANSFORM].translation
+                    this.specularProbes[current.id].draw((yaw, pitch, projection, index) => {
+                            const target = vec3.add([], translation, VIEWS.target[index])
+                            const view = mat4.lookAt([], translation, target, VIEWS.up[index])
+                            MaterialRenderer.drawProbe(view, projection, translation)
+                        },
+                        undefined,
+                        10000,
+                        1
+                    )
+                }
+                window.gpu.bindVertexArray(null)
+                this.step = STEPS_CUBE_MAP.PRE_FILTERED
+                break
+            case STEPS_CUBE_MAP.PRE_FILTERED:
+                for (let i = 0; i < this.lastCallLength; i++) {
+                    if (!specularProbes[i].active)
+                        continue
+                    const current = specularProbes[i].components[COMPONENTS.PROBE]
+                    this.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, Renderer.cubeBuffer, current.multiplier)
+                }
+                this.step = STEPS_CUBE_MAP.CALCULATE
+                break
+            case STEPS_CUBE_MAP.CALCULATE:
+                this.sort(meshes, specularProbes)
+                this.step = STEPS_CUBE_MAP.DONE
+                break
+            default:
+                this.step = STEPS_CUBE_MAP.DONE
+                break
         }
     }
 

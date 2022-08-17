@@ -1,6 +1,7 @@
 import COMPONENTS from "../../../data/COMPONENTS"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
+import Renderer from "../../../Renderer";
 
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
@@ -8,22 +9,20 @@ export default class SkyboxPass {
     lastMaterial
     isReady = false
 
-    execute(options, data) {
+    execute( ) {
         const {
             meshes,
-            materials,
-            meshesMap,
-        } = data
+            materials
+        } = Renderer.data
 
         const {
             elapsed,
             camera
-        } = options
+        } = Renderer.params
 
 
         this.lastMaterial = undefined
         MaterialRenderer.loopMeshes(
-            meshesMap,
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {

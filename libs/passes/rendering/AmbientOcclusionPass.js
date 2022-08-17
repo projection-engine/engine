@@ -3,6 +3,7 @@ import * as shaderCode from "../../../data/shaders/AO.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import IMAGE_WORKER_ACTIONS from "../../../data/IMAGE_WORKER_ACTIONS"
 import EngineLoop from "../../loop/EngineLoop";
+import Renderer from "../../../Renderer";
 
 let depth
 export default class AmbientOcclusionPass {
@@ -55,12 +56,12 @@ export default class AmbientOcclusionPass {
         return this.blurredFrameBuffer.colors[0]
     }
 
-    execute(options) {
+    execute() {
         const {
             total_strength, base, area,
             falloff, radius, samples,
             ao
-        } = options
+        } = Renderer.params
         if(ao && this.ready) {
             if(!depth)
                 depth = EngineLoop.renderMap.get("depthPrePass")

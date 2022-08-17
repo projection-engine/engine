@@ -2,6 +2,7 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../../data/shaders/FXAA.glsl"
 import * as shaderCode from "../../../data/shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../../../utils/generate-blur-buffers"
+import Renderer from "../../../Renderer";
 
 let shaderState
 export default class CompositePass {
@@ -18,12 +19,15 @@ export default class CompositePass {
         this.blurShader = new ShaderInstance(vertex, shaderCode.blurBox)
     }
 
-    execute(options, data, entities, worker, output) {
+    execute(entities, worker, output) {
+        const camera = Renderer.params.camera
         const {
             bloomStrength,
             bloomThreshold,
-            bloom
-        } = options.camera
+            bloom,
+            postProcessingStrength,
+            postProcessingEffects
+        } = camera
 
 
 
@@ -45,8 +49,8 @@ export default class CompositePass {
                 blurred: this.blurred,
                 resolution:  [this.w, this.h],
                 sceneColor: worker.colors[0],
-                intensity: options.camera.postProcessingStrength,
-                settings: options.camera.postProcessingEffects
+                intensity: postProcessingStrength,
+                settings: postProcessingEffects
             }
         output.startMapping()
         this.compositeShader.use()

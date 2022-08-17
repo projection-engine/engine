@@ -1,8 +1,9 @@
 import COMPONENTS from "../../../data/COMPONENTS";
 import {mat4} from "gl-matrix";
+import Renderer from "../../../Renderer";
 
-export function packagePointLights(renderer = window.renderer) {
-    const pointLights = renderer.data.pointLights
+export function packagePointLights() {
+    const pointLights = Renderer.data.pointLights
     let pointLightsQuantity = 0,
         pointLightData = [],
         activeOffset = 0
@@ -40,16 +41,16 @@ export function packagePointLights(renderer = window.renderer) {
             currentVector[12] = component.zNear
             currentVector[13] = component.shadowMap ? 1 : 0
         }
-    renderer.data.pointLightsQuantity = pointLightsQuantity
-    renderer.data.pointLightData = pointLightData
+    Renderer.data.pointLightsQuantity = pointLightsQuantity
+    Renderer.data.pointLightData = pointLightData
 }
 
-export function packageDirectionalLights(renderer = window.renderer) {
+export function packageDirectionalLights() {
     let maxTextures = 0,
         directionalLightsData = [],
         dirLightPOV = [],
         activeOffset = 0,
-        directionalLights = renderer.data.directionalLights
+        directionalLights = Renderer.data.directionalLights
     if (directionalLights)
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i]
@@ -80,7 +81,7 @@ export function packageDirectionalLights(renderer = window.renderer) {
                 dirLightPOV[i - activeOffset] = new Float32Array(16)
             mat4.multiply(dirLightPOV[i - activeOffset], component.lightProjection, component.lightView)
         }
-    renderer.data.maxTextures = maxTextures
-    renderer.data.directionalLightsData = directionalLightsData
-    renderer.data.dirLightPOV = dirLightPOV
+    Renderer.data.maxTextures = maxTextures
+    Renderer.data.directionalLightsData = directionalLightsData
+    Renderer.data.dirLightPOV = dirLightPOV
 }

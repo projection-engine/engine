@@ -2,6 +2,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import COMPONENTS from "../../../data/COMPONENTS"
 import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
+import Renderer from "../../../Renderer";
 
 const vertex = `#version 300 es
 
@@ -61,9 +62,9 @@ export default class DepthPrePass {
 
     constructor(resolution={w: window.screen.width, h: window.screen.height}) {
         this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h).texture({
-            precision: window.gpu.RGBA32F,
-            format: window.gpu.RGBA,
-            type: window.gpu.FLOAT
+            precision: gpu.RGBA32F,
+            format: gpu.RGBA,
+            type: gpu.FLOAT
         }).depthTest()
         this.normalFrameBuffer = new FramebufferInstance( resolution.w, resolution.h).texture()
 
@@ -76,9 +77,9 @@ export default class DepthPrePass {
     get normal(){
         return this.normalFrameBuffer.colors[0]
     }
-    execute(options, data) {
-        const {meshes, meshesMap} = data
-        const {camera} = options
+    execute() {
+        const meshes = Renderer.data.meshes
+        const camera = Renderer.params.camera
         // DEPTH && ID
         this.frameBuffer.startMapping()
         this.shader.use()
@@ -86,7 +87,7 @@ export default class DepthPrePass {
             const entity = meshes[i]
             if(!entity.active)
                 continue
-            const meshRef = meshesMap.get(entity.components[COMPONENTS.MESH].meshID)
+            const meshRef = Renderer.meshes.get(entity.components[COMPONENTS.MESH].meshID)
             if(!meshRef)
                 continue
             meshRef.useForDepth()
@@ -97,7 +98,7 @@ export default class DepthPrePass {
                 meshID: entity.components[COMPONENTS.PICK].pickID
             })
 
-            window.gpu.drawElements(window.gpu.TRIANGLES, meshRef.verticesQuantity, window.gpu.UNSIGNED_INT, 0)
+            gpu.drawElements(gpu.TRIANGLES, meshRef.verticesQuantity, gpu.UNSIGNED_INT, 0)
             meshRef.finish()
         }
         this.frameBuffer.stopMapping()
@@ -114,6 +115,6 @@ export default class DepthPrePass {
         this.normalFrameBuffer.draw()
         this.normalFrameBuffer.stopMapping()
 
-        window.gpu.bindVertexArray(null)
+        gpu.bindVertexArray(null)
     }
 }

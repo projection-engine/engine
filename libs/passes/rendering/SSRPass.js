@@ -2,6 +2,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../../data/shaders/SCREEN_SPACE.glsl"
 import EngineLoop from "../../loop/EngineLoop";
+import Renderer from "../../../Renderer";
 
 
 let gNormal, deferredSystem, gPosition, gBehaviour
@@ -16,14 +17,14 @@ export default class SSRPass {
         return this.FBO.colors[0]
     }
 
-    execute(options, currentFrame) {
+    execute(currentFrame) {
 
         const {
             camera,
             ssr,
             ssrStepSize,
             ssrMaxSteps
-        } = options
+        } = Renderer.params
         if(ssr) {
             if(gNormal === undefined) {
                 gNormal = EngineLoop.renderMap.get("depthPrePass").normal

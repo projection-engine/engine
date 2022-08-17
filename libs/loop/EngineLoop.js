@@ -20,6 +20,7 @@ import CompositePass from "../passes/postprocessing/CompositePass";
 import FinalPass from "../passes/postprocessing/FinalPass";
 import SkyboxPass from "../passes/rendering/SkyboxPass";
 import copyTexture from "../../services/copy-texture";
+import Renderer from "../../Renderer";
 
 export default class EngineLoop {
     static #initialized = false
@@ -52,7 +53,7 @@ export default class EngineLoop {
         miscMap.set("culling", new Culling())
         miscMap.set("metrics", new PerformanceMetrics())
         miscMap.set("physics", new Physics())
-        miscMap.set("scripting", new Scripting(resolution))
+        miscMap.set("scripting", new Scripting())
         miscMap.set("transformations", new Transformations())
 
 
@@ -63,70 +64,70 @@ export default class EngineLoop {
         EngineLoop.#initialized = true
     }
 
-    static #rendering(options, data, entities, onWrap) {
+    static #rendering(entities) {
+        const onWrap = Renderer.params.onWrap
         const map = EngineLoop.renderMap
         const FBO = map.get("currentFrameFBO")
         const deferred = map.get("deferred")
 
 
-        map.get("depthPrePass").execute(options, data)
+        map.get("depthPrePass").execute()
 
-        map.get("ao").execute(options, data, entities)
-        map.get("specularProbe").execute(options, data, entities)
-        map.get("diffuseProbe").execute(options, data, entities)
-        map.get("shadowMap").execute(options, data, entities)
+        map.get("ao").execute(entities)
+        map.get("specularProbe").execute(entities)
+        map.get("diffuseProbe").execute(entities)
+        map.get("shadowMap").execute(entities)
 
-        map.get("ssGI").execute(options, FBO.colors[0])
-        deferred.execute(options, data)
+        map.get("ssGI").execute(FBO.colors[0])
+        deferred.execute()
         deferred.drawBuffer(
-            options,
-            data,
             entities,
             isDuringBinding => {
                 if (onWrap != null)
-                    onWrap.execute(options, data, false, isDuringBinding)
+                    onWrap.execute(false, isDuringBinding)
                 if (isDuringBinding)
-                    map.get("skybox").execute(options, data)
+                    map.get("skybox").execute()
             }
         )
 
         FBO.startMapping()
         deferred.drawFrame()
         copyTexture(FBO, deferred.frameBuffer, gpu.DEPTH_BUFFER_BIT)
-        map.get("forward").execute(options, data)
+        map.get("forward").execute()
         if (onWrap != null)
-            onWrap.execute(options, data, true)
+            onWrap.execute(true)
         FBO.stopMapping()
 
-        map.get("ssr").execute(options, FBO.colors[0])
+        map.get("ssr").execute(FBO.colors[0])
     }
 
-    static #miscellaneous(options, data, entities) {
+    static #miscellaneous(entities) {
         const map = EngineLoop.miscMap
-        map.get("culling").execute(options, data, entities)
-        map.get("scripting").execute(options, data, entities)
-        map.get("metrics").execute(options, data, entities)
-        map.get("physics").execute(options, data, entities)
-        map.get("transformations").execute(options, data, entities)
+
+        map.get("culling").execute(entities)
+        map.get("scripting").execute(entities)
+        map.get("metrics").execute(entities)
+        map.get("physics").execute(entities)
+        map.get("transformations").execute(entities)
     }
 
-    static #postProcessing(options, data, entities) {
+    static #postProcessing(entities) {
         const ppMap = EngineLoop.ppMap
         const FBO = EngineLoop.renderMap.get("currentFrameFBO")
 
-        ppMap.get("compositePass").execute(options, data, entities, FBO, EngineLoop.ppMap.get("worker"))
-        ppMap.get("finalPass").execute(options)
+        ppMap.get("compositePass").execute(entities, FBO, EngineLoop.ppMap.get("worker"))
+        ppMap.get("finalPass").execute()
     }
 
 
-    static loop(options, data, entities, onWrap) {
+    static loop(entities) {
         if (!EngineLoop.#initialized)
             return
-        const gpu = window.gpu
+
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
-        EngineLoop.#miscellaneous(options, data, entities)
-        EngineLoop.#rendering(options, data, entities, onWrap)
-        EngineLoop.#postProcessing(options, data, entities)
+        EngineLoop.#miscellaneous(entities)
+        EngineLoop.#rendering(entities)
+        EngineLoop.#postProcessing(entities)
     }
 }

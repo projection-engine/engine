@@ -2,21 +2,19 @@ import CameraInstance from "./libs/instances/CameraInstance"
 import ENVIRONMENT from "./data/ENVIRONMENT"
 import EngineLoop from "./libs/loop/EngineLoop";
 
-let gpu
 export default class Renderer {
 
     static entitiesMap = new Map()
 
-    meshes = new Map()
-    activeEntitiesSize = 0 // DEV
+    static meshes = new Map()
     entities = []
     materials = []
 
     static environment = ENVIRONMENT.DEV
-    rootCamera = new CameraInstance()
+    static rootCamera = new CameraInstance()
 
-    data = {}
-    params = {}
+    static data = {}
+    static params = {}
 
     static queryMap = new Map()
     static then = 0
@@ -27,29 +25,21 @@ export default class Renderer {
 
 
     constructor(resolution) {
-        gpu = window.gpu
         EngineLoop.initialize(resolution)
 
         // CAMERA ASPECT RATIO OBSERVER
         new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
-            if (this.params.camera) {
-                this.params.camera.aspectRatio = bBox.width / bBox.height
-                this.params.camera.updateProjection()
+            if (Renderer.params.camera) {
+                Renderer.params.camera.aspectRatio = bBox.width / bBox.height
+                Renderer.params.camera.updateProjection()
             }
         }).observe(gpu.canvas)
     }
 
     callback() {
-        this.params.elapsed = performance.now() - Renderer.then
-
-        EngineLoop.loop(
-            this.params,
-            this.data,
-            this.entities,
-            this.params.onWrap
-        )
-
+        Renderer.params.elapsed = performance.now() - Renderer.then
+        EngineLoop.loop(this.entities)
         Renderer.frameID = requestAnimationFrame(() => this.callback())
     }
 

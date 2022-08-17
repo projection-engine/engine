@@ -1,5 +1,6 @@
 import {v4} from "uuid";
 import UIRenderer from "../../UIRenderer";
+import ELEMENT_ID from "../../data/ELEMENT_ID";
 
 export default class UIElement {
     parent
@@ -14,12 +15,17 @@ export default class UIElement {
     _styles = {}
     _tag = "div"
     _textContent = ""
+    queryKey = this.id
+    scripts = []
+    _layoutBlock = ""
 
     constructor(id, name, attributes) {
         if (name)
             this.name = name
-        if (id)
+        if (id) {
             this.id = id
+            this.queryKey = id
+        }
 
         if (attributes) {
             const {
@@ -38,14 +44,46 @@ export default class UIElement {
         }
     }
 
+    #updateTextContent() {
+        const element = document.createTextNode(this._textContent)
+
+        this._element.childNodes.forEach(child => {
+            if (child.nodeType === Node.TEXT_NODE)
+                this._element.removeChild(child)
+        })
+        this._element.appendChild(element)
+    }
+
     set textContent(inner) {
-        if (this._element)
-            this._element.innerText = inner
         this._textContent = inner
+        if (this._element)
+            this.#updateTextContent()
+    }
+
+    set layoutBlock(html) {
+        if (this._element)
+            this._element.innerHTML = html
+        this._layoutBlock = html
+    }
+
+    get layoutBlock() {
+        return this._layoutBlock
     }
 
     get textContent() {
         return this._textContent
+    }
+
+    #updateContent() {
+        this._element.id = this.queryKey
+        if (this._layoutBlock)
+            this._element.innerHTML = this._layoutBlock
+        if (this._textContent)
+            this.#updateTextContent()
+
+        Object.assign(this._element.style, this._styles)
+        if (this.className)
+            this._element.className = this.className
     }
 
     #initializeElement(isMountUnmount) {
@@ -54,18 +92,12 @@ export default class UIElement {
             this.unmount()
             wasUnmounted = true
         }
-        if (this._tag.toLowerCase() === "text")
-            this._element = document.createTextNode(this._textContent)
-        else {
-            this._element = document.createElement(this._tag)
-            if (this._textContent)
-                this._element.innerText = this._textContent
-        }
-        Object.assign(this._element.style, this._styles)
-        if (this.className)
-            this._element.className = this.className
+
+        this._element = document.createElement(this._tag)
+        this.#updateContent()
         if (wasUnmounted && !isMountUnmount)
             this.mount()
+        this._element.setAttribute(ELEMENT_ID, this.id)
     }
 
     set tag(tag) {
@@ -95,7 +127,6 @@ export default class UIElement {
     }
 
     updateStyles() {
-        console.log(this._element, this._styles)
         if (this._element)
             Object.assign(this._element.style, this._styles)
     }
@@ -106,7 +137,8 @@ export default class UIElement {
 
         if (!this._element)
             this.#initializeElement(true)
-
+        else
+            this.#updateContent()
         this.isInitialized = true
         this.parentElement.appendChild(this._element)
 
@@ -124,7 +156,9 @@ export default class UIElement {
             this.#initializeElement(true)
 
         this.isInitialized = false
-        this.parentElement.removeChild(this._element)
+        if (this._element.parentElement)
+            this._element.parentElement.removeChild(this._element)
+
 
         const elements = this.children
         for (let i = 0; i < elements.length; i++)

@@ -4,6 +4,7 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import EngineLoop from "../../loop/EngineLoop";
+import Renderer from "../../../Renderer";
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass {
@@ -30,22 +31,20 @@ export default class DeferredPass {
         })
         this.deferredFBO.draw()
     }
-    execute(options, data) {
+    execute( ) {
         const {
             meshes,
-            materials,
-            meshesMap
-        } = data
+            materials
+        } = Renderer.data
 
         const {
             elapsed,
             camera
-        } = options
+        } = Renderer.params
 
         this.frameBuffer.startMapping()
         this.lastMaterial = undefined
         MaterialRenderer.loopMeshes(
-            meshesMap,
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
@@ -73,7 +72,7 @@ export default class DeferredPass {
         this.frameBuffer.stopMapping()
     }
 
-    drawBuffer(options, data, entities, onWrap){
+    drawBuffer(entities, onWrap){
         if (aoTexture === undefined) {
             aoTexture = EngineLoop.renderMap.get("ao").texture
             ssGISystem = EngineLoop.renderMap.get("ssGI")
@@ -86,14 +85,14 @@ export default class DeferredPass {
             directionalLightsData,
             dirLightPOV,
             pointLightData
-        } = data
+        } = Renderer.data
         const {
             ao,
             camera,
             pcfSamples,
             ssr,
             ssgi
-        } = options
+        } = Renderer.params
 
         onWrap(false)
         this.deferredFBO.startMapping()

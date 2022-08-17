@@ -1,6 +1,7 @@
 import ShaderInstance from "../../instances/ShaderInstance"
 
 import * as shaderCode from "../../../data/shaders/FXAA.glsl"
+import Renderer from "../../../Renderer";
 
 
 export default class FinalPass{
@@ -22,14 +23,15 @@ export default class FinalPass{
         return ++this.lookUpIndex >= this.lookUpRandom.length ? this.lookUpRandom[this.lookUpIndex = 0] : this.lookUpRandom[this.lookUpIndex]
     }
 
-    execute(options) {
+    execute() {
         const {
             fxaa,
             FXAASpanMax,
             FXAAReduceMin,
             FXAAReduceMul,
-        } = options
-        const {filmGrain, filmGrainStrength, gamma, exposure} = options.camera
+            camera
+        } = Renderer.params
+        const {filmGrain, filmGrainStrength, gamma, exposure} = camera
 
         this.shader.use()
         this.shader.bindForUse({

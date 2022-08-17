@@ -11,7 +11,7 @@ export default class PerPixelMotionBlur {
 
     }
 
-    execute(options, data, entities, [worker, output]) {
+    execute( entities, [worker, output]) {
 
         // // DRAW DIFFERENCE
         // worker.startMapping()

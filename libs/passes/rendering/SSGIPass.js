@@ -3,6 +3,7 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../../data/shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../../utils/generate-blur-buffers"
 import EngineLoop from "../../loop/EngineLoop";
+import Renderer from "../../../Renderer";
 
 
 let normalSampler, deferredSystem, aoSystem, composite
@@ -34,7 +35,7 @@ export default class SSGIPass{
         this.normalsFBO.stopMapping()
     }
 
-    execute(options, lastFrame) {
+    execute(lastFrame) {
         const {
             camera,
             ssgi,
@@ -42,7 +43,7 @@ export default class SSGIPass{
             ssgiBrightness,
             ssgiStepSize,
             // ssgiKernel
-        } = options
+        } = Renderer.params
 
         if(ssgi) {
             if(normalSampler === undefined) {

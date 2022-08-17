@@ -5,7 +5,7 @@ import COMPONENTS from "../../../data/COMPONENTS"
 export default class Transformations {
     changed = new Map()
     hasUpdatedItem = false
-    execute(options, data, entities) {
+    execute(entities) {
         const l = entities.length
         this.hasUpdatedItem = false
         for (let i = 0; i < l; i++) {
@@ -22,23 +22,6 @@ export default class Transformations {
     transform(current, component){
         component.changed = false
         Transformation.transform(component.translation, component.rotationQuat, component.scaling, current.components[COMPONENTS.TRANSFORM].transformationMatrix)
-
-        if (current.components[COMPONENTS.COLLIDER]) {
-            switch (current.components[COMPONENTS.COLLIDER].axis) {
-            case "x":
-                if (component.scaling[0] > 1)
-                    current.components[COMPONENTS.COLLIDER].radius *= component.scaling[0]
-                break
-            case "y":
-                if (component.scaling[1] > 1)
-                    current.components[COMPONENTS.COLLIDER].radius *= component.scaling[1]
-                break
-            case "z":
-                if (component.scaling[2] > 1)
-                    current.components[COMPONENTS.COLLIDER].radius *= component.scaling[2]
-                break
-            }
-        }
 
         if (current.parent !== undefined && current.parent.components[COMPONENTS.TRANSFORM])
             mat4.multiply(

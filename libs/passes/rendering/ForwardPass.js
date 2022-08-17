@@ -1,35 +1,34 @@
 import COMPONENTS from "../../../data/COMPONENTS"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import EngineLoop from "../../loop/EngineLoop";
+import Renderer from "../../../Renderer";
 
 let aoTexture
 export default class ForwardPass {
     lastMaterial
 
-    execute(options, data) {
+    execute() {
         if (aoTexture === undefined)
             aoTexture = EngineLoop.renderMap.get("ao").texture
 
         const {
             meshes,
             materials,
-            meshesMap,
             pointLightsQuantity,
             maxTextures,
             directionalLightsData,
             dirLightPOV,
             pointLightData
-        } = data
+        } = Renderer.data
 
         const {
             elapsed,
             camera
-        } = options
+        } = Renderer.params
 
         this.lastMaterial = undefined
 
         MaterialRenderer.loopMeshes(
-            meshesMap,
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {

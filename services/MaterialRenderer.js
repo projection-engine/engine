@@ -90,27 +90,22 @@ export default class MaterialRenderer {
             MaterialRenderer.draw(mesh, material)
     }
 
-    static drawProbe({
-                         view,
-                         projection,
-                         cubeMapPosition,
-                         data,
-                         options,
-                     }) {
+    static drawProbe(view, projection, cubeMapPosition,) {
 
         const {
-                meshes, materials, meshesMap, directionalLightsData,
+                meshes, materials,
+                directionalLightsData,
                 dirLightPOV, pointLightsQuantity, pointLightData,
                 maxTextures
-            } = data,
-            {elapsed} = options,
+            } = Renderer.data,
+            {elapsed} = Renderer.params,
             l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = meshesMap.get(meshComponent.meshID)
+            const mesh = Renderer.meshes.get(meshComponent.meshID)
 
             if (mesh !== undefined) {
                 const currentMaterial = materials[meshComponent.materialID]
@@ -141,14 +136,14 @@ export default class MaterialRenderer {
         gpu.bindVertexArray(null)
     }
 
-    static loopMeshes(meshes, materials, entities, callback) {
+    static loopMeshes( materials, entities, callback) {
         const l = entities.length
         for (let m = 0; m < l; m++) {
             const current = entities[m]
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = meshes.get(meshComponent.meshID)
+            const mesh = Renderer.meshes.get(meshComponent.meshID)
             if (!mesh)
                 continue
             const mat = materials[meshComponent.materialID]

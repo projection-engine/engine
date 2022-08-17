@@ -6,6 +6,7 @@ import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../data/COMPONENTS"
 import Packager from "../../builder/Packager";
 import EngineLoop from "../../loop/EngineLoop";
+import Renderer from "../../../Renderer";
 
 export const VIEWS = {
     target: [
@@ -26,14 +27,13 @@ export const VIEWS = {
     ]
 }
 
-let transformationSystem, deferredSystem
 export default class ShadowMapPass {
     changed = false
 
     constructor() {
         this.maxCubeMaps = 2
         this.specularProbes = [
-            new CubeMapInstance( 512, true),
+            new CubeMapInstance(512, true),
             new CubeMapInstance(512, true)
         ]
         this.resolutionPerTexture = 1024
@@ -44,7 +44,7 @@ export default class ShadowMapPass {
     }
 
     updateFBOResolution() {
-        if(this.shadowsFrameBuffer){
+        if (this.shadowsFrameBuffer) {
             window.gpu.deleteTexture(this.shadowsFrameBuffer.depthSampler)
             window.gpu.deleteFramebuffer(this.shadowsFrameBuffer.FBO)
         }
@@ -53,7 +53,6 @@ export default class ShadowMapPass {
         this.shadowsFrameBuffer
             .depthTexture()
     }
-
 
 
     #prepareBuffer(
@@ -72,32 +71,27 @@ export default class ShadowMapPass {
 
     }
 
-    execute(options, data) {
-        const gpu = window.gpu
+    execute() {
         const {
             pointLights,
             meshes,
             directionalLights,
-            materials,
-            meshesMap
-        } = data
+            materials
+        } = Renderer.data
         const {
             shadowAtlasQuantity,
             shadowMapResolution
-        } = options
+        } = Renderer.params
 
         this.#prepareBuffer(
             shadowAtlasQuantity,
             shadowMapResolution
         )
-        if(!transformationSystem) {
-            deferredSystem =EngineLoop.renderMap.get("deferred")
-            transformationSystem = EngineLoop.miscMap.get("transformations")
-        }
+
         let lights2D = [], lights3D = []
         const dirL = directionalLights.length
         for (let i = 0; i < dirL; i++) {
-            if(!directionalLights[i].active)
+            if (!directionalLights[i].active)
                 continue
             const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
             if ((current.changed && current.shadowMap) || this.changed) {
@@ -108,7 +102,7 @@ export default class ShadowMapPass {
         }
         const pL = pointLights.length
         for (let i = 0; i < pL; i++) {
-            if(!pointLights[i].active)
+            if (!pointLights[i].active)
                 continue
             const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
             if (current.changed && current.shadowMap) {
@@ -117,7 +111,6 @@ export default class ShadowMapPass {
                 this.changed = true
             }
         }
-
 
 
         if (this.changed) {
@@ -149,7 +142,7 @@ export default class ShadowMapPass {
                         let currentLight = lights2D[face]
                         currentLight.atlasFace = [currentColumn, 0]
 
-                        ShadowMapPass.loopMeshes(meshes, meshesMap, deferredSystem, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
+                        ShadowMapPass.loopMeshes(meshes, materials, this.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
                     }
                     if (currentColumn > this.maxResolution / this.resolutionPerTexture) {
                         currentColumn = 0
@@ -171,22 +164,20 @@ export default class ShadowMapPass {
                         continue
                     this.specularProbes[i]
                         .draw((yaw, pitch, perspective, index) => {
-                            const target = vec3.add([], current.translation, VIEWS.target[index])
-                            ShadowMapPass.loopMeshes(
-                                meshes,
-                                meshesMap,
-                                deferredSystem,
-                                materials,
-                                this.shadowMapOmniShader,
-                                mat4.lookAt([], current.translation, target, VIEWS.up[index]),
-                                perspective,
-                                undefined,
-                                current.translation,
-                                [current.zNear, current.zFar])
-                        },
-                        false,
-                        current.zFar,
-                        current.zNear
+                                const target = vec3.add([], current.translation, VIEWS.target[index])
+                                ShadowMapPass.loopMeshes(
+                                    meshes,
+                                    materials,
+                                    this.shadowMapOmniShader,
+                                    mat4.lookAt([], current.translation, target, VIEWS.up[index]),
+                                    perspective,
+                                    undefined,
+                                    current.translation,
+                                    [current.zNear, current.zFar])
+                            },
+                            false,
+                            current.zFar,
+                            current.zNear
                         )
                 }
             }
@@ -195,19 +186,18 @@ export default class ShadowMapPass {
 
     }
 
-    static loopMeshes(meshes, meshesMap, deferredSystem, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
+    static loopMeshes(meshes, materials, shader, view, projection, color, lightPosition, shadowClipNearFar) {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = meshesMap.get(current.components[COMPONENTS.MESH].meshID)
-            if(!mesh)
+            const mesh = Renderer.meshes.get(current.components[COMPONENTS.MESH].meshID)
+            if (!mesh)
                 continue
             ShadowMapPass.drawMesh(mesh, view, projection, current.components[COMPONENTS.TRANSFORM].transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
         }
     }
 
     static drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, lightColor, shader, lightPosition, shadowClipNearFar) {
-        const gpu = window.gpu
         gpu.bindVertexArray(mesh.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
         mesh.vertexVBO.enable()
