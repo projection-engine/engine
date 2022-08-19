@@ -5,7 +5,6 @@ import CubeMapInstance from "../../instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../data/COMPONENTS"
 import Packager from "../../builder/Packager";
-import EngineLoop from "../../loop/EngineLoop";
 import Renderer from "../../../Renderer";
 
 export const VIEWS = {
