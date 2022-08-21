@@ -1,6 +1,6 @@
 import {mat4, vec3} from "gl-matrix"
-import Renderer from "../../Renderer";
-import EngineLoop from "../loop/EngineLoop";
+import RendererController from "../../RendererController";
+import LoopAPI from "../apis/LoopAPI";
 
 
 export default class CubeMapInstance {
@@ -13,10 +13,10 @@ export default class CubeMapInstance {
     #frameBuffer
 
     get irradianceShader(){
-        return EngineLoop.renderMap.get("irradianceShader")
+        return LoopAPI.renderMap.get("irradianceShader")
     }
     get prefilteredShader(){
-        return EngineLoop.renderMap.get("prefilteredShader")
+        return LoopAPI.renderMap.get("prefilteredShader")
     }
 
     constructor(resolution, asDepth) {
@@ -45,7 +45,7 @@ export default class CubeMapInstance {
                     multiplier
                 })
                 window.gpu.drawArrays(window.gpu.TRIANGLES, 0, 36)
-            }, Renderer.cubeBuffer, undefined, undefined, true)
+            }, RendererController.cubeBuffer, undefined, undefined, true)
         }
     }
 

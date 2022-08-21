@@ -2,8 +2,8 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../../data/shaders/AO.glsl"
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import IMAGE_WORKER_ACTIONS from "../../../data/IMAGE_WORKER_ACTIONS"
-import EngineLoop from "../../loop/EngineLoop";
-import Renderer from "../../../Renderer";
+import LoopAPI from "../../apis/LoopAPI";
+import RendererController from "../../../RendererController";
 
 let depth
 export default class AmbientOcclusionPass {
@@ -61,10 +61,10 @@ export default class AmbientOcclusionPass {
             total_strength, base, area,
             falloff, radius, samples,
             ao
-        } = Renderer.params
+        } = RendererController.params
         if(ao && this.ready) {
             if(!depth)
-                depth = EngineLoop.renderMap.get("depthPrePass")
+                depth = LoopAPI.renderMap.get("depthPrePass")
             this.frameBuffer.startMapping()
             this.shader.use()
             this.shader.bindForUse({

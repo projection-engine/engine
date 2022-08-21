@@ -1,8 +1,9 @@
 import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../../data/shaders/SCREEN_SPACE.glsl"
-import EngineLoop from "../../loop/EngineLoop";
-import Renderer from "../../../Renderer";
+import LoopAPI from "../../apis/LoopAPI";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 
 let gNormal, deferredSystem, gPosition, gBehaviour
@@ -20,15 +21,14 @@ export default class SSRPass {
     execute(currentFrame) {
 
         const {
-            camera,
             ssr,
             ssrStepSize,
             ssrMaxSteps
-        } = Renderer.params
+        } = RendererController.params
         if(ssr) {
             if(gNormal === undefined) {
-                gNormal = EngineLoop.renderMap.get("depthPrePass").normal
-                deferredSystem = EngineLoop.renderMap.get("deferred")
+                gNormal = LoopAPI.renderMap.get("depthPrePass").normal
+                deferredSystem = LoopAPI.renderMap.get("deferred")
                 gPosition = deferredSystem.frameBuffer.colors[0]
                 gBehaviour = deferredSystem.frameBuffer.colors[3]
             }
@@ -39,9 +39,9 @@ export default class SSRPass {
                 gPosition,
                 gNormal,
                 gBehaviour,
-                projection: camera.projectionMatrix,
-                viewMatrix: camera.viewMatrix,
-                invViewMatrix: camera.invViewMatrix,
+                projection: CameraAPI.projectionMatrix,
+                viewMatrix: CameraAPI.viewMatrix,
+                invViewMatrix: CameraAPI.invViewMatrix,
                 stepSize: ssrStepSize,
                 maxSteps: ssrMaxSteps
             })

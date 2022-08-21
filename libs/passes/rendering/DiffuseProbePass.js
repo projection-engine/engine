@@ -3,7 +3,7 @@ import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../../data/COMPONENTS"
 import CubeMapInstance from "../../instances/CubeMapInstance"
 import MaterialRenderer from "../../../services/MaterialRenderer";
-import Renderer from "../../../Renderer";
+import RendererController from "../../../RendererController";
 
 export const STEPS_LIGHT_PROBE = {
     GENERATION: 0,
@@ -25,7 +25,7 @@ export default class DiffuseProbePass {
         const {
             diffuseProbes,
             meshes
-        } = Renderer.data
+        } = RendererController.data
 
         if (this.lastCallLength !== diffuseProbes.length) {
             this.step = STEPS_LIGHT_PROBE.GENERATION

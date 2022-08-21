@@ -20,21 +20,21 @@ import CompositePass from "../passes/postprocessing/CompositePass";
 import FinalPass from "../passes/postprocessing/FinalPass";
 import SkyboxPass from "../passes/rendering/SkyboxPass";
 import copyTexture from "../../services/copy-texture";
-import Renderer from "../../Renderer";
+import RendererController from "../../RendererController";
 
-export default class EngineLoop {
+export default class LoopAPI {
     static #initialized = false
     static renderMap = new Map()
     static miscMap = new Map()
     static ppMap = new Map()
 
     static initialize(resolution) {
-        if (EngineLoop.#initialized)
+        if (LoopAPI.#initialized)
             return
 
-        const rendererMap = EngineLoop.renderMap
-        const miscMap = EngineLoop.miscMap
-        const ppMap = EngineLoop.ppMap
+        const rendererMap = LoopAPI.renderMap
+        const miscMap = LoopAPI.miscMap
+        const ppMap = LoopAPI.ppMap
         rendererMap.set("skybox", new SkyboxPass())
         rendererMap.set("ao", new AmbientOcclusionPass(resolution))
         rendererMap.set("deferred", new DeferredPass(resolution))
@@ -61,12 +61,12 @@ export default class EngineLoop {
         ppMap.set("compositePass", new CompositePass(resolution))
         ppMap.set("finalPass", new FinalPass(ppMap.get("worker").colors[0], rendererMap.get("currentFrameFBO")))
 
-        EngineLoop.#initialized = true
+        LoopAPI.#initialized = true
     }
 
     static #rendering(entities) {
-        const onWrap = Renderer.params.onWrap
-        const map = EngineLoop.renderMap
+        const onWrap = RendererController.params.onWrap
+        const map = LoopAPI.renderMap
         const FBO = map.get("currentFrameFBO")
         const deferred = map.get("deferred")
 
@@ -102,7 +102,7 @@ export default class EngineLoop {
     }
 
     static #miscellaneous(entities) {
-        const map = EngineLoop.miscMap
+        const map = LoopAPI.miscMap
 
         map.get("culling").execute(entities)
         map.get("scripting").execute(entities)
@@ -112,22 +112,22 @@ export default class EngineLoop {
     }
 
     static #postProcessing(entities) {
-        const ppMap = EngineLoop.ppMap
-        const FBO = EngineLoop.renderMap.get("currentFrameFBO")
+        const ppMap = LoopAPI.ppMap
+        const FBO = LoopAPI.renderMap.get("currentFrameFBO")
 
-        ppMap.get("compositePass").execute(entities, FBO, EngineLoop.ppMap.get("worker"))
+        ppMap.get("compositePass").execute(entities, FBO, LoopAPI.ppMap.get("worker"))
         ppMap.get("finalPass").execute()
     }
 
 
     static loop(entities) {
-        if (!EngineLoop.#initialized)
+        if (!LoopAPI.#initialized)
             return
 
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
-        EngineLoop.#miscellaneous(entities)
-        EngineLoop.#rendering(entities)
-        EngineLoop.#postProcessing(entities)
+        LoopAPI.#miscellaneous(entities)
+        LoopAPI.#rendering(entities)
+        LoopAPI.#postProcessing(entities)
     }
 }

@@ -1,7 +1,8 @@
 import COMPONENTS from "../../../data/COMPONENTS"
 import MaterialRenderer from "../../../services/MaterialRenderer";
-import EngineLoop from "../../loop/EngineLoop";
-import Renderer from "../../../Renderer";
+import LoopAPI from "../../apis/LoopAPI";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 let aoTexture
 export default class ForwardPass {
@@ -9,7 +10,7 @@ export default class ForwardPass {
 
     execute() {
         if (aoTexture === undefined)
-            aoTexture = EngineLoop.renderMap.get("ao").texture
+            aoTexture = LoopAPI.renderMap.get("ao").texture
 
         const {
             meshes,
@@ -19,12 +20,9 @@ export default class ForwardPass {
             directionalLightsData,
             dirLightPOV,
             pointLightData
-        } = Renderer.data
+        } = RendererController.data
 
-        const {
-            elapsed,
-            camera
-        } = Renderer.params
+        const elapsed = RendererController.params.elapsed
 
         this.lastMaterial = undefined
 
@@ -38,9 +36,9 @@ export default class ForwardPass {
                 const ambient = MaterialRenderer.getEnvironment(current)
                 MaterialRenderer.drawMesh({
                     mesh,
-                    camPosition: camera.position,
-                    viewMatrix: camera.viewMatrix,
-                    projectionMatrix: camera.projectionMatrix,
+                    camPosition: CameraAPI.position,
+                    viewMatrix: CameraAPI.viewMatrix,
+                    projectionMatrix: CameraAPI.projectionMatrix,
                     transformMatrix: transformationComponent.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,

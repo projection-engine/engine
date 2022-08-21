@@ -2,8 +2,9 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as ssGI from "../../../data/shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../../utils/generate-blur-buffers"
-import EngineLoop from "../../loop/EngineLoop";
-import Renderer from "../../../Renderer";
+import LoopAPI from "../../apis/LoopAPI";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 
 let normalSampler, deferredSystem, aoSystem, composite
@@ -37,20 +38,19 @@ export default class SSGIPass{
 
     execute(lastFrame) {
         const {
-            camera,
             ssgi,
             ssgiQuality,
             ssgiBrightness,
             ssgiStepSize,
             // ssgiKernel
-        } = Renderer.params
+        } = RendererController.params
 
         if(ssgi) {
             if(normalSampler === undefined) {
-                normalSampler = EngineLoop.renderMap.get("depthPrePass").normal
-                deferredSystem =EngineLoop.renderMap.get("deferred")
-                aoSystem = EngineLoop.renderMap.get("ao")
-                composite = EngineLoop.ppMap.get("compositePass")
+                normalSampler = LoopAPI.renderMap.get("depthPrePass").normal
+                deferredSystem =LoopAPI.renderMap.get("deferred")
+                aoSystem = LoopAPI.renderMap.get("ao")
+                composite = LoopAPI.ppMap.get("compositePass")
             }
             this.normalPass()
 
@@ -60,9 +60,9 @@ export default class SSGIPass{
                 previousFrame: lastFrame,
                 gPosition: deferredSystem.frameBuffer.colors[0],
                 gNormal: this.normalsFBO.colors[0],
-                projection: camera.projectionMatrix,
-                viewMatrix: camera.viewMatrix,
-                invViewMatrix: camera.invViewMatrix,
+                projection: CameraAPI.projectionMatrix,
+                viewMatrix: CameraAPI.viewMatrix,
+                invViewMatrix: CameraAPI.invViewMatrix,
                 step:ssgiStepSize,
                 maxSteps: ssgiQuality,
                 intensity: ssgiBrightness,

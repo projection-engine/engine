@@ -4,8 +4,8 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import CubeMapInstance from "../../instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../data/COMPONENTS"
-import Packager from "../../builder/Packager";
-import Renderer from "../../../Renderer";
+import BundlerAPI from "../../apis/BundlerAPI";
+import RendererController from "../../../RendererController";
 
 export const VIEWS = {
     target: [
@@ -76,11 +76,11 @@ export default class ShadowMapPass {
             meshes,
             directionalLights,
             materials
-        } = Renderer.data
+        } = RendererController.data
         const {
             shadowAtlasQuantity,
             shadowMapResolution
-        } = Renderer.params
+        } = RendererController.params
 
         this.#prepareBuffer(
             shadowAtlasQuantity,
@@ -113,7 +113,7 @@ export default class ShadowMapPass {
 
 
         if (this.changed) {
-            Packager.packageLights()
+            BundlerAPI.packageLights()
             this.changed = false
             gpu.cullFace(gpu.FRONT)
             this.shadowMapShader.use()
@@ -189,7 +189,7 @@ export default class ShadowMapPass {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = Renderer.meshes.get(current.components[COMPONENTS.MESH].meshID)
+            const mesh = RendererController.meshes.get(current.components[COMPONENTS.MESH].meshID)
             if (!mesh)
                 continue
             ShadowMapPass.drawMesh(mesh, view, projection, current.components[COMPONENTS.TRANSFORM].transformationMatrix, color, shader, lightPosition, shadowClipNearFar)

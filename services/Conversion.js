@@ -1,8 +1,9 @@
 import {mat4, vec4} from "gl-matrix"
+import CameraAPI from "../libs/apis/CameraAPI";
 
 export default class Conversion {
     static toQuadCoord(coords, quadSize) {
-        const target = window.gpu.canvas.getBoundingClientRect()
+        const target = gpu.canvas.getBoundingClientRect()
         const {x, y} = coords
         const {w, h} = quadSize
 
@@ -15,12 +16,12 @@ export default class Conversion {
         }
     }
 
-    static toScreen(x, y, camera){
-        const viewMatrix = camera.viewMatrix,
-            projectionMatrix = camera.projectionMatrix
+    static toScreen(x, y){
+        const viewMatrix = CameraAPI.viewMatrix,
+            projectionMatrix = CameraAPI.projectionMatrix
 
         // NORMALIZED DEVICE SPACE
-        const bBox = window.gpu.canvas.getBoundingClientRect()
+        const bBox = gpu.canvas.getBoundingClientRect()
         let xNormalized = ((x - bBox.x)/ bBox.width ) * 2 - 1,
             yNormalized = -((y - bBox.y )/ bBox.height) * 2 + 1
 

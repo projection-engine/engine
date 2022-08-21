@@ -1,7 +1,8 @@
 import COMPONENTS from "../../../data/COMPONENTS"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import MATERIAL_RENDERING_TYPES from "../../../data/MATERIAL_RENDERING_TYPES";
-import Renderer from "../../../Renderer";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
@@ -13,12 +14,9 @@ export default class SkyboxPass {
         const {
             meshes,
             materials
-        } = Renderer.data
+        } = RendererController.data
 
-        const {
-            elapsed,
-            camera
-        } = Renderer.params
+        const elapsed = RendererController.params.elapsed
 
 
         this.lastMaterial = undefined
@@ -38,9 +36,9 @@ export default class SkyboxPass {
                 const transformationComponent = current.components[COMPONENTS.TRANSFORM]
                 MaterialRenderer.drawMesh({
                     mesh,
-                    camPosition: camera.position,
-                    viewMatrix: camera.viewMatrix,
-                    projectionMatrix: camera.projectionMatrix,
+                    camPosition: CameraAPI.position,
+                    viewMatrix: CameraAPI.viewMatrix,
+                    projectionMatrix: CameraAPI.projectionMatrix,
                     transformMatrix: transformationComponent.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,

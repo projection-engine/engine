@@ -2,7 +2,8 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import ShaderInstance from "../../instances/ShaderInstance"
 import COMPONENTS from "../../../data/COMPONENTS"
 import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
-import Renderer from "../../../Renderer";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 const vertex = `#version 300 es
 
@@ -78,8 +79,7 @@ export default class DepthPrePass {
         return this.normalFrameBuffer.colors[0]
     }
     execute() {
-        const meshes = Renderer.data.meshes
-        const camera = Renderer.params.camera
+        const meshes = RendererController.data.meshes
         // DEPTH && ID
         this.frameBuffer.startMapping()
         this.shader.use()
@@ -87,14 +87,14 @@ export default class DepthPrePass {
             const entity = meshes[i]
             if(!entity.active)
                 continue
-            const meshRef = Renderer.meshes.get(entity.components[COMPONENTS.MESH].meshID)
+            const meshRef = RendererController.meshes.get(entity.components[COMPONENTS.MESH].meshID)
             if(!meshRef)
                 continue
             meshRef.useForDepth()
             this.shader.bindForUse({
-                viewMatrix: camera.viewMatrix,
+                viewMatrix: CameraAPI.viewMatrix,
                 transformMatrix: entity.components[COMPONENTS.TRANSFORM].transformationMatrix,
-                projectionMatrix: camera.projectionMatrix,
+                projectionMatrix: CameraAPI.projectionMatrix,
                 meshID: entity.components[COMPONENTS.PICK].pickID
             })
 
@@ -109,8 +109,8 @@ export default class DepthPrePass {
         this.normalShader.use()
         this.normalShader.bindForUse({
             depthSampler: this.depth,
-            projectionInverse: camera.invProjectionMatrix,
-            viewInverse: camera.invViewMatrix
+            projectionInverse: CameraAPI.invProjectionMatrix,
+            viewInverse: CameraAPI.invViewMatrix
         })
         this.normalFrameBuffer.draw()
         this.normalFrameBuffer.stopMapping()

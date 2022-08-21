@@ -1,6 +1,12 @@
-export default class CameraPostProcessing {
-    _bloom = false
+import {mat4} from "gl-matrix";
 
+export default class CameraPostProcessing {
+    zNear = .1
+    zFar = 1000
+    fov = Math.PI / 2
+    aspectRatio = 1
+    size = 50
+    _bloom = false
     filmGrain = false
     filmGrainStrength = 1.
 
@@ -11,6 +17,11 @@ export default class CameraPostProcessing {
 
     postProcessingEffects = new Uint8Array([1, 1, 1])
     postProcessingStrength = new Uint8Array([1, 1])
+
+    fxaa = true
+    FXAASpanMax = 8
+    FXAAReduceMin = 1 / 128
+    FXAAReduceMul = 1 / 8
 
     set distortion(v) {
         this.postProcessingEffects[0] = v ? 1 : 0

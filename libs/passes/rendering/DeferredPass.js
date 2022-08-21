@@ -3,14 +3,16 @@ import COMPONENTS from "../../../data/COMPONENTS"
 import ShaderInstance from "../../instances/ShaderInstance"
 import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
 import MaterialRenderer from "../../../services/MaterialRenderer";
-import EngineLoop from "../../loop/EngineLoop";
-import Renderer from "../../../Renderer";
+import LoopAPI from "../../apis/LoopAPI";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass {
     lastMaterial
-    constructor( resolution = {w: window.screen.width, h: window.screen.height}) {
-        this.frameBuffer = new FramebufferInstance( resolution.w, resolution.h)
+
+    constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
+        this.frameBuffer = new FramebufferInstance(resolution.w, resolution.h)
         this.frameBuffer
             .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
             .texture({attachment: 1})
@@ -24,23 +26,21 @@ export default class DeferredPass {
         this.toScreenShader = new ShaderInstance(shaderCode.vertex, shaderCode.toScreen)
     }
 
-    drawFrame(){
+    drawFrame() {
         this.toScreenShader.use()
         this.toScreenShader.bindForUse({
             uSampler: this.deferredFBO.colors[0]
         })
         this.deferredFBO.draw()
     }
-    execute( ) {
+
+    execute() {
         const {
             meshes,
             materials
-        } = Renderer.data
+        } = RendererController.data
 
-        const {
-            elapsed,
-            camera
-        } = Renderer.params
+        const elapsed = RendererController.params.elapsed
 
         this.frameBuffer.startMapping()
         this.lastMaterial = undefined
@@ -54,9 +54,9 @@ export default class DeferredPass {
                 const ambient = MaterialRenderer.getEnvironment(current)
                 MaterialRenderer.drawMesh({
                     mesh,
-                    camPosition: camera.position,
-                    viewMatrix: camera.viewMatrix,
-                    projectionMatrix: camera.projectionMatrix,
+                    camPosition: CameraAPI.position,
+                    viewMatrix: CameraAPI.viewMatrix,
+                    projectionMatrix: CameraAPI.projectionMatrix,
                     transformMatrix: transformationComponent.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,
@@ -72,12 +72,12 @@ export default class DeferredPass {
         this.frameBuffer.stopMapping()
     }
 
-    drawBuffer(entities, onWrap){
+    drawBuffer(entities, onWrap) {
         if (aoTexture === undefined) {
-            aoTexture = EngineLoop.renderMap.get("ao").texture
-            ssGISystem = EngineLoop.renderMap.get("ssGI")
-            ssrSystem = EngineLoop.renderMap.get("ssr")
-            shadowMapSystem = EngineLoop.renderMap.get("shadowMap")
+            aoTexture = LoopAPI.renderMap.get("ao").texture
+            ssGISystem = LoopAPI.renderMap.get("ssGI")
+            ssrSystem = LoopAPI.renderMap.get("ssr")
+            shadowMapSystem = LoopAPI.renderMap.get("shadowMap")
         }
         const {
             pointLightsQuantity,
@@ -85,14 +85,13 @@ export default class DeferredPass {
             directionalLightsData,
             dirLightPOV,
             pointLightData
-        } = Renderer.data
+        } = RendererController.data
         const {
             ao,
-            camera,
             pcfSamples,
             ssr,
             ssgi
-        } = Renderer.params
+        } = RendererController.params
 
         onWrap(false)
         this.deferredFBO.startMapping()
@@ -101,7 +100,7 @@ export default class DeferredPass {
         this.deferredShader.use()
         this.deferredShader.bindForUse({
             screenSpaceGI: ssgi ? ssGISystem.color : undefined,
-            screenSpaceReflections:ssr ? ssrSystem.color : undefined,
+            screenSpaceReflections: ssr ? ssrSystem.color : undefined,
             positionSampler: this.frameBuffer.colors[0],
             normalSampler: this.frameBuffer.colors[1],
             albedoSampler: this.frameBuffer.colors[2],
@@ -113,7 +112,7 @@ export default class DeferredPass {
             shadowCube0: shadowMapSystem?.specularProbes[0]?.texture,
             shadowCube1: shadowMapSystem?.specularProbes[1]?.texture,
 
-            cameraVec: camera.position,
+            cameraVec: CameraAPI.position,
             settings: [
                 maxTextures, shadowMapSystem.maxResolution, shadowMapSystem ? 0 : 1,
                 shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture, pointLightsQuantity, ao ? 1 : 0,

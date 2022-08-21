@@ -2,7 +2,8 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../../data/shaders/FXAA.glsl"
 import * as shaderCode from "../../../data/shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../../../utils/generate-blur-buffers"
-import Renderer from "../../../Renderer";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 let shaderState
 export default class CompositePass {
@@ -20,14 +21,13 @@ export default class CompositePass {
     }
 
     execute(entities, worker, output) {
-        const camera = Renderer.params.camera
         const {
             bloomStrength,
             bloomThreshold,
             bloom,
             postProcessingStrength,
             postProcessingEffects
-        } = camera
+        } = CameraAPI.metadata
 
 
 

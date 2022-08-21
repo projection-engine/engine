@@ -1,7 +1,8 @@
 import ShaderInstance from "../../instances/ShaderInstance"
 
 import * as shaderCode from "../../../data/shaders/FXAA.glsl"
-import Renderer from "../../../Renderer";
+import RendererController from "../../../RendererController";
+import CameraAPI from "../../apis/CameraAPI";
 
 
 export default class FinalPass{
@@ -24,14 +25,17 @@ export default class FinalPass{
     }
 
     execute() {
+
         const {
+            filmGrain,
+            filmGrainStrength,
+            gamma,
+            exposure,
             fxaa,
             FXAASpanMax,
             FXAAReduceMin,
-            FXAAReduceMul,
-            camera
-        } = Renderer.params
-        const {filmGrain, filmGrainStrength, gamma, exposure} = camera
+            FXAAReduceMul
+        } = CameraAPI.metadata
 
         this.shader.use()
         this.shader.bindForUse({

@@ -1,5 +1,5 @@
-import EngineLoop from "../libs/loop/EngineLoop";
-import Renderer from "../Renderer";
+import LoopAPI from "../libs/apis/LoopAPI";
+import RendererController from "../RendererController";
 import COMPONENTS from "../data/COMPONENTS";
 
 
@@ -19,7 +19,7 @@ export default class MaterialRenderer {
     }
 
     static getEnvironment(entity) {
-        const renderMap = EngineLoop.renderMap
+        const renderMap = LoopAPI.renderMap
         const specular = renderMap.get("specularProbe").probes[entity.id]
         const diffuse = renderMap.get("diffuseProbe").probes[entity.id]
 
@@ -72,7 +72,7 @@ export default class MaterialRenderer {
                 viewMatrix,
                 normalMatrix,
                 sceneColor,
-                brdfSampler: Renderer.BRDF,
+                brdfSampler: RendererController.BRDF,
                 elapsedTime: elapsed,
                 cameraVec: camPosition,
                 directionalLightsData,
@@ -97,21 +97,21 @@ export default class MaterialRenderer {
                 directionalLightsData,
                 dirLightPOV, pointLightsQuantity, pointLightData,
                 maxTextures
-            } = Renderer.data,
-            {elapsed} = Renderer.params,
+            } = RendererController.data,
+            {elapsed} = RendererController.params,
             l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = Renderer.meshes.get(meshComponent.meshID)
+            const mesh = RendererController.meshes.get(meshComponent.meshID)
 
             if (mesh !== undefined) {
                 const currentMaterial = materials[meshComponent.materialID]
-                let mat = currentMaterial && currentMaterial.ready ? currentMaterial : Renderer.fallbackMaterial
+                let mat = currentMaterial && currentMaterial.ready ? currentMaterial : RendererController.fallbackMaterial
                 if (!mat || !mat.ready)
-                    mat = Renderer.fallbackMaterial
+                    mat = RendererController.fallbackMaterial
                 const ambient = MaterialRenderer.getEnvironment(current)
                 MaterialRenderer.drawMesh({
                     ambient,
@@ -143,7 +143,7 @@ export default class MaterialRenderer {
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = Renderer.meshes.get(meshComponent.meshID)
+            const mesh = RendererController.meshes.get(meshComponent.meshID)
             if (!mesh)
                 continue
             const mat = materials[meshComponent.materialID]
