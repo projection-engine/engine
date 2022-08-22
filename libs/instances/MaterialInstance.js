@@ -39,7 +39,7 @@ export default class MaterialInstance {
 
             this.shadingType = settings.shadingType
             this.isForwardShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.FORWARD || settings.shadingType === MATERIAL_RENDERING_TYPES.UNLIT
-            this.isDeferredShaded= settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED
+            this.isDeferredShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED
             console.log(this.isForwardShaded, this.shadingType)
         }
     }
@@ -62,7 +62,7 @@ export default class MaterialInstance {
         this.settings = settings
         let message
         if (this._shader)
-            window.gpu.deleteProgram(this._shader.program)
+            gpu.deleteProgram(this._shader.program)
         this._shader = new ShaderInstance(vertexShader, shader)
 
         if (uniformData)
@@ -80,11 +80,11 @@ export default class MaterialInstance {
                                 texture = new TextureInstance(
                                     img,
                                     k.yFlip,
-                                    window.gpu[k.format?.internalFormat],
-                                    window.gpu[k.format?.format],
+                                    gpu[k.format?.internalFormat],
+                                    gpu[k.format?.format],
                                     true,
                                     false,
-                                    window.gpu.UNSIGNED_BYTE,
+                                    gpu.UNSIGNED_BYTE,
                                     undefined,
                                     undefined,
                                     0,
@@ -111,11 +111,10 @@ export default class MaterialInstance {
             this.ready = true
     }
 
-    use(bind = true, additionalUniforms = {}, isCubeMap = false) {
+    use(additionalUniforms = {}, isCubeMap = false) {
         const shader = isCubeMap ? this._cubeMapShader : this._shader
         if (shader) {
-            if (bind)
-                shader.use()
+            shader.use()
             const data = {...this.uniformData, ...additionalUniforms}
             shader.bindForUse(data)
         }
@@ -125,7 +124,7 @@ export default class MaterialInstance {
         gpu.deleteProgram(this._shader.program)
         Object.values(this.uniformData).map(d => {
             if (d instanceof WebGLTexture)
-                window.gpu.deleteTexture(d)
+                gpu.deleteTexture(d)
         })
     }
 }

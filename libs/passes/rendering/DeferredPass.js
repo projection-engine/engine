@@ -9,8 +9,6 @@ import CameraAPI from "../../apis/CameraAPI";
 
 let shadowMapSystem, aoTexture, ssGISystem, ssrSystem
 export default class DeferredPass {
-    lastMaterial
-
     constructor(resolution = {w: window.screen.width, h: window.screen.height}) {
         this.frameBuffer = new FramebufferInstance(resolution.w, resolution.h)
         this.frameBuffer
@@ -43,7 +41,6 @@ export default class DeferredPass {
         const elapsed = RendererController.params.elapsed
 
         this.frameBuffer.startMapping()
-        this.lastMaterial = undefined
         MaterialRenderer.loopMeshes(
             materials,
             meshes,
@@ -63,10 +60,8 @@ export default class DeferredPass {
                     materialComponent: meshComponent,
                     elapsed,
                     ambient,
-                    lastMaterial: this.lastMaterial,
                     onlyForward: false
                 })
-                this.lastMaterial = mat?.id
             }
         )
         this.frameBuffer.stopMapping()

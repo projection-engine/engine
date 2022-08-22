@@ -7,7 +7,6 @@ import CameraAPI from "../../apis/CameraAPI";
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class SkyboxPass {
-    lastMaterial
     isReady = false
 
     execute( ) {
@@ -44,11 +43,8 @@ export default class SkyboxPass {
                     normalMatrix: meshComponent.normalMatrix,
                     materialComponent: meshComponent,
 
-                    elapsed,
-                    lastMaterial: this.lastMaterial
+                    elapsed
                 }, true)
-
-                this.lastMaterial = mat?.id
             }
         )
         if (this.isReady) {

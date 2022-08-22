@@ -4,22 +4,26 @@ import COMPONENTS from "../../../data/COMPONENTS"
 
 export default class Transformations {
     changed = new Map()
-    hasUpdatedItem = false
+    static hasUpdatedItem = false
+
     execute(entities) {
         const l = entities.length
-        this.hasUpdatedItem = false
+        Transformations.hasUpdatedItem = false
         for (let i = 0; i < l; i++) {
             const current = entities[i]
-            if (!current.active || !current.components[COMPONENTS.TRANSFORM]?.changed){
+            if (!current.active || !current.components[COMPONENTS.TRANSFORM]?.changed) {
                 this.changed.set(current.id, false)
                 continue
             }
-            this.hasUpdatedItem = true
+            Transformations.hasUpdatedItem = true
             this.changed.set(current.id, true)
-            this.transform(current, current.components[COMPONENTS.TRANSFORM])
+            Transformations.transform(current)
         }
     }
-    transform(current, component){
+
+    static transform(current) {
+        const component = current.components[COMPONENTS.TRANSFORM]
+
         component.changed = false
         Transformation.transform(component.translation, component.rotationQuat, component.scaling, current.components[COMPONENTS.TRANSFORM].transformationMatrix)
 
@@ -32,8 +36,8 @@ export default class Transformations {
 
         const children = current.children
         for (let j = 0; j < children.length; j++) {
-            if(children[j].components[COMPONENTS.TRANSFORM])
-                this.transform(children[j], children[j].components[COMPONENTS.TRANSFORM])
+            if (children[j].components[COMPONENTS.TRANSFORM])
+                Transformations.transform(children[j])
         }
         component.changed = false
         if (current.components[COMPONENTS.MESH] !== undefined)
@@ -41,7 +45,7 @@ export default class Transformations {
     }
 }
 
-export function normalMatrix (matrix) {
+export function normalMatrix(matrix) {
     let a00 = matrix[0], a01 = matrix[1], a02 = matrix[2], a03 = matrix[3],
         a10 = matrix[4], a11 = matrix[5], a12 = matrix[6], a13 = matrix[7],
         a20 = matrix[8], a21 = matrix[9], a22 = matrix[10], a23 = matrix[11],

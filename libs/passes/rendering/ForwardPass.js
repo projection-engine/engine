@@ -6,7 +6,6 @@ import CameraAPI from "../../apis/CameraAPI";
 
 let aoTexture
 export default class ForwardPass {
-    lastMaterial
 
     execute() {
         if (aoTexture === undefined)
@@ -24,7 +23,7 @@ export default class ForwardPass {
 
         const elapsed = RendererController.params.elapsed
 
-        this.lastMaterial = undefined
+
 
         MaterialRenderer.loopMeshes(
             materials,
@@ -50,10 +49,10 @@ export default class ForwardPass {
                     pointLightData,
                     elapsed,
                     ambient,
-                    lastMaterial: this.lastMaterial,
+
                     ao: aoTexture
                 })
-                this.lastMaterial = mat?.id
+
             }
         )
     }

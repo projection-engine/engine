@@ -69,7 +69,7 @@ export default class MeshInstance {
 
     finish() {
 
-        gpu.bindVertexArray(null)
+
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
         this.vertexVBO.disable()
 
@@ -79,6 +79,8 @@ export default class MeshInstance {
             this.normalVBO.disable()
         if (this.tangentVBO)
             this.tangentVBO.disable()
+
+        gpu.bindVertexArray(null)
     }
 
     delete() {

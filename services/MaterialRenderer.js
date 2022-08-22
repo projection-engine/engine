@@ -56,7 +56,6 @@ export default class MaterialRenderer {
             elapsed,
             ambient,
             sceneColor,
-            lastMaterial,
             ao
         } = attributes
 
@@ -64,7 +63,6 @@ export default class MaterialRenderer {
             return
         mesh.use()
         material.use(
-            lastMaterial !== material.id,
             {
                 ...ambient,
                 projectionMatrix,

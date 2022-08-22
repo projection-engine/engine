@@ -56,6 +56,7 @@ function applyMethods(shaderCode) {
 }
 
 export default class ShaderInstance {
+    static programInUse
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     structRegex = (type) => {
@@ -70,16 +71,14 @@ export default class ShaderInstance {
     }
     length = 0
 
-    constructor(vertex, fragment,  setMessage) {
+    constructor(vertex, fragment, setMessage) {
         let alert = []
-        const gpu = window.gpu
         this.program = gpu.createProgram()
-        window.gpu = gpu
-        const vCode = this._compileShader(trimString(vertex), gpu.VERTEX_SHADER, m => alert.push(m))
-        const fCode = this._compileShader(trimString(fragment), gpu.FRAGMENT_SHADER, m => alert.push(m))
+        const vCode = this.#compileShader(trimString(vertex), gpu.VERTEX_SHADER, m => alert.push(m))
+        const fCode = this.#compileShader(trimString(fragment), gpu.FRAGMENT_SHADER, m => alert.push(m))
 
         this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)].flat()
-        if(typeof setMessage === "function")
+        if (typeof setMessage === "function")
             setMessage({
                 error: gpu.getError(),
                 messages: alert,
@@ -92,20 +91,20 @@ export default class ShaderInstance {
         this.length = this.uniforms.length
     }
 
-    _compileShader(shaderCode, shaderType, pushMessage) {
+    #compileShader(shaderCode, shaderType, pushMessage) {
         const bundledCode = applyMethods(shaderCode)
-        const shader = window.gpu.createShader(shaderType)
-        window.gpu.shaderSource(shader, bundledCode)
-        window.gpu.compileShader(shader)
-        let compiled = window.gpu.getShaderParameter(shader, window.gpu.COMPILE_STATUS)
+        const shader = gpu.createShader(shaderType)
+        gpu.shaderSource(shader, bundledCode)
+        gpu.compileShader(shader)
+        let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
         if (!compiled) {
-            console.error(window.gpu.getShaderInfoLog(shader))
+            console.error(gpu.getShaderInfoLog(shader))
             console.dir(shaderCode)
-            pushMessage(window.gpu.getShaderInfoLog(shader))
+            pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false
         } else {
-            window.gpu.attachShader(this.program, shader)
-            window.gpu.linkProgram(this.program)
+            gpu.attachShader(this.program, shader)
+            gpu.linkProgram(this.program)
 
             this.available = true
         }
@@ -126,7 +125,7 @@ export default class ShaderInstance {
                         uniformObjects.push({
                             type,
                             name,
-                            uLocation: window.gpu.getUniformLocation(this.program, name)
+                            uLocation: gpu.getUniformLocation(this.program, name)
                         })
                     } else {
                         let struct = code.match(this.structRegex(type))
@@ -142,7 +141,7 @@ export default class ShaderInstance {
                                             type: current[2],
                                             name: current[4],
                                             parent: name,
-                                            uLocation: window.gpu.getUniformLocation(this.program, name + "." + current[4])
+                                            uLocation: gpu.getUniformLocation(this.program, name + "." + current[4])
                                         }
                                     }
                                 }).filter(e => e !== undefined)
@@ -171,7 +170,7 @@ export default class ShaderInstance {
                                 type,
                                 name,
                                 arraySize,
-                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => window.gpu.getUniformLocation(this.program, name + `[${i}]`))
+                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]`))
                             })
                         } else {
                             let struct = code.match(this.structRegex(type))
@@ -189,7 +188,7 @@ export default class ShaderInstance {
                                                 name: current[4],
                                                 parent: name,
                                                 arraySize,
-                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => window.gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
+                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
                                             }
                                         }
                                     }).filter(e => e !== undefined)
@@ -229,38 +228,38 @@ export default class ShaderInstance {
     }
 
     static bind(uLocation, data, type, currentSamplerIndex, increaseIndex, c) {
-        try{
+        try {
             switch (type) {
-            case "float":
-            case "int":
-            case "vec2":
-            case "vec3":
-            case "vec4":
-            case "ivec2":
-            case "ivec3":
-            case "bool":
-                window.gpu[TYPES[type]](uLocation, data)
-                break
-            case "mat3":
-            case "mat4":
-                window.gpu[TYPES[type]](uLocation, false, data)
-                break
-            case "samplerCube":
-                window.gpu.activeTexture(window.gpu.TEXTURE0 + currentSamplerIndex)
-                window.gpu.bindTexture(window.gpu.TEXTURE_CUBE_MAP, data)
-                window.gpu.uniform1i(uLocation, currentSamplerIndex)
-                increaseIndex()
-                break
-            case "sampler2D":
-                gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
-                gpu.bindTexture(gpu.TEXTURE_2D, data)
-                gpu.uniform1i(uLocation, currentSamplerIndex)
-                increaseIndex()
-                break
-            default:
-                break
+                case "float":
+                case "int":
+                case "vec2":
+                case "vec3":
+                case "vec4":
+                case "ivec2":
+                case "ivec3":
+                case "bool":
+                    gpu[TYPES[type]](uLocation, data)
+                    break
+                case "mat3":
+                case "mat4":
+                    gpu[TYPES[type]](uLocation, false, data)
+                    break
+                case "samplerCube":
+                    gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
+                    gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, data)
+                    gpu.uniform1i(uLocation, currentSamplerIndex)
+                    increaseIndex()
+                    break
+                case "sampler2D":
+                    gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
+                    gpu.bindTexture(gpu.TEXTURE_2D, data)
+                    gpu.uniform1i(uLocation, currentSamplerIndex)
+                    increaseIndex()
+                    break
+                default:
+                    break
             }
-        }catch (err){
+        } catch (err) {
             console.error({
                 error: err,
                 uniform: uLocation,
@@ -272,7 +271,9 @@ export default class ShaderInstance {
     }
 
     use() {
-        window.gpu.useProgram(this.program)
+        if (ShaderInstance.programInUse !== this.program)
+            gpu.useProgram(this.program)
+        ShaderInstance.programInUse = this.program
     }
 }
 

@@ -2,14 +2,14 @@ import {createTexture} from "../../utils/utils"
 import QuadInstance from "./QuadInstance"
 
 export default class FramebufferInstance extends QuadInstance {
+    static lastBoundBuffer
     FBO
     RBO
-
     depthSampler
     colors = []
     attachments = []
 
-    constructor( width = screen.width, height = screen.height) {
+    constructor(width = screen.width, height = screen.height) {
         super()
         this.width = width
         this.height = height
@@ -32,19 +32,18 @@ export default class FramebufferInstance extends QuadInstance {
     startMapping(buffer = this.FBO, autoSetViewport = true, clear = true) {
         if (autoSetViewport)
             gpu.viewport(0, 0, this.width, this.height)
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, buffer)
+        this.use()
         if (clear)
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
     }
 
-    stopMapping(clear = true,) {
-
+    stopMapping(clear = true) {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
-
-        if (clear) {
+        FramebufferInstance.lastBoundBuffer = undefined
+        if (clear)
             gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
-        }
     }
+
     depthTexture(precision = gpu.DEPTH_COMPONENT32F) {
         this.use()
         this.depthSampler = createTexture(
@@ -129,7 +128,10 @@ export default class FramebufferInstance extends QuadInstance {
 
 
     use() {
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
+        if (FramebufferInstance.lastBoundBuffer !== this.FBO) {
+            gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
+            FramebufferInstance.lastBoundBuffer = this.FBO
+        }
         return this
     }
 
