@@ -1,5 +1,3 @@
-import {mat4} from "gl-matrix";
-
 export default class CameraPostProcessing {
     zNear = .1
     zFar = 1000

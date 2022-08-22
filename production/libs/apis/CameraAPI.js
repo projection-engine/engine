@@ -1,4 +1,4 @@
-import {mat4, quat} from "gl-matrix"
+import {mat4} from "gl-matrix"
 import CameraPostProcessing from "../../templates/basic/CameraPostProcessing";
 import COMPONENTS from "../../data/COMPONENTS";
 import RendererController from "../../RendererController";

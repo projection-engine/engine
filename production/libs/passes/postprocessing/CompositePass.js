@@ -2,7 +2,6 @@ import ShaderInstance from "../../instances/ShaderInstance"
 import {vertex} from "../../../data/shaders/FXAA.glsl"
 import * as shaderCode from "../../../data/shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../../../utils/generate-blur-buffers"
-import RendererController from "../../../RendererController";
 import CameraAPI from "../../apis/CameraAPI";
 
 let shaderState

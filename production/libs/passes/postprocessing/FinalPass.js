@@ -1,7 +1,6 @@
 import ShaderInstance from "../../instances/ShaderInstance"
 
 import * as shaderCode from "../../../data/shaders/FXAA.glsl"
-import RendererController from "../../../RendererController";
 import CameraAPI from "../../apis/CameraAPI";
 
 
