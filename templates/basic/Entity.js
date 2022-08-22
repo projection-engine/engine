@@ -13,6 +13,7 @@ export default class Entity {
     scripts = []
     children = []
     parent
+    pickID = [-1, -1, -1]
 
     constructor(id = v4(), name = "Empty entity", active=true) {
         this.id = id
@@ -24,7 +25,9 @@ export default class Entity {
     get isMesh(){
         return this.components[COMPONENTS.MESH] instanceof MeshComponent
     }
-
+    get pickIndex (){
+        return this.pickID[0] * 255 + this.pickID[1] * 255 + this.pickID[2] * 255
+    }
     clone(){
         let clone = new Entity()
         clone.name = "_" + this.name

@@ -95,7 +95,7 @@ export default class DepthPrePass {
                 viewMatrix: CameraAPI.viewMatrix,
                 transformMatrix: entity.components[COMPONENTS.TRANSFORM].transformationMatrix,
                 projectionMatrix: CameraAPI.projectionMatrix,
-                meshID: entity.components[COMPONENTS.PICK].pickID
+                meshID: entity.pickID
             })
 
             gpu.drawElements(gpu.TRIANGLES, meshRef.verticesQuantity, gpu.UNSIGNED_INT, 0)
