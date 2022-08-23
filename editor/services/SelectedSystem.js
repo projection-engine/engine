@@ -29,6 +29,8 @@ export default class SelectedSystem {
         const length = selected.length
         if (length === 0)
             return
+
+
         gpu.disable(gpu.DEPTH_TEST)
         this.shader.use()
         this.frameBuffer.startMapping()
@@ -40,21 +42,17 @@ export default class SelectedSystem {
             if (!mesh)
                 continue
             const t = current.components[COMPONENTS.TRANSFORM]
-            gpu.bindVertexArray(mesh.VAO)
-            gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
-
-            mesh.vertexVBO.enable()
+            mesh.use()
             this.shader.bindForUse({
                 projectionMatrix: CameraAPI.projectionMatrix,
                 transformMatrix: t.transformationMatrix,
                 viewMatrix: CameraAPI.viewMatrix
             })
-
-            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+            mesh.draw()
         }
         this.frameBuffer.stopMapping()
-        gpu.bindVertexArray(null)
         gpu.enable(gpu.DEPTH_TEST)
+
     }
 
     drawSilhouette(selected) {

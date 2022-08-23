@@ -197,9 +197,7 @@ export default class ShadowMapPass {
     }
 
     static drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, lightColor, shader, lightPosition, shadowClipNearFar) {
-        gpu.bindVertexArray(mesh.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, mesh.indexVBO)
-        mesh.vertexVBO.enable()
+        mesh.use()
         shader.bindForUse({
             shadowClipNearFar,
             viewMatrix,
@@ -208,14 +206,6 @@ export default class ShadowMapPass {
             lightColor,
             lightPosition
         })
-
-
-        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
-        gpu.bindVertexArray(null)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
-        mesh.vertexVBO.disable()
-        mesh.normalVBO.disable()
-        mesh.uvVBO.disable()
-
+        mesh.draw()
     }
 }

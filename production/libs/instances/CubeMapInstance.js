@@ -1,6 +1,7 @@
 import {mat4, vec3} from "gl-matrix"
 import RendererController from "../../RendererController";
 import LoopAPI from "../apis/LoopAPI";
+import MeshInstance from "./MeshInstance";
 
 
 export default class CubeMapInstance {
@@ -21,7 +22,7 @@ export default class CubeMapInstance {
 
     constructor(resolution, asDepth) {
         this.#res = resolution
-        this.#frameBuffer =  window.gpu.createFramebuffer()
+        this.#frameBuffer =  gpu.createFramebuffer()
         this.#asDepth = asDepth
     }
 
@@ -44,7 +45,7 @@ export default class CubeMapInstance {
                     uSampler: sampler,
                     multiplier
                 })
-                window.gpu.drawArrays(window.gpu.TRIANGLES, 0, 36)
+                gpu.drawArrays(gpu.TRIANGLES, 0, 36)
             }, RendererController.cubeBuffer, undefined, undefined, true)
         }
     }
@@ -52,8 +53,7 @@ export default class CubeMapInstance {
     generatePrefiltered(mipLevels = 6, resolution = 128, cubeBuffer, multiplier=[1,1,1]) {
 
         if (!this.#asDepth && cubeBuffer) {
-            const perspective = mat4.perspective([], 1.57, 1, .1, 10),
-                gpu = window.gpu
+            const perspective = mat4.perspective([], 1.57, 1, .1, 10)
 
             gpu.bindVertexArray(null)
             gpu.viewport(0, 0, resolution, resolution)
@@ -69,6 +69,7 @@ export default class CubeMapInstance {
 
             this.prefilteredShader.use()
             cubeBuffer.enable()
+            MeshInstance.finishIfUsed()
 
             for (let i = 0; i < mipLevels; i++) {
                 const currentRes = resolution * Math.pow(0.5, i)
@@ -98,9 +99,9 @@ export default class CubeMapInstance {
             }
             cubeBuffer.disable()
 
-            window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, null)
-            window.gpu.bindRenderbuffer(window.gpu.RENDERBUFFER, null)
-            window.gpu.deleteRenderbuffer(rbo)
+            gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+            gpu.bindRenderbuffer(gpu.RENDERBUFFER, null)
+            gpu.deleteRenderbuffer(rbo)
 
             return this
         } else
@@ -110,8 +111,7 @@ export default class CubeMapInstance {
     draw(callback, cubeBuffer, zFar = 10, zNear = .1, asIrradiance) {
         let resolution = asIrradiance ? 32 : this.#res, texture
 
-        const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar),
-            gpu = window.gpu
+        const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
 
         gpu.bindVertexArray(null)
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.#frameBuffer)
@@ -159,7 +159,6 @@ export default class CubeMapInstance {
     }
 
     #initializeTexture(resolution, mipmap) {
-        const gpu = window.gpu
         gpu.viewport(0, 0, resolution, resolution)
         let texture = gpu.createTexture()
         gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, texture)
@@ -195,11 +194,11 @@ export default class CubeMapInstance {
     }
     delete(){
         if(this.texture)
-            window.gpu.deleteTexture(this.texture)
+            gpu.deleteTexture(this.texture)
         if(this.irradianceTexture)
-            window.gpu.deleteTexture(this.irradianceTexture)
+            gpu.deleteTexture(this.irradianceTexture)
         if(this.prefiltered)
-            window.gpu.deleteTexture(this.prefiltered)
+            gpu.deleteTexture(this.prefiltered)
     }
 
 }

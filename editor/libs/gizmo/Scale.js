@@ -1,4 +1,4 @@
-import {vec4} from "gl-matrix"
+import {vec3, vec4} from "gl-matrix"
 import MeshInstance from "../../../production/libs/instances/MeshInstance"
 import COMPONENTS from "../../../production/data/COMPONENTS"
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
@@ -8,6 +8,7 @@ import mapEntity from "./utils/map-entity"
 import mesh from "../../data/SCALE_GIZMO.json"
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
+import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 
 const MOVEMENT_SCALE = .001
 
@@ -59,6 +60,17 @@ export default class Scale extends Gizmo {
                     this.transformElement([0, 0, sign * this.distanceZ])
                     this.distanceZ = 0
                 }
+                break
+            case AXIS.SCREEN_SPACE:
+                const position = ScreenSpaceGizmo.onMouseMove(event)
+                for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
+                    const target =  GizmoSystem.selectedEntities[i]
+                    const comp = target.components[COMPONENTS.TRANSFORM]
+                    vec3.add(comp.scaling, comp.scaling, vec3.sub([], position, comp.scaling))
+                    comp.changed = true
+                }
+                break
+            default:
                 break
         }
     }

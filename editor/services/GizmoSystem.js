@@ -17,9 +17,9 @@ import COMPONENTS from "../../production/data/COMPONENTS";
 import TransformComponent from "../../production/templates/components/TransformComponent";
 import Transformation from "../../production/services/Transformation";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
+import ScreenSpaceGizmo from "../libs/gizmo/ScreenSpaceGizmo";
 
 const EMPTY_COMPONENT = new TransformComponent()
-const PICK_ID_SS_GIZMO = [0, 0, 0]
 let depthSystem
 export default class GizmoSystem {
     static mainEntity
@@ -50,14 +50,13 @@ export default class GizmoSystem {
     }
 
 
-    static drawToDepthSampler(
-        mesh,
-        transforms
-    ) {
+    static drawToDepthSampler(mesh, transforms) {
+
+        gpu.disable(gpu.CULL_FACE)
+
         depthSystem.frameBuffer.startMapping()
         GizmoSystem.toBufferShader.use()
         mesh.use()
-        gpu.disable(gpu.CULL_FACE)
         for (let i = 0; i < transforms.length; i++) {
             GizmoSystem.toBufferShader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
@@ -68,10 +67,10 @@ export default class GizmoSystem {
                 translation: GizmoSystem.translation,
                 cameraIsOrthographic: CameraAPI.isOrthographic
             })
-            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+            mesh.draw()
         }
 
-
+        EditorRenderer.cubeMesh.use()
         GizmoSystem.toBufferShader.bindForUse({
             viewMatrix: CameraAPI.viewMatrix,
             transformMatrix: GizmoSystem.transformationMatrix,
@@ -81,41 +80,23 @@ export default class GizmoSystem {
             translation: GizmoSystem.translation,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
-        gpu.drawElements(gpu.TRIANGLES, EditorRenderer.cubeMesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        EditorRenderer.cubeMesh.draw()
+        depthSystem.frameBuffer.stopMapping()
 
         gpu.enable(gpu.CULL_FACE)
-        mesh.finish()
-        gpu.bindVertexArray(null)
-        depthSystem.frameBuffer.stopMapping()
         return depthSystem.frameBuffer
     }
 
     #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if (!GizmoSystem.transformationMatrix || Transformations.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
+        if (Transformations.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
             GizmoSystem.mainEntity = main
             GizmoSystem.translation = getEntityTranslation(main)
 
             const t = main.components[COMPONENTS.TRANSFORM]
             GizmoSystem.targetRotation = t !== undefined ? t.rotationQuat : [0, 0, 0, 1]
-
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
         }
-    }
-
-    #drawSSGizmo() {
-        if (!GizmoSystem.transformationMatrix)
-            return
-        const cube = EditorRenderer.cubeMesh
-        gpu.bindVertexArray(cube.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, cube.indexVBO)
-        cube.vertexVBO.enable()
-
-        GizmoSystem.gizmoShader.use()
-        Gizmo.drawGizmo(cube, GizmoSystem.transformationMatrix, 0, PICK_ID_SS_GIZMO, GizmoSystem.translation, -1)
-
-        cube.vertexVBO.disable()
-        gpu.bindVertexArray(null)
     }
 
     execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
@@ -125,9 +106,9 @@ export default class GizmoSystem {
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
             this.#findMainEntity()
             GizmoSystem.transformationType = transformationType
-            if (GizmoSystem.targetGizmo)
-                GizmoSystem.targetGizmo.execute()
-            this.#drawSSGizmo()
+            if (GizmoSystem.targetGizmo && GizmoSystem.translation != null)
+                GizmoSystem.targetGizmo.drawGizmo()
+            ScreenSpaceGizmo.drawGizmo()
         } else if (GizmoSystem.targetGizmo || !GizmoSystem.selectedEntities[0]) {
             GizmoSystem.targetGizmo = undefined
             GizmoSystem.selectedEntities = []

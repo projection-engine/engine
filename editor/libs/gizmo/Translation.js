@@ -1,4 +1,4 @@
-import {vec4} from "gl-matrix"
+import {vec3, vec4} from "gl-matrix"
 import MeshInstance from "../../../production/libs/instances/MeshInstance"
 import COMPONENTS from "../../../production/data/COMPONENTS"
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
@@ -7,6 +7,7 @@ import mapEntity from "./utils/map-entity"
 import mesh from "../../data/TRANSLATION_GIZMO.json"
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
+import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 
 const MOVEMENT_SCALE = .001
 export default class Translation extends Gizmo {
@@ -63,6 +64,17 @@ export default class Translation extends Gizmo {
                     this.distanceZ = 0
                 }
                 break
+            case AXIS.SCREEN_SPACE:
+                const position = ScreenSpaceGizmo.onMouseMove(event)
+                for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
+                    const target =  GizmoSystem.selectedEntities[i]
+                    const comp = target.components[COMPONENTS.TRANSFORM]
+                    vec3.add(comp.translation, comp.translation, vec3.sub([], position, comp.translation))
+                    comp.changed = true
+                }
+                break
+            default:
+                break
         }
 
     }
@@ -76,11 +88,9 @@ export default class Translation extends Gizmo {
 
         for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
             const target =  GizmoSystem.selectedEntities[i]
-            target.components[COMPONENTS.TRANSFORM].translation = [
-                target.components[COMPONENTS.TRANSFORM].translation[0] - toApply[0],
-                target.components[COMPONENTS.TRANSFORM].translation[1] - toApply[1],
-                target.components[COMPONENTS.TRANSFORM].translation[2] - toApply[2]
-            ]
+            const comp = target.components[COMPONENTS.TRANSFORM]
+            vec3.sub(comp.translation, comp.translation, toApply)
+            comp.changed = true
         }
     }
 

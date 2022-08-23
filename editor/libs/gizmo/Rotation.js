@@ -13,6 +13,7 @@ import ViewportPicker from "../../../production/services/ViewportPicker";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
+import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",
@@ -28,7 +29,7 @@ const CSS = {
     fontSize: ".75rem",
     display: "none"
 }
-const toDeg = 57.29, toRad = 3.1415 / 180
+const toDeg = 57.29, toRad = Math.PI / 180
 export default class Rotation {
     tracking = false
     currentRotation = [0, 0, 0]
@@ -58,17 +59,25 @@ export default class Rotation {
     }
 
     onMouseDown(event) {
+
         const w = gpu.canvas.width, h = gpu.canvas.height
         const x = event.clientX
         const y = event.clientY
 
         this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
-        this.currentCoord.clientX = event.clientX
-        this.currentCoord.clientY = event.clientY
+        this.currentCoord.clientX = x
+        this.currentCoord.clientY = y
         this.#testClick()
+
+        if(GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
+            ScreenSpaceGizmo.onMouseDown(event)
+
     }
 
     onMouseUp() {
+        if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
+            ScreenSpaceGizmo.onMouseUp()
+
         RendererStoreController.saveEntity(
             GizmoSystem.mainEntity.id,
             COMPONENTS.TRANSFORM,
@@ -129,12 +138,23 @@ export default class Rotation {
                     this.renderTarget.innerText = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
                 }
                 break
+            case AXIS.SCREEN_SPACE:
+                const position = ScreenSpaceGizmo.onMouseMove(event)
+                this.rotateElement(vec3.scale([], position, toRad), true)
+                const getRot = (r) => `${(r * toDeg).toFixed(1)} θ; `
+                this.renderTarget.innerText = getRot(this.currentRotation[0]) +getRot(this.currentRotation[1])+ getRot(this.currentRotation[2])
+                break
+            default:
+                break
         }
     }
 
-    rotateElement(vec) {
-        const quatA = [0, 0, 0, 1]
-        vec3.add(this.currentRotation, this.currentRotation, vec)
+    rotateElement(vec, screenSpace) {
+        const quatA = quat.create()
+        if(screenSpace)
+            this.currentRotation = vec
+        else
+            vec3.add(this.currentRotation, this.currentRotation, vec)
         if (vec[0] !== 0)
             quat.rotateX(quatA, quatA, vec[0])
         if (vec[1] !== 0)
@@ -145,6 +165,10 @@ export default class Rotation {
         const SIZE = GizmoSystem.selectedEntities.length
         for (let i = 0; i < SIZE; i++) {
             const target = GizmoSystem.selectedEntities[i].components[COMPONENTS.TRANSFORM]
+            if(screenSpace) {
+                target.rotationQuat = quatA
+                continue
+            }
             if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1) {
                 if (vec3.len(target.pivotPoint) > 0) {
                     const rotationMatrix = mat4.fromQuat([], quatA),
@@ -165,13 +189,9 @@ export default class Rotation {
         const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        const FBO = GizmoSystem.drawToDepthSampler(
-            GizmoSystem.planeMesh,
-            [mX, mY, mZ]
-        )
+        const FBO = GizmoSystem.drawToDepthSampler(GizmoSystem.planeMesh, [mX, mY, mZ])
         const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
         const pickID = Math.round(255 * dd[0])
-
         GizmoSystem.clickedAxis = pickID
 
         if (pickID === 0)
@@ -187,11 +207,6 @@ export default class Rotation {
 
             gpu.canvas.requestPointerLock()
         }
-    }
-
-    execute() {
-        if (GizmoSystem.translation)
-            this.#drawGizmo()
     }
 
     #rotateMatrix(axis, comp) {
@@ -219,7 +234,7 @@ export default class Rotation {
         return matrix
     }
 
-    #drawGizmo() {
+    drawGizmo() {
         gpu.clear(gpu.DEPTH_BUFFER_BIT)
         gpu.disable(gpu.CULL_FACE)
 
@@ -235,7 +250,6 @@ export default class Rotation {
             this.#draw(mY, AXIS.Y, this.yGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Z || !this.tracking)
             this.#draw(mZ, AXIS.Z, this.zGizmo.pickID)
-        GizmoSystem.planeMesh.finish()
         gpu.enable(gpu.CULL_FACE)
     }
 
@@ -252,6 +266,6 @@ export default class Rotation {
             circleSampler: this.texture.texture,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
-        gpu.drawElements(gpu.TRIANGLES, GizmoSystem.planeMesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GizmoSystem.planeMesh.draw()
     }
 }

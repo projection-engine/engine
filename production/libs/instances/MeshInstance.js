@@ -3,6 +3,7 @@ import VBOInstance from "./VBOInstance"
 import {v4 as uuidv4} from "uuid"
 
 export default class MeshInstance {
+    static lastUsedMesh
     verticesQuantity = 0
     trianglesQuantity = 0
 
@@ -54,7 +55,19 @@ export default class MeshInstance {
 
     }
 
+    static finishIfUsed(){
+        const lastUsed = MeshInstance.lastUsedMesh
+        if(lastUsed)
+            lastUsed.finish()
+    }
+
     use() {
+        const last = MeshInstance.lastUsedMesh
+        if (last === this)
+            return
+        else if (last != null)
+            last.finish()
+
         gpu.bindVertexArray(this.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
 
@@ -69,7 +82,6 @@ export default class MeshInstance {
 
     finish() {
 
-
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
         this.vertexVBO.disable()
 
@@ -81,6 +93,8 @@ export default class MeshInstance {
             this.tangentVBO.disable()
 
         gpu.bindVertexArray(null)
+
+        MeshInstance.lastUsedMesh = undefined
     }
 
     delete() {
@@ -100,5 +114,9 @@ export default class MeshInstance {
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
 
         this.vertexVBO.enable()
+    }
+
+    draw() {
+        gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
 }

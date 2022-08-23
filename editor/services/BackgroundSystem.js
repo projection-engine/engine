@@ -3,6 +3,7 @@ import ShaderInstance from "../../production/libs/instances/ShaderInstance"
 import {mat4} from "gl-matrix"
 import RendererController from "../../production/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
+import MeshInstance from "../../production/libs/instances/MeshInstance";
 
 
 export default class BackgroundSystem {
@@ -15,6 +16,8 @@ export default class BackgroundSystem {
 
         const {gamma, background, backgroundColor} = RendererController.params
         if(background) {
+            MeshInstance.finishIfUsed()
+
             gpu.depthMask(false)
             this.shader.use()
 

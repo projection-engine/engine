@@ -5,12 +5,13 @@ import COMPONENTS from "../data/COMPONENTS";
 
 export default class MaterialRenderer {
     static draw(mesh, material) {
+        mesh.use()
         if (material.settings.depthTest === false)
             gpu.disable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
             gpu.disable(gpu.BLEND)
 
-        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        mesh.draw()
 
         if (material.settings.depthTest === false)
             gpu.enable(gpu.DEPTH_TEST)
@@ -61,7 +62,6 @@ export default class MaterialRenderer {
 
         if (!mesh || !material)
             return
-        mesh.use()
         material.use(
             {
                 ...ambient,
@@ -82,8 +82,10 @@ export default class MaterialRenderer {
             },
             useCubeMapShader
         )
-        if (directDrawing)
-            gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        if (directDrawing) {
+            mesh.use()
+            mesh.draw()
+        }
         else
             MaterialRenderer.draw(mesh, material)
     }

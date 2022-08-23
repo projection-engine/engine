@@ -1,4 +1,5 @@
 import VBOInstance from "./VBOInstance"
+import MeshInstance from "./MeshInstance";
 
 const QUAD = [
     -1, -1, 0,
@@ -21,6 +22,8 @@ export default class QuadInstance {
     }
 
     draw() {
+        MeshInstance.finishIfUsed()
+
         gpu.disable(gpu.CULL_FACE)
         gpu.bindVertexArray(this.vao)
         this.vbo.enable()

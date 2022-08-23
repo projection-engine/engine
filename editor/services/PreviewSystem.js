@@ -88,7 +88,6 @@ export default class PreviewSystem {
                 ambient: {},
                 useCubeMapShader: true
             })
-            materialMesh.finish()
         } else if (materialMesh instanceof MaterialInstance) {
             const [viewMatrix, camPosition] = this.cameraData
             MaterialRenderer.drawMesh({
@@ -112,7 +111,6 @@ export default class PreviewSystem {
         }
         this.frameBuffer.stopMapping()
         response = BundlerAPI.framebufferToImage(this.frameBuffer.FBO)
-        EditorRenderer.sphereMesh.finish()
         window.gpu.bindVertexArray(null)
         return response
     }

@@ -87,19 +87,17 @@ export default class DepthPrePass {
             const entity = meshes[i]
             if(!entity.active)
                 continue
-            const meshRef = RendererController.meshes.get(entity.components[COMPONENTS.MESH].meshID)
-            if(!meshRef)
+            const mesh = RendererController.meshes.get(entity.components[COMPONENTS.MESH].meshID)
+            if(!mesh)
                 continue
-            meshRef.useForDepth()
+            mesh.useForDepth()
             this.shader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
                 transformMatrix: entity.components[COMPONENTS.TRANSFORM].transformationMatrix,
                 projectionMatrix: CameraAPI.projectionMatrix,
                 meshID: entity.pickID
             })
-
-            gpu.drawElements(gpu.TRIANGLES, meshRef.verticesQuantity, gpu.UNSIGNED_INT, 0)
-            meshRef.finish()
+            mesh.draw()
         }
         this.frameBuffer.stopMapping()
 

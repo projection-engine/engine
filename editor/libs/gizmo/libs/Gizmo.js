@@ -9,6 +9,7 @@ import ViewportPicker from "../../../../production/services/ViewportPicker";
 import CameraAPI from "../../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../../services/GizmoSystem";
 import AXIS from "../AXIS";
+import ScreenSpaceGizmo from "../ScreenSpaceGizmo";
 
 export default class Gizmo {
     tracking = false
@@ -46,6 +47,7 @@ export default class Gizmo {
     }
 
     onMouseDown(event) {
+
         if (!this.renderTarget)
             this.renderTarget = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
 
@@ -55,6 +57,9 @@ export default class Gizmo {
 
         this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
         this.#testClick()
+
+        if(GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
+            ScreenSpaceGizmo.onMouseDown(event)
     }
 
     notify(value, sign) {
@@ -63,6 +68,9 @@ export default class Gizmo {
     }
 
     onMouseUp() {
+        if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
+            ScreenSpaceGizmo.onMouseUp()
+
         if (this.totalMoved !== 0) {
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
@@ -111,16 +119,9 @@ export default class Gizmo {
     }
 
 
-    execute() {
-        if (GizmoSystem.translation && GizmoSystem.mainEntity === GizmoSystem.selectedEntities[0]) {
-            if (this.updateTransformationRealtime)
-                GizmoSystem.translation = getEntityTranslation(GizmoSystem.mainEntity)
-            this.draw()
-        }
-    }
-
     static translateMatrix(comp) {
-
+        if (!GizmoSystem.translation)
+            return
         const matrix = comp.transformationMatrix.slice(0)
 
         const translation = comp.translation,
@@ -143,8 +144,9 @@ export default class Gizmo {
         return matrix
     }
 
-    draw() {
-
+    drawGizmo() {
+        if (this.updateTransformationRealtime)
+            GizmoSystem.translation = getEntityTranslation(GizmoSystem.mainEntity)
         const mX = Gizmo.translateMatrix(this.xGizmo.components[COMPONENTS.TRANSFORM])
         const mY = Gizmo.translateMatrix(this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = Gizmo.translateMatrix(this.zGizmo.components[COMPONENTS.TRANSFORM])
@@ -157,7 +159,6 @@ export default class Gizmo {
             Gizmo.drawGizmo(this.xyz, mY, AXIS.Y, this.yGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Z || !this.tracking)
             Gizmo.drawGizmo(this.xyz, mZ, AXIS.Z, this.zGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)
-        this.xyz.finish()
     }
 
     static drawGizmo(mesh, transformMatrix, axis, id, translation, selectedAxis) {
@@ -172,6 +173,6 @@ export default class Gizmo {
             uID: id,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
-        gpu.drawElements(gpu.TRIANGLES, mesh.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        mesh.draw()
     }
 }

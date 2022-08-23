@@ -1,4 +1,3 @@
-import RendererController from "../production/RendererController"
 import {STEPS_CUBE_MAP} from "../production/libs/passes/rendering/SpecularProbePass"
 import Wrapper from "./services/Wrapper"
 import MaterialInstance from "../production/libs/instances/MaterialInstance"
@@ -14,6 +13,7 @@ import sphere from "./data/SPHERE.json"
 import camera from "./data/CAMERA.json"
 import LoopAPI from "../production/libs/apis/LoopAPI";
 import CameraTracker from "./libs/CameraTracker";
+import RendererController from "../production/RendererController.js";
 
 export default class EditorRenderer extends RendererController {
     gizmo

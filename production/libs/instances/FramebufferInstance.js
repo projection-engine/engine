@@ -42,6 +42,8 @@ export default class FramebufferInstance extends QuadInstance {
         FramebufferInstance.lastBoundBuffer = undefined
         if (clear)
             gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
+
+        gpu.bindVertexArray(null)
     }
 
     depthTexture(precision = gpu.DEPTH_COMPONENT32F) {

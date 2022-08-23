@@ -47,7 +47,6 @@ void main(){
     switch (axis) {
         case 2:
             color = vec3(1., 0., 0.);
-   
             break;
         case 3:
             color = vec3(0., 1., 0.);
