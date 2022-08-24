@@ -224,11 +224,16 @@ export default class BundlerAPI {
                     entity.scripts.push(newClass)
 
                 newClass.id = scriptID
+                return true
             } catch (runtimeError) {
+                console.error(runtimeError)
                 ConsoleAPI.error(`${runtimeError.name}: ${runtimeError.message}. (${src})`)
+                return false
             }
         } catch (syntaxError) {
             ConsoleAPI.error(`${syntaxError.name}: ${syntaxError.message}. (${src})`)
+            console.error(syntaxError)
+            return false
         }
     }
 
