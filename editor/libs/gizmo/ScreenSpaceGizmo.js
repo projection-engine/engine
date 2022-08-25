@@ -45,7 +45,6 @@ export default class ScreenSpaceGizmo {
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, cube.indexVBO)
         cube.vertexVBO.enable()
 
-        GizmoSystem.gizmoShader.use()
         Gizmo.drawGizmo(cube, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
 
         cube.vertexVBO.disable()

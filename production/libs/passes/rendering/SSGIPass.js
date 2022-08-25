@@ -27,7 +27,6 @@ export default class SSGIPass{
     }
     normalPass(){
         this.normalsFBO.startMapping()
-        this.normalsShader.use()
         this.normalsShader.bindForUse({
             gNormal: normalSampler,
             noise: aoSystem.noiseTexture
@@ -55,7 +54,6 @@ export default class SSGIPass{
             this.normalPass()
 
             this.FBO.startMapping()
-            this.ssgiShader.use()
             this.ssgiShader.bindForUse({
                 previousFrame: lastFrame,
                 gPosition: deferredSystem.frameBuffer.colors[0],

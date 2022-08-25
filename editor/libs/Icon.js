@@ -1,24 +1,18 @@
 import CameraAPI from "../../production/libs/apis/CameraAPI";
+import IconsSystem from "../services/IconsSystem";
 
 export default class Icon {
     bufferSize = 0
     constructor() {
         this.transformVBO = gpu.createBuffer()
     }
-    static start(VBO, VAO, shader) {
-        gpu.bindVertexArray(VAO)
-        VBO.enable()
-        shader.use()
-    }
-    static end(VBO) {
-        VBO.disable()
-        gpu.bindVertexArray(null)
-        gpu.bindBuffer(gpu.ARRAY_BUFFER, null)
-    }
+
 
     updateBuffer(data){
         this.bufferSize = data.length
+        console.trace(data)
         if(this.bufferSize > 0) {
+
             const temp = new Float32Array(data.map(d => Array.from(d)).flat())
             gpu.bindBuffer(gpu.ARRAY_BUFFER, this.transformVBO)
             gpu.bufferData(gpu.ARRAY_BUFFER, temp, gpu.STREAM_DRAW)
@@ -50,7 +44,7 @@ export default class Icon {
                 projectionMatrix: CameraAPI.projectionMatrix,
                 iconSize
             })
-            gpu.drawArraysInstanced(gpu.TRIANGLES, 0, 6, this.bufferSize)
+            IconsSystem.quad.drawInstanced(this.bufferSize)
             gpu.bindBuffer(gpu.ARRAY_BUFFER,null)
         }
     }

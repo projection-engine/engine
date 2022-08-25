@@ -14,6 +14,7 @@ import camera from "./data/CAMERA.json"
 import LoopAPI from "../production/libs/apis/LoopAPI";
 import CameraTracker from "./libs/CameraTracker";
 import RendererController from "../production/RendererController.js";
+import PLANE from "./data/PLANE.json";
 
 export default class EditorRenderer extends RendererController {
     gizmo
@@ -22,7 +23,7 @@ export default class EditorRenderer extends RendererController {
     static sphereMesh
     static cameraMesh
     static cubeMesh
-
+    static planeMesh
     constructor(resolution) {
         super(resolution)
         RendererController.environment = ENVIRONMENT.DEV
@@ -42,6 +43,11 @@ export default class EditorRenderer extends RendererController {
             id: "shading-models"
         })
 
+        EditorRenderer.planeMesh = new MeshInstance({
+            vertices: PLANE.vertices,
+            indices: PLANE.indices,
+            uvs: PLANE.uvs
+        })
         EditorRenderer.sphereMesh = new MeshInstance({
             ...sphere,
             uvs: [],

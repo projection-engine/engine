@@ -29,7 +29,6 @@ export default class GizmoSystem {
     static targetGizmo
     static toBufferShader
     static gizmoShader
-    static planeMesh
     static selectedEntities = []
     static clickedAxis
 
@@ -39,11 +38,7 @@ export default class GizmoSystem {
 
         GizmoSystem.toBufferShader = new ShaderInstance(shaderCode.sameSizeVertex, shaderCode.fragment)
         GizmoSystem.gizmoShader = new ShaderInstance(gizmoShaderCode.vertex, gizmoShaderCode.fragment)
-        GizmoSystem.planeMesh = new MeshInstance({
-            vertices: PLANE.vertices,
-            indices: PLANE.indices,
-            uvs: PLANE.uvs
-        })
+
         this.translationGizmo = new Translation()
         this.scaleGizmo = new Scale()
         this.rotationGizmo = new Rotation()
@@ -55,7 +50,6 @@ export default class GizmoSystem {
         gpu.disable(gpu.CULL_FACE)
 
         depthSystem.frameBuffer.startMapping()
-        GizmoSystem.toBufferShader.use()
         mesh.use()
         for (let i = 0; i < transforms.length; i++) {
             GizmoSystem.toBufferShader.bindForUse({

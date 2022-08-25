@@ -19,8 +19,6 @@ export default class BackgroundSystem {
             MeshInstance.finishIfUsed()
 
             gpu.depthMask(false)
-            this.shader.use()
-
             RendererController.cubeBuffer.enable()
             this.shader.bindForUse({
                 projectionMatrix: this.projection,

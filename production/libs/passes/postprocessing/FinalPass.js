@@ -36,7 +36,6 @@ export default class FinalPass{
             FXAAReduceMul
         } = CameraAPI.metadata
 
-        this.shader.use()
         this.shader.bindForUse({
             uSampler: this.workerTexture,
             enabled: [fxaa ? 1 : 0, filmGrain ? 1 : 0],

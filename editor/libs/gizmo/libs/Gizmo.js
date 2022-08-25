@@ -35,7 +35,7 @@ export default class Gizmo {
     }
 
     onMouseMove() {
-        if (!this.started) {
+        if (!this.started && GizmoSystem.mainEntity?.components && GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM]) {
             this.started = true
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
@@ -151,7 +151,6 @@ export default class Gizmo {
         const mY = Gizmo.translateMatrix(this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = Gizmo.translateMatrix(this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        GizmoSystem.gizmoShader.use()
         this.xyz.use()
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             Gizmo.drawGizmo(this.xyz, mX, AXIS.X, this.xGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)

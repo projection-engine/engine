@@ -66,7 +66,6 @@ export default class AmbientOcclusionPass {
             if(!depth)
                 depth = LoopAPI.renderMap.get("depthPrePass")
             this.frameBuffer.startMapping()
-            this.shader.use()
             this.shader.bindForUse({
                 randomSampler: this.noiseTexture,
                 depthSampler: depth.depth,
@@ -82,7 +81,6 @@ export default class AmbientOcclusionPass {
 
 
             this.blurredFrameBuffer.startMapping()
-            this.blurShader.use()
             this.blurShader.bindForUse({
                 aoSampler: this.frameBuffer.colors[0]
             })

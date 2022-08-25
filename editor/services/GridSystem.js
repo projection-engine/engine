@@ -13,7 +13,6 @@ export default class GridSystem {
     execute() {
 
         if (RendererController.params.gridVisibility && !CameraAPI.isOrthographic) {
-            this.gridShader.use()
             this.gridShader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
                 projectionMatrix: CameraAPI.projectionMatrix,

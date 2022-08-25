@@ -203,6 +203,9 @@ export default class ShaderInstance {
     }
 
     bindForUse(data) {
+        if (ShaderInstance.programInUse !== this.program)
+            gpu.useProgram(this.program)
+        ShaderInstance.programInUse = this.program
         let currentSamplerIndex = 0
 
         for (let v = 0; v < this.length; v++) {
@@ -270,11 +273,7 @@ export default class ShaderInstance {
         }
     }
 
-    use() {
-        if (ShaderInstance.programInUse !== this.program)
-            gpu.useProgram(this.program)
-        ShaderInstance.programInUse = this.program
-    }
+
 }
 
 export function trimString(str) {

@@ -119,4 +119,7 @@ export default class MeshInstance {
     draw() {
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
+    drawInstanced(quantity){
+        gpu.drawElementsInstanced(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0, quantity)
+    }
 }

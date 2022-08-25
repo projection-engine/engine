@@ -116,7 +116,6 @@ export default class ShadowMapPass {
             BundlerAPI.packageLights()
             this.changed = false
             gpu.cullFace(gpu.FRONT)
-            this.shadowMapShader.use()
             let currentColumn = 0, currentRow = 0
             if (lights2D.length > 0) {
                 this.shadowsFrameBuffer.startMapping()
@@ -155,7 +154,6 @@ export default class ShadowMapPass {
             }
 
             if (lights3D.length > 0) {
-                this.shadowMapOmniShader.use()
                 gpu.viewport(0, 0, 512, 512)
                 for (let i = 0; i < this.maxCubeMaps; i++) {
                     const current = lights3D[i]

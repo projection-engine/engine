@@ -114,7 +114,6 @@ export default class MaterialInstance {
     use(additionalUniforms = {}, isCubeMap = false) {
         const shader = isCubeMap ? this._cubeMapShader : this._shader
         if (shader) {
-            shader.use()
             const data = {...this.uniformData, ...additionalUniforms}
             shader.bindForUse(data)
         }

@@ -37,7 +37,6 @@ export default class CubeMapInstance {
 
     generateIrradiance(sampler=this.texture, multiplier=[1,1,1]) {
         if (!this.#asDepth) {
-            this.irradianceShader.use()
             this.draw((yaw, pitch, perspective) => {
                 this.irradianceShader.bindForUse({
                     projectionMatrix: perspective,
@@ -55,7 +54,8 @@ export default class CubeMapInstance {
         if (!this.#asDepth && cubeBuffer) {
             const perspective = mat4.perspective([], 1.57, 1, .1, 10)
 
-            gpu.bindVertexArray(null)
+            MeshInstance.finishIfUsed()
+
             gpu.viewport(0, 0, resolution, resolution)
             this.prefiltered = this.#initializeTexture(resolution, true)
             gpu.generateMipmap(gpu.TEXTURE_CUBE_MAP)
@@ -67,9 +67,7 @@ export default class CubeMapInstance {
             gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
             gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
 
-            this.prefilteredShader.use()
             cubeBuffer.enable()
-            MeshInstance.finishIfUsed()
 
             for (let i = 0; i < mipLevels; i++) {
                 const currentRes = resolution * Math.pow(0.5, i)

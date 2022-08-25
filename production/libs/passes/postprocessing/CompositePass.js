@@ -32,7 +32,6 @@ export default class CompositePass {
 
         if (bloom) {
             output.startMapping()
-            this.brightShader.use()
             this.brightShader.bindForUse({
                 sceneColor: worker.colors[0],
                 threshold: bloomThreshold
@@ -52,7 +51,6 @@ export default class CompositePass {
                 settings: postProcessingEffects
             }
         output.startMapping()
-        this.compositeShader.use()
         this.compositeShader.bindForUse(shaderState)
         output.draw()
         output.stopMapping()
@@ -61,7 +59,6 @@ export default class CompositePass {
     blur(fbo, bloomIntensity, blurBuffers = this.blurBuffers, upSampledBuffers = this.upSampledBuffers, kernel = 7) {
         const q = blurBuffers.length
 
-        this.blurShader.use()
         for (let level = 0; level < q; level++) {
             const {width, height} = blurBuffers[level]
             const previousColor = level > 0 ? blurBuffers[level - 1].height.colors[0] : fbo.colors[0]
@@ -85,7 +82,6 @@ export default class CompositePass {
             height.stopMapping()
         }
 
-        this.upSamplingShader.use()
         for (let index = 0; index < q - 1; index++) {
             const current = upSampledBuffers[index]
             current.startMapping()

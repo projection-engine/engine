@@ -32,7 +32,6 @@ export default class SelectedSystem {
 
 
         gpu.disable(gpu.DEPTH_TEST)
-        this.shader.use()
         this.frameBuffer.startMapping()
         for (let m = 0; m < length; m++) {
             const current = RendererController.entitiesMap.get(selected[m])
@@ -58,7 +57,6 @@ export default class SelectedSystem {
     drawSilhouette(selected) {
         const length = selected.length
         if (length > 0) {
-            this.shaderSilhouette.use()
             this.shaderSilhouette.bindForUse({
                 silhouette: this.frameBuffer.colors[0]
             })

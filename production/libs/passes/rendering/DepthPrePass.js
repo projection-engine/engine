@@ -82,7 +82,6 @@ export default class DepthPrePass {
         const meshes = RendererController.data.meshes
         // DEPTH && ID
         this.frameBuffer.startMapping()
-        this.shader.use()
         for(let i = 0; i < meshes.length; i++){
             const entity = meshes[i]
             if(!entity.active)
@@ -104,7 +103,6 @@ export default class DepthPrePass {
 
         // NORMALS
         this.normalFrameBuffer.startMapping()
-        this.normalShader.use()
         this.normalShader.bindForUse({
             depthSampler: this.depth,
             projectionInverse: CameraAPI.invProjectionMatrix,

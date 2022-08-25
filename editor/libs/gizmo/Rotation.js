@@ -14,6 +14,7 @@ import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
+import EditorRenderer from "../../EditorRenderer";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",
@@ -189,7 +190,7 @@ export default class Rotation {
         const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        const FBO = GizmoSystem.drawToDepthSampler(GizmoSystem.planeMesh, [mX, mY, mZ])
+        const FBO = GizmoSystem.drawToDepthSampler(EditorRenderer.planeMesh, [mX, mY, mZ])
         const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
         const pickID = Math.round(255 * dd[0])
         GizmoSystem.clickedAxis = pickID
@@ -242,8 +243,7 @@ export default class Rotation {
         const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        this.gizmoShader.use()
-        GizmoSystem.planeMesh.use()
+        EditorRenderer.planeMesh.use()
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             this.#draw(mX, AXIS.X, this.xGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Y || !this.tracking)
@@ -266,6 +266,6 @@ export default class Rotation {
             circleSampler: this.texture.texture,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
-        GizmoSystem.planeMesh.draw()
+        EditorRenderer.planeMesh.draw()
     }
 }

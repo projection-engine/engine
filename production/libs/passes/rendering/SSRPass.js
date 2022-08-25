@@ -33,7 +33,6 @@ export default class SSRPass {
                 gBehaviour = deferredSystem.frameBuffer.colors[3]
             }
             this.FBO.startMapping()
-            this.shader.use()
             this.shader.bindForUse({
                 previousFrame: currentFrame, // ALBEDO
                 gPosition,

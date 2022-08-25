@@ -25,7 +25,6 @@ export default class DeferredPass {
     }
 
     drawFrame() {
-        this.toScreenShader.use()
         this.toScreenShader.bindForUse({
             uSampler: this.deferredFBO.colors[0]
         })
@@ -92,7 +91,6 @@ export default class DeferredPass {
         this.deferredFBO.startMapping()
         onWrap(true)
 
-        this.deferredShader.use()
         this.deferredShader.bindForUse({
             screenSpaceGI: ssgi ? ssGISystem.color : undefined,
             screenSpaceReflections: ssr ? ssrSystem.color : undefined,
