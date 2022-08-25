@@ -1,10 +1,10 @@
 import CameraAPI from "../../production/libs/apis/CameraAPI";
-import ViewportEventsAPI from "../../production/libs/apis/ViewportEventsAPI";
+import InputEventsAPI from "../../production/libs/apis/InputEventsAPI";
 import {rotateY} from "../../../../components/viewport/utils/transform-camera";
 import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";
 
-let interval, ctrl, holding, isFocused, isDoubleClick, requested
+let interval, ctrl, holding, isFocused, isDoubleClick
 const BUTTON_MIDDLE = 1
 
 export default class CameraTracker {
@@ -55,10 +55,7 @@ export default class CameraTracker {
             }
             case "mousemove": {
                 if (isFocused || isDoubleClick) {
-                    if (!requested) {
-                        requested = true
-                        window.gpu.canvas.requestPointerLock()
-                    }
+                    InputEventsAPI.lockPointer()
                     if (!isDoubleClick) {
                         if (event.movementY < 0)
                             CameraTracker.pitch += .01 * Math.abs(event.movementY)
@@ -93,7 +90,6 @@ export default class CameraTracker {
             case "mouseup":
                 holding = false
                 ctrl = false
-                requested = false
                 isFocused = false
                 document.exitPointerLock()
                 isDoubleClick = false
@@ -111,23 +107,23 @@ export default class CameraTracker {
     static #id = v4()
 
     static startTracking() {
-        document.addEventListener("keydown", CameraTracker.#handleInput)
-        document.addEventListener("keyup", CameraTracker.#handleInput)
-        document.addEventListener("mouseup", CameraTracker.#handleInput)
-        document.addEventListener("mousemove", CameraTracker.#handleInput)
-
-        ViewportEventsAPI.addEvent("mousedown", CameraTracker.#handleInput, undefined, CameraTracker.#id)
-        ViewportEventsAPI.addEvent("wheel", CameraTracker.#handleInput, {passive: true}, CameraTracker.#id)
+        const events = InputEventsAPI.EVENTS
+        InputEventsAPI.listenTo(events.KEY_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
+        InputEventsAPI.listenTo(events.KEY_UP, CameraTracker.#handleInput, CameraTracker.#id)
+        InputEventsAPI.listenTo(events.MOUSE_UP, CameraTracker.#handleInput, CameraTracker.#id)
+        InputEventsAPI.listenTo(events.MOUSE_MOVE, CameraTracker.#handleInput, CameraTracker.#id)
+        InputEventsAPI.listenTo(events.MOUSE_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
+        InputEventsAPI.listenTo(events.WHEEL, CameraTracker.#handleInput, CameraTracker.#id)
     }
 
     static stopTracking() {
-        document.removeEventListener("keydown", CameraTracker.#handleInput)
-        document.removeEventListener("keyup", CameraTracker.#handleInput)
-        document.removeEventListener("mouseup", CameraTracker.#handleInput)
-        document.removeEventListener("mousemove", CameraTracker.#handleInput)
-
-        ViewportEventsAPI.removeEvent("mousedown", CameraTracker.#id)
-        ViewportEventsAPI.removeEvent("wheel", CameraTracker.#id)
+        const events = InputEventsAPI.EVENTS
+        InputEventsAPI.removeEvent(events.KEY_DOWN, CameraTracker.#id)
+        InputEventsAPI.removeEvent(events.KEY_UP, CameraTracker.#id)
+        InputEventsAPI.removeEvent(events.MOUSE_UP, CameraTracker.#id)
+        InputEventsAPI.removeEvent(events.MOUSE_MOVE, CameraTracker.#id)
+        InputEventsAPI.removeEvent(events.MOUSE_DOWN, CameraTracker.#id)
+        InputEventsAPI.removeEvent(events.WHEEL, CameraTracker.#id)
     }
 
     static update(onlyRadiusUpdate) {

@@ -10,7 +10,6 @@ export default class Icon {
 
     updateBuffer(data){
         this.bufferSize = data.length
-        console.trace(data)
         if(this.bufferSize > 0) {
 
             const temp = new Float32Array(data.map(d => Array.from(d)).flat())
