@@ -10,6 +10,7 @@ import CameraAPI from "../../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../../services/GizmoSystem";
 import AXIS from "../AXIS";
 import ScreenSpaceGizmo from "../ScreenSpaceGizmo";
+import DualAxisGizmo from "../DualAxisGizmo";
 
 export default class Gizmo {
     tracking = false
@@ -25,8 +26,6 @@ export default class Gizmo {
 
     started = false
 
-    translation = undefined
-    mainEntity = undefined
     updateTransformationRealtime = false
     key
 
@@ -56,36 +55,37 @@ export default class Gizmo {
         const y = event.clientY
 
         this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
+        ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
 
-        if(GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
-            ScreenSpaceGizmo.onMouseDown(event)
     }
 
     notify(value, sign) {
-        this.totalMoved += sign * value
-        this.renderTarget.innerText = this.totalMoved.toFixed(3) + " un"
+        GizmoSystem.totalMoved += sign * value
+        this.renderTarget.innerText = GizmoSystem.totalMoved.toFixed(3) + " un"
     }
 
     onMouseUp() {
-        if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
-            ScreenSpaceGizmo.onMouseUp()
+        ScreenSpaceGizmo.onMouseUp()
 
-        if (this.totalMoved !== 0) {
+        if (GizmoSystem.totalMoved !== 0) {
+            GizmoSystem.totalMoved = 0
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
                 COMPONENTS.TRANSFORM,
                 this.key,
                 GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM][this.key]
             )
+
         }
-        this.totalMoved = 0
+
         this.started = false
         document.exitPointerLock()
         this.distanceX = 0
         this.distanceY = 0
         this.distanceZ = 0
         GizmoSystem.clickedAxis = -1
+
         this.tracking = false
         this.renderTarget.style.display = "none"
     }
@@ -112,6 +112,7 @@ export default class Gizmo {
         if (pickID === 0)
             this.onMouseUp(true)
         else {
+            GizmoSystem.wasOnGizmo = true
             this.tracking = true
             gpu.canvas.requestPointerLock()
             this.renderTarget.style.display = "block"
@@ -145,6 +146,9 @@ export default class Gizmo {
     }
 
     drawGizmo() {
+        gpu.disable(gpu.CULL_FACE)
+        DualAxisGizmo.drawGizmo()
+
         if (this.updateTransformationRealtime)
             GizmoSystem.translation = getEntityTranslation(GizmoSystem.mainEntity)
         const mX = Gizmo.translateMatrix(this.xGizmo.components[COMPONENTS.TRANSFORM])
@@ -152,23 +156,24 @@ export default class Gizmo {
         const mZ = Gizmo.translateMatrix(this.zGizmo.components[COMPONENTS.TRANSFORM])
 
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
-            Gizmo.drawGizmo(this.xyz, mX, AXIS.X, this.xGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)
+            Gizmo.drawGizmo(this.xyz, mX, AXIS.X, this.xGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Y || !this.tracking)
-            Gizmo.drawGizmo(this.xyz, mY, AXIS.Y, this.yGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)
+            Gizmo.drawGizmo(this.xyz, mY, AXIS.Y, this.yGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Z || !this.tracking)
-            Gizmo.drawGizmo(this.xyz, mZ, AXIS.Z, this.zGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)
+            Gizmo.drawGizmo(this.xyz, mZ, AXIS.Z, this.zGizmo.pickID)
+        gpu.enable(gpu.CULL_FACE)
     }
 
-    static drawGizmo(mesh, transformMatrix, axis, id, translation, selectedAxis) {
+    static drawGizmo(mesh, transformMatrix, axis, uID) {
         GizmoSystem.gizmoShader.bindForUse({
             viewMatrix: CameraAPI.viewMatrix,
             transformMatrix,
             projectionMatrix: CameraAPI.projectionMatrix,
             camPos: CameraAPI.position,
-            translation,
+            translation: GizmoSystem.translation,
             axis,
-            selectedAxis,
-            uID: id,
+            selectedAxis: GizmoSystem.clickedAxis,
+            uID,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
         mesh.draw()

@@ -64,15 +64,26 @@ export default class Translation extends Gizmo {
                     this.distanceZ = 0
                 }
                 break
-            case AXIS.SCREEN_SPACE:
+            case AXIS.XY:
+            case AXIS.XZ:
+            case AXIS.ZY:
+            case AXIS.SCREEN_SPACE: {
                 const position = ScreenSpaceGizmo.onMouseMove(event)
-                for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
-                    const target =  GizmoSystem.selectedEntities[i]
+                if(GizmoSystem.clickedAxis === AXIS.XZ)
+                    position[1] = 0
+                if(GizmoSystem.clickedAxis === AXIS.XY)
+                    position[2] = 0
+                if(GizmoSystem.clickedAxis === AXIS.ZY)
+                    position[0] = 0
+                for (let i = 0; i < GizmoSystem.selectedEntities.length; i++) {
+                    const target = GizmoSystem.selectedEntities[i]
                     const comp = target.components[COMPONENTS.TRANSFORM]
+
                     vec3.add(comp.translation, comp.translation, vec3.sub([], position, comp.translation))
                     comp.changed = true
                 }
                 break
+            }
             default:
                 break
         }

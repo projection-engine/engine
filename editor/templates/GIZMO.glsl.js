@@ -1,5 +1,27 @@
-export const vertex = `#version 300 es
-#define SIZE .15
+import AXIS from "../libs/gizmo/AXIS";
+
+const SIZE_DEFINITION = `#define SIZE .15`
+const SCALE_METHOD = `
+vec3 t = translation - camPos;
+float len = length(camPos - translation) * SIZE;
+mat4 tt = transformMatrix;
+mat4 sc;
+for ( int x = 0; x < 4; x++ )
+    for ( int y = 0; y < 4; y++ )
+        if ( x == y && x <= 2)
+            sc[x][y] = cameraIsOrthographic ? 1.75 : len;
+        else if ( x == y )
+            sc[x][y] = 1.;
+        else
+            sc[x][y] = 0.;
+if(!cameraIsOrthographic){
+    tt[3][0]  += t.x;
+    tt[3][1]  += t.y;
+    tt[3][2]  += t.z;
+}
+`
+export const sameSizeVertex = `#version 300 es
+${SIZE_DEFINITION}
 layout (location = 1) in vec3 position;
 
 uniform mat4 viewMatrix;
@@ -8,27 +30,27 @@ uniform mat4 projectionMatrix;
 uniform vec3 camPos;
 uniform vec3 translation;
 uniform bool cameraIsOrthographic;
-
+ 
 void main(){
-    vec3 t = translation - camPos;
+    ${SCALE_METHOD}        
+    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
+}
+`
+export const vertex = `#version 300 es
+${SIZE_DEFINITION}
+layout (location = 1) in vec3 position; 
 
-		float len = length(camPos - translation) * SIZE;
-		mat4 tt = transformMatrix;
-		mat4 sc;
-		for ( int x = 0; x < 4; x++ )
-			for ( int y = 0; y < 4; y++ )
-				if ( x == y && x <= 2)
-					sc[x][y] = cameraIsOrthographic ? 1.75 : len;
-				else if ( x == y )
-					sc[x][y] = 1.;
-				else
-					sc[x][y] = 0.;
-		if(!cameraIsOrthographic){
-			tt[3][0]  += t.x;
-			tt[3][1]  += t.y;
-			tt[3][2]  += t.z;
-		}
-		gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 camPos;
+uniform vec3 translation;
+uniform bool cameraIsOrthographic;
+  
+
+void main(){ 
+    ${SCALE_METHOD}  
+    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
 }
 `
 
@@ -38,22 +60,31 @@ precision highp float;
 in vec4 vPosition;
 uniform int axis;
 uniform int selectedAxis;
-out vec4 fragColor;
- 
+out vec4 fragColor; 
 
 void main(){
     vec3 color = vec3(1.);
     vec3 loc = vec3(0.0, 1.0, 0.0);
     switch (axis) {
-        case 2:
+        case ${AXIS.X}:
             color = vec3(1., 0., 0.);
             break;
-        case 3:
+        case ${AXIS.Y}:
             color = vec3(0., 1., 0.);
             break;
-        case 4:
+        case ${AXIS.Z}:
             color = vec3(0., 0., 1.);
             break;
+        case ${AXIS.XZ}:
+                    color = vec3(0., 0., 1.);
+            
+        break;
+        case ${AXIS.XY}:
+            color = vec3(1., 0., 0.);
+        break;
+        case ${AXIS.ZY}:
+color = vec3(0., 1., 0.);
+        break;
         default:
             break;
     }
@@ -61,12 +92,11 @@ void main(){
     if(selectedAxis == axis)
         color = vec3(1., 1., 0.);
     
-    fragColor = vec4(color, 1.);
+    fragColor = vec4(color, axis > ${AXIS.Z} ? .75 : 1.);
 }
 `
 export const vertexRot = `#version 300 es
-
-#define SIZE .15
+${SIZE_DEFINITION}
 layout (location = 1) in vec3 position;
 layout (location = 3) in vec2 uvs;
 
@@ -208,3 +238,14 @@ void main(){
 }
 `
 
+export const pickFragment = `#version 300 es
+precision highp float;
+
+uniform vec3 uID;
+
+out vec4 fragColor;
+
+void main() {
+    fragColor = vec4(uID, 1.);
+}
+`

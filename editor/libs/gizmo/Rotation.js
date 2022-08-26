@@ -15,6 +15,8 @@ import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import EditorRenderer from "../../EditorRenderer";
+import MeshInstance from "../../../production/libs/instances/MeshInstance";
+import ROTATION_GIZMO from "../../data/ROTATION_GIZMO.json";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",
@@ -51,7 +53,11 @@ export default class Rotation {
             Object.assign(this.renderTarget.style, CSS)
             document.body.appendChild(this.renderTarget)
         }
-
+        this.xyz = new MeshInstance({
+            vertices: ROTATION_GIZMO.vertices,
+            indices: ROTATION_GIZMO.indices,
+            uvs: ROTATION_GIZMO.uvs
+        })
         this.gizmoShader = new ShaderInstance(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
         this.xGizmo = mapEntity("x", "ROTATION")
         this.yGizmo = mapEntity("y", "ROTATION")
@@ -61,6 +67,7 @@ export default class Rotation {
 
     onMouseDown(event) {
 
+        GizmoSystem.wasOnGizmo = true
         const w = gpu.canvas.width, h = gpu.canvas.height
         const x = event.clientX
         const y = event.clientY
@@ -70,7 +77,7 @@ export default class Rotation {
         this.currentCoord.clientY = y
         this.#testClick()
 
-        if(GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
+        if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
             ScreenSpaceGizmo.onMouseDown(event)
 
     }
@@ -79,12 +86,16 @@ export default class Rotation {
         if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
             ScreenSpaceGizmo.onMouseUp()
 
-        RendererStoreController.saveEntity(
-            GizmoSystem.mainEntity.id,
-            COMPONENTS.TRANSFORM,
-            "rotationQuat",
-            GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM].rotationQuat
-        )
+        if (GizmoSystem.totalMoved > 0) {
+            GizmoSystem.totalMoved = 0
+            RendererStoreController.saveEntity(
+                GizmoSystem.mainEntity.id,
+                COMPONENTS.TRANSFORM,
+                "rotationQuat",
+                GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM].rotationQuat
+            )
+
+        }
         document.exitPointerLock()
 
         this.started = false
@@ -116,6 +127,7 @@ export default class Rotation {
         switch (GizmoSystem.clickedAxis) {
             case AXIS.X:
                 this.distanceX += Math.abs(event.movementX * 0.05)
+
                 if (Math.abs(this.distanceX) >= this.gridSize) {
                     this.rotateElement([Math.sign(event.movementX) * this.gridSize * toRad, 0, 0])
                     this.distanceX = 0
@@ -143,7 +155,7 @@ export default class Rotation {
                 const position = ScreenSpaceGizmo.onMouseMove(event)
                 this.rotateElement(vec3.scale([], position, toRad), true)
                 const getRot = (r) => `${(r * toDeg).toFixed(1)} θ; `
-                this.renderTarget.innerText = getRot(this.currentRotation[0]) +getRot(this.currentRotation[1])+ getRot(this.currentRotation[2])
+                this.renderTarget.innerText = getRot(this.currentRotation[0]) + getRot(this.currentRotation[1]) + getRot(this.currentRotation[2])
                 break
             default:
                 break
@@ -151,8 +163,9 @@ export default class Rotation {
     }
 
     rotateElement(vec, screenSpace) {
+        GizmoSystem.totalMoved += vec[0] + vec[1] + vec[2]
         const quatA = quat.create()
-        if(screenSpace)
+        if (screenSpace)
             this.currentRotation = vec
         else
             vec3.add(this.currentRotation, this.currentRotation, vec)
@@ -166,7 +179,7 @@ export default class Rotation {
         const SIZE = GizmoSystem.selectedEntities.length
         for (let i = 0; i < SIZE; i++) {
             const target = GizmoSystem.selectedEntities[i].components[COMPONENTS.TRANSFORM]
-            if(screenSpace) {
+            if (screenSpace) {
                 target.rotationQuat = quatA
                 continue
             }
@@ -190,7 +203,7 @@ export default class Rotation {
         const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        const FBO = GizmoSystem.drawToDepthSampler(EditorRenderer.planeMesh, [mX, mY, mZ])
+        const FBO = GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
         const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
         const pickID = Math.round(255 * dd[0])
         GizmoSystem.clickedAxis = pickID
@@ -198,6 +211,7 @@ export default class Rotation {
         if (pickID === 0)
             this.onMouseUp(true)
         else if (pickID > 0) {
+            GizmoSystem.wasOnGizmo = true
             this.tracking = true
 
             this.renderTarget.style.left = this.currentCoord.clientX + "px"
@@ -265,6 +279,6 @@ export default class Rotation {
             circleSampler: this.texture.texture,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
-        EditorRenderer.planeMesh.draw()
+        this.xyz.draw()
     }
 }

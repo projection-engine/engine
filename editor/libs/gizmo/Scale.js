@@ -61,15 +61,27 @@ export default class Scale extends Gizmo {
                     this.distanceZ = 0
                 }
                 break
-            case AXIS.SCREEN_SPACE:
+            case AXIS.XY:
+            case AXIS.XZ:
+            case AXIS.ZY:
+            case AXIS.SCREEN_SPACE: {
                 const position = ScreenSpaceGizmo.onMouseMove(event)
-                for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
-                    const target =  GizmoSystem.selectedEntities[i]
+                for (let i = 0; i < GizmoSystem.selectedEntities.length; i++) {
+                    const target = GizmoSystem.selectedEntities[i]
                     const comp = target.components[COMPONENTS.TRANSFORM]
+
+                    if(GizmoSystem.clickedAxis === AXIS.XZ)
+                        position[1] = comp.scaling[1]
+                    if(GizmoSystem.clickedAxis === AXIS.XY)
+                        position[2] = comp.scaling[2]
+                    if(GizmoSystem.clickedAxis === AXIS.ZY)
+                        position[0] = comp.scaling[0]
+
                     vec3.add(comp.scaling, comp.scaling, vec3.sub([], position, comp.scaling))
                     comp.changed = true
                 }
                 break
+            }
             default:
                 break
         }
