@@ -30,14 +30,14 @@ export default class Entity {
     }
     clone(){
         let clone = new Entity()
-        clone.name = "_" + this.name
+        clone.name = this.name
         let newComponents = {}
         Object.keys(this.components).forEach(c => {
             if (c === COMPONENTS.TRANSFORM)
                 newComponents[COMPONENTS.TRANSFORM] = this.components[COMPONENTS.TRANSFORM].clone()
             else {
                 const cClone = cloneClass(this.components[c])
-                cClone.id = uuidv4()
+                cClone.id = v4()
                 newComponents[c] = cClone
             }
         })

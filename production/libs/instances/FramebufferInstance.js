@@ -1,8 +1,9 @@
 import {createTexture} from "../../utils/utils"
 import QuadInstance from "./QuadInstance"
+import GPU from "../../GPU";
 
 export default class FramebufferInstance extends QuadInstance {
-    static lastBoundBuffer
+
     FBO
     RBO
     depthSampler
@@ -39,7 +40,7 @@ export default class FramebufferInstance extends QuadInstance {
 
     stopMapping(clear = true) {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
-        FramebufferInstance.lastBoundBuffer = undefined
+        GPU.activeFramebuffer = undefined
         if (clear)
             gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
 
@@ -130,9 +131,9 @@ export default class FramebufferInstance extends QuadInstance {
 
 
     use() {
-        if (FramebufferInstance.lastBoundBuffer !== this.FBO) {
+        if (GPU.activeFramebuffer !== this.FBO) {
             gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
-            FramebufferInstance.lastBoundBuffer = this.FBO
+            GPU.activeFramebuffer = this.FBO
         }
         return this
     }

@@ -17,7 +17,6 @@ export default class Wrapper {
     }
 
     execute(isDuringFrameComposition, isDuringBinging) {
-        const meshes = RendererController.data.meshes
         const {
             selected,
             transformationType

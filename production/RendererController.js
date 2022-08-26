@@ -14,13 +14,11 @@ export default class RendererController {
 
     static data = {}
     static params = {}
-
     static queryMap = new Map()
     static then = 0
-    static cubeBuffer
-    static BRDF
     static frameID
     static fallbackMaterial
+
 
 
     constructor(resolution) {

@@ -2,9 +2,7 @@ import EditorRenderer from "../../EditorRenderer";
 import Gizmo from "./libs/Gizmo";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
-import Transformation from "../../../production/services/Transformation";
 import Conversion from "../../../production/services/Conversion";
-import COMPONENTS from "../../../production/data/COMPONENTS";
 import {vec3} from "gl-matrix";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 

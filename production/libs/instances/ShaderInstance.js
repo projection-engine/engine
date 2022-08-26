@@ -1,6 +1,7 @@
 import Shadows from "../../data/shaders/templates/SHADOWS"
 import * as PROBES from "../../data/shaders/templates/PROBES"
 import {PBR} from "../../data/shaders/templates/PBR"
+import GPU from "../../GPU";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -56,7 +57,6 @@ function applyMethods(shaderCode) {
 }
 
 export default class ShaderInstance {
-    static programInUse
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     structRegex = (type) => {
@@ -203,9 +203,9 @@ export default class ShaderInstance {
     }
 
     bindForUse(data) {
-        if (ShaderInstance.programInUse !== this.program)
+        if (GPU.activeShader !== this.program)
             gpu.useProgram(this.program)
-        ShaderInstance.programInUse = this.program
+        GPU.activeShader = this.program
         let currentSamplerIndex = 0
 
         for (let v = 0; v < this.length; v++) {

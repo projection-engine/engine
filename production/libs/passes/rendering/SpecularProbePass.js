@@ -4,6 +4,7 @@ import COMPONENTS from "../../../data/COMPONENTS"
 import CubeMapInstance from "../../instances/CubeMapInstance"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import RendererController from "../../../RendererController";
+import GPU from "../../../GPU";
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
@@ -58,7 +59,7 @@ export default class SpecularProbePass {
                     if (!specularProbes[i].active)
                         continue
                     const current = specularProbes[i].components[COMPONENTS.PROBE]
-                    this.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, RendererController.cubeBuffer, current.multiplier)
+                    this.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, GPU.cubeBuffer, current.multiplier)
                 }
                 this.step = STEPS_CUBE_MAP.CALCULATE
                 break

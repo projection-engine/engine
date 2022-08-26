@@ -4,6 +4,7 @@ import {mat4} from "gl-matrix"
 import RendererController from "../../production/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
 import MeshInstance from "../../production/libs/instances/MeshInstance";
+import GPU from "../../production/GPU";
 
 
 export default class BackgroundSystem {
@@ -19,7 +20,7 @@ export default class BackgroundSystem {
             MeshInstance.finishIfUsed()
 
             gpu.depthMask(false)
-            RendererController.cubeBuffer.enable()
+            GPU.cubeBuffer.enable()
             this.shader.bindForUse({
                 projectionMatrix: this.projection,
                 viewMatrix: CameraAPI.viewMatrix,
@@ -28,7 +29,7 @@ export default class BackgroundSystem {
             })
 
             gpu.drawArrays(gpu.TRIANGLES, 0, 36)
-            RendererController.cubeBuffer.disable()
+            GPU.cubeBuffer.disable()
 
             gpu.depthMask(true)
         }

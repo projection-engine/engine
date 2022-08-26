@@ -4,6 +4,7 @@ import DATA_TYPES from "../../data/DATA_TYPES"
 import {v4} from "uuid"
 import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS"
 import MATERIAL_RENDERING_TYPES from "../../data/MATERIAL_RENDERING_TYPES";
+import GPU from "../../GPU";
 
 export default class MaterialInstance {
     ready = false
@@ -71,7 +72,7 @@ export default class MaterialInstance {
                     switch (k.type) {
                         case DATA_TYPES.COLOR:
                         case DATA_TYPES.TEXTURE: {
-                            const img = k.type === DATA_TYPES.TEXTURE ? k.data : (await window.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {
+                            const img = k.type === DATA_TYPES.TEXTURE ? k.data : (await GPU.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {
                                 color: k.data,
                                 resolution: 16
                             }))

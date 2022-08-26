@@ -4,6 +4,7 @@ import FramebufferInstance from "../../instances/FramebufferInstance"
 import IMAGE_WORKER_ACTIONS from "../../../data/IMAGE_WORKER_ACTIONS"
 import LoopAPI from "../../apis/LoopAPI";
 import RendererController from "../../../RendererController";
+import GPU from "../../../GPU";
 
 let depth
 export default class AmbientOcclusionPass {
@@ -32,10 +33,10 @@ export default class AmbientOcclusionPass {
 
         this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
         this.blurShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragmentBlur)
-        
-        
-        
-        window.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, resolution)
+
+
+
+        GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, resolution)
             .then(({kernels, noise}) => {
                 this.kernels = kernels
                 this.noiseTexture = gpu.createTexture()

@@ -4,15 +4,12 @@ import * as cameraShaderCode from "../templates/GIZMO.glsl"
 import * as iconShaderCode from "../templates/ICON.glsl"
 import ShaderInstance from "../../production/libs/instances/ShaderInstance"
 import COMPONENTS from "../../production/data/COMPONENTS"
-import VBOInstance from "../../production/libs/instances/VBOInstance"
 import pointLightIcon from "../../../../data/icons/point_light.png"
 import directionalLightIcon from "../../../../data/icons/directional_light.png"
 import probeIcon from "../../../../data/icons/probe.png"
-import LoopAPI from "../../production/libs/apis/LoopAPI";
 import RendererController from "../../production/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
 import EditorRenderer from "../EditorRenderer";
-import MeshInstance from "../../production/libs/instances/MeshInstance";
 import QuadInstance from "../../production/libs/instances/QuadInstance";
 import Transformations from "../../production/libs/passes/misc/Transformations";
 
@@ -115,7 +112,7 @@ export default class IconsSystem {
 
     #drawCameras(cameras, selected) {
         if (cameras.length > 0) {
-            EditorRenderer.cameraMesh.use()
+
             for (let i = 0; i < cameras.length; i++) {
                 this.cameraShader.bindForUse({
                     viewMatrix: CameraAPI.viewMatrix,
@@ -126,7 +123,6 @@ export default class IconsSystem {
                 })
                 EditorRenderer.cameraMesh.draw()
             }
-            EditorRenderer.cameraMesh.finish()
         }
 
     }

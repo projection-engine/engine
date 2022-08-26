@@ -1,6 +1,7 @@
 import {createVBO} from "../../utils/utils"
 import VBOInstance from "./VBOInstance"
 import {v4 as uuidv4} from "uuid"
+import GPU from "../../GPU";
 
 export default class MeshInstance {
     static lastUsedMesh
@@ -55,14 +56,14 @@ export default class MeshInstance {
 
     }
 
-    static finishIfUsed(){
-        const lastUsed = MeshInstance.lastUsedMesh
-        if(lastUsed)
+    static finishIfUsed() {
+        const lastUsed = GPU.activeMesh
+        if (lastUsed != null)
             lastUsed.finish()
     }
 
     use() {
-        const last = MeshInstance.lastUsedMesh
+        const last = GPU.activeMesh
         if (last === this)
             return
         else if (last != null)
@@ -94,7 +95,7 @@ export default class MeshInstance {
 
         gpu.bindVertexArray(null)
 
-        MeshInstance.lastUsedMesh = undefined
+        GPU.activeMesh = undefined
     }
 
     delete() {
@@ -117,9 +118,12 @@ export default class MeshInstance {
     }
 
     draw() {
+        this.use()
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
-    drawInstanced(quantity){
+
+    drawInstanced(quantity) {
+        this.use()
         gpu.drawElementsInstanced(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0, quantity)
     }
 }

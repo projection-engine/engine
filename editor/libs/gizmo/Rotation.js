@@ -243,7 +243,6 @@ export default class Rotation {
         const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        EditorRenderer.planeMesh.use()
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             this.#draw(mX, AXIS.X, this.xGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Y || !this.tracking)

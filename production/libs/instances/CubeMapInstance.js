@@ -2,6 +2,7 @@ import {mat4, vec3} from "gl-matrix"
 import RendererController from "../../RendererController";
 import LoopAPI from "../apis/LoopAPI";
 import MeshInstance from "./MeshInstance";
+import GPU from "../../GPU";
 
 
 export default class CubeMapInstance {
@@ -45,7 +46,7 @@ export default class CubeMapInstance {
                     multiplier
                 })
                 gpu.drawArrays(gpu.TRIANGLES, 0, 36)
-            }, RendererController.cubeBuffer, undefined, undefined, true)
+            }, GPU.cubeBuffer, undefined, undefined, true)
         }
     }
 

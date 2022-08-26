@@ -151,7 +151,6 @@ export default class Gizmo {
         const mY = Gizmo.translateMatrix(this.yGizmo.components[COMPONENTS.TRANSFORM])
         const mZ = Gizmo.translateMatrix(this.zGizmo.components[COMPONENTS.TRANSFORM])
 
-        this.xyz.use()
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             Gizmo.drawGizmo(this.xyz, mX, AXIS.X, this.xGizmo.pickID, GizmoSystem.translation, GizmoSystem.clickedAxis)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Y || !this.tracking)

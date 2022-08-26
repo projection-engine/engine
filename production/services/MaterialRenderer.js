@@ -1,11 +1,11 @@
 import LoopAPI from "../libs/apis/LoopAPI";
 import RendererController from "../RendererController";
 import COMPONENTS from "../data/COMPONENTS";
+import GPU from "../GPU";
 
 
 export default class MaterialRenderer {
     static draw(mesh, material) {
-        mesh.use()
         if (material.settings.depthTest === false)
             gpu.disable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
@@ -70,7 +70,7 @@ export default class MaterialRenderer {
                 viewMatrix,
                 normalMatrix,
                 sceneColor,
-                brdfSampler: RendererController.BRDF,
+                brdfSampler: GPU.BRDF,
                 elapsedTime: elapsed,
                 cameraVec: camPosition,
                 directionalLightsData,
@@ -82,10 +82,8 @@ export default class MaterialRenderer {
             },
             useCubeMapShader
         )
-        if (directDrawing) {
-            mesh.use()
+        if (directDrawing)
             mesh.draw()
-        }
         else
             MaterialRenderer.draw(mesh, material)
     }

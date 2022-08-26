@@ -195,7 +195,6 @@ export default class ShadowMapPass {
     }
 
     static drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, lightColor, shader, lightPosition, shadowClipNearFar) {
-        mesh.use()
         shader.bindForUse({
             shadowClipNearFar,
             viewMatrix,

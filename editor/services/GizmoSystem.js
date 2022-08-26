@@ -7,8 +7,6 @@ import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 import getPickerId from "../../production/utils/get-picker-id"
 import * as shaderCode from "../../production/data/shaders/PICK.glsl"
 import LoopAPI from "../../production/libs/apis/LoopAPI";
-import MeshInstance from "../../production/libs/instances/MeshInstance";
-import PLANE from "../data/PLANE.json";
 import Transformations from "../../production/libs/passes/misc/Transformations";
 import getEntityTranslation from "../libs/gizmo/utils/get-entity-translation";
 import EditorRenderer from "../EditorRenderer";
@@ -50,7 +48,7 @@ export default class GizmoSystem {
         gpu.disable(gpu.CULL_FACE)
 
         depthSystem.frameBuffer.startMapping()
-        mesh.use()
+
         for (let i = 0; i < transforms.length; i++) {
             GizmoSystem.toBufferShader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
@@ -64,7 +62,6 @@ export default class GizmoSystem {
             mesh.draw()
         }
 
-        EditorRenderer.cubeMesh.use()
         GizmoSystem.toBufferShader.bindForUse({
             viewMatrix: CameraAPI.viewMatrix,
             transformMatrix: GizmoSystem.transformationMatrix,

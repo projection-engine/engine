@@ -41,7 +41,7 @@ export default class SelectedSystem {
             if (!mesh)
                 continue
             const t = current.components[COMPONENTS.TRANSFORM]
-            mesh.use()
+
             this.shader.bindForUse({
                 projectionMatrix: CameraAPI.projectionMatrix,
                 transformMatrix: t.transformationMatrix,
