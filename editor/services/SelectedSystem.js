@@ -4,6 +4,7 @@ import COMPONENTS from "../../production/data/COMPONENTS"
 import FramebufferInstance from "../../production/libs/instances/FramebufferInstance"
 import RendererController from "../../production/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
+import GPU from "../../production/GPU";
 
 
 export default class SelectedSystem {
@@ -37,14 +38,12 @@ export default class SelectedSystem {
             const current = RendererController.entitiesMap.get(selected[m])
             if (!current || !current.active)
                 continue
-            const mesh = RendererController.meshes.get(current.components[COMPONENTS.MESH]?.meshID)
+            const mesh = GPU.meshes.get(current.components[COMPONENTS.MESH]?.meshID)
             if (!mesh)
                 continue
-            const t = current.components[COMPONENTS.TRANSFORM]
-
             this.shader.bindForUse({
                 projectionMatrix: CameraAPI.projectionMatrix,
-                transformMatrix: t.transformationMatrix,
+                transformMatrix: current.transformationMatrix,
                 viewMatrix: CameraAPI.viewMatrix
             })
             mesh.draw()

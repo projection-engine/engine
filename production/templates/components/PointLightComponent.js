@@ -2,9 +2,7 @@ import Component from "../basic/Component"
 import POINT_LIGHT_PROPS from "../../data/component-props/POINT_LIGHT_PROPS";
 
 export default class PointLightComponent extends Component {
-    get isNative(){
-        return true
-    }
+
     _props = POINT_LIGHT_PROPS
     name = "POINT_LIGHT"
     _color = [255, 255, 255]

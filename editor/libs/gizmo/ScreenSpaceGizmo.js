@@ -6,13 +6,15 @@ import Conversion from "../../../production/services/Conversion";
 import {vec3} from "gl-matrix";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import getPickerId from "../../../production/utils/get-picker-id";
+import STATIC_MESHES from "../../../static/STATIC_MESHES";
+import GPU from "../../../production/GPU";
 
 
 const PICK_ID_SS_GIZMO = getPickerId(1)
 export default class ScreenSpaceGizmo {
     static cameraDistance
-    static mouseX
-    static mouseY
+    static mouseX = 0
+    static mouseY= 0
 
     static onMouseMove(event, damping = 1) {
         if (ScreenSpaceGizmo.cameraDistance == null)
@@ -27,20 +29,20 @@ export default class ScreenSpaceGizmo {
     }
 
     static onMouseDown(event) {
-        if (ScreenSpaceGizmo.mouseX !== undefined)
-            return
         const bBox = gpu.canvas.getBoundingClientRect()
-        ScreenSpaceGizmo.mouseX = event.offsetX - bBox.width / 2
-        ScreenSpaceGizmo.mouseY = event.offsetY - bBox.height / 2
+        ScreenSpaceGizmo.mouseX = event.clientX - bBox.width / 2
+        ScreenSpaceGizmo.mouseY = event.clientY - bBox.height / 2
     }
 
     static onMouseUp() {
         ScreenSpaceGizmo.cameraDistance = undefined
+        ScreenSpaceGizmo.mouseX = 0
+        ScreenSpaceGizmo.mouseY = 0
     }
 
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix)
             return
-        Gizmo.drawGizmo(EditorRenderer.cubeMesh, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
+        Gizmo.drawGizmo(GPU.meshes.get(STATIC_MESHES.CUBE), GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
     }
 }

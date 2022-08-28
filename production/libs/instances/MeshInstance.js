@@ -98,17 +98,6 @@ export default class MeshInstance {
         GPU.activeMesh = undefined
     }
 
-    delete() {
-        gpu.deleteVertexArray(this.VAO)
-        gpu.deleteBuffer(this.indexVBO)
-
-        if (this.uvVBO)
-            this.uvVBO.delete()
-        if (this.normalVBO)
-            this.normalVBO.delete()
-        if (this.tangentVBO)
-            this.tangentVBO.delete()
-    }
 
     useForDepth() {
         gpu.bindVertexArray(this.VAO)

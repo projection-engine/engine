@@ -13,7 +13,7 @@ export default class Transformation {
     static extractTransformations(mat) {
         return {
             translation: mat4.getTranslation([], mat),
-            rotationQuat: quat.normalize([], mat4.getRotation([], mat)),
+            rotationQuaternion: quat.normalize([], mat4.getRotation([], mat)),
             scaling: mat4.getScaling([], mat)
         }
     }

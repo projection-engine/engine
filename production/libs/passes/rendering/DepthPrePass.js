@@ -4,6 +4,7 @@ import COMPONENTS from "../../../data/COMPONENTS"
 import * as shaderCode from "../../../data/shaders/DEFERRED.glsl"
 import RendererController from "../../../RendererController";
 import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../../GPU";
 
 const vertex = `#version 300 es
 
@@ -86,13 +87,13 @@ export default class DepthPrePass {
             const entity = meshes[i]
             if(!entity.active)
                 continue
-            const mesh = RendererController.meshes.get(entity.components[COMPONENTS.MESH].meshID)
+            const mesh = GPU.meshes.get(entity.components[COMPONENTS.MESH].meshID)
             if(!mesh)
                 continue
             mesh.useForDepth()
             this.shader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
-                transformMatrix: entity.components[COMPONENTS.TRANSFORM].transformationMatrix,
+                transformMatrix: entity.transformationMatrix,
                 projectionMatrix: CameraAPI.projectionMatrix,
                 meshID: entity.pickID
             })

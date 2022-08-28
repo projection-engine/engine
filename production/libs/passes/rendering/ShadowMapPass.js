@@ -6,6 +6,7 @@ import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../data/COMPONENTS"
 import BundlerAPI from "../../apis/BundlerAPI";
 import RendererController from "../../../RendererController";
+import GPU from "../../../GPU";
 
 export const VIEWS = {
     target: [
@@ -105,7 +106,7 @@ export default class ShadowMapPass {
                 continue
             const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
             if (current.changed && current.shadowMap) {
-                lights3D.push({...current, translation: pointLights[i].components[COMPONENTS.TRANSFORM].position})
+                lights3D.push({...current, translation: pointLights[i].translation})
                 current.changed = false
                 this.changed = true
             }
@@ -187,10 +188,10 @@ export default class ShadowMapPass {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
-            const mesh = RendererController.meshes.get(current.components[COMPONENTS.MESH].meshID)
+            const mesh = GPU.meshes.get(current.components[COMPONENTS.MESH].meshID)
             if (!mesh)
                 continue
-            ShadowMapPass.drawMesh(mesh, view, projection, current.components[COMPONENTS.TRANSFORM].transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
+            ShadowMapPass.drawMesh(mesh, view, projection, current.transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
         }
     }
 

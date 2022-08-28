@@ -1,12 +1,10 @@
 import Entity from "../../../../production/templates/basic/Entity"
 import COMPONENTS from "../../../../production/data/COMPONENTS"
-import TransformComponent from "../../../../production/templates/components/TransformComponent"
 import Transformation from "../../../../production/services/Transformation"
 import getPickerId from "../../../../production/utils/get-picker-id";
 
 export default function mapEntity(axis, type) {
     const e = new Entity(undefined)
-    e.components[COMPONENTS.TRANSFORM] = new TransformComponent()
     let s, t = [0, 0, 0], r, index
     switch (axis) {
         case "x":
@@ -88,10 +86,10 @@ export default function mapEntity(axis, type) {
     }
 
     e.pickID = getPickerId(index)
-    e.components[COMPONENTS.TRANSFORM].translation = t
-    e.components[COMPONENTS.TRANSFORM].rotation = r
-    e.components[COMPONENTS.TRANSFORM].scaling = s
-    e.components[COMPONENTS.TRANSFORM].transformationMatrix = Transformation.transform(t, e.components[COMPONENTS.TRANSFORM].rotationQuat, s)
+    e.translation = t
+    e.rotation = r
+    e.scaling = s
+    e.transformationMatrix = Transformation.transform(t, e.rotationQuaternion, s)
 
     return e
 }

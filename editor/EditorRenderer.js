@@ -9,12 +9,14 @@ import {STEPS_LIGHT_PROBE} from "../production/libs/passes/rendering/DiffuseProb
 import BundlerAPI from "../production/libs/apis/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
 import MeshInstance from "../production/libs/instances/MeshInstance"
-import sphere from "./data/SPHERE.json"
+import CUBE from "./data/SPHERE.json"
 import camera from "./data/CAMERA.json"
 import LoopAPI from "../production/libs/apis/LoopAPI";
 import CameraTracker from "./libs/CameraTracker";
 import RendererController from "../production/RendererController.js";
 import PLANE from "./data/PLANE.json";
+import GPU from "../production/GPU";
+import STATIC_MESHES from "../static/STATIC_MESHES";
 
 export default class EditorRenderer extends RendererController {
     gizmo
@@ -43,25 +45,6 @@ export default class EditorRenderer extends RendererController {
             id: "shading-models"
         })
 
-        EditorRenderer.planeMesh = new MeshInstance({
-            vertices: PLANE.vertices,
-            indices: PLANE.indices,
-            uvs: PLANE.uvs
-        })
-        EditorRenderer.sphereMesh = new MeshInstance({
-            ...sphere,
-            uvs: [],
-            tangents: [],
-        })
-        EditorRenderer.cameraMesh = new MeshInstance({
-            ...camera,
-            uvs: [],
-            tangents: [],
-        })
-        EditorRenderer.cubeMesh = new MeshInstance({
-            vertices: [-1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, 1, 1, -1],
-            indices: [0, 3, 9, 0, 9, 6, 8, 10, 21, 8, 21, 19, 20, 23, 17, 20, 17, 14, 13, 15, 4, 13, 4, 2, 7, 18, 12, 7, 12, 1, 22, 11, 5, 22, 5, 16]
-        })
     }
 
     generatePreview(material) {

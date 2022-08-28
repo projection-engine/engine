@@ -38,14 +38,13 @@ export default class DiffuseProbePass {
                     const current = diffuseProbes[i]
                     if (!current.active)
                         continue
-                    const transformation = diffuseProbes[i].components[COMPONENTS.TRANSFORM]
                     this.baseCubeMap.draw((yaw, pitch, projection, index) => {
-                            const target = vec3.add([], transformation.translation, VIEWS.target[index])
-                            const view = mat4.lookAt([], transformation.translation, target, VIEWS.up[index])
+                            const target = vec3.add([], current.translation, VIEWS.target[index])
+                            const view = mat4.lookAt([], current.translation, target, VIEWS.up[index])
                             MaterialRenderer.drawProbe(
                                 view,
                                 projection,
-                                transformation.translation
+                                current.translation
                             )
 
                         },
@@ -77,14 +76,14 @@ export default class DiffuseProbePass {
         meshes
     ) {
         const MAX_PROBES = 4
-        for (let meshIndex in meshes) {
+        for (let meshIndex  = 0; meshIndex < meshes.length; meshIndex++) {
             const intersecting = []
             const currentMesh = meshes[meshIndex]
-            const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
+            const mPosition = currentMesh.translation
             for (let probeIndex in probes) {
                 const current = probes[probeIndex]
                 const component = probes[probeIndex].components[COMPONENTS.PROBE]
-                const probePosition = current.components[COMPONENTS.TRANSFORM].translation
+                const probePosition = current.translation
                 const texture = this.diffuseProbes[current.id].irradianceTexture
 
                 if (intersecting.length < MAX_PROBES) {

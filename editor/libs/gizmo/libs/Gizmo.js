@@ -34,13 +34,13 @@ export default class Gizmo {
     }
 
     onMouseMove() {
-        if (!this.started && GizmoSystem.mainEntity?.components && GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM]) {
+        if (!this.started && GizmoSystem.mainEntity?.components) {
             this.started = true
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
-                COMPONENTS.TRANSFORM,
+                undefined,
                 this.key,
-                GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM][this.key]
+                GizmoSystem.mainEntity[this.key]
             )
         }
     }
@@ -72,9 +72,9 @@ export default class Gizmo {
             GizmoSystem.totalMoved = 0
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
-                COMPONENTS.TRANSFORM,
+                undefined,
                 this.key,
-                GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM][this.key]
+                GizmoSystem.mainEntity[this.key]
             )
 
         }
@@ -90,17 +90,13 @@ export default class Gizmo {
         this.renderTarget.style.display = "none"
     }
 
-    exit() {
-        this.tracking = false
-    }
 
     #testClick() {
-        if (!GizmoSystem.mainEntity || !GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM])
+        if(!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
             return
-
-        const mX = Gizmo.translateMatrix(this.xGizmo.components[COMPONENTS.TRANSFORM])
-        const mY = Gizmo.translateMatrix(this.yGizmo.components[COMPONENTS.TRANSFORM])
-        const mZ = Gizmo.translateMatrix(this.zGizmo.components[COMPONENTS.TRANSFORM])
+        const mX = Gizmo.translateMatrix(this.xGizmo)
+        const mY = Gizmo.translateMatrix(this.yGizmo)
+        const mZ = Gizmo.translateMatrix(this.zGizmo)
         const FBO = GizmoSystem.drawToDepthSampler(
             this.xyz,
             [mX, mY, mZ]
@@ -120,18 +116,18 @@ export default class Gizmo {
     }
 
 
-    static translateMatrix(comp) {
+    static translateMatrix(entity) {
         if (!GizmoSystem.translation)
             return
-        const matrix = comp.transformationMatrix.slice(0)
+        const matrix = entity.transformationMatrix.slice(0)
 
-        const translation = comp.translation,
-            rotationQuat = comp.rotationQuat,
-            scale = comp.scaling
+        const translation = entity.translation,
+            rotationQuaternion = entity.rotationQuaternion,
+            scale = entity.scaling
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE)
             mat4.fromRotationTranslationScaleOrigin(
                 matrix,
-                quat.multiply([], GizmoSystem.targetRotation, rotationQuat),
+                quat.multiply([], GizmoSystem.targetRotation, rotationQuaternion),
                 vec3.add([], GizmoSystem.translation, translation),
                 scale,
                 translation
@@ -141,19 +137,21 @@ export default class Gizmo {
             matrix[13] += GizmoSystem.translation[1]
             matrix[14] += GizmoSystem.translation[2]
         }
-
         return matrix
     }
 
     drawGizmo() {
+        if(GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
+            return
+
         gpu.disable(gpu.CULL_FACE)
         DualAxisGizmo.drawGizmo()
 
         if (this.updateTransformationRealtime)
             GizmoSystem.translation = getEntityTranslation(GizmoSystem.mainEntity)
-        const mX = Gizmo.translateMatrix(this.xGizmo.components[COMPONENTS.TRANSFORM])
-        const mY = Gizmo.translateMatrix(this.yGizmo.components[COMPONENTS.TRANSFORM])
-        const mZ = Gizmo.translateMatrix(this.zGizmo.components[COMPONENTS.TRANSFORM])
+        const mX = Gizmo.translateMatrix(this.xGizmo)
+        const mY = Gizmo.translateMatrix(this.yGizmo)
+        const mZ = Gizmo.translateMatrix(this.zGizmo)
 
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             Gizmo.drawGizmo(this.xyz, mX, AXIS.X, this.xGizmo.pickID)

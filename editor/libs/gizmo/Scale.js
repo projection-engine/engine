@@ -9,6 +9,8 @@ import mesh from "../../data/SCALE_GIZMO.json"
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
+import GPU from "../../../production/GPU";
+import STATIC_MESHES from "../../../static/STATIC_MESHES";
 
 const MOVEMENT_SCALE = .001
 
@@ -23,14 +25,10 @@ export default class Scale extends Gizmo {
 
     constructor() {
         super()
+        this.xyz = GizmoSystem.scaleGizmoMesh
         this.xGizmo = mapEntity("x", "SCALE")
         this.yGizmo = mapEntity("y", "SCALE")
         this.zGizmo = mapEntity("z", "SCALE")
-
-        this.xyz = new MeshInstance({
-            vertices: mesh.vertices,
-            indices: mesh.indices
-        })
     }
 
     onMouseMove(event) {
@@ -68,17 +66,17 @@ export default class Scale extends Gizmo {
                 const position = ScreenSpaceGizmo.onMouseMove(event)
                 for (let i = 0; i < GizmoSystem.selectedEntities.length; i++) {
                     const target = GizmoSystem.selectedEntities[i]
-                    const comp = target.components[COMPONENTS.TRANSFORM]
 
+                    const moved = vec3.sub([], position, target.scaling)
                     if(GizmoSystem.clickedAxis === AXIS.XZ)
-                        position[1] = comp.scaling[1]
+                        moved[1] = 0
                     if(GizmoSystem.clickedAxis === AXIS.XY)
-                        position[2] = comp.scaling[2]
+                        moved[2] = 0
                     if(GizmoSystem.clickedAxis === AXIS.ZY)
-                        position[0] = comp.scaling[0]
+                        moved[0] = 0
 
-                    vec3.add(comp.scaling, comp.scaling, vec3.sub([], position, comp.scaling))
-                    comp.changed = true
+                    vec3.add(target.scaling, target.scaling, moved)
+                    target.changed = true
                 }
                 break
             }
@@ -92,14 +90,11 @@ export default class Scale extends Gizmo {
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE ||  GizmoSystem.selectedEntities.length > 1)
             toApply = vec
         else
-            toApply = vec4.transformQuat([], vec, GizmoSystem.selectedEntities[0].components[COMPONENTS.TRANSFORM].rotationQuat)
+            toApply = vec4.transformQuat([], vec, GizmoSystem.selectedEntities[0].rotationQuaternion)
         for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
-            const comp =  GizmoSystem.selectedEntities[i].components[COMPONENTS.TRANSFORM]
-            comp.scaling = [
-                comp.scaling[0] - toApply[0],
-                comp.scaling[1] - toApply[1],
-                comp.scaling[2] - toApply[2]
-            ]
+            const entity =  GizmoSystem.selectedEntities[i]
+            vec3.sub(entity.scaling, entity.scaling, toApply)
+            entity.changed = true
         }
     }
 }

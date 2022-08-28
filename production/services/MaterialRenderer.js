@@ -103,7 +103,7 @@ export default class MaterialRenderer {
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = RendererController.meshes.get(meshComponent.meshID)
+            const mesh = GPU.meshes.get(meshComponent.meshID)
 
             if (mesh !== undefined) {
                 const currentMaterial = materials[meshComponent.materialID]
@@ -117,7 +117,7 @@ export default class MaterialRenderer {
                     camPosition: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,
-                    transformMatrix: current.components[COMPONENTS.TRANSFORM].transformationMatrix,
+                    transformMatrix: current.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,
                     materialComponent: meshComponent,
@@ -141,7 +141,7 @@ export default class MaterialRenderer {
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = RendererController.meshes.get(meshComponent.meshID)
+            const mesh = GPU.meshes.get(meshComponent.meshID)
             if (!mesh)
                 continue
             const mat = materials[meshComponent.materialID]

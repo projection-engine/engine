@@ -4,9 +4,7 @@ import COMPONENTS from "../../data/COMPONENTS"
 import DIRECTIONAL_LIGHT_PROPS from "../../data/component-props/DIRECTIONAL_LIGHT_PROPS";
 
 export default class DirectionalLightComponent extends Component {
-    get isNative(){
-        return true
-    }
+
     name = "DIRECTIONAL_LIGHT"
     _props = DIRECTIONAL_LIGHT_PROPS
     _color = [255, 255, 255]
@@ -27,8 +25,8 @@ export default class DirectionalLightComponent extends Component {
     constructor(id, entity) {
         super(id)
         if (!entity)
-            throw new Error("Transformation inspector needed")
-        this.transformationComponent = entity.components[COMPONENTS.TRANSFORM]
+            throw new Error("Entity needed")
+        this.entity = entity
     }
 
     get intensity() {
@@ -70,11 +68,11 @@ export default class DirectionalLightComponent extends Component {
 
 
     get direction() {
-        return this.transformationComponent.translation
+        return this.entity.translation
     }
 
     set direction(data) {
-        this.transformationComponent.translation = data
+        this.entity.translation = data
         this.update()
     }
 
@@ -90,7 +88,7 @@ export default class DirectionalLightComponent extends Component {
 
 
     update() {
-        mat4.lookAt(this.lightView, this.transformationComponent.translation, this.center, [0, 1, 0])
+        mat4.lookAt(this.lightView, this.entity.translation, this.center, [0, 1, 0])
         mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar)
 
         this.changed = true

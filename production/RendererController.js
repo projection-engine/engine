@@ -6,7 +6,6 @@ export default class RendererController {
 
     static entitiesMap = new Map()
 
-    static meshes = new Map()
     entities = []
     materials = []
 
@@ -18,8 +17,6 @@ export default class RendererController {
     static then = 0
     static frameID
     static fallbackMaterial
-
-
 
     constructor(resolution) {
         LoopAPI.initialize(resolution)

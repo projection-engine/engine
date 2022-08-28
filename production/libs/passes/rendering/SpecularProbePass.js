@@ -40,7 +40,7 @@ export default class SpecularProbePass {
                         this.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
                     else
                         this.specularProbes[current.id].resolution = component.resolution
-                    const translation = specularProbes[i].components[COMPONENTS.TRANSFORM].translation
+                    const translation = specularProbes[i].translation
                     this.specularProbes[current.id].draw((yaw, pitch, projection, index) => {
                             const target = vec3.add([], translation, VIEWS.target[index])
                             const view = mat4.lookAt([], translation, target, VIEWS.up[index])
@@ -74,12 +74,12 @@ export default class SpecularProbePass {
     }
 
     sort(meshes, specularProbes) {
-        for (let meshIndex in meshes) {
+        for (let meshIndex = 0; meshIndex < meshes.length; meshIndex++) {
             let intersecting
             const currentMesh = meshes[meshIndex]
             for (let index in specularProbes) {
-                const probePosition = specularProbes[index].components[COMPONENTS.TRANSFORM].translation
-                const mPosition = currentMesh.components[COMPONENTS.TRANSFORM].translation
+                const probePosition = specularProbes[index].translation
+                const mPosition = currentMesh.translation
                 const distance = vec3.len(vec3.subtract([], probePosition, mPosition))
                 const component = specularProbes[index].components[COMPONENTS.PROBE]
                 if (!intersecting || distance < intersecting.distance)

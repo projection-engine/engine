@@ -7,7 +7,7 @@ import DATA_TYPES from "../../production/data/DATA_TYPES"
 import TextureInstance from "../../production/libs/instances/TextureInstance"
 import PointLightComponent from "../../production/templates/components/PointLightComponent"
 
-import TransformComponent from "../../production/templates/components/TransformComponent"
+import Movable from "../../production/templates/basic/Movable"
 import Transformation from "../../production/services/Transformation"
 import ProbeComponent from "../../production/templates/components/ProbeComponent"
 import CameraComponent from "../../production/templates/components/CameraComponent"
@@ -80,18 +80,6 @@ const ENTITIES = {
     },
 
     [COMPONENTS.POINT_LIGHT]: async (entity, k) => new PointLightComponent(entity.components[k].id),
-    [COMPONENTS.TRANSFORM]: async (entity, k) => {
-        const component = new TransformComponent(entity.components[k].id, true)
-
-        try {
-            component.updateQuatOnEulerChange = false
-            component.rotation = Transformation.getEuler(entity.components[k]._rotationQuat)
-            component.updateQuatOnEulerChange = true
-        } catch (e) {
-            console.error(e)
-        }
-        return component
-    },
     [COMPONENTS.PROBE]: async (entity, k) => new ProbeComponent(entity.components[k].id),
     [COMPONENTS.CAMERA]: async (entity, k) => new CameraComponent(entity.components[k].id)
 
@@ -101,7 +89,7 @@ export default async function parseEntityObject(entity) {
     const parsedEntity = new Entity(entity.id, entity.name, entity.active)
     Object.keys(entity)
         .forEach(k => {
-            if (k !== "components" && k !== parent)
+            if (k !== "components" && k !== "parent" && k !== "matrix")
                 parsedEntity[k] = entity[k]
         })
 
@@ -115,18 +103,15 @@ export default async function parseEntityObject(entity) {
                 const keys = Object.keys(entity.components[k])
                 for (let i = 0; i < keys.length; i++) {
                     const oK = keys[i]
-
-                    if (k === COMPONENTS.TRANSFORM && oK === "_transformationMatrix")
-                        continue
                     if (!oK.includes("__") && !oK.includes("#")) component[oK] = entity.components[k][oK]
                 }
                 parsedEntity.components[k] = component
-                if (k === COMPONENTS.TRANSFORM || k === COMPONENTS.DIRECTIONAL_LIGHT)
+                if ( k === COMPONENTS.DIRECTIONAL_LIGHT)
                     component.changed = true
             }
         }
-
     }
+    parsedEntity.changed = true
     for (let i = 0; i < parsedEntity.scripts.length; i++)
         await componentConstructor(parsedEntity, parsedEntity.scripts[i].id, false)
     return parsedEntity

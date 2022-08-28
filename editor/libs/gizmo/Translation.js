@@ -4,10 +4,13 @@ import COMPONENTS from "../../../production/data/COMPONENTS"
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
 import Gizmo from "./libs/Gizmo"
 import mapEntity from "./utils/map-entity"
-import mesh from "../../data/TRANSLATION_GIZMO.json"
+import TRANSLATION_GIZMO from "../../data/TRANSLATION_GIZMO.json"
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "./AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
+import GPU from "../../../production/GPU";
+import STATIC_MESHES from "../../../static/STATIC_MESHES";
+import ROTATION_GIZMO from "../../data/ROTATION_GIZMO.json";
 
 const MOVEMENT_SCALE = .001
 export default class Translation extends Gizmo {
@@ -16,20 +19,13 @@ export default class Translation extends Gizmo {
     currentCoord = undefined
     gridSize = .01
     key = "translation"
+
     constructor() {
         super()
+        this.xyz = GizmoSystem.translationGizmoMesh
         this.xGizmo = mapEntity("x", "TRANSLATION")
         this.yGizmo = mapEntity("y", "TRANSLATION")
         this.zGizmo = mapEntity("z", "TRANSLATION")
-
-        this.xyz = new MeshInstance({
-            vertices: mesh.vertices,
-            indices: mesh.indices,
-            normals: mesh.normals,
-            uvs: [],
-            tangents: []
-        })
-
         this.updateTransformationRealtime = true
     }
 
@@ -69,18 +65,18 @@ export default class Translation extends Gizmo {
             case AXIS.ZY:
             case AXIS.SCREEN_SPACE: {
                 const position = ScreenSpaceGizmo.onMouseMove(event)
-                if(GizmoSystem.clickedAxis === AXIS.XZ)
-                    position[1] = 0
-                if(GizmoSystem.clickedAxis === AXIS.XY)
-                    position[2] = 0
-                if(GizmoSystem.clickedAxis === AXIS.ZY)
-                    position[0] = 0
                 for (let i = 0; i < GizmoSystem.selectedEntities.length; i++) {
                     const target = GizmoSystem.selectedEntities[i]
-                    const comp = target.components[COMPONENTS.TRANSFORM]
-
-                    vec3.add(comp.translation, comp.translation, vec3.sub([], position, comp.translation))
-                    comp.changed = true
+                    const translation = target.translation
+                    const moved = vec3.sub([], position, translation)
+                    if (GizmoSystem.clickedAxis === AXIS.ZY)
+                        moved[0] =0
+                    if (GizmoSystem.clickedAxis === AXIS.XZ)
+                        moved[1] = 0
+                    if (GizmoSystem.clickedAxis === AXIS.XY)
+                        moved[2] = 0
+                    vec3.add(target.translation, translation, moved)
+                    target.changed = true
                 }
                 break
             }
@@ -91,18 +87,16 @@ export default class Translation extends Gizmo {
     }
 
     transformElement(vec) {
-        let toApply, firstEntity =  GizmoSystem.mainEntity
-        if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || !firstEntity.components[COMPONENTS.TRANSFORM] ||  GizmoSystem.selectedEntities.length > 1)
+        let toApply, firstEntity = GizmoSystem.mainEntity
+        if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
             toApply = vec
         else
-            toApply = vec4.transformQuat([], vec, firstEntity.components[COMPONENTS.TRANSFORM].rotationQuat)
-
-        for (let i = 0; i <  GizmoSystem.selectedEntities.length; i++) {
-            const target =  GizmoSystem.selectedEntities[i]
-            const comp = target.components[COMPONENTS.TRANSFORM]
-            vec3.sub(comp.translation, comp.translation, toApply)
-            comp.changed = true
+            toApply = vec4.transformQuat([], vec, firstEntity.rotationQuaternion)
+        const entities = GizmoSystem.selectedEntities
+        for (let i = 0; i < entities.length; i++) {
+            const target = entities[i]
+            vec3.add(target.translation, target.translation, toApply)
+            target.changed = true
         }
     }
-
 }

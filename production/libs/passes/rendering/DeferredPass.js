@@ -46,14 +46,14 @@ export default class DeferredPass {
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isDeferredShaded)
                     return
-                const transformationComponent = current.components[COMPONENTS.TRANSFORM]
+
                 const ambient = MaterialRenderer.getEnvironment(current)
                 MaterialRenderer.drawMesh({
                     mesh,
                     camPosition: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,
                     projectionMatrix: CameraAPI.projectionMatrix,
-                    transformMatrix: transformationComponent.transformationMatrix,
+                    transformMatrix: current.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,
                     materialComponent: meshComponent,

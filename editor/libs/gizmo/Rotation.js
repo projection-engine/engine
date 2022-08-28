@@ -17,6 +17,8 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import EditorRenderer from "../../EditorRenderer";
 import MeshInstance from "../../../production/libs/instances/MeshInstance";
 import ROTATION_GIZMO from "../../data/ROTATION_GIZMO.json";
+import GPU from "../../../production/GPU";
+import STATIC_MESHES from "../../../static/STATIC_MESHES";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",
@@ -53,11 +55,7 @@ export default class Rotation {
             Object.assign(this.renderTarget.style, CSS)
             document.body.appendChild(this.renderTarget)
         }
-        this.xyz = new MeshInstance({
-            vertices: ROTATION_GIZMO.vertices,
-            indices: ROTATION_GIZMO.indices,
-            uvs: ROTATION_GIZMO.uvs
-        })
+
         this.gizmoShader = new ShaderInstance(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
         this.xGizmo = mapEntity("x", "ROTATION")
         this.yGizmo = mapEntity("y", "ROTATION")
@@ -67,7 +65,6 @@ export default class Rotation {
 
     onMouseDown(event) {
 
-        GizmoSystem.wasOnGizmo = true
         const w = gpu.canvas.width, h = gpu.canvas.height
         const x = event.clientX
         const y = event.clientY
@@ -75,10 +72,10 @@ export default class Rotation {
         this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
         this.currentCoord.clientX = x
         this.currentCoord.clientY = y
+
+        ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
 
-        if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
-            ScreenSpaceGizmo.onMouseDown(event)
 
     }
 
@@ -90,9 +87,9 @@ export default class Rotation {
             GizmoSystem.totalMoved = 0
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
-                COMPONENTS.TRANSFORM,
-                "rotationQuat",
-                GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM].rotationQuat
+                undefined,
+                "rotationQuaternion",
+                GizmoSystem.mainEntity.rotationQuaternion
             )
 
         }
@@ -109,18 +106,15 @@ export default class Rotation {
         this.renderTarget.style.display = "none"
     }
 
-    exit() {
-        this.tracking = false
-    }
 
     onMouseMove(event) {
         if (!this.started) {
             this.started = true
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
-                COMPONENTS.TRANSFORM,
-                "rotationQuat",
-                GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM].rotationQuat
+                undefined,
+                "rotationQuaternion",
+                GizmoSystem.mainEntity.rotationQuaternion
             )
         }
 
@@ -178,9 +172,9 @@ export default class Rotation {
 
         const SIZE = GizmoSystem.selectedEntities.length
         for (let i = 0; i < SIZE; i++) {
-            const target = GizmoSystem.selectedEntities[i].components[COMPONENTS.TRANSFORM]
+            const target = GizmoSystem.selectedEntities[i]
             if (screenSpace) {
-                target.rotationQuat = quatA
+                target.rotationQuaternion = quatA
                 continue
             }
             if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1) {
@@ -189,28 +183,28 @@ export default class Rotation {
                         translated = vec3.sub([], target.translation, target.pivotPoint)
                     target.translation = vec3.add([], vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
                 }
-                target.rotationQuat = quat.multiply([], quatA, target.rotationQuat)
+                target.rotationQuaternion = quat.multiply([], quatA, target.rotationQuaternion)
             } else
-                target.rotationQuat = quat.multiply([], target.rotationQuat, quatA)
+                target.rotationQuaternion = quat.multiply([], target.rotationQuaternion, quatA)
         }
     }
 
 
     #testClick() {
-        if (!GizmoSystem.mainEntity || !GizmoSystem.mainEntity.components[COMPONENTS.TRANSFORM])
+        if(!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedRotation)
             return
-        const mX = this.#rotateMatrix("x", this.xGizmo.components[COMPONENTS.TRANSFORM])
-        const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
-        const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
+        const mX = this.#rotateMatrix("x", this.xGizmo)
+        const mY = this.#rotateMatrix("y", this.yGizmo)
+        const mZ = this.#rotateMatrix("z", this.zGizmo)
 
-        const FBO = GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
+        const FBO = GizmoSystem.drawToDepthSampler(GizmoSystem.rotationGizmoMesh, [mX, mY, mZ])
         const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
         const pickID = Math.round(255 * dd[0])
         GizmoSystem.clickedAxis = pickID
 
         if (pickID === 0)
             this.onMouseUp(true)
-        else if (pickID > 0) {
+        else {
             GizmoSystem.wasOnGizmo = true
             this.tracking = true
 
@@ -224,8 +218,8 @@ export default class Rotation {
         }
     }
 
-    #rotateMatrix(axis, comp) {
-        const matrix = comp.transformationMatrix.slice(0)
+    #rotateMatrix(axis, entity) {
+        const matrix = entity.transformationMatrix.slice(0)
         matrix[12] += GizmoSystem.translation[0]
         matrix[13] += GizmoSystem.translation[1]
         matrix[14] += GizmoSystem.translation[2]
@@ -244,18 +238,19 @@ export default class Rotation {
                     break
             }
         } else if (axis !== undefined)
-            return mat4.fromRotationTranslationScale([], quat.multiply([], GizmoSystem.targetRotation, comp.rotationQuat), GizmoSystem.translation, comp.scaling)
+            return mat4.fromRotationTranslationScale([], quat.multiply([], GizmoSystem.targetRotation, entity.rotationQuaternion), GizmoSystem.translation, entity.scaling)
 
         return matrix
     }
 
     drawGizmo() {
-        gpu.clear(gpu.DEPTH_BUFFER_BIT)
-        gpu.disable(gpu.CULL_FACE)
+        if(GizmoSystem.mainEntity.lockedRotation)
+            return
 
-        const mX = this.#rotateMatrix("x", this.xGizmo.components[COMPONENTS.TRANSFORM])
-        const mY = this.#rotateMatrix("y", this.yGizmo.components[COMPONENTS.TRANSFORM])
-        const mZ = this.#rotateMatrix("z", this.zGizmo.components[COMPONENTS.TRANSFORM])
+        gpu.disable(gpu.CULL_FACE)
+        const mX = this.#rotateMatrix("x", this.xGizmo)
+        const mY = this.#rotateMatrix("y", this.yGizmo)
+        const mZ = this.#rotateMatrix("z", this.zGizmo)
 
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             this.#draw(mX, AXIS.X, this.xGizmo.pickID)
@@ -279,6 +274,6 @@ export default class Rotation {
             circleSampler: this.texture.texture,
             cameraIsOrthographic: CameraAPI.isOrthographic
         })
-        this.xyz.draw()
+        GizmoSystem.rotationGizmoMesh.draw()
     }
 }

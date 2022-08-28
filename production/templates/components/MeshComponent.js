@@ -4,9 +4,7 @@ import MESH_TYPES from "../../data/MESH_TYPES"
 import FALLBACK_MATERIAL from "../../data/FALLBACK_MATERIAL";
 
 export default class MeshComponent extends Component{
-    get isNative(){
-        return true
-    }
+
     meshID
     normalMatrix = mat3.create()
     meshType= MESH_TYPES.STATIC

@@ -11,7 +11,7 @@ export default class Transformations {
         Transformations.hasUpdatedItem = false
         for (let i = 0; i < l; i++) {
             const current = entities[i]
-            if (!current.active || !current.components[COMPONENTS.TRANSFORM]?.changed) {
+            if (!current.active || !current.changed) {
                 this.changed.set(current.id, false)
                 continue
             }
@@ -21,27 +21,25 @@ export default class Transformations {
         }
     }
 
-    static transform(current) {
-        const component = current.components[COMPONENTS.TRANSFORM]
+    static transform(entity) {
 
-        component.changed = false
-        Transformation.transform(component.translation, component.rotationQuat, component.scaling, current.components[COMPONENTS.TRANSFORM].transformationMatrix)
 
-        if (current.parent !== undefined && current.parent.components[COMPONENTS.TRANSFORM])
+        entity.changed = false
+        Transformation.transform(entity.translation, entity.rotationQuaternion, entity.scaling, entity.transformationMatrix)
+
+        if (entity.parent != null)
             mat4.multiply(
-                component.transformationMatrix,
-                current.parent.components[COMPONENTS.TRANSFORM].transformationMatrix,
-                component.transformationMatrix
+                entity.transformationMatrix,
+                entity.parent.transformationMatrix,
+                entity.transformationMatrix
             )
 
-        const children = current.children
-        for (let j = 0; j < children.length; j++) {
-            if (children[j].components[COMPONENTS.TRANSFORM])
-                Transformations.transform(children[j])
-        }
-        component.changed = false
-        if (current.components[COMPONENTS.MESH] !== undefined)
-            current.components[COMPONENTS.MESH].normalMatrix = normalMatrix(current.components[COMPONENTS.TRANSFORM].transformationMatrix)
+        const children = entity.children
+        for (let j = 0; j < children.length; j++)
+            Transformations.transform(children[j])
+        entity.changed = false
+        if (entity.components[COMPONENTS.MESH] !== undefined)
+            entity.components[COMPONENTS.MESH].normalMatrix = normalMatrix(entity.transformationMatrix)
     }
 }
 

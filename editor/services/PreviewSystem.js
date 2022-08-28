@@ -7,6 +7,8 @@ import MaterialRenderer from "../../production/services/MaterialRenderer";
 import RendererController from "../../production/RendererController";
 import EditorRenderer from "../EditorRenderer";
 import BundlerAPI from "../../production/libs/apis/BundlerAPI";
+import GPU from "../../production/GPU";
+import STATIC_MESHES from "../../static/STATIC_MESHES";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {
@@ -55,16 +57,16 @@ export default class PreviewSystem {
                 maxY = materialMesh.maxBoundingBox[1] - materialMesh.minBoundingBox[1],
                 maxZ = materialMesh.maxBoundingBox[2] - materialMesh.minBoundingBox[2]
             const radius = Math.max(maxX, maxY, maxZ)
-            const cam = getCameraData(0, RADIAN_90, radius + 2, meshEntity.components[COMPONENTS.TRANSFORM].translation)
-            const transformMatrix = meshEntity.components[COMPONENTS.TRANSFORM].transformationMatrix
+            const cam = getCameraData(0, RADIAN_90, radius + 2, meshEntity.translation)
+            const transformMatrix = meshEntity.transformationMatrix
             const pointLightData = [[
-                0, meshEntity.components[COMPONENTS.TRANSFORM].translation[1] / 2, radius * 10, 0,
+                0, meshEntity.translation[1] / 2, radius * 10, 0,
                 1, 1, 1, 0,
                 .5, 0, 0, 0,
                 100, .1, 0, 0
             ],
                 [
-                    0, meshEntity.components[COMPONENTS.TRANSFORM].translation[1] / 2, -radius * 10, 0,
+                    0, meshEntity.translation[1] / 2, -radius * 10, 0,
                     1, 1, 1, 0,
                     .5, 0, 0, 0,
                     100, .1, 0, 0
@@ -91,7 +93,7 @@ export default class PreviewSystem {
         } else if (materialMesh instanceof MaterialInstance) {
             const [viewMatrix, camPosition] = this.cameraData
             MaterialRenderer.drawMesh({
-                mesh: EditorRenderer.sphereMesh,
+                mesh: GPU.meshes.get(STATIC_MESHES.SPHERE),
                 camPosition,
                 viewMatrix,
                 projectionMatrix: this.projection,

@@ -66,12 +66,10 @@ export default class CameraAPI extends CameraPostProcessing {
         if (!entity?.components || RendererController.environment === ENVIRONMENT.DEV)
             return
         const cameraObj = entity.components[COMPONENTS.CAMERA]
-        const transformation = entity.components[COMPONENTS.TRANSFORM]
 
         if (!cameraObj)
             return
-        if (transformation)
-            CameraAPI.directTransformation(transformation.translation, transformation.rotationQuat)
+        CameraAPI.directTransformation(entity.translation, entity.rotationQuaternion)
         CameraAPI.metadata.zFar = cameraObj.zFar
         CameraAPI.metadata.zNear = cameraObj.zNear
         CameraAPI.metadata.fov = cameraObj.fov

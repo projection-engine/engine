@@ -11,15 +11,21 @@ import getEntityTranslation from "../libs/gizmo/utils/get-entity-translation";
 import EditorRenderer from "../EditorRenderer";
 import Gizmo from "../libs/gizmo/libs/Gizmo";
 import COMPONENTS from "../../production/data/COMPONENTS";
-import TransformComponent from "../../production/templates/components/TransformComponent";
+import Movable from "../../production/templates/basic/Movable";
 import Transformation from "../../production/services/Transformation";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/gizmo/ScreenSpaceGizmo";
 import {vec3} from "gl-matrix";
 import AXIS from "../libs/gizmo/AXIS";
 import DualAxisGizmo, {XY_ID, XZ_ID, ZY_ID} from "../libs/gizmo/DualAxisGizmo";
+import GPU from "../../production/GPU";
+import STATIC_MESHES from "../../static/STATIC_MESHES";
+import ROTATION_GIZMO from "../data/ROTATION_GIZMO.json";
+import SCALE_GIZMO from "../data/SCALE_GIZMO.json";
+import TRANSLATION_GIZMO from "../data/TRANSLATION_GIZMO.json";
+import PLANE from "../data/PLANE.json";
 
-const EMPTY_COMPONENT = new TransformComponent()
+const EMPTY_COMPONENT = new Movable()
 let depthSystem
 export default class GizmoSystem {
     static mainEntity
@@ -33,10 +39,26 @@ export default class GizmoSystem {
     static clickedAxis
     static totalMoved = 0
     static wasOnGizmo
+    static rotationGizmoMesh
+    static scaleGizmoMesh
+    static translationGizmoMesh
+    static dualAxisGizmoMesh
+    static cubeMesh
 
     constructor() {
+        GPU.allocateMesh(STATIC_MESHES.DUAL_AXIS_GIZMO, PLANE)
+        GPU.allocateMesh(STATIC_MESHES.ROTATION_GIZMO, ROTATION_GIZMO)
+        GPU.allocateMesh(STATIC_MESHES.SCALE_GIZMO, SCALE_GIZMO)
+        GPU.allocateMesh(STATIC_MESHES.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
+
+        GizmoSystem.cubeMesh = GPU.meshes.get(STATIC_MESHES.CUBE)
+        GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.DUAL_AXIS_GIZMO)
+        GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.TRANSLATION_GIZMO)
+        GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.ROTATION_GIZMO)
+        GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.SCALE_GIZMO)
+
         EMPTY_COMPONENT.scaling = [.2, .2, .2]
-        Transformation.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuat, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.transformationMatrix)
+        Transformation.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.transformationMatrix)
 
         GizmoSystem.toBufferShader = new ShaderInstance(gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
         GizmoSystem.gizmoShader = new ShaderInstance(gizmoShaderCode.vertex, gizmoShaderCode.fragment)
@@ -73,7 +95,7 @@ export default class GizmoSystem {
             transformMatrix: GizmoSystem.transformationMatrix,
             uID: getPickerId(1)
         })
-        EditorRenderer.cubeMesh.draw()
+        GizmoSystem.cubeMesh.draw()
 
         DualAxisGizmo.drawToBuffer(data)
         depthSystem.frameBuffer.stopMapping()
@@ -88,8 +110,7 @@ export default class GizmoSystem {
             GizmoSystem.mainEntity = main
             GizmoSystem.translation = getEntityTranslation(main)
 
-            const t = main.components[COMPONENTS.TRANSFORM]
-            GizmoSystem.targetRotation = t !== undefined ? t.rotationQuat : [0, 0, 0, 1]
+            GizmoSystem.targetRotation = main.rotationQuaternion
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
         }
     }

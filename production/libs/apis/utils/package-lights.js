@@ -22,7 +22,7 @@ export function packagePointLights() {
             if (!pointLightData[i - activeOffset])
                 pointLightData[i - activeOffset] = new Float32Array(16)
             const currentVector = pointLightData[i - activeOffset]
-            const position = current.components[COMPONENTS.TRANSFORM].position
+            const position = current.translation
             currentVector[0] = position[0]
             currentVector[1] = position[1]
             currentVector[2] = position[2]
@@ -64,7 +64,7 @@ export function packageDirectionalLights() {
             if (!directionalLightsData[i - activeOffset])
                 directionalLightsData[i - activeOffset] = new Float32Array(9)
             const currentVector = directionalLightsData[i - activeOffset]
-            const position = current.components[COMPONENTS.TRANSFORM].translation
+            const position = current.translation
             currentVector[0] = position[0]
             currentVector[1] = position[1]
             currentVector[2] = position[2]

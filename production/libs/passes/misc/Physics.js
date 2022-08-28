@@ -32,7 +32,7 @@ export default class Physics {
         //                 calculateDisplacement(physicsComp.velocity[1], time, acceleration[1]),
         //                 calculateDisplacement(physicsComp.velocity[2], time, acceleration[2]),
         //             ]
-        //             current.views.TransformComponent.translation = sumArrays(displacement, current.views.TransformComponent.translation)
+        //             current.views.Movable.translation = sumArrays(displacement, current.views.Movable.translation)
         //         }
         //
         //     }

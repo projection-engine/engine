@@ -32,13 +32,12 @@ export default class SkyboxPass {
                     gpu.disable(gpu.CULL_FACE)
                     gpu.disable(gpu.DEPTH_TEST)
                 }
-                const transformationComponent = current.components[COMPONENTS.TRANSFORM]
                 MaterialRenderer.drawMesh({
                     mesh,
                     camPosition: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,
                     projectionMatrix: CameraAPI.projectionMatrix,
-                    transformMatrix: transformationComponent.transformationMatrix,
+                    transformMatrix: current.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,
                     materialComponent: meshComponent,
