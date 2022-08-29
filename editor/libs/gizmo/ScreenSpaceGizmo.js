@@ -22,7 +22,7 @@ export default class ScreenSpaceGizmo {
         ScreenSpaceGizmo.mouseY += event.movementY
 
         const mouseAcceleration = (ScreenSpaceGizmo.cameraDistance ** 2) * damping
-        const screenSpacePosition = Conversion.toScreen(ScreenSpaceGizmo.mouseX * mouseAcceleration, ScreenSpaceGizmo.mouseY * mouseAcceleration).slice(0, 3)
+        const screenSpacePosition = Conversion.toWorldCoordinates(ScreenSpaceGizmo.mouseX * mouseAcceleration, ScreenSpaceGizmo.mouseY * mouseAcceleration).slice(0, 3)
         for(let i = 0; i < 3; i++)
             screenSpacePosition[i] = Math.round(screenSpacePosition[i] / gridStep) * gridStep
         ScreenSpaceGizmo.mapToAxis(screenSpacePosition)
@@ -57,8 +57,11 @@ export default class ScreenSpaceGizmo {
     }
 
     static onMouseDown(event) {
-        ScreenSpaceGizmo.mouseX = event.clientX
-        ScreenSpaceGizmo.mouseY = event.clientY
+        const translation = GizmoSystem.mainEntity.translation
+        const coords = Conversion.toScreenCoordinates([translation[0], translation[1], translation[2]])
+        console.log(coords)
+        ScreenSpaceGizmo.mouseX = coords[0]
+        ScreenSpaceGizmo.mouseY = coords[1]
 
     }
 

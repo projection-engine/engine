@@ -6,8 +6,7 @@ import ShaderInstance from "../../production/libs/instances/ShaderInstance"
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 import getPickerId from "../../production/utils/get-picker-id"
 import LoopAPI from "../../production/libs/apis/LoopAPI";
-import Transformations from "../../production/libs/passes/misc/Transformations";
-import getEntityTranslation from "../libs/gizmo/utils/get-entity-translation";
+import MovementPass from "../../production/libs/passes/misc/MovementPass";
 import Gizmo from "../libs/gizmo/libs/Gizmo";
 import Movable from "../../production/templates/basic/Movable";
 import Transformation from "../../production/services/Transformation";
@@ -106,9 +105,9 @@ export default class GizmoSystem {
 
     #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if (Transformations.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
+        if (MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
             GizmoSystem.mainEntity = main
-            GizmoSystem.translation = getEntityTranslation(main)
+            GizmoSystem.translation = main.translation.slice(0)
 
             GizmoSystem.targetRotation = main.rotationQuaternion
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)

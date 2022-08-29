@@ -40,10 +40,10 @@ export default class CameraAPI extends CameraPostProcessing {
     static sphericalTransformation(rotationVec, radius, centerOn) {
         const [yaw, p] = rotationVec
         let pitch = p
-        if (pitch > Math.PI / 2)
-            pitch = Math.PI / 2
-        if (pitch < -Math.PI / 2)
-            pitch = -Math.PI / 2
+        if (pitch >= Math.PI/2)
+            pitch = 1.57
+        if (pitch <= -Math.PI/2)
+            pitch = -1.57
 
         const cosPitch = Math.cos(pitch)
         const position = []

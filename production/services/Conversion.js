@@ -11,19 +11,19 @@ export default class Conversion {
         const multiplierY = h / target.height
 
         return {
-            x:  x * multiplierX - target.left * multiplierX,
+            x: x * multiplierX - target.left * multiplierX,
             y: h - y * multiplierY + target.top * multiplierY - 1
         }
     }
 
-    static toScreen(x, y){
+    static toWorldCoordinates(x, y) {
         const viewMatrix = CameraAPI.viewMatrix,
             projectionMatrix = CameraAPI.projectionMatrix
 
         // NORMALIZED DEVICE SPACE
         const bBox = gpu.canvas.getBoundingClientRect()
-        let xNormalized = ((x - bBox.x)/ bBox.width ) * 2 - 1,
-            yNormalized = -((y - bBox.y )/ bBox.height) * 2 + 1
+        let xNormalized = ((x - bBox.x) / bBox.width) * 2 - 1,
+            yNormalized = -((y - bBox.y) / bBox.height) * 2 + 1
 
         // HOMOGENEOUS CLIP SPACE
         const homogeneousCoords = [xNormalized, yNormalized, 0, 0]
@@ -39,4 +39,19 @@ export default class Conversion {
         return vec4.transformMat4([], eyeCoords, inverseView)
     }
 
+    static toScreenCoordinates(vec) {
+        const target = [...vec, 1]
+        vec4.transformMat4(target, target,CameraAPI.viewMatrix)
+        vec4.transformMat4(target, target, CameraAPI.projectionMatrix)
+
+        // NORMALIZED DEVICE SPACE
+        const bBox = gpu.canvas.getBoundingClientRect()
+        const widthHalf = bBox.width / 2
+        const heightHalf = bBox.height / 2
+
+        target[0] = (target[0] * widthHalf) + widthHalf;
+        target[1] = -(target[1] * heightHalf) + heightHalf;
+
+        return [target[0], target[1]]
+    }
 }

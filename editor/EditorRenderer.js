@@ -12,10 +12,19 @@ import LoopAPI from "../production/libs/apis/LoopAPI";
 import CameraTracker from "./libs/CameraTracker";
 import RendererController from "../production/RendererController.js";
 import GizmoSystem from "./services/GizmoSystem";
+import Entity from "../production/templates/basic/Entity";
+import Transformation from "../production/services/Transformation";
 
+function getCursor() {
+    const entity = new Entity()
+    entity.lockedRotation = true
+    entity.lockedScaling = true
+    entity.transformationMatrix = Transformation.transform(entity.translation, [0, 0, 0, 1], entity.scaling)
+    return entity
+}
 export default class EditorRenderer extends RendererController {
     gizmo
-    cursor
+    static cursor = getCursor()
     selected = []
     static sphereMesh
     static cameraMesh
@@ -75,7 +84,6 @@ export default class EditorRenderer extends RendererController {
             {
                 ...params,
                 gizmo: this.gizmo,
-                cursor: this.cursor,
                 onWrap: prodEnv ? null : this.editorSystem,
             })
     }

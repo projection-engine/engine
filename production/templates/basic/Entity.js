@@ -13,6 +13,7 @@ export default class Entity extends Movable {
     children = []
     parent
     pickID = [-1, -1, -1]
+    instancingGroupID
 
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()

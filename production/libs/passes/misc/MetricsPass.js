@@ -1,4 +1,4 @@
-export default class PerformanceMetrics {
+export default class MetricsPass {
     #times = []
     #renderTarget
     previousFrametime = 0

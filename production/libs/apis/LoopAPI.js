@@ -12,10 +12,10 @@ import ShaderInstance from "../instances/ShaderInstance";
 import * as shaderCode from "../../data/shaders/CUBE_MAP.glsl";
 
 import Culling from "../passes/misc/Culling";
-import PerformanceMetrics from "../passes/misc/PerformanceMetrics";
+import MetricsPass from "../passes/misc/MetricsPass";
 import Physics from "../passes/misc/Physics";
-import Scripting from "../passes/misc/Scripting";
-import Transformations from "../passes/misc/Transformations";
+import ScriptingPass from "../passes/misc/ScriptingPass";
+import MovementPass from "../passes/misc/MovementPass";
 import CompositePass from "../passes/postprocessing/CompositePass";
 import FinalPass from "../passes/postprocessing/FinalPass";
 import SkyboxPass from "../passes/rendering/SkyboxPass";
@@ -51,10 +51,10 @@ export default class LoopAPI {
 
 
         miscMap.set("culling", new Culling())
-        miscMap.set("metrics", new PerformanceMetrics())
+        miscMap.set("metrics", new MetricsPass())
         miscMap.set("physics", new Physics())
-        miscMap.set("scripting", new Scripting())
-        miscMap.set("transformations", new Transformations())
+        miscMap.set("scripting", new ScriptingPass())
+        miscMap.set("transformations", new MovementPass())
 
 
         ppMap.set("worker", (new FramebufferInstance(resolution.w, resolution.h)).texture())

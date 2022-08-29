@@ -1,7 +1,6 @@
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../../../data/misc/TRANSFORMATION_TYPE"
 import Conversion from "../../../../production/services/Conversion"
-import getEntityTranslation from "../utils/get-entity-translation"
 import INFORMATION_CONTAINER from "../../../../../../data/misc/INFORMATION_CONTAINER"
 import RendererStoreController from "../../../../../../stores/RendererStoreController";
 import ViewportPicker from "../../../../production/services/ViewportPicker";
@@ -83,7 +82,6 @@ export default class Gizmo {
                 this.key,
                 GizmoSystem.mainEntity[this.key]
             )
-
         }
 
         this.started = false
@@ -153,7 +151,7 @@ export default class Gizmo {
         DualAxisGizmo.drawGizmo()
 
         if (this.updateTransformationRealtime)
-            GizmoSystem.translation = getEntityTranslation(GizmoSystem.mainEntity)
+            GizmoSystem.translation = GizmoSystem.mainEntity.translation.slice(0)
         const mX = Gizmo.translateMatrix(this.xGizmo)
         const mY = Gizmo.translateMatrix(this.yGizmo)
         const mZ = Gizmo.translateMatrix(this.zGizmo)

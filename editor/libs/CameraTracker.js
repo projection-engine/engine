@@ -60,10 +60,10 @@ export default class CameraTracker {
                         if (event.movementY < 0)
                             CameraTracker.pitch += .01 * Math.abs(event.movementY)
 
-                        else if (event.movementY > 0)
+                        else if (event.movementY >= 0)
                             CameraTracker.pitch -= .01 * Math.abs(event.movementY)
 
-                        if (event.movementX > 0)
+                        if (event.movementX >= 0)
                             CameraTracker.yaw += .01 * Math.abs(event.movementX)
                         else if (event.movementX < 0)
                             CameraTracker.yaw -= .01 * Math.abs(event.movementX)
@@ -127,11 +127,12 @@ export default class CameraTracker {
     }
 
     static update(onlyRadiusUpdate) {
+        CameraAPI.metadata.size = CameraTracker.radius
+        CameraAPI.sphericalTransformation([CameraTracker.yaw, CameraTracker.pitch], CameraTracker.radius, CameraTracker.centerOn)
+
         if (CameraTracker.gizmoReference && !onlyRadiusUpdate) {
             const transformationMatrix = CameraAPI.staticViewMatrix
             CameraTracker.gizmoReference.style.transform = `translateZ(calc(var(--cube-size) * -3)) matrix3d(${transformationMatrix})`
         }
-        CameraAPI.metadata.size = CameraTracker.radius
-        CameraAPI.sphericalTransformation([CameraTracker.yaw, CameraTracker.pitch], CameraTracker.radius, CameraTracker.centerOn)
     }
 }

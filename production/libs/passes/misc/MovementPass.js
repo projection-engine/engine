@@ -1,29 +1,33 @@
 import {mat4} from "gl-matrix"
 import Transformation from "../../../services/Transformation"
 import COMPONENTS from "../../../data/COMPONENTS"
+import GPU from "../../../GPU";
 
-export default class Transformations {
+export default class MovementPass {
     changed = new Map()
     static hasUpdatedItem = false
+    static instancingNeedsUpdate = new Map()
 
     execute(entities) {
-        const l = entities.length
-        Transformations.hasUpdatedItem = false
-        for (let i = 0; i < l; i++) {
+        const size = entities.length
+        MovementPass.hasUpdatedItem = false
+        for (let i = 0; i < size; i++) {
             const current = entities[i]
             if (!current.active || !current.changed) {
                 this.changed.set(current.id, false)
                 continue
             }
-            Transformations.hasUpdatedItem = true
+            MovementPass.hasUpdatedItem = true
             this.changed.set(current.id, true)
-            Transformations.transform(current)
+            MovementPass.transform(current)
+        }
+        if(MovementPass.instancingNeedsUpdate.size > 0) {
+            MovementPass.instancingNeedsUpdate.forEach(i => i.updateBuffer())
+            MovementPass.instancingNeedsUpdate.clear()
         }
     }
 
     static transform(entity) {
-
-
         entity.changed = false
         Transformation.transform(entity.translation, entity.rotationQuaternion, entity.scaling, entity.transformationMatrix)
 
@@ -36,10 +40,17 @@ export default class Transformations {
 
         const children = entity.children
         for (let j = 0; j < children.length; j++)
-            Transformations.transform(children[j])
+            MovementPass.transform(children[j])
         entity.changed = false
-        if (entity.components[COMPONENTS.MESH] !== undefined)
-            entity.components[COMPONENTS.MESH].normalMatrix = normalMatrix(entity.transformationMatrix)
+
+        const mesh = entity.components[COMPONENTS.MESH]
+        if (mesh !== undefined)
+            mesh.normalMatrix = normalMatrix(entity.transformationMatrix)
+
+        if (entity.instancingGroupID) {
+            const i = GPU.instancingGroup.get(entity.instancingGroupID)
+            MovementPass.instancingNeedsUpdate.set(entity.instancingGroupID, i)
+        }
     }
 }
 

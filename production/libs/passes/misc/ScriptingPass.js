@@ -5,7 +5,7 @@ import UserInterfaceController from "../../../UserInterfaceController";
 
 const DEV = ENVIRONMENT.DEV
 let entities
-export default class Scripting {
+export default class ScriptingPass {
     execute() {
 
         if (RendererController.environment === DEV) {
