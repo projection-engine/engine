@@ -8,22 +8,18 @@ import getPickerId from "../../production/utils/get-picker-id"
 import LoopAPI from "../../production/libs/apis/LoopAPI";
 import Transformations from "../../production/libs/passes/misc/Transformations";
 import getEntityTranslation from "../libs/gizmo/utils/get-entity-translation";
-import EditorRenderer from "../EditorRenderer";
 import Gizmo from "../libs/gizmo/libs/Gizmo";
-import COMPONENTS from "../../production/data/COMPONENTS";
 import Movable from "../../production/templates/basic/Movable";
 import Transformation from "../../production/services/Transformation";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/gizmo/ScreenSpaceGizmo";
-import {vec3} from "gl-matrix";
-import AXIS from "../libs/gizmo/AXIS";
-import DualAxisGizmo, {XY_ID, XZ_ID, ZY_ID} from "../libs/gizmo/DualAxisGizmo";
+import DualAxisGizmo from "../libs/gizmo/DualAxisGizmo";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import ROTATION_GIZMO from "../data/ROTATION_GIZMO.json";
 import SCALE_GIZMO from "../data/SCALE_GIZMO.json";
 import TRANSLATION_GIZMO from "../data/TRANSLATION_GIZMO.json";
-import PLANE from "../data/PLANE.json";
+import PLANE from "../data/DUAL_AXIS_GIZMO.json";
 
 const EMPTY_COMPONENT = new Movable()
 let depthSystem
@@ -45,6 +41,10 @@ export default class GizmoSystem {
     static dualAxisGizmoMesh
     static cubeMesh
 
+    static translationGizmo
+    static scaleGizmo
+    static rotationGizmo
+
     constructor() {
         GPU.allocateMesh(STATIC_MESHES.DUAL_AXIS_GIZMO, PLANE)
         GPU.allocateMesh(STATIC_MESHES.ROTATION_GIZMO, ROTATION_GIZMO)
@@ -63,9 +63,9 @@ export default class GizmoSystem {
         GizmoSystem.toBufferShader = new ShaderInstance(gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
         GizmoSystem.gizmoShader = new ShaderInstance(gizmoShaderCode.vertex, gizmoShaderCode.fragment)
 
-        this.translationGizmo = new Translation()
-        this.scaleGizmo = new Scale()
-        this.rotationGizmo = new Rotation()
+        GizmoSystem.translationGizmo = new Translation()
+        GizmoSystem.scaleGizmo = new Scale()
+        GizmoSystem.rotationGizmo = new Rotation()
     }
 
 

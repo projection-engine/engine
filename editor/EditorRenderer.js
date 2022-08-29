@@ -8,15 +8,10 @@ import SHADING_MODELS from "../../../data/misc/SHADING_MODELS"
 import {STEPS_LIGHT_PROBE} from "../production/libs/passes/rendering/DiffuseProbePass"
 import BundlerAPI from "../production/libs/apis/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
-import MeshInstance from "../production/libs/instances/MeshInstance"
-import CUBE from "./data/SPHERE.json"
-import camera from "./data/CAMERA.json"
 import LoopAPI from "../production/libs/apis/LoopAPI";
 import CameraTracker from "./libs/CameraTracker";
 import RendererController from "../production/RendererController.js";
-import PLANE from "./data/PLANE.json";
-import GPU from "../production/GPU";
-import STATIC_MESHES from "../static/STATIC_MESHES";
+import GizmoSystem from "./services/GizmoSystem";
 
 export default class EditorRenderer extends RendererController {
     gizmo
@@ -57,9 +52,9 @@ export default class EditorRenderer extends RendererController {
 
     get gizmos() {
         return {
-            rotation: this.editorSystem.gizmoSystem.rotationGizmo,
-            translation: this.editorSystem.gizmoSystem.translationGizmo,
-            scale: this.editorSystem.gizmoSystem.scaleGizmo
+            rotation: GizmoSystem.rotationGizmo,
+            translation: GizmoSystem.translationGizmo,
+            scale: GizmoSystem.scaleGizmo
         }
     }
 

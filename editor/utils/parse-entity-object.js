@@ -6,9 +6,6 @@ import MeshComponent from "../../production/templates/components/MeshComponent"
 import DATA_TYPES from "../../production/data/DATA_TYPES"
 import TextureInstance from "../../production/libs/instances/TextureInstance"
 import PointLightComponent from "../../production/templates/components/PointLightComponent"
-
-import Movable from "../../production/templates/basic/Movable"
-import Transformation from "../../production/services/Transformation"
 import ProbeComponent from "../../production/templates/components/ProbeComponent"
 import CameraComponent from "../../production/templates/components/CameraComponent"
 import componentConstructor from "../../../component-constructor";

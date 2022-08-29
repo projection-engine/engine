@@ -1,4 +1,3 @@
-import COMPONENTS from "../../../data/COMPONENTS"
 import MaterialRenderer from "../../../services/MaterialRenderer";
 import LoopAPI from "../../apis/LoopAPI";
 import RendererController from "../../../RendererController";

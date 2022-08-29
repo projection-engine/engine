@@ -1,5 +1,3 @@
-import COMPONENTS from "../../../../production/data/COMPONENTS"
-
 export default function getEntityTranslation(entity) {
     const parent = entity.parent
     const parentMatrix = parent?.transformationMatrix

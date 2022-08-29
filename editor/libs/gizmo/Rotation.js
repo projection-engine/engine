@@ -5,20 +5,14 @@ import {mat4, quat, vec3} from "gl-matrix"
 import TextureInstance from "../../../production/libs/instances/TextureInstance"
 import circle from "../../../../../data/icons/circle.png"
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
-import COMPONENTS from "../../../production/data/COMPONENTS"
 import Conversion from "../../../production/services/Conversion"
 import mapEntity from "./utils/map-entity"
 import RendererStoreController from "../../../../../stores/RendererStoreController";
 import ViewportPicker from "../../../production/services/ViewportPicker";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
-import AXIS from "./AXIS";
+import AXIS from "../../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
-import EditorRenderer from "../../EditorRenderer";
-import MeshInstance from "../../../production/libs/instances/MeshInstance";
-import ROTATION_GIZMO from "../../data/ROTATION_GIZMO.json";
-import GPU from "../../../production/GPU";
-import STATIC_MESHES from "../../../static/STATIC_MESHES";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",

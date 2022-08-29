@@ -1,5 +1,4 @@
 import {mat4, quat, vec3} from "gl-matrix"
-import COMPONENTS from "../../../../production/data/COMPONENTS"
 import TRANSFORMATION_TYPE from "../../../../../../data/misc/TRANSFORMATION_TYPE"
 import Conversion from "../../../../production/services/Conversion"
 import getEntityTranslation from "../utils/get-entity-translation"
@@ -8,7 +7,7 @@ import RendererStoreController from "../../../../../../stores/RendererStoreContr
 import ViewportPicker from "../../../../production/services/ViewportPicker";
 import CameraAPI from "../../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../../services/GizmoSystem";
-import AXIS from "../AXIS";
+import AXIS from "../../../data/AXIS";
 import ScreenSpaceGizmo from "../ScreenSpaceGizmo";
 import DualAxisGizmo from "../DualAxisGizmo";
 
@@ -23,14 +22,17 @@ export default class Gizmo {
     xyz
     gridSize
     totalMoved = 0
-
+    static movement = [0, 0, 0]
     started = false
 
     updateTransformationRealtime = false
     key
+    static tooltip
+
 
     constructor() {
-        this.renderTarget = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+        Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+
     }
 
     onMouseMove() {
@@ -47,8 +49,8 @@ export default class Gizmo {
 
     onMouseDown(event) {
 
-        if (!this.renderTarget)
-            this.renderTarget = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+        if (!Gizmo.tooltip)
+            Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
 
         const w = gpu.canvas.width, h = gpu.canvas.height
         const x = event.clientX
@@ -60,12 +62,17 @@ export default class Gizmo {
 
     }
 
-    notify(value, sign) {
-        GizmoSystem.totalMoved += sign * value
-        this.renderTarget.innerText = GizmoSystem.totalMoved.toFixed(3) + " un"
+    static notify(position) {
+        if(!Gizmo.tooltip)
+            return
+        Gizmo.tooltip.isChanging()
+        GizmoSystem.totalMoved = 1
+        Gizmo.tooltip.textContent = `X ${position[0].toFixed(2)}  |  Y ${position[1].toFixed(2)}  |  Z ${position[2].toFixed(2)}`
     }
 
     onMouseUp() {
+        if(Gizmo.tooltip)
+            Gizmo.tooltip.finished()
         ScreenSpaceGizmo.onMouseUp()
 
         if (GizmoSystem.totalMoved !== 0) {
@@ -81,18 +88,16 @@ export default class Gizmo {
 
         this.started = false
         document.exitPointerLock()
-        this.distanceX = 0
-        this.distanceY = 0
-        this.distanceZ = 0
+        Gizmo.movement = [0, 0, 0]
         GizmoSystem.clickedAxis = -1
 
         this.tracking = false
-        this.renderTarget.style.display = "none"
+        Gizmo.tooltip.style.display = "none"
     }
 
 
     #testClick() {
-        if(!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
+        if (!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
             return
         const mX = Gizmo.translateMatrix(this.xGizmo)
         const mY = Gizmo.translateMatrix(this.yGizmo)
@@ -111,7 +116,7 @@ export default class Gizmo {
             GizmoSystem.wasOnGizmo = true
             this.tracking = true
             gpu.canvas.requestPointerLock()
-            this.renderTarget.style.display = "block"
+            Gizmo.tooltip.style.display = "block"
         }
     }
 
@@ -141,7 +146,7 @@ export default class Gizmo {
     }
 
     drawGizmo() {
-        if(GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
+        if (GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
             return
 
         gpu.disable(gpu.CULL_FACE)

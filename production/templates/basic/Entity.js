@@ -1,5 +1,4 @@
 import {v4} from "uuid"
-import COMPONENTS from "../../data/COMPONENTS"
 import cloneClass from "../../utils/clone-class"
 import Movable from "./Movable";
 

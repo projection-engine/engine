@@ -1,10 +1,17 @@
-import AXIS from "../libs/gizmo/AXIS";
+import AXIS from "../data/AXIS";
 
 const SIZE_DEFINITION = `#define SIZE .15`
-const SCALE_METHOD = `
+const TRANSLATION_METHOD = `
 vec3 t = translation - camPos;
 float len = length(camPos - translation) * SIZE;
 mat4 tt = transformMatrix;
+if(!cameraIsOrthographic){
+    tt[3][0]  += t.x;
+    tt[3][1]  += t.y;
+    tt[3][2]  += t.z;
+}
+`
+const SCALE_METHOD = `
 mat4 sc;
 for ( int x = 0; x < 4; x++ )
     for ( int y = 0; y < 4; y++ )
@@ -14,11 +21,7 @@ for ( int x = 0; x < 4; x++ )
             sc[x][y] = 1.;
         else
             sc[x][y] = 0.;
-if(!cameraIsOrthographic){
-    tt[3][0]  += t.x;
-    tt[3][1]  += t.y;
-    tt[3][2]  += t.z;
-}
+
 `
 export const sameSizeVertex = `#version 300 es
 ${SIZE_DEFINITION}
@@ -32,6 +35,7 @@ uniform vec3 translation;
 uniform bool cameraIsOrthographic;
  
 void main(){
+    ${TRANSLATION_METHOD}
     ${SCALE_METHOD}        
     gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
 }
@@ -46,11 +50,29 @@ uniform mat4 projectionMatrix;
 uniform vec3 camPos;
 uniform vec3 translation;
 uniform bool cameraIsOrthographic;
-  
+uniform bool isSurface;
 
-void main(){ 
-    ${SCALE_METHOD}  
-    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
+void main(){
+    ${TRANSLATION_METHOD}
+    if(!isSurface){
+        ${SCALE_METHOD}
+        tt = tt * sc;
+        gl_Position =  projectionMatrix * viewMatrix * tt *  vec4(position,1.0);
+    }  
+    else{
+        mat4 sc;
+        for ( int x = 0; x < 4; x++ )
+            for ( int y = 0; y < 4; y++ )
+                if ( x == y && x <= 2)
+                    sc[x][y] = 1000.;
+                else if ( x == y )
+                    sc[x][y] = 1.;
+                else
+                    sc[x][y] = 0.;
+ 
+      
+        gl_Position =  projectionMatrix * viewMatrix * tt * sc *  vec4(position,1.0);
+    }
 }
 `
 
@@ -61,6 +83,8 @@ in vec4 vPosition;
 uniform int axis;
 uniform int selectedAxis;
 out vec4 fragColor; 
+uniform bool isSurface;
+
 
 void main(){
     vec3 color = vec3(1.);
@@ -83,16 +107,19 @@ void main(){
             color = vec3(1., 0., 0.);
         break;
         case ${AXIS.ZY}:
-color = vec3(0., 1., 0.);
+            color = vec3(0., 1., 0.);
         break;
         default:
             break;
     }
-  
+    float opacity = 1.;  
     if(selectedAxis == axis)
         color = vec3(1., 1., 0.);
-    
-    fragColor = vec4(color, axis > ${AXIS.Z} ? .75 : 1.);
+    if(isSurface)
+        opacity = .1;
+    else if (axis > ${AXIS.Z} && selectedAxis != axis)
+        opacity = .75;
+    fragColor = vec4(color, opacity);
 }
 `
 export const vertexRot = `#version 300 es

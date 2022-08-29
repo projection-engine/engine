@@ -2,23 +2,13 @@ import COMPONENTS from "../../data/COMPONENTS"
 import toObject from "../../utils/to-object"
 import {packageDirectionalLights, packagePointLights} from "./utils/package-lights";
 import materialEntityMapper from "./utils/material-entity-mapper";
-import {v4} from "uuid";
-import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS";
-import {createTexture} from "../../utils/utils";
-import VBOInstance from "../instances/VBOInstance";
-import cube from "../../data/CUBE.json";
 import RendererController from "../../RendererController";
 import LoopAPI from "./LoopAPI";
-import MaterialInstance from "../instances/MaterialInstance";
-import * as shaderCode from "../../data/shaders/FALLBACK.glsl";
-import FALLBACK_MATERIAL from "../../data/FALLBACK_MATERIAL";
-import imageProcessorWorker from "../../services/image-processor-worker";
 import Component from "../../templates/basic/Component";
 import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./QueryAPI";
 import InputEventsAPI from "./InputEventsAPI";
 import CameraAPI from "./CameraAPI";
-import GPU from "../../GPU";
 
 
 export default class BundlerAPI {

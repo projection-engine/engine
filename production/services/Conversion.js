@@ -38,4 +38,5 @@ export default class Conversion {
         const inverseView = mat4.invert([], viewMatrix)
         return vec4.transformMat4([], eyeCoords, inverseView)
     }
+
 }

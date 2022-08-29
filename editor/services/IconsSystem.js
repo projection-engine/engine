@@ -9,7 +9,6 @@ import directionalLightIcon from "../../../../data/icons/directional_light.png"
 import probeIcon from "../../../../data/icons/probe.png"
 import RendererController from "../../production/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
-import EditorRenderer from "../EditorRenderer";
 import QuadInstance from "../../production/libs/instances/QuadInstance";
 import Transformations from "../../production/libs/passes/misc/Transformations";
 import GPU from "../../production/GPU";

@@ -1,5 +1,4 @@
 import Entity from "../../../../production/templates/basic/Entity"
-import COMPONENTS from "../../../../production/data/COMPONENTS"
 import Transformation from "../../../../production/services/Transformation"
 import getPickerId from "../../../../production/utils/get-picker-id";
 

@@ -1,7 +1,6 @@
-import EditorRenderer from "../../EditorRenderer";
 import Gizmo from "./libs/Gizmo";
 import GizmoSystem from "../../services/GizmoSystem";
-import AXIS from "./AXIS";
+import AXIS from "../../data/AXIS";
 import Conversion from "../../../production/services/Conversion";
 import {vec3} from "gl-matrix";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
@@ -16,22 +15,51 @@ export default class ScreenSpaceGizmo {
     static mouseX = 0
     static mouseY= 0
 
-    static onMouseMove(event, damping = 1) {
+    static onMouseMove(event, damping = 1, gridStep=.001) {
         if (ScreenSpaceGizmo.cameraDistance == null)
             ScreenSpaceGizmo.cameraDistance = vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position))
         ScreenSpaceGizmo.mouseX += event.movementX
         ScreenSpaceGizmo.mouseY += event.movementY
 
-        const mouseAcceleration = ScreenSpaceGizmo.cameraDistance ** 2
+        const mouseAcceleration = (ScreenSpaceGizmo.cameraDistance ** 2) * damping
         const screenSpacePosition = Conversion.toScreen(ScreenSpaceGizmo.mouseX * mouseAcceleration, ScreenSpaceGizmo.mouseY * mouseAcceleration).slice(0, 3)
-        vec3.scale(screenSpacePosition, screenSpacePosition, damping / ScreenSpaceGizmo.cameraDistance)
+        for(let i = 0; i < 3; i++)
+            screenSpacePosition[i] = Math.round(screenSpacePosition[i] / gridStep) * gridStep
+        ScreenSpaceGizmo.mapToAxis(screenSpacePosition)
+
         return screenSpacePosition
     }
 
+    static mapToAxis(vec){
+        switch (GizmoSystem.clickedAxis){
+            case AXIS.X:
+                vec[1] = 0
+                vec[2] = 0
+                break
+            case AXIS.Y:
+                vec[0] = 0
+                vec[2] = 0
+                break
+            case AXIS.Z:
+                vec[0] = 0
+                vec[1] = 0
+                break
+            case AXIS.XZ:
+                vec[1] = 0
+                break
+            case AXIS.XY:
+                vec[2] = 0
+                break
+            case AXIS.ZY:
+                vec[0] = 0
+                break
+        }
+    }
+
     static onMouseDown(event) {
-        const bBox = gpu.canvas.getBoundingClientRect()
-        ScreenSpaceGizmo.mouseX = event.clientX - bBox.width / 2
-        ScreenSpaceGizmo.mouseY = event.clientY - bBox.height / 2
+        ScreenSpaceGizmo.mouseX = event.clientX
+        ScreenSpaceGizmo.mouseY = event.clientY
+
     }
 
     static onMouseUp() {

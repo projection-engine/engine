@@ -1,10 +1,10 @@
-import Component from "./Component"
-import {mat4, quat, vec3} from "gl-matrix"
+import {mat4, quat} from "gl-matrix"
 import Transformation from "../../services/Transformation"
 import TRANSFORMATION_PROPS from "../../data/component-props/TRANSFORMATION_PROPS";
+import Component from "./Component";
 
 const toDeg = 57.29
-export default class Movable {
+export default class Movable extends Component{
     _props = TRANSFORMATION_PROPS
     _rotationQuat = quat.create()
     _translation = [0, 0, 0]

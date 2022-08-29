@@ -1,14 +1,12 @@
-import EditorRenderer from "../../EditorRenderer";
-import Gizmo from "./libs/Gizmo";
 import GizmoSystem from "../../services/GizmoSystem";
-import AXIS from "./AXIS";
-import Conversion from "../../../production/services/Conversion";
+import AXIS from "../../data/AXIS";
 import {mat4, quat, vec3} from "gl-matrix";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import mapEntity from "./utils/map-entity";
-import COMPONENTS from "../../../production/data/COMPONENTS";
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE";
 import getPickerId from "../../../production/utils/get-picker-id";
+import STATIC_MESHES from "../../../static/STATIC_MESHES";
+import GPU from "../../../production/GPU";
 
 export const XZ_ID = getPickerId(AXIS.XZ), XY_ID = getPickerId(AXIS.XY), ZY_ID = getPickerId(AXIS.ZY)
 export default class DualAxisGizmo {
@@ -88,9 +86,11 @@ export default class DualAxisGizmo {
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix)
             return
+        gpu.disable(gpu.CULL_FACE)
         const clicked = GizmoSystem.clickedAxis
         const notSelected = !clicked || clicked <= 0
         const gizmos = DualAxisGizmo.gizmos
+
         if (clicked === AXIS.XY || notSelected) {
             DualAxisGizmo.matrixXY = DualAxisGizmo.#translateMatrix(gizmos.XY)
             DualAxisGizmo.#draw(
@@ -98,6 +98,8 @@ export default class DualAxisGizmo {
                 AXIS.XY,
                 DualAxisGizmo.matrixXY
             )
+
+
         }
 
         if (clicked === AXIS.XZ || notSelected) {
@@ -116,10 +118,13 @@ export default class DualAxisGizmo {
                 AXIS.ZY,
                 DualAxisGizmo.matrixZY
             )
+
         }
+        gpu.enable(gpu.CULL_FACE)
     }
 
-    static #draw(uID, axis, transformMatrix) {
+    static #draw(uID, axis, transformMatrix, isSurface = false) {
+
         GizmoSystem.gizmoShader.bindForUse({
             viewMatrix: CameraAPI.viewMatrix,
             transformMatrix,
@@ -127,11 +132,15 @@ export default class DualAxisGizmo {
             projectionMatrix: CameraAPI.projectionMatrix,
             camPos: CameraAPI.position,
             translation: GizmoSystem.translation,
-            axis,
+            axis: isSurface ? undefined : axis,
             selectedAxis: GizmoSystem.clickedAxis,
             uID,
-            cameraIsOrthographic: CameraAPI.isOrthographic
+            cameraIsOrthographic: CameraAPI.isOrthographic,
+            isSurface
         })
-        GizmoSystem.dualAxisGizmoMesh.draw()
+        if (!isSurface)
+            GizmoSystem.dualAxisGizmoMesh.draw()
+        else
+            GPU.meshes.get(STATIC_MESHES.PLANE).draw()
     }
 }
