@@ -1,10 +1,10 @@
 import COMPONENTS from "../../data/COMPONENTS"
 import toObject from "../../utils/to-object"
-import {packageDirectionalLights, packagePointLights} from "./utils/package-lights";
-import materialEntityMapper from "./utils/material-entity-mapper";
-import RendererController from "../../RendererController";
-import LoopAPI from "./LoopAPI";
-import Component from "../../templates/basic/Component";
+import {packageDirectionalLights, packagePointLights} from "../../utils/package-lights";
+import materialEntityMapper from "../../utils/material-entity-mapper";
+import RendererController from "../../controllers/RendererController";
+import LoopController from "../../controllers/LoopController";
+import Component from "../../templates/Component";
 import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./QueryAPI";
 import InputEventsAPI from "./InputEventsAPI";
@@ -91,8 +91,8 @@ export default class BundlerAPI {
             data = RendererController.data,
             entities = renderer.entities
 
-        const sSystem = LoopAPI.renderMap.get("specularProbe")
-        const dSystem = LoopAPI.renderMap.get("diffuseProbe")
+        const sSystem = LoopController.renderMap.get("specularProbe")
+        const dSystem = LoopController.renderMap.get("diffuseProbe")
         const sP = toObject(data.specularProbes), dP = toObject(data.diffuseProbes)
         const specularProbes = sSystem.specularProbes
         const diffuseProbes = dSystem.diffuseProbes

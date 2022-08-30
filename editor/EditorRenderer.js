@@ -1,19 +1,19 @@
-import {STEPS_CUBE_MAP} from "../production/libs/passes/rendering/SpecularProbePass"
+import {STEPS_CUBE_MAP} from "../production/templates/passes/SpecularProbePass"
 import Wrapper from "./services/Wrapper"
-import MaterialInstance from "../production/libs/instances/MaterialInstance"
+import MaterialInstance from "../production/controllers/instances/MaterialInstance"
 import * as debugCode from "./templates/DEBUG.glsl"
 import * as shaderCode from "../production/data/shaders/FALLBACK.glsl"
 import DATA_TYPES from "../production/data/DATA_TYPES"
 import SHADING_MODELS from "../../../data/misc/SHADING_MODELS"
-import {STEPS_LIGHT_PROBE} from "../production/libs/passes/rendering/DiffuseProbePass"
+import {STEPS_LIGHT_PROBE} from "../production/templates/passes/DiffuseProbePass"
 import BundlerAPI from "../production/libs/apis/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
-import LoopAPI from "../production/libs/apis/LoopAPI";
+import LoopController from "../production/controllers/LoopController";
 import CameraTracker from "./libs/CameraTracker";
-import RendererController from "../production/RendererController.js";
+import RendererController from "../production/controllers/RendererController.js";
 import GizmoSystem from "./services/GizmoSystem";
-import Entity from "../production/templates/basic/Entity";
-import Transformation from "../production/services/Transformation";
+import Entity from "../production/templates/Entity";
+import Transformation from "../production/libs/Transformation";
 
 function getCursor() {
     const entity = new Entity()
@@ -30,10 +30,10 @@ export default class EditorRenderer extends RendererController {
     static cameraMesh
     static cubeMesh
     static planeMesh
-    constructor(resolution) {
-        super(resolution)
+    constructor() {
+        super()
         RendererController.environment = ENVIRONMENT.DEV
-        this.editorSystem = new Wrapper(resolution)
+        this.editorSystem = new Wrapper()
         this.debugMaterial = new MaterialInstance({
             vertex: shaderCode.vertex,
             fragment: debugCode.fragment,
@@ -68,8 +68,8 @@ export default class EditorRenderer extends RendererController {
     }
 
     refreshProbes() {
-        LoopAPI.renderMap.get("diffuseProbe").step = STEPS_CUBE_MAP.BASE
-        LoopAPI.renderMap.get("specularProbe").step = STEPS_LIGHT_PROBE.GENERATION
+        LoopController.renderMap.get("diffuseProbe").step = STEPS_CUBE_MAP.BASE
+        LoopController.renderMap.get("specularProbe").step = STEPS_LIGHT_PROBE.GENERATION
     }
 
     updatePackage(prodEnv, params) {

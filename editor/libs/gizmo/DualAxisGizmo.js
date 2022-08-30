@@ -6,7 +6,7 @@ import mapEntity from "./utils/map-entity";
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE";
 import getPickerId from "../../../production/utils/get-picker-id";
 import STATIC_MESHES from "../../../static/STATIC_MESHES";
-import GPU from "../../../production/GPU";
+import GPU from "../../../production/controllers/GPU";
 
 export const XZ_ID = getPickerId(AXIS.XZ), XY_ID = getPickerId(AXIS.XY), ZY_ID = getPickerId(AXIS.ZY)
 export default class DualAxisGizmo {

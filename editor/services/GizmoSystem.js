@@ -2,26 +2,27 @@ import Translation from "../libs/gizmo/Translation"
 import Rotation from "../libs/gizmo/Rotation"
 import Scale from "../libs/gizmo/Scale"
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
-import ShaderInstance from "../../production/libs/instances/ShaderInstance"
+import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 import getPickerId from "../../production/utils/get-picker-id"
-import LoopAPI from "../../production/libs/apis/LoopAPI";
-import MovementPass from "../../production/libs/passes/misc/MovementPass";
+import LoopController from "../../production/controllers/LoopController";
+import MovementPass from "../../production/templates/passes/MovementPass";
 import Gizmo from "../libs/gizmo/libs/Gizmo";
-import Movable from "../../production/templates/basic/Movable";
-import Transformation from "../../production/services/Transformation";
+import Movable from "../../production/templates/Movable";
+import Transformation from "../../production/libs/Transformation";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/gizmo/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/gizmo/DualAxisGizmo";
-import GPU from "../../production/GPU";
+import GPU from "../../production/controllers/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import ROTATION_GIZMO from "../data/ROTATION_GIZMO.json";
 import SCALE_GIZMO from "../data/SCALE_GIZMO.json";
 import TRANSLATION_GIZMO from "../data/TRANSLATION_GIZMO.json";
 import PLANE from "../data/DUAL_AXIS_GIZMO.json";
+import DepthPass from "../../production/templates/passes/DepthPass";
 
 const EMPTY_COMPONENT = new Movable()
-let depthSystem
+
 export default class GizmoSystem {
     static mainEntity
     static transformationMatrix
@@ -76,6 +77,7 @@ export default class GizmoSystem {
     }
 
     static drawToDepthSampler(mesh, transforms) {
+        const FBO = DepthPass.framebuffer
         const data = {
             viewMatrix: CameraAPI.viewMatrix,
             projectionMatrix: CameraAPI.projectionMatrix,
@@ -85,7 +87,7 @@ export default class GizmoSystem {
         }
         gpu.disable(gpu.CULL_FACE)
 
-        depthSystem.frameBuffer.startMapping()
+        FBO.startMapping()
 
         for (let i = 0; i < transforms.length; i++) {
             GizmoSystem.toBufferShader.bindForUse({
@@ -104,26 +106,32 @@ export default class GizmoSystem {
         GizmoSystem.cubeMesh.draw()
 
         DualAxisGizmo.drawToBuffer(data)
-        depthSystem.frameBuffer.stopMapping()
+        FBO.stopMapping()
 
         gpu.enable(gpu.CULL_FACE)
-        return depthSystem.frameBuffer
+        return FBO
     }
 
     #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if (MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
+        if (MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main && main) {
             GizmoSystem.mainEntity = main
             GizmoSystem.updateTranslation()
 
             GizmoSystem.targetRotation = main.rotationQuaternion
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
         }
+        else if (!main){
+            GizmoSystem.targetGizmo = undefined
+            GizmoSystem.selectedEntities = []
+            GizmoSystem.mainEntity = undefined
+            GizmoSystem.transformationMatrix = undefined
+            GizmoSystem.translation = undefined
+        }
     }
 
     execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
-        if (!depthSystem)
-            depthSystem = LoopAPI.renderMap.get("depthPrePass")
+
         if (GizmoSystem.selectedEntities.length > 0) {
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
             this.#findMainEntity()

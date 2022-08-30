@@ -4,14 +4,14 @@ import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
 import PreviewSystem from "./PreviewSystem"
 import BackgroundSystem from "./BackgroundSystem"
-import RendererController from "../../production/RendererController";
+import RendererController from "../../production/controllers/RendererController";
 
 export default class Wrapper {
-    constructor(resolution) {
+    constructor() {
         this.gridSystem = new GridSystem()
         this.billboardSystem = new IconsSystem()
         this.gizmoSystem = new GizmoSystem()
-        this.selectedSystem = new SelectedSystem(resolution)
+        this.selectedSystem = new SelectedSystem()
         this.previewSystem = new PreviewSystem()
         this.backgroundSystem = new BackgroundSystem()
     }

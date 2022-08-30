@@ -1,11 +1,11 @@
-import FramebufferInstance from "../../production/libs/instances/FramebufferInstance"
+import FramebufferInstance from "../../production/controllers/instances/FramebufferInstance"
 import {mat4} from "gl-matrix"
-import MeshInstance from "../../production/libs/instances/MeshInstance"
-import MaterialInstance from "../../production/libs/instances/MaterialInstance"
-import MaterialRenderer from "../../production/services/MaterialRenderer";
-import RendererController from "../../production/RendererController";
+import MeshInstance from "../../production/controllers/instances/MeshInstance"
+import MaterialInstance from "../../production/controllers/instances/MaterialInstance"
+import MaterialRenderer from "../../production/libs/MaterialRenderer";
+import RendererController from "../../production/controllers/RendererController";
 import BundlerAPI from "../../production/libs/apis/BundlerAPI";
-import GPU from "../../production/GPU";
+import GPU from "../../production/controllers/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 
 

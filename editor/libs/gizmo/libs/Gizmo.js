@@ -1,9 +1,9 @@
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../../../data/misc/TRANSFORMATION_TYPE"
-import Conversion from "../../../../production/services/Conversion"
+import Conversion from "../../../../production/libs/Conversion"
 import INFORMATION_CONTAINER from "../../../../../../data/misc/INFORMATION_CONTAINER"
 import RendererStoreController from "../../../../../../stores/RendererStoreController";
-import ViewportPicker from "../../../../production/services/ViewportPicker";
+import ViewportPicker from "../../../../production/libs/ViewportPicker";
 import CameraAPI from "../../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../../services/GizmoSystem";
 import AXIS from "../../../data/AXIS";

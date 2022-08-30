@@ -1,10 +1,10 @@
 import * as shaderCode from "../templates/SKYBOX.glsl"
-import ShaderInstance from "../../production/libs/instances/ShaderInstance"
+import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import {mat4} from "gl-matrix"
-import RendererController from "../../production/RendererController";
+import RendererController from "../../production/controllers/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
-import MeshInstance from "../../production/libs/instances/MeshInstance";
-import GPU from "../../production/GPU";
+import MeshInstance from "../../production/controllers/instances/MeshInstance";
+import GPU from "../../production/controllers/GPU";
 
 
 export default class BackgroundSystem {

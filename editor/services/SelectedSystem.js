@@ -1,15 +1,15 @@
-import ShaderInstance from "../../production/libs/instances/ShaderInstance"
+import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import * as shaderCode from "../templates/SELECTED.glsl"
 import COMPONENTS from "../../production/data/COMPONENTS"
-import FramebufferInstance from "../../production/libs/instances/FramebufferInstance"
-import RendererController from "../../production/RendererController";
+import FramebufferInstance from "../../production/controllers/instances/FramebufferInstance"
+import RendererController from "../../production/controllers/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
-import GPU from "../../production/GPU";
+import GPU from "../../production/controllers/GPU";
 
 
 export default class SelectedSystem {
 
-    constructor(resolution) {
+    constructor( ) {
         this.shaderSilhouette = new ShaderInstance(
             shaderCode.vertexSilhouette,
             shaderCode.fragmentSilhouette
@@ -23,7 +23,7 @@ export default class SelectedSystem {
             format: gpu.RED,
             type: gpu.FLOAT
         }
-        this.frameBuffer = new FramebufferInstance(resolution.w, resolution.h).texture(TEXTURE)
+        this.frameBuffer = new FramebufferInstance().texture(TEXTURE)
     }
 
     drawToBuffer(selected) {
@@ -59,7 +59,7 @@ export default class SelectedSystem {
             this.shaderSilhouette.bindForUse({
                 silhouette: this.frameBuffer.colors[0]
             })
-            this.frameBuffer.draw()
+            GPU.quad.draw()
             gpu.bindVertexArray(null)
         }
     }

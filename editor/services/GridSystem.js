@@ -1,13 +1,14 @@
 import * as shaderCode from "../templates/GRID.glsl"
-import ShaderInstance from "../../production/libs/instances/ShaderInstance"
-import QuadInstance from "../../production/libs/instances/QuadInstance"
-import RendererController from "../../production/RendererController";
+import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
+import QuadInstance from "../../production/controllers/instances/QuadInstance"
+import RendererController from "../../production/controllers/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
+import GPU from "../../production/controllers/GPU";
 
 export default class GridSystem {
     constructor() {
         this.gridShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
-        this.grid = new QuadInstance()
+
     }
 
     execute() {
@@ -20,7 +21,7 @@ export default class GridSystem {
                 exposure: CameraAPI.metadata.exposure
             })
 
-            this.grid.draw()
+            GPU.quad.draw()
         }
     }
 }

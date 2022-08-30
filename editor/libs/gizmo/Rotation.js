@@ -1,14 +1,14 @@
-import ShaderInstance from "../../../production/libs/instances/ShaderInstance"
+import ShaderInstance from "../../../production/controllers/instances/ShaderInstance"
 import * as gizmoShaderCode from "../../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TextureInstance from "../../../production/libs/instances/TextureInstance"
+import TextureInstance from "../../../production/controllers/instances/TextureInstance"
 import circle from "../../../../../data/icons/circle.png"
 import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
-import Conversion from "../../../production/services/Conversion"
+import Conversion from "../../../production/libs/Conversion"
 import mapEntity from "./utils/map-entity"
 import RendererStoreController from "../../../../../stores/RendererStoreController";
-import ViewportPicker from "../../../production/services/ViewportPicker";
+import ViewportPicker from "../../../production/libs/ViewportPicker";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";

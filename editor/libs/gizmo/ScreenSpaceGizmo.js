@@ -1,12 +1,12 @@
 import Gizmo from "./libs/Gizmo";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";
-import Conversion from "../../../production/services/Conversion";
+import Conversion from "../../../production/libs/Conversion";
 import {vec3} from "gl-matrix";
 import CameraAPI from "../../../production/libs/apis/CameraAPI";
 import getPickerId from "../../../production/utils/get-picker-id";
 import STATIC_MESHES from "../../../static/STATIC_MESHES";
-import GPU from "../../../production/GPU";
+import GPU from "../../../production/controllers/GPU";
 
 
 const PICK_ID_SS_GIZMO = getPickerId(1)

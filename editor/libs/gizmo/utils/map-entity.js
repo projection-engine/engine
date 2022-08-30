@@ -1,5 +1,5 @@
-import Entity from "../../../../production/templates/basic/Entity"
-import Transformation from "../../../../production/services/Transformation"
+import Entity from "../../../../production/templates/Entity"
+import Transformation from "../../../../production/libs/Transformation"
 import getPickerId from "../../../../production/utils/get-picker-id";
 
 export default function mapEntity(axis, type) {

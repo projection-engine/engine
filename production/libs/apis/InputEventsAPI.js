@@ -1,6 +1,6 @@
 import ENVIRONMENT from "../../data/ENVIRONMENT";
-import UserInterfaceController from "../../UserInterfaceController";
-import RendererController from "../../RendererController";
+import UserInterfaceController from "../../controllers/UserInterfaceController";
+import RendererController from "../../controllers/RendererController";
 
 function getTarget(key) {
     const events = InputEventsAPI.EVENTS

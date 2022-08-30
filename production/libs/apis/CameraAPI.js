@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix"
-import CameraPostProcessing from "../../templates/basic/CameraPostProcessing";
+import CameraPostProcessing from "./CameraPostProcessing";
 import COMPONENTS from "../../data/COMPONENTS";
-import RendererController from "../../RendererController";
+import RendererController from "../../controllers/RendererController";
 import ENVIRONMENT from "../../data/ENVIRONMENT";
 
 export default class CameraAPI extends CameraPostProcessing {

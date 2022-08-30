@@ -1,4 +1,4 @@
-import Component from "../../templates/basic/Component";
+import Component from "../../templates/Component";
 
 export default  [
     Component.number("FOV", "fov", 175, 1, .1, true),
