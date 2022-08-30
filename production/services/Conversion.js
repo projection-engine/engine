@@ -46,8 +46,8 @@ export default class Conversion {
 
         // NORMALIZED DEVICE SPACE
         const bBox = gpu.canvas.getBoundingClientRect()
-        const widthHalf = bBox.width / 2
-        const heightHalf = bBox.height / 2
+        const widthHalf = bBox.width/2
+        const heightHalf = bBox.height/2
 
         target[0] = (target[0] * widthHalf) + widthHalf;
         target[1] = -(target[1] * heightHalf) + heightHalf;

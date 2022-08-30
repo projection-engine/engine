@@ -13,25 +13,33 @@ const PICK_ID_SS_GIZMO = getPickerId(1)
 export default class ScreenSpaceGizmo {
     static cameraDistance
     static mouseX = 0
-    static mouseY= 0
+    static mouseY = 0
 
-    static onMouseMove(event, damping = 1, gridStep=.001) {
-        if (ScreenSpaceGizmo.cameraDistance == null)
-            ScreenSpaceGizmo.cameraDistance = vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position))
+    static onMouseMove(event, damping = 1, gridStep = .001) {
+        if (GizmoSystem.clickedAxis < 0)
+            return [0, 0, 0]
+        const cameraDistance = ScreenSpaceGizmo.cameraDistance
         ScreenSpaceGizmo.mouseX += event.movementX
         ScreenSpaceGizmo.mouseY += event.movementY
 
-        const mouseAcceleration = (ScreenSpaceGizmo.cameraDistance ** 2) * damping
+        const mouseAcceleration = (cameraDistance ** 2) * damping
         const screenSpacePosition = Conversion.toWorldCoordinates(ScreenSpaceGizmo.mouseX * mouseAcceleration, ScreenSpaceGizmo.mouseY * mouseAcceleration).slice(0, 3)
-        for(let i = 0; i < 3; i++)
+        vec3.scale(screenSpacePosition, screenSpacePosition, 1 / cameraDistance)
+        for (let i = 0; i < 3; i++)
             screenSpacePosition[i] = Math.round(screenSpacePosition[i] / gridStep) * gridStep
         ScreenSpaceGizmo.mapToAxis(screenSpacePosition)
 
         return screenSpacePosition
     }
 
-    static mapToAxis(vec){
-        switch (GizmoSystem.clickedAxis){
+    static mapToAxis(vec) {
+        const axis = GizmoSystem.clickedAxis
+        if (axis < 0) {
+            vec[0] = 0
+            vec[1] = 0
+            vec[2] = 0
+        }
+        switch (axis) {
             case AXIS.X:
                 vec[1] = 0
                 vec[2] = 0
@@ -56,17 +64,16 @@ export default class ScreenSpaceGizmo {
         }
     }
 
-    static onMouseDown(event) {
+    static onMouseDown() {
         const translation = GizmoSystem.mainEntity.translation
         const coords = Conversion.toScreenCoordinates([translation[0], translation[1], translation[2]])
-        console.log(coords)
+
         ScreenSpaceGizmo.mouseX = coords[0]
         ScreenSpaceGizmo.mouseY = coords[1]
-
+        ScreenSpaceGizmo.cameraDistance = vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position))
     }
 
     static onMouseUp() {
-        ScreenSpaceGizmo.cameraDistance = undefined
         ScreenSpaceGizmo.mouseX = 0
         ScreenSpaceGizmo.mouseY = 0
     }

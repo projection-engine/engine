@@ -12,30 +12,21 @@ import DualAxisGizmo from "../DualAxisGizmo";
 
 export default class Gizmo {
     tracking = false
-    distanceX = 0
-    distanceY = 0
-    distanceZ = 0
     xGizmo
     yGizmo
     zGizmo
     xyz
     gridSize
     totalMoved = 0
-    static movement = [0, 0, 0]
     started = false
-
     updateTransformationRealtime = false
     key
+
+    static movement = [0, 0, 0]
     static tooltip
 
-
-    constructor() {
-        Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-
-    }
-
     onMouseMove() {
-        if (!this.started && GizmoSystem.mainEntity?.components) {
+        if (!this.started && GizmoSystem.mainEntity) {
             this.started = true
             RendererStoreController.saveEntity(
                 GizmoSystem.mainEntity.id,
@@ -47,7 +38,6 @@ export default class Gizmo {
     }
 
     onMouseDown(event) {
-
         if (!Gizmo.tooltip)
             Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
 
@@ -58,7 +48,6 @@ export default class Gizmo {
         this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
         ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
-
     }
 
     static notify(position) {
@@ -84,12 +73,12 @@ export default class Gizmo {
             )
         }
 
+        this.tracking = false
         this.started = false
+
         document.exitPointerLock()
         Gizmo.movement = [0, 0, 0]
         GizmoSystem.clickedAxis = -1
-
-        this.tracking = false
         Gizmo.tooltip.style.display = "none"
     }
 
@@ -100,12 +89,9 @@ export default class Gizmo {
         const mX = Gizmo.translateMatrix(this.xGizmo)
         const mY = Gizmo.translateMatrix(this.yGizmo)
         const mZ = Gizmo.translateMatrix(this.zGizmo)
-        const FBO = GizmoSystem.drawToDepthSampler(
-            this.xyz,
-            [mX, mY, mZ]
-        )
+        const FBO = GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
         const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
-        const pickID = Math.round(255 * (dd[0]))
+        const pickID = Math.round(255 * dd[0])
         GizmoSystem.clickedAxis = pickID
 
         if (pickID === 0)
@@ -151,7 +137,7 @@ export default class Gizmo {
         DualAxisGizmo.drawGizmo()
 
         if (this.updateTransformationRealtime)
-            GizmoSystem.translation = GizmoSystem.mainEntity.translation.slice(0)
+            GizmoSystem.updateTranslation()
         const mX = Gizmo.translateMatrix(this.xGizmo)
         const mY = Gizmo.translateMatrix(this.yGizmo)
         const mZ = Gizmo.translateMatrix(this.zGizmo)

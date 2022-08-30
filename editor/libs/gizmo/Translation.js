@@ -5,7 +5,7 @@ import mapEntity from "./utils/map-entity"
 import GizmoSystem from "../../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 
-const MOVEMENT_SCALE = .01
+const MOVEMENT_SCALE = .1
 export default class Translation extends Gizmo {
     clickedAxis = -1
     tracking = false
@@ -26,6 +26,7 @@ export default class Translation extends Gizmo {
     onMouseMove(event) {
         super.onMouseMove()
         const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
+
         this.moveEntities(position)
         Gizmo.notify(position)
     }

@@ -67,6 +67,13 @@ export default class GizmoSystem {
         GizmoSystem.rotationGizmo = new Rotation()
     }
 
+    static updateTranslation() {
+        const main = GizmoSystem.mainEntity
+        if (!main)
+            return
+        const matrix = main.transformationMatrix
+        GizmoSystem.translation = [matrix[12], matrix[13], matrix[14]]
+    }
 
     static drawToDepthSampler(mesh, transforms) {
         const data = {
@@ -107,7 +114,7 @@ export default class GizmoSystem {
         const main = GizmoSystem.selectedEntities[0]
         if (MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
             GizmoSystem.mainEntity = main
-            GizmoSystem.translation = main.translation.slice(0)
+            GizmoSystem.updateTranslation()
 
             GizmoSystem.targetRotation = main.rotationQuaternion
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)

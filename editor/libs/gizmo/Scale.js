@@ -5,8 +5,7 @@ import mapEntity from "./utils/map-entity"
 import GizmoSystem from "../../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 
-const MOVEMENT_SCALE = .01
-
+const MOVEMENT_SCALE = .1
 export default class Scale extends Gizmo {
     tracking = false
 
