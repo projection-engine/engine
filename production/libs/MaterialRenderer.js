@@ -3,6 +3,8 @@ import RendererController from "../controllers/RendererController";
 import COMPONENTS from "../data/COMPONENTS";
 import GPU from "../controllers/GPU";
 import AOPass from "../templates/passes/AOPass";
+import SpecularProbePass from "../templates/passes/SpecularProbePass";
+import DiffuseProbePass from "../templates/passes/DiffuseProbePass";
 
 
 export default class MaterialRenderer {
@@ -21,9 +23,8 @@ export default class MaterialRenderer {
     }
 
     static getEnvironment(entity) {
-        const renderMap = LoopController.renderMap
-        const specular = renderMap.get("specularProbe").probes[entity.id]
-        const diffuse = renderMap.get("diffuseProbe").probes[entity.id]
+        const specular = SpecularProbePass.probes[entity.id]
+        const diffuse = DiffuseProbePass.probes[entity.id]
 
         if (diffuse)
             return {

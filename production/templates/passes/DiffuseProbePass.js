@@ -12,33 +12,36 @@ export const STEPS_LIGHT_PROBE = {
     CALCULATE: 4
 }
 export default class DiffuseProbePass {
-    step = STEPS_LIGHT_PROBE.GENERATION
-    lastCallLength = -1
-    probes = {}
-    diffuseProbes = {}
+    static step = STEPS_LIGHT_PROBE.GENERATION
+    static lastCallLength = -1
+    static probes = {}
+    static diffuseProbes = {}
+    static baseCubeMap
 
-    constructor() {
-        this.baseCubeMap = new CubeMapInstance(128)
+    static initialize() {
+        DiffuseProbePass.baseCubeMap = new CubeMapInstance(128)
     }
 
-    execute() {
+    static execute() {
         const {
             diffuseProbes,
             meshes
         } = RendererController.data
+        if (!DiffuseProbePass.baseCubeMap)
+            return
 
-        if (this.lastCallLength !== diffuseProbes.length) {
-            this.step = STEPS_LIGHT_PROBE.GENERATION
-            this.lastCallLength = diffuseProbes.length
+        if (DiffuseProbePass.lastCallLength !== diffuseProbes.length) {
+            DiffuseProbePass.step = STEPS_LIGHT_PROBE.GENERATION
+            DiffuseProbePass.lastCallLength = diffuseProbes.length
         }
-        switch (this.step) {
+        switch (DiffuseProbePass.step) {
 
             case STEPS_LIGHT_PROBE.GENERATION:
                 for (let i = 0; i < diffuseProbes.length; i++) {
                     const current = diffuseProbes[i]
                     if (!current.active)
                         continue
-                    this.baseCubeMap.draw((yaw, pitch, projection, index) => {
+                    DiffuseProbePass.baseCubeMap.draw((yaw, pitch, projection, index) => {
                             const target = vec3.add([], current.translation, VIEWS.target[index])
                             const view = mat4.lookAt([], current.translation, target, VIEWS.up[index])
                             MaterialRenderer.drawProbe(
@@ -52,31 +55,27 @@ export default class DiffuseProbePass {
                         10000,
                         1
                     )
-                    if (!this.diffuseProbes[current.id]) {
-                        this.diffuseProbes[current.id]
-                        this.diffuseProbes[current.id] = new CubeMapInstance(32)
-                    }
-                    this.diffuseProbes[current.id].generateIrradiance(this.baseCubeMap.texture, current.components[COMPONENTS.PROBE].multiplier)
+                    if (!DiffuseProbePass.diffuseProbes[current.id])
+                        DiffuseProbePass.diffuseProbes[current.id] = new CubeMapInstance(32)
+
+                    DiffuseProbePass.diffuseProbes[current.id].generateIrradiance(DiffuseProbePass.baseCubeMap.texture, current.components[COMPONENTS.PROBE].multiplier)
                 }
 
-                this.step = STEPS_LIGHT_PROBE.CALCULATE
+                DiffuseProbePass.step = STEPS_LIGHT_PROBE.CALCULATE
                 break
             case STEPS_LIGHT_PROBE.CALCULATE:
-                this.sort(diffuseProbes, meshes)
-                this.step = STEPS_LIGHT_PROBE.DONE
+                DiffuseProbePass.sort(diffuseProbes, meshes)
+                DiffuseProbePass.step = STEPS_LIGHT_PROBE.DONE
                 break
             default:
-                this.step = STEPS_LIGHT_PROBE.DONE
+                DiffuseProbePass.step = STEPS_LIGHT_PROBE.DONE
                 break
         }
     }
 
-    sort(
-        probes,
-        meshes
-    ) {
+    static sort(probes, meshes) {
         const MAX_PROBES = 4
-        for (let meshIndex  = 0; meshIndex < meshes.length; meshIndex++) {
+        for (let meshIndex = 0; meshIndex < meshes.length; meshIndex++) {
             const intersecting = []
             const currentMesh = meshes[meshIndex]
             const mPosition = currentMesh.translation
@@ -84,7 +83,7 @@ export default class DiffuseProbePass {
                 const current = probes[probeIndex]
                 const component = probes[probeIndex].components[COMPONENTS.PROBE]
                 const probePosition = current.translation
-                const texture = this.diffuseProbes[current.id].irradianceTexture
+                const texture = DiffuseProbePass.diffuseProbes[current.id].irradianceTexture
 
                 if (intersecting.length < MAX_PROBES) {
                     intersecting.push({
@@ -108,11 +107,11 @@ export default class DiffuseProbePass {
             }
             if (intersecting.length > 0) {
                 const sorted = intersecting.sort((a, b) => a.distance - b.distance)
-                this.probes[currentMesh.id] = []
+                DiffuseProbePass.probes[currentMesh.id] = []
                 for (let i = 0; i < sorted.length; i++) {
-                    this.probes[currentMesh.id][i] = {}
-                    this.probes[currentMesh.id][i].texture = sorted[i].ref
-                    this.probes[currentMesh.id][i].multiplier = sorted[i].multiplier
+                    DiffuseProbePass.probes[currentMesh.id][i] = {}
+                    DiffuseProbePass.probes[currentMesh.id][i].texture = sorted[i].ref
+                    DiffuseProbePass.probes[currentMesh.id][i].multiplier = sorted[i].multiplier
                 }
             }
         }

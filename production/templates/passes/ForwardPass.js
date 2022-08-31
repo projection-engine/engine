@@ -4,8 +4,7 @@ import RendererController from "../../controllers/RendererController";
 import CameraAPI from "../../libs/apis/CameraAPI";
 
 export default class ForwardPass {
-
-    execute() {
+    static execute() {
         const {
             meshes,
             materials,
@@ -17,7 +16,6 @@ export default class ForwardPass {
         } = RendererController.data
 
         const elapsed = RendererController.params.elapsed
-
 
 
         MaterialRenderer.loopMeshes(

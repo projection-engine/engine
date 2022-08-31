@@ -6,9 +6,9 @@ import CameraAPI from "../../libs/apis/CameraAPI";
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class SkyboxPass {
-    isReady = false
+    static isReady = false
 
-    execute( ) {
+    static execute() {
         const {
             meshes,
             materials
@@ -17,7 +17,6 @@ export default class SkyboxPass {
         const elapsed = RendererController.params.elapsed
 
 
-        this.lastMaterial = undefined
         MaterialRenderer.loopMeshes(
             materials,
             meshes,
@@ -25,8 +24,8 @@ export default class SkyboxPass {
 
                 if (mat.shadingType !== SKYBOX_TYPE)
                     return
-                if (!this.isReady) {
-                    this.isReady = true
+                if (!SkyboxPass.isReady) {
+                    SkyboxPass.isReady = true
                     gpu.depthMask(true)
                     gpu.disable(gpu.CULL_FACE)
                     gpu.disable(gpu.DEPTH_TEST)
@@ -45,11 +44,11 @@ export default class SkyboxPass {
                 }, true)
             }
         )
-        if (this.isReady) {
+        if (SkyboxPass.isReady) {
             gpu.enable(gpu.DEPTH_TEST)
             gpu.enable(gpu.CULL_FACE)
             gpu.depthMask(false)
-            this.isReady = false
+            SkyboxPass.isReady = false
         }
     }
 }

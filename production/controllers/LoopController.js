@@ -25,8 +25,6 @@ import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 export default class LoopController {
     static #initialized = false
-    static renderMap = new Map()
-    static miscMap = new Map()
     static previousFrame
 
     static initialize() {
@@ -43,17 +41,8 @@ export default class LoopController {
         AOPass.initialize()
         SSGIPass.initialize()
         SSRPass.initialize()
-
-        const rendererMap = LoopController.renderMap
-        const miscMap = LoopController.miscMap
-
-        rendererMap.set("skybox", new SkyboxPass())
-        rendererMap.set("forward", new ForwardPass())
-
-
-        rendererMap.set("shadowMap", new ShadowMapPass())
-        rendererMap.set("specularProbe", new SpecularProbePass())
-        rendererMap.set("diffuseProbe", new DiffuseProbePass())
+        DiffuseProbePass.initialize()
+        ShadowMapPass.initialize()
 
         // miscMap.set("culling", new CullingPass())
         // miscMap.set("physics", new PhysicsPass())
@@ -63,14 +52,13 @@ export default class LoopController {
 
     static #rendering(entities) {
         const onWrap = RendererController.params.onWrap
-        const map = LoopController.renderMap
         const FBO = LoopController.previousFrame
         DepthPass.execute()
         AOPass.execute()
 
-        map.get("specularProbe").execute(entities)
-        map.get("diffuseProbe").execute(entities)
-        map.get("shadowMap").execute(entities)
+        SpecularProbePass.execute()
+        DiffuseProbePass.execute()
+        ShadowMapPass.execute(entities)
 
         SSGIPass.execute()
         DeferredPass.execute()
@@ -80,14 +68,14 @@ export default class LoopController {
                 if (onWrap != null)
                     onWrap.execute(false, isDuringBinding)
                 if (isDuringBinding)
-                    map.get("skybox").execute()
+                    SkyboxPass.execute()
             }
         )
 
         FBO.startMapping()
         DeferredPass.drawFrame()
         GPU.copyTexture(FBO, DeferredPass.gBuffer, gpu.DEPTH_BUFFER_BIT)
-        map.get("forward").execute()
+        ForwardPass.execute()
         if (onWrap != null)
             onWrap.execute(true)
         FBO.stopMapping()
@@ -96,8 +84,6 @@ export default class LoopController {
     }
 
     static #miscellaneous(entities) {
-        const map = LoopController.miscMap
-
         // map.get("culling").execute(entities)
         ScriptingPass.execute()
         MetricsPass.execute(entities)

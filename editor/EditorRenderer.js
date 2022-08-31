@@ -1,11 +1,11 @@
-import {STEPS_CUBE_MAP} from "../production/templates/passes/SpecularProbePass"
+import SpecularProbePass, {STEPS_CUBE_MAP} from "../production/templates/passes/SpecularProbePass"
 import Wrapper from "./services/Wrapper"
 import MaterialInstance from "../production/controllers/instances/MaterialInstance"
 import * as debugCode from "./templates/DEBUG.glsl"
 import * as shaderCode from "../production/data/shaders/FALLBACK.glsl"
 import DATA_TYPES from "../production/data/DATA_TYPES"
 import SHADING_MODELS from "../../../data/misc/SHADING_MODELS"
-import {STEPS_LIGHT_PROBE} from "../production/templates/passes/DiffuseProbePass"
+import DiffuseProbePass, {STEPS_LIGHT_PROBE} from "../production/templates/passes/DiffuseProbePass"
 import BundlerAPI from "../production/libs/apis/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
 import LoopController from "../production/controllers/LoopController";
@@ -68,8 +68,8 @@ export default class EditorRenderer extends RendererController {
     }
 
     refreshProbes() {
-        LoopController.renderMap.get("diffuseProbe").step = STEPS_CUBE_MAP.BASE
-        LoopController.renderMap.get("specularProbe").step = STEPS_LIGHT_PROBE.GENERATION
+        DiffuseProbePass.step = STEPS_CUBE_MAP.BASE
+        SpecularProbePass.step = STEPS_LIGHT_PROBE.GENERATION
     }
 
     updatePackage(prodEnv, params) {

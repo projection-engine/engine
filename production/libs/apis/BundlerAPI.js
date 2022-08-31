@@ -9,6 +9,8 @@ import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./QueryAPI";
 import InputEventsAPI from "./InputEventsAPI";
 import CameraAPI from "./CameraAPI";
+import SpecularProbePass from "../../templates/passes/SpecularProbePass";
+import DiffuseProbePass from "../../templates/passes/DiffuseProbePass";
 
 
 export default class BundlerAPI {
@@ -91,13 +93,13 @@ export default class BundlerAPI {
             data = RendererController.data,
             entities = renderer.entities
 
-        const sSystem = LoopController.renderMap.get("specularProbe")
-        const dSystem = LoopController.renderMap.get("diffuseProbe")
+
+
         const sP = toObject(data.specularProbes), dP = toObject(data.diffuseProbes)
-        const specularProbes = sSystem.specularProbes
-        const diffuseProbes = dSystem.diffuseProbes
-        const s = sSystem.probes
-        const d = dSystem.probes
+        const specularProbes = SpecularProbePass.specularProbes
+        const diffuseProbes = DiffuseProbePass.diffuseProbes
+        const s = SpecularProbePass.probes
+        const d = DiffuseProbePass.probes
 
         Object.keys(specularProbes).forEach(k => {
             if (!sP[k]) {

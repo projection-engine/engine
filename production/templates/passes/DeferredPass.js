@@ -9,8 +9,8 @@ import GPU from "../../controllers/GPU";
 import AOPass from "./AOPass";
 import SSGIPass from "./SSGIPass";
 import SSRPass from "./SSRPass";
+import ShadowMapPass from "./ShadowMapPass";
 
-let shadowMapSystem
 export default class DeferredPass {
     static gBuffer
     static deferredShader
@@ -86,8 +86,7 @@ export default class DeferredPass {
     }
 
     static drawBuffer(entities, onWrap) {
-        if (shadowMapSystem === undefined)
-            shadowMapSystem = LoopController.renderMap.get("shadowMap")
+
         const {
             pointLightsQuantity,
             maxTextures,
@@ -105,8 +104,7 @@ export default class DeferredPass {
         onWrap(false)
         DeferredPass.compositeFBO.startMapping()
         onWrap(true)
-
-        DeferredPass.deferredShader.bindForUse({
+        const uniforms = {
             screenSpaceGI: ssgi ? SSGIPass.sampler : undefined,
             screenSpaceReflections: ssr ? SSRPass.sampler : undefined,
             positionSampler: DeferredPass.positionSampler,
@@ -114,22 +112,25 @@ export default class DeferredPass {
             albedoSampler: DeferredPass.albedoSampler,
             behaviourSampler: DeferredPass.behaviourSampler,
             ambientSampler: DeferredPass.ambientSampler,
-            shadowMapTexture: shadowMapSystem?.shadowsFrameBuffer?.depthSampler,
             aoSampler: AOPass.filteredSampler,
-
-            shadowCube0: shadowMapSystem?.specularProbes[0]?.texture,
-            shadowCube1: shadowMapSystem?.specularProbes[1]?.texture,
-
             cameraVec: CameraAPI.position,
-            settings: [
-                maxTextures, shadowMapSystem.maxResolution, shadowMapSystem ? 0 : 1,
-                shadowMapSystem.maxResolution / shadowMapSystem.resolutionPerTexture, pointLightsQuantity, ao ? 1 : 0,
-                pcfSamples, 0, 0
-            ],
             directionalLightsData,
             dirLightPOV,
-            pointLightData
-        })
+            pointLightData,
+            settings: [
+                maxTextures, ShadowMapPass.maxResolution,
+                ShadowMapPass.ready ? 0 : 1,
+                ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture,
+                pointLightsQuantity, ao ? 1 : 0,
+                pcfSamples, 0, 0
+            ]
+        }
+        if (ShadowMapPass.ready) {
+            uniforms.shadowMapTexture = ShadowMapPass.shadowsFrameBuffer.depthSampler
+            uniforms.shadowCube0 = ShadowMapPass.specularProbes[0].texture
+            uniforms.shadowCube1 = ShadowMapPass.specularProbes[1].texture
+        }
+        DeferredPass.deferredShader.bindForUse(uniforms)
 
         GPU.quad.draw()
         DeferredPass.compositeFBO.stopMapping()
