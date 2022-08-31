@@ -1,12 +1,12 @@
-import GizmoSystem from "../../services/GizmoSystem";
-import AXIS from "../../data/AXIS";
+import GizmoSystem from "../services/GizmoSystem";
+import AXIS from "../data/AXIS";
 import {mat4, quat, vec3} from "gl-matrix";
-import CameraAPI from "../../../production/libs/apis/CameraAPI";
-import mapEntity from "./utils/map-entity";
-import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE";
-import getPickerId from "../../../production/utils/get-picker-id";
-import STATIC_MESHES from "../../../static/STATIC_MESHES";
-import GPU from "../../../production/controllers/GPU";
+import CameraAPI from "../../production/libs/apis/CameraAPI";
+import mapGizmoMesh from "../utils/map-gizmo-mesh";
+import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE";
+import getPickerId from "../../production/utils/get-picker-id";
+import STATIC_MESHES from "../../static/STATIC_MESHES";
+import GPU from "../../production/controllers/GPU";
 
 export const XZ_ID = getPickerId(AXIS.XZ), XY_ID = getPickerId(AXIS.XY), ZY_ID = getPickerId(AXIS.ZY)
 export default class DualAxisGizmo {
@@ -17,9 +17,9 @@ export default class DualAxisGizmo {
     static mouseX
     static mouseY
     static gizmos = {
-        XY: mapEntity("XY", "DUAL"),
-        XZ: mapEntity("XZ", "DUAL"),
-        ZY: mapEntity("ZY", "DUAL")
+        XY: mapGizmoMesh("XY", "DUAL"),
+        XZ: mapGizmoMesh("XZ", "DUAL"),
+        ZY: mapGizmoMesh("ZY", "DUAL")
     }
 
     static onMouseMove(event) {

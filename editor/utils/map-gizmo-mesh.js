@@ -1,8 +1,8 @@
-import Entity from "../../../../production/templates/Entity"
-import Transformation from "../../../../production/libs/Transformation"
-import getPickerId from "../../../../production/utils/get-picker-id";
+import Entity from "../../production/templates/Entity"
+import Transformation from "../../production/libs/Transformation"
+import getPickerId from "../../production/utils/get-picker-id";
 
-export default function mapEntity(axis, type) {
+export default function mapGizmoMesh(axis, type) {
     const e = new Entity(undefined)
     let s, t = [0, 0, 0], r, index
     switch (axis) {

@@ -1,8 +1,8 @@
 import {vec3, vec4} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
-import Gizmo from "./libs/Gizmo"
-import mapEntity from "./utils/map-entity"
-import GizmoSystem from "../../services/GizmoSystem";
+import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
+import Gizmo from "./Gizmo"
+import mapGizmoMesh from "../utils/map-gizmo-mesh"
+import GizmoSystem from "../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 
 const MOVEMENT_SCALE = .1
@@ -16,9 +16,9 @@ export default class Translation extends Gizmo {
     constructor() {
         super()
         this.xyz = GizmoSystem.translationGizmoMesh
-        this.xGizmo = mapEntity("x", "TRANSLATION")
-        this.yGizmo = mapEntity("y", "TRANSLATION")
-        this.zGizmo = mapEntity("z", "TRANSLATION")
+        this.xGizmo = mapGizmoMesh("x", "TRANSLATION")
+        this.yGizmo = mapGizmoMesh("y", "TRANSLATION")
+        this.zGizmo = mapGizmoMesh("z", "TRANSLATION")
         this.updateTransformationRealtime = true
     }
 

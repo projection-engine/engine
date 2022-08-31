@@ -122,10 +122,9 @@ export default class BundlerAPI {
         })
     }
 
-    static packageLights() {
-        const renderer = window.renderer
-        packagePointLights(renderer)
-        packageDirectionalLights(renderer)
+    static packageLights(keepOld) {
+        packagePointLights(keepOld)
+        packageDirectionalLights(keepOld)
     }
 
     static linkScript(data, entity, scriptID, src) {

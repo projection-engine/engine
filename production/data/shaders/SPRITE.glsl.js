@@ -1,4 +1,5 @@
 
+
 export const fragment = `#version 300 es
 
 precision mediump float;
@@ -58,8 +59,12 @@ void main(){
     gl_Position = vec4(transformed.xyz, 1.0);
 }
 `
+export default {
+    vertex,
+    fragment
+}
 
-
+// TODO - REMOVE THIS
 export const selectedVertex = `#version 300 es
 
 #define SIZE .2
@@ -80,9 +85,9 @@ out vec2 uv;
 void main(){
     uv = (position.xy) * 0.5 + 0.5;
     vec3 t = vec3(0.);
-    if(forceAsIcon == false){
+    if(forceAsIcon == false)
     	t = translation - camPos;
-    }
+   
     float len = length(camPos - translation) * SIZE; 
     mat4 tt = transformMatrix;
 

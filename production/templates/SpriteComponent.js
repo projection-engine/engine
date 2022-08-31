@@ -9,6 +9,9 @@ export default class SpriteComponent {
     colorOverride = [1, 1, 1]
     useImageColors = false
     alwaysFaceCamera = false
+    keepSameSize = false
+    doInstancedDrawing = false
+    iconSize = 1.
 
     set alpha(data){
         this.backgroundColor[3] = data

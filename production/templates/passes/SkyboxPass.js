@@ -2,12 +2,13 @@ import MaterialRenderer from "../../libs/MaterialRenderer";
 import MATERIAL_RENDERING_TYPES from "../../data/MATERIAL_RENDERING_TYPES";
 import RendererController from "../../controllers/RendererController";
 import CameraAPI from "../../libs/apis/CameraAPI";
+import {mat4} from "gl-matrix";
 
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class SkyboxPass {
     static isReady = false
-
+    static projectionMatrix = mat4.perspective([], 1.57, 1, .1, 1000)
     static execute() {
         const {
             meshes,
@@ -15,8 +16,6 @@ export default class SkyboxPass {
         } = RendererController.data
 
         const elapsed = RendererController.params.elapsed
-
-
         MaterialRenderer.loopMeshes(
             materials,
             meshes,
@@ -26,7 +25,7 @@ export default class SkyboxPass {
                     return
                 if (!SkyboxPass.isReady) {
                     SkyboxPass.isReady = true
-                    gpu.depthMask(true)
+                    gpu.depthMask(false)
                     gpu.disable(gpu.CULL_FACE)
                     gpu.disable(gpu.DEPTH_TEST)
                 }
@@ -34,7 +33,7 @@ export default class SkyboxPass {
                     mesh,
                     camPosition: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,
-                    projectionMatrix: CameraAPI.projectionMatrix,
+                    projectionMatrix: SkyboxPass.projectionMatrix,
                     transformMatrix: current.transformationMatrix,
                     material: mat,
                     normalMatrix: meshComponent.normalMatrix,
@@ -47,7 +46,7 @@ export default class SkyboxPass {
         if (SkyboxPass.isReady) {
             gpu.enable(gpu.DEPTH_TEST)
             gpu.enable(gpu.CULL_FACE)
-            gpu.depthMask(false)
+            gpu.depthMask(true)
             SkyboxPass.isReady = false
         }
     }

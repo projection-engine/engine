@@ -1,18 +1,18 @@
-import ShaderInstance from "../../../production/controllers/instances/ShaderInstance"
-import * as gizmoShaderCode from "../../templates/GIZMO.glsl"
+import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
+import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TextureInstance from "../../../production/controllers/instances/TextureInstance"
-import circle from "../../../../../data/icons/circle.png"
-import TRANSFORMATION_TYPE from "../../../../../data/misc/TRANSFORMATION_TYPE"
-import Conversion from "../../../production/libs/Conversion"
-import mapEntity from "./utils/map-entity"
-import RendererStoreController from "../../../../../stores/RendererStoreController";
-import ViewportPicker from "../../../production/libs/ViewportPicker";
-import CameraAPI from "../../../production/libs/apis/CameraAPI";
-import GizmoSystem from "../../services/GizmoSystem";
-import AXIS from "../../data/AXIS";
+import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
+import Conversion from "../../production/libs/Conversion"
+import mapGizmoMesh from "../utils/map-gizmo-mesh"
+import RendererStoreController from "../../../../stores/RendererStoreController";
+import ViewportPicker from "../../production/libs/ViewportPicker";
+import CameraAPI from "../../production/libs/apis/CameraAPI";
+import GizmoSystem from "../services/GizmoSystem";
+import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
+import GPU from "../../production/controllers/GPU";
+import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",
@@ -51,10 +51,10 @@ export default class Rotation {
         }
 
         this.gizmoShader = new ShaderInstance(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
-        this.xGizmo = mapEntity("x", "ROTATION")
-        this.yGizmo = mapEntity("y", "ROTATION")
-        this.zGizmo = mapEntity("z", "ROTATION")
-        this.texture = new TextureInstance(circle, false)
+        this.xGizmo = mapGizmoMesh("x", "ROTATION")
+        this.yGizmo = mapGizmoMesh("y", "ROTATION")
+        this.zGizmo = mapGizmoMesh("z", "ROTATION")
+        this.texture = GPU.textures.get(STATIC_TEXTURES.ROTATION_GIZMO)
     }
 
     onMouseDown(event) {

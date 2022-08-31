@@ -1,14 +1,14 @@
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../../../data/misc/TRANSFORMATION_TYPE"
-import Conversion from "../../../../production/libs/Conversion"
-import INFORMATION_CONTAINER from "../../../../../../data/misc/INFORMATION_CONTAINER"
-import RendererStoreController from "../../../../../../stores/RendererStoreController";
-import ViewportPicker from "../../../../production/libs/ViewportPicker";
-import CameraAPI from "../../../../production/libs/apis/CameraAPI";
-import GizmoSystem from "../../../services/GizmoSystem";
-import AXIS from "../../../data/AXIS";
-import ScreenSpaceGizmo from "../ScreenSpaceGizmo";
-import DualAxisGizmo from "../DualAxisGizmo";
+import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
+import Conversion from "../../production/libs/Conversion"
+import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER"
+import RendererStoreController from "../../../../stores/RendererStoreController";
+import ViewportPicker from "../../production/libs/ViewportPicker";
+import CameraAPI from "../../production/libs/apis/CameraAPI";
+import GizmoSystem from "../services/GizmoSystem";
+import AXIS from "../data/AXIS";
+import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
+import DualAxisGizmo from "./DualAxisGizmo";
 
 export default class Gizmo {
     tracking = false
@@ -79,6 +79,7 @@ export default class Gizmo {
         document.exitPointerLock()
         Gizmo.movement = [0, 0, 0]
         GizmoSystem.clickedAxis = -1
+        if(Gizmo.tooltip)
         Gizmo.tooltip.style.display = "none"
     }
 

@@ -1,4 +1,3 @@
-import TextureInstance from "./TextureInstance"
 import ShaderInstance from "./ShaderInstance"
 import DATA_TYPES from "../../data/DATA_TYPES"
 import {v4} from "uuid"
@@ -15,6 +14,7 @@ export default class MaterialInstance {
     shadingType = MATERIAL_RENDERING_TYPES.DEFERRED
     isForwardShaded = false
     isDeferredShaded = true
+    texturesInUse = {}
 
     constructor({
                     vertex,
@@ -76,24 +76,19 @@ export default class MaterialInstance {
                                 color: k.data,
                                 resolution: 16
                             }))
-                            let texture
-                            await new Promise(r => {
-                                texture = new TextureInstance(
-                                    img,
-                                    k.yFlip,
-                                    gpu[k.format?.internalFormat],
-                                    gpu[k.format?.format],
-                                    true,
-                                    false,
-                                    gpu.UNSIGNED_BYTE,
-                                    undefined,
-                                    undefined,
-                                    0,
-                                    () => {
-                                        r()
-                                    }
-                                )
-                            })
+                            const textureID = v4()
+                            let texture = await GPU.allocateTexture({
+                                img,
+                                yFlip: k.yFlip,
+                                internalFormat: gpu[k.format?.internalFormat],
+                                format: gpu[k.format?.format],
+                                repeat: true,
+                                noMipMapping: false,
+                                type: gpu.UNSIGNED_BYTE,
+                                border: 0
+                            }, textureID)
+                            this.texturesInUse[textureID] = texture
+
                             this.uniformData[k.key] = texture.texture
                             break
                         }
@@ -125,6 +120,10 @@ export default class MaterialInstance {
         Object.values(this.uniformData).map(d => {
             if (d instanceof WebGLTexture)
                 gpu.deleteTexture(d)
+        })
+        this.texturesInUse.values().forEach(t => {
+            if (t.texture instanceof WebGLTexture)
+                gpu.deleteTexture(t.texture)
         })
     }
 }

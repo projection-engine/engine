@@ -3,56 +3,46 @@ import GPU from "../GPU";
 
 export default class TextureInstance {
     loaded = false
+    texture
+    attributes = {}
 
-    constructor(
-        img,
-        yFlip,
-    
-        internalFormat,
-        format,
-        repeat,
-        noMipMapping,
-        type,
-        width,
-        height,
-        border,
-        onLoad
-    ) {
-        this.attributes = {yFlip, internalFormat, format, repeat, noMipMapping, type, width, height, border,}
-
-        const init = (res) => this.#init(res, yFlip,  internalFormat, format, repeat, noMipMapping, type, width, height, border, onLoad)
+    async initialize(attributes) {
+        const img = attributes.img
+        this.attributes = attributes
         if (typeof img === "string") {
-
-            if (img.includes("libs:image/"))
-                GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
-                    .then(res => {
-                        res.naturalHeight = res.height
-                        res.naturalWidth = res.width
-                        init(res)
-                    })
-            else {
+            if (img.includes("data:image/")) {
+                const res = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
+                res.naturalHeight = res.height
+                res.naturalWidth = res.width
+                this.attributes.img = res
+                this.texture = TextureInstance.#initializeTexture(this.attributes)
+            } else {
                 const i = new Image()
                 i.src = img
-                i.decode().then(() => init(i))
+                await i.decode()
+                this.attributes.img = i
+                this.texture = TextureInstance.#initializeTexture(this.attributes)
             }
         } else
-            init(img)
+            this.texture = TextureInstance.#initializeTexture(this.attributes)
+        this.loaded = true
     }
 
-    #init(
-        img,
-        yFlip,
-        internalFormat = window.gpu.SRGB8_ALPHA8,
-        format = window.gpu.RGBA,
-        repeat = false,
-        noMipMapping = false,
-        type = window.gpu.UNSIGNED_BYTE,
-        width,
-        height,
-        border = 0,
-        onLoad=()=>null
-    ) {
-        const gpu = window.gpu
+    static #initializeTexture(attributes) {
+        const {
+            img,
+            yFlip,
+            internalFormat = gpu.SRGB8_ALPHA8,
+            format = gpu.RGBA,
+            repeat = false,
+            noMipMapping = false,
+            type = gpu.UNSIGNED_BYTE,
+            width,
+            height,
+            border = 0,
+            onLoad = () => null
+        } = attributes
+
         const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
         let newTexture = gpu.createTexture()
         if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
@@ -74,29 +64,16 @@ export default class TextureInstance {
             gpu.generateMipmap(gpu.TEXTURE_2D)
 
         gpu.bindTexture(gpu.TEXTURE_2D, null)
-
-        this.texture = newTexture
-
-        this.loaded = true
         onLoad()
+        return newTexture
     }
 
     update(newImage) {
         if (this.loaded) {
-            window.gpu.deleteTexture(this.texture)
+            gpu.deleteTexture(this.texture)
             GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
-                this.#init(
-                    res,
-                    this.attributes.yFlip,
-                    this.attributes.internalFormat,
-                    this.attributes.format,
-                    this.attributes.repeat,
-                    this.attributes.noMipMapping,
-                    this.attributes.type,
-                    this.attributes.width,
-                    this.attributes.height,
-                    this.attributes.border
-                )
+                this.attributes.img = res
+                TextureInstance.#initializeTexture(this.attributes)
             })
         }
     }

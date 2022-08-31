@@ -1,22 +1,27 @@
 import COMPONENTS from "../data/COMPONENTS";
 import {mat4} from "gl-matrix";
 import RendererController from "../controllers/RendererController";
+import MovementPass from "../templates/passes/MovementPass";
 
-export function packagePointLights() {
+export function packagePointLights(keepOld) {
     const pointLights = RendererController.data.pointLights
     let pointLightsQuantity = 0,
-        pointLightData = [],
+        pointLightData =  keepOld ? RendererController.data.pointLightData : [],
         activeOffset = 0
-
+    if(!pointLightData)
+        pointLightData = []
 
     if (pointLights)
         for (let i = 0; i < pointLights.length; i++) {
             const current = pointLights[i]
+
             if (!current.active) {
                 activeOffset++
                 continue
             }
             pointLightsQuantity++
+            if (MovementPass.lightEntityChanged && !MovementPass.changed.get(current.id))
+                continue
             const component = current.components[COMPONENTS.POINT_LIGHT]
 
             if (!pointLightData[i - activeOffset])
@@ -41,16 +46,21 @@ export function packagePointLights() {
             currentVector[12] = component.zNear
             currentVector[13] = component.shadowMap ? 1 : 0
         }
+
     RendererController.data.pointLightsQuantity = pointLightsQuantity
     RendererController.data.pointLightData = pointLightData
 }
 
-export function packageDirectionalLights() {
+export function packageDirectionalLights(keepOld) {
     let maxTextures = 0,
-        directionalLightsData = [],
-        dirLightPOV = [],
+        directionalLightsData = keepOld ? RendererController.data.directionalLightsData : [],
+        dirLightPOV = keepOld ? RendererController.data.dirLightPOV : [],
         activeOffset = 0,
         directionalLights = RendererController.data.directionalLights
+    if(!directionalLightsData || !dirLightPOV) {
+        directionalLightsData = []
+        dirLightPOV = []
+    }
     if (directionalLights)
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i]
@@ -59,6 +69,8 @@ export function packageDirectionalLights() {
                 continue
             }
             maxTextures++
+            if (MovementPass.lightEntityChanged && !MovementPass.changed.get(current.id))
+                continue
             const component = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
 
             if (!directionalLightsData[i - activeOffset])
@@ -81,6 +93,7 @@ export function packageDirectionalLights() {
                 dirLightPOV[i - activeOffset] = new Float32Array(16)
             mat4.multiply(dirLightPOV[i - activeOffset], component.lightProjection, component.lightView)
         }
+
     RendererController.data.maxTextures = maxTextures
     RendererController.data.directionalLightsData = directionalLightsData
     RendererController.data.dirLightPOV = dirLightPOV

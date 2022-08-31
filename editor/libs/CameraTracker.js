@@ -55,7 +55,6 @@ export default class CameraTracker {
             }
             case "mousemove": {
                 if (isFocused || isDoubleClick) {
-                    InputEventsAPI.lockPointer()
                     if (!isDoubleClick) {
                         if (event.movementY < 0)
                             CameraTracker.pitch += .01 * Math.abs(event.movementY)
@@ -91,7 +90,6 @@ export default class CameraTracker {
                 holding = false
                 ctrl = false
                 isFocused = false
-                document.exitPointerLock()
                 isDoubleClick = false
                 break
             case "keyup":
@@ -110,8 +108,8 @@ export default class CameraTracker {
         const events = InputEventsAPI.EVENTS
         InputEventsAPI.listenTo(events.KEY_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
         InputEventsAPI.listenTo(events.KEY_UP, CameraTracker.#handleInput, CameraTracker.#id)
-        InputEventsAPI.listenTo(events.MOUSE_UP, CameraTracker.#handleInput, CameraTracker.#id)
-        InputEventsAPI.listenTo(events.MOUSE_MOVE, CameraTracker.#handleInput, CameraTracker.#id)
+        InputEventsAPI.listenTo(events.MOUSE_UP, CameraTracker.#handleInput)
+        InputEventsAPI.listenTo(events.MOUSE_MOVE, CameraTracker.#handleInput)
         InputEventsAPI.listenTo(events.MOUSE_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
         InputEventsAPI.listenTo(events.WHEEL, CameraTracker.#handleInput, CameraTracker.#id)
     }

@@ -2,29 +2,35 @@ import {mat4} from "gl-matrix"
 import Transformation from "../../libs/Transformation"
 import COMPONENTS from "../../data/COMPONENTS"
 import GPU from "../../controllers/GPU";
+import BundlerAPI from "../../libs/apis/BundlerAPI";
 
 export default class MovementPass {
     static changed = new Map()
     static hasUpdatedItem = false
     static instancingNeedsUpdate = new Map()
+    static lightEntityChanged = false
 
     static execute(entities) {
         const size = entities.length
         MovementPass.hasUpdatedItem = false
+        MovementPass.lightEntityChanged = false
+        if (MovementPass.changed.size > 0)
+            MovementPass.changed.clear()
+
         for (let i = 0; i < size; i++) {
             const current = entities[i]
-            if (!current.active || !current.changed) {
-                MovementPass.changed.set(current.id, false)
+            if(!current.changed || !current.active)
                 continue
-            }
             MovementPass.hasUpdatedItem = true
             MovementPass.changed.set(current.id, true)
             MovementPass.transform(current)
         }
-        if(MovementPass.instancingNeedsUpdate.size > 0) {
+        if (MovementPass.instancingNeedsUpdate.size > 0) {
             MovementPass.instancingNeedsUpdate.forEach(i => i.updateBuffer())
             MovementPass.instancingNeedsUpdate.clear()
         }
+        if (MovementPass.lightEntityChanged)
+            BundlerAPI.packageLights(true)
     }
 
     static transform(entity) {
@@ -51,6 +57,8 @@ export default class MovementPass {
             const i = GPU.instancingGroup.get(entity.instancingGroupID)
             MovementPass.instancingNeedsUpdate.set(entity.instancingGroupID, i)
         }
+        if (COMPONENTS.POINT_LIGHT in entity.components || COMPONENTS.DIRECTIONAL_LIGHT in entity.components)
+            MovementPass.lightEntityChanged = true
     }
 }
 
