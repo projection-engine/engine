@@ -2,7 +2,6 @@ import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import * as shaderCode from "../../data/shaders/AO.glsl"
 import FramebufferInstance from "../../controllers/instances/FramebufferInstance"
 import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS"
-import LoopController from "../../controllers/LoopController";
 import RendererController from "../../controllers/RendererController";
 import GPU from "../../controllers/GPU";
 import DepthPass from "./DepthPass";

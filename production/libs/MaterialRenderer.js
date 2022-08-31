@@ -1,4 +1,3 @@
-import LoopController from "../controllers/LoopController";
 import RendererController from "../controllers/RendererController";
 import COMPONENTS from "../data/COMPONENTS";
 import GPU from "../controllers/GPU";

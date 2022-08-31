@@ -1,5 +1,4 @@
 import MaterialRenderer from "../../libs/MaterialRenderer";
-import LoopController from "../../controllers/LoopController";
 import RendererController from "../../controllers/RendererController";
 import CameraAPI from "../../libs/apis/CameraAPI";
 

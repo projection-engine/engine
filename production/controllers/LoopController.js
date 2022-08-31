@@ -7,12 +7,8 @@ import SSRPass from "../templates/passes/SSRPass";
 import ShadowMapPass from "../templates/passes/ShadowMapPass";
 import SpecularProbePass from "../templates/passes/SpecularProbePass";
 import DiffuseProbePass from "../templates/passes/DiffuseProbePass";
-import ShaderInstance from "./instances/ShaderInstance";
 import * as shaderCode from "../data/shaders/CUBE_MAP.glsl";
-
-import CullingPass from "../templates/passes/CullingPass";
 import MetricsPass from "../templates/passes/MetricsPass";
-import PhysicsPass from "../templates/passes/PhysicsPass";
 import ScriptingPass from "../templates/passes/ScriptingPass";
 import MovementPass from "../templates/passes/MovementPass";
 import ScreenEffectsPass from "../templates/passes/ScreenEffectsPass";

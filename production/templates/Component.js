@@ -43,15 +43,15 @@ export default class Component {
         }
     }
 
-    static color(label, key) {
-        return {type: "color", label, key}
+    static color(label, key, disabledIf) {
+        return {type: "color", label, key, disabledIf}
     }
 
     static boolean(label, key) {
         return {type: "boolean", label, key}
     }
 
-    static image(label, key) {
+    static imageTexture(label, key) {
         return {type: "image", label, key}
     }
 

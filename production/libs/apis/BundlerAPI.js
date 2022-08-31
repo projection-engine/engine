@@ -3,7 +3,6 @@ import toObject from "../../utils/to-object"
 import {packageDirectionalLights, packagePointLights} from "../../utils/package-lights";
 import materialEntityMapper from "../../utils/material-entity-mapper";
 import RendererController from "../../controllers/RendererController";
-import LoopController from "../../controllers/LoopController";
 import Component from "../../templates/Component";
 import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./QueryAPI";

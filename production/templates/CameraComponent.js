@@ -2,10 +2,8 @@ import Component from "./Component"
 import CAMERA_PROPS from "../data/component-props/CAMERA_PROPS";
 
 export default class CameraComponent extends Component {
-    get isNative() {
-        return true
-    }
     _props = CAMERA_PROPS
+    name = "CAMERA"
 
     fov = 1.57
     aspectRatio = 1
@@ -27,7 +25,7 @@ export default class CameraComponent extends Component {
 
     ortho = false
     size = 100
-    name = "CAMERA"
+
     constructor(id) {
         super(id)
     }

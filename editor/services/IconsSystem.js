@@ -8,7 +8,6 @@ import directionalLightIcon from "../../../../data/icons/directional_light.png"
 import probeIcon from "../../../../data/icons/probe.png"
 import RendererController from "../../production/controllers/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
-import QuadInstance from "../../production/controllers/instances/QuadInstance";
 import GPU from "../../production/controllers/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import CAMERA from "../data/CAMERA.json";

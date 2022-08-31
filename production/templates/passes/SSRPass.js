@@ -1,4 +1,3 @@
-import FramebufferInstance from "../../controllers/instances/FramebufferInstance"
 import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import * as ssGI from "../../data/shaders/SCREEN_SPACE.glsl"
 import LoopController from "../../controllers/LoopController";

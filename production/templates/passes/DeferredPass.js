@@ -2,7 +2,6 @@ import FramebufferInstance from "../../controllers/instances/FramebufferInstance
 import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import * as shaderCode from "../../data/shaders/DEFERRED.glsl"
 import MaterialRenderer from "../../libs/MaterialRenderer";
-import LoopController from "../../controllers/LoopController";
 import RendererController from "../../controllers/RendererController";
 import CameraAPI from "../../libs/apis/CameraAPI";
 import GPU from "../../controllers/GPU";

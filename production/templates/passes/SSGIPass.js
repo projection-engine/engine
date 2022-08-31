@@ -2,7 +2,6 @@ import FramebufferInstance from "../../controllers/instances/FramebufferInstance
 import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import * as ssGI from "../../data/shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
-import LoopController from "../../controllers/LoopController";
 import RendererController from "../../controllers/RendererController";
 import CameraAPI from "../../libs/apis/CameraAPI";
 import GPU from "../../controllers/GPU";

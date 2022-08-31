@@ -1,5 +1,4 @@
 import {mat4, vec3} from "gl-matrix"
-import LoopController from "../LoopController";
 import MeshInstance from "./MeshInstance";
 import GPU from "../GPU";
 import STATIC_SHADERS from "../../../static/STATIC_SHADERS";

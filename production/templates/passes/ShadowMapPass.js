@@ -1,5 +1,4 @@
 import * as smShaders from "../../data/shaders/SHADOW_MAP.glsl"
-import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import FramebufferInstance from "../../controllers/instances/FramebufferInstance"
 import CubeMapInstance from "../../controllers/instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"

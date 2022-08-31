@@ -1,4 +1,3 @@
-import FramebufferInstance from "../../controllers/instances/FramebufferInstance"
 import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import COMPONENTS from "../../data/COMPONENTS"
 import * as shaderCode from "../../data/shaders/DEFERRED.glsl"

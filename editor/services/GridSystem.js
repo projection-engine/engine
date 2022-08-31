@@ -1,6 +1,5 @@
 import * as shaderCode from "../templates/GRID.glsl"
 import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
-import QuadInstance from "../../production/controllers/instances/QuadInstance"
 import RendererController from "../../production/controllers/RendererController";
 import CameraAPI from "../../production/libs/apis/CameraAPI";
 import GPU from "../../production/controllers/GPU";

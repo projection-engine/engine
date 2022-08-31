@@ -1,5 +1,4 @@
 import {createTexture} from "../../utils/utils"
-import QuadInstance from "./QuadInstance"
 import GPU from "../GPU";
 
 export default class FramebufferInstance {

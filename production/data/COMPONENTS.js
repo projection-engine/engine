@@ -3,5 +3,6 @@ module.exports = {
     POINT_LIGHT: "PointLightComponent",
     MESH: "MeshComponent",
     CAMERA: "CameraComponent",
-    PROBE: "ProbeComponent"
+    PROBE: "ProbeComponent",
+    SPRITE: "SpriteComponent"
 }

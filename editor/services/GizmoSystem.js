@@ -5,7 +5,6 @@ import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
 import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 import getPickerId from "../../production/utils/get-picker-id"
-import LoopController from "../../production/controllers/LoopController";
 import MovementPass from "../../production/templates/passes/MovementPass";
 import Gizmo from "../libs/gizmo/libs/Gizmo";
 import Movable from "../../production/templates/Movable";

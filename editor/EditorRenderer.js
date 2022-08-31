@@ -8,7 +8,6 @@ import SHADING_MODELS from "../../../data/misc/SHADING_MODELS"
 import DiffuseProbePass, {STEPS_LIGHT_PROBE} from "../production/templates/passes/DiffuseProbePass"
 import BundlerAPI from "../production/libs/apis/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
-import LoopController from "../production/controllers/LoopController";
 import CameraTracker from "./libs/CameraTracker";
 import RendererController from "../production/controllers/RendererController.js";
 import GizmoSystem from "./services/GizmoSystem";
