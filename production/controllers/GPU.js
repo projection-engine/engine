@@ -114,7 +114,9 @@ export default class GPU extends InstanceController {
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, width, height).texture().depthTest()
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, width, height).texture()
 
-        GPU.allocateShader(STATIC_SHADERS.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
+        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
+        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE_INSTANCED, SPRITEGlsl.vertexInstanced, SPRITEGlsl.fragment)
+
     }
 
     static async allocateTexture(imageData, id) {

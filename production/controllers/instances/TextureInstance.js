@@ -45,8 +45,7 @@ export default class TextureInstance {
 
         const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
         let newTexture = gpu.createTexture()
-        if (yFlip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
-
+        gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, !yFlip)
         gpu.bindTexture(gpu.TEXTURE_2D, newTexture)
         gpu.texImage2D(
             gpu.TEXTURE_2D,

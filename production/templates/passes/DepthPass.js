@@ -1,10 +1,10 @@
-import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import COMPONENTS from "../../data/COMPONENTS"
 import * as shaderCode from "../../data/shaders/DEFERRED.glsl"
 import RendererController from "../../controllers/RendererController";
-import CameraAPI from "../../libs/apis/CameraAPI";
+import CameraAPI from "../../libs/CameraAPI";
 import GPU from "../../controllers/GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/STATIC_SHADERS";
 
 const vertex = `#version 300 es
 
@@ -82,8 +82,8 @@ export default class DepthPass {
         DepthPass.normalFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.RECONSTRUCTED_NORMALS)
         DepthPass.normal = DepthPass.normalFBO.colors[0]
 
-        DepthPass.shader = new ShaderInstance(vertex, frag)
-        DepthPass.normalShader = new ShaderInstance(shaderCode.vertex, normal)
+        DepthPass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEPTH, vertex, frag)
+        DepthPass.normalShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.NORMAL_RECONSTRUCTION, shaderCode.vertex, normal)
     }
 
     static execute() {

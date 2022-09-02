@@ -1,10 +1,10 @@
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
-import Conversion from "../../production/libs/Conversion"
+import ConversionAPI from "../../production/libs/ConversionAPI"
 import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER"
 import RendererStoreController from "../../../../stores/RendererStoreController";
-import ViewportPicker from "../../production/libs/ViewportPicker";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import PickingAPI from "../../production/libs/PickingAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
@@ -45,7 +45,7 @@ export default class Gizmo {
         const x = event.clientX
         const y = event.clientY
 
-        this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
+        this.currentCoord = ConversionAPI.toQuadCoord({x, y}, {w, h})
         ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
     }
@@ -91,7 +91,7 @@ export default class Gizmo {
         const mY = Gizmo.translateMatrix(this.yGizmo)
         const mZ = Gizmo.translateMatrix(this.zGizmo)
         const FBO = GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
-        const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
+        const dd = PickingAPI.depthPick(FBO, this.currentCoord)
         const pickID = Math.round(255 * dd[0])
         GizmoSystem.clickedAxis = pickID
 

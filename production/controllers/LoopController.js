@@ -18,6 +18,7 @@ import RendererController from "./RendererController";
 import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import SpritePass from "../templates/passes/SpritePass";
 
 export default class LoopController {
     static #initialized = false
@@ -27,8 +28,8 @@ export default class LoopController {
         if (LoopController.#initialized)
             return
         LoopController.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
-        GPU.allocateShader(STATIC_SHADERS.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
-        GPU.allocateShader(STATIC_SHADERS.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
+        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
+        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
 
         ScreenEffectsPass.initialize()
         DepthPass.initialize()
@@ -39,7 +40,7 @@ export default class LoopController {
         SSRPass.initialize()
         DiffuseProbePass.initialize()
         ShadowMapPass.initialize()
-
+        SpritePass.initialize()
         // miscMap.set("culling", new CullingPass())
         // miscMap.set("physics", new PhysicsPass())
 
@@ -72,6 +73,7 @@ export default class LoopController {
         DeferredPass.drawFrame()
         GPU.copyTexture(FBO, DeferredPass.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardPass.execute()
+        SpritePass.execute()
         if (onWrap != null)
             onWrap.execute(true)
         FBO.stopMapping()

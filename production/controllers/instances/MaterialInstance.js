@@ -1,4 +1,3 @@
-import ShaderInstance from "./ShaderInstance"
 import DATA_TYPES from "../../data/DATA_TYPES"
 import {v4} from "uuid"
 import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS"
@@ -52,7 +51,7 @@ export default class MaterialInstance {
     set cubeMapShader([shader, vertexShader]) {
         const v = shader !== undefined && shader !== null
         if (v) {
-            this._cubeMapShader = new ShaderInstance(vertexShader, shader)
+            this._cubeMapShader = GPU.allocateShader(this.id + "-CUBE-MAP", vertexShader, shader)
             this.hasCubeMap = v
         }
     }
@@ -62,9 +61,11 @@ export default class MaterialInstance {
         this.ready = false
         this.settings = settings
         let message
-        if (this._shader)
-            gpu.deleteProgram(this._shader.program)
-        this._shader = new ShaderInstance(vertexShader, shader)
+
+        GPU.destroyShader(this.id)
+        GPU.destroyShader(this.id + "-CUBE-MAP")
+
+        this._shader = GPU.allocateShader(this.id, vertexShader, shader)
 
         if (uniformData)
             Promise.all(uniformData.map(k => {

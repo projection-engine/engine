@@ -1,5 +1,5 @@
-import ENVIRONMENT from "../../data/ENVIRONMENT";
-import RendererController from "../../controllers/RendererController";
+import ENVIRONMENT from "../data/ENVIRONMENT";
+import RendererController from "../controllers/RendererController";
 import {v4} from "uuid";
 
 const types = Object.freeze({

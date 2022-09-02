@@ -1,39 +1,37 @@
-import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import * as shaderCode from "../templates/SELECTED.glsl"
 import COMPONENTS from "../../production/data/COMPONENTS"
-import FramebufferInstance from "../../production/controllers/instances/FramebufferInstance"
 import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import GPU from "../../production/controllers/GPU";
+import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
 
 
 export default class SelectedSystem {
+    static shaderSilhouette
+    static shader
+    static frameBuffer
+    static silhouetteSampler
 
-    constructor( ) {
-        this.shaderSilhouette = new ShaderInstance(
-            shaderCode.vertexSilhouette,
-            shaderCode.fragmentSilhouette
-        )
-        this.shader = new ShaderInstance(
-            shaderCode.vertex,
-            shaderCode.fragment
-        )
-        const TEXTURE = {
+    static initialize() {
+        SelectedSystem.shaderSilhouette = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE, shaderCode.vertexSilhouette, shaderCode.fragmentSilhouette)
+        SelectedSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE_OUTLINE, shaderCode.vertex, shaderCode.fragment)
+        SelectedSystem.frameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.OUTLINE).texture({
             precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT
-        }
-        this.frameBuffer = new FramebufferInstance().texture(TEXTURE)
+        })
+        SelectedSystem.silhouetteSampler = SelectedSystem.frameBuffer.colors[0]
     }
 
-    drawToBuffer(selected) {
+    static drawToBuffer(selected) {
         const length = selected.length
         if (length === 0)
             return
 
 
         gpu.disable(gpu.DEPTH_TEST)
-        this.frameBuffer.startMapping()
+        SelectedSystem.frameBuffer.startMapping()
         for (let m = 0; m < length; m++) {
             const current = RendererController.entitiesMap.get(selected[m])
             if (!current || !current.active)
@@ -41,26 +39,25 @@ export default class SelectedSystem {
             const mesh = GPU.meshes.get(current.components[COMPONENTS.MESH]?.meshID)
             if (!mesh)
                 continue
-            this.shader.bindForUse({
+            SelectedSystem.shader.bindForUse({
                 projectionMatrix: CameraAPI.projectionMatrix,
                 transformMatrix: current.transformationMatrix,
                 viewMatrix: CameraAPI.viewMatrix
             })
             mesh.draw()
         }
-        this.frameBuffer.stopMapping()
+        SelectedSystem.frameBuffer.stopMapping()
         gpu.enable(gpu.DEPTH_TEST)
 
     }
 
-    drawSilhouette(selected) {
+    static drawSilhouette(selected) {
         const length = selected.length
         if (length > 0) {
-            this.shaderSilhouette.bindForUse({
-                silhouette: this.frameBuffer.colors[0]
+            SelectedSystem.shaderSilhouette.bindForUse({
+                silhouette: SelectedSystem.silhouetteSampler
             })
             GPU.quad.draw()
-            gpu.bindVertexArray(null)
         }
     }
 }

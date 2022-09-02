@@ -1,6 +1,6 @@
-import MaterialRenderer from "../../libs/MaterialRenderer";
+import MaterialController from "../../controllers/MaterialController";
 import RendererController from "../../controllers/RendererController";
-import CameraAPI from "../../libs/apis/CameraAPI";
+import CameraAPI from "../../libs/CameraAPI";
 
 export default class ForwardPass {
     static execute() {
@@ -17,15 +17,15 @@ export default class ForwardPass {
         const elapsed = RendererController.params.elapsed
 
 
-        MaterialRenderer.loopMeshes(
+        MaterialController.loopMeshes(
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isForwardShaded)
                     return
 
-                const ambient = MaterialRenderer.getEnvironment(current)
-                MaterialRenderer.drawMesh({
+                const ambient = MaterialController.getEnvironment(current)
+                MaterialController.drawMesh({
                     mesh,
                     camPosition: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,

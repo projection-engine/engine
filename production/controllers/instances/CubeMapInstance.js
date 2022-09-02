@@ -14,10 +14,10 @@ export default class CubeMapInstance {
     #frameBuffer
 
     get irradianceShader(){
-        return GPU.shaders.get(STATIC_SHADERS.IRRADIANCE)
+        return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.IRRADIANCE)
     }
     get prefilteredShader(){
-        return GPU.shaders.get(STATIC_SHADERS.PREFILTERED)
+        return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.PREFILTERED)
     }
 
     constructor(resolution, asDepth) {

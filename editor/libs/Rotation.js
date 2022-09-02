@@ -1,18 +1,18 @@
-import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
-import Conversion from "../../production/libs/Conversion"
+import ConversionAPI from "../../production/libs/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
 import RendererStoreController from "../../../../stores/RendererStoreController";
-import ViewportPicker from "../../production/libs/ViewportPicker";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import PickingAPI from "../../production/libs/PickingAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../production/controllers/GPU";
 import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
+import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",
@@ -50,7 +50,7 @@ export default class Rotation {
             document.body.appendChild(this.renderTarget)
         }
 
-        this.gizmoShader = new ShaderInstance(gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
+        this.gizmoShader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.ROTATION_GIZMO, gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
         this.xGizmo = mapGizmoMesh("x", "ROTATION")
         this.yGizmo = mapGizmoMesh("y", "ROTATION")
         this.zGizmo = mapGizmoMesh("z", "ROTATION")
@@ -63,7 +63,7 @@ export default class Rotation {
         const x = event.clientX
         const y = event.clientY
 
-        this.currentCoord = Conversion.toQuadCoord({x, y}, {w, h})
+        this.currentCoord = ConversionAPI.toQuadCoord({x, y}, {w, h})
         this.currentCoord.clientX = x
         this.currentCoord.clientY = y
 
@@ -185,14 +185,14 @@ export default class Rotation {
 
 
     #testClick() {
-        if(!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedRotation)
+        if (!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedRotation)
             return
         const mX = this.#rotateMatrix("x", this.xGizmo)
         const mY = this.#rotateMatrix("y", this.yGizmo)
         const mZ = this.#rotateMatrix("z", this.zGizmo)
 
         const FBO = GizmoSystem.drawToDepthSampler(GizmoSystem.rotationGizmoMesh, [mX, mY, mZ])
-        const dd = ViewportPicker.depthPick(FBO, this.currentCoord)
+        const dd = PickingAPI.depthPick(FBO, this.currentCoord)
         const pickID = Math.round(255 * dd[0])
         GizmoSystem.clickedAxis = pickID
 
@@ -238,7 +238,7 @@ export default class Rotation {
     }
 
     drawGizmo() {
-        if(GizmoSystem.mainEntity.lockedRotation)
+        if (GizmoSystem.mainEntity.lockedRotation)
             return
 
         gpu.disable(gpu.CULL_FACE)

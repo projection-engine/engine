@@ -1,7 +1,7 @@
-import MaterialRenderer from "../../libs/MaterialRenderer";
+import MaterialController from "../../controllers/MaterialController";
 import MATERIAL_RENDERING_TYPES from "../../data/MATERIAL_RENDERING_TYPES";
 import RendererController from "../../controllers/RendererController";
-import CameraAPI from "../../libs/apis/CameraAPI";
+import CameraAPI from "../../libs/CameraAPI";
 import {mat4} from "gl-matrix";
 
 
@@ -16,7 +16,7 @@ export default class SkyboxPass {
         } = RendererController.data
 
         const elapsed = RendererController.params.elapsed
-        MaterialRenderer.loopMeshes(
+        MaterialController.loopMeshes(
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
@@ -29,7 +29,7 @@ export default class SkyboxPass {
                     gpu.disable(gpu.CULL_FACE)
                     gpu.disable(gpu.DEPTH_TEST)
                 }
-                MaterialRenderer.drawMesh({
+                MaterialController.drawMesh({
                     mesh,
                     camPosition: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,

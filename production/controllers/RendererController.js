@@ -1,4 +1,4 @@
-import CameraAPI from "../libs/apis/CameraAPI"
+import CameraAPI from "../libs/CameraAPI"
 import ENVIRONMENT from "../data/ENVIRONMENT"
 import LoopController from "./LoopController";
 

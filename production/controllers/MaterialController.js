@@ -1,12 +1,12 @@
-import RendererController from "../controllers/RendererController";
+import RendererController from "./RendererController";
 import COMPONENTS from "../data/COMPONENTS";
-import GPU from "../controllers/GPU";
+import GPU from "./GPU";
 import AOPass from "../templates/passes/AOPass";
 import SpecularProbePass from "../templates/passes/SpecularProbePass";
 import DiffuseProbePass from "../templates/passes/DiffuseProbePass";
 
 
-export default class MaterialRenderer {
+export default class MaterialController {
     static draw(mesh, material) {
         if (material.settings.depthTest === false)
             gpu.disable(gpu.DEPTH_TEST)
@@ -85,7 +85,7 @@ export default class MaterialRenderer {
         if (directDrawing)
             mesh.draw()
         else
-            MaterialRenderer.draw(mesh, material)
+            MaterialController.draw(mesh, material)
     }
 
     static drawProbe(view, projection, cubeMapPosition,) {
@@ -110,8 +110,8 @@ export default class MaterialRenderer {
                 let mat = currentMaterial && currentMaterial.ready ? currentMaterial : RendererController.fallbackMaterial
                 if (!mat || !mat.ready)
                     mat = RendererController.fallbackMaterial
-                const ambient = MaterialRenderer.getEnvironment(current)
-                MaterialRenderer.drawMesh({
+                const ambient = MaterialController.getEnvironment(current)
+                MaterialController.drawMesh({
                     ambient,
                     mesh,
                     camPosition: cubeMapPosition,

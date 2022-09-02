@@ -1,28 +1,27 @@
-export default class ViewportPicker {
+export default class PickingAPI {
     static readBlock(depthFBO, start, end) {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
-        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(w * h * 4)
-
-        window.gpu.readPixels(
+        gpu.readPixels(
             end.x > start.x ? start.x : end.x,
             end.y > start.y ? start.y : end.y,
             w,
             h,
-            window.gpu.RGBA,
-            window.gpu.FLOAT,
+            gpu.RGBA,
+            gpu.FLOAT,
             dd
         )
-        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, null)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
 
         return dd
     }
 
     static depthPick(depthFBO, coords) {
-        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, depthFBO.FBO)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, depthFBO.FBO)
         let dd = new Float32Array(4)
-        window.gpu.readPixels(
+        gpu.readPixels(
             coords.x,
             coords.y,
             1,
@@ -31,7 +30,7 @@ export default class ViewportPicker {
             window.gpu.FLOAT,
             dd
         )
-        window.gpu.bindFramebuffer(window.gpu.FRAMEBUFFER, null)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         return dd
     }
 

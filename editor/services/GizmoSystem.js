@@ -2,23 +2,18 @@ import Translation from "../libs/Translation"
 import Rotation from "../libs/Rotation"
 import Scale from "../libs/Scale"
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
-import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
-import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 import getPickerId from "../../production/utils/get-picker-id"
 import MovementPass from "../../production/templates/passes/MovementPass";
 import Gizmo from "../libs/Gizmo";
 import Movable from "../../production/templates/Movable";
-import Transformation from "../../production/libs/Transformation";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import TransformationAPI from "../../production/libs/TransformationAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
 import GPU from "../../production/controllers/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
-import ROTATION_GIZMO from "../data/ROTATION_GIZMO.json";
-import SCALE_GIZMO from "../data/SCALE_GIZMO.json";
-import TRANSLATION_GIZMO from "../data/TRANSLATION_GIZMO.json";
-import PLANE from "../data/DUAL_AXIS_GIZMO.json";
 import DepthPass from "../../production/templates/passes/DepthPass";
+import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 const EMPTY_COMPONENT = new Movable()
 
@@ -44,11 +39,7 @@ export default class GizmoSystem {
     static scaleGizmo
     static rotationGizmo
 
-    constructor() {
-        GPU.allocateMesh(STATIC_MESHES.DUAL_AXIS_GIZMO, PLANE)
-        GPU.allocateMesh(STATIC_MESHES.ROTATION_GIZMO, ROTATION_GIZMO)
-        GPU.allocateMesh(STATIC_MESHES.SCALE_GIZMO, SCALE_GIZMO)
-        GPU.allocateMesh(STATIC_MESHES.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
+    static initialize() {
 
         GizmoSystem.cubeMesh = GPU.meshes.get(STATIC_MESHES.CUBE)
         GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.DUAL_AXIS_GIZMO)
@@ -57,11 +48,10 @@ export default class GizmoSystem {
         GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.SCALE_GIZMO)
 
         EMPTY_COMPONENT.scaling = [.2, .2, .2]
-        Transformation.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.transformationMatrix)
+        TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.transformationMatrix)
 
-        GizmoSystem.toBufferShader = new ShaderInstance(gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
-        GizmoSystem.gizmoShader = new ShaderInstance(gizmoShaderCode.vertex, gizmoShaderCode.fragment)
-
+        GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
+        GizmoSystem.gizmoShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.GIZMO)
         GizmoSystem.translationGizmo = new Translation()
         GizmoSystem.scaleGizmo = new Scale()
         GizmoSystem.rotationGizmo = new Rotation()
@@ -111,7 +101,7 @@ export default class GizmoSystem {
         return FBO
     }
 
-    #findMainEntity() {
+    static #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
         if (MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main && main) {
             GizmoSystem.mainEntity = main
@@ -119,8 +109,7 @@ export default class GizmoSystem {
 
             GizmoSystem.targetRotation = main.rotationQuaternion
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
-        }
-        else if (!main){
+        } else if (!main) {
             GizmoSystem.targetGizmo = undefined
             GizmoSystem.selectedEntities = []
             GizmoSystem.mainEntity = undefined
@@ -129,11 +118,11 @@ export default class GizmoSystem {
         }
     }
 
-    execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
+    static execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
 
         if (GizmoSystem.selectedEntities.length > 0) {
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
-            this.#findMainEntity()
+            GizmoSystem.#findMainEntity()
             GizmoSystem.transformationType = transformationType
             if (GizmoSystem.targetGizmo && GizmoSystem.translation != null)
                 GizmoSystem.targetGizmo.drawGizmo()

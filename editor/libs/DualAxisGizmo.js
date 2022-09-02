@@ -1,7 +1,7 @@
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import {mat4, quat, vec3} from "gl-matrix";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import mapGizmoMesh from "../utils/map-gizmo-mesh";
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE";
 import getPickerId from "../../production/utils/get-picker-id";

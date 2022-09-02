@@ -41,13 +41,15 @@ export default class InstanceController {
         GPU.instancingGroup.set(id, instance)
         return instance
     }
+
     static linkEntityToGroup(id) {
         // TODO
     }
 
-    static unlinkEntityToGroup(){
+    static unlinkEntityToGroup() {
         // TODO
     }
+
     static allocateMesh(id, bufferData) {
         if (!bufferData || !id)
             return
@@ -55,6 +57,7 @@ export default class InstanceController {
         instance.id = id
         GPU.meshes.set(id, instance)
     }
+
     static destroyMesh(instance) {
         if (Object.values(STATIC_MESHES).find(m => m === instance.id))
             return
@@ -73,6 +76,7 @@ export default class InstanceController {
         }
 
     }
+
     static allocateShader(id, vertex, fragment, cb) {
         const instance = new ShaderInstance(vertex, fragment, cb)
         GPU.shaders.set(id, instance)
@@ -80,7 +84,7 @@ export default class InstanceController {
     }
 
     static destroyShader(id) {
-        if (Object.values(STATIC_SHADERS).find(m => m === id))
+        if (Object.values(STATIC_SHADERS.PRODUCTION).find(m => m === id) || Object.values(STATIC_SHADERS.DEVELOPMENT).find(m => m === id))
             return
         const instance = GPU.shaders.get(id)
         if (!instance)

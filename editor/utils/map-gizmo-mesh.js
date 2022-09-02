@@ -1,5 +1,5 @@
 import Entity from "../../production/templates/Entity"
-import Transformation from "../../production/libs/Transformation"
+import TransformationAPI from "../../production/libs/TransformationAPI"
 import getPickerId from "../../production/utils/get-picker-id";
 
 export default function mapGizmoMesh(axis, type) {
@@ -88,7 +88,7 @@ export default function mapGizmoMesh(axis, type) {
     e.translation = t
     e.rotation = r
     e.scaling = s
-    e.transformationMatrix = Transformation.transform(t, e.rotationQuaternion, s)
+    e.transformationMatrix = TransformationAPI.transform(t, e.rotationQuaternion, s)
 
     return e
 }

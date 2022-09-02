@@ -1,12 +1,12 @@
-import FramebufferInstance from "../../production/controllers/instances/FramebufferInstance"
 import {mat4} from "gl-matrix"
 import MeshInstance from "../../production/controllers/instances/MeshInstance"
 import MaterialInstance from "../../production/controllers/instances/MaterialInstance"
-import MaterialRenderer from "../../production/libs/MaterialRenderer";
+import MaterialController from "../../production/controllers/MaterialController";
 import RendererController from "../../production/controllers/RendererController";
-import BundlerAPI from "../../production/libs/apis/BundlerAPI";
+import BundlerAPI from "../../production/libs/BundlerAPI";
 import GPU from "../../production/controllers/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
+import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {
@@ -20,34 +20,34 @@ function getCameraData(pitch, yaw, radius, centerOn) {
 
 const RADIAN_60 = 1.0472, RADIAN_90 = 1.57
 export default class PreviewSystem {
-    identity = mat4.create()
-
-    constructor() {
-        this.frameBuffer = new FramebufferInstance(300, 300)
-            .texture({precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
-
-        this.cameraData = getCameraData(0, RADIAN_90, 2.5, [0, 0, 0])
-        this.projection = mat4.perspective([], RADIAN_60, 1, .1, 10000)
-        this.pointLightData = [
-            [
-                0, 0, 10, 0,
-                1, 1, 1, 0,
-                .5, 0, 0, 0,
-                100, .1, 0, 0
-            ],
-            [
-                0, 0, -10, 0,
-                1, 1, 1, 0,
-                .5, 0, 0, 0,
-                100, .1, 0, 0
-            ]
+    static identity = mat4.create()
+    static frameBuffer
+    static cameraData = getCameraData(0, RADIAN_90, 2.5, [0, 0, 0])
+    static projection = mat4.perspective([], RADIAN_60, 1, .1, 10000)
+    static pointLightData = [
+        [
+            0, 0, 10, 0,
+            1, 1, 1, 0,
+            .5, 0, 0, 0,
+            100, .1, 0, 0
+        ],
+        [
+            0, 0, -10, 0,
+            1, 1, 1, 0,
+            .5, 0, 0, 0,
+            100, .1, 0, 0
         ]
+    ]
+
+    static initialize() {
+        PreviewSystem.frameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.PREVIEW, 300, 300)
+            .texture({precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
     }
 
-    execute(data, materialMesh, meshEntity) {
+    static execute(materialMesh, meshEntity) {
         const {elapsed} = RendererController.params
         let response
-        this.frameBuffer.startMapping()
+        PreviewSystem.frameBuffer.startMapping()
 
 
         if (meshEntity && materialMesh instanceof MeshInstance) {
@@ -70,14 +70,14 @@ export default class PreviewSystem {
                     100, .1, 0, 0
                 ]]
 
-            MaterialRenderer.drawMesh({
+            MaterialController.drawMesh({
                 mesh: materialMesh,
                 camPosition: cam[1],
                 viewMatrix: cam[0],
-                projectionMatrix: this.projection,
+                projectionMatrix: PreviewSystem.projection,
                 transformMatrix,
                 material: RendererController.fallbackMaterial,
-                normalMatrix: this.identity,
+                normalMatrix: PreviewSystem.identity,
                 directionalLightsQuantity: 0,
                 directionalLightsData: [],
                 dirLightPOV: [],
@@ -89,29 +89,29 @@ export default class PreviewSystem {
                 useCubeMapShader: true
             })
         } else if (materialMesh instanceof MaterialInstance) {
-            const [viewMatrix, camPosition] = this.cameraData
-            MaterialRenderer.drawMesh({
+            const [viewMatrix, camPosition] = PreviewSystem.cameraData
+            MaterialController.drawMesh({
                 mesh: GPU.meshes.get(STATIC_MESHES.SPHERE),
                 camPosition,
                 viewMatrix,
-                projectionMatrix: this.projection,
-                transformMatrix: this.identity,
+                projectionMatrix: PreviewSystem.projection,
+                transformMatrix: PreviewSystem.identity,
                 material: materialMesh,
-                normalMatrix: this.identity,
+                normalMatrix: PreviewSystem.identity,
                 directionalLightsQuantity: 0,
                 directionalLightsData: [],
                 dirLightPOV: [],
                 pointLightsQuantity: 2,
-                pointLightData: this.pointLightData,
+                pointLightData: PreviewSystem.pointLightData,
                 materialComponent: {},
                 elapsed,
                 ambient: {},
                 useCubeMapShader: true
             })
         }
-        this.frameBuffer.stopMapping()
-        response = BundlerAPI.framebufferToImage(this.frameBuffer.FBO)
-        window.gpu.bindVertexArray(null)
+        PreviewSystem.frameBuffer.stopMapping()
+        response = BundlerAPI.framebufferToImage(PreviewSystem.frameBuffer.FBO)
+        gpu.bindVertexArray(null)
         return response
     }
 }

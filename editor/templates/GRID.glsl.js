@@ -85,8 +85,8 @@ void main() {
     
     float linearDepth = computeLinearDepth(fragPos3D);
     float fading = max(0., (0.5 - abs(linearDepth)));
-    vec3 verticalAxisColor = vec3(.0, .0, 1.);
-    vec3 horizontalAxisColor = vec3(1., .0, .0);
+    vec3 verticalAxisColor = vec3(.0, .0, 10.);
+    vec3 horizontalAxisColor = vec3(10., .0, .0);
     
 
         finalColor = (

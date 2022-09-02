@@ -1,25 +1,24 @@
 import * as shaderCode from "../templates/GRID.glsl"
-import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import GPU from "../../production/controllers/GPU";
+import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 export default class GridSystem {
-    constructor() {
-        this.gridShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
+    static shader
 
+    static initialize() {
+        GridSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GRID, shaderCode.vertex, shaderCode.fragment)
     }
 
-    execute() {
-
+    static execute() {
         if (RendererController.params.gridVisibility && !CameraAPI.isOrthographic) {
-            this.gridShader.bindForUse({
+            GridSystem.shader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
                 projectionMatrix: CameraAPI.projectionMatrix,
                 gamma: CameraAPI.metadata.gamma,
                 exposure: CameraAPI.metadata.exposure
             })
-
             GPU.quad.draw()
         }
     }

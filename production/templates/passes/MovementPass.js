@@ -1,8 +1,8 @@
 import {mat4} from "gl-matrix"
-import Transformation from "../../libs/Transformation"
+import TransformationAPI from "../../libs/TransformationAPI"
 import COMPONENTS from "../../data/COMPONENTS"
 import GPU from "../../controllers/GPU";
-import BundlerAPI from "../../libs/apis/BundlerAPI";
+import BundlerAPI from "../../libs/BundlerAPI";
 
 export default class MovementPass {
     static changed = new Map()
@@ -35,7 +35,7 @@ export default class MovementPass {
 
     static transform(entity) {
         entity.changed = false
-        Transformation.transform(entity.translation, entity.rotationQuaternion, entity.scaling, entity.transformationMatrix)
+        TransformationAPI.transform(entity.translation, entity.rotationQuaternion, entity.scaling, entity.transformationMatrix)
 
         if (entity.parent != null)
             mat4.multiply(

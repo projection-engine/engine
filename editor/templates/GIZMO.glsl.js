@@ -212,24 +212,39 @@ void main(){
 export const shadedVertex = `#version 300 es
 
 layout (location = 1) in vec3 position;
- layout (location = 2) in vec3 normal;
+#define SIZE .15
 
+uniform vec3 translation;
+uniform vec3 cameraPosition;
+uniform bool sameSize;
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
+ 
 
-out vec3 normalVec;
-
-void main(){
-   normalVec = normalize(normal);
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position,1.0);
+void main(){ 
+    mat4 sc  ;
+    if(sameSize){
+        float len = length(cameraPosition - translation) * SIZE;
+            
+        for ( int x = 0; x < 4; x++ )
+            for ( int y = 0; y < 4; y++ )
+                if ( x == y && x <= 2)
+                    sc[x][y] = len;
+                else if ( x == y )
+                    sc[x][y] = 1.;
+                else
+                    sc[x][y] = 0.;
+        sc = transformMatrix * sc;      
+    }
+    else
+        sc = transformMatrix;
+    gl_Position = projectionMatrix * viewMatrix * sc * vec4(position,1.0);
 }
 `
 
 export const shadedFragment = `#version 300 es
 precision highp float;
- 
-in vec3 normalVec;
 
 uniform int axis;
 uniform int selectedAxis; 
@@ -241,14 +256,17 @@ void main(){
     vec3 loc = vec3(0.0, 1.0, 0.0);
     switch (axis) {
         case 1:
-            color = vec3(1., 0., 0.);
+            color = vec3(10., 0., 0.);
    
             break;
         case 2:
-            color = vec3(0., 1., 0.);
+            color = vec3(0., 10., 0.);
             break;
         case 3:
-            color = vec3(0., 0., 1.);
+            color = vec3(0., 0., 10.);
+            break;
+        case -1:
+            color = vec3(10., .15, .0);
             break;
         default:
             break;
@@ -256,12 +274,9 @@ void main(){
   
     if(selectedAxis == axis)
         color = vec3(1., 1., 0.);
+
     
-    float shadingIntensity = dot(normalVec, vec3(0., 5.0, 0.0));
-    float brightness = max(0.5, shadingIntensity);
-    color = color * brightness;
-    
-    fragColor = vec4(color, .95);
+    fragColor = vec4(color, 1.);
 }
 `
 

@@ -1,10 +1,10 @@
-import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import {vertex} from "../../data/shaders/FXAA.glsl"
 import * as shaderCode from "../../data/shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
-import CameraAPI from "../../libs/apis/CameraAPI";
+import CameraAPI from "../../libs/CameraAPI";
 import GPU from "../../controllers/GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/STATIC_SHADERS";
 
 let shaderState
 export default class ScreenEffectsPass {
@@ -23,10 +23,11 @@ export default class ScreenEffectsPass {
         const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
         ScreenEffectsPass.blurBuffers = blurBuffers
         ScreenEffectsPass.upSampledBuffers = upSampledBuffers
-        ScreenEffectsPass.compositeShader = new ShaderInstance(vertex, shaderCode.compositeFragment,)
-        ScreenEffectsPass.upSamplingShader = new ShaderInstance(vertex, shaderCode.bilinearUpSampling,)
-        ScreenEffectsPass.brightShader = new ShaderInstance(vertex, shaderCode.brightFragment,)
-        ScreenEffectsPass.blurShader = new ShaderInstance(vertex, shaderCode.blurBox)
+
+        ScreenEffectsPass.compositeShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, vertex, shaderCode.compositeFragment,)
+        ScreenEffectsPass.upSamplingShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.BILINEAR_UP_SAMPLING, vertex, shaderCode.bilinearUpSampling,)
+        ScreenEffectsPass.brightShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, vertex, shaderCode.brightFragment,)
+        ScreenEffectsPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, vertex, shaderCode.blurBox)
         ScreenEffectsPass.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
         ScreenEffectsPass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
     }

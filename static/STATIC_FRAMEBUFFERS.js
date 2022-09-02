@@ -4,5 +4,11 @@ export default {
     DEPTH: "DEPTH",
     RECONSTRUCTED_NORMALS: "RECONSTRUCTED_NORMALS",
     SSR: "SSR",
-    AO: "AO"
+    AO: "AO",
+    DEFERRED_COMPOSITION: "DEFERRED_COMPOSITION",
+
+    EDITOR: {
+        OUTLINE: "OUTLINE",
+        PREVIEW: "PREVIEW"
+    }
 }

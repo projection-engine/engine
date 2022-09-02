@@ -1,11 +1,12 @@
-import Entity from "../../production/templates/Entity"
-import COMPONENTS from "../../production/data/COMPONENTS"
-import DirectionalLightComponent from "../../production/templates/DirectionalLightComponent"
-import MeshComponent from "../../production/templates/MeshComponent"
-import PointLightComponent from "../../production/templates/PointLightComponent"
-import ProbeComponent from "../../production/templates/ProbeComponent"
-import CameraComponent from "../../production/templates/CameraComponent"
+import Entity from "../templates/Entity"
+import COMPONENTS from "../data/COMPONENTS"
+import DirectionalLightComponent from "../templates/DirectionalLightComponent"
+import MeshComponent from "../templates/MeshComponent"
+import PointLightComponent from "../templates/PointLightComponent"
+import ProbeComponent from "../templates/ProbeComponent"
+import CameraComponent from "../templates/CameraComponent"
 import componentConstructor from "../../../component-constructor";
+import SpriteComponent from "../templates/SpriteComponent";
 
 
 const ENTITIES = {
@@ -13,7 +14,8 @@ const ENTITIES = {
     [COMPONENTS.MESH]: async (entity, k) => new MeshComponent(entity.components[k].id, entity.components[k].meshID, entity.components[k].materialID),
     [COMPONENTS.POINT_LIGHT]: async (entity, k) => new PointLightComponent(entity.components[k].id),
     [COMPONENTS.PROBE]: async (entity, k) => new ProbeComponent(entity.components[k].id),
-    [COMPONENTS.CAMERA]: async (entity, k) => new CameraComponent(entity.components[k].id)
+    [COMPONENTS.CAMERA]: async (entity, k) => new CameraComponent(entity.components[k].id),
+    [COMPONENTS.SPRITE]: async () => new SpriteComponent(),
 }
 
 export default async function parseEntityObject(entity) {

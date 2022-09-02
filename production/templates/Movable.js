@@ -1,5 +1,5 @@
 import {mat4, quat} from "gl-matrix"
-import Transformation from "../libs/Transformation"
+import TransformationAPI from "../libs/TransformationAPI"
 import TRANSFORMATION_PROPS from "../data/component-props/TRANSFORMATION_PROPS";
 import Component from "./Component";
 
@@ -24,7 +24,7 @@ export default class Movable extends Component{
     }
 
     get rotation() {
-        return Transformation.getEuler(this.rotationQuaternion)
+        return TransformationAPI.getEuler(this.rotationQuaternion)
     }
 
     get scaling() {
@@ -42,8 +42,6 @@ export default class Movable extends Component{
         return this._rotationQuat
     }
 
-
- 
     set rotationQuaternion(q) {
         this.changed = true
         this._rotationUpdated = false

@@ -3,7 +3,7 @@ import FramebufferInstance from "../../controllers/instances/FramebufferInstance
 import CubeMapInstance from "../../controllers/instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../data/COMPONENTS"
-import BundlerAPI from "../../libs/apis/BundlerAPI";
+import BundlerAPI from "../../libs/BundlerAPI";
 import RendererController from "../../controllers/RendererController";
 import GPU from "../../controllers/GPU";
 import STATIC_SHADERS from "../../../static/STATIC_SHADERS";
@@ -45,8 +45,8 @@ export default class ShadowMapPass {
             new CubeMapInstance(512, true)
         ]
         ShadowMapPass.allocateData()
-        ShadowMapPass.shadowMapShader = GPU.allocateShader(STATIC_SHADERS.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
-        ShadowMapPass.shadowMapOmniShader = GPU.allocateShader(STATIC_SHADERS.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
+        ShadowMapPass.shadowMapShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
+        ShadowMapPass.shadowMapOmniShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
         ShadowMapPass.ready = true
     }
 

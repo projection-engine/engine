@@ -1,4 +1,3 @@
-import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import * as shaderCode from "../../data/shaders/AO.glsl"
 import FramebufferInstance from "../../controllers/instances/FramebufferInstance"
 import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS"
@@ -6,6 +5,7 @@ import RendererController from "../../controllers/RendererController";
 import GPU from "../../controllers/GPU";
 import DepthPass from "./DepthPass";
 import STATIC_FRAMEBUFFERS from "../../../static/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/STATIC_SHADERS";
 
 export default class AOPass {
     static ready = false
@@ -41,8 +41,8 @@ export default class AOPass {
             })
         AOPass.filteredSampler = AOPass.blurredFBO.colors[0]
 
-        AOPass.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
-        AOPass.blurShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragmentBlur)
+        AOPass.shader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO, shaderCode.vertex, shaderCode.fragment)
+        AOPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, shaderCode.vertex, shaderCode.fragmentBlur)
 
 
         GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, GPU.internalResolution)

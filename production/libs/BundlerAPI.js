@@ -1,15 +1,15 @@
-import COMPONENTS from "../../data/COMPONENTS"
-import toObject from "../../utils/to-object"
-import {packageDirectionalLights, packagePointLights} from "../../utils/package-lights";
-import materialEntityMapper from "../../utils/material-entity-mapper";
-import RendererController from "../../controllers/RendererController";
-import Component from "../../templates/Component";
+import COMPONENTS from "../data/COMPONENTS"
+import toObject from "../utils/to-object"
+import {packageDirectionalLights, packagePointLights} from "../utils/package-lights";
+import materialEntityMapper from "../utils/material-entity-mapper";
+import RendererController from "../controllers/RendererController";
+import Component from "../templates/Component";
 import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./QueryAPI";
 import InputEventsAPI from "./InputEventsAPI";
 import CameraAPI from "./CameraAPI";
-import SpecularProbePass from "../../templates/passes/SpecularProbePass";
-import DiffuseProbePass from "../../templates/passes/DiffuseProbePass";
+import SpecularProbePass from "../templates/passes/SpecularProbePass";
+import DiffuseProbePass from "../templates/passes/DiffuseProbePass";
 
 
 export default class BundlerAPI {
@@ -22,14 +22,13 @@ export default class BundlerAPI {
 
         const attributes = {...params}
         const data = {
-
             pointLights: [],
             meshes: [],
             directionalLights: [],
             specularProbes: [],
             cameras: [],
             diffuseProbes: [],
-
+            sprites: [],
             materials: toObject(materials),
             materialEntityMap: materialEntityMapper(entities, materials)
         }
@@ -49,6 +48,8 @@ export default class BundlerAPI {
                 data.cameras.push(entity)
             if (entity.components[COMPONENTS.PROBE] && !entity.components[COMPONENTS.PROBE].specularProbe)
                 data.diffuseProbes.push(entity)
+            if (entity.components[COMPONENTS.SPRITE])
+                data.sprites.push(entity)
         }
 
         RendererController.params = attributes
@@ -92,8 +93,6 @@ export default class BundlerAPI {
             data = RendererController.data,
             entities = renderer.entities
 
-
-
         const sP = toObject(data.specularProbes), dP = toObject(data.diffuseProbes)
         const specularProbes = SpecularProbePass.specularProbes
         const diffuseProbes = DiffuseProbePass.diffuseProbes
@@ -110,6 +109,7 @@ export default class BundlerAPI {
                 delete s[k]
             }
         })
+
         Object.keys(diffuseProbes).forEach(k => {
             if (!dP[k]) {
                 const entity = entities.find(e => e.id === k)
@@ -130,8 +130,6 @@ export default class BundlerAPI {
     static linkScript(data, entity, scriptID, src) {
         const found = entity.scripts.findIndex(s => s.id === scriptID)
         try {
-
-
             const generator = new Function("InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI", data.toString())
             try {
 

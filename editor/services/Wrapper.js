@@ -2,19 +2,11 @@ import GridSystem from "./GridSystem"
 import IconsSystem from "./IconsSystem"
 import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
-import PreviewSystem from "./PreviewSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import RendererController from "../../production/controllers/RendererController";
 
 export default class Wrapper {
-    constructor() {
-        this.gridSystem = new GridSystem()
-        this.billboardSystem = new IconsSystem()
-        this.gizmoSystem = new GizmoSystem()
-        this.selectedSystem = new SelectedSystem()
-        this.previewSystem = new PreviewSystem()
-        this.backgroundSystem = new BackgroundSystem()
-    }
+
 
     execute(isDuringFrameComposition, isDuringBinging) {
         const {
@@ -23,16 +15,16 @@ export default class Wrapper {
         } = RendererController.params
 
         if (!isDuringFrameComposition && !isDuringBinging)
-            this.selectedSystem.drawToBuffer(selected)
+            SelectedSystem.drawToBuffer(selected)
         else if (!isDuringFrameComposition) {
-            this.backgroundSystem.execute()
-            this.gridSystem.execute()
+            BackgroundSystem.execute()
+            GridSystem.execute()
         } else if (isDuringFrameComposition) {
             gpu.enable(gpu.BLEND)
             gpu.blendFunc(gpu.SRC_ALPHA, gpu.ONE_MINUS_SRC_ALPHA)
-            this.billboardSystem.execute()
-            this.selectedSystem.drawSilhouette(selected)
-            this.gizmoSystem.execute(transformationType)
+            IconsSystem.execute()
+            SelectedSystem.drawSilhouette(selected)
+            GizmoSystem.execute(transformationType)
         }
     }
 }

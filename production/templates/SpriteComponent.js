@@ -1,26 +1,33 @@
 import SPRITE_PROPS from "../data/component-props/SPRITE_PROPS";
+import Component from "./Component";
 
-export default class SpriteComponent {
+export default class SpriteComponent extends Component{
     _props = SPRITE_PROPS
     name = "SPRITE"
 
     imageID
-    backgroundColor = [0, 0, 0, 0]
-    colorOverride = [1, 1, 1]
-    useImageColors = false
-    alwaysFaceCamera = false
-    keepSameSize = false
-    doInstancedDrawing = false
-    iconSize = 1.
+    isInstanced = false
 
-    set alpha(data){
-        this.backgroundColor[3] = data
+    attributes = [0, 0] // [ alwaysFaceCamera, keepSameSize, iconSize ]
+
+    get alwaysFaceCamera(){
+        return this.attributes[0] === 1
     }
-    get alpha(){
-        return this.backgroundColor[3]
+    get keepSameSize(){
+        return this.attributes[1] === 1
     }
+
+
+    set alwaysFaceCamera(d){
+        this.attributes[0] = d ? 1 : 0
+    }
+    set keepSameSize(d){
+        this.attributes[1] = d ? 1 : 0
+    }
+
 
     constructor(imageID) {
+        super()
         this.imageID = imageID
     }
 

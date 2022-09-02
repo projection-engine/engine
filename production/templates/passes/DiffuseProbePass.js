@@ -2,7 +2,7 @@ import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../data/COMPONENTS"
 import CubeMapInstance from "../../controllers/instances/CubeMapInstance"
-import MaterialRenderer from "../../libs/MaterialRenderer";
+import MaterialController from "../../controllers/MaterialController";
 import RendererController from "../../controllers/RendererController";
 
 export const STEPS_LIGHT_PROBE = {
@@ -44,7 +44,7 @@ export default class DiffuseProbePass {
                     DiffuseProbePass.baseCubeMap.draw((yaw, pitch, projection, index) => {
                             const target = vec3.add([], current.translation, VIEWS.target[index])
                             const view = mat4.lookAt([], current.translation, target, VIEWS.up[index])
-                            MaterialRenderer.drawProbe(
+                            MaterialController.drawProbe(
                                 view,
                                 projection,
                                 current.translation

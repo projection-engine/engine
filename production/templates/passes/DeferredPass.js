@@ -1,14 +1,15 @@
 import FramebufferInstance from "../../controllers/instances/FramebufferInstance"
-import ShaderInstance from "../../controllers/instances/ShaderInstance"
 import * as shaderCode from "../../data/shaders/DEFERRED.glsl"
-import MaterialRenderer from "../../libs/MaterialRenderer";
+import MaterialController from "../../controllers/MaterialController";
 import RendererController from "../../controllers/RendererController";
-import CameraAPI from "../../libs/apis/CameraAPI";
+import CameraAPI from "../../libs/CameraAPI";
 import GPU from "../../controllers/GPU";
 import AOPass from "./AOPass";
 import SSGIPass from "./SSGIPass";
 import SSRPass from "./SSRPass";
 import ShadowMapPass from "./ShadowMapPass";
+import STATIC_SHADERS from "../../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../../static/STATIC_FRAMEBUFFERS";
 
 export default class DeferredPass {
     static gBuffer
@@ -37,9 +38,9 @@ export default class DeferredPass {
         DeferredPass.behaviourSampler = DeferredPass.gBuffer.colors[3]
         DeferredPass.ambientSampler = DeferredPass.gBuffer.colors[4]
 
-        DeferredPass.deferredShader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
-        DeferredPass.compositeFBO = (new FramebufferInstance()).texture()
-        DeferredPass.toScreenShader = new ShaderInstance(shaderCode.vertex, shaderCode.toScreen)
+        DeferredPass.deferredShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, shaderCode.vertex, shaderCode.fragment)
+        DeferredPass.compositeFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
+        DeferredPass.toScreenShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, shaderCode.vertex, shaderCode.toScreen)
     }
 
     static drawFrame() {
@@ -58,15 +59,15 @@ export default class DeferredPass {
         const elapsed = RendererController.params.elapsed
 
         DeferredPass.gBuffer.startMapping()
-        MaterialRenderer.loopMeshes(
+        MaterialController.loopMeshes(
             materials,
             meshes,
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isDeferredShaded)
                     return
 
-                const ambient = MaterialRenderer.getEnvironment(current)
-                MaterialRenderer.drawMesh({
+                const ambient = MaterialController.getEnvironment(current)
+                MaterialController.drawMesh({
                     mesh,
                     camPosition: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,

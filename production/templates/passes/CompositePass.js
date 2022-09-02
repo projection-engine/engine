@@ -1,9 +1,8 @@
-import ShaderInstance from "../../controllers/instances/ShaderInstance"
-
 import * as shaderCode from "../../data/shaders/FXAA.glsl"
-import CameraAPI from "../../libs/apis/CameraAPI";
+import CameraAPI from "../../libs/CameraAPI";
 import GPU from "../../controllers/GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/STATIC_SHADERS";
 
 
 export default class CompositePass {
@@ -13,7 +12,7 @@ export default class CompositePass {
     static shader
 
     static initialize() {
-        CompositePass.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
+        CompositePass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.FRAME_COMPOSITION, shaderCode.vertex, shaderCode.fragment)
         for (let i = 1e6; i > 0; i--)
             CompositePass.lookUpRandom.push(Math.random())
         CompositePass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER).colors[0]

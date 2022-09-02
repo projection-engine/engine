@@ -37,7 +37,7 @@ export default class QuadInstance {
         gpu.bindVertexArray(null)
     }
 
-    use(cb) {
+    use() {
         MeshInstance.finishIfUsed()
         gpu.disable(gpu.CULL_FACE)
         gpu.bindVertexArray(QuadInstance.VAO)

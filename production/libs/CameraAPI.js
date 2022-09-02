@@ -1,8 +1,8 @@
 import {mat4} from "gl-matrix"
-import CameraPostProcessing from "./CameraPostProcessing";
-import COMPONENTS from "../../data/COMPONENTS";
-import RendererController from "../../controllers/RendererController";
-import ENVIRONMENT from "../../data/ENVIRONMENT";
+import CameraPostProcessing from "../templates/CameraPostProcessing";
+import COMPONENTS from "../data/COMPONENTS";
+import RendererController from "../controllers/RendererController";
+import ENVIRONMENT from "../data/ENVIRONMENT";
 
 export default class CameraAPI extends CameraPostProcessing {
     static isOrthographic = false

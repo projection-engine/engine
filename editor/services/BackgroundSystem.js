@@ -1,19 +1,19 @@
 import * as shaderCode from "../templates/SKYBOX.glsl"
-import ShaderInstance from "../../production/controllers/instances/ShaderInstance"
 import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/apis/CameraAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
 import MeshInstance from "../../production/controllers/instances/MeshInstance";
 import GPU from "../../production/controllers/GPU";
 import SkyboxPass from "../../production/templates/passes/SkyboxPass";
+import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 
 export default class BackgroundSystem {
-    constructor() {
-        this.shader = new ShaderInstance(shaderCode.vertex, shaderCode.fragment)
-
+    static shader
+    static initialize() {
+        BackgroundSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.fragment)
     }
 
-    execute() {
+    static execute() {
 
         const {gamma, background, backgroundColor} = RendererController.params
         if (background) {
@@ -21,7 +21,7 @@ export default class BackgroundSystem {
 
             gpu.depthMask(false)
             GPU.cubeBuffer.enable()
-            this.shader.bindForUse({
+            BackgroundSystem.shader.bindForUse({
                 projectionMatrix: SkyboxPass.projectionMatrix,
                 viewMatrix: CameraAPI.viewMatrix,
                 gamma: gamma,

@@ -5,6 +5,7 @@ export default class ProbeComponent extends Component {
 
     name = "PROBE"
     _props = PROBE_PROPS
+
     get isDiffuse(){
         return !this.specularProbe
     }

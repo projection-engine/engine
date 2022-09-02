@@ -1,5 +1,5 @@
-import CameraAPI from "../../production/libs/apis/CameraAPI";
-import InputEventsAPI from "../../production/libs/apis/InputEventsAPI";
+import CameraAPI from "../../production/libs/CameraAPI";
+import InputEventsAPI from "../../production/libs/InputEventsAPI";
 import {rotateY} from "../../../../components/viewport/utils/transform-camera";
 import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";

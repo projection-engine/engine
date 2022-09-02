@@ -1,5 +1,5 @@
-import RendererController from "../../controllers/RendererController";
-import UserInterfaceController from "../../controllers/UserInterfaceController";
+import RendererController from "../controllers/RendererController";
+import UserInterfaceController from "../controllers/UserInterfaceController";
 
 export default class QueryAPI {
     static getEntityByQueryID(id) {
