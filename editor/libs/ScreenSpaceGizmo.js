@@ -7,7 +7,6 @@ import CameraAPI from "../../production/libs/CameraAPI";
 import getPickerId from "../../production/utils/get-picker-id";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import GPU from "../../production/controllers/GPU";
-import EditorRenderer from "../EditorRenderer";
 
 
 const PICK_ID_SS_GIZMO = getPickerId(1)

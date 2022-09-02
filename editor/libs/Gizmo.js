@@ -2,7 +2,7 @@ import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/libs/ConversionAPI"
 import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER"
-import RendererStoreController from "../../../../stores/RendererStoreController";
+import EngineStore from "../../../../stores/EngineStore";
 import PickingAPI from "../../production/libs/PickingAPI";
 import CameraAPI from "../../production/libs/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
@@ -28,7 +28,7 @@ export default class Gizmo {
     onMouseMove() {
         if (!this.started && GizmoSystem.mainEntity) {
             this.started = true
-            RendererStoreController.saveEntity(
+            EngineStore.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 this.key,
@@ -65,7 +65,7 @@ export default class Gizmo {
 
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
-            RendererStoreController.saveEntity(
+            EngineStore.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 this.key,

@@ -4,7 +4,7 @@ import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/libs/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
-import RendererStoreController from "../../../../stores/RendererStoreController";
+import EngineStore from "../../../../stores/EngineStore";
 import PickingAPI from "../../production/libs/PickingAPI";
 import CameraAPI from "../../production/libs/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
@@ -79,7 +79,7 @@ export default class Rotation {
 
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
-            RendererStoreController.saveEntity(
+            EngineStore.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 "rotationQuaternion",
@@ -104,7 +104,7 @@ export default class Rotation {
     onMouseMove(event) {
         if (!this.started) {
             this.started = true
-            RendererStoreController.saveEntity(
+            EngineStore.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 "rotationQuaternion",
