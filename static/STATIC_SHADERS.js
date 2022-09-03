@@ -31,7 +31,6 @@ export default {
         SILHOUETTE_OUTLINE: "SILHOUETTE_OUTLINE",
 
 
-        UNSHADED: "UNSHADED",
         ROTATION_GIZMO: "ROTATION_GIZMO",
         BACKGROUND: "BACKGROUND"
     }

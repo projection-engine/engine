@@ -34,7 +34,7 @@ export default class SpritePass {
             shaderAttr.attributes = component.attributes
 
             SpritePass.shader.bindForUse(shaderAttr)
-            GPU.quad.draw()
+            GPU.quad.drawQuad()
         }
         GPU.quad.finish()
     }

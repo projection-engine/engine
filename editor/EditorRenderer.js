@@ -33,7 +33,7 @@ function getCursor() {
     const entity = new Entity()
     entity.lockedRotation = true
     entity.lockedScaling = true
-    entity.scaling = (new Array(3)).fill(.13)
+    entity.scaling = (new Array(3)).fill(.075)
     entity.transformationMatrix = TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling)
     return entity
 }
@@ -47,7 +47,6 @@ export default class EditorRenderer extends RendererController {
         GPU.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
         GPU.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()
         GPU.allocateTexture(circle, STATIC_TEXTURES.ROTATION_GIZMO).catch()
-        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.UNSHADED, cameraShaderCode.shadedVertex, cameraShaderCode.shadedFragment)
         GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
         GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
 
@@ -66,7 +65,6 @@ export default class EditorRenderer extends RendererController {
         BackgroundSystem.initialize()
         GizmoSystem.initialize()
 
-        this.editorSystem = new Wrapper()
 
     }
 
@@ -93,7 +91,7 @@ export default class EditorRenderer extends RendererController {
         BundlerAPI.build(
             {
                 ...params,
-                onWrap: prodEnv ? null : this.editorSystem,
+                onWrap: prodEnv ? null : Wrapper,
             })
     }
 

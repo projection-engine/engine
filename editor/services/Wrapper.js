@@ -4,15 +4,11 @@ import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import RendererController from "../../production/controllers/RendererController";
+import SelectionStore from "../../../../stores/SelectionStore";
 
 export default class Wrapper {
-
-
-    execute(isDuringFrameComposition, isDuringBinging) {
-        const {
-            selected,
-            transformationType
-        } = RendererController.params
+    static execute(isDuringFrameComposition, isDuringBinging) {
+        const {selected, transformationType} = RendererController.params
 
         if (!isDuringFrameComposition && !isDuringBinging)
             SelectedSystem.drawToBuffer(selected)
