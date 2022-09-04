@@ -1,6 +1,14 @@
 import {v4} from "uuid"
 import cloneClass from "../utils/clone-class"
 import Movable from "./Movable";
+import COMPONENTS from "../data/COMPONENTS";
+
+import DirectionalLightComponent from "./DirectionalLightComponent";
+import MeshComponent from "./MeshComponent";
+import PointLightComponent from "./PointLightComponent";
+import ProbeComponent from "./ProbeComponent";
+import CameraComponent from "./CameraComponent";
+import SpriteComponent from "./SpriteComponent";
 
 
 export default class Entity extends Movable {
@@ -60,5 +68,45 @@ export default class Entity extends Movable {
         clone.lockedScaling = this.lockedScaling
 
         return clone
+    }
+
+    static nativeComponents = {
+        [COMPONENTS.DIRECTIONAL_LIGHT]: async (entity, k) => new DirectionalLightComponent(entity.components[k].id, entity),
+        [COMPONENTS.MESH]: async (entity, k) => new MeshComponent(entity.components[k].id, entity.components[k].meshID, entity.components[k].materialID),
+        [COMPONENTS.POINT_LIGHT]: async (entity, k) => new PointLightComponent(entity.components[k].id),
+        [COMPONENTS.PROBE]: async (entity, k) => new ProbeComponent(entity.components[k].id),
+        [COMPONENTS.CAMERA]: async (entity, k) => new CameraComponent(entity.components[k].id),
+        [COMPONENTS.SPRITE]: async () => new SpriteComponent(),
+    }
+
+    static async parseEntityObject(entity) {
+
+        const parsedEntity = new Entity(entity.id, entity.name, entity.active)
+        Object.keys(entity)
+            .forEach(k => {
+                if (k !== "components" && k !== "parent" && k !== "matrix")
+                    parsedEntity[k] = entity[k]
+            })
+
+        parsedEntity.parent = undefined
+        parsedEntity.parentCache = entity.parent
+        for (const k in entity.components) {
+            if (typeof Entity.nativeComponents[k] === "function") {
+                let component = await Entity.nativeComponents[k](entity, k)
+
+                if (component) {
+                    const keys = Object.keys(entity.components[k])
+                    for (let i = 0; i < keys.length; i++) {
+                        const oK = keys[i]
+                        if (!oK.includes("__") && !oK.includes("#")) component[oK] = entity.components[k][oK]
+                    }
+                    parsedEntity.components[k] = component
+                    if (k === COMPONENTS.DIRECTIONAL_LIGHT)
+                        component.changed = true
+                }
+            }
+        }
+        parsedEntity.changed = true
+        return parsedEntity
     }
 }

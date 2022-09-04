@@ -1,31 +1,64 @@
 import CameraAPI from "../../production/libs/CameraAPI";
 import InputEventsAPI from "../../production/libs/InputEventsAPI";
-import {rotateY} from "../../../../components/viewport/utils/transform-camera";
+
 import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";
+import {quat, vec3} from "gl-matrix";
 
 let interval, ctrl, holding, isFocused, isDoubleClick
 const BUTTON_MIDDLE = 1
 
 export default class CameraTracker {
-    static cameraSpeed = 0.01
-    static increment = 0
+    static movementSpeed = 0.01
     static scrollSpeed = .5
-    static cameraScrollDelay = 100
+    static scrollDelay = 100
+    static turnSpeed = .01
+
+    static increment = 0
 
     static yaw = 1.5
-    static pitch = 1.5
+    static pitch = 0
     static centerOn = [0, 0, 0]
-    static radius = 10
+    static radius = 1
     static gizmoReference
     static cameraInitialized = false
     static animated = false
+
+
+    static #incrementRadius(increment) {
+        const cosPitch = Math.cos(CameraTracker.pitch)
+        const position = []
+        position[0] = increment * cosPitch * Math.cos(CameraTracker.yaw)
+        position[1] = increment * Math.sin(CameraTracker.pitch)
+        position[2] = increment * cosPitch * Math.sin(CameraTracker.yaw)
+
+        vec3.add(CameraTracker.centerOn, CameraTracker.centerOn, position)
+        CameraTracker.update(true)
+    }
+
+    static rotateY(angle, vec) {
+        const matrix = new Array(4)
+        for (let i = 0; i < 4; i++) {
+            matrix[i] = new Array(4).fill(0)
+        }
+        matrix[0][0] = Math.cos(angle)
+        matrix[0][2] = Math.sin(angle)
+        matrix[2][0] = -Math.sin(angle)
+        matrix[1][1] = 1
+        matrix[2][2] = Math.cos(angle)
+        matrix[3][3] = 1
+        return [
+            vec[0] * matrix[0][0] + vec[1] * matrix[1][0] + vec[2] * matrix[2][0],
+            vec[0] * matrix[0][1] + vec[1] * matrix[1][1] + vec[2] * matrix[2][1],
+            vec[0] * matrix[0][2] + vec[1] * matrix[1][2] + vec[2] * matrix[2][2]
+        ]
+    }
 
     static #handleInput(event) {
         switch (event.type) {
             case "wheel": {
                 const forward = event.deltaY < 0
-                const distance = (forward ? 1 : -1) * CameraTracker.scrollSpeed * (CameraTracker.animated ? 1 : 3)
+                const distance = (forward ? 1 : -1) * CameraTracker.scrollSpeed
 
                 if (CameraTracker.animated) {
                     const s = Math.sign(CameraTracker.increment)
@@ -34,12 +67,12 @@ export default class CameraTracker {
                     CameraTracker.increment += distance
                     if (interval)
                         clearInterval(interval)
-                    let percentage = Math.abs(CameraTracker.increment / CameraTracker.cameraScrollDelay)
+                    let percentage = Math.abs(CameraTracker.increment / CameraTracker.scrollDelay)
 
                     interval = setInterval(() => {
                         if (s < 0 && CameraTracker.increment <= 0 || s > 0 && CameraTracker.increment >= 0) {
-                            CameraTracker.radius -= CameraTracker.increment * percentage
-                            CameraTracker.update(true)
+                            const increment = -CameraTracker.increment * percentage
+                            CameraTracker.#incrementRadius(increment)
                             if (s > 0)
                                 CameraTracker.increment -= percentage
                             else
@@ -47,28 +80,27 @@ export default class CameraTracker {
                         } else
                             clearInterval(interval)
                     }, 1)
-                } else {
-                    CameraTracker.radius -= distance
-                    CameraTracker.update(true)
-                }
+                } else
+                    CameraTracker.#incrementRadius(-distance)
                 break
             }
             case "mousemove": {
                 if (isFocused || isDoubleClick) {
                     if (!isDoubleClick) {
                         if (event.movementY < 0)
-                            CameraTracker.pitch += .01 * Math.abs(event.movementY)
+                            CameraTracker.pitch += CameraTracker.turnSpeed * Math.abs(event.movementY)
 
                         else if (event.movementY >= 0)
-                            CameraTracker.pitch -= .01 * Math.abs(event.movementY)
+                            CameraTracker.pitch -= CameraTracker.turnSpeed * Math.abs(event.movementY)
+
 
                         if (event.movementX >= 0)
-                            CameraTracker.yaw += .01 * Math.abs(event.movementX)
+                            CameraTracker.yaw += CameraTracker.turnSpeed * Math.abs(event.movementX)
                         else if (event.movementX < 0)
-                            CameraTracker.yaw -= .01 * Math.abs(event.movementX)
+                            CameraTracker.yaw -= CameraTracker.turnSpeed * Math.abs(event.movementX)
 
                     } else {
-                        const newPosition = rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.cameraSpeed * event.movementY, 0, -CameraTracker.cameraSpeed * event.movementX])
+                        const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.movementSpeed * event.movementY, 0, -CameraTracker.movementSpeed * event.movementX])
 
                         CameraTracker.centerOn[0] += newPosition[0]
                         CameraTracker.centerOn[1] -= ctrl ? .1 * event.movementY : newPosition[1]
@@ -79,8 +111,10 @@ export default class CameraTracker {
                 break
             }
             case "mousedown":
-                if (holding)
+                if (holding) {
+                    document.body.requestPointerLock()
                     isDoubleClick = true
+                }
                 if (event.button === BUTTON_MIDDLE) {
                     isFocused = true
                 } else
@@ -132,5 +166,34 @@ export default class CameraTracker {
             const transformationMatrix = CameraAPI.staticViewMatrix
             CameraTracker.gizmoReference.style.transform = `translateZ(calc(var(--cube-size) * -3)) matrix3d(${transformationMatrix})`
         }
+    }
+
+    static transformCamera(event, type) {
+        document.body.requestPointerLock()
+        const handleMouseMove = (e) => {
+            const incrementX = CameraTracker.movementSpeed * e.movementX,
+                incrementY = CameraTracker.movementSpeed * e.movementY,
+                c = [...CameraTracker.centerOn]
+
+            if (type === 1) {
+                const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [incrementX, 0, 0])
+                c[0] += newPosition[0]
+                c[1] -= incrementY
+                c[2] += newPosition[2]
+
+                CameraTracker.centerOn = c
+                CameraTracker.update()
+            } else {
+                CameraTracker.radius += CameraTracker.movementSpeed * e.movementX
+                CameraTracker.update()
+            }
+        }
+
+        const handleMouseUp = () => {
+            document.exitPointerLock()
+            document.removeEventListener("mousemove", handleMouseMove)
+        }
+        document.addEventListener("mousemove", handleMouseMove)
+        document.addEventListener("mouseup", handleMouseUp, {once: true})
     }
 }

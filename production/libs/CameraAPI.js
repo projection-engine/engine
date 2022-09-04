@@ -4,6 +4,7 @@ import COMPONENTS from "../data/COMPONENTS";
 import RendererController from "../controllers/RendererController";
 import ENVIRONMENT from "../data/ENVIRONMENT";
 
+const toRad = Math.PI/180
 export default class CameraAPI extends CameraPostProcessing {
     static isOrthographic = false
     static metadata = new CameraPostProcessing()
@@ -38,12 +39,7 @@ export default class CameraAPI extends CameraPostProcessing {
     }
 
     static sphericalTransformation(rotationVec, radius, centerOn) {
-        const [yaw, p] = rotationVec
-        let pitch = p
-        if (pitch >= Math.PI/2)
-            pitch = 1.57
-        if (pitch <= -Math.PI/2)
-            pitch = -1.57
+        const [yaw, pitch] = rotationVec
 
         const cosPitch = Math.cos(pitch)
         const position = []
