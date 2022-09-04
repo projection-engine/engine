@@ -56,7 +56,7 @@ export default class IconsSystem {
     static execute() {
         const {cameras} = RendererController.data
         const {iconsVisibility} = RendererController.params
-        let current
+
         if (iconsVisibility) {
             const attr = {
                 viewMatrix: CameraAPI.viewMatrix,
@@ -78,20 +78,20 @@ export default class IconsSystem {
             gpu.disable(gpu.DEPTH_TEST)
 
             GPU.quad.use()
-
-            current = EditorRenderer.cursor
+            // CURSOR
             attr.scale = SCALE_CURSOR
-            attr.transformationMatrix = current.transformationMatrix
+            attr.transformationMatrix = EditorRenderer.cursor.transformationMatrix
             attr.iconSampler = IconsSystem.cursorTexture
             attr.attributes = [1, 1]
             SpritePass.shader.bindForUse(attr)
             GPU.quad.drawQuad()
 
-            const locked = SelectionStore.lockedEntity
+            // LOCKED
+            const locked = RendererController.entitiesMap.get(SelectionStore.lockedEntity)
             if (IconsSystem.texture && locked) {
-                current = RendererController.entitiesMap.get(locked)
+
                 attr.scale = SCALE
-                attr.transformationMatrix = current.transformationMatrix
+                attr.transformationMatrix = locked.transformationMatrix
                 attr.iconSampler = IconsSystem.texture
 
                 SpritePass.shader.bindForUse(attr)
