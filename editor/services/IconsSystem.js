@@ -9,6 +9,7 @@ import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
 import COMPONENTS from "../../production/data/COMPONENTS";
 import SpritePass from "../../production/templates/passes/SpritePass";
 import TransformationAPI from "../../production/libs/TransformationAPI";
+import GizmoSystem from "./GizmoSystem";
 
 const SCALE = (new Array(3)).fill(.3)
 const SCALE_CURSOR = (new Array(3)).fill(.5)
@@ -17,7 +18,8 @@ export default class IconsSystem {
     static cameraMesh
     static shader
     static selectedMap
-    static texture
+    static textureOrange
+    static textureYellow
     static cursorTexture
 
 
@@ -31,12 +33,20 @@ export default class IconsSystem {
         canvas.height = 128
 
         // LOCKED ENTITY
+        ctx.fillStyle = "yellow"
+        ctx.arc(64, 64, 10, 0, Math.PI * 2)
+        ctx.fill()
+        GPU.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL).then(texture => {
+            IconsSystem.textureYellow = texture.texture
+        })
+
+        ctx.clearRect(0, 0, 128, 128)
+
         ctx.fillStyle = "rgb(255, 69, 0)"
         ctx.arc(64, 64, 10, 0, Math.PI * 2)
         ctx.fill()
-
-        GPU.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL).then(texture => {
-            IconsSystem.texture = texture.texture
+        GPU.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL_ORANGE).then(texture => {
+            IconsSystem.textureOrange = texture.texture
         })
 
         ctx.clearRect(0, 0, 128, 128)
@@ -53,7 +63,7 @@ export default class IconsSystem {
     }
 
 
-    static execute() {
+    static execute(selected) {
         const {cameras} = RendererController.data
         const {iconsVisibility} = RendererController.params
 
@@ -78,25 +88,35 @@ export default class IconsSystem {
             gpu.disable(gpu.DEPTH_TEST)
 
             GPU.quad.use()
-            // CURSOR
-            attr.scale = SCALE_CURSOR
-            attr.transformationMatrix = EditorRenderer.cursor.transformationMatrix
-            attr.iconSampler = IconsSystem.cursorTexture
-            attr.attributes = [1, 1]
-            SpritePass.shader.bindForUse(attr)
-            GPU.quad.drawQuad()
+            if (!GizmoSystem.translation) {
+                attr.scale = SCALE_CURSOR
+                attr.transformationMatrix = EditorRenderer.cursor.transformationMatrix
+                attr.iconSampler = IconsSystem.cursorTexture
+                attr.attributes = [1, 1]
+                SpritePass.shader.bindForUse(attr)
+                GPU.quad.drawQuad()
+            }
+            const size = selected?.length
+            if (size > 0) {
+                for (let i = 0; i < size; i++) {
+                    const current = RendererController.entitiesMap.get(selected[i])
+                    attr.scale = SCALE
+                    attr.transformationMatrix = current.transformationMatrix
+                    attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
 
-            // LOCKED
-            const locked = RendererController.entitiesMap.get(SelectionStore.lockedEntity)
-            if (IconsSystem.texture && locked) {
-
+                    SpritePass.shader.bindForUse(attr)
+                    GPU.quad.drawQuad()
+                }
+            } else {
+                const current = RendererController.entitiesMap.get(SelectionStore.lockedEntity)
                 attr.scale = SCALE
-                attr.transformationMatrix = locked.transformationMatrix
-                attr.iconSampler = IconsSystem.texture
+                attr.transformationMatrix = current.transformationMatrix
+                attr.iconSampler = IconsSystem.textureYellow
 
                 SpritePass.shader.bindForUse(attr)
                 GPU.quad.drawQuad()
             }
+
 
             GPU.quad.finish()
             gpu.enable(gpu.DEPTH_TEST)

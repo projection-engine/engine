@@ -4,8 +4,11 @@ import InputEventsAPI from "../../production/libs/InputEventsAPI";
 import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";
 import {quat, vec3} from "gl-matrix";
+import GizmoSystem from "../services/GizmoSystem";
+import Gizmo from "./Gizmo";
+import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER";
 
-let interval, ctrl, holding, isFocused, isDoubleClick
+let interval, ctrl, holding, isFocused, isDoubleClick, timeout
 const BUTTON_MIDDLE = 1
 
 export default class CameraTracker {
@@ -25,15 +28,34 @@ export default class CameraTracker {
     static animated = false
 
 
-    static #incrementRadius(increment) {
-        const cosPitch = Math.cos(CameraTracker.pitch)
-        const position = []
-        position[0] = increment * cosPitch * Math.cos(CameraTracker.yaw)
-        position[1] = increment * Math.sin(CameraTracker.pitch)
-        position[2] = increment * cosPitch * Math.sin(CameraTracker.yaw)
+    static #incrementCameraPlacement(ctrlKey, increment) {
+        if (ctrlKey) {
+            const cosPitch = Math.cos(CameraTracker.pitch)
+            const position = []
+            position[0] = increment * cosPitch * Math.cos(CameraTracker.yaw)
+            position[1] = increment * Math.sin(CameraTracker.pitch)
+            position[2] = increment * cosPitch * Math.sin(CameraTracker.yaw)
 
-        vec3.add(CameraTracker.centerOn, CameraTracker.centerOn, position)
-        CameraTracker.update(true)
+            vec3.add(CameraTracker.centerOn, CameraTracker.centerOn, position)
+            CameraTracker.update(true)
+
+        } else {
+            CameraTracker.radius += increment
+            CameraTracker.update(true)
+        }
+        if (!Gizmo.tooltip)
+            Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+        if(Gizmo.tooltip) {
+            Gizmo.tooltip.isChanging()
+            Gizmo.tooltip.textContent = `X ${CameraTracker.centerOn[0].toFixed(2)}  |  Y ${CameraTracker.centerOn[1].toFixed(2)}  |  Z ${CameraTracker.centerOn[2].toFixed(2)}  |  Radius ${CameraTracker.radius.toFixed(0)}`
+        }
+        clearTimeout(timeout)
+        timeout = setTimeout(() => {
+            if (!Gizmo.tooltip)
+                Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+            if(Gizmo.tooltip)
+                Gizmo.tooltip.finished()
+        }, 500)
     }
 
     static rotateY(angle, vec) {
@@ -72,7 +94,7 @@ export default class CameraTracker {
                     interval = setInterval(() => {
                         if (s < 0 && CameraTracker.increment <= 0 || s > 0 && CameraTracker.increment >= 0) {
                             const increment = -CameraTracker.increment * percentage
-                            CameraTracker.#incrementRadius(increment)
+                            CameraTracker.#incrementCameraPlacement(event.ctrlKey, increment)
                             if (s > 0)
                                 CameraTracker.increment -= percentage
                             else
@@ -81,7 +103,7 @@ export default class CameraTracker {
                             clearInterval(interval)
                     }, 1)
                 } else
-                    CameraTracker.#incrementRadius(-distance)
+                    CameraTracker.#incrementCameraPlacement(event.ctrlKey, -distance)
                 break
             }
             case "mousemove": {
@@ -125,6 +147,7 @@ export default class CameraTracker {
                 ctrl = false
                 isFocused = false
                 isDoubleClick = false
+
                 break
             case "keyup":
             case "keydown":
@@ -169,8 +192,9 @@ export default class CameraTracker {
     }
 
     static transformCamera(event, type) {
-        document.body.requestPointerLock()
         const handleMouseMove = (e) => {
+            if (!document.pointerLockElement)
+                document.body.requestPointerLock()
             const incrementX = CameraTracker.movementSpeed * e.movementX,
                 incrementY = CameraTracker.movementSpeed * e.movementY,
                 c = [...CameraTracker.centerOn]
@@ -191,9 +215,9 @@ export default class CameraTracker {
 
         const handleMouseUp = () => {
             document.exitPointerLock()
-            document.removeEventListener("mousemove", handleMouseMove)
+            document.body.removeEventListener("mousemove", handleMouseMove)
         }
-        document.addEventListener("mousemove", handleMouseMove)
-        document.addEventListener("mouseup", handleMouseUp, {once: true})
+        document.body.addEventListener("mousemove", handleMouseMove)
+        document.body.addEventListener("mouseup", handleMouseUp, {once: true})
     }
 }

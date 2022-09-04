@@ -79,8 +79,7 @@ export default class Gizmo {
         document.exitPointerLock()
         Gizmo.movement = [0, 0, 0]
         GizmoSystem.clickedAxis = -1
-        if(Gizmo.tooltip)
-        Gizmo.tooltip.style.display = "none"
+
     }
 
 
@@ -101,7 +100,6 @@ export default class Gizmo {
             GizmoSystem.wasOnGizmo = true
             this.tracking = true
             gpu.canvas.requestPointerLock()
-            Gizmo.tooltip.style.display = "block"
         }
     }
 

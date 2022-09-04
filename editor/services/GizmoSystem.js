@@ -33,7 +33,7 @@ export default class GizmoSystem {
     static scaleGizmoMesh
     static translationGizmoMesh
     static dualAxisGizmoMesh
-    static cubeMesh
+    static screenSpaceMesh
 
     static translationGizmo
     static scaleGizmo
@@ -41,7 +41,7 @@ export default class GizmoSystem {
 
     static initialize() {
 
-        GizmoSystem.cubeMesh = GPU.meshes.get(STATIC_MESHES.CUBE)
+        GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.SPHERE)
         GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.DUAL_AXIS_GIZMO)
         GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.TRANSLATION_GIZMO)
         GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.ROTATION_GIZMO)
@@ -92,7 +92,7 @@ export default class GizmoSystem {
             transformMatrix: GizmoSystem.transformationMatrix,
             uID: getPickerId(1)
         })
-        GizmoSystem.cubeMesh.draw()
+        GizmoSystem.screenSpaceMesh.draw()
 
         DualAxisGizmo.drawToBuffer(data)
         FBO.stopMapping()

@@ -18,9 +18,10 @@ export default class Wrapper {
         } else if (isDuringFrameComposition) {
             gpu.enable(gpu.BLEND)
             gpu.blendFunc(gpu.SRC_ALPHA, gpu.ONE_MINUS_SRC_ALPHA)
-            IconsSystem.execute()
+
             SelectedSystem.drawSilhouette(selected)
             GizmoSystem.execute(transformationType)
+            IconsSystem.execute(selected)
         }
     }
 }
