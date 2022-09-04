@@ -2,6 +2,9 @@ import Shadows from "../../data/shaders/templates/SHADOWS"
 import * as PROBES from "../../data/shaders/templates/PROBES"
 import {PBR} from "../../data/shaders/templates/PBR"
 import GPU from "../GPU";
+import {mat3, mat4} from "gl-matrix";
+import {v4} from "uuid";
+
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -56,6 +59,7 @@ function applyMethods(shaderCode) {
     return response
 }
 
+
 export default class ShaderInstance {
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
@@ -77,7 +81,7 @@ export default class ShaderInstance {
         const vCode = this.#compileShader(trimString(vertex), gpu.VERTEX_SHADER, m => alert.push(m))
         const fCode = this.#compileShader(trimString(fragment), gpu.FRAGMENT_SHADER, m => alert.push(m))
 
-        this.uniforms = [...this._extractUniforms(vCode), ...this._extractUniforms(fCode)].flat()
+        this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat()
         if (typeof setMessage === "function")
             setMessage({
                 error: gpu.getError(),
@@ -99,7 +103,6 @@ export default class ShaderInstance {
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
         if (!compiled) {
             console.error(gpu.getShaderInfoLog(shader))
-            console.dir(shaderCode)
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false
         } else {
@@ -111,7 +114,7 @@ export default class ShaderInstance {
         return bundledCode
     }
 
-    _extractUniforms(code) {
+    #extractUniforms(code) {
         let uniformObjects = []
         const uniforms = code.match(this.regex)
         if (uniforms) {
@@ -207,69 +210,64 @@ export default class ShaderInstance {
             gpu.useProgram(this.program)
         GPU.activeShader = this.program
         let currentSamplerIndex = 0
-
+        const increase = () => currentSamplerIndex++
         for (let v = 0; v < this.length; v++) {
             const current = this.uniforms[v]
-
-            if (current.arraySize !== undefined) {
+            if (current.uLocations != null) {
                 const dataAttr = current.parent !== undefined ? data[current.parent] : data[current.name]
-                if (dataAttr) {
-                    const l = (current.arraySize < dataAttr.length ? current.arraySize : dataAttr.length)
-                    for (let i = 0; i < l; i++) {
-                        if (current.parent)
-                            ShaderInstance.bind(current.uLocations[i], dataAttr[i][current.name], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
-                        else
-                            ShaderInstance.bind(current.uLocations[i], dataAttr[i], current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
-                    }
+                for (let i = 0; i < current.uLocations.length; i++) {
+                    const u = current.uLocations[i]
+                    const d = dataAttr[i]
+                    if (current.parent)
+                        ShaderInstance.bind(u, d[current.name], current.type, currentSamplerIndex, increase)
+                    else
+                        ShaderInstance.bind(u, d, current.type, currentSamplerIndex, increase)
                 }
             } else {
                 const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
-                ShaderInstance.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, () => currentSamplerIndex++, current)
+                ShaderInstance.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, increase)
             }
         }
-
     }
 
-    static bind(uLocation, data, type, currentSamplerIndex, increaseIndex, c) {
-        try {
-            switch (type) {
-                case "float":
-                case "int":
-                case "vec2":
-                case "vec3":
-                case "vec4":
-                case "ivec2":
-                case "ivec3":
-                case "bool":
-                    gpu[TYPES[type]](uLocation, data)
-                    break
-                case "mat3":
-                case "mat4":
-                    gpu[TYPES[type]](uLocation, false, data)
-                    break
-                case "samplerCube":
-                    gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
-                    gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, data)
-                    gpu.uniform1i(uLocation, currentSamplerIndex)
-                    increaseIndex()
-                    break
-                case "sampler2D":
-                    gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
-                    gpu.bindTexture(gpu.TEXTURE_2D, data)
-                    gpu.uniform1i(uLocation, currentSamplerIndex)
-                    increaseIndex()
-                    break
-                default:
-                    break
-            }
-        } catch (err) {
-            console.error({
-                error: err,
-                uniform: uLocation,
-                type,
-                data,
-                c
-            })
+    static bind(uLocation, data, type, currentSamplerIndex, increaseIndex) {
+        switch (type) {
+            case "float":
+            case "int":
+            case "vec2":
+            case "vec3":
+            case "vec4":
+            case "ivec2":
+            case "ivec3":
+            case "bool":
+                if (data == null)
+                    return
+                gpu[TYPES[type]](uLocation, data)
+                break
+            case "mat3":
+                if (data == null)
+                    return
+                gpu.uniformMatrix3fv(uLocation, false, data)
+                break
+            case "mat4":
+                if (data == null)
+                    return
+                gpu.uniformMatrix4fv(uLocation, false, data)
+                break
+            case "samplerCube":
+                gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
+                gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, data)
+                gpu.uniform1i(uLocation, currentSamplerIndex)
+                increaseIndex()
+                break
+            case "sampler2D":
+                gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
+                gpu.bindTexture(gpu.TEXTURE_2D, data)
+                gpu.uniform1i(uLocation, currentSamplerIndex)
+                increaseIndex()
+                break
+            default:
+                break
         }
     }
 
