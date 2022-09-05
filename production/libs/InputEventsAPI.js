@@ -43,7 +43,6 @@ export default class InputEventsAPI {
         listener.callbacks.delete(id)
         if (listener.callbacks.size === 0) {
             listener.remove()
-            console.log("REMOVED")
             InputEventsAPI.#events.delete(eventKey)
         }
         return true

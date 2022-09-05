@@ -3,8 +3,7 @@ import InputEventsAPI from "../../production/libs/InputEventsAPI";
 
 import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";
-import {quat, vec3} from "gl-matrix";
-import GizmoSystem from "../services/GizmoSystem";
+import {vec3} from "gl-matrix";
 import Gizmo from "./Gizmo";
 import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER";
 

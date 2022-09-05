@@ -6,11 +6,8 @@ import EditorRenderer from "../EditorRenderer";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 import SelectionStore from "../../../../stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
-import COMPONENTS from "../../production/data/COMPONENTS";
 import SpritePass from "../../production/templates/passes/SpritePass";
-import TransformationAPI from "../../production/libs/TransformationAPI";
 import GizmoSystem from "./GizmoSystem";
-import AXIS from "../data/AXIS";
 
 const SCALE = (new Array(3)).fill(.15)
 const SCALE_CURSOR = (new Array(3)).fill(.5)

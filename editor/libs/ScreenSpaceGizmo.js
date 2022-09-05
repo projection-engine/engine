@@ -5,8 +5,6 @@ import ConversionAPI from "../../production/libs/ConversionAPI";
 import {vec3} from "gl-matrix";
 import CameraAPI from "../../production/libs/CameraAPI";
 import getPickerId from "../../production/utils/get-picker-id";
-import STATIC_MESHES from "../../static/STATIC_MESHES";
-import GPU from "../../production/controllers/GPU";
 
 
 const PICK_ID_SS_GIZMO = getPickerId(1)
@@ -71,7 +69,6 @@ export default class ScreenSpaceGizmo {
         const mD = ScreenSpaceGizmo.mouseDelta
         mD.x = event.clientX
         mD.y = event.clientY
-        console.log(mD)
     }
 
     static onMouseUp() {

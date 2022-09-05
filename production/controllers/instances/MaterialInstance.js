@@ -40,7 +40,6 @@ export default class MaterialInstance {
             this.shadingType = settings.shadingType
             this.isForwardShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.FORWARD || settings.shadingType === MATERIAL_RENDERING_TYPES.UNLIT
             this.isDeferredShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED
-            console.log(this.isForwardShaded, this.shadingType)
         }
     }
 
@@ -104,8 +103,11 @@ export default class MaterialInstance {
                     onCompiled(message)
                 this.ready = true
             })
-        else
+        else {
+            if (onCompiled)
+                onCompiled()
             this.ready = true
+        }
     }
 
     use(additionalUniforms = {}, isCubeMap = false) {

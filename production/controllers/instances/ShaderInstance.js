@@ -3,7 +3,6 @@ import * as PROBES from "../../data/shaders/templates/PROBES"
 import {PBR} from "../../data/shaders/templates/PBR"
 import GPU from "../GPU";
 import {mat3, mat4} from "gl-matrix";
-import {v4} from "uuid";
 
 
 const TYPES = {

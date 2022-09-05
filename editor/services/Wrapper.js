@@ -4,7 +4,6 @@ import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import RendererController from "../../production/controllers/RendererController";
-import SelectionStore from "../../../../stores/SelectionStore";
 import CameraAPI from "../../production/libs/CameraAPI";
 
 export default class Wrapper {

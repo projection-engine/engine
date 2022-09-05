@@ -1,6 +1,4 @@
-import SpecularProbePass, {STEPS_CUBE_MAP} from "../production/templates/passes/SpecularProbePass"
 import Wrapper from "./services/Wrapper"
-import DiffuseProbePass, {STEPS_LIGHT_PROBE} from "../production/templates/passes/DiffuseProbePass"
 import BundlerAPI from "../production/libs/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
 import CameraTracker from "./libs/CameraTracker";
@@ -16,7 +14,6 @@ import STATIC_TEXTURES from "../static/STATIC_TEXTURES";
 import circle from "../../../data/icons/circle.png";
 import STATIC_MESHES from "../static/STATIC_MESHES";
 import CAMERA from "./data/CAMERA.json";
-import * as cameraShaderCode from "./templates/GIZMO.glsl";
 import * as gizmoShaderCode from "./templates/GIZMO.glsl";
 import STATIC_SHADERS from "../static/STATIC_SHADERS";
 import GridSystem from "./services/GridSystem";
