@@ -10,10 +10,11 @@ import COMPONENTS from "../../production/data/COMPONENTS";
 import SpritePass from "../../production/templates/passes/SpritePass";
 import TransformationAPI from "../../production/libs/TransformationAPI";
 import GizmoSystem from "./GizmoSystem";
+import AXIS from "../data/AXIS";
 
-const SCALE = (new Array(3)).fill(.3)
+const SCALE = (new Array(3)).fill(.15)
 const SCALE_CURSOR = (new Array(3)).fill(.5)
-const PIXEL = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/hfrw4ABCYBppQw0l8AAAAASUVORK5CYII=`
+
 export default class IconsSystem {
     static cameraMesh
     static shader
@@ -26,6 +27,8 @@ export default class IconsSystem {
     static initialize() {
         IconsSystem.cameraMesh = GPU.meshes.get(STATIC_MESHES.CAMERA)
         IconsSystem.selectedMap = SelectionStore.map
+
+        IconsSystem.shader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.UNSHADED)
 
         const canvas = document.createElement("canvas")
         const ctx = canvas.getContext("2d")
@@ -64,27 +67,16 @@ export default class IconsSystem {
 
 
     static execute(selected) {
-        const {cameras} = RendererController.data
         const {iconsVisibility} = RendererController.params
-
         if (iconsVisibility) {
             const attr = {
                 viewMatrix: CameraAPI.viewMatrix,
                 cameraPosition: CameraAPI.position,
                 projectionMatrix: CameraAPI.projectionMatrix,
                 translation: [0, 0, 0],
-                sameSize: false
+                sameSize: false,
+                highlight: false
             }
-            for (let i = 0; i < cameras.length; i++) {
-
-                attr.axis = 3
-                attr.selectedAxis = IconsSystem.selectedMap.get(cameras[i].id) ? 3 : 0
-                attr.transformMatrix = cameras[i].transformationMatrix
-
-                IconsSystem.shader.bindForUse(attr)
-                IconsSystem.cameraMesh.draw()
-            }
-
             gpu.disable(gpu.DEPTH_TEST)
 
             GPU.quad.use()
@@ -98,6 +90,7 @@ export default class IconsSystem {
             }
             const size = selected?.length
             entitiesLoop: if (size > 0) {
+                attr.attributes = [1, 1]
                 for (let i = 0; i < size; i++) {
                     const current = RendererController.entitiesMap.get(selected[i])
                     if(!current)
@@ -110,6 +103,7 @@ export default class IconsSystem {
                     GPU.quad.drawQuad()
                 }
             } else {
+                attr.attributes = [1, 1]
                 const current = RendererController.entitiesMap.get(SelectionStore.lockedEntity)
                 if(!current)
                     break entitiesLoop

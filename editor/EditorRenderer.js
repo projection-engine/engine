@@ -43,11 +43,13 @@ export default class EditorRenderer extends RendererController {
 
     constructor() {
         super()
+
         GPU.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
         GPU.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
         GPU.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()
         GPU.allocateTexture(circle, STATIC_TEXTURES.ROTATION_GIZMO).catch()
         GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
+        GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
         GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
 
         GPU.allocateMesh(STATIC_MESHES.CAMERA, CAMERA)
@@ -68,19 +70,6 @@ export default class EditorRenderer extends RendererController {
 
     }
 
-    get gizmos() {
-        return {
-            rotation: GizmoSystem.rotationGizmo,
-            translation: GizmoSystem.translationGizmo,
-            scale: GizmoSystem.scaleGizmo
-        }
-    }
-
-    refreshProbes() {
-        DiffuseProbePass.step = STEPS_CUBE_MAP.BASE
-        SpecularProbePass.step = STEPS_LIGHT_PROBE.GENERATION
-    }
-
     updatePackage(prodEnv, params) {
         RendererController.environment = prodEnv ? ENVIRONMENT.EXECUTION : ENVIRONMENT.DEV
         if (!prodEnv)
@@ -93,19 +82,6 @@ export default class EditorRenderer extends RendererController {
                 ...params,
                 onWrap: prodEnv ? null : Wrapper,
             })
-    }
-
-    arrayToObject(arr) {
-        const obj = {}
-        arr.forEach(a => {
-            obj[a] = true
-        })
-        return obj
-    }
-
-    stop() {
-        super.stop()
-        CameraTracker.stopTracking()
     }
 
 }

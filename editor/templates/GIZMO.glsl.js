@@ -221,3 +221,57 @@ void main() {
     fragColor = vec4(uID, 1.);
 }
 `
+
+
+export const cameraVertex = `#version 300 es
+
+layout (location = 1) in vec3 position;
+#define SIZE .15
+
+uniform vec3 translation;
+uniform vec3 cameraPosition;
+uniform bool sameSize;
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 projectionMatrix;
+ 
+
+void main(){ 
+    mat4 sc  ;
+    if(sameSize){
+        float len = length(cameraPosition - translation) * SIZE;
+            
+        for ( int x = 0; x < 4; x++ )
+            for ( int y = 0; y < 4; y++ )
+                if ( x == y && x <= 2)
+                    sc[x][y] = len;
+                else if ( x == y )
+                    sc[x][y] = 1.;
+                else
+                    sc[x][y] = 0.;
+        sc = transformMatrix * sc;      
+    }
+    else
+        sc = transformMatrix;
+    gl_Position = projectionMatrix * viewMatrix * sc * vec4(position,1.0);
+}
+`
+
+export const cameraFragment = `#version 300 es
+precision highp float;
+
+ 
+uniform bool highlight; 
+out vec4 fragColor;
+
+
+void main(){
+    vec3 color = vec3(0., 0., 1.);
+
+    if(highlight)
+        color = vec3(1., 1., 0.);
+
+    
+    fragColor = vec4(color, .95);
+}
+`

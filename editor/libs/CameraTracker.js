@@ -45,7 +45,7 @@ export default class CameraTracker {
         }
         if (!Gizmo.tooltip)
             Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-        if(Gizmo.tooltip) {
+        if (Gizmo.tooltip) {
             Gizmo.tooltip.isChanging()
             Gizmo.tooltip.textContent = `X ${CameraTracker.centerOn[0].toFixed(2)}  |  Y ${CameraTracker.centerOn[1].toFixed(2)}  |  Z ${CameraTracker.centerOn[2].toFixed(2)}  |  Radius ${CameraTracker.radius.toFixed(0)}`
         }
@@ -53,7 +53,7 @@ export default class CameraTracker {
         timeout = setTimeout(() => {
             if (!Gizmo.tooltip)
                 Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-            if(Gizmo.tooltip)
+            if (Gizmo.tooltip)
                 Gizmo.tooltip.finished()
         }, 500)
     }
@@ -125,7 +125,7 @@ export default class CameraTracker {
                         const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.movementSpeed * event.movementY, 0, -CameraTracker.movementSpeed * event.movementX])
 
                         CameraTracker.centerOn[0] += newPosition[0]
-                        CameraTracker.centerOn[1] -= ctrl ? .1 * event.movementY : newPosition[1]
+                        CameraTracker.centerOn[1] -= ctrl ? CameraTracker.movementSpeed * event.movementY : newPosition[1]
                         CameraTracker.centerOn[2] += newPosition[2]
                     }
                     CameraTracker.update(isDoubleClick)
@@ -191,24 +191,22 @@ export default class CameraTracker {
         }
     }
 
-    static transformCamera(event, type) {
-        const handleMouseMove = (e) => {
+    static transformCamera(e, type) {
+        const handleMouseMove = (event) => {
+
             if (!document.pointerLockElement)
                 document.body.requestPointerLock()
-            const incrementX = CameraTracker.movementSpeed * e.movementX,
-                incrementY = CameraTracker.movementSpeed * e.movementY,
-                c = [...CameraTracker.centerOn]
 
             if (type === 1) {
-                const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [incrementX, 0, 0])
-                c[0] += newPosition[0]
-                c[1] -= incrementY
-                c[2] += newPosition[2]
+                const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [0, 0, -CameraTracker.movementSpeed * event.movementX])
 
-                CameraTracker.centerOn = c
+                CameraTracker.centerOn[0] += newPosition[0]
+                CameraTracker.centerOn[1] -= CameraTracker.movementSpeed * event.movementY
+                CameraTracker.centerOn[2] += newPosition[2]
+
                 CameraTracker.update()
             } else {
-                CameraTracker.radius += CameraTracker.movementSpeed * e.movementX
+                CameraTracker.radius += CameraTracker.movementSpeed * event.movementX
                 CameraTracker.update()
             }
         }

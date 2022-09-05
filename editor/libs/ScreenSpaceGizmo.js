@@ -83,6 +83,6 @@ export default class ScreenSpaceGizmo {
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix)
             return
-        Gizmo.drawGizmo(GPU.meshes.get(STATIC_MESHES.CUBE), GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
+        Gizmo.drawGizmo(GizmoSystem.screenSpaceMesh, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
     }
 }

@@ -16,7 +16,7 @@ import DepthPass from "../../production/templates/passes/DepthPass";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 const EMPTY_COMPONENT = new Movable()
-
+const toDeg = Math.PI/180
 export default class GizmoSystem {
     static mainEntity
     static transformationMatrix
@@ -38,6 +38,10 @@ export default class GizmoSystem {
     static translationGizmo
     static scaleGizmo
     static rotationGizmo
+
+    static DEFAULT_ROTATION = toDeg
+    static DEFAULT_SCALE = .001
+    static DEFAULT_TRANSLATION = .001
 
     static initialize() {
 

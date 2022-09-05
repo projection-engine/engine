@@ -24,6 +24,7 @@ export default {
     },
 
     DEVELOPMENT: {
+        UNSHADED: "UNSHADED",
         TO_BUFFER: "TO_BUFFER",
         GIZMO: "GIZMO",
         GRID: "GRID",
