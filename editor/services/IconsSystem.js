@@ -97,9 +97,11 @@ export default class IconsSystem {
                 GPU.quad.drawQuad()
             }
             const size = selected?.length
-            if (size > 0) {
+            entitiesLoop: if (size > 0) {
                 for (let i = 0; i < size; i++) {
                     const current = RendererController.entitiesMap.get(selected[i])
+                    if(!current)
+                        continue
                     attr.scale = SCALE
                     attr.transformationMatrix = current.transformationMatrix
                     attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
@@ -109,6 +111,8 @@ export default class IconsSystem {
                 }
             } else {
                 const current = RendererController.entitiesMap.get(SelectionStore.lockedEntity)
+                if(!current)
+                    break entitiesLoop
                 attr.scale = SCALE
                 attr.transformationMatrix = current.transformationMatrix
                 attr.iconSampler = IconsSystem.textureYellow
