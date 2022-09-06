@@ -39,7 +39,6 @@ export default class MaterialInstance {
     set settings(settings) {
         if (settings) {
             this.#settings = settings
-
             this.shadingType = settings.shadingType
             this.isForwardShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.FORWARD || settings.shadingType === MATERIAL_RENDERING_TYPES.UNLIT
             this.isDeferredShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED
@@ -60,6 +59,8 @@ export default class MaterialInstance {
 
 
     set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
+        if (this.ready)
+            this.delete()
         this.ready = false
         this.settings = settings
         let message
@@ -88,11 +89,11 @@ export default class MaterialInstance {
                             break
                         }
                         case DATA_TYPES.TEXTURE: {
-                            try{
+                            try {
                                 if (MaterialInstance.readAsset) {
                                     const textureID = k.data
                                     const asset = await MaterialInstance.readAsset(textureID)
-                                    if(asset){
+                                    if (asset) {
                                         const textureData = typeof asset === "string" ? JSON.parse(asset) : asset
                                         let texture = await GPU.allocateTexture({
                                             ...textureData,
@@ -106,7 +107,7 @@ export default class MaterialInstance {
                                         this.uniformData[k.key] = texture.texture
                                     }
                                 }
-                            }catch (error){
+                            } catch (error) {
                                 console.error(error)
                             }
                             break
@@ -138,15 +139,19 @@ export default class MaterialInstance {
     }
 
     delete() {
-        gpu.deleteProgram(this._shader.program)
-        Object.values(this.uniformData).map(d => {
-            if (d instanceof WebGLTexture)
-                gpu.deleteTexture(d)
-        })
-        this.texturesInUse.values().forEach(t => {
-            if (t.texture instanceof WebGLTexture)
-                gpu.deleteTexture(t.texture)
-        })
+        try {
+            gpu.deleteProgram(this._shader.program)
+            Object.values(this.uniformData).map(d => {
+                if (d instanceof WebGLTexture)
+                    gpu.deleteTexture(d)
+            })
+            Object.values(this.texturesInUse).forEach(t => {
+                if (t.texture instanceof WebGLTexture)
+                    gpu.deleteTexture(t.texture)
+            })
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     static async parseMaterialObject({cubeMapShader, shader, vertexShader, uniforms, uniformData, settings}, id) {
