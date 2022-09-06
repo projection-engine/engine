@@ -1,5 +1,8 @@
 import IMAGE_WORKER_ACTIONS from "../../data/IMAGE_WORKER_ACTIONS"
 import GPU from "../GPU";
+import TEXTURE_WRAPPING from "../../data/texture/TEXTURE_WRAPPING";
+import TEXTURE_FILTERING from "../../data/texture/TEXTURE_FILTERING";
+import TEXTURE_FORMATS from "../../data/texture/TEXTURE_FORMATS";
 
 export default class TextureInstance {
     loaded = false
@@ -31,39 +34,44 @@ export default class TextureInstance {
     static #initializeTexture(attributes) {
         const {
             img,
-            yFlip,
-            internalFormat = gpu.SRGB8_ALPHA8,
-            format = gpu.RGBA,
-            repeat = false,
-            noMipMapping = false,
-            type = gpu.UNSIGNED_BYTE,
-            width,
-            height,
-            border = 0,
-            onLoad = () => null
+            yFlip = false,
+
+            wrapS=TEXTURE_WRAPPING.REPEAT,
+            wrapT=TEXTURE_WRAPPING.REPEAT,
+            minFilter =  TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR,
+            magFilter =  TEXTURE_FILTERING.MAG.LINEAR,
+
+            internalFormat = TEXTURE_FORMATS.SRGBA.internalFormat,
+            format =  TEXTURE_FORMATS.SRGBA.format,
+
+            width = img.naturalWidth,
+            height = img.naturalHeight
         } = attributes
 
-        const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
+
         let newTexture = gpu.createTexture()
-        gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, !yFlip)
+
+        if(yFlip)
+            gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
+
         gpu.bindTexture(gpu.TEXTURE_2D, newTexture)
-        gpu.texImage2D(
-            gpu.TEXTURE_2D,
-            0, internalFormat, width ? width : img.naturalWidth, height ? height : img.naturalHeight, border, format, type, img)
+        gpu.texImage2D(gpu.TEXTURE_2D, 0, gpu[internalFormat], width, height, 0, gpu[format], gpu.UNSIGNED_BYTE, img)
 
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, repeat ? gpu.REPEAT : gpu.LINEAR_MIPMAP_LINEAR)
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu[minFilter])
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu[magFilter])
 
-        if (anisotropicEXT && !noMipMapping) {
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu[wrapS]);
+        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu[wrapT]);
+
+        if (minFilter === TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR) {
+            const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
             const anisotropicAmountMin = 8
             const anisotropicAmount = Math.min(anisotropicAmountMin, gpu.getParameter(anisotropicEXT.MAX_TEXTURE_MAX_ANISOTROPY_EXT))
             gpu.texParameterf(gpu.TEXTURE_2D, anisotropicEXT.TEXTURE_MAX_ANISOTROPY_EXT, anisotropicAmount)
-        }
-        if (!noMipMapping)
             gpu.generateMipmap(gpu.TEXTURE_2D)
+        }
 
         gpu.bindTexture(gpu.TEXTURE_2D, null)
-        onLoad()
         return newTexture
     }
 

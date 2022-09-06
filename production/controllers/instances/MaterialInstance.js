@@ -14,6 +14,9 @@ export default class MaterialInstance {
     isForwardShaded = false
     isDeferredShaded = true
     texturesInUse = {}
+    updateTexture = {}
+
+    static readAsset
 
     constructor({
                     vertex,
@@ -70,26 +73,42 @@ export default class MaterialInstance {
             Promise.all(uniformData.map(k => {
                 return new Promise(async resolve => {
                     switch (k.type) {
-                        case DATA_TYPES.COLOR:
-                        case DATA_TYPES.TEXTURE: {
-                            const img = k.type === DATA_TYPES.TEXTURE ? k.data : (await GPU.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {
+                        case DATA_TYPES.COLOR: {
+                            const img = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {
                                 color: k.data,
-                                resolution: 16
-                            }))
-                            const textureID = v4()
-                            let texture = await GPU.allocateTexture({
-                                img,
-                                yFlip: k.yFlip,
-                                internalFormat: gpu[k.format?.internalFormat],
-                                format: gpu[k.format?.format],
-                                repeat: true,
-                                noMipMapping: false,
-                                type: gpu.UNSIGNED_BYTE,
-                                border: 0
-                            }, textureID)
+                                resolution: 4
+                            })
+                            const textureID = k.data.toString()
+                            let texture = await GPU.allocateTexture(img, textureID)
                             this.texturesInUse[textureID] = texture
-
+                            this.updateTexture[textureID] = (newTexture) => {
+                                this.uniformData[k.key] = newTexture
+                            }
                             this.uniformData[k.key] = texture.texture
+                            break
+                        }
+                        case DATA_TYPES.TEXTURE: {
+                            try{
+                                if (MaterialInstance.readAsset) {
+                                    const textureID = k.data
+                                    const asset = await MaterialInstance.readAsset(textureID)
+                                    if(asset){
+                                        const textureData = typeof asset === "string" ? JSON.parse(asset) : asset
+                                        let texture = await GPU.allocateTexture({
+                                            ...textureData,
+                                            img: textureData.base64,
+                                            yFlip: textureData.flipY,
+                                        }, textureID)
+                                        this.texturesInUse[textureID] = texture
+                                        this.updateTexture[textureID] = (newTexture) => {
+                                            this.uniformData[k.key] = newTexture
+                                        }
+                                        this.uniformData[k.key] = texture.texture
+                                    }
+                                }
+                            }catch (error){
+                                console.error(error)
+                            }
                             break
                         }
                         default:
@@ -128,5 +147,22 @@ export default class MaterialInstance {
             if (t.texture instanceof WebGLTexture)
                 gpu.deleteTexture(t.texture)
         })
+    }
+
+    static async parseMaterialObject({cubeMapShader, shader, vertexShader, uniforms, uniformData, settings}, id) {
+        let newMat
+        await new Promise(resolve => {
+            newMat = GPU.allocateMaterial({
+                vertex: vertexShader,
+                fragment: shader,
+                cubeMapShaderCode: cubeMapShader?.code,
+                onCompiled: () => resolve(),
+                settings,
+                uniformData
+            }, id)
+        })
+        newMat.uniforms = uniforms
+        return newMat
+
     }
 }

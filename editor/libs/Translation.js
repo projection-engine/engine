@@ -1,5 +1,5 @@
 import {vec3, vec4} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../data/TRANSFORMATION_TYPE"
 import Gizmo from "./Gizmo"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
 import GizmoSystem from "../services/GizmoSystem";

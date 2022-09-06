@@ -1,7 +1,7 @@
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/libs/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
 import EngineStore from "../../../../stores/EngineStore";

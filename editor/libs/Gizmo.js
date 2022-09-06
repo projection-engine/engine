@@ -1,7 +1,7 @@
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../data/misc/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/libs/ConversionAPI"
-import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER"
+import INFORMATION_CONTAINER from "../../../../data/INFORMATION_CONTAINER"
 import EngineStore from "../../../../stores/EngineStore";
 import PickingAPI from "../../production/libs/PickingAPI";
 import CameraAPI from "../../production/libs/CameraAPI";

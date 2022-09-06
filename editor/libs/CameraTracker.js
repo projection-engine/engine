@@ -5,7 +5,7 @@ import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";
 import {vec3} from "gl-matrix";
 import Gizmo from "./Gizmo";
-import INFORMATION_CONTAINER from "../../../../data/misc/INFORMATION_CONTAINER";
+import INFORMATION_CONTAINER from "../../../../data/INFORMATION_CONTAINER";
 
 let interval, ctrl, holding, isFocused, isDoubleClick, timeout
 const BUTTON_MIDDLE = 1

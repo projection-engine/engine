@@ -28,19 +28,23 @@ export default class GPU extends InstanceController {
     static activeShader
     static activeFramebuffer
     static activeMesh
+
+    static materials = new Map()
     static shaders = new Map()
     static frameBuffers = new Map()
     static meshes = new Map()
     static cubeMaps = new Map()
     static instancingGroup = new Map()
     static textures = new Map()
+
     static cubeBuffer
     static BRDF
     static imageWorker
     static quad
     static internalResolution = {w: screen.width, h: screen.height}
 
-    static async initializeContext(canvas, [width, height]) {
+    static async initializeContext(canvas, [width, height], readAsset) {
+        MaterialInstance.readAsset = readAsset
         GPU.internalResolution = {w: width, h: height}
         if (GPU.context)
             return
@@ -96,13 +100,13 @@ export default class GPU extends InstanceController {
             gpu.CLAMP_TO_EDGE
         )
         GPU.cubeBuffer = new VBOInstance(1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
-        RendererController.fallbackMaterial = new MaterialInstance({
-            vertex: shaderCode.fallbackVertex,
-            fragment: shaderCode.fragment,
 
-            cubeMapShaderCode: shaderCode.cubeMapShader,
-            id: FALLBACK_MATERIAL
-        })
+        RendererController.fallbackMaterial = GPU.allocateMaterial({
+                vertex: shaderCode.fallbackVertex,
+                fragment: shaderCode.fragment,
+                cubeMapShaderCode: shaderCode.cubeMapShader
+            }, FALLBACK_MATERIAL)
+
         GPU.context = gpu
 
         GPU.allocateMesh(STATIC_MESHES.SPHERE, ICO_SPHERE)
@@ -125,6 +129,11 @@ export default class GPU extends InstanceController {
         const texture = new TextureInstance()
         GPU.textures.set(id, texture)
         await texture.initialize(typeof imageData === "object" ? imageData : {img: imageData})
+        GPU.materials.forEach(material => {
+            console.log(material.texturesInUse)
+            if(material.updateTexture[id] != null)
+                material.updateTexture[id](texture.texture)
+        })
         return texture
     }
 
@@ -132,7 +141,16 @@ export default class GPU extends InstanceController {
         const found = GPU.textures.get(imageID)
         if (!found || !(found.texture instanceof WebGLTexture))
             return
+
         gpu.deleteTexture(found.texture)
+        GPU.textures.delete(imageID)
+    }
+
+    static allocateMaterial(data, id) {
+        const material = new MaterialInstance(data)
+        material.id = id
+        GPU.materials.set(id, material)
+        return material
     }
 
     static copyTexture(target, source, type = gpu.DEPTH_BUFFER_BIT) {

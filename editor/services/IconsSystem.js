@@ -9,7 +9,7 @@ import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
 import SpritePass from "../../production/templates/passes/SpritePass";
 import GizmoSystem from "./GizmoSystem";
 
-const SCALE = (new Array(3)).fill(.15)
+const SCALE = (new Array(3)).fill(.25)
 const SCALE_CURSOR = (new Array(3)).fill(.5)
 
 export default class IconsSystem {

@@ -90,6 +90,7 @@ export default class InstanceController {
         if (!instance)
             return
         gpu.deleteProgram(instance.program)
+        GPU.shaders.delete(id)
     }
 
 }
