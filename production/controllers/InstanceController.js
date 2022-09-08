@@ -1,10 +1,10 @@
-import FramebufferInstance from "./instances/FramebufferInstance";
-import GPU from "./GPU";
+import FramebufferInstance from "../instances/FramebufferInstance";
+import GPU from "../GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import InstancedRenderGroup from "./instances/InstancedRenderGroup";
-import MeshInstance from "./instances/MeshInstance";
-import ShaderInstance from "./instances/ShaderInstance";
+import InstancedRenderGroup from "../instances/InstancedRenderGroup";
+import MeshInstance from "../instances/MeshInstance";
+import ShaderInstance from "../instances/ShaderInstance";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 export default class InstanceController {

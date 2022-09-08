@@ -1,5 +1,5 @@
 import {mat4, quat} from "gl-matrix"
-import TransformationAPI from "../libs/TransformationAPI"
+import TransformationAPI from "../apis/TransformationAPI"
 import TRANSFORMATION_PROPS from "../data/component-props/TRANSFORMATION_PROPS";
 import Component from "./Component";
 

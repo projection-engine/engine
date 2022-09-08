@@ -53,17 +53,20 @@ vec4 grid(vec3 fragPos3D, float scale, bool lighter,  vec3 verticalAxisColor, ve
     float minimumz = min(derivative.y, 1.);
     float minimumx = min(derivative.x, 1.);
     float baseColor = 0.2;
-    vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(lighter ?  line : line - .5, 1.0));
+    vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(lighter ?  line : line - .25, 1.));
     
     float comparison = .3;
   
       
-    if(fragPos3D.x > -comparison * minimumx && fragPos3D.x < comparison * minimumx)
+    if(fragPos3D.x > -comparison * minimumx && fragPos3D.x < comparison * minimumx){
         color.rgb = verticalAxisColor;
+        color.a = 1.;
+    }
 
-
-    if(fragPos3D.z > -comparison * minimumz && fragPos3D.z < comparison * minimumz)
+    if(fragPos3D.z > -comparison * minimumz && fragPos3D.z < comparison * minimumz){
         color.rgb = horizontalAxisColor;
+        color.a = 1.;
+        }
     
     return color;
 }
@@ -89,15 +92,15 @@ void main() {
     vec3 horizontalAxisColor = vec3(10., .0, .0);
     
 
-        finalColor = (
-            grid(fragPos3D* .2, 2., true,  verticalAxisColor, horizontalAxisColor) +
-            grid(fragPos3D * .2, 1., false,  verticalAxisColor, horizontalAxisColor)
-         ) * float(t > 0.);
+    finalColor = (
+        grid(fragPos3D* .2, 2., true,  verticalAxisColor, horizontalAxisColor) +
+        grid(fragPos3D * .2, 1., false,  verticalAxisColor, horizontalAxisColor)
+     ) * float(t > 0.);
       
    
     finalColor.rgb = vec3(1.0) - exp(-finalColor.rgb * exposure * .75);
     finalColor.rgb = pow(finalColor.rgb, vec3(gamma));
     
-    finalColor.a *= min(fading, .4);
+    finalColor.a *= min(fading, .2);
 }
 `

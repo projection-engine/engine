@@ -1,9 +1,9 @@
 import Gizmo from "./Gizmo";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
-import ConversionAPI from "../../production/libs/ConversionAPI";
+import ConversionAPI from "../../production/apis/ConversionAPI";
 import {vec3} from "gl-matrix";
-import CameraAPI from "../../production/libs/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import getPickerId from "../../production/utils/get-picker-id";
 
 

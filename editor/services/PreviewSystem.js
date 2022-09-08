@@ -1,12 +1,13 @@
 import {mat4} from "gl-matrix"
-import MeshInstance from "../../production/controllers/instances/MeshInstance"
-import MaterialInstance from "../../production/controllers/instances/MaterialInstance"
+import MeshInstance from "../../production/instances/MeshInstance"
+import MaterialInstance from "../../production/instances/MaterialInstance"
 import MaterialController from "../../production/controllers/MaterialController";
-import RendererController from "../../production/controllers/RendererController";
-import BundlerAPI from "../../production/libs/BundlerAPI";
-import GPU from "../../production/controllers/GPU";
+import Engine from "../../production/Engine";
+import BundlerAPI from "../../production/apis/BundlerAPI";
+import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
+import FALLBACK_MATERIAL from "../../production/data/FALLBACK_MATERIAL";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {
@@ -45,7 +46,7 @@ export default class PreviewSystem {
     }
 
     static execute(materialMesh, meshEntity) {
-        const {elapsed} = RendererController.params
+        const {elapsed} = Engine.params
         let response
         PreviewSystem.frameBuffer.startMapping()
 
@@ -76,7 +77,7 @@ export default class PreviewSystem {
                 viewMatrix: cam[0],
                 projectionMatrix: PreviewSystem.projection,
                 transformMatrix,
-                material: RendererController.fallbackMaterial,
+                material: GPU.materials.get(FALLBACK_MATERIAL),
                 normalMatrix: PreviewSystem.identity,
                 directionalLightsQuantity: 0,
                 directionalLightsData: [],

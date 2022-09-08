@@ -1,5 +1,5 @@
-import CameraAPI from "../../production/libs/CameraAPI";
-import InputEventsAPI from "../../production/libs/InputEventsAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
+import InputEventsAPI from "../../production/apis/InputEventsAPI";
 
 import KEYS from "../../production/data/KEYS";
 import {v4} from "uuid";

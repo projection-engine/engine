@@ -1,4 +1,4 @@
-import FramebufferInstance from "../controllers/instances/FramebufferInstance"
+import FramebufferInstance from "../instances/FramebufferInstance"
 
 export default function generateBlurBuffers(quantity, w, h, downscaleStrength=2){
     const blurBuffers = [],

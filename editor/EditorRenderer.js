@@ -1,15 +1,15 @@
 import Wrapper from "./services/Wrapper"
-import BundlerAPI from "../production/libs/BundlerAPI"
+import BundlerAPI from "../production/apis/BundlerAPI"
 import ENVIRONMENT from "../production/data/ENVIRONMENT"
 import CameraTracker from "./libs/CameraTracker";
-import RendererController from "../production/controllers/RendererController.js";
+import Engine from "../production/Engine.js";
 import GizmoSystem from "./services/GizmoSystem";
 import Entity from "../production/templates/Entity";
-import TransformationAPI from "../production/libs/TransformationAPI";
+import TransformationAPI from "../production/apis/TransformationAPI";
 import pointLightIcon from "../../../data/icons/point_light.png";
 import directionalLightIcon from "../../../data/icons/directional_light.png";
 import probeIcon from "../../../data/icons/probe.png";
-import GPU from "../production/controllers/GPU";
+import GPU from "../production/GPU";
 import STATIC_TEXTURES from "../static/STATIC_TEXTURES";
 import circle from "../../../data/icons/circle.png";
 import STATIC_MESHES from "../static/STATIC_MESHES";
@@ -35,7 +35,7 @@ function getCursor() {
     return entity
 }
 
-export default class EditorRenderer extends RendererController {
+export default class EditorRenderer extends Engine {
     static cursor = getCursor()
 
     constructor() {
@@ -55,7 +55,7 @@ export default class EditorRenderer extends RendererController {
         GPU.allocateMesh(STATIC_MESHES.SCALE_GIZMO, SCALE_GIZMO)
         GPU.allocateMesh(STATIC_MESHES.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
 
-        RendererController.environment = ENVIRONMENT.DEV
+        Engine.environment = ENVIRONMENT.DEV
 
         GridSystem.initialize()
         IconsSystem.initialize()
@@ -68,7 +68,7 @@ export default class EditorRenderer extends RendererController {
     }
 
     updatePackage(prodEnv, params) {
-        RendererController.environment = prodEnv ? ENVIRONMENT.EXECUTION : ENVIRONMENT.DEV
+        Engine.environment = prodEnv ? ENVIRONMENT.EXECUTION : ENVIRONMENT.DEV
         if (!prodEnv)
             CameraTracker.startTracking()
         else

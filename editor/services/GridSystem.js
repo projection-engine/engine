@@ -1,7 +1,7 @@
 import * as shaderCode from "../templates/GRID.glsl"
-import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/CameraAPI";
-import GPU from "../../production/controllers/GPU";
+import Engine from "../../production/Engine";
+import CameraAPI from "../../production/apis/CameraAPI";
+import GPU from "../../production/GPU";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 export default class GridSystem {
@@ -12,7 +12,7 @@ export default class GridSystem {
     }
 
     static execute() {
-        if (RendererController.params.gridVisibility && !CameraAPI.isOrthographic) {
+        if (Engine.params.gridVisibility && !CameraAPI.isOrthographic) {
             GridSystem.shader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
                 projectionMatrix: CameraAPI.projectionMatrix,

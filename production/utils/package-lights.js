@@ -1,12 +1,12 @@
 import COMPONENTS from "../data/COMPONENTS";
 import {mat4} from "gl-matrix";
-import RendererController from "../controllers/RendererController";
-import MovementPass from "../templates/passes/MovementPass";
+import Engine from "../Engine";
+import MovementPass from "../passes/MovementPass";
 
 export function packagePointLights(keepOld) {
-    const pointLights = RendererController.data.pointLights
+    const pointLights = Engine.data.pointLights
     let pointLightsQuantity = 0,
-        pointLightData =  keepOld ? RendererController.data.pointLightData : [],
+        pointLightData =  keepOld ? Engine.data.pointLightData : [],
         activeOffset = 0
     if(!pointLightData)
         pointLightData = []
@@ -47,16 +47,16 @@ export function packagePointLights(keepOld) {
             currentVector[13] = component.shadowMap ? 1 : 0
         }
 
-    RendererController.data.pointLightsQuantity = pointLightsQuantity
-    RendererController.data.pointLightData = pointLightData
+    Engine.data.pointLightsQuantity = pointLightsQuantity
+    Engine.data.pointLightData = pointLightData
 }
 
 export function packageDirectionalLights(keepOld) {
     let maxTextures = 0,
-        directionalLightsData = keepOld ? RendererController.data.directionalLightsData : [],
-        dirLightPOV = keepOld ? RendererController.data.dirLightPOV : [],
+        directionalLightsData = keepOld ? Engine.data.directionalLightsData : [],
+        dirLightPOV = keepOld ? Engine.data.dirLightPOV : [],
         activeOffset = 0,
-        directionalLights = RendererController.data.directionalLights
+        directionalLights = Engine.data.directionalLights
     if(!directionalLightsData || !dirLightPOV) {
         directionalLightsData = []
         dirLightPOV = []
@@ -94,7 +94,7 @@ export function packageDirectionalLights(keepOld) {
             mat4.multiply(dirLightPOV[i - activeOffset], component.lightProjection, component.lightView)
         }
 
-    RendererController.data.maxTextures = maxTextures
-    RendererController.data.directionalLightsData = directionalLightsData
-    RendererController.data.dirLightPOV = dirLightPOV
+    Engine.data.maxTextures = maxTextures
+    Engine.data.directionalLightsData = directionalLightsData
+    Engine.data.dirLightPOV = dirLightPOV
 }

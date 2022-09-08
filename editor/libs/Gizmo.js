@@ -1,10 +1,10 @@
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../data/TRANSFORMATION_TYPE"
-import ConversionAPI from "../../production/libs/ConversionAPI"
+import ConversionAPI from "../../production/apis/ConversionAPI"
 import INFORMATION_CONTAINER from "../../../../data/INFORMATION_CONTAINER"
 import EngineStore from "../../../../stores/EngineStore";
-import PickingAPI from "../../production/libs/PickingAPI";
-import CameraAPI from "../../production/libs/CameraAPI";
+import PickingAPI from "../../production/apis/PickingAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";

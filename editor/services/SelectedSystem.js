@@ -1,8 +1,8 @@
 import * as shaderCode from "../templates/SELECTED.glsl"
 import COMPONENTS from "../../production/data/COMPONENTS"
-import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/CameraAPI";
-import GPU from "../../production/controllers/GPU";
+import Engine from "../../production/Engine";
+import CameraAPI from "../../production/apis/CameraAPI";
+import GPU from "../../production/GPU";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
 
@@ -29,11 +29,10 @@ export default class SelectedSystem {
         if (length === 0)
             return
 
-
         gpu.disable(gpu.DEPTH_TEST)
         SelectedSystem.frameBuffer.startMapping()
         for (let m = 0; m < length; m++) {
-            const current = RendererController.entitiesMap.get(selected[m])
+            const current = Engine.entitiesMap.get(selected[m])
             if (!current || !current.active)
                 continue
             const mesh = GPU.meshes.get(current.components[COMPONENTS.MESH]?.meshID)

@@ -1,12 +1,12 @@
-import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/CameraAPI";
-import GPU from "../../production/controllers/GPU";
+import Engine from "../../production/Engine";
+import CameraAPI from "../../production/apis/CameraAPI";
+import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import EditorRenderer from "../EditorRenderer";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 import SelectionStore from "../../../../stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
-import SpritePass from "../../production/templates/passes/SpritePass";
+import SpritePass from "../../production/passes/SpritePass";
 import GizmoSystem from "./GizmoSystem";
 
 const SCALE = (new Array(3)).fill(.25)
@@ -64,7 +64,7 @@ export default class IconsSystem {
 
 
     static execute(selected) {
-        const {iconsVisibility} = RendererController.params
+        const {iconsVisibility} = Engine.params
         if (iconsVisibility) {
             const attr = {
                 viewMatrix: CameraAPI.viewMatrix,
@@ -89,7 +89,7 @@ export default class IconsSystem {
             entitiesLoop: if (size > 0) {
                 attr.attributes = [1, 1]
                 for (let i = 0; i < size; i++) {
-                    const current = RendererController.entitiesMap.get(selected[i])
+                    const current = Engine.entitiesMap.get(selected[i])
                     if(!current)
                         continue
                     attr.scale = SCALE
@@ -101,7 +101,7 @@ export default class IconsSystem {
                 }
             } else {
                 attr.attributes = [1, 1]
-                const current = RendererController.entitiesMap.get(SelectionStore.lockedEntity)
+                const current = Engine.entitiesMap.get(SelectionStore.lockedEntity)
                 if(!current)
                     break entitiesLoop
                 attr.scale = SCALE

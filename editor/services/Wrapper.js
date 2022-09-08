@@ -3,13 +3,13 @@ import IconsSystem from "./IconsSystem"
 import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
-import RendererController from "../../production/controllers/RendererController";
-import CameraAPI from "../../production/libs/CameraAPI";
+import Engine from "../../production/Engine";
+import CameraAPI from "../../production/apis/CameraAPI";
 
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
-        const {selected, transformationType, iconsVisibility} = RendererController.params
-        const {cameras} = RendererController.data
+        const {selected, transformationType, iconsVisibility} = Engine.params
+        const {cameras} = Engine.data
 
         if (!isDuringFrameComposition && !isDuringBinging)
             SelectedSystem.drawToBuffer(selected)

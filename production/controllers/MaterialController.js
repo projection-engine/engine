@@ -1,9 +1,10 @@
-import RendererController from "./RendererController";
+import Engine from "../Engine";
 import COMPONENTS from "../data/COMPONENTS";
-import GPU from "./GPU";
-import AOPass from "../templates/passes/AOPass";
-import SpecularProbePass from "../templates/passes/SpecularProbePass";
-import DiffuseProbePass from "../templates/passes/DiffuseProbePass";
+import GPU from "../GPU";
+import AOPass from "../passes/AOPass";
+import SpecularProbePass from "../passes/SpecularProbePass";
+import DiffuseProbePass from "../passes/DiffuseProbePass";
+import FALLBACK_MATERIAL from "../data/FALLBACK_MATERIAL";
 
 
 export default class MaterialController {
@@ -89,14 +90,14 @@ export default class MaterialController {
     }
 
     static drawProbe(view, projection, cubeMapPosition,) {
-
+        const materials = GPU.materials
         const {
-                meshes, materials,
+                meshes,
                 directionalLightsData,
                 dirLightPOV, pointLightsQuantity, pointLightData,
                 maxTextures
-            } = RendererController.data,
-            {elapsed} = RendererController.params,
+            } = Engine.data,
+            {elapsed} = Engine.params,
             l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m]
@@ -106,10 +107,9 @@ export default class MaterialController {
             const mesh = GPU.meshes.get(meshComponent.meshID)
 
             if (mesh !== undefined) {
-                const currentMaterial = materials[meshComponent.materialID]
-                let mat = currentMaterial && currentMaterial.ready ? currentMaterial : RendererController.fallbackMaterial
+                let mat = materials.get(meshComponent.materialID)
                 if (!mat || !mat.ready)
-                    mat = RendererController.fallbackMaterial
+                    mat = GPU.materials.get(FALLBACK_MATERIAL)
                 const ambient = MaterialController.getEnvironment(current)
                 MaterialController.drawMesh({
                     ambient,
@@ -134,17 +134,20 @@ export default class MaterialController {
         gpu.bindVertexArray(null)
     }
 
-    static loopMeshes( materials, entities, callback) {
+    static loopMeshes(entities, callback) {
         const l = entities.length
+        const materials = GPU.materials
+        const meshes = GPU.meshes
+
         for (let m = 0; m < l; m++) {
             const current = entities[m]
             if (!current.active)
                 continue
             const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = GPU.meshes.get(meshComponent.meshID)
+            const mesh = meshes.get(meshComponent.meshID)
             if (!mesh)
                 continue
-            const mat = materials[meshComponent.materialID]
+            const mat = materials.get(meshComponent.materialID)
             if (!mat || !mat.ready)
                 continue
             callback(mat, mesh, meshComponent, current)

@@ -3,16 +3,16 @@ import Rotation from "../libs/Rotation"
 import Scale from "../libs/Scale"
 import TRANSFORMATION_TYPE from "../../../../data/TRANSFORMATION_TYPE"
 import getPickerId from "../../production/utils/get-picker-id"
-import MovementPass from "../../production/templates/passes/MovementPass";
+import MovementPass from "../../production/passes/MovementPass";
 import Gizmo from "../libs/Gizmo";
 import Movable from "../../production/templates/Movable";
-import TransformationAPI from "../../production/libs/TransformationAPI";
-import CameraAPI from "../../production/libs/CameraAPI";
+import TransformationAPI from "../../production/apis/TransformationAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
-import GPU from "../../production/controllers/GPU";
+import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
-import DepthPass from "../../production/templates/passes/DepthPass";
+import DepthPass from "../../production/passes/DepthPass";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 
 const EMPTY_COMPONENT = new Movable()

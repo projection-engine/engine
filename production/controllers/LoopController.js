@@ -1,24 +1,24 @@
-import AOPass from "../templates/passes/AOPass";
-import DeferredPass from "../templates/passes/DeferredPass";
-import ForwardPass from "../templates/passes/ForwardPass";
-import DepthPass from "../templates/passes/DepthPass";
-import SSGIPass from "../templates/passes/SSGIPass";
-import SSRPass from "../templates/passes/SSRPass";
-import ShadowMapPass from "../templates/passes/ShadowMapPass";
-import SpecularProbePass from "../templates/passes/SpecularProbePass";
-import DiffuseProbePass from "../templates/passes/DiffuseProbePass";
-import * as shaderCode from "../data/shaders/CUBE_MAP.glsl";
-import MetricsPass from "../templates/passes/MetricsPass";
-import ScriptingPass from "../templates/passes/ScriptingPass";
-import MovementPass from "../templates/passes/MovementPass";
-import ScreenEffectsPass from "../templates/passes/ScreenEffectsPass";
-import CompositePass from "../templates/passes/CompositePass";
-import SkyboxPass from "../templates/passes/SkyboxPass";
-import RendererController from "./RendererController";
-import GPU from "./GPU";
+import AOPass from "../passes/AOPass";
+import DeferredPass from "../passes/DeferredPass";
+import ForwardPass from "../passes/ForwardPass";
+import DepthPass from "../passes/DepthPass";
+import SSGIPass from "../passes/SSGIPass";
+import SSRPass from "../passes/SSRPass";
+import ShadowMapPass from "../passes/ShadowMapPass";
+import SpecularProbePass from "../passes/SpecularProbePass";
+import DiffuseProbePass from "../passes/DiffuseProbePass";
+import * as shaderCode from "../shaders/CUBE_MAP.glsl";
+import MetricsPass from "../passes/MetricsPass";
+import ScriptingPass from "../passes/ScriptingPass";
+import MovementPass from "../passes/MovementPass";
+import ScreenEffectsPass from "../passes/ScreenEffectsPass";
+import CompositePass from "../passes/CompositePass";
+import SkyboxPass from "../passes/SkyboxPass";
+import Engine from "../Engine";
+import GPU from "../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
-import SpritePass from "../templates/passes/SpritePass";
+import SpritePass from "../passes/SpritePass";
 
 export default class LoopController {
     static #initialized = false
@@ -48,7 +48,7 @@ export default class LoopController {
     }
 
     static #rendering(entities) {
-        const onWrap = RendererController.params.onWrap
+        const onWrap = Engine.params.onWrap
         const FBO = LoopController.previousFrame
         DepthPass.execute()
         AOPass.execute()
@@ -62,10 +62,10 @@ export default class LoopController {
         DeferredPass.drawBuffer(
             entities,
             isDuringBinding => {
-                if (onWrap != null)
-                    onWrap.execute(false, isDuringBinding)
                 if (isDuringBinding)
                     SkyboxPass.execute()
+                if (onWrap != null)
+                    onWrap.execute(false, isDuringBinding)
             }
         )
 
