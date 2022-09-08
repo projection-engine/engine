@@ -56,6 +56,7 @@ export default class InstanceController {
         const instance = new MeshInstance(bufferData)
         instance.id = id
         GPU.meshes.set(id, instance)
+        return instance
     }
 
     static destroyMesh(instance) {

@@ -125,7 +125,7 @@ export default class GPU extends InstanceController {
 
     static async allocateTexture(imageData, id) {
         if (GPU.textures.get(id) != null)
-            return
+            return GPU.textures.get(id)
         const texture = new TextureInstance()
         GPU.textures.set(id, texture)
         await texture.initialize(typeof imageData === "object" ? imageData : {img: imageData})

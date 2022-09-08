@@ -94,17 +94,24 @@ export default class MaterialInstance {
                                     const textureID = k.data
                                     const asset = await MaterialInstance.readAsset(textureID)
                                     if (asset) {
+                                        if(GPU.textures.get(textureID))
+                                            GPU.destroyTexture(textureID)
                                         const textureData = typeof asset === "string" ? JSON.parse(asset) : asset
+                                        console.log(textureData, asset)
                                         let texture = await GPU.allocateTexture({
                                             ...textureData,
                                             img: textureData.base64,
                                             yFlip: textureData.flipY,
                                         }, textureID)
-                                        this.texturesInUse[textureID] = texture
-                                        this.updateTexture[textureID] = (newTexture) => {
-                                            this.uniformData[k.key] = newTexture
+                                        console.log(texture, textureID, textureData, asset)
+
+                                        if(texture) {
+                                            this.texturesInUse[textureID] = texture
+                                            this.updateTexture[textureID] = (newTexture) => {
+                                                this.uniformData[k.key] = newTexture
+                                            }
+                                            this.uniformData[k.key] = texture.texture
                                         }
-                                        this.uniformData[k.key] = texture.texture
                                     }
                                 }
                             } catch (error) {
@@ -146,9 +153,10 @@ export default class MaterialInstance {
                     gpu.deleteTexture(d)
             })
             Object.values(this.texturesInUse).forEach(t => {
-                if (t.texture instanceof WebGLTexture)
+                if (t && t.texture instanceof WebGLTexture)
                     gpu.deleteTexture(t.texture)
             })
+            this.texturesInUse = {}
         } catch (err) {
             console.error(err)
         }
