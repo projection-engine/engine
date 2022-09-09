@@ -35,7 +35,6 @@ export default class TextureInstance {
     static #initializeTexture(attributes) {
         const {
             img,
-            yFlip = false,
 
             wrapS=TEXTURE_WRAPPING.REPEAT,
             wrapT=TEXTURE_WRAPPING.REPEAT,
@@ -51,9 +50,6 @@ export default class TextureInstance {
 
 
         let newTexture = gpu.createTexture()
-
-        if(yFlip)
-            gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
 
         gpu.bindTexture(gpu.TEXTURE_2D, newTexture)
         gpu.texImage2D(gpu.TEXTURE_2D, 0, gpu[internalFormat], width, height, 0, gpu[format], gpu.UNSIGNED_BYTE, img)

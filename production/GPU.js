@@ -136,9 +136,9 @@ export default class GPU extends InstanceController {
 
     static destroyTexture(imageID) {
         const found = GPU.textures.get(imageID)
-        if (!found || !(found.texture instanceof WebGLTexture))
+        if (!found)
             return
-
+        if(found.texture instanceof WebGLTexture)
         gpu.deleteTexture(found.texture)
         GPU.textures.delete(imageID)
     }

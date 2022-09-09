@@ -4,7 +4,7 @@ export default  [
 
     Component.group("INTENSITY_COLOR", [
         Component.color("COLOR", "color"),
-        Component.number("INTENSITY", "color", undefined, undefined, .01),
+        Component.number("INTENSITY", "intensity", 100, 0),
     ]),
 
 
