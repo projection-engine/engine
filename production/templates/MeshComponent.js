@@ -2,7 +2,6 @@ import Component from "./Component"
 import {mat3} from "gl-matrix"
 import MESH_TYPES from "../data/MESH_TYPES"
 import FALLBACK_MATERIAL from "../data/FALLBACK_MATERIAL";
-import GPU from "../GPU";
 
 export default class MeshComponent extends Component{
 

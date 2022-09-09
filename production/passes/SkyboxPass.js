@@ -50,6 +50,7 @@ export default class SkyboxPass {
             gpu.enable(gpu.CULL_FACE)
             gpu.depthMask(true)
             SkyboxPass.isReady = false
-        }
+        } else if (SkyboxPass.hasRendered)
+            SkyboxPass.hasRendered = false
     }
 }

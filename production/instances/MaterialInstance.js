@@ -59,6 +59,68 @@ export default class MaterialInstance {
     }
 
 
+    async updateUniformData(data) {
+        return await Promise.all(data.map(k => {
+            return new Promise(async resolve => {
+                switch (k.type) {
+                    case DATA_TYPES.COLOR: {
+                        const img = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {
+                            color: k.data,
+                            resolution: 4
+                        })
+                        const textureID = k.data.toString()
+                        let texture = await GPU.allocateTexture(img, textureID)
+
+                        this.texturesInUse[textureID] = texture
+                        this.updateTexture[textureID] = (newTexture) => {
+                            this.uniformData[k.key] = newTexture
+                        }
+                        this.uniformData[k.key] = texture.texture
+                        break
+                    }
+                    case DATA_TYPES.TEXTURE: {
+                        try {
+                            if (MaterialInstance.readAsset) {
+                                const textureID = k.data
+                                if(!this.texturesInUse[textureID]) {
+                                    const asset = await MaterialInstance.readAsset(textureID)
+                                    if (asset) {
+                                        if (GPU.textures.get(textureID))
+                                            GPU.destroyTexture(textureID)
+                                        const textureData = typeof asset === "string" ? JSON.parse(asset) : asset
+                                        console.log(textureData, asset)
+                                        let texture = await GPU.allocateTexture({
+                                            ...textureData,
+                                            img: textureData.base64,
+                                            yFlip: textureData.flipY,
+                                        }, textureID)
+                                        console.log(texture, textureID, textureData, asset)
+
+                                        if (texture) {
+                                            this.texturesInUse[textureID] = texture
+                                            this.updateTexture[textureID] = (newTexture) => {
+                                                this.uniformData[k.key] = newTexture
+                                            }
+                                            this.uniformData[k.key] = texture.texture
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error(error)
+                        }
+                        break
+                    }
+                    default:
+                        this.uniformData[k.key] = k.data
+                        break
+                }
+                resolve()
+            })
+        }))
+
+    }
+
     set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
         if (this.ready)
             this.delete()
@@ -70,68 +132,14 @@ export default class MaterialInstance {
         GPU.destroyShader(this.id + "-CUBE-MAP")
 
         this._shader = GPU.allocateShader(this.id, vertexShader, shader)
-
         if (uniformData)
-            Promise.all(uniformData.map(k => {
-                return new Promise(async resolve => {
-                    switch (k.type) {
-                        case DATA_TYPES.COLOR: {
-                            const img = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE, {
-                                color: k.data,
-                                resolution: 4
-                            })
-                            const textureID = k.data.toString()
-                            let texture = await GPU.allocateTexture(img, textureID)
-                            this.texturesInUse[textureID] = texture
-                            this.updateTexture[textureID] = (newTexture) => {
-                                this.uniformData[k.key] = newTexture
-                            }
-                            this.uniformData[k.key] = texture.texture
-                            break
-                        }
-                        case DATA_TYPES.TEXTURE: {
-                            try {
-                                if (MaterialInstance.readAsset) {
-                                    const textureID = k.data
-                                    const asset = await MaterialInstance.readAsset(textureID)
-                                    if (asset) {
-                                        if(GPU.textures.get(textureID))
-                                            GPU.destroyTexture(textureID)
-                                        const textureData = typeof asset === "string" ? JSON.parse(asset) : asset
-                                        console.log(textureData, asset)
-                                        let texture = await GPU.allocateTexture({
-                                            ...textureData,
-                                            img: textureData.base64,
-                                            yFlip: textureData.flipY,
-                                        }, textureID)
-                                        console.log(texture, textureID, textureData, asset)
-
-                                        if(texture) {
-                                            this.texturesInUse[textureID] = texture
-                                            this.updateTexture[textureID] = (newTexture) => {
-                                                this.uniformData[k.key] = newTexture
-                                            }
-                                            this.uniformData[k.key] = texture.texture
-                                        }
-                                    }
-                                }
-                            } catch (error) {
-                                console.error(error)
-                            }
-                            break
-                        }
-                        default:
-                            this.uniformData[k.key] = k.data
-                            break
-                    }
-                    resolve()
-                })
-            })).then(() => {
+            this.updateUniformData(uniformData).then(() => {
                 if (onCompiled)
                     onCompiled(message)
                 this.ready = true
             })
         else {
+            this.uniformData = {}
             if (onCompiled)
                 onCompiled()
             this.ready = true

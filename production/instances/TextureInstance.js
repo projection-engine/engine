@@ -29,6 +29,7 @@ export default class TextureInstance {
         } else
             this.texture = TextureInstance.#initializeTexture(this.attributes)
         this.loaded = true
+        this.attributes = {}
     }
 
     static #initializeTexture(attributes) {
