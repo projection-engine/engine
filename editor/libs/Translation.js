@@ -26,9 +26,8 @@ export default class Translation extends Gizmo {
     onMouseMove(event) {
         super.onMouseMove()
         const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
-
         this.moveEntities(position)
-        Gizmo.notify(position)
+        Gizmo.notify()
     }
 
     moveEntities(vec) {
@@ -36,14 +35,12 @@ export default class Translation extends Gizmo {
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
             toApply = vec
         else
-            toApply = vec4.transformQuat([], vec, firstEntity.rotationQuaternion)
+            toApply = vec4.transformQuat([], [...vec, 1], firstEntity.rotationQuaternion)
         const entities = GizmoSystem.selectedEntities
         for (let i = 0; i < entities.length; i++) {
             const target = entities[i]
-
-            const moved = vec3.sub([], toApply, target.translation)
-            ScreenSpaceGizmo.mapToAxis(moved)
-            vec3.add(target.translation, target.translation, moved)
+            console.log(toApply)
+            vec3.add(target.translation, target.translation, toApply)
 
             target.changed = true
         }

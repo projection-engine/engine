@@ -27,7 +27,7 @@ export default class Scale extends Gizmo {
         super.onMouseMove()
         const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
         this.moveEntities(position)
-        Gizmo.notify(position)
+        Gizmo.notify()
     }
 
     moveEntities(vec) {
@@ -38,9 +38,7 @@ export default class Scale extends Gizmo {
             toApply = vec4.transformQuat([], vec, GizmoSystem.selectedEntities[0].rotationQuaternion)
         for (let i = 0; i < GizmoSystem.selectedEntities.length; i++) {
             const entity = GizmoSystem.selectedEntities[i]
-            const moved = vec3.sub([], toApply, entity.scaling)
-            ScreenSpaceGizmo.mapToAxis(moved)
-            vec3.add(entity.scaling, entity.scaling, moved)
+            vec3.add(entity.scaling, entity.scaling, toApply)
             entity.changed = true
         }
     }

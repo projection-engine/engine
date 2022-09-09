@@ -34,6 +34,16 @@ export default class ConversionAPI {
         // WORLD SPACE
         return vec4.transformMat4([], eyeCoords, CameraAPI.invViewMatrix)
     }
+    static toLinearWorldCoordinates(x, y) {
+        // EYE SPACE
+
+        const eyeCoords = vec4.transformMat4([],  [x, y, 0, 0], CameraAPI.invProjectionMatrix)
+        eyeCoords[2] = -1
+        eyeCoords[3] = 1
+
+        // WORLD SPACE
+        return vec4.transformMat4([], eyeCoords, CameraAPI.invViewMatrix)
+    }
 
     static toScreenCoordinates(vec) {
         const target = [...vec, 1]

@@ -3,21 +3,18 @@ import ENVIRONMENT from "./data/ENVIRONMENT"
 import LoopController from "./controllers/LoopController";
 
 export default class Engine {
-
     static entitiesMap = new Map()
-
-    entities = []
-    materials = []
-
+    static entities = []
     static environment = ENVIRONMENT.DEV
-
     static data = {}
     static params = {}
     static queryMap = new Map()
     static then = 0
     static frameID
+    static isReady = false
 
-    constructor() {
+
+    static initialize () {
         LoopController.initialize()
 
         new ResizeObserver(() => {
@@ -25,20 +22,21 @@ export default class Engine {
             CameraAPI.metadata.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
         }).observe(gpu.canvas)
+        Engine.isReady = true
     }
 
-    callback() {
+    static #callback() {
         Engine.params.elapsed = performance.now() - Engine.then
-        LoopController.loop(this.entities)
-        Engine.frameID = requestAnimationFrame(() => this.callback())
+        LoopController.loop(Engine.entities)
+        Engine.frameID = requestAnimationFrame(() => Engine.#callback())
     }
 
-    start() {
-        if (!Engine.frameID)
-            Engine.frameID = requestAnimationFrame(() => this.callback())
+    static start() {
+        if (!Engine.frameID && Engine.isReady)
+            Engine.frameID = requestAnimationFrame(() => Engine.#callback())
     }
 
-    stop() {
+    static stop() {
         cancelAnimationFrame(Engine.frameID)
         Engine.frameID = undefined
     }

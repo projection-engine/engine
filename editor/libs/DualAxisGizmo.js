@@ -22,18 +22,6 @@ export default class DualAxisGizmo {
         ZY: mapGizmoMesh("ZY", "DUAL")
     }
 
-    static onMouseMove(event) {
-
-    }
-
-    static onMouseDown(event) {
-
-    }
-
-    static onMouseUp() {
-
-    }
-
     static drawToBuffer(data) {
         GizmoSystem.toBufferShader.bindForUse({
             ...data,
@@ -98,8 +86,6 @@ export default class DualAxisGizmo {
                 AXIS.XY,
                 DualAxisGizmo.matrixXY
             )
-
-
         }
 
         if (clicked === AXIS.XZ || notSelected) {
@@ -124,7 +110,6 @@ export default class DualAxisGizmo {
     }
 
     static #draw(uID, axis, transformMatrix, isSurface = false) {
-
         GizmoSystem.gizmoShader.bindForUse({
             viewMatrix: CameraAPI.viewMatrix,
             transformMatrix,

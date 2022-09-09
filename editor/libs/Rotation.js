@@ -74,8 +74,6 @@ export default class Rotation {
     }
 
     onMouseUp() {
-        if (GizmoSystem.clickedAxis === AXIS.SCREEN_SPACE)
-            ScreenSpaceGizmo.onMouseUp()
 
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
@@ -114,7 +112,7 @@ export default class Rotation {
 
         switch (GizmoSystem.clickedAxis) {
             case AXIS.X:
-                this.distanceX += Math.abs(event.movementX * 0.05)
+                this.distanceX += Math.abs(event.movementX * 0.1)
 
                 if (Math.abs(this.distanceX) >= this.gridSize) {
                     this.rotateElement([Math.sign(event.movementX) * this.gridSize * toRad, 0, 0])
@@ -123,7 +121,7 @@ export default class Rotation {
                 }
                 break
             case AXIS.Y:
-                this.distanceY += Math.abs(event.movementX * 0.05)
+                this.distanceY += Math.abs(event.movementX * 0.1)
                 if (Math.abs(this.distanceY) >= this.gridSize) {
                     this.rotateElement([0, Math.sign(event.movementX) * this.gridSize * toRad, 0])
                     this.renderTarget.innerText = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
@@ -131,7 +129,7 @@ export default class Rotation {
                 }
                 break
             case AXIS.Z:
-                this.distanceZ += Math.abs(event.movementX * 0.05)
+                this.distanceZ += Math.abs(event.movementX * 0.1)
                 if (Math.abs(this.distanceZ) >= this.gridSize) {
                     this.rotateElement([0, 0, Math.sign(event.movementX) * this.gridSize * toRad])
 

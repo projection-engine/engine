@@ -2,7 +2,6 @@ import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
-import EditorRenderer from "../EditorRenderer";
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
 import SelectionStore from "../../../../stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
@@ -79,7 +78,7 @@ export default class IconsSystem {
             GPU.quad.use()
             if (!GizmoSystem.translation) {
                 attr.scale = SCALE_CURSOR
-                attr.transformationMatrix = EditorRenderer.cursor.transformationMatrix
+                attr.transformationMatrix = window.engineCursor.transformationMatrix
                 attr.iconSampler = IconsSystem.cursorTexture
                 attr.attributes = [1, 1]
                 SpritePass.shader.bindForUse(attr)

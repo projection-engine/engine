@@ -11,25 +11,25 @@ const PICK_ID_SS_GIZMO = getPickerId(1)
 export default class ScreenSpaceGizmo {
     static cameraDistance
     static mouseDelta = {x: 0, y: 0}
-
+    static totalMoved = [0,0,0]
 
     static onMouseMove(event, damping = 1, gridStep = .001) {
         if (GizmoSystem.clickedAxis < 0)
             return [0, 0, 0]
 
-
-        const cameraDistance = ScreenSpaceGizmo.cameraDistance
-        const mouseAcceleration = (cameraDistance ** 2) * damping
+        const cameraDistance = ScreenSpaceGizmo.cameraDistance ** 2
+        const mouseAcceleration = cameraDistance * damping
         const mD = ScreenSpaceGizmo.mouseDelta
-        mD.x += event.movementX * mouseAcceleration
-        mD.y += event.movementY * mouseAcceleration
-        const screenSpacePosition = ConversionAPI.toWorldCoordinates(mD.x, mD.y).slice(0, 3)
-        vec3.scale(screenSpacePosition, screenSpacePosition, 1 / cameraDistance)
+        const mY = -event.movementY, mX = event.movementX
+        const x = Math.sign(mX) * mD.x + mX * mouseAcceleration
+        const y = Math.sign(mY) * mD.y + mY * mouseAcceleration
+        const ssP = ConversionAPI.toLinearWorldCoordinates(x, y).slice(0, 3)
         for (let i = 0; i < 3; i++)
-            screenSpacePosition[i] = Math.round(screenSpacePosition[i] / gridStep) * gridStep
-        ScreenSpaceGizmo.mapToAxis(screenSpacePosition)
+            ssP[i] = (Math.round(ssP[i] / gridStep) * gridStep) * damping / cameraDistance
+        ScreenSpaceGizmo.mapToAxis(ssP)
+        vec3.add(ScreenSpaceGizmo.totalMoved,ScreenSpaceGizmo.totalMoved, ssP )
 
-        return screenSpacePosition
+        return ssP
     }
 
     static mapToAxis(vec) {
@@ -64,18 +64,14 @@ export default class ScreenSpaceGizmo {
         }
     }
 
-    static onMouseDown(event) {
-        ScreenSpaceGizmo.cameraDistance = vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position))
-        const mD = ScreenSpaceGizmo.mouseDelta
-        mD.x = event.clientX
-        mD.y = event.clientY
+    static onMouseDown( ) {
+        ScreenSpaceGizmo.cameraDistance = Math.max(vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position)), 50)
+
+        const b = gpu.canvas.getBoundingClientRect()
+        ScreenSpaceGizmo.mouseDelta.x = b.width / 2
+        ScreenSpaceGizmo.mouseDelta.y = b.height / 2
     }
 
-    static onMouseUp() {
-        const mD = ScreenSpaceGizmo.mouseDelta
-        mD.x = 0
-        mD.y = 0
-    }
 
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix)

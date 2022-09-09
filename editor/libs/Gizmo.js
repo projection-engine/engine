@@ -50,7 +50,8 @@ export default class Gizmo {
         this.#testClick()
     }
 
-    static notify(position) {
+    static notify( ) {
+        const position = ScreenSpaceGizmo.totalMoved
         if(!Gizmo.tooltip)
             return
         Gizmo.tooltip.isChanging()
@@ -61,7 +62,6 @@ export default class Gizmo {
     onMouseUp() {
         if(Gizmo.tooltip)
             Gizmo.tooltip.finished()
-        ScreenSpaceGizmo.onMouseUp()
 
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0

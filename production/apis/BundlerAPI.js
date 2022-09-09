@@ -15,7 +15,6 @@ export default class BundlerAPI {
 
 
     static build(params) {
-        const renderer = window.renderer
         const entities = Array.from(Engine.entitiesMap.values())
 
         const attributes = {...params}
@@ -51,9 +50,7 @@ export default class BundlerAPI {
         Engine.params = attributes
         Engine.data = data
 
-        renderer.entities = entities
-
-
+        Engine.entities = entities
         BundlerAPI.updateCamera()
         BundlerAPI.removeUnusedProbes()
         BundlerAPI.packageLights()
@@ -85,9 +82,8 @@ export default class BundlerAPI {
     }
 
     static removeUnusedProbes() {
-        const renderer = window.renderer,
-            data = Engine.data,
-            entities = renderer.entities
+        const data = Engine.data,
+            entities = Engine.entities
 
         const sP = toObject(data.specularProbes), dP = toObject(data.diffuseProbes)
         const specularProbes = SpecularProbePass.specularProbes
