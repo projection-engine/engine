@@ -100,10 +100,10 @@ export default class GPU extends InstanceController {
             gpu.CLAMP_TO_EDGE
         )
         GPU.cubeBuffer = new VBOInstance(1, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
-        GPU.allocateMesh(STATIC_MESHES.SPHERE, ICO_SPHERE)
-        GPU.allocateMesh(STATIC_MESHES.CUBE, CUBE)
-        GPU.allocateMesh(STATIC_MESHES.CYLINDER, CYLINDER)
-        GPU.allocateMesh(STATIC_MESHES.PLANE, PLANE)
+        GPU.allocateMesh(STATIC_MESHES.PRODUCTION.SPHERE, ICO_SPHERE)
+        GPU.allocateMesh(STATIC_MESHES.PRODUCTION.CUBE, CUBE)
+        GPU.allocateMesh(STATIC_MESHES.PRODUCTION.CYLINDER, CYLINDER)
+        GPU.allocateMesh(STATIC_MESHES.PRODUCTION.PLANE, PLANE)
 
 
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, width, height).texture().depthTest()

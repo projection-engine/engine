@@ -1,10 +1,10 @@
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/app/windows/project/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/frontend/project/data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/apis/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
-import EngineStore from "../../../../src/app/windows/project/stores/EngineStore";
+import EngineStore from "../../../../src/frontend/project/stores/EngineStore";
 import PickingAPI from "../../production/apis/PickingAPI";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";

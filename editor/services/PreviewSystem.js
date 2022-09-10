@@ -92,7 +92,7 @@ export default class PreviewSystem {
         } else if (materialMesh instanceof MaterialInstance) {
             const [viewMatrix, camPosition] = PreviewSystem.cameraData
             MaterialController.drawMesh({
-                mesh: GPU.meshes.get(STATIC_MESHES.SPHERE),
+                mesh: GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
                 camPosition,
                 viewMatrix,
                 projectionMatrix: PreviewSystem.projection,

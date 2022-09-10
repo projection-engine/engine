@@ -1,9 +1,9 @@
 import GPU from "../production/GPU";
-import pointLightIcon from "../../../src/app/windows/project/data/icons/point_light.png";
+import pointLightIcon from "../../../src/frontend/project/data/icons/point_light.png";
 import STATIC_TEXTURES from "../static/STATIC_TEXTURES";
-import directionalLightIcon from "../../../src/app/windows/project/data/icons/directional_light.png";
-import probeIcon from "../../../src/app/windows/project/data/icons/probe.png";
-import circle from "../../../src/app/windows/project/data/icons/circle.png";
+import directionalLightIcon from "../../../src/frontend/project/data/icons/directional_light.png";
+import probeIcon from "../../../src/frontend/project/data/icons/probe.png";
+import circle from "../../../src/frontend/project/data/icons/circle.png";
 import STATIC_SHADERS from "../static/STATIC_SHADERS";
 import * as gizmoShaderCode from "./templates/GIZMO.glsl";
 import STATIC_MESHES from "../static/STATIC_MESHES";
@@ -40,11 +40,11 @@ export default function initializer() {
     GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
     GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
 
-    GPU.allocateMesh(STATIC_MESHES.CAMERA, CAMERA)
-    GPU.allocateMesh(STATIC_MESHES.DUAL_AXIS_GIZMO, PLANE)
-    GPU.allocateMesh(STATIC_MESHES.ROTATION_GIZMO, ROTATION_GIZMO)
-    GPU.allocateMesh(STATIC_MESHES.SCALE_GIZMO, SCALE_GIZMO)
-    GPU.allocateMesh(STATIC_MESHES.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
+    GPU.allocateMesh(STATIC_MESHES.EDITOR.CAMERA, CAMERA)
+    GPU.allocateMesh(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO, PLANE)
+    GPU.allocateMesh(STATIC_MESHES.EDITOR.ROTATION_GIZMO, ROTATION_GIZMO)
+    GPU.allocateMesh(STATIC_MESHES.EDITOR.SCALE_GIZMO, SCALE_GIZMO)
+    GPU.allocateMesh(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
 
     Engine.environment = ENVIRONMENT.DEV
 

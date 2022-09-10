@@ -10,8 +10,7 @@ export default  [
 
     Component.group("SHADOWS", [
         Component.boolean("ENABLED", "shadowMap"),
-    ]),
-    Component.group("VIEW_PLANES", [
+
         Component.number("FAR", "zFar"),
         Component.number("NEAR", "zNear"),
     ]),

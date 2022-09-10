@@ -4,7 +4,7 @@ import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
-import SelectionStore from "../../../../src/app/windows/project/stores/SelectionStore";
+import SelectionStore from "../../../../src/frontend/project/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/SpritePass";
 import GizmoSystem from "./GizmoSystem";
@@ -23,7 +23,7 @@ export default class IconsSystem {
 
 
     static initialize() {
-        IconsSystem.cameraMesh = GPU.meshes.get(STATIC_MESHES.CAMERA)
+        IconsSystem.cameraMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.CAMERA)
         IconsSystem.selectedMap = SelectionStore.map
 
         IconsSystem.shader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.UNSHADED)

@@ -1,7 +1,7 @@
 import Translation from "../libs/Translation"
 import Rotation from "../libs/Rotation"
 import Scale from "../libs/Scale"
-import TRANSFORMATION_TYPE from "../../../../src/app/windows/project/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/frontend/project/data/TRANSFORMATION_TYPE"
 import getPickerId from "../../production/utils/get-picker-id"
 import MovementPass from "../../production/passes/MovementPass";
 import Gizmo from "../libs/Gizmo";
@@ -45,11 +45,11 @@ export default class GizmoSystem {
 
     static initialize() {
 
-        GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.SPHERE)
-        GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.DUAL_AXIS_GIZMO)
-        GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.TRANSLATION_GIZMO)
-        GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.ROTATION_GIZMO)
-        GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.SCALE_GIZMO)
+        GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
+        GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO)
+        GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO)
+        GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.ROTATION_GIZMO)
+        GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.SCALE_GIZMO)
 
         EMPTY_COMPONENT.scaling = [.2, .2, .2]
         TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.transformationMatrix)

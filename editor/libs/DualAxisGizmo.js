@@ -3,7 +3,7 @@ import AXIS from "../data/AXIS";
 import {mat4, quat, vec3} from "gl-matrix";
 import CameraAPI from "../../production/apis/CameraAPI";
 import mapGizmoMesh from "../utils/map-gizmo-mesh";
-import TRANSFORMATION_TYPE from "../../../../src/app/windows/project/data/TRANSFORMATION_TYPE";
+import TRANSFORMATION_TYPE from "../../../../src/frontend/project/data/TRANSFORMATION_TYPE";
 import getPickerId from "../../production/utils/get-picker-id";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 import GPU from "../../production/GPU";
@@ -126,6 +126,6 @@ export default class DualAxisGizmo {
         if (!isSurface)
             GizmoSystem.dualAxisGizmoMesh.draw()
         else
-            GPU.meshes.get(STATIC_MESHES.PLANE).draw()
+            GPU.meshes.get(STATIC_MESHES.PRODUCTION.PLANE).draw()
     }
 }

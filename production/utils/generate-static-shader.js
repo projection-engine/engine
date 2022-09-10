@@ -59,6 +59,6 @@ function generateStaticShader(length,uniforms){
     }
     const res = {}
     res.uniformMap = uniformMap
-    res.method = new Function("uniformMap, data, gpu", bindCode)
+    res.method = new Function("uniformMap, static, gpu", bindCode)
     return res
 }

@@ -13,7 +13,7 @@ export default class TextureInstance {
         const img = attributes.img
         this.attributes = attributes
         if (typeof img === "string") {
-            if (img.includes("data:image/")) {
+            if (img.includes("static:image/")) {
                 const res = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
                 res.naturalHeight = res.height
                 res.naturalWidth = res.width

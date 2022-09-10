@@ -1,5 +1,4 @@
 import Component from "../Component";
-import CAMERA_PROPS from "../../data/component-props/CAMERA_PROPS";
 import COLLIDER_PROPS from "../../data/component-props/COLLIDER_PROPS";
 
 export default class BoxColliderComponent extends Component {

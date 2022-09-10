@@ -1,5 +1,3 @@
-import {v4 as uuidv4} from "uuid"
-
 export default class Component {
     static propTypes = Object.freeze({
         NUMBER: "number",

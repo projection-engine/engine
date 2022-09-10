@@ -1,8 +1,10 @@
 import Engine from "../production/Engine";
 import Entity from "../production/instances/entity/Entity";
-import componentConstructor from "../../../src/app/windows/project/libs/component-constructor";
-import dispatchRendererEntities, {ENTITY_ACTIONS} from "../../../src/app/windows/project/stores/templates/dispatch-renderer-entities";
-import EngineStore from "../../../src/app/windows/project/stores/EngineStore";
+import componentConstructor from "../../../src/frontend/project/libs/component-constructor";
+import dispatchRendererEntities, {
+    ENTITY_ACTIONS
+} from "../../../src/frontend/project/stores/templates/dispatch-renderer-entities";
+import EngineStore from "../../../src/frontend/project/stores/EngineStore";
 import ENVIRONMENT from "../production/data/ENVIRONMENT";
 import UserInterfaceController from "../production/controllers/UserInterfaceController";
 

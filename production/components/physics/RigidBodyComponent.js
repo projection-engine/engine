@@ -1,5 +1,4 @@
 import Component from "../Component";
-import COLLIDER_PROPS from "../../data/component-props/COLLIDER_PROPS";
 import RIGID_BODY_PROPS from "../../data/component-props/RIGID_BODY_PROPS";
 
 export default class RigidBodyComponent extends Component{

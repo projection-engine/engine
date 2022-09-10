@@ -60,7 +60,7 @@ export default class InstanceController {
     }
 
     static destroyMesh(instance) {
-        if (Object.values(STATIC_MESHES).find(m => m === instance.id))
+        if ([...Object.values(STATIC_MESHES.PRODUCTION), ...Object.values(STATIC_MESHES.EDITOR)].find(m => m === instance.id))
             return
         const mesh = typeof instance === "string" ? GPU.meshes.get(instance) : instance
         if (mesh instanceof MeshInstance) {
