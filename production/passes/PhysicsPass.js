@@ -1,4 +1,4 @@
-import Ammo from "../../../physics/ammo.wasm.js"
+import Ammo from "../../physics/ammo.wasm.js"
 
 const COLLISION = "COLLISION",
     DISPATCHER = "DISPATCHER",
