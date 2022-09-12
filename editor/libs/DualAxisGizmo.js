@@ -5,7 +5,7 @@ import CameraAPI from "../../production/apis/CameraAPI";
 import mapGizmoMesh from "../utils/map-gizmo-mesh";
 import TRANSFORMATION_TYPE from "../../../../src/frontend/editor/data/TRANSFORMATION_TYPE";
 import getPickerId from "../../production/utils/get-picker-id";
-import STATIC_MESHES from "../../static/STATIC_MESHES";
+import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import GPU from "../../production/GPU";
 
 export const XZ_ID = getPickerId(AXIS.XZ), XY_ID = getPickerId(AXIS.XY), ZY_ID = getPickerId(AXIS.ZY)

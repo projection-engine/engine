@@ -1,11 +1,11 @@
 import * as shaderCode from "../shaders/AO.glsl"
 import FramebufferInstance from "../instances/FramebufferInstance"
-import IMAGE_WORKER_ACTIONS from "../data/IMAGE_WORKER_ACTIONS"
+import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import Engine from "../Engine";
 import GPU from "../GPU";
 import DepthPass from "./DepthPass";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../apis/QuadAPI";
 
 export default class AOPass {

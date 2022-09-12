@@ -3,8 +3,8 @@ import * as shaderCode from "../shaders/EFFECTS.glsl"
 import generateBlurBuffers from "../utils/generate-blur-buffers"
 import CameraAPI from "../apis/CameraAPI";
 import GPU from "../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../apis/QuadAPI";
 
 let shaderState

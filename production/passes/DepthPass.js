@@ -1,10 +1,10 @@
-import COMPONENTS from "../data/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS"
 import * as shaderCode from "../shaders/DEFERRED.glsl"
 import Engine from "../Engine";
 import CameraAPI from "../apis/CameraAPI";
 import GPU from "../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../apis/QuadAPI";
 
 const vertex = `#version 300 es

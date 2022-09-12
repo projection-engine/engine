@@ -1,7 +1,7 @@
 import CameraAPI from "../../production/apis/CameraAPI";
 import InputEventsAPI from "../../production/apis/InputEventsAPI";
 
-import KEYS from "../../production/data/KEYS";
+import KEYS from "../../static/KEYS";
 import {v4} from "uuid";
 import {vec3} from "gl-matrix";
 import Gizmo from "./Gizmo";

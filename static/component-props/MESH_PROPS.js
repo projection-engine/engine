@@ -1,4 +1,4 @@
-import Component from "../../components/Component";
+import Component from "../../production/components/Component";
 
 export default [
     Component.group("RENDERING", [

@@ -1,6 +1,6 @@
 import {mat3, mat4, quat} from "gl-matrix"
 import TransformationAPI from "../../apis/TransformationAPI"
-import TRANSFORMATION_PROPS from "../../data/component-props/TRANSFORMATION_PROPS";
+import TRANSFORMATION_PROPS from "../../../static/component-props/TRANSFORMATION_PROPS";
 import Component from "../../components/Component";
 
 const toDeg = 57.29

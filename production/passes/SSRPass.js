@@ -5,8 +5,8 @@ import CameraAPI from "../apis/CameraAPI";
 import GPU from "../GPU";
 import DepthPass from "./DepthPass";
 import DeferredPass from "./DeferredPass";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../apis/QuadAPI";
 
 

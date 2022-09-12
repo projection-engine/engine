@@ -1,8 +1,8 @@
 import {mat4} from "gl-matrix"
 import PostProcessing from "./PostProcessing";
-import COMPONENTS from "../data/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS";
 import Engine from "../Engine";
-import ENVIRONMENT from "../data/ENVIRONMENT";
+import ENVIRONMENT from "../../static/ENVIRONMENT";
 import SkyboxPass from "../passes/SkyboxPass";
 
 const toRad = Math.PI/180

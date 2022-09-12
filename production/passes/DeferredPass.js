@@ -8,8 +8,8 @@ import AOPass from "./AOPass";
 import SSGIPass from "./SSGIPass";
 import SSRPass from "./SSRPass";
 import ShadowMapPass from "./ShadowMapPass";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import QuadAPI from "../apis/QuadAPI";
 
 export default class DeferredPass {

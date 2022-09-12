@@ -1,7 +1,7 @@
 import {mat4, vec3} from "gl-matrix"
 import MeshInstance from "./MeshInstance";
 import GPU from "../GPU";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 
 export default class CubeMapInstance {

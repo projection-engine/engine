@@ -1,4 +1,4 @@
-import COMPONENTS from "../data/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS"
 import {packageDirectionalLights, packagePointLights} from "../utils/package-lights";
 import Engine from "../Engine";
 import Component from "../components/Component";
@@ -8,6 +8,8 @@ import InputEventsAPI from "./InputEventsAPI";
 import CameraAPI from "./CameraAPI";
 import SpecularProbePass from "../passes/SpecularProbePass";
 import DiffuseProbePass from "../passes/DiffuseProbePass";
+import ENVIRONMENT from "../../static/ENVIRONMENT";
+import PhysicsPass from "../passes/PhysicsPass";
 
 function toObject(classes){
     const res = {}, s = classes.length
@@ -20,7 +22,13 @@ export default class BundlerAPI {
 
 
     static build(params) {
+
         const entities = Array.from(Engine.entitiesMap.values())
+        if(Engine.environment !== ENVIRONMENT.DEV){
+            PhysicsPass.clearEntries()
+            for(let i = 0; i < entities.length; i++)
+                PhysicsPass.registerRigidBody(entities[i])
+        }
 
         const attributes = {...params}
         const data = {

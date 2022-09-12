@@ -1,5 +1,5 @@
 import Component from "../Component"
-import CAMERA_PROPS from "../../data/component-props/CAMERA_PROPS";
+import CAMERA_PROPS from "../../../static/component-props/CAMERA_PROPS";
 
 export default class CameraComponent extends Component {
     _props = CAMERA_PROPS
@@ -25,11 +25,5 @@ export default class CameraComponent extends Component {
 
     ortho = false
     size = 100
-
-    constructor(id) {
-        super(id)
-    }
-
-
 }
 

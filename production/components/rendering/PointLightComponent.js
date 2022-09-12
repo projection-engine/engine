@@ -1,5 +1,5 @@
 import Component from "../Component"
-import POINT_LIGHT_PROPS from "../../data/component-props/POINT_LIGHT_PROPS";
+import POINT_LIGHT_PROPS from "../../../static/component-props/POINT_LIGHT_PROPS";
 
 export default class PointLightComponent extends Component {
 

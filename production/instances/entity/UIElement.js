@@ -1,6 +1,6 @@
 import {v4} from "uuid";
 import UserInterfaceController from "../../controllers/UserInterfaceController";
-import ELEMENT_ID from "../../data/ELEMENT_ID";
+import ELEMENT_ID from "../../../static/ELEMENT_ID";
 
 export default class UIElement {
     parent

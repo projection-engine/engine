@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix"
 import TransformationAPI from "../apis/TransformationAPI"
-import COMPONENTS from "../data/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS"
 import GPU from "../GPU";
 import BundlerAPI from "../apis/BundlerAPI";
 

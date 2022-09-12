@@ -1,4 +1,4 @@
-import ENVIRONMENT from "../data/ENVIRONMENT"
+import ENVIRONMENT from "../../static/ENVIRONMENT"
 import Engine from "../Engine";
 import UserInterfaceController from "../controllers/UserInterfaceController";
 

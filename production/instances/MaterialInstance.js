@@ -1,7 +1,7 @@
-import DATA_TYPES from "../data/DATA_TYPES"
+import DATA_TYPES from "../../static/DATA_TYPES"
 import {v4} from "uuid"
-import IMAGE_WORKER_ACTIONS from "../data/IMAGE_WORKER_ACTIONS"
-import MATERIAL_RENDERING_TYPES from "../data/MATERIAL_RENDERING_TYPES";
+import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
+import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import GPU from "../GPU";
 
 export default class MaterialInstance {

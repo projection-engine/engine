@@ -1,8 +1,8 @@
-import IMAGE_WORKER_ACTIONS from "../data/IMAGE_WORKER_ACTIONS"
+import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPU from "../GPU";
-import TEXTURE_WRAPPING from "../data/texture/TEXTURE_WRAPPING";
-import TEXTURE_FILTERING from "../data/texture/TEXTURE_FILTERING";
-import TEXTURE_FORMATS from "../data/texture/TEXTURE_FORMATS";
+import TEXTURE_WRAPPING from "../../static/texture/TEXTURE_WRAPPING";
+import TEXTURE_FILTERING from "../../static/texture/TEXTURE_FILTERING";
+import TEXTURE_FORMATS from "../../static/texture/TEXTURE_FORMATS";
 
 export default class TextureInstance {
     loaded = false

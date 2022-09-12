@@ -5,8 +5,7 @@ module.exports = {
     CAMERA: "CameraComponent",
     PROBE: "ProbeComponent",
     SPRITE: "SpriteComponent",
-    SPHERE_COLLIDER: "SphereCollider",
-    CAPSULE_COLLIDER: "CapsuleCollider",
-    BOX_COLLIDER: "BoxCollider",
-    RIGID_BODY: "RigidBody"
+    PHYSICS_COLLIDER: "PHYSICS_COLLIDER",
+    RIGID_BODY: "RigidBody",
+    CULLING: "CullingComponent"
 }

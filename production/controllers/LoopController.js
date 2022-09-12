@@ -16,8 +16,8 @@ import CompositePass from "../passes/CompositePass";
 import SkyboxPass from "../passes/SkyboxPass";
 import Engine from "../Engine";
 import GPU from "../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SpritePass from "../passes/SpritePass";
 import PhysicsPass from "../passes/PhysicsPass";
 

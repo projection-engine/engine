@@ -11,8 +11,8 @@ import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../production/GPU";
-import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 const CSS = {
     backdropFilter: "blur(10px) brightness(70%)",

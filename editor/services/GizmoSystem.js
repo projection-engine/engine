@@ -11,9 +11,10 @@ import CameraAPI from "../../production/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
 import GPU from "../../production/GPU";
-import STATIC_MESHES from "../../static/STATIC_MESHES";
+import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import DepthPass from "../../production/passes/DepthPass";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import Entity from "../../production/instances/entity/Entity";
 
 const EMPTY_COMPONENT = new Movable()
 const toDeg = Math.PI/180
@@ -107,7 +108,7 @@ export default class GizmoSystem {
 
     static #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if (MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main && main) {
+        if ((MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
             GizmoSystem.mainEntity = main
             GizmoSystem.updateTranslation()
 

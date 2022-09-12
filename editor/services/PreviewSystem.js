@@ -4,9 +4,9 @@ import MaterialInstance from "../../production/instances/MaterialInstance"
 import MaterialController from "../../production/controllers/MaterialController";
 import BundlerAPI from "../../production/apis/BundlerAPI";
 import GPU from "../../production/GPU";
-import STATIC_MESHES from "../../static/STATIC_MESHES";
-import STATIC_FRAMEBUFFERS from "../../static/STATIC_FRAMEBUFFERS";
-import FALLBACK_MATERIAL from "../../production/data/FALLBACK_MATERIAL";
+import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {

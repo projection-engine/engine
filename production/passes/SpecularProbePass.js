@@ -1,6 +1,6 @@
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
-import COMPONENTS from "../data/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS"
 import CubeMapInstance from "../instances/CubeMapInstance"
 import MaterialController from "../controllers/MaterialController";
 import Engine from "../Engine";

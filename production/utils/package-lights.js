@@ -1,4 +1,4 @@
-import COMPONENTS from "../data/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
 import MovementPass from "../passes/MovementPass";

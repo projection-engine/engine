@@ -1,11 +1,11 @@
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";
-import STATIC_MESHES from "../../static/STATIC_MESHES";
+import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/frontend/editor/stores/SelectionStore";
-import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
+import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/SpritePass";
 import GizmoSystem from "./GizmoSystem";
 import QuadAPI from "../../production/apis/QuadAPI";

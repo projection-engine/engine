@@ -1,6 +1,6 @@
 import Component from "../Component"
 import {mat4} from "gl-matrix"
-import DIRECTIONAL_LIGHT_PROPS from "../../data/component-props/DIRECTIONAL_LIGHT_PROPS";
+import DIRECTIONAL_LIGHT_PROPS from "../../../static/component-props/DIRECTIONAL_LIGHT_PROPS";
 
 export default class DirectionalLightComponent extends Component {
 
@@ -8,7 +8,6 @@ export default class DirectionalLightComponent extends Component {
     _props = DIRECTIONAL_LIGHT_PROPS
     _color = [255, 255, 255]
     fixedColor = [1, 1, 1]
-    transformationComponent
     _zNear = -1
     _zFar = 10000
     lightView = mat4.create()

@@ -2,11 +2,11 @@ import * as smShaders from "../shaders/SHADOW_MAP.glsl"
 import FramebufferInstance from "../instances/FramebufferInstance"
 import CubeMapInstance from "../instances/CubeMapInstance"
 import {mat4, vec3} from "gl-matrix"
-import COMPONENTS from "../data/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS"
 import BundlerAPI from "../apis/BundlerAPI";
 import Engine from "../Engine";
 import GPU from "../GPU";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 export const VIEWS = {
     target: [

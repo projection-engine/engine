@@ -1,5 +1,5 @@
 import CameraAPI from "./apis/CameraAPI"
-import ENVIRONMENT from "./data/ENVIRONMENT"
+import ENVIRONMENT from "../static/ENVIRONMENT"
 import LoopController from "./controllers/LoopController";
 
 export default class Engine {

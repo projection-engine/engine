@@ -1,4 +1,4 @@
-import ENVIRONMENT from "../data/ENVIRONMENT";
+import ENVIRONMENT from "../../static/ENVIRONMENT";
 import Engine from "../Engine";
 import {v4} from "uuid";
 

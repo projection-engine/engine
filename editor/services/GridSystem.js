@@ -2,7 +2,7 @@ import * as shaderCode from "../templates/GRID.glsl"
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../../production/apis/QuadAPI";
 
 export default class GridSystem {

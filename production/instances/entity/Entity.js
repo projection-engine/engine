@@ -1,7 +1,6 @@
 import {v4} from "uuid"
 import Movable from "./Movable";
-import COMPONENTS from "../../data/COMPONENTS";
-
+import COMPONENTS from "../../../static/COMPONENTS";
 import DirectionalLightComponent from "../../components/rendering/DirectionalLightComponent";
 import MeshComponent from "../../components/rendering/MeshComponent";
 import PointLightComponent from "../../components/rendering/PointLightComponent";
@@ -9,9 +8,8 @@ import ProbeComponent from "../../components/rendering/ProbeComponent";
 import CameraComponent from "../../components/misc/CameraComponent";
 import SpriteComponent from "../../components/rendering/SpriteComponent";
 import RigidBodyComponent from "../../components/physics/RigidBodyComponent";
-import BoxColliderComponent from "../../components/physics/BoxColliderComponent";
-import SphereColliderComponent from "../../components/physics/SphereColliderComponent";
-import CapsuleColliderComponent from "../../components/physics/CapsuleColliderComponent";
+import PhysicsColliderComponent from "../../components/physics/PhysicsColliderComponent";
+import CullingComponent from "../../components/misc/CullingComponent";
 
 
 export default class Entity extends Movable {
@@ -68,10 +66,9 @@ export default class Entity extends Movable {
         [COMPONENTS.CAMERA]: CameraComponent,
         [COMPONENTS.SPRITE]: SpriteComponent,
 
-        [COMPONENTS.SPHERE_COLLIDER]: SphereColliderComponent,
-        [COMPONENTS.BOX_COLLIDER]: BoxColliderComponent,
-        [COMPONENTS.CAPSULE_COLLIDER]: CapsuleColliderComponent,
+        [COMPONENTS.PHYSICS_COLLIDER]: PhysicsColliderComponent,
         [COMPONENTS.RIGID_BODY]: RigidBodyComponent,
+        [COMPONENTS.CULLING]: CullingComponent,
     }
 
     static parseEntityObject(entity) {

@@ -4,7 +4,7 @@ import CameraAPI from "../../production/apis/CameraAPI";
 import MeshInstance from "../../production/instances/MeshInstance";
 import GPU from "../../production/GPU";
 import SkyboxPass from "../../production/passes/SkyboxPass";
-import STATIC_SHADERS from "../../static/STATIC_SHADERS";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 
 export default class BackgroundSystem {

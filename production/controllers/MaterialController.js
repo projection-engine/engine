@@ -1,10 +1,10 @@
 import Engine from "../Engine";
-import COMPONENTS from "../data/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS";
 import GPU from "../GPU";
 import AOPass from "../passes/AOPass";
 import SpecularProbePass from "../passes/SpecularProbePass";
 import DiffuseProbePass from "../passes/DiffuseProbePass";
-import MATERIAL_RENDERING_TYPES from "../data/MATERIAL_RENDERING_TYPES";
+import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 
 
 export default class MaterialController {
