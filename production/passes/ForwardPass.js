@@ -14,33 +14,31 @@ export default class ForwardPass {
             dirLightPOV,
             pointLightData
         } = Engine.data
-
-        const elapsed = Engine.params.elapsed
-
-
         MaterialController.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isForwardShaded)
                     return
 
-                const ambient = MaterialController.getEnvironment(current)
-                MaterialController.drawMesh({
+
+                MaterialController.drawMesh(
+                    current.id,
                     mesh,
-                    camPosition: CameraAPI.position,
+                    mat,
+                    meshComponent,
+                    {
+                    cameraVec: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,
                     projectionMatrix: CameraAPI.projectionMatrix,
                     transformMatrix: current.transformationMatrix,
-                    material: mat,
-                    normalMatrix: meshComponent.normalMatrix,
+
+                    normalMatrix: current.normalMatrix,
                     materialComponent: meshComponent,
                     directionalLightsQuantity: maxTextures,
                     directionalLightsData,
                     dirLightPOV,
-                    pointLightsQuantity,
-                    pointLightData,
-                    elapsed,
-                    ambient
+                    lightQuantity: pointLightsQuantity,
+                    pointLightData
                 })
 
             }

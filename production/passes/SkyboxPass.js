@@ -16,7 +16,6 @@ export default class SkyboxPass {
             meshes
         } = Engine.data
 
-        const elapsed = Engine.params.elapsed
         MaterialController.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
@@ -29,18 +28,19 @@ export default class SkyboxPass {
                     gpu.disable(gpu.CULL_FACE)
                     gpu.disable(gpu.DEPTH_TEST)
                 }
-                MaterialController.drawMesh({
+                MaterialController.drawMesh(
+                    current.id,
                     mesh,
-                    camPosition: CameraAPI.position,
-                    viewMatrix: CameraAPI.viewMatrix,
-                    projectionMatrix: SkyboxPass.projectionMatrix,
-                    transformMatrix: current.transformationMatrix,
-                    material: mat,
-                    normalMatrix: meshComponent.normalMatrix,
-                    materialComponent: meshComponent,
-
-                    elapsed
-                }, true)
+                    mat,
+                    meshComponent,
+                    {
+                        cameraVec: CameraAPI.position,
+                        viewMatrix: CameraAPI.viewMatrix,
+                        projectionMatrix: SkyboxPass.projectionMatrix,
+                        transformMatrix: current.transformationMatrix,
+                        normalMatrix: current.normalMatrix,
+                        materialComponent: meshComponent
+                    }, true)
 
             }
         )

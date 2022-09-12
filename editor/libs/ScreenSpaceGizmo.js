@@ -20,7 +20,7 @@ export default class ScreenSpaceGizmo {
         const cameraDistance = ScreenSpaceGizmo.cameraDistance ** 2
         const mouseAcceleration = cameraDistance * damping
         const mD = ScreenSpaceGizmo.mouseDelta
-        const mY = -event.movementY, mX = event.movementX
+        const mY = -event.movementY * 2, mX = event.movementX
         const x = Math.sign(mX) * mD.x + mX * mouseAcceleration
         const y = Math.sign(mY) * mD.y + mY * mouseAcceleration
         const ssP = ConversionAPI.toLinearWorldCoordinates(x, y).slice(0, 3)
@@ -65,7 +65,7 @@ export default class ScreenSpaceGizmo {
     }
 
     static onMouseDown( ) {
-        ScreenSpaceGizmo.cameraDistance = Math.max(vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position)), 50)
+        ScreenSpaceGizmo.cameraDistance = Math.min(Math.max(vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position)), 50), 150)
 
         const b = gpu.canvas.getBoundingClientRect()
         ScreenSpaceGizmo.mouseDelta.x = b.width / 2

@@ -26,9 +26,7 @@ export default class SpriteComponent extends Component{
     }
 
 
-    constructor(imageID) {
+    constructor() {
         super()
-        this.imageID = imageID
     }
-
 }

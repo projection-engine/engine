@@ -13,7 +13,7 @@ export default class TextureInstance {
         const img = attributes.img
         this.attributes = attributes
         if (typeof img === "string") {
-            if (img.includes("static:image/")) {
+            if (img.includes("data:image/")) {
                 const res = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
                 res.naturalHeight = res.height
                 res.naturalWidth = res.width
@@ -45,14 +45,15 @@ export default class TextureInstance {
             format =  TEXTURE_FORMATS.SRGBA.format,
 
             width = img.naturalWidth,
-            height = img.naturalHeight
+            height = img.naturalHeight,
+            type
         } = attributes
 
 
         let newTexture = gpu.createTexture()
 
         gpu.bindTexture(gpu.TEXTURE_2D, newTexture)
-        gpu.texImage2D(gpu.TEXTURE_2D, 0, gpu[internalFormat], width, height, 0, gpu[format], gpu.UNSIGNED_BYTE, img)
+        gpu.texImage2D(gpu.TEXTURE_2D, 0, gpu[internalFormat], width, height, 0, gpu[format], typeof type === "string" ? gpu[type] : gpu.UNSIGNED_BYTE, img)
 
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu[minFilter])
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu[magFilter])

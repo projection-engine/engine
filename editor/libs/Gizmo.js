@@ -1,8 +1,8 @@
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/frontend/project/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/frontend/editor/data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/apis/ConversionAPI"
-import INFORMATION_CONTAINER from "../../../../src/frontend/project/data/INFORMATION_CONTAINER"
-import EngineStore from "../../../../src/frontend/project/stores/EngineStore";
+import INFORMATION_CONTAINER from "../../../../src/frontend/editor/data/INFORMATION_CONTAINER"
+import EngineStore from "../../../../src/frontend/editor/stores/EngineStore";
 import PickingAPI from "../../production/apis/PickingAPI";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";

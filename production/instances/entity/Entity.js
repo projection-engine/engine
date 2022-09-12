@@ -1,5 +1,4 @@
 import {v4} from "uuid"
-import cloneClass from "../../utils/clone-class"
 import Movable from "./Movable";
 import COMPONENTS from "../../data/COMPONENTS";
 
@@ -20,7 +19,7 @@ export default class Entity extends Movable {
     queryKey
     name
     active
-    components = {}
+    components = new Map()
     scripts = []
     children = []
     parent
@@ -44,78 +43,92 @@ export default class Entity extends Movable {
         delete temp.parent
         temp.parent = this.parent?.id
         delete temp.children
+        const parsedComponents = {}
+        Array.from(this.components.entries())
+            .forEach(([k, v]) => {
+                parsedComponents[k] = v
+            })
+        temp.components = parsedComponents
         return temp
     }
 
     clone() {
-        let clone = new Entity()
-        clone.name = this.name
-        let newComponents = {}
-
-        Object.keys(this.components).forEach(c => {
-            const cClone = cloneClass(this.components[c])
-            cClone.id = v4()
-            newComponents[c] = cClone
-        })
-
-        delete clone.components
-        clone.components = newComponents
-        clone.active = this.active
-
-        clone.rotation = [...this.rotation]
-        clone.rotationQuaternion = [...this.rotationQuaternion]
-        clone.translation = [...this.translation]
-        clone.scaling = [...this.scaling]
-        clone.matrix = [...this.matrix]
-        clone.baseTransformationMatrix = [...this.baseTransformationMatrix]
-        clone.lockedRotation = this.lockedRotation
-        clone.lockedScaling = this.lockedScaling
-
-        return clone
+        const str = Entity.serializeComplexObject(this.serializable())
+        const newEntity = Entity.parseEntityObject(JSON.parse(str))
+        newEntity.id = v4()
+        newEntity.queryKey = newEntity.id.slice(0, newEntity.id.length / 2);
+        return newEntity
     }
 
     static nativeComponents = {
-        [COMPONENTS.DIRECTIONAL_LIGHT]: (entity) => new DirectionalLightComponent(entity),
-        [COMPONENTS.MESH]: (entity, k) => new MeshComponent(entity.components[k].meshID, entity.components[k].materialID),
-        [COMPONENTS.POINT_LIGHT]: () => new PointLightComponent(),
-        [COMPONENTS.PROBE]: () => new ProbeComponent(),
-        [COMPONENTS.CAMERA]: () => new CameraComponent(),
-        [COMPONENTS.SPRITE]: () => new SpriteComponent(),
+        [COMPONENTS.DIRECTIONAL_LIGHT]: DirectionalLightComponent,
+        [COMPONENTS.MESH]: MeshComponent,
+        [COMPONENTS.POINT_LIGHT]: PointLightComponent,
+        [COMPONENTS.PROBE]: ProbeComponent,
+        [COMPONENTS.CAMERA]: CameraComponent,
+        [COMPONENTS.SPRITE]: SpriteComponent,
 
-        [COMPONENTS.SPHERE_COLLIDER]: () => new SphereColliderComponent(),
-        [COMPONENTS.BOX_COLLIDER]: () => new BoxColliderComponent(),
-        [COMPONENTS.CAPSULE_COLLIDER]: () => new CapsuleColliderComponent(),
-        [COMPONENTS.RIGID_BODY]: () => new RigidBodyComponent(),
+        [COMPONENTS.SPHERE_COLLIDER]: SphereColliderComponent,
+        [COMPONENTS.BOX_COLLIDER]: BoxColliderComponent,
+        [COMPONENTS.CAPSULE_COLLIDER]: CapsuleColliderComponent,
+        [COMPONENTS.RIGID_BODY]: RigidBodyComponent,
     }
 
-    static async parseEntityObject(entity) {
+    static parseEntityObject(entity) {
 
         const parsedEntity = new Entity(entity.id, entity.name, entity.active)
-        Object.keys(entity)
-            .forEach(k => {
-                if (k !== "components" && k !== "parent" && k !== "matrix")
-                    parsedEntity[k] = entity[k]
-            })
+        const keys = Object.keys(entity)
+
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i]
+            if (k !== "components" && k !== "parent" && k !== "matrix")
+                parsedEntity[k] = entity[k]
+        }
 
         parsedEntity.parent = undefined
         parsedEntity.parentCache = entity.parent
         for (const k in entity.components) {
-            if (typeof Entity.nativeComponents[k] === "function") {
-                let component = Entity.nativeComponents[k](entity, k)
-
-                if (component) {
-                    const keys = Object.keys(entity.components[k])
-                    for (let i = 0; i < keys.length; i++) {
-                        const oK = keys[i]
-                        if (!oK.includes("__") && !oK.includes("#")) component[oK] = entity.components[k][oK]
-                    }
-                    parsedEntity.components[k] = component
-                    if (k === COMPONENTS.DIRECTIONAL_LIGHT)
-                        component.changed = true
-                }
+            const component = parsedEntity.addComponent(k)
+            if (!component)
+                continue
+            const keys = Object.keys(entity.components[k])
+            for (let i = 0; i < keys.length; i++) {
+                const componentValue = keys[i]
+                if (componentValue.includes("__") || componentValue.includes("#") || componentValue === "_props" || componentValue === "_name")
+                    continue
+                component[componentValue] = entity.components[k][componentValue]
             }
+            if (k === COMPONENTS.DIRECTIONAL_LIGHT)
+                component.changed = true
         }
         parsedEntity.changed = true
         return parsedEntity
+    }
+
+    addComponent(KEY) {
+        let instance = Entity.nativeComponents[KEY]
+        if (instance != null) {
+            instance = new instance(KEY === COMPONENTS.DIRECTIONAL_LIGHT ? this : undefined)
+            this.components.set(KEY, instance)
+            return instance
+        }
+    }
+
+    static serializeComplexObject(obj) {
+        return JSON.stringify(
+            obj,
+            (key, value) => {
+                if (value instanceof Int8Array ||
+                    value instanceof Uint8Array ||
+                    value instanceof Uint8ClampedArray ||
+                    value instanceof Int16Array ||
+                    value instanceof Uint16Array ||
+                    value instanceof Int32Array ||
+                    value instanceof Uint32Array ||
+                    value instanceof Float32Array ||
+                    value instanceof Float64Array)
+                    return Array.from(value)
+                return value
+            })
     }
 }

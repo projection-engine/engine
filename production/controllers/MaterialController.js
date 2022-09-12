@@ -4,7 +4,7 @@ import GPU from "../GPU";
 import AOPass from "../passes/AOPass";
 import SpecularProbePass from "../passes/SpecularProbePass";
 import DiffuseProbePass from "../passes/DiffuseProbePass";
-import FALLBACK_MATERIAL from "../data/FALLBACK_MATERIAL";
+import MATERIAL_RENDERING_TYPES from "../data/MATERIAL_RENDERING_TYPES";
 
 
 export default class MaterialController {
@@ -22,67 +22,42 @@ export default class MaterialController {
             gpu.enable(gpu.BLEND)
     }
 
-    static getEnvironment(entity) {
-        const specular = SpecularProbePass.probes[entity.id]
-        const diffuse = DiffuseProbePass.probes[entity.id]
-
-        if (diffuse)
-            return {
-                irradiance0: diffuse[0]?.texture,
-                irradiance1: diffuse[1]?.texture,
-                irradiance2: diffuse[2]?.texture,
-
-                prefilteredMap: specular?.texture,
-                ambientLODSamples: specular?.mipmaps
+    static #getEnvironment(id, meshComponent) {
+        const result = []
+        if (meshComponent.diffuseProbeInfluence) {
+            const diffuse = DiffuseProbePass.probes[id]
+            if (diffuse) {
+                result[2] = diffuse[0]?.texture
+                result[3] = diffuse[1]?.texture
+                result[4] = diffuse[2]?.texture
             }
-        return {
-            prefilteredMap: specular?.texture,
-            ambientLODSamples: specular?.mipmaps
         }
+
+        if (meshComponent.specularProbeInfluence) {
+            const specular = SpecularProbePass.probes[id]
+            if (specular) {
+                result[0] = specular?.texture
+                result[1] = specular?.mipmaps
+            }
+        }
+        return result
     }
 
-    static drawMesh(attributes, directDrawing = false) {
-        const {
-            useCubeMapShader,
-            mesh,
-            camPosition,
-            viewMatrix,
-            projectionMatrix,
-            transformMatrix,
-            material,
-            normalMatrix,
-            directionalLightsQuantity,
-            directionalLightsData,
-            dirLightPOV,
-            pointLightsQuantity,
-            pointLightData,
-            elapsed,
-            ambient,
-            sceneColor
-        } = attributes
+    static drawMesh(id, mesh, material, meshComponent, uniforms, directDrawing = false) {
+        if (material.shadingType !== MATERIAL_RENDERING_TYPES.SKYBOX) {
+            const ambient = MaterialController.#getEnvironment(id, meshComponent)
+            uniforms.prefilteredMap = ambient[0]
+            uniforms.ambientLODSamples = ambient[1]
+            uniforms.irradiance0 = ambient[2]
+            uniforms.irradiance1 = ambient[3]
+            uniforms.irradiance2 = ambient[4]
+        }
 
-        if (!mesh || !material)
-            return
-        material.use(
-            {
-                ...ambient,
-                projectionMatrix,
-                transformMatrix,
-                viewMatrix,
-                normalMatrix,
-                sceneColor,
-                brdfSampler: GPU.BRDF,
-                elapsedTime: elapsed,
-                cameraVec: camPosition,
-                directionalLightsData,
-                directionalLightsQuantity,
-                dirLightPOV,
-                aoSampler: AOPass.filteredSampler,
-                lightQuantity: pointLightsQuantity,
-                pointLightData
-            },
-            useCubeMapShader
-        )
+        uniforms.brdfSampler = GPU.BRDF
+        uniforms.aoSampler = AOPass.filteredSampler
+        uniforms.elapsedTime = Engine.elapsed
+        material.use(uniforms, uniforms.useCubeMapShader)
+
         if (directDrawing)
             mesh.draw()
         else
@@ -90,47 +65,33 @@ export default class MaterialController {
     }
 
     static drawProbe(view, projection, cubeMapPosition,) {
-        const materials = GPU.materials
         const {
-                meshes,
-                directionalLightsData,
-                dirLightPOV, pointLightsQuantity, pointLightData,
-                maxTextures
-            } = Engine.data,
-            {elapsed} = Engine.params,
-            l = meshes.length
-        for (let m = 0; m < l; m++) {
-            const current = meshes[m]
-            if (!current.active)
-                continue
-            const meshComponent = current.components[COMPONENTS.MESH]
-            const mesh = GPU.meshes.get(meshComponent.meshID)
-
-            if (mesh !== undefined) {
-                let mat = materials.get(meshComponent.materialID)
-                if (!mat || !mat.ready)
-                    mat = GPU.materials.get(FALLBACK_MATERIAL)
-                const ambient = MaterialController.getEnvironment(current)
-                MaterialController.drawMesh({
-                    ambient,
-                    mesh,
-                    camPosition: cubeMapPosition,
+            meshes,
+            directionalLightsData,
+            dirLightPOV, pointLightsQuantity, pointLightData,
+            maxTextures
+        } = Engine.data
+        MaterialController.loopMeshes(meshes, (mat, mesh, meshComponent, current) => {
+            MaterialController.drawMesh(
+                current.id,
+                mesh,
+                mat,
+                meshComponent,
+                {
+                    cameraVec: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,
                     transformMatrix: current.transformationMatrix,
-                    material: mat,
-                    normalMatrix: meshComponent.normalMatrix,
+                    normalMatrix: current.normalMatrix,
                     materialComponent: meshComponent,
                     directionalLightsQuantity: maxTextures,
                     directionalLightsData,
                     dirLightPOV,
-                    pointLightsQuantity,
+                    lightQuantity: pointLightsQuantity,
                     pointLightData,
-                    elapsed,
                     useCubeMapShader: true
                 })
-            }
-        }
+        })
         gpu.bindVertexArray(null)
     }
 
@@ -143,15 +104,12 @@ export default class MaterialController {
             const current = entities[m]
             if (!current.active)
                 continue
-            const meshComponent = current.components[COMPONENTS.MESH]
+            const meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = meshes.get(meshComponent.meshID)
-            if (!mesh)
-                continue
             const mat = materials.get(meshComponent.materialID)
-            if (!mat || !mat.ready)
+            if (!mesh || !mat || !mat.ready)
                 continue
             callback(mat, mesh, meshComponent, current)
         }
-        gpu.bindVertexArray(null)
     }
 }

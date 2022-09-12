@@ -58,7 +58,7 @@ export default class DiffuseProbePass {
                     if (!DiffuseProbePass.diffuseProbes[current.id])
                         DiffuseProbePass.diffuseProbes[current.id] = new CubeMapInstance(32)
 
-                    DiffuseProbePass.diffuseProbes[current.id].generateIrradiance(DiffuseProbePass.baseCubeMap.texture, current.components[COMPONENTS.PROBE].multiplier)
+                    DiffuseProbePass.diffuseProbes[current.id].generateIrradiance(DiffuseProbePass.baseCubeMap.texture, current.components.get(COMPONENTS.PROBE).multiplier)
                 }
 
                 DiffuseProbePass.step = STEPS_LIGHT_PROBE.CALCULATE
@@ -81,7 +81,7 @@ export default class DiffuseProbePass {
             const mPosition = currentMesh.translation
             for (let probeIndex in probes) {
                 const current = probes[probeIndex]
-                const component = probes[probeIndex].components[COMPONENTS.PROBE]
+                const component = probes[probeIndex].components.get(COMPONENTS.PROBE)
                 const probePosition = current.translation
                 const texture = DiffuseProbePass.diffuseProbes[current.id].irradianceTexture
 

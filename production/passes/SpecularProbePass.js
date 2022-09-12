@@ -35,7 +35,7 @@ export default class SpecularProbePass {
                     const current = specularProbes[i]
                     if (!current.active)
                         continue
-                    const component = current.components[COMPONENTS.PROBE]
+                    const component = current.components.get(COMPONENTS.PROBE)
                     if (!SpecularProbePass.specularProbes[current.id])
                         SpecularProbePass.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
                     else
@@ -58,7 +58,7 @@ export default class SpecularProbePass {
                 for (let i = 0; i < SpecularProbePass.lastCallLength; i++) {
                     if (!specularProbes[i].active)
                         continue
-                    const current = specularProbes[i].components[COMPONENTS.PROBE]
+                    const current = specularProbes[i].components.get(COMPONENTS.PROBE)
                     SpecularProbePass.specularProbes[specularProbes[i].id].generatePrefiltered(current.mipmaps, current.resolution, GPU.cubeBuffer, current.multiplier)
                 }
                 SpecularProbePass.step = STEPS_CUBE_MAP.CALCULATE
@@ -73,15 +73,17 @@ export default class SpecularProbePass {
         }
     }
 
-    static sort(meshes, specularProbes) {
-        for (let meshIndex = 0; meshIndex < meshes.length; meshIndex++) {
+    static sort(entities, specularProbes) {
+        for (let meshIndex = 0; meshIndex < entities.length; meshIndex++) {
             let intersecting
-            const currentMesh = meshes[meshIndex]
-            for (let index in specularProbes) {
+            const entity = entities[meshIndex]
+            if (!entity.components.get(COMPONENTS.MESH).contributeToProbes)
+                continue
+            for (let index = 0; index < specularProbes.length; index++) {
                 const probePosition = specularProbes[index].translation
-                const mPosition = currentMesh.translation
+                const mPosition = entity.translation
                 const distance = vec3.len(vec3.subtract([], probePosition, mPosition))
-                const component = specularProbes[index].components[COMPONENTS.PROBE]
+                const component = specularProbes[index].components.get(COMPONENTS.PROBE)
                 if (!intersecting || distance < intersecting.distance)
                     intersecting = {
                         mipmaps: component.mipmaps - 1,
@@ -92,9 +94,9 @@ export default class SpecularProbePass {
             }
 
             if (intersecting) {
-                SpecularProbePass.probes[currentMesh.id] = {}
-                SpecularProbePass.probes[currentMesh.id].texture = intersecting.texture
-                SpecularProbePass.probes[currentMesh.id].mipmaps = intersecting.mipmaps
+                SpecularProbePass.probes[entity.id] = {}
+                SpecularProbePass.probes[entity.id].texture = intersecting.texture
+                SpecularProbePass.probes[entity.id].mipmaps = intersecting.mipmaps
             }
         }
     }

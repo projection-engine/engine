@@ -13,7 +13,7 @@ export default class QueryAPI {
     static getEntitiesWithNativeComponent(componentKey) {
         const newArr = []
         Engine.entitiesMap.forEach(entity => {
-            if (entity.components[componentKey] != null)
+            if (entity.components.get(componentKey) != null)
                 newArr.push(entity)
         })
         return newArr

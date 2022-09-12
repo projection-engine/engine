@@ -28,7 +28,7 @@ export default class Engine {
     }
 
     static #callback() {
-        Engine.params.elapsed = performance.now() - Engine.then
+        Engine.elapsed = performance.now() - Engine.then
         LoopController.loop(Engine.entities)
         Engine.frameID = requestAnimationFrame(() => Engine.#callback())
     }

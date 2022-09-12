@@ -37,6 +37,9 @@ export default class PhysicsPass {
     }
 
     static execute(entities) {
+        for(let i = 0; i < entities.length; i++){
+            const entity = entities[i]
 
+        }
     }
 }

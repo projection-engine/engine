@@ -81,10 +81,6 @@ export default class LoopController {
         SSRPass.execute()
     }
 
-    static #miscellaneous(entities) {
-
-    }
-
 
     static loop(entities) {
         if (!LoopController.#initialized)

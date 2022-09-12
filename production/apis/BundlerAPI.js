@@ -1,5 +1,4 @@
 import COMPONENTS from "../data/COMPONENTS"
-import toObject from "../utils/to-object"
 import {packageDirectionalLights, packagePointLights} from "../utils/package-lights";
 import Engine from "../Engine";
 import Component from "../components/Component";
@@ -10,7 +9,13 @@ import CameraAPI from "./CameraAPI";
 import SpecularProbePass from "../passes/SpecularProbePass";
 import DiffuseProbePass from "../passes/DiffuseProbePass";
 
+function toObject(classes){
+    const res = {}, s = classes.length
+    for(let i = 0; i < s; i++)
+        res[classes[i].id] = classes[i]
 
+    return res
+}
 export default class BundlerAPI {
 
 
@@ -31,19 +36,19 @@ export default class BundlerAPI {
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
             Engine.queryMap.set(entity.queryKey, entity)
-            if (entity.components[COMPONENTS.POINT_LIGHT])
+            if (entity.components.get(COMPONENTS.POINT_LIGHT))
                 data.pointLights.push(entity)
-            if (entity.components[COMPONENTS.MESH])
+            if (entity.components.get(COMPONENTS.MESH))
                 data.meshes.push(entity)
-            if (entity.components[COMPONENTS.DIRECTIONAL_LIGHT])
+            if (entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT))
                 data.directionalLights.push(entity)
-            if (entity.components[COMPONENTS.PROBE] && entity.components[COMPONENTS.PROBE].specularProbe)
+            if (entity.components.get(COMPONENTS.PROBE) && entity.components.get(COMPONENTS.PROBE).specularProbe)
                 data.specularProbes.push(entity)
-            if (entity.components[COMPONENTS.CAMERA])
+            if (entity.components.get(COMPONENTS.CAMERA))
                 data.cameras.push(entity)
-            if (entity.components[COMPONENTS.PROBE] && !entity.components[COMPONENTS.PROBE].specularProbe)
+            if (entity.components.get(COMPONENTS.PROBE) && !entity.components.get(COMPONENTS.PROBE).specularProbe)
                 data.diffuseProbes.push(entity)
-            if (entity.components[COMPONENTS.SPRITE])
+            if (entity.components.get(COMPONENTS.SPRITE))
                 data.sprites.push(entity)
         }
 

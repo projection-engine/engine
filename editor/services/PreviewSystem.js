@@ -2,7 +2,6 @@ import {mat4} from "gl-matrix"
 import MeshInstance from "../../production/instances/MeshInstance"
 import MaterialInstance from "../../production/instances/MaterialInstance"
 import MaterialController from "../../production/controllers/MaterialController";
-import Engine from "../../production/Engine";
 import BundlerAPI from "../../production/apis/BundlerAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
@@ -46,7 +45,6 @@ export default class PreviewSystem {
     }
 
     static execute(materialMesh, meshEntity) {
-        const {elapsed} = Engine.params
         let response
         PreviewSystem.frameBuffer.startMapping()
 
@@ -71,44 +69,46 @@ export default class PreviewSystem {
                     100, .1, 0, 0
                 ]]
 
-            MaterialController.drawMesh({
-                mesh: materialMesh,
-                camPosition: cam[1],
-                viewMatrix: cam[0],
-                projectionMatrix: PreviewSystem.projection,
-                transformMatrix,
-                material: GPU.materials.get(FALLBACK_MATERIAL),
-                normalMatrix: PreviewSystem.identity,
-                directionalLightsQuantity: 0,
-                directionalLightsData: [],
-                dirLightPOV: [],
-                pointLightsQuantity: 2,
-                pointLightData: pointLightData,
-                materialComponent: {},
-                elapsed,
-                ambient: {},
-                useCubeMapShader: true
-            })
+            MaterialController.drawMesh(
+                undefined,
+                materialMesh,
+                GPU.materials.get(FALLBACK_MATERIAL),
+                {},
+                {
+                    cameraVec: cam[1],
+                    viewMatrix: cam[0],
+                    projectionMatrix: PreviewSystem.projection,
+                    transformMatrix,
+
+                    normalMatrix: PreviewSystem.identity,
+                    directionalLightsQuantity: 0,
+                    directionalLightsData: [],
+                    dirLightPOV: [],
+                    lightQuantity: 2,
+                    pointLightData: pointLightData,
+                    useCubeMapShader: true
+                })
         } else if (materialMesh instanceof MaterialInstance) {
-            const [viewMatrix, camPosition] = PreviewSystem.cameraData
-            MaterialController.drawMesh({
-                mesh: GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
-                camPosition,
-                viewMatrix,
-                projectionMatrix: PreviewSystem.projection,
-                transformMatrix: PreviewSystem.identity,
-                material: materialMesh,
-                normalMatrix: PreviewSystem.identity,
-                directionalLightsQuantity: 0,
-                directionalLightsData: [],
-                dirLightPOV: [],
-                pointLightsQuantity: 2,
-                pointLightData: PreviewSystem.pointLightData,
-                materialComponent: {},
-                elapsed,
-                ambient: {},
-                useCubeMapShader: true
-            })
+            const [viewMatrix, cameraVec] = PreviewSystem.cameraData
+            MaterialController.drawMesh(
+                undefined,
+                GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
+                materialMesh,
+                {},
+                {
+                    cameraVec,
+                    viewMatrix,
+                    projectionMatrix: PreviewSystem.projection,
+                    transformMatrix: PreviewSystem.identity,
+                    normalMatrix: PreviewSystem.identity,
+                    directionalLightsQuantity: 0,
+                    directionalLightsData: [],
+                    dirLightPOV: [],
+                    lightQuantity: 2,
+                    pointLightData: PreviewSystem.pointLightData,
+
+                    useCubeMapShader: true
+                })
         }
         PreviewSystem.frameBuffer.stopMapping()
         response = BundlerAPI.framebufferToImage(PreviewSystem.frameBuffer.FBO)

@@ -19,7 +19,7 @@ export default class MovementPass {
 
         for (let i = 0; i < size; i++) {
             const current = entities[i]
-            if(!current.changed || !current.active)
+            if (!current.changed || !current.active)
                 continue
             MovementPass.hasUpdatedItem = true
             MovementPass.changed.set(current.id, true)
@@ -48,16 +48,13 @@ export default class MovementPass {
         for (let j = 0; j < children.length; j++)
             MovementPass.transform(children[j])
         entity.changed = false
-
-        const mesh = entity.components[COMPONENTS.MESH]
-        if (mesh !== undefined)
-            mesh.normalMatrix = normalMatrix(entity.transformationMatrix)
+        entity.normalMatrix = normalMatrix(entity.transformationMatrix)
 
         if (entity.instancingGroupID) {
             const i = GPU.instancingGroup.get(entity.instancingGroupID)
             MovementPass.instancingNeedsUpdate.set(entity.instancingGroupID, i)
         }
-        if (COMPONENTS.POINT_LIGHT in entity.components || COMPONENTS.DIRECTIONAL_LIGHT in entity.components)
+        if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
             MovementPass.lightEntityChanged = true
     }
 }

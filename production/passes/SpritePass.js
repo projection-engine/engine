@@ -25,7 +25,7 @@ export default class SpritePass {
 
         QuadAPI.use()
         for (let i = 0; i < sprites.length; i++) {
-            const current = sprites[i], component = current.components[COMPONENTS.SPRITE]
+            const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
             const texture = textures.get(component.imageID)
             if (!texture)
                 continue

@@ -1,10 +1,10 @@
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/frontend/project/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/frontend/editor/data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/apis/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
-import EngineStore from "../../../../src/frontend/project/stores/EngineStore";
+import EngineStore from "../../../../src/frontend/editor/stores/EngineStore";
 import PickingAPI from "../../production/apis/PickingAPI";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
@@ -33,10 +33,9 @@ export default class Rotation {
     tracking = false
     currentRotation = [0, 0, 0]
     gridSize = .1
-    distanceX = 0
-    distanceY = 0
-    distanceZ = 0
+
     started = false
+    currentIncrement = 0
 
     constructor() {
 
@@ -66,11 +65,9 @@ export default class Rotation {
         this.currentCoord = ConversionAPI.toQuadCoord({x, y}, {w, h})
         this.currentCoord.clientX = x
         this.currentCoord.clientY = y
-
+        this.currentIncrement = 0
         ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
-
-
     }
 
     onMouseUp() {
@@ -88,13 +85,12 @@ export default class Rotation {
         document.exitPointerLock()
 
         this.started = false
-        this.distanceX = 0
         this.distanceY = 0
         this.distanceZ = 0
         GizmoSystem.clickedAxis = -1
         this.tracking = false
         this.currentRotation = [0, 0, 0]
-        this.renderTarget.innerText = ""
+        this.renderTarget.textContent = ""
         this.renderTarget.style.display = "none"
     }
 
@@ -110,38 +106,30 @@ export default class Rotation {
             )
         }
 
+        const g = this.gridSize * toRad
+        this.currentIncrement += event.movementX * .01
+        const mappedValue = Math.round(this.currentIncrement / g) * g
+        if (Math.abs(mappedValue) > 0)
+            this.currentIncrement = 0
+
         switch (GizmoSystem.clickedAxis) {
             case AXIS.X:
-                this.distanceX += Math.abs(event.movementX * 0.1)
-
-                if (Math.abs(this.distanceX) >= this.gridSize) {
-                    this.rotateElement([Math.sign(event.movementX) * this.gridSize * toRad, 0, 0])
-                    this.distanceX = 0
-                    this.renderTarget.innerText = `${(this.currentRotation[0] * toDeg).toFixed(1)} θ`
-                }
+                this.rotateElement([mappedValue, 0, 0])
+                this.renderTarget.textContent = `${(GizmoSystem.totalMoved * toDeg).toFixed(1)} θ`
                 break
             case AXIS.Y:
-                this.distanceY += Math.abs(event.movementX * 0.1)
-                if (Math.abs(this.distanceY) >= this.gridSize) {
-                    this.rotateElement([0, Math.sign(event.movementX) * this.gridSize * toRad, 0])
-                    this.renderTarget.innerText = `${(this.currentRotation[1] * toDeg).toFixed(1)} θ`
-                    this.distanceY = 0
-                }
+                this.rotateElement([0, mappedValue, 0])
+                this.renderTarget.textContent = `${(GizmoSystem.totalMoved * toDeg).toFixed(1)} θ`
                 break
             case AXIS.Z:
-                this.distanceZ += Math.abs(event.movementX * 0.1)
-                if (Math.abs(this.distanceZ) >= this.gridSize) {
-                    this.rotateElement([0, 0, Math.sign(event.movementX) * this.gridSize * toRad])
-
-                    this.distanceZ = 0
-                    this.renderTarget.innerText = `${(this.currentRotation[2] * toDeg).toFixed(1)} θ`
-                }
+                this.rotateElement([0, 0, mappedValue])
+                this.renderTarget.textContent = `${(GizmoSystem.totalMoved * toDeg).toFixed(1)} θ`
                 break
             case AXIS.SCREEN_SPACE:
-                const position = ScreenSpaceGizmo.onMouseMove(event)
-                this.rotateElement(vec3.scale([], position, toRad), true)
+                const position = vec3.add([], this.currentRotation, ScreenSpaceGizmo.onMouseMove(event, toRad, this.gridSize))
+                this.rotateElement(position, true)
                 const getRot = (r) => `${(r * toDeg).toFixed(1)} θ; `
-                this.renderTarget.innerText = getRot(this.currentRotation[0]) + getRot(this.currentRotation[1]) + getRot(this.currentRotation[2])
+                this.renderTarget.textContent = getRot(this.currentRotation[0]) + getRot(this.currentRotation[1]) + getRot(this.currentRotation[2])
                 break
             default:
                 break
@@ -204,7 +192,7 @@ export default class Rotation {
             this.renderTarget.style.top = this.currentCoord.clientY + "px"
             this.renderTarget.style.display = "block"
             this.renderTarget.style.width = "fit-content"
-            this.renderTarget.innerText = "0 θ"
+            this.renderTarget.textContent = "0 θ"
 
             gpu.canvas.requestPointerLock()
         }

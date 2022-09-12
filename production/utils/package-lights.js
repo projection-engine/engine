@@ -22,7 +22,7 @@ export function packagePointLights(keepOld) {
             pointLightsQuantity++
             if (MovementPass.lightEntityChanged && !MovementPass.changed.get(current.id))
                 continue
-            const component = current.components[COMPONENTS.POINT_LIGHT]
+            const component = current.components.get(COMPONENTS.POINT_LIGHT)
 
             if (!pointLightData[i - activeOffset])
                 pointLightData[i - activeOffset] = new Float32Array(16)
@@ -71,7 +71,7 @@ export function packageDirectionalLights(keepOld) {
             maxTextures++
             if (MovementPass.lightEntityChanged && !MovementPass.changed.get(current.id))
                 continue
-            const component = current.components[COMPONENTS.DIRECTIONAL_LIGHT]
+            const component = current.components.get(COMPONENTS.DIRECTIONAL_LIGHT)
 
             if (!directionalLightsData[i - activeOffset])
                 directionalLightsData[i - activeOffset] = new Float32Array(9)

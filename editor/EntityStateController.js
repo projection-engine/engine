@@ -1,10 +1,10 @@
 import Engine from "../production/Engine";
 import Entity from "../production/instances/entity/Entity";
-import componentConstructor from "../../../src/frontend/project/libs/component-constructor";
+import componentConstructor from "../../../src/frontend/editor/libs/component-constructor";
 import dispatchRendererEntities, {
     ENTITY_ACTIONS
-} from "../../../src/frontend/project/stores/templates/dispatch-renderer-entities";
-import EngineStore from "../../../src/frontend/project/stores/EngineStore";
+} from "../../../src/frontend/editor/stores/templates/dispatch-renderer-entities";
+import EngineStore from "../../../src/frontend/editor/stores/EngineStore";
 import ENVIRONMENT from "../production/data/ENVIRONMENT";
 import UserInterfaceController from "../production/controllers/UserInterfaceController";
 
@@ -15,7 +15,8 @@ export default class EntityStateController {
     static async startPlayState() {
         if (EntityStateController.#isPlaying)
             return
-        EntityStateController.#state = Engine.entities.map(e => e.serializable())
+
+        EntityStateController.#state = Engine.entities.map(e => Entity.serializeComplexObject(e.serializable()))
         EntityStateController.#isPlaying = true
 
 
@@ -42,7 +43,7 @@ export default class EntityStateController {
             return
         const mapped = []
         for (let i = 0; i < EntityStateController.#state.length; i++) {
-            const entity = await Entity.parseEntityObject(EntityStateController.#state[i])
+            const entity = Entity.parseEntityObject(JSON.parse(EntityStateController.#state[i]))
             for (let i = 0; i < entity.scripts.length; i++)
                 await componentConstructor(entity, entity.scripts[i].id, false)
             mapped.push(entity)
@@ -53,4 +54,5 @@ export default class EntityStateController {
         EngineStore.updateStore({...engine, executingAnimation: false})
         Engine.environment = ENVIRONMENT.DEV
     }
+
 }

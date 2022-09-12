@@ -60,10 +60,9 @@ export default class CameraAPI extends PostProcessing {
     }
 
     static updateViewTarget(entity) {
-
         if (!entity?.components || Engine.environment === ENVIRONMENT.DEV)
             return
-        const cameraObj = entity.components[COMPONENTS.CAMERA]
+        const cameraObj = entity.components.get(COMPONENTS.CAMERA)
 
         if (!cameraObj)
             return

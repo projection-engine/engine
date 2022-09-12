@@ -6,7 +6,7 @@ export default function materialEntityMapper(entities, materials) {
         const current = []
         for (let j = 0; j < entities.length; j++) {
             const entity = entities[j]
-            if (entity.components[COMPONENTS.MESH]?.materialID === materials[i].id)
+            if (entity.components.get(COMPONENTS.MESH)?.materialID === materials[i].id)
                 current.push(entity)
         }
         result.push(current)

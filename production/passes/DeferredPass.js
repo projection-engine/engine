@@ -39,9 +39,9 @@ export default class DeferredPass {
         DeferredPass.behaviourSampler = DeferredPass.gBuffer.colors[3]
         DeferredPass.ambientSampler = DeferredPass.gBuffer.colors[4]
 
-        DeferredPass.deferredShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, shaderCode.vertex, shaderCode.fragment)
+        DeferredPass.deferredShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, shaderCode.vertex, shaderCode.fragment)
         DeferredPass.compositeFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
-        DeferredPass.toScreenShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, shaderCode.vertex, shaderCode.toScreen)
+        DeferredPass.toScreenShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, shaderCode.vertex, shaderCode.toScreen)
     }
 
     static drawFrame() {
@@ -54,7 +54,6 @@ export default class DeferredPass {
     static execute() {
         const {meshes} = Engine.data
 
-        const elapsed = Engine.params.elapsed
 
         DeferredPass.gBuffer.startMapping()
         MaterialController.loopMeshes(
@@ -62,21 +61,19 @@ export default class DeferredPass {
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isDeferredShaded)
                     return
-
-                const ambient = MaterialController.getEnvironment(current)
-                MaterialController.drawMesh({
+                MaterialController.drawMesh(
+                    current.id,
                     mesh,
-                    camPosition: CameraAPI.position,
-                    viewMatrix: CameraAPI.viewMatrix,
-                    projectionMatrix: CameraAPI.projectionMatrix,
-                    transformMatrix: current.transformationMatrix,
-                    material: mat,
-                    normalMatrix: meshComponent.normalMatrix,
-                    materialComponent: meshComponent,
-                    elapsed,
-                    ambient,
-                    onlyForward: false
-                })
+                    mat,
+                    meshComponent,
+                    {
+                        cameraVec: CameraAPI.position,
+                        viewMatrix: CameraAPI.viewMatrix,
+                        projectionMatrix: CameraAPI.projectionMatrix,
+                        transformMatrix: current.transformationMatrix,
+                        normalMatrix: current.normalMatrix,
+                        materialComponent: meshComponent
+                    })
             }
         )
         DeferredPass.gBuffer.stopMapping()

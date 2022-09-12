@@ -1,7 +1,7 @@
 import Component from "../../components/Component";
 
 export default  [
-    Component.number("FOV", "fov", 175, 1, .1, true),
+    Component.number("FOV", "fov", 3.054236111111111, 0.1745277777777778, .1, true),
     Component.group("ORTHO_PROJECTION", [
         Component.boolean("ENABLED", "ortho"),
         Component.number("SIZE", "size", 175, 1)

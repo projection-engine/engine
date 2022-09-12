@@ -1,4 +1,4 @@
-import {mat4, quat} from "gl-matrix"
+import {mat3, mat4, quat} from "gl-matrix"
 import TransformationAPI from "../../apis/TransformationAPI"
 import TRANSFORMATION_PROPS from "../../data/component-props/TRANSFORMATION_PROPS";
 import Component from "../../components/Component";
@@ -17,6 +17,7 @@ export default class Movable extends Component{
     lockedTranslation = false
     lockedRotation = false
     lockedScaling = false
+    normalMatrix = mat3.create()
 
 
     get position() {

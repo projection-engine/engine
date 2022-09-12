@@ -4,7 +4,7 @@ import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/STATIC_MESHES";
 
 import STATIC_SHADERS from "../../static/STATIC_SHADERS";
-import SelectionStore from "../../../../src/frontend/project/stores/SelectionStore";
+import SelectionStore from "../../../../src/frontend/editor/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/SpritePass";
 import GizmoSystem from "./GizmoSystem";

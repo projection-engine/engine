@@ -95,7 +95,7 @@ export default class DepthPass {
             const entity = meshes[i]
             if (!entity.active)
                 continue
-            const mesh = GPU.meshes.get(entity.components[COMPONENTS.MESH].meshID)
+            const mesh = GPU.meshes.get(entity.components.get(COMPONENTS.MESH).meshID)
             if (!mesh)
                 continue
             mesh.useForDepth()

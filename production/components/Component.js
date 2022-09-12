@@ -8,7 +8,8 @@ export default class Component {
         COLOR: "color",
         BOOLEAN: "bool",
         IMAGE: "image",
-        MESH: "mesh"
+        MESH: "mesh",
+        MATERIAL: "material"
     })
 
 
@@ -68,10 +69,13 @@ export default class Component {
     static imageTexture(label, key) {
         return {type: Component.propTypes.IMAGE, label, key}
     }
-
-    static mesh(label, key) {
+    static materialInstance(label, key) {
+        return {type: Component.propTypes.MATERIAL, label, key}
+    }
+    static meshInstance(label, key) {
         return {type: Component.propTypes.MESH, label, key}
     }
+
 
     get props() {
         return this._props

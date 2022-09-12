@@ -101,7 +101,7 @@ export default class ShadowMapPass {
         for (let i = 0; i < dirL; i++) {
             if (!directionalLights[i].active)
                 continue
-            const current = directionalLights[i].components[COMPONENTS.DIRECTIONAL_LIGHT]
+            const current = directionalLights[i].components.get(COMPONENTS.DIRECTIONAL_LIGHT)
             if (!current)
                 continue
             if ((current.changed && current.shadowMap) || ShadowMapPass.changed) {
@@ -114,7 +114,7 @@ export default class ShadowMapPass {
         for (let i = 0; i < pL; i++) {
             if (!pointLights[i].active)
                 continue
-            const current = pointLights[i].components[COMPONENTS.POINT_LIGHT]
+            const current = pointLights[i].components.get(COMPONENTS.POINT_LIGHT)
             if (current?.changed && current.shadowMap) {
                 lights3D.push({...current, translation: pointLights[i].translation})
                 current.changed = false
@@ -195,9 +195,9 @@ export default class ShadowMapPass {
     static loopMeshes(meshes, shader, view, projection, color, lightPosition, shadowClipNearFar) {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
-            const current = meshes[m]
-            const mesh = GPU.meshes.get(current.components[COMPONENTS.MESH].meshID)
-            if (!mesh)
+            const current = meshes[m], meshComponent = current.components.get(COMPONENTS.MESH)
+            const mesh = GPU.meshes.get(meshComponent.meshID)
+            if (!mesh || !meshComponent.castsShadows)
                 continue
             ShadowMapPass.drawMesh(mesh, view, projection, current.transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
         }

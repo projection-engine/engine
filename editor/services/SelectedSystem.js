@@ -36,7 +36,7 @@ export default class SelectedSystem {
             const current = Engine.entitiesMap.get(selected[m])
             if (!current || !current.active)
                 continue
-            const mesh = GPU.meshes.get(current.components[COMPONENTS.MESH]?.meshID)
+            const mesh = GPU.meshes.get(current.components.get(COMPONENTS.MESH)?.meshID)
             if (!mesh)
                 continue
             SelectedSystem.shader.bindForUse({
