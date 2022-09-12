@@ -199,7 +199,7 @@ export default class ShadowMapPass {
             const mesh = GPU.meshes.get(meshComponent.meshID)
             if (!mesh || !meshComponent.castsShadows)
                 continue
-            ShadowMapPass.drawMesh(mesh, view, projection, current.transformationMatrix, color, shader, lightPosition, shadowClipNearFar)
+            ShadowMapPass.drawMesh(mesh, view, projection, current.matrix, color, shader, lightPosition, shadowClipNearFar)
         }
     }
 

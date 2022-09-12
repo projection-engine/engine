@@ -88,7 +88,7 @@ export default function mapGizmoMesh(axis, type) {
     e.translation = t
     e.rotation = r
     e.scaling = s
-    e.transformationMatrix = TransformationAPI.transform(t, e.rotationQuaternion, s)
+    e.matrix = TransformationAPI.transform(t, e.rotationQuaternion, s)
 
     return e
 }

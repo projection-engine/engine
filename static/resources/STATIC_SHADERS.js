@@ -24,6 +24,8 @@ export default {
     },
 
     DEVELOPMENT: {
+        WIREFRAME: "WIREFRAME",
+
         UNSHADED: "UNSHADED",
         TO_BUFFER: "TO_BUFFER",
         GIZMO: "GIZMO",

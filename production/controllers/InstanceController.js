@@ -75,7 +75,6 @@ export default class InstanceController {
                 mesh.tangentVBO.delete()
             GPU.meshes.delete(mesh.id)
         }
-
     }
 
     static allocateShader(id, vertex, fragment, cb) {

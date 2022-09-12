@@ -5,6 +5,7 @@ import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
+import WireframeSystem from "./WireframeSystem";
 
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
@@ -42,6 +43,7 @@ export default class Wrapper {
 
             GizmoSystem.execute(transformationType)
             IconsSystem.execute(selected)
+            WireframeSystem.execute(selected)
         }
     }
 }

@@ -1,9 +1,11 @@
-import {mat4} from "gl-matrix"
+import {mat4, vec3} from "gl-matrix"
 import TransformationAPI from "../apis/TransformationAPI"
 import COMPONENTS from "../../static/COMPONENTS"
 import GPU from "../GPU";
 import BundlerAPI from "../apis/BundlerAPI";
+import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 
+const COLLIDER = COMPONENTS.PHYSICS_COLLIDER, P_LIGHT = COMPONENTS.POINT_LIGHT, D_LIGHT = COMPONENTS.DIRECTIONAL_LIGHT
 export default class MovementPass {
     static changed = new Map()
     static hasUpdatedItem = false
@@ -34,27 +36,49 @@ export default class MovementPass {
     }
 
     static transform(entity) {
+        const components = entity.components
         entity.changed = false
-        TransformationAPI.transform(entity.translation, entity.rotationQuaternion, entity.scaling, entity.transformationMatrix)
+        TransformationAPI.transform(entity.translation, entity.rotationQuaternion, entity.scaling, entity.matrix)
+
+        mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
+
+        entity.absoluteTranslation[0] = entity.matrix[12]
+        entity.absoluteTranslation[1] = entity.matrix[13]
+        entity.absoluteTranslation[2] = entity.matrix[14]
+
 
         if (entity.parent != null)
             mat4.multiply(
-                entity.transformationMatrix,
-                entity.parent.transformationMatrix,
-                entity.transformationMatrix
+                entity.matrix,
+                entity.parent.matrix,
+                entity.matrix
             )
 
         const children = entity.children
         for (let j = 0; j < children.length; j++)
             MovementPass.transform(children[j])
-        entity.changed = false
-        entity.normalMatrix = normalMatrix(entity.transformationMatrix)
+
+        entity.normalMatrix = normalMatrix(entity.matrix)
+        const colliderComp = components.get(COLLIDER)
+        if (colliderComp != null) {
+            let m
+            entity.collisionTransformationMatrix = m = mat4.create()
+            const translation = vec3.add([], colliderComp.center, entity.absoluteTranslation)
+            mat4.translate(m, m, translation)
+            if (colliderComp.collisionType === COLLISION_TYPES.BOX)
+                mat4.scale(m, m, colliderComp.size)
+            else {
+                const r = colliderComp.radius
+                mat4.scale(m, m, [r, r, r])
+            }
+
+        }
 
         if (entity.instancingGroupID) {
             const i = GPU.instancingGroup.get(entity.instancingGroupID)
             MovementPass.instancingNeedsUpdate.set(entity.instancingGroupID, i)
         }
-        if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
+        if (components.get(P_LIGHT) != null || components.get(D_LIGHT) != null)
             MovementPass.lightEntityChanged = true
     }
 }

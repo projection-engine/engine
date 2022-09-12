@@ -81,7 +81,7 @@ export default class MaterialController {
                     cameraVec: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,
-                    transformMatrix: current.transformationMatrix,
+                    transformMatrix: current.matrix,
                     normalMatrix: current.normalMatrix,
                     materialComponent: meshComponent,
                     directionalLightsQuantity: maxTextures,

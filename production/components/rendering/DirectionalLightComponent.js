@@ -19,14 +19,6 @@ export default class DirectionalLightComponent extends Component {
     center = [0, 0, 0]
     _intensity = 1
 
-
-    constructor(entity) {
-        super()
-        if (!entity)
-            throw new Error("Entity needed")
-        this.entity = entity
-    }
-
     get intensity() {
         return this._intensity
     }
@@ -66,11 +58,11 @@ export default class DirectionalLightComponent extends Component {
 
 
     get direction() {
-        return this.entity.translation
+        return this.__entity.translation
     }
 
     set direction(data) {
-        this.entity.translation = data
+        this.__entity.translation = data
         this.update()
     }
 
@@ -86,7 +78,7 @@ export default class DirectionalLightComponent extends Component {
 
 
     update() {
-        mat4.lookAt(this.lightView, this.entity.translation, this.center, [0, 1, 0])
+        mat4.lookAt(this.lightView, this.__entity.translation, this.center, [0, 1, 0])
         mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar)
 
         this.changed = true

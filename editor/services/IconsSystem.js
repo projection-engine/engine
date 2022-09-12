@@ -78,23 +78,23 @@ export default class IconsSystem {
             gpu.disable(gpu.DEPTH_TEST)
 
             QuadAPI.use()
-            if (!GizmoSystem.translation) {
-                attr.scale = SCALE_CURSOR
-                attr.transformationMatrix = window.engineCursor.transformationMatrix
-                attr.iconSampler = IconsSystem.cursorTexture
-                attr.attributes = [1, 1]
-                SpritePass.shader.bindForUse(attr)
-                QuadAPI.drawQuad()
-            }
+
+            attr.scale = SCALE_CURSOR
+            attr.transformationMatrix = window.engineCursor.matrix
+            attr.iconSampler = IconsSystem.cursorTexture
+            attr.attributes = [1, 1]
+            SpritePass.shader.bindForUse(attr)
+            QuadAPI.drawQuad()
+
             const size = selected?.length
             entitiesLoop: if (size > 0) {
                 attr.attributes = [1, 1]
                 for (let i = 0; i < size; i++) {
                     const current = Engine.entitiesMap.get(selected[i])
-                    if(!current)
+                    if (!current)
                         continue
                     attr.scale = SCALE
-                    attr.transformationMatrix = current.transformationMatrix
+                    attr.transformationMatrix = current.matrix
                     attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
 
                     SpritePass.shader.bindForUse(attr)
@@ -103,10 +103,10 @@ export default class IconsSystem {
             } else {
                 attr.attributes = [1, 1]
                 const current = Engine.entitiesMap.get(SelectionStore.lockedEntity)
-                if(!current)
+                if (!current)
                     break entitiesLoop
                 attr.scale = SCALE
-                attr.transformationMatrix = current.transformationMatrix
+                attr.transformationMatrix = current.matrix
                 attr.iconSampler = IconsSystem.textureYellow
 
                 SpritePass.shader.bindForUse(attr)

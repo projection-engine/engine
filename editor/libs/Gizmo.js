@@ -107,7 +107,7 @@ export default class Gizmo {
     static translateMatrix(entity) {
         if (!GizmoSystem.translation)
             return
-        const matrix = entity.transformationMatrix.slice(0)
+        const matrix = entity.matrix.slice(0)
 
         const translation = entity.translation,
             rotationQuaternion = entity.rotationQuaternion,

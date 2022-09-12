@@ -22,13 +22,14 @@ import BackgroundSystem from "./services/BackgroundSystem";
 import GizmoSystem from "./services/GizmoSystem";
 import Entity from "../production/instances/entity/Entity";
 import TransformationAPI from "../production/apis/TransformationAPI";
+import WireframeSystem from "./services/WireframeSystem";
 
 function getCursor() {
     const entity = new Entity()
     entity.lockedRotation = true
     entity.lockedScaling = true
     entity.scaling = (new Array(3)).fill(.075)
-    entity.transformationMatrix = TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling)
+    entity.matrix = TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling)
     return entity
 }
 export default function initializer() {
@@ -48,6 +49,7 @@ export default function initializer() {
 
     Engine.environment = ENVIRONMENT.DEV
 
+    WireframeSystem.initialize()
     GridSystem.initialize()
     IconsSystem.initialize()
     SelectedSystem.initialize()

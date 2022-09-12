@@ -30,7 +30,7 @@ export default class SpritePass {
             if (!texture)
                 continue
             shaderAttr.scale = current.scaling
-            shaderAttr.transformationMatrix = current.transformationMatrix
+            shaderAttr.transformationMatrix = current.matrix
             shaderAttr.iconSampler = texture.texture
             shaderAttr.attributes = component.attributes
 

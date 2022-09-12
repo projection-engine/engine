@@ -49,6 +49,7 @@ export default class QuadAPI {
         gpu.drawArrays(gpu.TRIANGLES, 0, 6)
     }
 
+
     static drawInstanced(quantity) {
         gpu.drawArraysInstanced(gpu.TRIANGLES, 0, 6, quantity)
     }

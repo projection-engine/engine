@@ -199,7 +199,7 @@ export default class Rotation {
     }
 
     #rotateMatrix(axis, entity) {
-        const matrix = entity.transformationMatrix.slice(0)
+        const matrix = entity.matrix.slice(0)
         matrix[12] += GizmoSystem.translation[0]
         matrix[13] += GizmoSystem.translation[1]
         matrix[14] += GizmoSystem.translation[2]

@@ -30,7 +30,7 @@ export default class ForwardPass {
                     cameraVec: CameraAPI.position,
                     viewMatrix: CameraAPI.viewMatrix,
                     projectionMatrix: CameraAPI.projectionMatrix,
-                    transformMatrix: current.transformationMatrix,
+                    transformMatrix: current.matrix,
 
                     normalMatrix: current.normalMatrix,
                     materialComponent: meshComponent,

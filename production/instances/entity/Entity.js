@@ -45,6 +45,7 @@ export default class Entity extends Movable {
         Array.from(this.components.entries())
             .forEach(([k, v]) => {
                 parsedComponents[k] = v
+
             })
         temp.components = parsedComponents
         return temp
@@ -105,7 +106,8 @@ export default class Entity extends Movable {
     addComponent(KEY) {
         let instance = Entity.nativeComponents[KEY]
         if (instance != null) {
-            instance = new instance(KEY === COMPONENTS.DIRECTIONAL_LIGHT ? this : undefined)
+            instance = new instance()
+            instance.__entity = this
             this.components.set(KEY, instance)
             return instance
         }
@@ -115,6 +117,8 @@ export default class Entity extends Movable {
         return JSON.stringify(
             obj,
             (key, value) => {
+                if(key.startsWith("#") || key.startsWith("__"))
+                    return undefined
                 if (value instanceof Int8Array ||
                     value instanceof Uint8Array ||
                     value instanceof Uint8ClampedArray ||
@@ -125,6 +129,7 @@ export default class Entity extends Movable {
                     value instanceof Float32Array ||
                     value instanceof Float64Array)
                     return Array.from(value)
+
                 return value
             })
     }

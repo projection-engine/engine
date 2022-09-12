@@ -101,7 +101,7 @@ export default class DepthPass {
             mesh.useForDepth()
             DepthPass.shader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
-                transformMatrix: entity.transformationMatrix,
+                transformMatrix: entity.matrix,
                 projectionMatrix: CameraAPI.projectionMatrix,
                 meshID: entity.pickID
             })

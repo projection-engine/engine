@@ -11,7 +11,7 @@ export default class Component {
         MESH: "mesh",
         MATERIAL: "material"
     })
-
+    __entity
 
     _props = []
     _icon = ""

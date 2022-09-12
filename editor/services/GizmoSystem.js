@@ -53,7 +53,7 @@ export default class GizmoSystem {
         GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.SCALE_GIZMO)
 
         EMPTY_COMPONENT.scaling = [.2, .2, .2]
-        TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.transformationMatrix)
+        TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.matrix)
 
         GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
         GizmoSystem.gizmoShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.GIZMO)
@@ -66,7 +66,7 @@ export default class GizmoSystem {
         const main = GizmoSystem.mainEntity
         if (!main)
             return
-        const matrix = main.transformationMatrix
+        const matrix = main.matrix
         GizmoSystem.translation = [matrix[12], matrix[13], matrix[14]]
     }
 

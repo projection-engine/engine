@@ -1,24 +1,25 @@
-import {mat3, mat4, quat} from "gl-matrix"
+import {mat3, mat4, quat, vec3} from "gl-matrix"
 import TransformationAPI from "../../apis/TransformationAPI"
 import TRANSFORMATION_PROPS from "../../../static/component-props/TRANSFORMATION_PROPS";
 import Component from "../../components/Component";
 
 const toDeg = 57.29
-export default class Movable extends Component{
+export default class Movable extends Component {
     _props = TRANSFORMATION_PROPS
     _rotationQuat = quat.create()
-    _translation = [0, 0, 0]
-    _scaling = [1, 1, 1]
-    pivotPoint = [0,0,0]
+    _translation = vec3.create()
+    _scaling = vec3.create()
+    pivotPoint = vec3.create()
     changed = false
     matrix = mat4.create()
     baseTransformationMatrix = mat4.create()
+    collisionTransformationMatrix
 
     lockedTranslation = false
     lockedRotation = false
     lockedScaling = false
     normalMatrix = mat3.create()
-
+    absoluteTranslation = vec3.create()
 
     get position() {
         return this._translation
@@ -31,13 +32,11 @@ export default class Movable extends Component{
     get scaling() {
         return this._scaling
     }
+
     get translation() {
         return this._translation
     }
 
-    get transformationMatrix() {
-        return this.matrix
-    }
 
     get rotationQuaternion() {
         return this._rotationQuat
@@ -45,15 +44,14 @@ export default class Movable extends Component{
 
     set rotationQuaternion(q) {
         this.changed = true
-        this._rotationUpdated = false
         quat.normalize(this._rotationQuat, q)
     }
 
     set rotation(data) {
         this.changed = true
-        quat.fromEuler(this._rotationQuat , data[0] * toDeg, data[1] * toDeg, data[2] * toDeg)
+        quat.fromEuler(this._rotationQuat, data[0] * toDeg, data[1] * toDeg, data[2] * toDeg)
     }
-    
+
     set translation(data) {
         this.changed = true
         this._translation = data
@@ -64,8 +62,4 @@ export default class Movable extends Component{
         this._scaling = data
     }
 
-    set transformationMatrix(data) {
-        mat4.multiply(this.matrix, data, this.baseTransformationMatrix)
-        this.changed = false
-    }
 }

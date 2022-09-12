@@ -14,7 +14,7 @@ export default class InstancedRenderGroup{
         this.bufferSize = this.entities.size
         if(this.bufferSize > 0) {
             const data = []
-            this.entities.forEach(entity => data.push(Array.from(entity.transformationMatrix)))
+            this.entities.forEach(entity => data.push(Array.from(entity.matrix)))
             const temp = new Float32Array(data.flat())
             gpu.bindBuffer(gpu.ARRAY_BUFFER, this.transformVBO)
             gpu.bufferData(gpu.ARRAY_BUFFER, temp, gpu.STREAM_DRAW)

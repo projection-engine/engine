@@ -55,7 +55,7 @@ export default class PreviewSystem {
                 maxZ = materialMesh.maxBoundingBox[2] - materialMesh.minBoundingBox[2]
             const radius = Math.max(maxX, maxY, maxZ)
             const cam = getCameraData(0, RADIAN_90, radius + 2, meshEntity.translation)
-            const transformMatrix = meshEntity.transformationMatrix
+            const transformMatrix = meshEntity.matrix
             const pointLightData = [[
                 0, meshEntity.translation[1] / 2, radius * 10, 0,
                 1, 1, 1, 0,

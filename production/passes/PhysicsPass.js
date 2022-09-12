@@ -1,11 +1,8 @@
-import Ammo from "../../physics/ammo.wasm.js"
+import Ammo from "ammo.js"
 import Engine from "../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
-import {COMPONENT} from "../../../../src/static/FILE_TYPES";
 import COMPONENTS from "../../static/COMPONENTS";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
-import {quat} from "gl-matrix";
-
 const COLLISION = "COLLISION",
     DISPATCHER = "DISPATCHER",
     BROAD_PHASE = "BROAD_PHASE",
@@ -17,10 +14,8 @@ export default class PhysicsPass {
     static ammo
     static worldSettings = new Map()
     static world
-
     static rigidBodies = []
     static rigidBodiesMap = new Map()
-
     static tempTransformation
 
     static async initialize() {
@@ -40,9 +35,6 @@ export default class PhysicsPass {
 
         PhysicsPass.updateGravity(...DEFAULT_GRAVITY)
         PhysicsPass.tempTransformation = new ammo.btTransform();
-        const t = new ammo.btTransform()
-        t.setIdentity()
-        console.log(t)
     }
 
     static updateGravity(x, y, z) {
@@ -89,7 +81,7 @@ export default class PhysicsPass {
 
         const m = entity.translation
         const q = entity.rotationQuaternion
-        console.log(m)
+
         comp.__transform = new ammo.btTransform();
         comp.__transform.setIdentity();
         comp.__transform.setOrigin(new ammo.btVector3(...m));
@@ -129,15 +121,12 @@ export default class PhysicsPass {
         PhysicsPass.world.removeRigidBody(comp.__body)
         PhysicsPass.rigidBodiesMap.delete(entity.id)
         PhysicsPass.rigidBodies = PhysicsPass.rigidBodies.filter(r => r !== entity)
-
-
     }
 
     static clearEntries() {
         for (let i = 0; i < PhysicsPass.rigidBodies.length; i++)
             PhysicsPass.removeRigidBody(PhysicsPass.rigidBodies[i])
     }
-
 
     static execute() {
         if (Engine.environment === DEV_ENV || !PhysicsPass.ammo)
@@ -169,9 +158,6 @@ export default class PhysicsPass {
             q[1] = quaternion.y()
             q[2] = quaternion.z()
             q[3] = quaternion.w()
-
-            console.log(q)
-            // quat.normalize(current.rotationQuaternion, q)
 
             current.changed = true
         }

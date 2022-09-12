@@ -41,7 +41,7 @@ export default class SelectedSystem {
                 continue
             SelectedSystem.shader.bindForUse({
                 projectionMatrix: CameraAPI.projectionMatrix,
-                transformMatrix: current.transformationMatrix,
+                transformMatrix: current.matrix,
                 viewMatrix: CameraAPI.viewMatrix
             })
             mesh.draw()
