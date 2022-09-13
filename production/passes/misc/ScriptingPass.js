@@ -1,6 +1,6 @@
-import ENVIRONMENT from "../../static/ENVIRONMENT"
-import Engine from "../Engine";
-import UserInterfaceController from "../controllers/UserInterfaceController";
+import ENVIRONMENT from "../../../static/ENVIRONMENT"
+import Engine from "../../Engine";
+import UserInterfaceController from "../../controllers/UserInterfaceController";
 
 
 const DEV = ENVIRONMENT.DEV

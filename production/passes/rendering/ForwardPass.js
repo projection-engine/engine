@@ -1,7 +1,7 @@
-import MaterialController from "../controllers/MaterialController";
-import Engine from "../Engine";
-import CameraAPI from "../apis/CameraAPI";
-import GPU from "../GPU";
+import MaterialController from "../../controllers/MaterialController";
+import Engine from "../../Engine";
+import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../GPU";
 
 export default class ForwardPass {
     static execute() {

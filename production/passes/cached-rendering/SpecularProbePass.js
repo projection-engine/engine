@@ -1,10 +1,11 @@
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
-import COMPONENTS from "../../static/COMPONENTS"
-import CubeMapInstance from "../instances/CubeMapInstance"
-import MaterialController from "../controllers/MaterialController";
-import Engine from "../Engine";
-import GPU from "../GPU";
+import COMPONENTS from "../../../static/COMPONENTS.json"
+import CubeMapInstance from "../../instances/CubeMapInstance"
+import MaterialController from "../../controllers/MaterialController";
+import Engine from "../../Engine";
+import GPU from "../../GPU";
+import {STEPS_LIGHT_PROBE} from "./DiffuseProbePass";
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,
@@ -14,6 +15,9 @@ export const STEPS_CUBE_MAP = {
     CALCULATE: 3
 }
 export default class SpecularProbePass {
+    static compile(){
+        SpecularProbePass.step = STEPS_CUBE_MAP.BASE
+    }
     static step = STEPS_CUBE_MAP.BASE
     static lastCallLength = -1
     static probes = {}

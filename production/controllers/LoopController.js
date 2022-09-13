@@ -1,25 +1,25 @@
-import AOPass from "../passes/AOPass";
-import DeferredPass from "../passes/DeferredPass";
-import ForwardPass from "../passes/ForwardPass";
-import DepthPass from "../passes/DepthPass";
-import SSGIPass from "../passes/SSGIPass";
-import SSRPass from "../passes/SSRPass";
-import ShadowMapPass from "../passes/ShadowMapPass";
-import SpecularProbePass from "../passes/SpecularProbePass";
-import DiffuseProbePass from "../passes/DiffuseProbePass";
+import AOPass from "../passes/effects/AOPass";
+import DeferredPass from "../passes/rendering/DeferredPass";
+import ForwardPass from "../passes/rendering/ForwardPass";
+import DepthPass from "../passes/effects/DepthPass";
+import SSGIPass from "../passes/effects/SSGIPass";
+import SSRPass from "../passes/effects/SSRPass";
+import ShadowMapPass from "../passes/cached-rendering/ShadowMapPass";
+import SpecularProbePass from "../passes/cached-rendering/SpecularProbePass";
+import DiffuseProbePass from "../passes/cached-rendering/DiffuseProbePass";
 import * as shaderCode from "../shaders/CUBE_MAP.glsl";
-import MetricsPass from "../passes/MetricsPass";
-import ScriptingPass from "../passes/ScriptingPass";
-import MovementPass from "../passes/MovementPass";
-import ScreenEffectsPass from "../passes/ScreenEffectsPass";
-import CompositePass from "../passes/CompositePass";
-import SkyboxPass from "../passes/SkyboxPass";
+import MetricsPass from "../passes/misc/MetricsPass";
+import ScriptingPass from "../passes/misc/ScriptingPass";
+import ScreenEffectsPass from "../passes/post-processing/ScreenEffectsPass";
+import CompositePass from "../passes/post-processing/CompositePass";
+import SkyboxPass from "../passes/rendering/SkyboxPass";
 import Engine from "../Engine";
 import GPU from "../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import SpritePass from "../passes/SpritePass";
-import PhysicsPass from "../passes/PhysicsPass";
+import SpritePass from "../passes/effects/SpritePass";
+import PhysicsPass from "../passes/math/PhysicsPass";
+import WorkerController from "../workers/WorkerController";
 
 export default class LoopController {
     static #initialized = false
@@ -28,6 +28,8 @@ export default class LoopController {
     static async initialize() {
         if (LoopController.#initialized)
             return
+
+        WorkerController.initialize()
         LoopController.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
@@ -89,7 +91,7 @@ export default class LoopController {
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
         PhysicsPass.execute(entities)
         ScriptingPass.execute()
-        MovementPass.execute(entities)
+        WorkerController.execute()
         LoopController.#rendering(entities)
         ScreenEffectsPass.execute()
         CompositePass.execute()

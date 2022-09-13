@@ -1,16 +1,16 @@
-import FramebufferInstance from "../instances/FramebufferInstance"
-import * as ssGI from "../shaders/SCREEN_SPACE.glsl"
-import generateBlurBuffers from "../utils/generate-blur-buffers"
-import Engine from "../Engine";
-import CameraAPI from "../apis/CameraAPI";
-import GPU from "../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import FramebufferInstance from "../../instances/FramebufferInstance"
+import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
+import generateBlurBuffers from "../../utils/generate-blur-buffers"
+import Engine from "../../Engine";
+import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../GPU";
+import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import DepthPass from "./DepthPass";
-import ScreenEffectsPass from "./ScreenEffectsPass";
-import DeferredPass from "./DeferredPass";
+import ScreenEffectsPass from "../post-processing/ScreenEffectsPass";
+import DeferredPass from "../rendering/DeferredPass";
 import AOPass from "./AOPass";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../apis/QuadAPI";
+import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import QuadAPI from "../../apis/QuadAPI";
 
 
 export default class SSGIPass {

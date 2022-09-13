@@ -1,8 +1,9 @@
 import Ammo from "ammo.js"
-import Engine from "../Engine";
-import ENVIRONMENT from "../../static/ENVIRONMENT";
-import COMPONENTS from "../../static/COMPONENTS";
-import COLLISION_TYPES from "../../static/COLLISION_TYPES";
+import Engine from "../../Engine";
+import ENVIRONMENT from "../../../static/ENVIRONMENT";
+import COMPONENTS from "../../../static/COMPONENTS";
+import COLLISION_TYPES from "../../../static/COLLISION_TYPES";
+
 const COLLISION = "COLLISION",
     DISPATCHER = "DISPATCHER",
     BROAD_PHASE = "BROAD_PHASE",

@@ -1,9 +1,9 @@
 import Engine from "../Engine";
-import COMPONENTS from "../../static/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS.json";
 import GPU from "../GPU";
-import AOPass from "../passes/AOPass";
-import SpecularProbePass from "../passes/SpecularProbePass";
-import DiffuseProbePass from "../passes/DiffuseProbePass";
+import AOPass from "../passes/effects/AOPass";
+import SpecularProbePass from "../passes/cached-rendering/SpecularProbePass";
+import DiffuseProbePass from "../passes/cached-rendering/DiffuseProbePass";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 
 

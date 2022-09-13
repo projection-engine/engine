@@ -1,9 +1,9 @@
-import * as shaderCode from "../shaders/FXAA.glsl"
-import CameraAPI from "../apis/CameraAPI";
-import GPU from "../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../apis/QuadAPI";
+import * as shaderCode from "../../shaders/FXAA.glsl"
+import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../GPU";
+import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import QuadAPI from "../../apis/QuadAPI";
 
 
 export default class CompositePass {

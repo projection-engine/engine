@@ -1,7 +1,7 @@
-import COMPONENTS from "../../static/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS.json";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
-import MovementPass from "../passes/MovementPass";
+import WorkerController from "../workers/WorkerController";
 
 export function packagePointLights(keepOld) {
     const pointLights = Engine.data.pointLights
@@ -20,7 +20,7 @@ export function packagePointLights(keepOld) {
                 continue
             }
             pointLightsQuantity++
-            if (MovementPass.lightEntityChanged && !MovementPass.changed.get(current.id))
+            if (!current.changesApplied)
                 continue
             const component = current.components.get(COMPONENTS.POINT_LIGHT)
 
@@ -69,7 +69,7 @@ export function packageDirectionalLights(keepOld) {
                 continue
             }
             maxTextures++
-            if (MovementPass.lightEntityChanged && !MovementPass.changed.get(current.id))
+            if (!current.changesApplied)
                 continue
             const component = current.components.get(COMPONENTS.DIRECTIONAL_LIGHT)
 

@@ -1,6 +1,6 @@
 import {v4} from "uuid"
 import Movable from "./Movable";
-import COMPONENTS from "../../../static/COMPONENTS";
+import COMPONENTS from "../../../static/COMPONENTS.json";
 import DirectionalLightComponent from "../../components/rendering/DirectionalLightComponent";
 import MeshComponent from "../../components/rendering/MeshComponent";
 import PointLightComponent from "../../components/rendering/PointLightComponent";
@@ -12,6 +12,15 @@ import PhysicsColliderComponent from "../../components/physics/PhysicsColliderCo
 import CullingComponent from "../../components/misc/CullingComponent";
 
 
+const TYPED_ATTRIBUTES = [
+    "_translation",
+    "__changedBuffer",
+    "_rotationQuat",
+    "matrix",
+    "absoluteTranslation",
+    "_scaling",
+    "baseTransformationMatrix"
+]
 export default class Entity extends Movable {
     id
     queryKey
@@ -79,8 +88,16 @@ export default class Entity extends Movable {
 
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i]
-            if (k !== "components" && k !== "parent" && k !== "matrix")
+            if (k !== "components" && k !== "parent" && k !== "matrix" && !TYPED_ATTRIBUTES.includes(k))
                 parsedEntity[k] = entity[k]
+        }
+
+        for (let i = 0; i < TYPED_ATTRIBUTES.length; i++) {
+            const key = TYPED_ATTRIBUTES[i]
+            if (!entity[key])
+                continue
+            for (let j = 0; j < parsedEntity[key].length; j++)
+                parsedEntity[key][j] = entity[key][j]
         }
 
         parsedEntity.parent = undefined
@@ -117,7 +134,7 @@ export default class Entity extends Movable {
         return JSON.stringify(
             obj,
             (key, value) => {
-                if(key.startsWith("#") || key.startsWith("__"))
+                if (key.startsWith("#") || key.startsWith("__"))
                     return undefined
                 if (value instanceof Int8Array ||
                     value instanceof Uint8Array ||

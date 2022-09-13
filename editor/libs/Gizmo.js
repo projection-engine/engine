@@ -1,8 +1,8 @@
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/frontend/editor/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/apis/ConversionAPI"
-import INFORMATION_CONTAINER from "../../../../src/frontend/editor/data/INFORMATION_CONTAINER"
-import EngineStore from "../../../../src/frontend/editor/stores/EngineStore";
+import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER"
+import EngineStore from "../../../../src/editor/stores/EngineStore";
 import PickingAPI from "../../production/apis/PickingAPI";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
@@ -38,6 +38,7 @@ export default class Gizmo {
     }
 
     onMouseDown(event) {
+        ScreenSpaceGizmo.totalMoved = [0,0,0]
         if (!Gizmo.tooltip)
             Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
 
@@ -60,6 +61,7 @@ export default class Gizmo {
     }
 
     onMouseUp() {
+        ScreenSpaceGizmo.totalMoved = [0,0,0]
         if(Gizmo.tooltip)
             Gizmo.tooltip.finished()
 

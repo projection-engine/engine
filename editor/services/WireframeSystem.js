@@ -1,12 +1,13 @@
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import GPU from "../../production/GPU";
-import COMPONENTS from "../../static/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS.json";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import WIREFRAMEGlsl from "../templates/WIREFRAME.glsl";
 import CameraAPI from "../../production/apis/CameraAPI";
 import Engine from "../../production/Engine";
-
+import {mat4, vec3} from "gl-matrix";
+const EMPTY_MATRIX = mat4.create()
 export default class WireframeSystem {
     static cube
     static sphere
@@ -37,7 +38,17 @@ export default class WireframeSystem {
             const collision = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
             if (!collision)
                 continue
-
+            if (entity.changesApplied) {
+                const m = mat4.copy(entity.collisionTransformationMatrix, EMPTY_MATRIX)
+                const translation = vec3.add([], collision.center, entity.absoluteTranslation)
+                mat4.translate(m, m, translation)
+                if (collision.collisionType === COLLISION_TYPES.BOX)
+                    mat4.scale(m, m, collision.size)
+                else {
+                    const r = collision.radius
+                    mat4.scale(m, m, [r, r, r])
+                }
+            }
             obj.transformMatrix = entity.collisionTransformationMatrix
             WireframeSystem.shader.bindForUse(obj)
             switch (collision.collisionType) {

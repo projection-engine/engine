@@ -1,16 +1,16 @@
-import FramebufferInstance from "../instances/FramebufferInstance"
-import * as shaderCode from "../shaders/DEFERRED.glsl"
-import MaterialController from "../controllers/MaterialController";
-import Engine from "../Engine";
-import CameraAPI from "../apis/CameraAPI";
-import GPU from "../GPU";
-import AOPass from "./AOPass";
-import SSGIPass from "./SSGIPass";
-import SSRPass from "./SSRPass";
-import ShadowMapPass from "./ShadowMapPass";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import QuadAPI from "../apis/QuadAPI";
+import FramebufferInstance from "../../instances/FramebufferInstance"
+import * as shaderCode from "../../shaders/DEFERRED.glsl"
+import MaterialController from "../../controllers/MaterialController";
+import Engine from "../../Engine";
+import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../GPU";
+import AOPass from "../effects/AOPass";
+import SSGIPass from "../effects/SSGIPass";
+import SSRPass from "../effects/SSRPass";
+import ShadowMapPass from "../cached-rendering/ShadowMapPass";
+import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
+import QuadAPI from "../../apis/QuadAPI";
 
 export default class DeferredPass {
     static gBuffer

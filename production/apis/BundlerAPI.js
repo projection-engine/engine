@@ -1,4 +1,4 @@
-import COMPONENTS from "../../static/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS.json"
 import {packageDirectionalLights, packagePointLights} from "../utils/package-lights";
 import Engine from "../Engine";
 import Component from "../components/Component";
@@ -6,10 +6,11 @@ import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./QueryAPI";
 import InputEventsAPI from "./InputEventsAPI";
 import CameraAPI from "./CameraAPI";
-import SpecularProbePass from "../passes/SpecularProbePass";
-import DiffuseProbePass from "../passes/DiffuseProbePass";
+import SpecularProbePass from "../passes/cached-rendering/SpecularProbePass";
+import DiffuseProbePass from "../passes/cached-rendering/DiffuseProbePass";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
-import PhysicsPass from "../passes/PhysicsPass";
+import PhysicsPass from "../passes/math/PhysicsPass";
+import WorkerController from "../workers/WorkerController";
 
 function toObject(classes){
     const res = {}, s = classes.length
@@ -68,6 +69,8 @@ export default class BundlerAPI {
         BundlerAPI.removeUnusedProbes()
         BundlerAPI.packageLights()
         Engine.then = performance.now()
+        WorkerController.initialize()
+        WorkerController.registerEntities()
     }
 
     // TODO - REMOVE THIS METHOD

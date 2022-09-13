@@ -1,9 +1,9 @@
 import GPU from "../production/GPU";
-import pointLightIcon from "../../../src/frontend/editor/data/icons/point_light.png";
+import pointLightIcon from "../../../src/editor/data/icons/point_light.png";
 import STATIC_TEXTURES from "../static/resources/STATIC_TEXTURES";
-import directionalLightIcon from "../../../src/frontend/editor/data/icons/directional_light.png";
-import probeIcon from "../../../src/frontend/editor/data/icons/probe.png";
-import circle from "../../../src/frontend/editor/data/icons/circle.png";
+import directionalLightIcon from "../../../src/editor/data/icons/directional_light.png";
+import probeIcon from "../../../src/editor/data/icons/probe.png";
+import circle from "../../../src/editor/data/icons/circle.png";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 import * as gizmoShaderCode from "./templates/GIZMO.glsl";
 import STATIC_MESHES from "../static/resources/STATIC_MESHES";
@@ -29,7 +29,7 @@ function getCursor() {
     entity.lockedRotation = true
     entity.lockedScaling = true
     entity.scaling = (new Array(3)).fill(.075)
-    entity.matrix = TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling)
+    TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling, entity.matrix)
     return entity
 }
 export default function initializer() {

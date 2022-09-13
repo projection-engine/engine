@@ -1,6 +1,7 @@
 import CameraAPI from "./apis/CameraAPI"
 import ENVIRONMENT from "../static/ENVIRONMENT"
 import LoopController from "./controllers/LoopController";
+import WorkerController from "./workers/WorkerController";
 
 export default class Engine {
     static entitiesMap = new Map()
@@ -12,7 +13,7 @@ export default class Engine {
     static then = 0
     static frameID
     static isReady = false
-
+    static simulationFramerate = 16
 
     static initialize() {
         LoopController.initialize()

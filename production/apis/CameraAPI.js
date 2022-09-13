@@ -1,9 +1,9 @@
 import {mat4} from "gl-matrix"
 import PostProcessing from "./PostProcessing";
-import COMPONENTS from "../../static/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS.json";
 import Engine from "../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
-import SkyboxPass from "../passes/SkyboxPass";
+import SkyboxPass from "../passes/rendering/SkyboxPass";
 
 const toRad = Math.PI/180
 export default class CameraAPI extends PostProcessing {

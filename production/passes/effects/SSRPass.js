@@ -1,13 +1,13 @@
-import * as ssGI from "../shaders/SCREEN_SPACE.glsl"
-import LoopController from "../controllers/LoopController";
-import Engine from "../Engine";
-import CameraAPI from "../apis/CameraAPI";
-import GPU from "../GPU";
+import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
+import LoopController from "../../controllers/LoopController";
+import Engine from "../../Engine";
+import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../GPU";
 import DepthPass from "./DepthPass";
-import DeferredPass from "./DeferredPass";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../apis/QuadAPI";
+import DeferredPass from "../rendering/DeferredPass";
+import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import QuadAPI from "../../apis/QuadAPI";
 
 
 export default class SSRPass {

@@ -1,11 +1,11 @@
-import {vertex} from "../shaders/FXAA.glsl"
-import * as shaderCode from "../shaders/EFFECTS.glsl"
-import generateBlurBuffers from "../utils/generate-blur-buffers"
-import CameraAPI from "../apis/CameraAPI";
-import GPU from "../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../apis/QuadAPI";
+import {vertex} from "../../shaders/FXAA.glsl"
+import * as shaderCode from "../../shaders/EFFECTS.glsl"
+import generateBlurBuffers from "../../utils/generate-blur-buffers"
+import CameraAPI from "../../apis/CameraAPI";
+import GPU from "../../GPU";
+import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
+import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import QuadAPI from "../../apis/QuadAPI";
 
 let shaderState
 export default class ScreenEffectsPass {

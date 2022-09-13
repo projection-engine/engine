@@ -1,10 +1,10 @@
 import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/frontend/editor/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
 import ConversionAPI from "../../production/apis/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
-import EngineStore from "../../../../src/frontend/editor/stores/EngineStore";
+import EngineStore from "../../../../src/editor/stores/EngineStore";
 import PickingAPI from "../../production/apis/PickingAPI";
 import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
@@ -154,18 +154,19 @@ export default class Rotation {
         for (let i = 0; i < SIZE; i++) {
             const target = GizmoSystem.selectedEntities[i]
             if (screenSpace) {
-                target.rotationQuaternion = quatA
+                quat.copy(target.rotationQuaternion, quatA)
                 continue
             }
             if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1) {
                 if (vec3.len(target.pivotPoint) > 0) {
                     const rotationMatrix = mat4.fromQuat([], quatA),
                         translated = vec3.sub([], target.translation, target.pivotPoint)
-                    target.translation = vec3.add([], vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
+                  vec3.add(target.translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
                 }
-                target.rotationQuaternion = quat.multiply([], quatA, target.rotationQuaternion)
+                quat.multiply(target.rotationQuaternion, quatA, target.rotationQuaternion)
             } else
-                target.rotationQuaternion = quat.multiply([], target.rotationQuaternion, quatA)
+                quat.multiply(target.rotationQuaternion, target.rotationQuaternion, quatA)
+            target.changed = true
         }
     }
 

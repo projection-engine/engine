@@ -1,9 +1,8 @@
 import Translation from "../libs/Translation"
 import Rotation from "../libs/Rotation"
 import Scale from "../libs/Scale"
-import TRANSFORMATION_TYPE from "../../../../src/frontend/editor/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
 import getPickerId from "../../production/utils/get-picker-id"
-import MovementPass from "../../production/passes/MovementPass";
 import Gizmo from "../libs/Gizmo";
 import Movable from "../../production/instances/entity/Movable";
 import TransformationAPI from "../../production/apis/TransformationAPI";
@@ -12,9 +11,10 @@ import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import DepthPass from "../../production/passes/DepthPass";
+import DepthPass from "../../production/passes/effects/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Entity from "../../production/instances/entity/Entity";
+import WorkerController from "../../production/workers/WorkerController";
 
 const EMPTY_COMPONENT = new Movable()
 const toDeg = Math.PI/180
@@ -108,7 +108,7 @@ export default class GizmoSystem {
 
     static #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if ((MovementPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
+        if ((WorkerController.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
             GizmoSystem.mainEntity = main
             GizmoSystem.updateTranslation()
 

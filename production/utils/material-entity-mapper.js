@@ -1,4 +1,4 @@
-import COMPONENTS from "../../static/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS.json";
 
 export default function materialEntityMapper(entities, materials) {
     const result = []

@@ -1,17 +1,19 @@
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
-import COMPONENTS from "../../static/COMPONENTS"
-import CubeMapInstance from "../instances/CubeMapInstance"
-import MaterialController from "../controllers/MaterialController";
-import Engine from "../Engine";
+import COMPONENTS from "../../../static/COMPONENTS.json"
+import CubeMapInstance from "../../instances/CubeMapInstance"
+import MaterialController from "../../controllers/MaterialController";
+import Engine from "../../Engine";
 
 export const STEPS_LIGHT_PROBE = {
     GENERATION: 0,
-
     DONE: 3,
     CALCULATE: 4
 }
 export default class DiffuseProbePass {
+    static compile(){
+        DiffuseProbePass.step = STEPS_LIGHT_PROBE.GENERATION
+    }
     static step = STEPS_LIGHT_PROBE.GENERATION
     static lastCallLength = -1
     static probes = {}
