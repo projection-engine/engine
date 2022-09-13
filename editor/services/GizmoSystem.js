@@ -40,10 +40,6 @@ export default class GizmoSystem {
     static scaleGizmo
     static rotationGizmo
 
-    static DEFAULT_ROTATION = toDeg
-    static DEFAULT_SCALE = .001
-    static DEFAULT_TRANSLATION = .001
-
     static initialize() {
 
         GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
@@ -126,7 +122,7 @@ export default class GizmoSystem {
     static execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
 
         if (GizmoSystem.selectedEntities.length > 0) {
-            gpu.clear(gpu.DEPTH_BUFFER_BIT)
+
             GizmoSystem.#findMainEntity()
             GizmoSystem.transformationType = transformationType
             if (GizmoSystem.targetGizmo && GizmoSystem.translation != null)

@@ -5,7 +5,7 @@ import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
-import WireframeSystem from "./WireframeSystem";
+import CollisionMeshInfoSystem from "./CollisionMeshInfoSystem";
 
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
@@ -18,11 +18,14 @@ export default class Wrapper {
             BackgroundSystem.execute()
             GridSystem.execute()
         } else if (isDuringFrameComposition) {
+
             gpu.enable(gpu.BLEND)
             gpu.blendFunc(gpu.SRC_ALPHA, gpu.ONE_MINUS_SRC_ALPHA)
 
             SelectedSystem.drawSilhouette(selected)
 
+            gpu.clear(gpu.DEPTH_BUFFER_BIT)
+            CollisionMeshInfoSystem.execute(selected)
             if(iconsVisibility) {
                 const attr = {
                     viewMatrix: CameraAPI.viewMatrix,
@@ -40,10 +43,10 @@ export default class Wrapper {
                     IconsSystem.cameraMesh.draw()
                 }
             }
-
+            gpu.clear(gpu.DEPTH_BUFFER_BIT)
             GizmoSystem.execute(transformationType)
             IconsSystem.execute(selected)
-            WireframeSystem.execute(selected)
+
         }
     }
 }

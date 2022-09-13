@@ -22,7 +22,7 @@ import BackgroundSystem from "./services/BackgroundSystem";
 import GizmoSystem from "./services/GizmoSystem";
 import Entity from "../production/instances/entity/Entity";
 import TransformationAPI from "../production/apis/TransformationAPI";
-import WireframeSystem from "./services/WireframeSystem";
+import CollisionMeshInfoSystem from "./services/CollisionMeshInfoSystem";
 
 function getCursor() {
     const entity = new Entity()
@@ -49,7 +49,7 @@ export default function initializer() {
 
     Engine.environment = ENVIRONMENT.DEV
 
-    WireframeSystem.initialize()
+    CollisionMeshInfoSystem.initialize()
     GridSystem.initialize()
     IconsSystem.initialize()
     SelectedSystem.initialize()

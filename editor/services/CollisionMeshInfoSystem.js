@@ -8,15 +8,18 @@ import CameraAPI from "../../production/apis/CameraAPI";
 import Engine from "../../production/Engine";
 import {mat4, vec3} from "gl-matrix";
 const EMPTY_MATRIX = mat4.create()
-export default class WireframeSystem {
+
+
+
+export default class CollisionMeshInfoSystem {
     static cube
     static sphere
     static shader
 
     static initialize() {
-        WireframeSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
-        WireframeSystem.cube = GPU.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
-        WireframeSystem.sphere = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
+        CollisionMeshInfoSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
+        CollisionMeshInfoSystem.cube = GPU.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
+        CollisionMeshInfoSystem.sphere = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
 
     }
 
@@ -38,7 +41,8 @@ export default class WireframeSystem {
             const collision = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
             if (!collision)
                 continue
-            if (entity.changesApplied) {
+            if (entity.changesApplied || !entity.collisionUpdated) {
+                entity.collisionUpdated = true
                 const m = mat4.copy(entity.collisionTransformationMatrix, EMPTY_MATRIX)
                 const translation = vec3.add([], collision.center, entity.absoluteTranslation)
                 mat4.translate(m, m, translation)
@@ -50,13 +54,13 @@ export default class WireframeSystem {
                 }
             }
             obj.transformMatrix = entity.collisionTransformationMatrix
-            WireframeSystem.shader.bindForUse(obj)
+            CollisionMeshInfoSystem.shader.bindForUse(obj)
             switch (collision.collisionType) {
                 case COLLISION_TYPES.SPHERE:
-                    WireframeSystem.sphere.drawLines()
+                    CollisionMeshInfoSystem.sphere.draw()
                     break
                 case COLLISION_TYPES.BOX:
-                    WireframeSystem.cube.drawLines()
+                    CollisionMeshInfoSystem.cube.draw()
                     break
             }
         }
