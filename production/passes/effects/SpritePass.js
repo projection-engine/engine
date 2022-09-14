@@ -1,9 +1,9 @@
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/CameraAPI";
+import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import COMPONENTS from "../../../static/COMPONENTS.json";
-import QuadAPI from "../../apis/QuadAPI";
+import QuadAPI from "../../apis/rendering/QuadAPI";
 
 export default class SpritePass {
     static shader

@@ -1,6 +1,6 @@
-import MaterialController from "../../controllers/MaterialController";
+import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/CameraAPI";
+import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 
 export default class ForwardPass {
@@ -14,14 +14,14 @@ export default class ForwardPass {
             dirLightPOV,
             pointLightData
         } = Engine.data
-        MaterialController.loopMeshes(
+        MaterialAPI.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isForwardShaded)
                     return
 
 
-                MaterialController.drawMesh(
+                MaterialAPI.drawMesh(
                     current.id,
                     mesh,
                     mat,

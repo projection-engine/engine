@@ -1,8 +1,8 @@
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../../static/COMPONENTS.json"
-import CubeMapInstance from "../../instances/CubeMapInstance"
-import MaterialController from "../../controllers/MaterialController";
+import ProbeController from "../../instances/ProbeController"
+import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
 import GPU from "../../GPU";
 
@@ -40,14 +40,14 @@ export default class SpecularProbePass {
                         continue
                     const component = current.components.get(COMPONENTS.PROBE)
                     if (!SpecularProbePass.specularProbes[current.id])
-                        SpecularProbePass.specularProbes[current.id] = new CubeMapInstance(component.resolution, false)
+                        SpecularProbePass.specularProbes[current.id] = new ProbeController(component.resolution, false)
                     else
                         SpecularProbePass.specularProbes[current.id].resolution = component.resolution
                     const translation = specularProbes[i].translation
                     SpecularProbePass.specularProbes[current.id].draw((yaw, pitch, projection, index) => {
                             const target = vec3.add([], translation, VIEWS.target[index])
                             const view = mat4.lookAt([], translation, target, VIEWS.up[index])
-                            MaterialController.drawProbe(view, projection, translation)
+                            MaterialAPI.drawProbe(view, projection, translation)
                         },
                         undefined,
                         10000,

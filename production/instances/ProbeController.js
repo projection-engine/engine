@@ -1,10 +1,10 @@
 import {mat4, vec3} from "gl-matrix"
-import MeshInstance from "./MeshInstance";
+import MeshController from "./MeshController";
 import GPU from "../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 
-export default class CubeMapInstance {
+export default class ProbeController {
     texture
     prefiltered
     irradianceTexture
@@ -54,7 +54,7 @@ export default class CubeMapInstance {
         if (!this.#asDepth && cubeBuffer) {
             const perspective = mat4.perspective([], 1.57, 1, .1, 10)
 
-            MeshInstance.finishIfUsed()
+            MeshController.finishIfUsed()
 
             gpu.viewport(0, 0, resolution, resolution)
             this.prefiltered = this.#initializeTexture(resolution, true)

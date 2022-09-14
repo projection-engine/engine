@@ -1,6 +1,6 @@
 import {v4} from "uuid";
-import UserInterfaceController from "../../controllers/UserInterfaceController";
-import ELEMENT_ID from "../../../static/ELEMENT_ID";
+import UIAPI from "../apis/utils/UIAPI";
+import ELEMENT_ID from "../../static/ELEMENT_ID";
 
 export default class UIElement {
     parent
@@ -114,7 +114,7 @@ export default class UIElement {
     }
 
     get parentElement() {
-        return this.parent ? this.parent.element : UserInterfaceController.renderTarget
+        return this.parent ? this.parent.element : UIAPI.renderTarget
     }
 
     set styles(data) {

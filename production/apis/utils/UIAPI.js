@@ -1,15 +1,15 @@
 import {v4} from "uuid";
 
-export default class UserInterfaceController {
+export default class UIAPI {
     static ID = v4()
     static #renderTarget
     static entities = new Map()
 
     static get renderTarget() {
-        if (!UserInterfaceController.#renderTarget && window.gpu) {
+        if (!UIAPI.#renderTarget && window.gpu) {
 
             const t = document.createElement("span")
-            UserInterfaceController.#renderTarget = t
+            UIAPI.#renderTarget = t
             Object.assign(t.style, {
                 position: "absolute",
                 top: 0,
@@ -20,30 +20,30 @@ export default class UserInterfaceController {
             gpu.canvas.before(t)
 
         }
-        return UserInterfaceController.#renderTarget
+        return UIAPI.#renderTarget
     }
 
     static start() {
 
-        if (!UserInterfaceController.renderTarget)
+        if (!UIAPI.renderTarget)
             return
-        const components = Array.from(UserInterfaceController.entities.values())
+        const components = Array.from(UIAPI.entities.values())
         for (let i = 0; i < components.length; i++)
             components[i].mount()
-        UserInterfaceController.#renderTarget.style.display = "initial"
+        UIAPI.#renderTarget.style.display = "initial"
     }
 
     static stop() {
-        if (!UserInterfaceController.#renderTarget)
+        if (!UIAPI.#renderTarget)
             return
-        const components = Array.from(UserInterfaceController.entities.values())
+        const components = Array.from(UIAPI.entities.values())
         for (let i = 0; i < components.length; i++)
             components[i].unmount()
-        UserInterfaceController.#renderTarget.style.display = "none"
+        UIAPI.#renderTarget.style.display = "none"
     }
 
     static restart() {
-        UserInterfaceController.stop()
-        UserInterfaceController.start()
+        UIAPI.stop()
+        UIAPI.start()
     }
 }

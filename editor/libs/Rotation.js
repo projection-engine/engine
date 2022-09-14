@@ -2,18 +2,18 @@ import * as gizmoShaderCode from "../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
-import ConversionAPI from "../../production/apis/ConversionAPI"
+import ConversionAPI from "../../production/apis/math/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
 import EngineStore from "../../../../src/editor/stores/EngineStore";
-import PickingAPI from "../../production/apis/PickingAPI";
-import CameraAPI from "../../production/apis/CameraAPI";
+import PickingAPI from "../../production/apis/utils/PickingAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../production/GPU";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import Gizmo from "./Gizmo";
+import GizmoAPI from "./GizmoAPI";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 
@@ -103,7 +103,7 @@ export default class Rotation {
             default:
                 break
         }
-        Gizmo.notify([this.currentRotation[0] * toDeg, this.currentRotation[1] * toDeg, this.currentRotation[2] * toDeg])
+        GizmoSystem.notify([this.currentRotation[0] * toDeg, this.currentRotation[1] * toDeg, this.currentRotation[2] * toDeg])
     }
 
     rotateElement(vec, screenSpace) {

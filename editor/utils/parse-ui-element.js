@@ -1,4 +1,4 @@
-import UIElement from "../../production/instances/entity/UIElement";
+import UIElement from "../../production/instances/UIElement";
 
 export default function parseUiElement(obj) {
     const newElement = new UIElement()

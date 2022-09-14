@@ -4,7 +4,7 @@ import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
 import CollisionMeshInfoSystem from "./CollisionMeshInfoSystem";
 
 export default class Wrapper {

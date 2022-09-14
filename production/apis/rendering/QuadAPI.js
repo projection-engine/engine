@@ -1,5 +1,5 @@
-import VBOInstance from "../instances/VBOInstance"
-import MeshInstance from "../instances/MeshInstance";
+import VBOController from "../../instances/VBOController"
+import MeshController from "../../instances/MeshController";
 
 const QUAD = [
     -1, -1, 0,
@@ -17,7 +17,7 @@ export default class QuadAPI {
         if (!QuadAPI.VAO) {
             QuadAPI.VAO = gpu.createVertexArray()
             gpu.bindVertexArray(QuadAPI.VAO)
-            QuadAPI.VBO = new VBOInstance(
+            QuadAPI.VBO = new VBOController(
                 0,
                 new Float32Array(QUAD),
                 gpu.ARRAY_BUFFER,
@@ -28,7 +28,7 @@ export default class QuadAPI {
     }
 
     static draw() {
-        MeshInstance.finishIfUsed()
+        MeshController.finishIfUsed()
 
         gpu.disable(gpu.CULL_FACE)
         gpu.bindVertexArray(QuadAPI.VAO)
@@ -39,7 +39,7 @@ export default class QuadAPI {
     }
 
     static use() {
-        MeshInstance.finishIfUsed()
+        MeshController.finishIfUsed()
         gpu.disable(gpu.CULL_FACE)
         gpu.bindVertexArray(QuadAPI.VAO)
         QuadAPI.VBO.enable()

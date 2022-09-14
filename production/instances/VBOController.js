@@ -1,6 +1,6 @@
 import {createVBO} from "../utils/utils"
 
-export default class VBOInstance {
+export default class VBOController {
     // static lastUsed
     constructor(  index, data, type, size, dataType, normalized=false, renderingType, stride=0) {
         this.id = createVBO( type, data, renderingType)
@@ -23,7 +23,7 @@ export default class VBOInstance {
         this.length = data.length
     }
     enable(){
-        // VBOInstance.lastUsed = this.id
+        // VBOController.lastUsed = this.id
         gpu.enableVertexAttribArray(this.index)
         gpu.bindBuffer(this.type, this.id)
         gpu.vertexAttribPointer(this.index, this.size, this.type, this.normalized, this.stride, 0)

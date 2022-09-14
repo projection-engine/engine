@@ -1,5 +1,5 @@
 import {vec4} from "gl-matrix"
-import CameraAPI from "./CameraAPI";
+import CameraAPI from "../camera/CameraAPI";
 
 export default class ConversionAPI {
     static toQuadCoord(coords, quadSize) {

@@ -1,4 +1,4 @@
-import Ammo from "ammo.js"
+import Ammo from "ammo-electron-build"
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../../static/ENVIRONMENT";
 import COMPONENTS from "../../../static/COMPONENTS";

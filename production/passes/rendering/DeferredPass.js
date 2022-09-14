@@ -1,8 +1,8 @@
-import FramebufferInstance from "../../instances/FramebufferInstance"
+import FramebufferController from "../../instances/FramebufferController"
 import * as shaderCode from "../../shaders/DEFERRED.glsl"
-import MaterialController from "../../controllers/MaterialController";
+import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/CameraAPI";
+import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import AOPass from "../effects/AOPass";
 import SSGIPass from "../effects/SSGIPass";
@@ -10,7 +10,7 @@ import SSRPass from "../effects/SSRPass";
 import ShadowMapPass from "../cached-rendering/ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
-import QuadAPI from "../../apis/QuadAPI";
+import QuadAPI from "../../apis/rendering/QuadAPI";
 
 export default class DeferredPass {
     static gBuffer
@@ -24,7 +24,7 @@ export default class DeferredPass {
     static ambientSampler
 
     static initialize() {
-        DeferredPass.gBuffer = new FramebufferInstance()
+        DeferredPass.gBuffer = new FramebufferController()
         DeferredPass.gBuffer
             .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
             .texture({attachment: 1})
@@ -56,12 +56,12 @@ export default class DeferredPass {
 
 
         DeferredPass.gBuffer.startMapping()
-        MaterialController.loopMeshes(
+        MaterialAPI.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isDeferredShaded)
                     return
-                MaterialController.drawMesh(
+                MaterialAPI.drawMesh(
                     current.id,
                     mesh,
                     mat,

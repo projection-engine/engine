@@ -1,7 +1,7 @@
 import {createTexture} from "../utils/utils"
 import GPU from "../GPU";
 
-export default class FramebufferInstance {
+export default class FramebufferController {
 
     FBO
     RBO

@@ -1,12 +1,11 @@
 import {mat4} from "gl-matrix"
 import PostProcessing from "./PostProcessing";
-import COMPONENTS from "../../static/COMPONENTS.json";
-import Engine from "../Engine";
-import ENVIRONMENT from "../../static/ENVIRONMENT";
-import SkyboxPass from "../passes/rendering/SkyboxPass";
+import COMPONENTS from "../../../static/COMPONENTS.json";
+import Engine from "../../Engine";
+import ENVIRONMENT from "../../../static/ENVIRONMENT";
+import SkyboxPass from "../../passes/rendering/SkyboxPass";
 
-const toRad = Math.PI/180
-export default class CameraAPI extends PostProcessing {
+export default class CameraAPI {
     static isOrthographic = false
     static metadata = new PostProcessing()
     static position = [0, 0, 0]

@@ -1,5 +1,5 @@
-import Engine from "../Engine";
-import UserInterfaceController from "../controllers/UserInterfaceController";
+import Engine from "../../Engine";
+import UIAPI from "./UIAPI";
 
 export default class QueryAPI {
     static getEntityByQueryID(id) {
@@ -20,7 +20,7 @@ export default class QueryAPI {
     }
 
     static getUIElementByQueryID(id) {
-        const arr = Array.from(UserInterfaceController.entities.values())
+        const arr = Array.from(UIAPI.entities.values())
         for (let i = 0; i < arr.length; i++) {
             if (arr[i].queryKey === id)
                 return arr[i]
@@ -28,6 +28,13 @@ export default class QueryAPI {
         return undefined
     }
 
+    static getEntityByPickerID(id){
+        if(id === 0)
+            return
+
+        const entities = Engine.entities
+        return  entities.find(e => e?.pickIndex === id)
+    }
     static loadFile(absoluteName) {
         // TODO - IMPLEMENT LOADING API FOR WEB AND NATIVE
     }

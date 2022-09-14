@@ -20,8 +20,8 @@ import SelectedSystem from "./services/SelectedSystem";
 import PreviewSystem from "./services/PreviewSystem";
 import BackgroundSystem from "./services/BackgroundSystem";
 import GizmoSystem from "./services/GizmoSystem";
-import Entity from "../production/instances/entity/Entity";
-import TransformationAPI from "../production/apis/TransformationAPI";
+import Entity from "../production/instances/Entity";
+import TransformationAPI from "../production/apis/math/TransformationAPI";
 import CollisionMeshInfoSystem from "./services/CollisionMeshInfoSystem";
 
 function getCursor() {

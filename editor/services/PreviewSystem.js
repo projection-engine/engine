@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix"
-import MeshInstance from "../../production/instances/MeshInstance"
-import MaterialInstance from "../../production/instances/MaterialInstance"
-import MaterialController from "../../production/controllers/MaterialController";
+import MeshController from "../../production/instances/MeshController"
+import MaterialController from "../../production/instances/MaterialController"
+import MaterialAPI from "../../production/apis/rendering/MaterialAPI";
 import BundlerAPI from "../../production/apis/BundlerAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
@@ -49,7 +49,7 @@ export default class PreviewSystem {
         PreviewSystem.frameBuffer.startMapping()
 
 
-        if (meshEntity && materialMesh instanceof MeshInstance) {
+        if (meshEntity && materialMesh instanceof MeshController) {
             const maxX = materialMesh.maxBoundingBox[0] - materialMesh.minBoundingBox[0],
                 maxY = materialMesh.maxBoundingBox[1] - materialMesh.minBoundingBox[1],
                 maxZ = materialMesh.maxBoundingBox[2] - materialMesh.minBoundingBox[2]
@@ -69,7 +69,7 @@ export default class PreviewSystem {
                     100, .1, 0, 0
                 ]]
 
-            MaterialController.drawMesh(
+            MaterialAPI.drawMesh(
                 undefined,
                 materialMesh,
                 GPU.materials.get(FALLBACK_MATERIAL),
@@ -88,9 +88,9 @@ export default class PreviewSystem {
                     pointLightData: pointLightData,
                     useCubeMapShader: true
                 })
-        } else if (materialMesh instanceof MaterialInstance) {
+        } else if (materialMesh instanceof MaterialController) {
             const [viewMatrix, cameraVec] = PreviewSystem.cameraData
-            MaterialController.drawMesh(
+            MaterialAPI.drawMesh(
                 undefined,
                 GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
                 materialMesh,

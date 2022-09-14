@@ -3,18 +3,19 @@ import Rotation from "../libs/Rotation"
 import Scale from "../libs/Scale"
 import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
 import getPickerId from "../../production/utils/get-picker-id"
-import Gizmo from "../libs/Gizmo";
-import Movable from "../../production/instances/entity/Movable";
-import TransformationAPI from "../../production/apis/TransformationAPI";
-import CameraAPI from "../../production/apis/CameraAPI";
+import GizmoAPI from "../libs/GizmoAPI";
+import Movable from "../../production/instances/Movable";
+import TransformationAPI from "../../production/apis/math/TransformationAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
 import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import DepthPass from "../../production/passes/effects/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import Entity from "../../production/instances/entity/Entity";
+import Entity from "../../production/instances/Entity";
 import WorkerController from "../../production/workers/WorkerController";
+import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
 
 const EMPTY_COMPONENT = new Movable()
 export default class GizmoSystem {
@@ -34,7 +35,7 @@ export default class GizmoSystem {
     static translationGizmoMesh
     static dualAxisGizmoMesh
     static screenSpaceMesh
-
+static tooltip
     static translationGizmo
     static scaleGizmo
     static rotationGizmo
@@ -56,6 +57,14 @@ export default class GizmoSystem {
         GizmoSystem.scaleGizmo = new Scale()
         GizmoSystem.rotationGizmo = new Rotation()
     }
+    static onMouseDown(){
+        if (!GizmoSystem.tooltip)
+            GizmoSystem.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+    }
+    static onMouseUp(){
+        if(GizmoSystem.tooltip)
+            setTimeout(() =>  GizmoSystem.tooltip.finished(), 250)
+    }
 
     static updateTranslation() {
         const main = GizmoSystem.mainEntity
@@ -75,7 +84,6 @@ export default class GizmoSystem {
             cameraIsOrthographic: CameraAPI.isOrthographic
         }
         gpu.disable(gpu.CULL_FACE)
-
         FBO.startMapping()
 
         for (let i = 0; i < transforms.length; i++) {
@@ -107,7 +115,7 @@ export default class GizmoSystem {
             GizmoSystem.mainEntity = main
             GizmoSystem.targetRotation = main.rotationQuaternion
             GizmoSystem.updateTranslation()
-            GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
+            GizmoSystem.transformationMatrix = GizmoAPI.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
 
 
         } else if (!main) {
@@ -136,4 +144,12 @@ export default class GizmoSystem {
             GizmoSystem.translation = undefined
         }
     }
+    static notify(targetBuffer) {
+        if(!GizmoSystem.tooltip)
+            return
+        GizmoSystem.tooltip.isChanging()
+        GizmoSystem.totalMoved = 1
+        GizmoSystem.tooltip.textContent = `X ${targetBuffer[0].toFixed(2)}  |  Y ${targetBuffer[1].toFixed(2)}  |  Z ${targetBuffer[2].toFixed(2)}`
+    }
+
 }

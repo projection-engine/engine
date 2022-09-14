@@ -58,7 +58,7 @@ function applyMethods(shaderCode) {
 }
 
 
-export default class ShaderInstance {
+export default class ShaderController {
     available = false
     regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     structRegex = (type) => {
@@ -217,13 +217,13 @@ export default class ShaderInstance {
                     const u = current.uLocations[i]
                     const d = dataAttr[i]
                     if (current.parent)
-                        ShaderInstance.bind(u, d[current.name], current.type, currentSamplerIndex, increase)
+                        ShaderController.bind(u, d[current.name], current.type, currentSamplerIndex, increase)
                     else
-                        ShaderInstance.bind(u, d, current.type, currentSamplerIndex, increase)
+                        ShaderController.bind(u, d, current.type, currentSamplerIndex, increase)
                 }
             } else {
                 const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
-                ShaderInstance.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, increase)
+                ShaderController.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, increase)
             }
         }
     }

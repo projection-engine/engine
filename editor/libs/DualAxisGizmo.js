@@ -1,7 +1,7 @@
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import {mat4, quat, vec3} from "gl-matrix";
-import CameraAPI from "../../production/apis/CameraAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
 import mapGizmoMesh from "../utils/map-gizmo-mesh";
 import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE";
 import getPickerId from "../../production/utils/get-picker-id";
@@ -13,9 +13,7 @@ export default class DualAxisGizmo {
     static matrixXZ
     static matrixXY
     static matrixZY
-    static cameraDistance
-    static mouseX
-    static mouseY
+
     static gizmos = {
         XY: mapGizmoMesh("XY", "DUAL"),
         XZ: mapGizmoMesh("XZ", "DUAL"),

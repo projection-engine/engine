@@ -45,7 +45,7 @@ export default class WorkerController {
         for (let i = 0; i < entities.length; i++)
             WorkerController.registerEntity(entities[i])
 
-        setTimeout(() => BundlerAPI.packageLights(true), 250)
+        setTimeout(() => BundlerAPI.packageLights(), 250)
     }
 
     static removeEntity(entity) {

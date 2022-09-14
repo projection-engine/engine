@@ -1,15 +1,15 @@
 import {v4} from "uuid"
 import Movable from "./Movable";
-import COMPONENTS from "../../../static/COMPONENTS.json";
-import DirectionalLightComponent from "../../components/rendering/DirectionalLightComponent";
-import MeshComponent from "../../components/rendering/MeshComponent";
-import PointLightComponent from "../../components/rendering/PointLightComponent";
-import ProbeComponent from "../../components/rendering/ProbeComponent";
-import CameraComponent from "../../components/misc/CameraComponent";
-import SpriteComponent from "../../components/rendering/SpriteComponent";
-import RigidBodyComponent from "../../components/physics/RigidBodyComponent";
-import PhysicsColliderComponent from "../../components/physics/PhysicsColliderComponent";
-import CullingComponent from "../../components/misc/CullingComponent";
+import COMPONENTS from "../../static/COMPONENTS.json";
+import DirectionalLightComponent from "../components/rendering/DirectionalLightComponent";
+import MeshComponent from "../components/rendering/MeshComponent";
+import PointLightComponent from "../components/rendering/PointLightComponent";
+import ProbeComponent from "../components/rendering/ProbeComponent";
+import CameraComponent from "../components/misc/CameraComponent";
+import SpriteComponent from "../components/rendering/SpriteComponent";
+import RigidBodyComponent from "../components/physics/RigidBodyComponent";
+import PhysicsColliderComponent from "../components/physics/PhysicsColliderComponent";
+import CullingComponent from "../components/misc/CullingComponent";
 
 
 const TYPED_ATTRIBUTES = [

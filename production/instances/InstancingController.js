@@ -1,4 +1,4 @@
-export default class InstancedRenderGroup{
+export default class InstancingController {
     id
     bufferSize = 0
     entities = new Map()

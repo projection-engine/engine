@@ -1,3 +1,6 @@
+import ConversionAPI from "../math/ConversionAPI";
+import DepthPass from "../../passes/effects/DepthPass";
+
 export default class PickingAPI {
     static readBlock(depthFBO, start, end) {
         const w = Math.round(Math.abs(start.x - end.x))
@@ -33,5 +36,12 @@ export default class PickingAPI {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         return dd
     }
+    static readPixelData(x, y) {
+        const w = window.gpu.canvas.width, h = window.gpu.canvas.height
+        const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
+        const picked = PickingAPI.depthPick(DepthPass.framebuffer, coords)
+        return Math.round((picked[1] + picked[2]) * 255)
+    }
+
 
 }

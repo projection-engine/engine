@@ -1,8 +1,8 @@
 import {mat4, vec3} from "gl-matrix"
 import {VIEWS} from "./ShadowMapPass"
 import COMPONENTS from "../../../static/COMPONENTS.json"
-import CubeMapInstance from "../../instances/CubeMapInstance"
-import MaterialController from "../../controllers/MaterialController";
+import ProbeController from "../../instances/ProbeController"
+import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
 
 export const STEPS_LIGHT_PROBE = {
@@ -21,7 +21,7 @@ export default class DiffuseProbePass {
     static baseCubeMap
 
     static initialize() {
-        DiffuseProbePass.baseCubeMap = new CubeMapInstance(128)
+        DiffuseProbePass.baseCubeMap = new ProbeController(128)
     }
 
     static execute() {
@@ -46,7 +46,7 @@ export default class DiffuseProbePass {
                     DiffuseProbePass.baseCubeMap.draw((yaw, pitch, projection, index) => {
                             const target = vec3.add([], current.translation, VIEWS.target[index])
                             const view = mat4.lookAt([], current.translation, target, VIEWS.up[index])
-                            MaterialController.drawProbe(
+                            MaterialAPI.drawProbe(
                                 view,
                                 projection,
                                 current.translation
@@ -58,7 +58,7 @@ export default class DiffuseProbePass {
                         1
                     )
                     if (!DiffuseProbePass.diffuseProbes[current.id])
-                        DiffuseProbePass.diffuseProbes[current.id] = new CubeMapInstance(32)
+                        DiffuseProbePass.diffuseProbes[current.id] = new ProbeController(32)
 
                     DiffuseProbePass.diffuseProbes[current.id].generateIrradiance(DiffuseProbePass.baseCubeMap.texture, current.components.get(COMPONENTS.PROBE).multiplier)
                 }

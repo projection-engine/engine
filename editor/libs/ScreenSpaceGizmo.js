@@ -1,9 +1,9 @@
-import Gizmo from "./Gizmo";
+import GizmoAPI from "./GizmoAPI";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
-import ConversionAPI from "../../production/apis/ConversionAPI";
+import ConversionAPI from "../../production/apis/math/ConversionAPI";
 import {vec3} from "gl-matrix";
-import CameraAPI from "../../production/apis/CameraAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
 import getPickerId from "../../production/utils/get-picker-id";
 
 
@@ -74,6 +74,6 @@ export default class ScreenSpaceGizmo {
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix || GizmoSystem.clickedAxis >= 0 )
             return
-        Gizmo.drawGizmo(GizmoSystem.screenSpaceMesh, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
+        GizmoAPI.drawGizmo(GizmoSystem.screenSpaceMesh, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
     }
 }

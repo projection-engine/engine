@@ -1,13 +1,13 @@
 export default class MBPass {
     constructor( ) {
-        // this.velocityFramebuffer = new FramebufferInstance(resolution.w, resolution.h)
+        // this.velocityFramebuffer = new FramebufferController(resolution.w, resolution.h)
         // this.velocityFramebuffer.texture()
         //
         //
         // // TODO - SHADERS
-        // this.velocityShader = new ShaderInstance(vertex, shaderCode.blurBox)
-        // this.textureCopyShader = new ShaderInstance(vertex, shaderCode.blurBox,)
-        // this.motionBlurShader = new ShaderInstance(vertex, shaderCode.blurBox,)
+        // this.velocityShader = new ShaderController(vertex, shaderCode.blurBox)
+        // this.textureCopyShader = new ShaderController(vertex, shaderCode.blurBox,)
+        // this.motionBlurShader = new ShaderController(vertex, shaderCode.blurBox,)
 
     }
 

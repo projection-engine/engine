@@ -1,10 +1,10 @@
-import CameraAPI from "../../production/apis/CameraAPI";
-import InputEventsAPI from "../../production/apis/InputEventsAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
+import InputEventsAPI from "../../production/apis/utils/InputEventsAPI";
 
 import KEYS from "../../static/KEYS";
 import {v4} from "uuid";
 import {vec3} from "gl-matrix";
-import Gizmo from "./Gizmo";
+import GizmoAPI from "./GizmoAPI";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
 
 let interval, ctrl, holding, isFocused, isDoubleClick, timeout
@@ -42,18 +42,18 @@ export default class CameraTracker {
             CameraTracker.radius += increment
             CameraTracker.update(true)
         }
-        if (!Gizmo.tooltip)
-            Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-        if (Gizmo.tooltip) {
-            Gizmo.tooltip.isChanging()
-            Gizmo.tooltip.textContent = `X ${CameraTracker.centerOn[0].toFixed(2)}  |  Y ${CameraTracker.centerOn[1].toFixed(2)}  |  Z ${CameraTracker.centerOn[2].toFixed(2)}  |  Radius ${CameraTracker.radius.toFixed(0)}`
+        if (!GizmoAPI.tooltip)
+            GizmoAPI.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+        if (GizmoAPI.tooltip) {
+            GizmoAPI.tooltip.isChanging()
+            GizmoAPI.tooltip.textContent = `X ${CameraTracker.centerOn[0].toFixed(2)}  |  Y ${CameraTracker.centerOn[1].toFixed(2)}  |  Z ${CameraTracker.centerOn[2].toFixed(2)}  |  Radius ${CameraTracker.radius.toFixed(0)}`
         }
         clearTimeout(timeout)
         timeout = setTimeout(() => {
-            if (!Gizmo.tooltip)
-                Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-            if (Gizmo.tooltip)
-                Gizmo.tooltip.finished()
+            if (!GizmoAPI.tooltip)
+                GizmoAPI.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
+            if (GizmoAPI.tooltip)
+                GizmoAPI.tooltip.finished()
         }, 500)
     }
 

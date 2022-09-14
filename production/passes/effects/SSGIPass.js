@@ -1,8 +1,8 @@
-import FramebufferInstance from "../../instances/FramebufferInstance"
+import FramebufferController from "../../instances/FramebufferController"
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/CameraAPI";
+import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import DepthPass from "./DepthPass";
@@ -10,7 +10,7 @@ import ScreenEffectsPass from "../post-processing/ScreenEffectsPass";
 import DeferredPass from "../rendering/DeferredPass";
 import AOPass from "./AOPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/QuadAPI";
+import QuadAPI from "../../apis/rendering/QuadAPI";
 
 
 export default class SSGIPass {
@@ -30,8 +30,8 @@ export default class SSGIPass {
         SSGIPass.blurBuffers = blurBuffers
         SSGIPass.upSampledBuffers = upSampledBuffers
 
-        SSGIPass.normalsFBO = (new FramebufferInstance()).texture()
-        SSGIPass.FBO = (new FramebufferInstance()).texture()
+        SSGIPass.normalsFBO = (new FramebufferController()).texture()
+        SSGIPass.FBO = (new FramebufferController()).texture()
         SSGIPass.normalsShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, ssGI.vShader, ssGI.stochasticNormals)
         SSGIPass.ssgiShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, ssGI.vShader, ssGI.ssGI)
 

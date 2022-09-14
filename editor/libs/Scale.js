@@ -1,18 +1,13 @@
 import {vec3, vec4} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
-import Gizmo from "./Gizmo"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
 import GizmoSystem from "../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
+import GizmoInheritance from "./GizmoInheritance";
 
 const MOVEMENT_SCALE = .1
-export default class Scale extends Gizmo {
-    tracking = false
-
+export default class Scale extends GizmoInheritance {
     gridSize = .01
-    distanceX = 0
-    distanceY = 0
-    distanceZ = 0
     key = "scaling"
 
     constructor() {
@@ -27,7 +22,7 @@ export default class Scale extends Gizmo {
         super.onMouseMove()
         const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
         this.moveEntities(position)
-        Gizmo.notify(GizmoSystem.mainEntity._scaling)
+        GizmoSystem.notify(GizmoSystem.mainEntity._scaling)
     }
 
     moveEntities(vec) {

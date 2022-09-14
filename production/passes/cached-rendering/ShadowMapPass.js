@@ -1,6 +1,6 @@
 import * as smShaders from "../../shaders/SHADOW_MAP.glsl"
-import FramebufferInstance from "../../instances/FramebufferInstance"
-import CubeMapInstance from "../../instances/CubeMapInstance"
+import FramebufferController from "../../instances/FramebufferController"
+import ProbeController from "../../instances/ProbeController"
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../static/COMPONENTS.json"
 import BundlerAPI from "../../apis/BundlerAPI";
@@ -41,8 +41,8 @@ export default class ShadowMapPass {
     static initialize() {
 
         ShadowMapPass.specularProbes = [
-            new CubeMapInstance(512, true),
-            new CubeMapInstance(512, true)
+            new ProbeController(512, true),
+            new ProbeController(512, true)
         ]
         ShadowMapPass.allocateData()
         ShadowMapPass.shadowMapShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
@@ -56,7 +56,7 @@ export default class ShadowMapPass {
             gpu.deleteFramebuffer(ShadowMapPass.shadowsFrameBuffer.FBO)
         }
 
-        ShadowMapPass.shadowsFrameBuffer = new FramebufferInstance(ShadowMapPass.maxResolution, ShadowMapPass.maxResolution)
+        ShadowMapPass.shadowsFrameBuffer = new FramebufferController(ShadowMapPass.maxResolution, ShadowMapPass.maxResolution)
         ShadowMapPass.shadowsFrameBuffer
             .depthTexture()
     }

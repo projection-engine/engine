@@ -1,5 +1,5 @@
-import VBOInstance from "../instances/VBOInstance"
-import MeshInstance from "../instances/MeshInstance";
+import VBOController from "../../instances/VBOController"
+import MeshController from "../../instances/MeshController";
 
 const LINE = [
     0,0,0,
@@ -13,7 +13,7 @@ export default class LineAPI {
         if (!LineAPI.VAO) {
             LineAPI.VAO = gpu.createVertexArray()
             gpu.bindVertexArray(LineAPI.VAO)
-            LineAPI.VBO = new VBOInstance(
+            LineAPI.VBO = new VBOController(
                 0,
                 new Float32Array(LINE),
                 gpu.ARRAY_BUFFER,
@@ -24,7 +24,7 @@ export default class LineAPI {
     }
 
     static draw() {
-        MeshInstance.finishIfUsed()
+        MeshController.finishIfUsed()
 
         gpu.disable(gpu.CULL_FACE)
         gpu.bindVertexArray(LineAPI.VAO)
@@ -35,7 +35,7 @@ export default class LineAPI {
     }
 
     static use() {
-        MeshInstance.finishIfUsed()
+        MeshController.finishIfUsed()
         gpu.disable(gpu.CULL_FACE)
         gpu.bindVertexArray(LineAPI.VAO)
         LineAPI.VBO.enable()

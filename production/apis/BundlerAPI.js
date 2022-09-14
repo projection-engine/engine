@@ -3,14 +3,16 @@ import {packageDirectionalLights, packagePointLights} from "../utils/package-lig
 import Engine from "../Engine";
 import Component from "../components/Component";
 import ConsoleAPI from "./ConsoleAPI";
-import QueryAPI from "./QueryAPI";
-import InputEventsAPI from "./InputEventsAPI";
-import CameraAPI from "./CameraAPI";
+import QueryAPI from "./utils/QueryAPI";
+import InputEventsAPI from "./utils/InputEventsAPI";
+import CameraAPI from "./camera/CameraAPI";
 import SpecularProbePass from "../passes/cached-rendering/SpecularProbePass";
 import DiffuseProbePass from "../passes/cached-rendering/DiffuseProbePass";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import PhysicsPass from "../passes/math/PhysicsPass";
 import WorkerController from "../workers/WorkerController";
+import {FALLBACK_MATERIAL} from "../../production";
+import GPU from "../GPU";
 
 function toObject(classes){
     const res = {}, s = classes.length
@@ -71,6 +73,8 @@ export default class BundlerAPI {
         Engine.then = performance.now()
         WorkerController.initialize()
         WorkerController.registerEntities()
+        console.log(entities)
+        console.log(GPU.materials.get(FALLBACK_MATERIAL))
     }
 
     // TODO - REMOVE THIS METHOD

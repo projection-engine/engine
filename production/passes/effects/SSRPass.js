@@ -1,13 +1,13 @@
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
-import LoopController from "../../controllers/LoopController";
+import LoopAPI from "../../apis/rendering/LoopAPI";
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/CameraAPI";
+import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import DepthPass from "./DepthPass";
 import DeferredPass from "../rendering/DeferredPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/QuadAPI";
+import QuadAPI from "../../apis/rendering/QuadAPI";
 
 
 export default class SSRPass {
@@ -20,7 +20,7 @@ export default class SSRPass {
         SSRPass.FBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSR).texture()
         SSRPass.sampler = SSRPass.FBO.colors[0]
         SSRPass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSR, ssGI.vShader, ssGI.fragment)
-        SSRPass.prevFrame = LoopController.previousFrame.colors[0]
+        SSRPass.prevFrame = LoopAPI.previousFrame.colors[0]
     }
 
     static execute() {

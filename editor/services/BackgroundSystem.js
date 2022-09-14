@@ -1,7 +1,7 @@
 import * as shaderCode from "../templates/SKYBOX.glsl"
 import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
-import MeshInstance from "../../production/instances/MeshInstance";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
+import MeshController from "../../production/instances/MeshController";
 import GPU from "../../production/GPU";
 import SkyboxPass from "../../production/passes/rendering/SkyboxPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -21,7 +21,7 @@ export default class BackgroundSystem {
         if (!background)
             return
 
-        MeshInstance.finishIfUsed()
+        MeshController.finishIfUsed()
         gpu.depthMask(false)
         GPU.cubeBuffer.enable()
         BackgroundSystem.shader.bindForUse({

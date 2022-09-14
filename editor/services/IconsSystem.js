@@ -1,5 +1,5 @@
 import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
+import CameraAPI from "../../production/apis/camera/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 
@@ -7,7 +7,7 @@ import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/editor/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/effects/SpritePass";
-import QuadAPI from "../../production/apis/QuadAPI";
+import QuadAPI from "../../production/apis/rendering/QuadAPI";
 
 const SCALE = (new Array(3)).fill(.25)
 const SCALE_CURSOR = (new Array(3)).fill(.5)

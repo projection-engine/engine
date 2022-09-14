@@ -4,7 +4,7 @@ import TEXTURE_WRAPPING from "../../static/texture/TEXTURE_WRAPPING";
 import TEXTURE_FILTERING from "../../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../../static/texture/TEXTURE_FORMATS";
 
-export default class TextureInstance {
+export default class TextureController {
     loaded = false
     texture
     attributes = {}
@@ -18,16 +18,16 @@ export default class TextureInstance {
                 res.naturalHeight = res.height
                 res.naturalWidth = res.width
                 this.attributes.img = res
-                this.texture = TextureInstance.#initializeTexture(this.attributes)
+                this.texture = TextureController.#initializeTexture(this.attributes)
             } else {
                 const i = new Image()
                 i.src = img
                 await i.decode()
                 this.attributes.img = i
-                this.texture = TextureInstance.#initializeTexture(this.attributes)
+                this.texture = TextureController.#initializeTexture(this.attributes)
             }
         } else
-            this.texture = TextureInstance.#initializeTexture(this.attributes)
+            this.texture = TextureController.#initializeTexture(this.attributes)
         this.loaded = true
         this.attributes = {}
     }
@@ -78,7 +78,7 @@ export default class TextureInstance {
             gpu.deleteTexture(this.texture)
             GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
                 this.attributes.img = res
-                TextureInstance.#initializeTexture(this.attributes)
+                TextureController.#initializeTexture(this.attributes)
             })
         }
     }

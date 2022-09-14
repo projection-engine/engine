@@ -1,6 +1,6 @@
-import CameraAPI from "./apis/CameraAPI"
+import CameraAPI from "./apis/camera/CameraAPI"
 import ENVIRONMENT from "../static/ENVIRONMENT"
-import LoopController from "./controllers/LoopController";
+import LoopAPI from "./apis/rendering/LoopAPI";
 
 export default class Engine {
     static entitiesMap = new Map()
@@ -12,10 +12,11 @@ export default class Engine {
     static then = 0
     static frameID
     static isReady = false
-    static simulationFramerate = 16
+    static readAsset
+
 
     static initialize() {
-        LoopController.initialize()
+        LoopAPI.initialize()
             .then(() => {
                 new ResizeObserver(() => {
                     const bBox = gpu.canvas.getBoundingClientRect()
@@ -29,7 +30,7 @@ export default class Engine {
 
     static #callback() {
         Engine.elapsed = performance.now() - Engine.then
-        LoopController.loop(Engine.entities)
+        LoopAPI.loop(Engine.entities)
         Engine.frameID = requestAnimationFrame(() => Engine.#callback())
     }
 

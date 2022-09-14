@@ -1,5 +1,5 @@
-import Entity from "../../production/instances/entity/Entity"
-import TransformationAPI from "../../production/apis/TransformationAPI"
+import Entity from "../../production/instances/Entity"
+import TransformationAPI from "../../production/apis/math/TransformationAPI"
 import getPickerId from "../../production/utils/get-picker-id";
 
 export default function mapGizmoMesh(axis, type) {
