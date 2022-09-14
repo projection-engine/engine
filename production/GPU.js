@@ -183,7 +183,6 @@ export default class GPU {
         const inUse = {}
         for (let i = 0; i < mat.length; i++) {
             textures.forEach(t => {
-                console.log(mat[i].texturesInUse, t)
                 if (mat[i].texturesInUse[t] != null)
                     inUse[t] = true
             })

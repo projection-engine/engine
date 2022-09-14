@@ -67,14 +67,13 @@ export default class BundlerAPI {
         Engine.data = data
 
         Engine.entities = entities
+        if(Engine.environment === ENVIRONMENT.DEV)
         BundlerAPI.updateCamera()
         BundlerAPI.removeUnusedProbes()
         BundlerAPI.packageLights()
         Engine.then = performance.now()
         WorkerController.initialize()
         WorkerController.registerEntities()
-        console.log(entities)
-        console.log(GPU.materials.get(FALLBACK_MATERIAL))
     }
 
     // TODO - REMOVE THIS METHOD
