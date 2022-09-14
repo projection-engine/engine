@@ -4,10 +4,10 @@ import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
 import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
-import AOPass from "../effects/AOPass";
-import SSGIPass from "../effects/SSGIPass";
-import SSRPass from "../effects/SSRPass";
-import ShadowMapPass from "../cached-rendering/ShadowMapPass";
+import AOPass from "./AOPass";
+import SSGIPass from "./SSGIPass";
+import SSRPass from "./SSRPass";
+import ShadowMapPass from "./ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
@@ -24,7 +24,7 @@ export default class DeferredPass {
     static ambientSampler
 
     static initialize() {
-        DeferredPass.gBuffer = new FramebufferController()
+        DeferredPass.gBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
         DeferredPass.gBuffer
             .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
             .texture({attachment: 1})

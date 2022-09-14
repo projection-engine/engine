@@ -1,5 +1,5 @@
 import ConversionAPI from "../math/ConversionAPI";
-import DepthPass from "../../passes/effects/DepthPass";
+import DepthPass from "../../passes/rendering/DepthPass";
 
 export default class PickingAPI {
     static readBlock(depthFBO, start, end) {

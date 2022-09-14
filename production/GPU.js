@@ -86,7 +86,6 @@ export default class GPU {
         }
         worker.onmessage = ({data: {data, id}}) => {
             const callback = callbacks.find(c => c.id === id)
-
             if (callback)
                 callback.callback(data)
         }
@@ -206,6 +205,8 @@ export default class GPU {
     }
 
     static allocateFramebuffer(id, width = GPU.internalResolution.w, height = GPU.internalResolution.h) {
+        if(GPU.frameBuffers.get(id))
+            return  GPU.frameBuffers.get(id)
         const fbo = new FramebufferController(width, height)
         GPU.frameBuffers.set(id, fbo)
         return fbo

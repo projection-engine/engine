@@ -17,7 +17,7 @@ export default class AOPass {
     static shader
     static blurShader
     static kernels
-    static noiseTexture
+    static noiseSampler
 
     static initialize() {
         AOPass.framebuffer = new FramebufferController()
@@ -45,18 +45,18 @@ export default class AOPass {
         AOPass.shader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO, shaderCode.vertex, shaderCode.fragment)
         AOPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, shaderCode.vertex, shaderCode.fragmentBlur)
 
-
+        const w = GPU.internalResolution.w / 4, h = GPU.internalResolution.h / 4
         GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, GPU.internalResolution)
             .then(({kernels, noise}) => {
                 AOPass.kernels = kernels
-                AOPass.noiseTexture = gpu.createTexture()
-                gpu.bindTexture(gpu.TEXTURE_2D, AOPass.noiseTexture)
+                AOPass.noiseSampler = gpu.createTexture()
+                gpu.bindTexture(gpu.TEXTURE_2D, AOPass.noiseSampler)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
-                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, GPU.internalResolution.w, GPU.internalResolution.h)
-                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, GPU.internalResolution.w, GPU.internalResolution.h, gpu.RG, gpu.FLOAT, noise)
+                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RGBA16F, w, h)
+                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RGBA, gpu.FLOAT, noise)
                 AOPass.ready = true
             })
     }
@@ -72,14 +72,14 @@ export default class AOPass {
 
             AOPass.framebuffer.startMapping()
             AOPass.shader.bindForUse({
-                randomSampler: AOPass.noiseTexture,
-                depthSampler: DepthPass.depth,
+                randomSampler: AOPass.noiseSampler,
+                depthSampler: DepthPass.depthSampler,
                 settings: [
                     total_strength, base, area,
                     falloff, radius, samples,
                     0, 0, 0
                 ],
-                normalSampler: DepthPass.normal
+                normalSampler: DepthPass.normalSampler
             })
             QuadAPI.draw()
             AOPass.framebuffer.stopMapping()

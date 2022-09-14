@@ -7,7 +7,7 @@ import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import DepthPass from "./DepthPass";
 import ScreenEffectsPass from "../post-processing/ScreenEffectsPass";
-import DeferredPass from "../rendering/DeferredPass";
+import DeferredPass from "./DeferredPass";
 import AOPass from "./AOPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
@@ -22,33 +22,24 @@ export default class SSGIPass {
     static normalsShader
     static ssgiShader
     static lastFrame
-    static normalsSampler
+    static normalSampler
 
 
     static initialize() {
-        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPU.internalResolution.w, GPU.internalResolution.h, 4)
+        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h, 2)
         SSGIPass.blurBuffers = blurBuffers
         SSGIPass.upSampledBuffers = upSampledBuffers
 
-        SSGIPass.normalsFBO = (new FramebufferController()).texture()
-        SSGIPass.FBO = (new FramebufferController()).texture()
-        SSGIPass.normalsShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, ssGI.vShader, ssGI.stochasticNormals)
-        SSGIPass.ssgiShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, ssGI.vShader, ssGI.ssGI)
+        SSGIPass.normalsShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, ssGI.vShader, ssGI.stochasticNormals)
+        SSGIPass.normalsFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS)
+        SSGIPass.normalsFBO.texture({linear: true})
+        SSGIPass.normalSampler = SSGIPass.normalsFBO.colors[0]
 
+        SSGIPass.FBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
+        SSGIPass.FBO.texture({linear: true})
+        SSGIPass.ssgiShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, ssGI.vShader, ssGI.ssGI)
         SSGIPass.lastFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
-        SSGIPass.normalsSampler = SSGIPass.normalsFBO.colors[0]
-        SSGIPass.sampler = upSampledBuffers[SSGIPass.blurBuffers.length - 2].colors[0]
-    }
 
-
-    static #normalPass() {
-        SSGIPass.normalsFBO.startMapping()
-        SSGIPass.normalsShader.bindForUse({
-            gNormal: DepthPass.normal,
-            noise: AOPass.noiseTexture
-        })
-        QuadAPI.draw()
-        SSGIPass.normalsFBO.stopMapping()
     }
 
     static execute() {
@@ -60,23 +51,31 @@ export default class SSGIPass {
         } = Engine.params
 
         if (ssgi) {
-            SSGIPass.#normalPass()
+            SSGIPass.normalsFBO.startMapping()
+            SSGIPass.normalsShader.bindForUse({
+                gNormal: DepthPass.normalSampler,
+                noise: AOPass.noiseSampler
+            })
+            QuadAPI.draw()
+            SSGIPass.normalsFBO.stopMapping()
+
+
             SSGIPass.FBO.startMapping()
             SSGIPass.ssgiShader.bindForUse({
-                previousFrame: DeferredPass.albedoSampler,
+                previousFrame:  SSGIPass.lastFrame,
                 gPosition: DeferredPass.positionSampler,
-                gNormal: SSGIPass.normalsSampler,
+                gNormal: SSGIPass.normalSampler,
                 projection: CameraAPI.projectionMatrix,
                 viewMatrix: CameraAPI.viewMatrix,
                 invViewMatrix: CameraAPI.invViewMatrix,
                 step: ssgiStepSize,
                 maxSteps: ssgiQuality,
                 intensity: ssgiBrightness,
-                noiseSampler: AOPass.noiseTexture
+                noiseSampler: AOPass.noiseSampler
             })
             QuadAPI.draw()
             SSGIPass.FBO.stopMapping()
-            ScreenEffectsPass.blur(SSGIPass.FBO, 1, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers, 1.)
+            SSGIPass.sampler = ScreenEffectsPass.blur(SSGIPass.FBO, 1, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
         }
     }
 }

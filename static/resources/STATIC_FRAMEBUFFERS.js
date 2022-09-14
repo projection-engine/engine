@@ -6,7 +6,9 @@ export default {
     SSR: "SSR",
     AO: "AO",
     DEFERRED_COMPOSITION: "DEFERRED_COMPOSITION",
-
+    SSGI: "SSGI",
+    SSGI_NORMALS: "SSGI_NORMALS",
+    G_BUFFER:"G_BUFFER",
     EDITOR: {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"

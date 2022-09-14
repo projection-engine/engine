@@ -4,7 +4,7 @@ import Engine from "../../Engine";
 import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import DepthPass from "./DepthPass";
-import DeferredPass from "../rendering/DeferredPass";
+import DeferredPass from "./DeferredPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
@@ -34,7 +34,7 @@ export default class SSRPass {
             SSRPass.shader.bindForUse({
                 previousFrame: SSRPass.prevFrame, // ALBEDO
                 gPosition: DeferredPass.positionSampler,
-                gNormal: DepthPass.normal,
+                gNormal: DepthPass.normalSampler,
                 gBehaviour: DeferredPass.behaviourSampler,
                 projection: CameraAPI.projectionMatrix,
                 viewMatrix: CameraAPI.viewMatrix,

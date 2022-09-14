@@ -6,7 +6,7 @@ import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/editor/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
-import SpritePass from "../../production/passes/effects/SpritePass";
+import SpritePass from "../../production/passes/rendering/SpritePass";
 import QuadAPI from "../../production/apis/rendering/QuadAPI";
 
 const SCALE = (new Array(3)).fill(.25)

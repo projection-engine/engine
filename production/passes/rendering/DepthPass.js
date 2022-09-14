@@ -34,7 +34,7 @@ void main(void){
 const normal = `#version 300 es
 precision highp  float;
  
-#define THRESHOLD .001
+#define THRESHOLD .0000001
 in vec2 texCoord;  
 uniform sampler2D depthSampler;
 uniform mat4 projectionInverse;
@@ -59,16 +59,17 @@ void main(void){
     vec3 P0 = reconstructPosition(texCoord, depth, viewInverse * projectionInverse);   
     vec3 normal = normalize(cross(dFdx(P0), dFdy(P0)));
  
-    fragNormal = vec4(normalize(vec4(normal, 1.)).rgb, 1.);
+    fragNormal = vec4(normalize(normal) , 1.);
 }`
 export default class DepthPass {
     static framebuffer
     static normalFBO
-    static depth
-    static normal
+    static depthSampler
+    static normalSampler
 
     static shader
     static normalShader
+
     static initialize() {
         DepthPass.framebuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEPTH)
         DepthPass.framebuffer
@@ -78,10 +79,11 @@ export default class DepthPass {
                 type: gpu.FLOAT
             })
             .depthTest()
-        DepthPass.depth = DepthPass.framebuffer.colors[0]
+        DepthPass.depthSampler = DepthPass.framebuffer.colors[0]
 
         DepthPass.normalFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.RECONSTRUCTED_NORMALS)
-        DepthPass.normal = DepthPass.normalFBO.colors[0]
+        DepthPass.normalFBO.texture()
+        DepthPass.normalSampler = DepthPass.normalFBO.colors[0]
 
         DepthPass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEPTH, vertex, frag)
         DepthPass.normalShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.NORMAL_RECONSTRUCTION, shaderCode.vertex, normal)
@@ -112,13 +114,11 @@ export default class DepthPass {
         // NORMALS
         DepthPass.normalFBO.startMapping()
         DepthPass.normalShader.bindForUse({
-            depthSampler: DepthPass.depth,
+            depthSampler: DepthPass.depthSampler,
             projectionInverse: CameraAPI.invProjectionMatrix,
             viewInverse: CameraAPI.invViewMatrix
         })
         QuadAPI.draw()
         DepthPass.normalFBO.stopMapping()
-
-        gpu.bindVertexArray(null)
     }
 }

@@ -11,7 +11,7 @@ import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import DepthPass from "../../production/passes/effects/DepthPass";
+import DepthPass from "../../production/passes/rendering/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Entity from "../../production/instances/Entity";
 import WorkerController from "../../production/workers/WorkerController";

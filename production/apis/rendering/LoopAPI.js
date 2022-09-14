@@ -1,12 +1,12 @@
-import AOPass from "../../passes/effects/AOPass";
+import AOPass from "../../passes/rendering/AOPass";
 import DeferredPass from "../../passes/rendering/DeferredPass";
 import ForwardPass from "../../passes/rendering/ForwardPass";
-import DepthPass from "../../passes/effects/DepthPass";
-import SSGIPass from "../../passes/effects/SSGIPass";
-import SSRPass from "../../passes/effects/SSRPass";
-import ShadowMapPass from "../../passes/cached-rendering/ShadowMapPass";
-import SpecularProbePass from "../../passes/cached-rendering/SpecularProbePass";
-import DiffuseProbePass from "../../passes/cached-rendering/DiffuseProbePass";
+import DepthPass from "../../passes/rendering/DepthPass";
+import SSGIPass from "../../passes/rendering/SSGIPass";
+import SSRPass from "../../passes/rendering/SSRPass";
+import ShadowMapPass from "../../passes/rendering/ShadowMapPass";
+import SpecularProbePass from "../../passes/rendering/SpecularProbePass";
+import DiffuseProbePass from "../../passes/rendering/DiffuseProbePass";
 import * as shaderCode from "../../shaders/CUBE_MAP.glsl";
 import MetricsPass from "../../passes/misc/MetricsPass";
 import ScriptingPass from "../../passes/misc/ScriptingPass";
@@ -17,7 +17,7 @@ import Engine from "../../Engine";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import SpritePass from "../../passes/effects/SpritePass";
+import SpritePass from "../../passes/rendering/SpritePass";
 import PhysicsPass from "../../passes/math/PhysicsPass";
 import WorkerController from "../../workers/WorkerController";
 

@@ -76,17 +76,18 @@ export default function imageProcessorWorker(){
                     }
 
                     let p = w * h
-                    const noiseTextureData = new Float32Array(p * 2)
+                    const noiseTextureData = new Float32Array(p * 3)
 
                     for (let i = 0; i < p; ++i) {
                         let index = i * 2
                         noiseTextureData[index] = Math.random() * 2.0 - 1.0
                         noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0
+                        noiseTextureData[index + 2] = 0
                     }
                     self.postMessage({data: {
                             noise: noiseTextureData,
                             kernels
-                        }, id})
+                        }, id}, [noiseTextureData.buffer])
                     break
                 }
                 default:
