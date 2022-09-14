@@ -28,7 +28,7 @@ export default class WorkerController {
                 if (typeof event.data === "string")
                     WorkerController.instancingNeedsUpdate.set(event.data, GPU.instancingGroup.get(event.data))
             }
-            w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: {buffer: WorkerController.#hasChangeBuffer, simulationFramerate: Engine.simulationFramerate}})
+            w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: WorkerController.#hasChangeBuffer})
         }
     }
 
@@ -45,6 +45,7 @@ export default class WorkerController {
         for (let i = 0; i < entities.length; i++)
             WorkerController.registerEntity(entities[i])
 
+        setTimeout(() => BundlerAPI.packageLights(true), 250)
     }
 
     static removeEntity(entity) {
@@ -53,10 +54,11 @@ export default class WorkerController {
             return
         thread.postMessage({type: WORKER_MESSAGES.REMOVE_ENTITY, payload: entity.id})
         WorkerController.linkedEntities.delete(entity.id)
+        entity.__workerGroup = undefined
     }
 
     static registerEntity(entity) {
-        if (!WorkerController.#initialized || entity.__workerGroup != null && WorkerController.linkedEntities.get(entity.id))
+        if (!WorkerController.#initialized || (entity.__workerGroup != null && WorkerController.linkedEntities.get(entity.id)))
             return
         WorkerController.linkedEntities.set(entity.id, entity)
         const currentThread = WorkerController.threads[WorkerController.#currentWorkerIndex]
@@ -73,7 +75,6 @@ export default class WorkerController {
         })
 
         entity.__workerGroup = WorkerController.#currentWorkerIndex
-
         if (WorkerController.#currentWorkerIndex >= WorkerController.threads.length - 1)
             WorkerController.#currentWorkerIndex = 0
         else
@@ -82,8 +83,10 @@ export default class WorkerController {
     }
 
     static execute() {
-
-        BundlerAPI.packageLights(true)
+        if(WorkerController.#hasChangeBuffer[0] === 1) {
+            BundlerAPI.packageLights(true)
+            WorkerController.#hasChangeBuffer[0] = 0
+        }
 
         if (WorkerController.instancingNeedsUpdate.size > 0) {
             WorkerController.instancingNeedsUpdate.forEach(i => i.updateBuffer())

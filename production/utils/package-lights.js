@@ -1,7 +1,6 @@
 import COMPONENTS from "../../static/COMPONENTS.json";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
-import WorkerController from "../workers/WorkerController";
 
 export function packagePointLights(keepOld) {
     const pointLights = Engine.data.pointLights

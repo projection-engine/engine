@@ -25,7 +25,7 @@ for ( int x = 0; x < 4; x++ )
 `
 export const sameSizeVertex = `#version 300 es
 ${SIZE_DEFINITION}
-layout (location = 1) in vec3 position;
+layout (location = 0) in vec3 position;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
@@ -42,7 +42,7 @@ void main(){
 `
 export const vertex = `#version 300 es
 ${SIZE_DEFINITION}
-layout (location = 1) in vec3 position; 
+layout (location = 0) in vec3 position; 
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
@@ -124,8 +124,8 @@ void main(){
 `
 export const vertexRot = `#version 300 es
 ${SIZE_DEFINITION}
-layout (location = 1) in vec3 position;
-layout (location = 3) in vec2 uvs;
+layout (location = 0) in vec3 position;
+layout (location = 2) in vec2 uvs;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
@@ -225,7 +225,7 @@ void main() {
 
 export const cameraVertex = `#version 300 es
 
-layout (location = 1) in vec3 position;
+layout (location = 0) in vec3 position;
 #define SIZE .15
 
 uniform vec3 translation;

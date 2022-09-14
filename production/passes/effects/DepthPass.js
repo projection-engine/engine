@@ -9,7 +9,7 @@ import QuadAPI from "../../apis/QuadAPI";
 
 const vertex = `#version 300 es
 
-layout (location = 1) in vec3 position;
+layout (location = 0) in vec3 position;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;

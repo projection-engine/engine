@@ -38,7 +38,7 @@ export default class Gizmo {
     }
 
     onMouseDown(event) {
-        ScreenSpaceGizmo.totalMoved = [0,0,0]
+
         if (!Gizmo.tooltip)
             Gizmo.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
 
@@ -51,19 +51,18 @@ export default class Gizmo {
         this.#testClick()
     }
 
-    static notify( ) {
-        const position = ScreenSpaceGizmo.totalMoved
+    static notify(targetBuffer) {
         if(!Gizmo.tooltip)
             return
         Gizmo.tooltip.isChanging()
         GizmoSystem.totalMoved = 1
-        Gizmo.tooltip.textContent = `X ${position[0].toFixed(2)}  |  Y ${position[1].toFixed(2)}  |  Z ${position[2].toFixed(2)}`
+        Gizmo.tooltip.textContent = `X ${targetBuffer[0].toFixed(2)}  |  Y ${targetBuffer[1].toFixed(2)}  |  Z ${targetBuffer[2].toFixed(2)}`
     }
 
     onMouseUp() {
-        ScreenSpaceGizmo.totalMoved = [0,0,0]
+
         if(Gizmo.tooltip)
-            Gizmo.tooltip.finished()
+           setTimeout(() =>  Gizmo.tooltip.finished(), 250)
 
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
@@ -137,8 +136,10 @@ export default class Gizmo {
         gpu.disable(gpu.CULL_FACE)
         DualAxisGizmo.drawGizmo()
 
-        if (this.updateTransformationRealtime)
+        if (this.updateTransformationRealtime) {
             GizmoSystem.updateTranslation()
+            GizmoSystem.transformationMatrix = Gizmo.translateMatrix(GizmoSystem.EMPTY_COMPONENT)
+        }
         const mX = Gizmo.translateMatrix(this.xGizmo)
         const mY = Gizmo.translateMatrix(this.yGizmo)
         const mZ = Gizmo.translateMatrix(this.zGizmo)

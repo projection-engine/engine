@@ -11,7 +11,6 @@ const PICK_ID_SS_GIZMO = getPickerId(1)
 export default class ScreenSpaceGizmo {
     static cameraDistance
     static mouseDelta = {x: 0, y: 0}
-    static totalMoved = [0,0,0]
 
     static onMouseMove(event, damping = 1, gridStep = .001) {
         if (GizmoSystem.clickedAxis < 0)
@@ -27,7 +26,6 @@ export default class ScreenSpaceGizmo {
         for (let i = 0; i < 3; i++)
             ssP[i] = (Math.round(ssP[i] / gridStep) * gridStep) * damping / cameraDistance
         ScreenSpaceGizmo.mapToAxis(ssP)
-        vec3.add(ScreenSpaceGizmo.totalMoved,ScreenSpaceGizmo.totalMoved, ssP )
 
         return ssP
     }
@@ -74,7 +72,7 @@ export default class ScreenSpaceGizmo {
 
 
     static drawGizmo() {
-        if (!GizmoSystem.transformationMatrix)
+        if (!GizmoSystem.transformationMatrix || GizmoSystem.clickedAxis >= 0 )
             return
         Gizmo.drawGizmo(GizmoSystem.screenSpaceMesh, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
     }

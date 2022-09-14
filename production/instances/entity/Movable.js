@@ -1,4 +1,4 @@
-import {mat3, mat4, quat, vec3} from "gl-matrix"
+import {quat} from "gl-matrix"
 import TransformationAPI from "../../apis/TransformationAPI"
 import TRANSFORMATION_PROPS from "../../../static/component-props/TRANSFORMATION_PROPS";
 import Component from "../../components/Component";
@@ -9,17 +9,24 @@ import Component from "../../components/Component";
  * @field __workerGroup {int} - Transformation group which entity is linked to
  */
 
+const S = () => {
+    const b = new Float32Array(new SharedArrayBuffer(12))
+    b[0] = 1
+    b[1] = 1
+    b[2] = 1
+    return b
+}
 const toDeg = 57.29
 export default class Movable extends Component {
     _props = TRANSFORMATION_PROPS
     _rotationQuat = new Float32Array(new SharedArrayBuffer(16))
     _translation = new Float32Array(new SharedArrayBuffer(12))
-    _scaling = new Float32Array(new SharedArrayBuffer(12))
+    _scaling = S()
     pivotPoint = new Float32Array(new SharedArrayBuffer(12))
 
-    matrix = new Float32Array(new SharedArrayBuffer(64))
-    baseTransformationMatrix = new Float32Array(new SharedArrayBuffer(64))
-    collisionTransformationMatrix = new Float32Array(new SharedArrayBuffer(64))
+    matrix = Movable.generateIdentity()
+    baseTransformationMatrix = Movable.generateIdentity()
+    collisionTransformationMatrix = Movable.generateIdentity()
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
     lockedTranslation = false
@@ -30,6 +37,14 @@ export default class Movable extends Component {
     absoluteTranslation = new Float32Array(new SharedArrayBuffer(12))
     __workerGroup
 
+    static generateIdentity(){
+        const buffer = new Float32Array(new SharedArrayBuffer(64))
+        buffer[0] = 1
+        buffer[5]= 1
+        buffer[10]= 1
+        buffer[15]= 1
+        return buffer
+    }
 
     get position() {
         return this._translation

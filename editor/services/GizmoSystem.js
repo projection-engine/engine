@@ -17,7 +17,6 @@ import Entity from "../../production/instances/entity/Entity";
 import WorkerController from "../../production/workers/WorkerController";
 
 const EMPTY_COMPONENT = new Movable()
-const toDeg = Math.PI/180
 export default class GizmoSystem {
     static mainEntity
     static transformationMatrix
@@ -39,7 +38,7 @@ export default class GizmoSystem {
     static translationGizmo
     static scaleGizmo
     static rotationGizmo
-
+    static EMPTY_COMPONENT = EMPTY_COMPONENT
     static initialize() {
 
         GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
@@ -106,10 +105,11 @@ export default class GizmoSystem {
         const main = GizmoSystem.selectedEntities[0]
         if ((WorkerController.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
             GizmoSystem.mainEntity = main
-            GizmoSystem.updateTranslation()
-
             GizmoSystem.targetRotation = main.rotationQuaternion
+            GizmoSystem.updateTranslation()
             GizmoSystem.transformationMatrix = Gizmo.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
+
+
         } else if (!main) {
             GizmoSystem.targetGizmo = undefined
             GizmoSystem.selectedEntities = []

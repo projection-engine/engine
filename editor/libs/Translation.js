@@ -27,7 +27,7 @@ export default class Translation extends Gizmo {
         super.onMouseMove()
         const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
         this.moveEntities(position)
-        Gizmo.notify()
+        Gizmo.notify(GizmoSystem.mainEntity._translation)
     }
 
     moveEntities(vec) {
@@ -39,7 +39,6 @@ export default class Translation extends Gizmo {
         const entities = GizmoSystem.selectedEntities
         for (let i = 0; i < entities.length; i++) {
             const target = entities[i]
-            console.log(toApply)
             vec3.add(target.translation, target.translation, toApply)
 
             target.changed = true

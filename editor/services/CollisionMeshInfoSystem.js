@@ -7,6 +7,7 @@ import WIREFRAMEGlsl from "../templates/WIREFRAME.glsl";
 import CameraAPI from "../../production/apis/CameraAPI";
 import Engine from "../../production/Engine";
 import {mat4, vec3} from "gl-matrix";
+
 const EMPTY_MATRIX = mat4.create()
 
 

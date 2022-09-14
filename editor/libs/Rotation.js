@@ -13,22 +13,10 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../production/GPU";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import Gizmo from "./Gizmo";
 
-const CSS = {
-    backdropFilter: "blur(10px) brightness(70%)",
-    borderRadius: "5px",
-    width: "fit-content",
-    height: "fit-content",
-    position: "absolute",
-    top: "4px",
-    left: "4px",
-    zIndex: "10",
-    color: "white",
-    padding: "8px",
-    fontSize: ".75rem",
-    display: "none"
-}
 const toDeg = 57.29, toRad = Math.PI / 180
+
 export default class Rotation {
     tracking = false
     currentRotation = [0, 0, 0]
@@ -38,17 +26,6 @@ export default class Rotation {
     currentIncrement = 0
 
     constructor() {
-
-        const targetID = gpu.canvas.id + "-gizmo"
-        if (document.getElementById(targetID) !== null)
-            this.renderTarget = document.getElementById(targetID)
-        else {
-            this.renderTarget = document.createElement("div")
-            this.renderTarget.id = targetID
-            Object.assign(this.renderTarget.style, CSS)
-            document.body.appendChild(this.renderTarget)
-        }
-
         this.gizmoShader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.ROTATION_GIZMO, gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
         this.xGizmo = mapGizmoMesh("x", "ROTATION")
         this.yGizmo = mapGizmoMesh("y", "ROTATION")
@@ -85,13 +62,9 @@ export default class Rotation {
         document.exitPointerLock()
 
         this.started = false
-        this.distanceY = 0
-        this.distanceZ = 0
         GizmoSystem.clickedAxis = -1
         this.tracking = false
         this.currentRotation = [0, 0, 0]
-        this.renderTarget.textContent = ""
-        this.renderTarget.style.display = "none"
     }
 
 
@@ -115,25 +88,22 @@ export default class Rotation {
         switch (GizmoSystem.clickedAxis) {
             case AXIS.X:
                 this.rotateElement([mappedValue, 0, 0])
-                this.renderTarget.textContent = `${(GizmoSystem.totalMoved * toDeg).toFixed(1)} θ`
                 break
             case AXIS.Y:
                 this.rotateElement([0, mappedValue, 0])
-                this.renderTarget.textContent = `${(GizmoSystem.totalMoved * toDeg).toFixed(1)} θ`
                 break
             case AXIS.Z:
                 this.rotateElement([0, 0, mappedValue])
-                this.renderTarget.textContent = `${(GizmoSystem.totalMoved * toDeg).toFixed(1)} θ`
+
                 break
             case AXIS.SCREEN_SPACE:
                 const position = vec3.add([], this.currentRotation, ScreenSpaceGizmo.onMouseMove(event, toRad, this.gridSize))
                 this.rotateElement(position, true)
-                const getRot = (r) => `${(r * toDeg).toFixed(1)} θ; `
-                this.renderTarget.textContent = getRot(this.currentRotation[0]) + getRot(this.currentRotation[1]) + getRot(this.currentRotation[2])
                 break
             default:
                 break
         }
+        Gizmo.notify([this.currentRotation[0] * toDeg, this.currentRotation[1] * toDeg, this.currentRotation[2] * toDeg])
     }
 
     rotateElement(vec, screenSpace) {
@@ -161,7 +131,7 @@ export default class Rotation {
                 if (vec3.len(target.pivotPoint) > 0) {
                     const rotationMatrix = mat4.fromQuat([], quatA),
                         translated = vec3.sub([], target.translation, target.pivotPoint)
-                  vec3.add(target.translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
+                    vec3.add(target.translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
                 }
                 quat.multiply(target.rotationQuaternion, quatA, target.rotationQuaternion)
             } else
@@ -188,13 +158,6 @@ export default class Rotation {
         else {
             GizmoSystem.wasOnGizmo = true
             this.tracking = true
-
-            this.renderTarget.style.left = this.currentCoord.clientX + "px"
-            this.renderTarget.style.top = this.currentCoord.clientY + "px"
-            this.renderTarget.style.display = "block"
-            this.renderTarget.style.width = "fit-content"
-            this.renderTarget.textContent = "0 θ"
-
             gpu.canvas.requestPointerLock()
         }
     }

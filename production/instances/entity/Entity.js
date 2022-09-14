@@ -21,6 +21,7 @@ const TYPED_ATTRIBUTES = [
     "_scaling",
     "baseTransformationMatrix"
 ]
+
 export default class Entity extends Movable {
     id
     queryKey

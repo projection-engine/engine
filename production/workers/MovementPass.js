@@ -27,8 +27,6 @@ export class MovementPass {
         const entities = MovementPass.targets
         const size = entities.length
 
-        MovementPass.controlBuffers[0] = 0
-
         for (let i = 0; i < size; i++) {
             const current = entities[i]
 

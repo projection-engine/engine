@@ -63,7 +63,7 @@ export default class SSGIPass {
             SSGIPass.#normalPass()
             SSGIPass.FBO.startMapping()
             SSGIPass.ssgiShader.bindForUse({
-                previousFrame: SSGIPass.lastFrame,
+                previousFrame: DeferredPass.albedoSampler,
                 gPosition: DeferredPass.positionSampler,
                 gNormal: SSGIPass.normalsSampler,
                 projection: CameraAPI.projectionMatrix,

@@ -5,7 +5,6 @@ import CubeMapInstance from "../../instances/CubeMapInstance"
 import MaterialController from "../../controllers/MaterialController";
 import Engine from "../../Engine";
 import GPU from "../../GPU";
-import {STEPS_LIGHT_PROBE} from "./DiffuseProbePass";
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,

@@ -27,7 +27,7 @@ export default class Scale extends Gizmo {
         super.onMouseMove()
         const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
         this.moveEntities(position)
-        Gizmo.notify()
+        Gizmo.notify(GizmoSystem.mainEntity._scaling)
     }
 
     moveEntities(vec) {

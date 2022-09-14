@@ -11,7 +11,7 @@ self.onmessage = (event) => {
     const {type, payload} =event.data
     switch (type){
         case WORKER_MESSAGES.INITIALIZE:
-            MovementPass.initialize(payload.buffer, self, payload.simulationFramerate)
+            MovementPass.initialize(payload, self)
             break
         case WORKER_MESSAGES.REGISTER_ENTITY:
             MovementPass.targets.push(payload)
