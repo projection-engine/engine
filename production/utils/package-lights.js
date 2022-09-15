@@ -1,6 +1,7 @@
 import COMPONENTS from "../../static/COMPONENTS.json";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
+import {BundlerAPI} from "../../production";
 
 export function packagePointLights(keepOld) {
     const pointLights = Engine.data.pointLights
@@ -18,9 +19,10 @@ export function packagePointLights(keepOld) {
                 activeOffset++
                 continue
             }
-            pointLightsQuantity++
-            if (!current.changesApplied)
+
+            if (!current.changesApplied && !current.needsLightUpdate)
                 continue
+            pointLightsQuantity++
             const component = current.components.get(COMPONENTS.POINT_LIGHT)
 
             if (!pointLightData[i - activeOffset])
@@ -44,7 +46,9 @@ export function packagePointLights(keepOld) {
             currentVector[11] = component.zFar
             currentVector[12] = component.zNear
             currentVector[13] = component.shadowMap ? 1 : 0
+            BundlerAPI.lightsChanged.push(component)
         }
+    console.log(pointLightData, pointLightsQuantity)
 
     Engine.data.pointLightsQuantity = pointLightsQuantity
     Engine.data.pointLightData = pointLightData
@@ -68,12 +72,16 @@ export function packageDirectionalLights(keepOld) {
                 continue
             }
             maxTextures++
-            if (!current.changesApplied)
+            if (!current.changesApplied && !current.needsLightUpdate)
                 continue
+            current.needsLightUpdate = false
             const component = current.components.get(COMPONENTS.DIRECTIONAL_LIGHT)
+            mat4.lookAt(component.lightView, component.__entity.translation, component.center, [0, 1, 0])
+            mat4.ortho(component.lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
 
             if (!directionalLightsData[i - activeOffset])
                 directionalLightsData[i - activeOffset] = new Float32Array(9)
+
             const currentVector = directionalLightsData[i - activeOffset]
             const position = current.translation
             currentVector[0] = position[0]
@@ -88,9 +96,11 @@ export function packageDirectionalLights(keepOld) {
             currentVector[6] = component.atlasFace[0]
             currentVector[7] = component.atlasFace[1]
             currentVector[8] = component.shadowMap ? 1 : 0
-            if (!dirLightPOV[i - activeOffset])
-                dirLightPOV[i - activeOffset] = new Float32Array(16)
-            mat4.multiply(dirLightPOV[i - activeOffset], component.lightProjection, component.lightView)
+            component.lightIndex = i - activeOffset
+            if (!dirLightPOV[component.lightIndex])
+                dirLightPOV[component.lightIndex] = new Float32Array(16)
+            mat4.multiply(dirLightPOV[component.lightIndex], component.lightProjection, component.lightView)
+            BundlerAPI.lightsChanged.push(component)
         }
 
     Engine.data.maxTextures = maxTextures

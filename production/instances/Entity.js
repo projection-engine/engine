@@ -10,6 +10,7 @@ import SpriteComponent from "../components/rendering/SpriteComponent";
 import RigidBodyComponent from "../components/physics/RigidBodyComponent";
 import PhysicsColliderComponent from "../components/physics/PhysicsColliderComponent";
 import CullingComponent from "../components/misc/CullingComponent";
+import BundlerAPI from "../apis/BundlerAPI";
 
 
 const TYPED_ATTRIBUTES = [
@@ -26,19 +27,27 @@ export default class Entity extends Movable {
     id
     queryKey
     name
-    active
+    _active
     components = new Map()
     scripts = []
     children = []
     parent
     pickID = [-1, -1, -1]
     instancingGroupID
+    set active(data){
+        this._active = data
+        if(this.components.get(COMPONENTS.POINT_LIGHT) || this.components.get(COMPONENTS.DIRECTIONAL_LIGHT))
+            BundlerAPI.packageLights(true)
+    }
+    get active(){
+        return this._active
+    }
 
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
         this.id = id
         this.name = name
-        this.active = active
+        this._active = active
         this.queryKey = id.slice(0, id.length / 2);
     }
 

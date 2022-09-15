@@ -7,6 +7,8 @@ import BundlerAPI from "../../apis/BundlerAPI";
 import Engine from "../../Engine";
 import GPU from "../../GPU";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
+import PointLightComponent from "../../components/rendering/PointLightComponent";
 
 export const VIEWS = {
     target: [
@@ -37,6 +39,8 @@ export default class ShadowMapPass {
     static shadowMapOmniShader
     static shadowsFrameBuffer
     static ready = false
+    static #lights2D = []
+    static #lights3D = []
 
     static initialize() {
 
@@ -48,17 +52,14 @@ export default class ShadowMapPass {
         ShadowMapPass.shadowMapShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
         ShadowMapPass.shadowMapOmniShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
         ShadowMapPass.ready = true
+
     }
 
     static allocateData() {
-        if (ShadowMapPass.shadowsFrameBuffer) {
-            gpu.deleteTexture(ShadowMapPass.shadowsFrameBuffer.depthSampler)
-            gpu.deleteFramebuffer(ShadowMapPass.shadowsFrameBuffer.FBO)
-        }
-
-        ShadowMapPass.shadowsFrameBuffer = new FramebufferController(ShadowMapPass.maxResolution, ShadowMapPass.maxResolution)
-        ShadowMapPass.shadowsFrameBuffer
-            .depthTexture()
+        if (ShadowMapPass.shadowsFrameBuffer)
+            GPU.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
+        ShadowMapPass.shadowsFrameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, ShadowMapPass.maxResolution, ShadowMapPass.maxResolution)
+        ShadowMapPass.shadowsFrameBuffer.depthTexture()
     }
 
 
@@ -78,140 +79,114 @@ export default class ShadowMapPass {
 
     }
 
-    static execute() {
-        if (!ShadowMapPass.ready)
-            return
-        const {
-            pointLights,
-            directionalLights,
-            meshes
-        } = Engine.data
-        const {
-            shadowAtlasQuantity,
-            shadowMapResolution
-        } = Engine.params
-
-        ShadowMapPass.allocateBuffers(
-            shadowAtlasQuantity,
-            shadowMapResolution
-        )
-
-        let lights2D = [], lights3D = []
-        const dirL = directionalLights.length
-        for (let i = 0; i < dirL; i++) {
-            if (!directionalLights[i].active)
+    static #generateToUpdateMap() {
+        const arr = BundlerAPI.lightsChanged
+        const l = arr.length
+        for (let i = 0; i < l; i++) {
+            if(!arr[i].shadowMap)
                 continue
-            const current = directionalLights[i].components.get(COMPONENTS.DIRECTIONAL_LIGHT)
-            if (!current)
-                continue
-            if ((current.changed && current.shadowMap) || ShadowMapPass.changed) {
-                lights2D.push(current)
-                current.changed = false
-                ShadowMapPass.changed = true
-            }
-        }
-        const pL = pointLights.length
-        for (let i = 0; i < pL; i++) {
-            if (!pointLights[i].active)
-                continue
-            const current = pointLights[i].components.get(COMPONENTS.POINT_LIGHT)
-            if (current?.changed && current.shadowMap) {
-                lights3D.push({...current, translation: pointLights[i].translation})
-                current.changed = false
-                ShadowMapPass.changed = true
-            }
+            if (arr[i] instanceof PointLightComponent)
+                ShadowMapPass.#lights3D.push({...arr[i], translation: arr[i].__entity.translation})
+            else
+                ShadowMapPass.#lights2D.push(arr[i])
         }
 
-
-        if (ShadowMapPass.changed) {
-            BundlerAPI.packageLights()
-            ShadowMapPass.changed = false
-            gpu.cullFace(gpu.FRONT)
-            let currentColumn = 0, currentRow = 0
-            if (lights2D.length > 0) {
-                ShadowMapPass.shadowsFrameBuffer.startMapping()
-                gpu.enable(gpu.SCISSOR_TEST)
-                for (let face = 0; face < (ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture) ** 2; face++) {
-                    if (face < lights2D.length) {
-                        gpu.viewport(
-                            currentColumn * ShadowMapPass.resolutionPerTexture,
-                            currentRow * ShadowMapPass.resolutionPerTexture,
-                            ShadowMapPass.resolutionPerTexture,
-                            ShadowMapPass.resolutionPerTexture
-                        )
-                        gpu.scissor(
-                            currentColumn * ShadowMapPass.resolutionPerTexture,
-                            currentRow * ShadowMapPass.resolutionPerTexture,
-                            ShadowMapPass.resolutionPerTexture,
-                            ShadowMapPass.resolutionPerTexture
-                        )
-
-                        gpu.clear(gpu.DEPTH_BUFFER_BIT)
-
-                        let currentLight = lights2D[face]
-                        currentLight.atlasFace = [currentColumn, 0]
-
-                        ShadowMapPass.loopMeshes(meshes, ShadowMapPass.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
-                    }
-                    if (currentColumn > ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture) {
-                        currentColumn = 0
-                        currentRow += 1
-                    } else
-                        currentColumn += 1
-                }
-                gpu.disable(gpu.SCISSOR_TEST)
-                ShadowMapPass.shadowsFrameBuffer.stopMapping()
-
-            }
-
-            if (lights3D.length > 0) {
-                gpu.viewport(0, 0, 512, 512)
-                for (let i = 0; i < ShadowMapPass.maxCubeMaps; i++) {
-                    const current = lights3D[i]
-                    if (!current)
-                        continue
-                    ShadowMapPass.specularProbes[i]
-                        .draw((yaw, pitch, perspective, index) => {
-                                const target = vec3.add([], current.translation, VIEWS.target[index])
-                                ShadowMapPass.loopMeshes(
-                                    meshes,
-                                    ShadowMapPass.shadowMapOmniShader,
-                                    mat4.lookAt([], current.translation, target, VIEWS.up[index]),
-                                    perspective,
-                                    undefined,
-                                    current.translation,
-                                    [current.zNear, current.zFar])
-                            },
-                            false,
-                            current.zFar,
-                            current.zNear
-                        )
-                }
-            }
-            gpu.cullFace(gpu.BACK)
-        }
     }
 
-    static loopMeshes(meshes, shader, view, projection, color, lightPosition, shadowClipNearFar) {
+    static execute() {
+        if (!ShadowMapPass.ready || !ShadowMapPass.changed && BundlerAPI.lightsChanged.length === 0)
+            return;
+
+        ShadowMapPass.#generateToUpdateMap()
+        const lights2D = ShadowMapPass.#lights2D
+        const lights3D = ShadowMapPass.#lights3D
+
+        gpu.cullFace(gpu.FRONT)
+        let currentColumn = 0, currentRow = 0
+        if (lights2D.length > 0) {
+            ShadowMapPass.shadowsFrameBuffer.startMapping()
+            gpu.enable(gpu.SCISSOR_TEST)
+            const size = (ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture) ** 2
+            for (let face = 0; face < size; face++) {
+                if (face < lights2D.length) {
+                    const currentLight = lights2D[face]
+
+                    gpu.viewport(
+                        currentColumn * ShadowMapPass.resolutionPerTexture,
+                        currentRow * ShadowMapPass.resolutionPerTexture,
+                        ShadowMapPass.resolutionPerTexture,
+                        ShadowMapPass.resolutionPerTexture
+                    )
+                    gpu.scissor(
+                        currentColumn * ShadowMapPass.resolutionPerTexture,
+                        currentRow * ShadowMapPass.resolutionPerTexture,
+                        ShadowMapPass.resolutionPerTexture,
+                        ShadowMapPass.resolutionPerTexture
+                    )
+                    gpu.clear(gpu.DEPTH_BUFFER_BIT)
+
+                    currentLight.atlasFace = [currentColumn, 0]
+                    ShadowMapPass.loopMeshes(ShadowMapPass.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
+                }
+                if (currentColumn > ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture) {
+                    currentColumn = 0
+                    currentRow += 1
+                } else
+                    currentColumn += 1
+            }
+            gpu.disable(gpu.SCISSOR_TEST)
+            ShadowMapPass.shadowsFrameBuffer.stopMapping()
+        }
+
+        if (lights3D.length > 0) {
+            gpu.viewport(0, 0, 512, 512)
+            for (let i = 0; i < ShadowMapPass.maxCubeMaps; i++) {
+                const current = lights3D[i]
+                if (!current)
+                    continue
+                ShadowMapPass.specularProbes[i]
+                    .draw((yaw, pitch, perspective, index) => {
+                            const target = vec3.add([], current.translation, VIEWS.target[index])
+                            ShadowMapPass.loopMeshes(
+                                ShadowMapPass.shadowMapOmniShader,
+                                mat4.lookAt([], current.translation, target, VIEWS.up[index]),
+                                perspective,
+                                undefined,
+                                current.translation,
+                                [current.zNear, current.zFar])
+                        },
+                        false,
+                        current.zFar,
+                        current.zNear
+                    )
+            }
+        }
+        gpu.cullFace(gpu.BACK)
+        ShadowMapPass.changed = false
+        ShadowMapPass.#lights2D = []
+        ShadowMapPass.#lights3D = []
+        BundlerAPI.lightsChanged = []
+    }
+
+    static loopMeshes(shader, view, projection, color, lightPosition, shadowClipNearFar) {
+        const meshes = Engine.data.meshes
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m], meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = GPU.meshes.get(meshComponent.meshID)
             if (!mesh || !meshComponent.castsShadows)
                 continue
-            ShadowMapPass.drawMesh(mesh, view, projection, current.matrix, color, shader, lightPosition, shadowClipNearFar)
+            console.log("RENDERING")
+            shader.bindForUse({
+                shadowClipNearFar,
+                viewMatrix: view,
+                transformMatrix: current.matrix,
+                projectionMatrix: projection,
+                lightColor: color,
+                lightPosition
+            })
+            mesh.draw()
         }
     }
 
-    static drawMesh(mesh, viewMatrix, projectionMatrix, transformMatrix, lightColor, shader, lightPosition, shadowClipNearFar) {
-        shader.bindForUse({
-            shadowClipNearFar,
-            viewMatrix,
-            transformMatrix,
-            projectionMatrix,
-            lightColor,
-            lightPosition
-        })
-        mesh.draw()
-    }
 }

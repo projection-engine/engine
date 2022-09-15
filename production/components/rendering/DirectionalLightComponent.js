@@ -8,16 +8,17 @@ export default class DirectionalLightComponent extends Component {
     _props = DIRECTIONAL_LIGHT_PROPS
     _color = [255, 255, 255]
     fixedColor = [1, 1, 1]
-    _zNear = -1
-    _zFar = 10000
+    zNear = -1
+    zFar = 10000
     lightView = mat4.create()
     lightProjection = mat4.create()
-    _size = 35
+    size = 35
     atlasFace = [0, 0]
     changed = true
     shadowMap = true
     center = [0, 0, 0]
     _intensity = 1
+    lightIndex = -1
 
     get intensity() {
         return this._intensity
@@ -37,49 +38,8 @@ export default class DirectionalLightComponent extends Component {
         this.fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
 
-    get zNear() {
-        return this._zNear
-    }
-
-    set zNear(data) {
-        this._zNear = data
-        this.update()
-    }
-
-
-    get zFar() {
-        return this._zFar
-    }
-
-    set zFar(data) {
-        this._zFar = data
-        this.update()
-    }
-
-
-    get direction() {
-        return this.__entity.translation
-    }
-
-    set direction(data) {
-        this.__entity.translation = data
-        this.update()
-    }
-
-
-    get size() {
-        return this._size
-    }
-
-    set size(data) {
-        this._size = data
-        this.update()
-    }
-
 
     update() {
-        mat4.lookAt(this.lightView, this.__entity.translation, this.center, [0, 1, 0])
-        mat4.ortho(this.lightProjection, -this._size, this._size, -this._size, this._size, this._zNear, this._zFar)
 
         this.changed = true
     }

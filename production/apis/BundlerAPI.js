@@ -20,7 +20,10 @@ function toObject(classes) {
     return res
 }
 
+let lightTimeout
+
 export default class BundlerAPI {
+    static lightsChanged = []
 
     static addEntity(entity) {
         Engine.entitiesMap.set(entity.id, entity)
@@ -71,7 +74,7 @@ export default class BundlerAPI {
 
         const entity = Engine.entitiesMap.get(id)
         console.log(id, entity)
-        if(!entity)
+        if (!entity)
             return
         const onMap = Engine.dataEntity.get(id)
         Object.keys(onMap).forEach(k => Engine.data[k] = Engine.data[k].filter(e => e !== entity))
@@ -122,9 +125,18 @@ export default class BundlerAPI {
         })
     }
 
-    static packageLights(keepOld) {
-        packagePointLights(keepOld)
-        packageDirectionalLights(keepOld)
+    static packageLights(keepOld, force) {
+        if (force) {
+            packagePointLights(keepOld)
+            packageDirectionalLights(keepOld)
+            return
+        }
+        clearTimeout(lightTimeout)
+        lightTimeout = setTimeout(() => {
+            packagePointLights(keepOld)
+            packageDirectionalLights(keepOld)
+        }, 50)
+
     }
 
     static linkScript(data, entity, scriptID, src) {

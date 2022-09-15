@@ -9,6 +9,7 @@ export default {
     SSGI: "SSGI",
     SSGI_NORMALS: "SSGI_NORMALS",
     G_BUFFER:"G_BUFFER",
+    SHADOWS: "SHADOWS",
     EDITOR: {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"

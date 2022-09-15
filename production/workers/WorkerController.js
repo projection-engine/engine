@@ -69,7 +69,7 @@ export default class WorkerController {
 
     static execute() {
         if(WorkerController.#hasChangeBuffer[0] === 1) {
-            BundlerAPI.packageLights(true)
+            BundlerAPI.packageLights(true, true)
             WorkerController.#hasChangeBuffer[0] = 0
         }
 

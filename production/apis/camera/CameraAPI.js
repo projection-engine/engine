@@ -1,4 +1,4 @@
-import {mat4} from "gl-matrix"
+import {mat4, vec3} from "gl-matrix"
 import PostProcessing from "./PostProcessing";
 import COMPONENTS from "../../../static/COMPONENTS.json";
 import Engine from "../../Engine";
@@ -8,11 +8,12 @@ import SkyboxPass from "../../passes/rendering/SkyboxPass";
 export default class CameraAPI {
     static isOrthographic = false
     static metadata = new PostProcessing()
-    static position = [0, 0, 0]
+    static position = vec3.create()
     static viewMatrix = mat4.create()
     static projectionMatrix = mat4.create()
     static invViewMatrix = mat4.create()
     static invProjectionMatrix = mat4.create()
+    static staticViewMatrix = mat4.create()
 
     static updateProjection(orthoSize = CameraAPI.metadata.size) {
         const aR = CameraAPI.metadata.aspectRatio
@@ -25,8 +26,8 @@ export default class CameraAPI {
         SkyboxPass.projectionMatrix = mat4.perspective([], CameraAPI.metadata.fov, aR, .1, 1000)
     }
 
-    static get staticViewMatrix() {
-        const matrix = [...CameraAPI.viewMatrix]
+    static #updateStaticViewMatrix() {
+        const matrix = mat4.copy(CameraAPI.staticViewMatrix, CameraAPI.viewMatrix)
         matrix[12] = matrix[13] = matrix[14] = 0
         return matrix
     }
@@ -36,26 +37,27 @@ export default class CameraAPI {
         mat4.invert(CameraAPI.viewMatrix, CameraAPI.invViewMatrix)
 
         const m = CameraAPI.invViewMatrix
-        CameraAPI.position = [m[12], m[13], m[14]]
+        CameraAPI.position[0] = m[12]
+        CameraAPI.position[1] = m[13]
+        CameraAPI.position[2] = m[14]
+        CameraAPI.#updateStaticViewMatrix()
     }
 
     static sphericalTransformation(rotationVec, radius, centerOn) {
         const [yaw, pitch] = rotationVec
 
         const cosPitch = Math.cos(pitch)
-        const position = []
-        position[0] = radius * cosPitch * Math.cos(yaw) + centerOn[0]
-        position[1] = radius * Math.sin(pitch) + centerOn[1]
-        position[2] = radius * cosPitch * Math.sin(yaw) + centerOn[2]
 
-        mat4.lookAt(CameraAPI.viewMatrix, position, centerOn, [0, 1, 0])
+        CameraAPI.position[0] = radius * cosPitch * Math.cos(yaw) + centerOn[0]
+        CameraAPI.position[1] = radius * Math.sin(pitch) + centerOn[1]
+        CameraAPI.position[2] = radius * cosPitch * Math.sin(yaw) + centerOn[2]
+        mat4.lookAt(CameraAPI.viewMatrix, CameraAPI.position, centerOn, [0, 1, 0])
         mat4.invert(CameraAPI.invViewMatrix, CameraAPI.viewMatrix)
-
-        const m = CameraAPI.invViewMatrix
-        CameraAPI.position = [m[12], m[13], m[14]]
+        CameraAPI.#updateStaticViewMatrix()
 
         if (CameraAPI.isOrthographic)
             CameraAPI.updateProjection(radius)
+
     }
 
     static updateViewTarget(entity) {

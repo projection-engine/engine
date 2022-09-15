@@ -140,6 +140,7 @@ export default class GPU {
         GPU.textures.set(id, texture)
         await texture.initialize(typeof imageData === "object" ? imageData : {img: imageData})
         GPU.materials.forEach(material => {
+
             if (material.updateTexture[id] != null)
                 material.updateTexture[id](texture.texture)
         })

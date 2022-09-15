@@ -9,6 +9,8 @@ export default class MaterialInstanceController {
     settings = {}
     uniforms = {}
     ready = false
+    texturesInUse = {}
+    updateTexture = {}
 
     constructor(id, uniformData, materialReference, resolve) {
         this.materialReference = materialReference
