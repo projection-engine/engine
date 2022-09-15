@@ -16,7 +16,11 @@ import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Entity from "../../production/instances/Entity";
 import WorkerController from "../../production/workers/WorkerController";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
+import AXIS from "../data/AXIS";
+import LineAPI from "../../production/apis/rendering/LineAPI";
+import {mat4} from "gl-matrix";
 
+const M = mat4.create()
 const EMPTY_COMPONENT = new Movable()
 export default class GizmoSystem {
     static mainEntity
@@ -28,6 +32,7 @@ export default class GizmoSystem {
     static gizmoShader
     static selectedEntities = []
     static clickedAxis
+
     static totalMoved = 0
     static wasOnGizmo
     static rotationGizmoMesh
@@ -35,11 +40,15 @@ export default class GizmoSystem {
     static translationGizmoMesh
     static dualAxisGizmoMesh
     static screenSpaceMesh
-static tooltip
+    static tooltip
     static translationGizmo
     static scaleGizmo
     static rotationGizmo
+    static lineShader
     static EMPTY_COMPONENT = EMPTY_COMPONENT
+
+    static activeGizmoMatrix = M
+
     static initialize() {
 
         GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
@@ -51,19 +60,23 @@ static tooltip
         EMPTY_COMPONENT.scaling = [.2, .2, .2]
         TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.matrix)
 
+        GizmoSystem.lineShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)
         GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
         GizmoSystem.gizmoShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.GIZMO)
         GizmoSystem.translationGizmo = new Translation()
         GizmoSystem.scaleGizmo = new Scale()
         GizmoSystem.rotationGizmo = new Rotation()
     }
-    static onMouseDown(){
+
+    static onMouseDown() {
+
         if (!GizmoSystem.tooltip)
             GizmoSystem.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
     }
-    static onMouseUp(){
-        if(GizmoSystem.tooltip)
-            setTimeout(() =>  GizmoSystem.tooltip.finished(), 250)
+
+    static onMouseUp() {
+        if (GizmoSystem.tooltip)
+            setTimeout(() => GizmoSystem.tooltip.finished(), 250)
     }
 
     static updateTranslation() {
@@ -130,12 +143,40 @@ static tooltip
     static execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
 
         if (GizmoSystem.selectedEntities.length > 0) {
-
+            const t = GizmoSystem.targetGizmo
             GizmoSystem.#findMainEntity()
             GizmoSystem.transformationType = transformationType
-            if (GizmoSystem.targetGizmo && GizmoSystem.translation != null)
-                GizmoSystem.targetGizmo.drawGizmo()
-            ScreenSpaceGizmo.drawGizmo()
+            if (t && GizmoSystem.translation != null) {
+                t.drawGizmo()
+                ScreenSpaceGizmo.drawGizmo()
+            }
+            if (t instanceof Translation) {
+                const c = GizmoSystem.clickedAxis
+                const o = {
+                    viewMatrix: CameraAPI.viewMatrix,
+                    transformMatrix: GizmoSystem.activeGizmoMatrix,
+                    projectionMatrix: CameraAPI.projectionMatrix
+                }
+                if (c === AXIS.X) {
+
+                    o.axis = [1, 0, 0]
+                    GizmoSystem.lineShader.bindForUse(o)
+                    LineAPI.draw(o.axis)
+                }
+
+                if (c === AXIS.Y) {
+                    o.axis = [0, 1, 0]
+                    GizmoSystem.lineShader.bindForUse(o)
+                    LineAPI.draw(o.axis)
+                }
+
+                if (c === AXIS.Z) {
+                    o.axis = [0, 0, 1]
+                    GizmoSystem.lineShader.bindForUse(o)
+                    LineAPI.draw(o.axis)
+                }
+            }
+
         } else if (GizmoSystem.targetGizmo || !GizmoSystem.selectedEntities[0]) {
             GizmoSystem.targetGizmo = undefined
             GizmoSystem.selectedEntities = []
@@ -144,8 +185,9 @@ static tooltip
             GizmoSystem.translation = undefined
         }
     }
+
     static notify(targetBuffer) {
-        if(!GizmoSystem.tooltip)
+        if (!GizmoSystem.tooltip)
             return
         GizmoSystem.tooltip.isChanging()
         GizmoSystem.totalMoved = 1

@@ -24,6 +24,7 @@ export default {
     },
 
     DEVELOPMENT: {
+        LINE: "LINE",
         WIREFRAME: "WIREFRAME",
 
         UNSHADED: "UNSHADED",

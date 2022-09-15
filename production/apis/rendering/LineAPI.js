@@ -1,56 +1,93 @@
 import VBOController from "../../instances/VBOController"
 import MeshController from "../../instances/MeshController";
 
-const LINE = [
-    0,0,0,
-    0,1,0
-]
+const X = [
+        0, 0, 0,
+        1, 0, 0
+    ],
+    Y = [
+        0, 0, 0,
+        0, 1, 0
+    ],
+    Z = [
+        0, 0, 0,
+        0, 0, 1
+    ]
 export default class LineAPI {
-    static VAO
-    static VBO
+    static vaoX
+    static vboX
+
+    static vaoY
+    static vboY
+
+    static vaoZ
+    static vboZ
+    static #initialized = false
+
+    static lastUsedVBO
 
     static initialize() {
-        if (!LineAPI.VAO) {
-            LineAPI.VAO = gpu.createVertexArray()
-            gpu.bindVertexArray(LineAPI.VAO)
-            LineAPI.VBO = new VBOController(
-                0,
-                new Float32Array(LINE),
-                gpu.ARRAY_BUFFER,
-                3,
-                gpu.FLOAT
-            )
+        if (LineAPI.#initialized) return
+        LineAPI.#initialized = true
+
+        LineAPI.vaoX = gpu.createVertexArray()
+        gpu.bindVertexArray(LineAPI.vaoX)
+        LineAPI.vboX = new VBOController(
+            0,
+            new Float32Array(X),
+            gpu.ARRAY_BUFFER,
+            3,
+            gpu.FLOAT
+        )
+        gpu.bindVertexArray(null)
+
+        LineAPI.vaoY = gpu.createVertexArray()
+        gpu.bindVertexArray(LineAPI.vaoY)
+        LineAPI.vboY = new VBOController(
+            0,
+            new Float32Array(Y),
+            gpu.ARRAY_BUFFER,
+            3,
+            gpu.FLOAT
+        )
+        gpu.bindVertexArray(null)
+
+        LineAPI.vaoZ = gpu.createVertexArray()
+        gpu.bindVertexArray(LineAPI.vaoZ)
+        LineAPI.vboZ = new VBOController(
+            0,
+            new Float32Array(Z),
+            gpu.ARRAY_BUFFER,
+            3,
+            gpu.FLOAT
+        )
+
+    }
+
+    static draw(direction) {
+        let vao, vbo
+        if (direction[0] === 1) {
+            vbo = LineAPI.vboX
+            vao = LineAPI.vaoX
         }
-    }
+        if (direction[1] === 1) {
+            vbo = LineAPI.vboY
+            vao = LineAPI.vaoY
+        }
+        if (direction[2] === 1) {
+            vbo = LineAPI.vboZ
+            vao = LineAPI.vaoZ
+        }
+        if (!vbo) return
 
-    static draw() {
         MeshController.finishIfUsed()
 
-        gpu.disable(gpu.CULL_FACE)
-        gpu.bindVertexArray(LineAPI.VAO)
-        LineAPI.VBO.enable()
+        gpu.bindVertexArray(vao)
+        vbo.enable()
         gpu.drawArrays(gpu.LINES, 0, 2)
-        gpu.enable(gpu.CULL_FACE)
+
+
         gpu.bindVertexArray(null)
     }
 
-    static use() {
-        MeshController.finishIfUsed()
-        gpu.disable(gpu.CULL_FACE)
-        gpu.bindVertexArray(LineAPI.VAO)
-        LineAPI.VBO.enable()
-    }
-
-
-
-    static drawInstanced(quantity) {
-        gpu.drawArraysInstanced(gpu.LINES, 0, 2, quantity)
-    }
-
-    static finish() {
-        LineAPI.VBO.disable()
-        gpu.bindVertexArray(null)
-        gpu.enable(gpu.CULL_FACE)
-
-    }
 }

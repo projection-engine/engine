@@ -1,5 +1,51 @@
 import AXIS from "../data/AXIS";
 
+
+export const lineFragment = `
+#version 300 es
+precision lowp float;
+out vec4 finalColor;
+void main() {
+    finalColor = vec4(1., 1., .0, 1);
+}
+`
+
+export const lineVertex = `#version 300 es
+layout (location = 0) in vec3 position; 
+ 
+#define HALF 5000.
+#define FULL 1000000.
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix; 
+uniform mat4 projectionMatrix;
+uniform vec3 axis; 
+
+void main() {
+ 
+    mat4 sc = mat4(0.);
+    for ( int x = 0; x < 4; x++ )
+        for ( int y = 0; y < 4; y++ )
+            if ( x == y && x <= 2)
+                sc[x][y] = 1.;
+            else if ( x == y )
+                sc[x][y] = 1.;
+
+    if(axis.x > 0.){
+           sc[0][0] = FULL;
+           sc[3][0] = -HALF;
+    }
+    if(axis.y > 0.){
+           sc[1][1] = FULL;
+           sc[3][1] = -HALF;
+    }
+    if(axis.z > 0.){
+           sc[2][2] = FULL;
+           sc[3][2] = -HALF;
+    } 
+    gl_Position = projectionMatrix * viewMatrix * transformMatrix* sc * vec4(position, 1.0);
+}
+
+`
 const SIZE_DEFINITION = `#define SIZE .15`
 const TRANSLATION_METHOD = `
 vec3 t = translation - camPos;

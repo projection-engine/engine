@@ -99,12 +99,19 @@ export default class GizmoInheritance {
         const mY = GizmoAPI.translateMatrix(this.yGizmo)
         const mZ = GizmoAPI.translateMatrix(this.zGizmo)
 
+
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.X || !this.tracking)
             GizmoAPI.drawGizmo(this.xyz, mX, AXIS.X, this.xGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Y || !this.tracking)
             GizmoAPI.drawGizmo(this.xyz, mY, AXIS.Y, this.yGizmo.pickID)
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Z || !this.tracking)
             GizmoAPI.drawGizmo(this.xyz, mZ, AXIS.Z, this.zGizmo.pickID)
+
+        if (this.key !== "scaling" && this.tracking) {
+            const c = mat4.create()
+            GizmoAPI.applyTransformation(c, [0,0,0,1], [0,0,0],  [1, 1, 1])
+            GizmoSystem.activeGizmoMatrix = c
+        }
         gpu.enable(gpu.CULL_FACE)
     }
 }

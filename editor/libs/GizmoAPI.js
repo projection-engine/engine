@@ -10,6 +10,7 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import DualAxisGizmo from "./DualAxisGizmo";
 import {ConversionAPI} from "../../production";
 import CameraAPI from "../../production/apis/camera/CameraAPI";
+import LineAPI from "../../production/apis/rendering/LineAPI";
 
 export default class GizmoAPI {
     static tooltip
@@ -18,26 +19,25 @@ export default class GizmoAPI {
         if (!GizmoSystem.translation)
             return
         const matrix = entity.matrix.slice(0)
+        GizmoAPI.applyTransformation(matrix, entity.rotationQuaternion, entity.translation, entity.scaling)
+        return matrix
+    }
 
-        const translation = entity.translation,
-            rotationQuaternion = entity.rotationQuaternion,
-            scale = entity.scaling
+    static applyTransformation(matrix, q, t, s){
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE)
             mat4.fromRotationTranslationScaleOrigin(
                 matrix,
-                quat.multiply([], GizmoSystem.targetRotation, rotationQuaternion),
-                vec3.add([], GizmoSystem.translation, translation),
-                scale,
-                translation
+                quat.multiply([], GizmoSystem.targetRotation, q),
+                vec3.add([], GizmoSystem.translation, t),
+                s,
+                t
             )
         else {
             matrix[12] += GizmoSystem.translation[0]
             matrix[13] += GizmoSystem.translation[1]
             matrix[14] += GizmoSystem.translation[2]
         }
-        return matrix
     }
-
     static drawGizmo(mesh, transformMatrix, axis, uID) {
         GizmoSystem.gizmoShader.bindForUse({
             viewMatrix: CameraAPI.viewMatrix,
