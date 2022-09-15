@@ -48,7 +48,6 @@ export function packagePointLights(keepOld) {
             currentVector[13] = component.shadowMap ? 1 : 0
             BundlerAPI.lightsChanged.push(component)
         }
-    console.log(pointLightData, pointLightsQuantity)
 
     Engine.data.pointLightsQuantity = pointLightsQuantity
     Engine.data.pointLightData = pointLightData
