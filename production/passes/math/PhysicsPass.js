@@ -116,7 +116,7 @@ export default class PhysicsPass {
     static removeRigidBody(entity) {
         const ammo = PhysicsPass.ammo
         const comp = entity.components.get(COMP)
-        if (!ammo || !comp.__initialized)
+        if (!ammo || !comp?.__initialized)
             return
         comp.__initialized = false
         PhysicsPass.world.removeRigidBody(comp.__body)
@@ -124,10 +124,6 @@ export default class PhysicsPass {
         PhysicsPass.rigidBodies = PhysicsPass.rigidBodies.filter(r => r !== entity)
     }
 
-    static clearEntries() {
-        for (let i = 0; i < PhysicsPass.rigidBodies.length; i++)
-            PhysicsPass.removeRigidBody(PhysicsPass.rigidBodies[i])
-    }
 
     static execute() {
         if (Engine.environment === DEV_ENV || !PhysicsPass.ammo)

@@ -11,94 +11,83 @@ import DiffuseProbePass from "../passes/rendering/DiffuseProbePass";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import PhysicsPass from "../passes/math/PhysicsPass";
 import WorkerController from "../workers/WorkerController";
-import {FALLBACK_MATERIAL} from "../../production";
-import GPU from "../GPU";
 
-function toObject(classes){
+function toObject(classes) {
     const res = {}, s = classes.length
-    for(let i = 0; i < s; i++)
+    for (let i = 0; i < s; i++)
         res[classes[i].id] = classes[i]
 
     return res
 }
+
 export default class BundlerAPI {
 
+    static addEntity(entity) {
+        Engine.entitiesMap.set(entity.id, entity)
+        Engine.entities.push(entity)
+        PhysicsPass.registerRigidBody(entity)
 
-    static build(params) {
-
-        const entities = Array.from(Engine.entitiesMap.values())
-        if(Engine.environment !== ENVIRONMENT.DEV){
-            PhysicsPass.clearEntries()
-            for(let i = 0; i < entities.length; i++)
-                PhysicsPass.registerRigidBody(entities[i])
+        const data = Engine.data
+        Engine.queryMap.set(entity.queryKey, entity)
+        let onMap = Engine.dataEntity.get(entity.id) || {}
+        if (entity.components.get(COMPONENTS.POINT_LIGHT)) {
+            data.pointLights.push(entity)
+            onMap.pointLights = true
+        }
+        if (entity.components.get(COMPONENTS.MESH)) {
+            data.meshes.push(entity)
+            onMap.meshes = true
+        }
+        if (entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
+            data.directionalLights.push(entity)
+            onMap.directionalLights = true
+        }
+        if (entity.components.get(COMPONENTS.PROBE) && entity.components.get(COMPONENTS.PROBE).specularProbe) {
+            data.specularProbes.push(entity)
+            onMap.specularProbes = true
+        }
+        if (entity.components.get(COMPONENTS.CAMERA)) {
+            data.cameras.push(entity)
+            onMap.cameras = true
+        }
+        if (entity.components.get(COMPONENTS.PROBE) && !entity.components.get(COMPONENTS.PROBE).specularProbe) {
+            data.diffuseProbes.push(entity)
+            onMap.diffuseProbes = true
+        }
+        if (entity.components.get(COMPONENTS.SPRITE)) {
+            data.sprites.push(entity)
+            onMap.sprites = true
         }
 
-        const attributes = {...params}
-        const data = {
-            pointLights: [],
-            meshes: [],
-            directionalLights: [],
-            specularProbes: [],
-            cameras: [],
-            diffuseProbes: [],
-            sprites: []
-        }
 
-        for (let i = 0; i < entities.length; i++) {
-            const entity = entities[i]
-            Engine.queryMap.set(entity.queryKey, entity)
-            if (entity.components.get(COMPONENTS.POINT_LIGHT))
-                data.pointLights.push(entity)
-            if (entity.components.get(COMPONENTS.MESH))
-                data.meshes.push(entity)
-            if (entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT))
-                data.directionalLights.push(entity)
-            if (entity.components.get(COMPONENTS.PROBE) && entity.components.get(COMPONENTS.PROBE).specularProbe)
-                data.specularProbes.push(entity)
-            if (entity.components.get(COMPONENTS.CAMERA))
-                data.cameras.push(entity)
-            if (entity.components.get(COMPONENTS.PROBE) && !entity.components.get(COMPONENTS.PROBE).specularProbe)
-                data.diffuseProbes.push(entity)
-            if (entity.components.get(COMPONENTS.SPRITE))
-                data.sprites.push(entity)
-        }
+        Engine.dataEntity.set(entity.id, onMap)
+        if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
+            BundlerAPI.packageLights()
 
-        Engine.params = attributes
-        Engine.data = data
+        WorkerController.registerEntity(entity)
+    }
 
-        Engine.entities = entities
-        if(Engine.environment === ENVIRONMENT.DEV)
-        BundlerAPI.updateCamera()
+    static removeEntity(id) {
+
+        const entity = Engine.entitiesMap.get(id)
+        console.log(id, entity)
+        if(!entity)
+            return
+        const onMap = Engine.dataEntity.get(id)
+        Object.keys(onMap).forEach(k => Engine.data[k] = Engine.data[k].filter(e => e !== entity))
+
+        Engine.entitiesMap.delete(id)
+        Engine.entities = Engine.entities.filter(e => e.id !== id)
+
+        PhysicsPass.removeRigidBody(entity)
+
         BundlerAPI.removeUnusedProbes()
-        BundlerAPI.packageLights()
-        Engine.then = performance.now()
-        WorkerController.initialize()
-        WorkerController.registerEntities()
+        if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
+            BundlerAPI.packageLights()
+
+        WorkerController.removeEntity(entity)
     }
 
-    // TODO - REMOVE THIS METHOD
-    static updateCamera() {
-        const params = Engine.params
-        CameraAPI.metadata.zNear = params.zNear
-        CameraAPI.metadata.zFar = params.zFar
-        CameraAPI.metadata.fov = params.fov
-
-        CameraAPI.metadata.distortion = params.distortion
-        CameraAPI.metadata.distortionStrength = params.distortionStrength
-        CameraAPI.metadata.chromaticAberration = params.chromaticAberration
-        CameraAPI.metadata.chromaticAberrationStrength = params.chromaticAberrationStrength
-        CameraAPI.metadata.filmGrain = params.filmGrain
-        CameraAPI.metadata.filmGrainStrength = params.filmGrainStrength
-        CameraAPI.metadata.bloom = params.bloom
-        CameraAPI.metadata.bloomStrength = params.bloomStrength
-        CameraAPI.metadata.bloomThreshold = params.bloomThreshold
-        CameraAPI.metadata.gamma = params.gamma
-        CameraAPI.metadata.exposure = params.exposure
-
-        const bBox = window.gpu.canvas.getBoundingClientRect()
-        CameraAPI.metadata.aspectRatio = bBox.width / bBox.height
-        CameraAPI.updateProjection()
-    }
 
     static removeUnusedProbes() {
         const data = Engine.data,

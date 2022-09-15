@@ -4,8 +4,6 @@ import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
-import SSGIPass from "../rendering/SSGIPass";
-import DepthPass from "../rendering/DepthPass";
 
 
 export default class CompositePass {

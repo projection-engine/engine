@@ -1,5 +1,6 @@
 import {v4} from "uuid"
 import MaterialAPI from "../apis/rendering/MaterialAPI";
+import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 
 export default class MaterialInstanceController {
     id = v4()
@@ -7,6 +8,7 @@ export default class MaterialInstanceController {
     uniformData = {}
     settings = {}
     uniforms = {}
+    ready = false
 
     constructor(id, uniformData, materialReference, resolve) {
         this.materialReference = materialReference
@@ -15,6 +17,10 @@ export default class MaterialInstanceController {
         this.settings = materialReference.settings
         MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
             resolve(this)
+            this.ready = true
+            this.shadingType = this.materialReference.shadingType
+            this.isForwardShaded = this.materialReference.isForwardShaded
+            this.isDeferredShaded = this.materialReference.isDeferredShaded
         })
     }
 

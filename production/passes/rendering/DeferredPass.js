@@ -1,4 +1,3 @@
-import FramebufferController from "../../instances/FramebufferController"
 import * as shaderCode from "../../shaders/DEFERRED.glsl"
 import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";

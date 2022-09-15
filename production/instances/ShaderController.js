@@ -213,6 +213,8 @@ export default class ShaderController {
             const current = this.uniforms[v]
             if (current.uLocations != null) {
                 const dataAttr = current.parent !== undefined ? data[current.parent] : data[current.name]
+                if(!dataAttr)
+                    continue
                 for (let i = 0; i < current.uLocations.length; i++) {
                     const u = current.uLocations[i]
                     const d = dataAttr[i]

@@ -1,4 +1,3 @@
-import {createVBO} from "../utils/utils"
 import VBOController from "./VBOController"
 import {v4 as uuidv4} from "uuid"
 import GPU from "../GPU";
@@ -40,7 +39,7 @@ export default class MeshController {
         this.VAO = gpu.createVertexArray()
         gpu.bindVertexArray(this.VAO)
 
-        this.indexVBO = createVBO(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
+        this.indexVBO = VBOController.createVBO(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
         this.vertexVBO = new VBOController(0, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
 
         if (normals && normals.length > 0)

@@ -1,7 +1,4 @@
-import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
-
-import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER"
+import {mat4} from "gl-matrix"
 import EngineStore from "../../../../src/editor/stores/EngineStore";
 
 import GizmoSystem from "../services/GizmoSystem";
@@ -9,7 +6,6 @@ import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import DualAxisGizmo from "./DualAxisGizmo";
 import {ConversionAPI, PickingAPI} from "../../production";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
 import GizmoAPI from "./GizmoAPI";
 
 export default class GizmoInheritance {

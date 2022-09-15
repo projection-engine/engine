@@ -12,10 +12,13 @@ export default class QueryAPI {
 
     static getEntitiesWithNativeComponent(componentKey) {
         const newArr = []
-        Engine.entitiesMap.forEach(entity => {
+        for (let i = 0; i < Engine.entities.length; i++) {
+            const entity = Engine.entities[i]
             if (entity.components.get(componentKey) != null)
                 newArr.push(entity)
-        })
+        }
+
+
         return newArr
     }
 
@@ -28,13 +31,14 @@ export default class QueryAPI {
         return undefined
     }
 
-    static getEntityByPickerID(id){
-        if(id === 0)
+    static getEntityByPickerID(id) {
+        if (id === 0)
             return
 
         const entities = Engine.entities
-        return  entities.find(e => e?.pickIndex === id)
+        return entities.find(e => e?.pickIndex === id)
     }
+
     static loadFile(absoluteName) {
         // TODO - IMPLEMENT LOADING API FOR WEB AND NATIVE
     }

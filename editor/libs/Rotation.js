@@ -13,7 +13,6 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../production/GPU";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import GizmoAPI from "./GizmoAPI";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 

@@ -7,6 +7,7 @@ import DiffuseProbePass from "../../passes/rendering/DiffuseProbePass";
 import MATERIAL_RENDERING_TYPES from "../../../static/MATERIAL_RENDERING_TYPES";
 import DATA_TYPES from "../../../static/DATA_TYPES";
 import IMAGE_WORKER_ACTIONS from "../../../static/IMAGE_WORKER_ACTIONS";
+import MaterialInstanceController from "../../instances/MaterialInstanceController";
 
 
 export default class MaterialAPI {
@@ -59,6 +60,7 @@ export default class MaterialAPI {
         uniforms.brdfSampler = GPU.BRDF
         uniforms.aoSampler = AOPass.filteredSampler
         uniforms.elapsedTime = Engine.elapsed
+
         material.use(uniforms, uniforms.useCubeMapShader)
 
         if (directDrawing)
@@ -110,6 +112,8 @@ export default class MaterialAPI {
             const meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = meshes.get(meshComponent.meshID)
             const mat = materials.get(meshComponent.materialID)
+
+
             if (!mesh || !mat || !mat.ready)
                 continue
             callback(mat, mesh, meshComponent, current)
@@ -140,7 +144,7 @@ export default class MaterialAPI {
                         try {
                             if (Engine.readAsset) {
                                 const textureID = k.data
-                                if(!material.texturesInUse[textureID]) {
+                                if (!material.texturesInUse[textureID]) {
                                     const asset = await Engine.readAsset(textureID)
                                     if (asset) {
                                         if (GPU.textures.get(textureID))

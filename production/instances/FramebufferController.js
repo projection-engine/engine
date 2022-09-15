@@ -1,5 +1,5 @@
-import {createTexture} from "../utils/utils"
 import GPU from "../GPU";
+import TextureController from "./TextureController";
 
 export default class FramebufferController {
 
@@ -48,7 +48,7 @@ export default class FramebufferController {
 
     depthTexture(precision = gpu.DEPTH_COMPONENT32F) {
         this.use()
-        this.depthSampler = createTexture(
+        this.depthSampler = TextureController.createTexture(
             this.width,
             this.height,
             precision,

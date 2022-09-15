@@ -32,21 +32,6 @@ export default class WorkerController {
         }
     }
 
-    static registerEntities() {
-        if (!WorkerController.#initialized)
-            return
-
-        const entities = Engine.entities
-        WorkerController.linkedEntities.forEach(entity => {
-            if (!Engine.entitiesMap.get(entity.id))
-                WorkerController.removeEntity(entity)
-        })
-
-        for (let i = 0; i < entities.length; i++)
-            WorkerController.registerEntity(entities[i])
-
-        setTimeout(() => BundlerAPI.packageLights(), 250)
-    }
 
     static removeEntity(entity) {
         const thread = WorkerController.threads[entity.__workerGroup]

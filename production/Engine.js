@@ -6,7 +6,16 @@ export default class Engine {
     static entitiesMap = new Map()
     static entities = []
     static environment = ENVIRONMENT.DEV
-    static data = {}
+    static data = {
+        pointLights: [],
+        meshes: [],
+        directionalLights: [],
+        specularProbes: [],
+        cameras: [],
+        diffuseProbes: [],
+        sprites: []
+    }
+    static dataEntity = new Map()
     static params = {}
     static queryMap = new Map()
     static then = 0
@@ -25,6 +34,7 @@ export default class Engine {
                 }).observe(gpu.canvas)
                 Engine.isReady = true
                 Engine.start()
+                Engine.then = performance.now()
             })
     }
 

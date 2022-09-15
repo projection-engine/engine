@@ -14,7 +14,7 @@ export default class ScriptingPass {
         }
 
         if (!entities)
-            entities = [...Array.from(Engine.entitiesMap.values()), ...Array.from(UIAPI.entities.values())]
+            entities = [...Engine.entities, ...Array.from(UIAPI.entities.values())]
         const size = entities.length
         for (let i = 0; i < size; i++) {
             const scripts = entities[i].scripts

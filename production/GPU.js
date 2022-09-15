@@ -38,7 +38,6 @@ export default class GPU {
     static activeMesh
 
     static materials = new Map()
-    static materialInstances = new Map()
     static shaders = new Map()
     static frameBuffers = new Map()
     static meshes = new Map()
@@ -169,10 +168,11 @@ export default class GPU {
             return GPU.materials.get(id)
 
         const instance = await (new Promise(resolve => {
-            new MaterialInstanceController(id, data, original, resolve)
+            new MaterialInstanceController(id, data.uniformData, original, resolve)
         }))
         GPU.materials.set(id, instance)
         original.instances.set(id, instance)
+
         return  instance
     }
 
@@ -182,6 +182,8 @@ export default class GPU {
         const inUse = {}
         for (let i = 0; i < mat.length; i++) {
             textures.forEach(t => {
+                if(!mat[i]?.texturesInUse)
+                    return
                 if (mat[i].texturesInUse[t] != null)
                     inUse[t] = true
             })

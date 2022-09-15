@@ -1,4 +1,3 @@
-import FramebufferController from "../../instances/FramebufferController"
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
 import Engine from "../../Engine";
