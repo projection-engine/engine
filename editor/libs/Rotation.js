@@ -33,7 +33,7 @@ export default class Rotation {
     }
 
     onMouseDown(event) {
-
+        GizmoSystem.onMouseDown()
         const w = gpu.canvas.width, h = gpu.canvas.height
         const x = event.clientX
         const y = event.clientY
@@ -47,7 +47,7 @@ export default class Rotation {
     }
 
     onMouseUp() {
-
+        GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
             EngineStore.saveEntity(

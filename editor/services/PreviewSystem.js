@@ -7,6 +7,7 @@ import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
+import FramebufferController from "../../production/instances/FramebufferController";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {
@@ -111,7 +112,7 @@ export default class PreviewSystem {
                 })
         }
         PreviewSystem.frameBuffer.stopMapping()
-        response = BundlerAPI.framebufferToImage(PreviewSystem.frameBuffer.FBO)
+        response = FramebufferController.toImage(PreviewSystem.frameBuffer.FBO)
         gpu.bindVertexArray(null)
         return response
     }

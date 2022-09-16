@@ -11,6 +11,8 @@ import RigidBodyComponent from "../components/physics/RigidBodyComponent";
 import PhysicsColliderComponent from "../components/physics/PhysicsColliderComponent";
 import CullingComponent from "../components/misc/CullingComponent";
 import BundlerAPI from "../apis/BundlerAPI";
+import UIComponent from "../components/misc/UIComponent";
+import Engine from "../Engine";
 
 
 const TYPED_ATTRIBUTES = [
@@ -34,12 +36,19 @@ export default class Entity extends Movable {
     parent
     pickID = [-1, -1, -1]
     instancingGroupID
-    set active(data){
+
+    set active(data) {
         this._active = data
-        if(this.components.get(COMPONENTS.POINT_LIGHT) || this.components.get(COMPONENTS.DIRECTIONAL_LIGHT))
+
+        if (this.components.get(COMPONENTS.POINT_LIGHT) || this.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
             BundlerAPI.packageLights(true)
+            this.needsLightUpdate = true
+        }
+        else
+            BundlerAPI.registerEntityComponents(this)
     }
-    get active(){
+
+    get active() {
         return this._active
     }
 
@@ -89,6 +98,7 @@ export default class Entity extends Movable {
         [COMPONENTS.PHYSICS_COLLIDER]: PhysicsColliderComponent,
         [COMPONENTS.RIGID_BODY]: RigidBodyComponent,
         [COMPONENTS.CULLING]: CullingComponent,
+        [COMPONENTS.UI]: UIComponent,
     }
 
     static parseEntityObject(entity) {
@@ -136,8 +146,20 @@ export default class Entity extends Movable {
             instance = new instance()
             instance.__entity = this
             this.components.set(KEY, instance)
+
+            if (Engine.entitiesMap.get(this.id) != null) // initialized
+                BundlerAPI.registerEntityComponents(this)
+
             return instance
         }
+    }
+
+    removeComponent(KEY) {
+        const hasComponent = this.components.get(KEY) != null
+        this.components.delete(KEY)
+
+        if (hasComponent && Engine.entitiesMap.get(this.id) != null)
+            BundlerAPI.registerEntityComponents(this)
     }
 
     static serializeComplexObject(obj) {

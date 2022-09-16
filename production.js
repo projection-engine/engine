@@ -12,14 +12,12 @@ import SpecularProbePass from "./production/passes/rendering/SpecularProbePass";
 import ENVIRONMENT from "./static/ENVIRONMENT";
 import FALLBACK_MATERIAL from "./static/FALLBACK_MATERIAL";
 import Entity from "./production/instances/Entity"
-import UIAPI from "./production/apis/utils/UIAPI"
 import getPickerId from "./production/utils/get-picker-id"
 import IMAGE_WORKER_ACTIONS from "./static/IMAGE_WORKER_ACTIONS"
 
 export {
     IMAGE_WORKER_ACTIONS,
     getPickerId,
-    UIAPI,
     ConversionAPI,
     PickingAPI,
     DepthPass,

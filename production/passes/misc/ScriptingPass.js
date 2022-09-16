@@ -1,6 +1,5 @@
 import ENVIRONMENT from "../../../static/ENVIRONMENT"
 import Engine from "../../Engine";
-import UIAPI from "../../apis/utils/UIAPI";
 
 
 const DEV = ENVIRONMENT.DEV
@@ -14,7 +13,7 @@ export default class ScriptingPass {
         }
 
         if (!entities)
-            entities = [...Engine.entities, ...Array.from(UIAPI.entities.values())]
+            entities = [...Engine.entities]
         const size = entities.length
         for (let i = 0; i < size; i++) {
             const scripts = entities[i].scripts

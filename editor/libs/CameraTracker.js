@@ -11,6 +11,7 @@ let interval, ctrl, holding, isFocused, isDoubleClick, timeout
 const BUTTON_MIDDLE = 1
 
 export default class CameraTracker {
+    static #isTracking = false
     static movementSpeed = 0.01
     static scrollSpeed = .5
     static scrollDelay = 100
@@ -161,6 +162,9 @@ export default class CameraTracker {
     static #id = v4()
 
     static startTracking() {
+        if (CameraTracker.#isTracking)
+            return
+        CameraTracker.#isTracking = true
         const events = InputEventsAPI.EVENTS
         InputEventsAPI.listenTo(events.KEY_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
         InputEventsAPI.listenTo(events.KEY_UP, CameraTracker.#handleInput, CameraTracker.#id)
@@ -171,6 +175,9 @@ export default class CameraTracker {
     }
 
     static stopTracking() {
+        if (!CameraTracker.#isTracking)
+            return
+        CameraTracker.#isTracking = false
         const events = InputEventsAPI.EVENTS
         InputEventsAPI.removeEvent(events.KEY_DOWN, CameraTracker.#id)
         InputEventsAPI.removeEvent(events.KEY_UP, CameraTracker.#id)

@@ -1,5 +1,4 @@
 import ENVIRONMENT from "../../../static/ENVIRONMENT";
-import UIAPI from "./UIAPI";
 import Engine from "../../Engine";
 
 function getTarget(key) {
@@ -49,9 +48,7 @@ export default class InputEventsAPI {
     }
 
     static get targetElement() {
-        if (Engine.environment === ENVIRONMENT.DEV)
-            return window.gpu.canvas
-        return UIAPI.renderTarget
+        return window.gpu.canvas.parentElement
     }
 
     static get isCursorLocked() {

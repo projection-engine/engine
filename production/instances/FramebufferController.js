@@ -140,4 +140,27 @@ export default class FramebufferController {
         this.use()
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT | gpu.STENCIL_BUFFER_BIT)
     }
+
+    static toImage(fbo, w = 300, h = 300) {
+        const canvas = document.createElement("canvas")
+        canvas.width = w
+        canvas.height = h
+        const context = canvas.getContext("2d")
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, fbo)
+        let data = new Float32Array(w * h * 4)
+        gpu.readPixels(0, 0, w, h, gpu.RGBA, gpu.FLOAT, data)
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] *= 255
+            data[i + 1] *= 255
+            data[i + 2] *= 255
+            data[i + 3] = 255
+        }
+
+        const imageData = context.createImageData(w, h)
+        imageData.data.set(data)
+        context.putImageData(imageData, 0, 0)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+        data = canvas.toDataURL()
+        return data
+    }
 }

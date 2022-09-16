@@ -21,63 +21,79 @@ function toObject(classes) {
 }
 
 let lightTimeout
+const STYLES = {
+    position: "absolute",
+    boxSizing: "border-box",
+    display: "block",
+    width: "100%",
+    height: "100%"
+}
 
 export default class BundlerAPI {
     static lightsChanged = []
+    static uiMountingPoint
+    static get uiMountingPoint() {
+        return BundlerAPI.uiMountingPoint
+    }
 
     static addEntity(entity) {
         Engine.entitiesMap.set(entity.id, entity)
         Engine.entities.push(entity)
-        PhysicsPass.registerRigidBody(entity)
+        WorkerController.registerEntity(entity)
+        BundlerAPI.registerEntityComponents(entity)
+    }
 
+    static registerEntityComponents(entity) {
+        PhysicsPass.registerRigidBody(entity)
         const data = Engine.data
         Engine.queryMap.set(entity.queryKey, entity)
-        let onMap = Engine.dataEntity.get(entity.id) || {}
+
+
+        let placementMap = Engine.dataEntity.get(entity.id) || {}
+        if (Object.keys(placementMap).length > 0)
+            Object.keys(placementMap).forEach(k => Engine.data[k] = Engine.data[k].filter(e => e !== entity))
         if (entity.components.get(COMPONENTS.POINT_LIGHT)) {
             data.pointLights.push(entity)
-            onMap.pointLights = true
+            placementMap.pointLights = true
         }
         if (entity.components.get(COMPONENTS.MESH)) {
             data.meshes.push(entity)
-            onMap.meshes = true
+            placementMap.meshes = true
         }
         if (entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
             data.directionalLights.push(entity)
-            onMap.directionalLights = true
+            placementMap.directionalLights = true
         }
         if (entity.components.get(COMPONENTS.PROBE) && entity.components.get(COMPONENTS.PROBE).specularProbe) {
             data.specularProbes.push(entity)
-            onMap.specularProbes = true
+            placementMap.specularProbes = true
         }
         if (entity.components.get(COMPONENTS.CAMERA)) {
             data.cameras.push(entity)
-            onMap.cameras = true
+            placementMap.cameras = true
         }
         if (entity.components.get(COMPONENTS.PROBE) && !entity.components.get(COMPONENTS.PROBE).specularProbe) {
             data.diffuseProbes.push(entity)
-            onMap.diffuseProbes = true
+            placementMap.diffuseProbes = true
         }
         if (entity.components.get(COMPONENTS.SPRITE)) {
             data.sprites.push(entity)
-            onMap.sprites = true
+            placementMap.sprites = true
         }
+        if (BundlerAPI.uiMountingPoint != null)
+            BundlerAPI.#createUIEntity(entity)
 
-
-        Engine.dataEntity.set(entity.id, onMap)
+        Engine.dataEntity.set(entity.id, placementMap)
         if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
             BundlerAPI.packageLights()
-
-        WorkerController.registerEntity(entity)
     }
 
     static removeEntity(id) {
-
         const entity = Engine.entitiesMap.get(id)
-        console.log(id, entity)
         if (!entity)
             return
-        const onMap = Engine.dataEntity.get(id)
-        Object.keys(onMap).forEach(k => Engine.data[k] = Engine.data[k].filter(e => e !== entity))
+        const placementMap = Engine.dataEntity.get(id)
+        Object.keys(placementMap).forEach(k => Engine.data[k] = Engine.data[k].filter(e => e !== entity))
 
         Engine.entitiesMap.delete(id)
         Engine.entities = Engine.entities.filter(e => e.id !== id)
@@ -89,6 +105,7 @@ export default class BundlerAPI {
             BundlerAPI.packageLights()
 
         WorkerController.removeEntity(entity)
+        BundlerAPI.#deleteUIEntity(entity)
     }
 
 
@@ -173,26 +190,90 @@ export default class BundlerAPI {
         }
     }
 
-    static framebufferToImage(fbo, w = 300, h = 300) {
-        const canvas = document.createElement("canvas")
-        canvas.width = w
-        canvas.height = h
-        const context = canvas.getContext("2d")
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, fbo)
-        let data = new Float32Array(w * h * 4)
-        gpu.readPixels(0, 0, w, h, gpu.RGBA, gpu.FLOAT, data)
-        for (let i = 0; i < data.length; i += 4) {
-            data[i] *= 255
-            data[i + 1] *= 255
-            data[i + 2] *= 255
-            data[i + 3] = 255
+
+    static #deleteUIEntity(entity) {
+        const UI = entity.components.get(COMPONENTS.UI)
+        if (!UI || !UI.__element)
+            return
+        const children = UI.__element.querySelectorAll("[data-enginewrapper='-']")
+        children.forEach(c => {
+            UI.__element.removeChild(c)
+            BundlerAPI.uiMountingPoint.appendChild(c)
+            UI.anchorElement = undefined
+        })
+    }
+
+    static #createUIEntity(entity) {
+        const UI = entity.components.get(COMPONENTS.UI)
+        if (!entity.active || !UI || Engine.queryMap.get(entity.queryKey) !== entity)
+            return
+        const el = document.createElement("div")
+        Object.assign(el.style, UI.wrapperStyles)
+        el.id = entity.queryKey
+        el.innerHTML = UI.uiLayoutData
+
+        el.setAttribute("data-enginewrapper", "-")
+        el.setAttribute("data-engineentityid", entity.id)
+        BundlerAPI.uiMountingPoint.appendChild(el)
+        UI.__element = el
+
+        return {parent: UI.anchorElement, element: el}
+    }
+
+    static buildUI(target) {
+        console.trace(target)
+        if (target != null)
+            BundlerAPI.uiMountingPoint = target
+        if (!BundlerAPI.uiMountingPoint) {
+            const el = document.createElement("span")
+            InputEventsAPI.targetElement.appendChild(el)
+            BundlerAPI.uiMountingPoint = el
+        }
+        BundlerAPI.uiMountingPoint.style.display = "none"
+        const elementsToBind = []
+        const entities = Engine.entities
+        for (let i = 0; i < entities.length; i++)
+            elementsToBind.push(BundlerAPI.#createUIEntity(entities[i]))
+        for (let i = 0; i < elementsToBind.length; i++) {
+            if (!elementsToBind[i])
+                continue
+            const {parent, element} = elementsToBind[i]
+            const parentElement = document.getElementById(parent)
+            if (parentElement)
+                parentElement.appendChild(element)
+            else
+                BundlerAPI.uiMountingPoint.appendChild(element)
         }
 
-        const imageData = context.createImageData(w, h)
-        imageData.data.set(data)
-        context.putImageData(imageData, 0, 0)
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
-        data = canvas.toDataURL()
-        return data
+        Object.assign(BundlerAPI.uiMountingPoint.style, STYLES)
     }
+
+    static updateUIEntity(entity) {
+        const UI = entity.components.get(COMPONENTS.UI)
+        console.log(entity, UI)
+        if (!entity.active || !UI || Engine.queryMap.get(entity.queryKey) !== entity || !UI.__element)
+            return
+
+        const el = UI.__element
+        el.removeAttribute("style")
+        Object.assign(el.style, UI.wrapperStyles)
+        el.id = entity.queryKey
+        el.innerHTML = UI.uiLayoutData
+    }
+
+    static destroyUI() {
+        if (!BundlerAPI.uiMountingPoint)
+            return
+
+        BundlerAPI.uiMountingPoint.innerHTML = ""
+        const entities = Engine.entities
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i]
+            const UI = entity.components.get(COMPONENTS.UI)
+            if (!entity.active || !UI || Engine.queryMap.get(entity.queryKey) !== entity)
+                continue
+            UI.__element = undefined
+        }
+    }
+
 }

@@ -32,7 +32,7 @@ export default class GizmoInheritance {
     }
 
     onMouseDown(event) {
-        GizmoSystem.onMouseUp()
+        GizmoSystem.onMouseDown()
         const w = gpu.canvas.width, h = gpu.canvas.height
         const x = event.clientX
         const y = event.clientY
@@ -44,6 +44,7 @@ export default class GizmoInheritance {
 
 
     onMouseUp() {
+        GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
             EngineStore.saveEntity(

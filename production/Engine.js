@@ -4,6 +4,10 @@ import LoopAPI from "./apis/rendering/LoopAPI";
 
 export default class Engine {
     static entitiesMap = new Map()
+    static dataEntity = new Map()
+    static queryMap = new Map()
+    static UILayouts = new Map()
+
     static entities = []
     static environment = ENVIRONMENT.DEV
     static data = {
@@ -15,9 +19,7 @@ export default class Engine {
         diffuseProbes: [],
         sprites: []
     }
-    static dataEntity = new Map()
     static params = {}
-    static queryMap = new Map()
     static then = 0
     static frameID
     static isReady = false
@@ -34,14 +36,15 @@ export default class Engine {
                 }).observe(gpu.canvas)
                 Engine.isReady = true
                 Engine.start()
-                Engine.then = performance.now()
             })
     }
 
     static #callback() {
-        Engine.elapsed = performance.now() - Engine.then
+        Engine.then = performance.now()
         LoopAPI.loop(Engine.entities)
+        Engine.elapsed = performance.now() - Engine.then
         Engine.frameID = requestAnimationFrame(() => Engine.#callback())
+
     }
 
     static start() {

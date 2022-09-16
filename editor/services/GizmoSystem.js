@@ -69,14 +69,16 @@ export default class GizmoSystem {
     }
 
     static onMouseDown() {
-
+        console.log(GizmoSystem.tooltip)
         if (!GizmoSystem.tooltip)
             GizmoSystem.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
     }
 
     static onMouseUp() {
         if (GizmoSystem.tooltip)
-            setTimeout(() => GizmoSystem.tooltip.finished(), 250)
+            setTimeout(() => {
+                GizmoSystem.tooltip.finished()
+            }, 250)
     }
 
     static updateTranslation() {
@@ -189,6 +191,7 @@ export default class GizmoSystem {
     static notify(targetBuffer) {
         if (!GizmoSystem.tooltip)
             return
+
         GizmoSystem.tooltip.isChanging()
         GizmoSystem.totalMoved = 1
         GizmoSystem.tooltip.textContent = `X ${targetBuffer[0].toFixed(2)}  |  Y ${targetBuffer[1].toFixed(2)}  |  Z ${targetBuffer[2].toFixed(2)}`

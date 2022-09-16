@@ -7,5 +7,6 @@
   "SPRITE": "SpriteComponent",
   "PHYSICS_COLLIDER": "PHYSICS_COLLIDER",
   "RIGID_BODY": "RigidBody",
-  "CULLING": "CullingComponent"
+  "CULLING": "CullingComponent",
+  "UI": "UI"
 }
