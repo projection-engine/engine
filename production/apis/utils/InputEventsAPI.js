@@ -9,7 +9,7 @@ function getTarget(key) {
 }
 
 export default class InputEventsAPI {
-    static #events = new Map()
+    static #callbacks = new Map()
     static EVENTS = Object.freeze({
         KEY_DOWN: "keydown",
         KEY_UP: "keyup",
@@ -23,28 +23,18 @@ export default class InputEventsAPI {
 
     static listenTo(eventKey, callback, id) {
         const target = getTarget(eventKey)
-        if (!InputEventsAPI.#events.get(eventKey)) {
-            const newListener = {callbacks: new Map([[id, callback]])}
-            const handler =  (event)  => {
-                newListener.callbacks.forEach(callback => callback(event))
-            }
-            target.addEventListener(eventKey, handler, eventKey === InputEventsAPI.EVENTS.WHEEL ? {passive: true} : undefined)
-            newListener.remove = () => target.removeEventListener(eventKey, handler)
-            InputEventsAPI.#events.set(eventKey, newListener)
-        } else
-            InputEventsAPI.#events.get(eventKey).callbacks.set(id, callback)
+        const existing =InputEventsAPI.#callbacks.get(id) || []
+        InputEventsAPI.#callbacks.set(id, [...existing, {callback, target, eventKey}])
+        target.addEventListener(eventKey, callback)
     }
 
-    static removeEvent(eventKey, id) {
-        const listener = InputEventsAPI.#events.get(eventKey)
-        if (!listener || !listener.callbacks.get(id))
-            return false
-        listener.callbacks.delete(id)
-        if (listener.callbacks.size === 0) {
-            listener.remove()
-            InputEventsAPI.#events.delete(eventKey)
+    static removeEvent(id) {
+        const existing =InputEventsAPI.#callbacks.get(id) || []
+        for(let i =0; i < existing.length; i++) {
+            const {callback, target, eventKey} = existing[i]
+            target.removeEventListener(eventKey, callback)
         }
-        return true
+        InputEventsAPI.#callbacks.delete(id)
     }
 
     static get targetElement() {

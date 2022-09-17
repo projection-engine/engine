@@ -1,5 +1,5 @@
 import {mat4, vec3} from "gl-matrix"
-import PostProcessing from "./PostProcessing";
+import PostProcessing from "../../instances/PostProcessing";
 import COMPONENTS from "../../../static/COMPONENTS.json";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../../static/ENVIRONMENT";

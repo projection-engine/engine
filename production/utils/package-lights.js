@@ -1,7 +1,7 @@
 import COMPONENTS from "../../static/COMPONENTS.json";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
-import {BundlerAPI} from "../../production";
+import {EntityAPI} from "../../production";
 
 export function packagePointLights(keepOld) {
     const pointLights = Engine.data.pointLights
@@ -46,7 +46,7 @@ export function packagePointLights(keepOld) {
             currentVector[11] = component.zFar
             currentVector[12] = component.zNear
             currentVector[13] = component.shadowMap ? 1 : 0
-            BundlerAPI.lightsChanged.push(component)
+            EntityAPI.lightsChanged.push(component)
         }
 
     Engine.data.pointLightsQuantity = pointLightsQuantity
@@ -99,7 +99,7 @@ export function packageDirectionalLights(keepOld) {
             if (!dirLightPOV[component.lightIndex])
                 dirLightPOV[component.lightIndex] = new Float32Array(16)
             mat4.multiply(dirLightPOV[component.lightIndex], component.lightProjection, component.lightView)
-            BundlerAPI.lightsChanged.push(component)
+            EntityAPI.lightsChanged.push(component)
         }
 
     Engine.data.maxTextures = maxTextures

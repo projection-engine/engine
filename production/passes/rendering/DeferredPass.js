@@ -97,7 +97,6 @@ export default class DeferredPass {
         onWrap(false)
         DeferredPass.compositeFBO.startMapping()
         onWrap(true)
-        console.log()
         const uniforms = {
             screenSpaceGI: ssgi ? SSGIPass.sampler : undefined,
             screenSpaceReflections: ssr ? SSRPass.sampler : undefined,

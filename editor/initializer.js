@@ -23,6 +23,7 @@ import GizmoSystem from "./services/GizmoSystem";
 import Entity from "../production/instances/Entity";
 import TransformationAPI from "../production/apis/math/TransformationAPI";
 import CollisionMeshInfoSystem from "./services/CollisionMeshInfoSystem";
+import UIAPI from "../production/apis/UIAPI";
 
 function getCursor() {
     const entity = new Entity()
@@ -33,6 +34,8 @@ function getCursor() {
     return entity
 }
 export default function initializer() {
+
+    UIAPI.useIframe = true
     GPU.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
     GPU.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
     GPU.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()

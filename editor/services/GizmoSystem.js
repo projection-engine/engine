@@ -69,7 +69,6 @@ export default class GizmoSystem {
     }
 
     static onMouseDown() {
-        console.log(GizmoSystem.tooltip)
         if (!GizmoSystem.tooltip)
             GizmoSystem.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
     }

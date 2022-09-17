@@ -93,7 +93,8 @@ export default class PhysicsPass {
             PhysicsPass.#initializeCollider(entity)
 
         const shape = colliderComp.__shape
-        comp.__inertia = new ammo.btVector3(0, 0, 0)
+        comp.__inertia = new ammo.btVector3(comp.inertia[0], comp.inertia[1], comp.inertia[2])
+        console.log(comp.inertia)
         if (comp.mass > 0)
             shape.calculateLocalInertia(comp.mass, comp.__inertia)
 
@@ -131,7 +132,7 @@ export default class PhysicsPass {
         const rigidBodies = PhysicsPass.rigidBodies
         const length = rigidBodies.length
         const tempTransformation = PhysicsPass.tempTransformation
-        PhysicsPass.world.stepSimulation(Engine.elapsed * 0.0001, 10)
+        PhysicsPass.world.stepSimulation(Engine.elapsed * .1, 10)
         for (let i = 0; i < length; i++) {
             const current = rigidBodies[i]
             const component = current.components.get(COMP)
@@ -144,8 +145,8 @@ export default class PhysicsPass {
             const position = tempTransformation.getOrigin()
             const quaternion = tempTransformation.getRotation()
 
-            const t = current.translation
-            const q = current.rotationQuaternion
+            const t = current._translation
+            const q = current._rotationQuat
 
             t[0] = position.x()
             t[1] = position.y()
@@ -156,7 +157,7 @@ export default class PhysicsPass {
             q[2] = quaternion.z()
             q[3] = quaternion.w()
 
-            current.changed = true
+            current.__changedBuffer[0] = 1
         }
     }
 }

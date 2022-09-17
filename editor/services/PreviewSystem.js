@@ -2,7 +2,7 @@ import {mat4} from "gl-matrix"
 import MeshController from "../../production/instances/MeshController"
 import MaterialController from "../../production/instances/MaterialController"
 import MaterialAPI from "../../production/apis/rendering/MaterialAPI";
-import BundlerAPI from "../../production/apis/BundlerAPI";
+import EntityAPI from "../../production/apis/EntityAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
@@ -89,7 +89,6 @@ export default class PreviewSystem {
                 })
         } else if (materialMesh instanceof MaterialController) {
             const [viewMatrix, cameraVec] = PreviewSystem.cameraData
-            console.log(materialMesh, meshEntity)
             MaterialAPI.drawMesh(
                 undefined,
                 GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),

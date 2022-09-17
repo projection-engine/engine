@@ -13,6 +13,8 @@ const BUTTON_MIDDLE = 1
 
 export default class CameraTracker {
     static #isTracking = false
+    static #id = v4()
+
     static movementSpeed = 0.01
     static scrollSpeed = .5
     static scrollDelay = 100
@@ -160,9 +162,10 @@ export default class CameraTracker {
         }
     }
 
-    static #id = v4()
+
 
     static startTracking() {
+        console.log("IS TRACKING ", CameraTracker.#isTracking)
         if (CameraTracker.#isTracking)
             return
         CameraTracker.#isTracking = true

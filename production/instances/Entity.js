@@ -10,7 +10,7 @@ import SpriteComponent from "../components/rendering/SpriteComponent";
 import RigidBodyComponent from "../components/physics/RigidBodyComponent";
 import PhysicsColliderComponent from "../components/physics/PhysicsColliderComponent";
 import CullingComponent from "../components/misc/CullingComponent";
-import BundlerAPI from "../apis/BundlerAPI";
+import EntityAPI from "../apis/EntityAPI";
 import UIComponent from "../components/misc/UIComponent";
 import Engine from "../Engine";
 
@@ -41,11 +41,11 @@ export default class Entity extends Movable {
         this._active = data
 
         if (this.components.get(COMPONENTS.POINT_LIGHT) || this.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
-            BundlerAPI.packageLights(true)
+            EntityAPI.packageLights(true)
             this.needsLightUpdate = true
         }
         else
-            BundlerAPI.registerEntityComponents(this)
+            EntityAPI.registerEntityComponents(this)
     }
 
     get active() {
@@ -148,7 +148,7 @@ export default class Entity extends Movable {
             this.components.set(KEY, instance)
 
             if (Engine.entitiesMap.get(this.id) != null) // initialized
-                BundlerAPI.registerEntityComponents(this)
+                EntityAPI.registerEntityComponents(this)
 
             return instance
         }
@@ -159,7 +159,7 @@ export default class Entity extends Movable {
         this.components.delete(KEY)
 
         if (hasComponent && Engine.entitiesMap.get(this.id) != null)
-            BundlerAPI.registerEntityComponents(this)
+            EntityAPI.registerEntityComponents(this)
     }
 
     static serializeComplexObject(obj) {

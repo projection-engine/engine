@@ -5,7 +5,7 @@ import TransformationAPI from "./production/apis/math/TransformationAPI";
 import InputEventsAPI from "./production/apis/utils/InputEventsAPI";
 import GPU from "./production/GPU";
 import Engine from "./production/Engine";
-import BundlerAPI from "./production/apis/BundlerAPI";
+import EntityAPI from "./production/apis/EntityAPI";
 import KEYS from "./static/KEYS";
 import DiffuseProbePass from "./production/passes/rendering/DiffuseProbePass";
 import SpecularProbePass from "./production/passes/rendering/SpecularProbePass";
@@ -27,7 +27,7 @@ export {
     InputEventsAPI,
     GPU,
     Engine,
-    BundlerAPI,
+    EntityAPI,
     KEYS,
     DiffuseProbePass,
     SpecularProbePass,

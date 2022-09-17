@@ -1,4 +1,4 @@
-import BundlerAPI from "../apis/BundlerAPI";
+import EntityAPI from "../apis/EntityAPI";
 import GPU from "../GPU";
 import Engine from "../Engine";
 import WORKER_MESSAGES from "./WORKER_MESSAGES.json"
@@ -69,7 +69,7 @@ export default class WorkerController {
 
     static execute() {
         if(WorkerController.#hasChangeBuffer[0] === 1) {
-            BundlerAPI.packageLights(true, true)
+            EntityAPI.packageLights(true, true)
             WorkerController.#hasChangeBuffer[0] = 0
         }
 

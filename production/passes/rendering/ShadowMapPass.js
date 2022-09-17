@@ -3,7 +3,7 @@ import FramebufferController from "../../instances/FramebufferController"
 import ProbeController from "../../instances/ProbeController"
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../static/COMPONENTS.json"
-import BundlerAPI from "../../apis/BundlerAPI";
+import EntityAPI from "../../apis/EntityAPI";
 import Engine from "../../Engine";
 import GPU from "../../GPU";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
@@ -80,7 +80,7 @@ export default class ShadowMapPass {
     }
 
     static #generateToUpdateMap() {
-        const arr = BundlerAPI.lightsChanged
+        const arr = EntityAPI.lightsChanged
         const l = arr.length
         for (let i = 0; i < l; i++) {
             if(!arr[i].shadowMap)
@@ -94,7 +94,7 @@ export default class ShadowMapPass {
     }
 
     static execute() {
-        if (!ShadowMapPass.ready || !ShadowMapPass.changed && BundlerAPI.lightsChanged.length === 0)
+        if (!ShadowMapPass.ready || !ShadowMapPass.changed && EntityAPI.lightsChanged.length === 0)
             return;
 
         ShadowMapPass.#generateToUpdateMap()
@@ -165,7 +165,7 @@ export default class ShadowMapPass {
         ShadowMapPass.changed = false
         ShadowMapPass.#lights2D = []
         ShadowMapPass.#lights3D = []
-        BundlerAPI.lightsChanged = []
+        EntityAPI.lightsChanged = []
     }
 
     static loopMeshes(shader, view, projection, color, lightPosition, shadowClipNearFar) {
@@ -176,7 +176,6 @@ export default class ShadowMapPass {
             const mesh = GPU.meshes.get(meshComponent.meshID)
             if (!mesh || !meshComponent.castsShadows)
                 continue
-            console.log("RENDERING")
             shader.bindForUse({
                 shadowClipNearFar,
                 viewMatrix: view,
