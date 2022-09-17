@@ -41,15 +41,13 @@ export default class PreviewSystem {
     ]
 
     static initialize() {
-        PreviewSystem.frameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.PREVIEW, 300, 300)
-            .texture({precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
+        PreviewSystem.frameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.PREVIEW, 300, 300).texture()
     }
 
     static execute(materialMesh, meshEntity) {
         let response
+
         PreviewSystem.frameBuffer.startMapping()
-
-
         if (meshEntity && materialMesh instanceof MeshController) {
             const maxX = materialMesh.maxBoundingBox[0] - materialMesh.minBoundingBox[0],
                 maxY = materialMesh.maxBoundingBox[1] - materialMesh.minBoundingBox[1],
@@ -74,7 +72,7 @@ export default class PreviewSystem {
                 undefined,
                 materialMesh,
                 GPU.materials.get(FALLBACK_MATERIAL),
-                {},
+                undefined,
                 {
                     cameraVec: cam[1],
                     viewMatrix: cam[0],
@@ -91,11 +89,12 @@ export default class PreviewSystem {
                 })
         } else if (materialMesh instanceof MaterialController) {
             const [viewMatrix, cameraVec] = PreviewSystem.cameraData
+            console.log(materialMesh, meshEntity)
             MaterialAPI.drawMesh(
                 undefined,
                 GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
                 materialMesh,
-                {},
+                undefined,
                 {
                     cameraVec,
                     viewMatrix,
@@ -112,8 +111,9 @@ export default class PreviewSystem {
                 })
         }
         PreviewSystem.frameBuffer.stopMapping()
+
         response = FramebufferController.toImage(PreviewSystem.frameBuffer.FBO)
-        gpu.bindVertexArray(null)
+
         return response
     }
 }

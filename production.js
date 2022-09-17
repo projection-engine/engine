@@ -14,8 +14,10 @@ import FALLBACK_MATERIAL from "./static/FALLBACK_MATERIAL";
 import Entity from "./production/instances/Entity"
 import getPickerId from "./production/utils/get-picker-id"
 import IMAGE_WORKER_ACTIONS from "./static/IMAGE_WORKER_ACTIONS"
+import COMPONENTS from "./static/COMPONENTS.json"
 
 export {
+    COMPONENTS,
     IMAGE_WORKER_ACTIONS,
     getPickerId,
     ConversionAPI,

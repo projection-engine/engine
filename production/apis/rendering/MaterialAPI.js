@@ -28,6 +28,8 @@ export default class MaterialAPI {
 
     static #getEnvironment(id, meshComponent) {
         const result = []
+        if(!meshComponent)
+            return result
         if (meshComponent.diffuseProbeInfluence) {
             const diffuse = DiffuseProbePass.probes[id]
             if (diffuse) {

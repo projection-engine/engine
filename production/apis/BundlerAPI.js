@@ -106,6 +106,7 @@ export default class BundlerAPI {
 
         WorkerController.removeEntity(entity)
         BundlerAPI.#deleteUIEntity(entity)
+        Engine.queryMap.delete(entity.queryKey)
     }
 
 
@@ -201,6 +202,9 @@ export default class BundlerAPI {
             BundlerAPI.uiMountingPoint.appendChild(c)
             UI.anchorElement = undefined
         })
+        const p = UI.__element.parentElement
+        if (p)
+            p.removeChild(UI.__element)
     }
 
     static #createUIEntity(entity) {

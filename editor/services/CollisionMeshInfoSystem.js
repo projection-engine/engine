@@ -37,7 +37,8 @@ export default class CollisionMeshInfoSystem {
 
         for (let i = 0; i < size; i++) {
             const entity = entities.get(selected[i])
-            if (!entity.active || !entity.collisionTransformationMatrix)
+
+            if (!entity?.active || !entity.collisionTransformationMatrix)
                 continue
             const collision = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
             if (!collision)

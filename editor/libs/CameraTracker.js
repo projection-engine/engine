@@ -6,6 +6,7 @@ import {v4} from "uuid";
 import {vec3} from "gl-matrix";
 import GizmoAPI from "./GizmoAPI";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
+import TransformationAPI from "../../production/apis/math/TransformationAPI";
 
 let interval, ctrl, holding, isFocused, isDoubleClick, timeout
 const BUTTON_MIDDLE = 1
