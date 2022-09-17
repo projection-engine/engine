@@ -80,12 +80,12 @@ export default class PhysicsPass {
             return
         }
 
-        const m = entity.translation
-        const q = entity.rotationQuaternion
+        const t = entity.absoluteTranslation
+        const q = entity._rotationQuat
 
         comp.__transform = new ammo.btTransform();
         comp.__transform.setIdentity();
-        comp.__transform.setOrigin(new ammo.btVector3(...m));
+        comp.__transform.setOrigin(new ammo.btVector3(...t));
         comp.__transform.setRotation(new ammo.btQuaternion(...q));
         comp.__motionState = new ammo.btDefaultMotionState(comp.__transform);
 
@@ -93,8 +93,8 @@ export default class PhysicsPass {
             PhysicsPass.#initializeCollider(entity)
 
         const shape = colliderComp.__shape
-        comp.__inertia = new ammo.btVector3(comp.inertia[0], comp.inertia[1], comp.inertia[2])
-        console.log(comp.inertia)
+        const i = comp.inertia
+        comp.__inertia = new ammo.btVector3(i[0], i[1], i[2])
         if (comp.mass > 0)
             shape.calculateLocalInertia(comp.mass, comp.__inertia)
 

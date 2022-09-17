@@ -27,8 +27,6 @@ import UIAPI from "../production/apis/UIAPI";
 
 function getCursor() {
     const entity = new Entity()
-    entity.lockedRotation = true
-    entity.lockedScaling = true
     entity.scaling = (new Array(3)).fill(.075)
     TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling, entity.matrix)
     return entity

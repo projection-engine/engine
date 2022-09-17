@@ -31,7 +31,7 @@ export default class Engine {
             .then(() => {
                 new ResizeObserver(() => {
                     const bBox = gpu.canvas.getBoundingClientRect()
-                    CameraAPI.metadata.aspectRatio = bBox.width / bBox.height
+                    CameraAPI.aspectRatio = bBox.width / bBox.height
                     CameraAPI.updateProjection()
                 }).observe(gpu.canvas)
                 Engine.isReady = true

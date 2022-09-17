@@ -2,6 +2,7 @@ import {quat} from "gl-matrix"
 import TransformationAPI from "../apis/math/TransformationAPI"
 import TRANSFORMATION_PROPS from "../../static/component-props/TRANSFORMATION_PROPS";
 import Component from "../components/Component";
+import SharedBufferAPI from "../apis/SharedBufferAPI";
 
 
 /**
@@ -9,42 +10,24 @@ import Component from "../components/Component";
  * @field __workerGroup {int} - Transformation group which entity is linked to
  */
 
-const S = () => {
-    const b = new Float32Array(new SharedArrayBuffer(12))
-    b[0] = 1
-    b[1] = 1
-    b[2] = 1
-    return b
-}
+
 const toDeg = 57.29
 export default class Movable extends Component {
     _props = TRANSFORMATION_PROPS
-    _rotationQuat = new Float32Array(new SharedArrayBuffer(16))
-    _translation = new Float32Array(new SharedArrayBuffer(12))
-    _scaling = S()
-    pivotPoint = new Float32Array(new SharedArrayBuffer(12))
+    _rotationQuat = SharedBufferAPI.allocateVector(4, 0, true)
+    _translation = SharedBufferAPI.allocateVector(3)
+    _scaling = SharedBufferAPI.allocateVector(3, 1)
+    pivotPoint = SharedBufferAPI.allocateVector(3)
 
-    matrix = Movable.generateIdentity()
-    baseTransformationMatrix = Movable.generateIdentity()
-    collisionTransformationMatrix = Movable.generateIdentity()
+    matrix = SharedBufferAPI.allocateMatrix(4, true)
+    baseTransformationMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    collisionTransformationMatrix = SharedBufferAPI.allocateMatrix(4, true)
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
-    lockedTranslation = false
-    lockedRotation = false
-    lockedScaling = false
 
-    normalMatrix = new Float32Array(new SharedArrayBuffer(48))
-    absoluteTranslation = new Float32Array(new SharedArrayBuffer(12))
+    normalMatrix = SharedBufferAPI.allocateMatrix(3)
+    absoluteTranslation = SharedBufferAPI.allocateVector(3)
     __workerGroup
-
-    static generateIdentity(){
-        const buffer = new Float32Array(new SharedArrayBuffer(64))
-        buffer[0] = 1
-        buffer[5]= 1
-        buffer[10]= 1
-        buffer[15]= 1
-        return buffer
-    }
 
     get position() {
         return this._translation

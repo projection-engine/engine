@@ -25,7 +25,7 @@ export default [
         Component.array(["X", "Y", "Z"], "center", 3, .001, undefined, undefined)
     ]),
     Component.group("SIZE", [
-        Component.array(["X", "Y", "Z"], "size", 3, .001, undefined, undefined, false, (comp) => comp.collisionType !== COLLISION_TYPES.BOX)
+        Component.array(["X", "Y", "Z"], "size", 3, .001, undefined, 0, false, (comp) => comp.collisionType !== COLLISION_TYPES.BOX)
     ]),
 
 

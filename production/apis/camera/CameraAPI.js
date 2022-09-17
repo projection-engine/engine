@@ -4,60 +4,153 @@ import COMPONENTS from "../../../static/COMPONENTS.json";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../../static/ENVIRONMENT";
 import SkyboxPass from "../../passes/rendering/SkyboxPass";
+import SharedBufferAPI from "../SharedBufferAPI";
+import GPU from "../../GPU";
+import WORKER_MESSAGES from "../../workers/WORKER_MESSAGES.json";
+
+/**
+ * @field notificationBuffers {Uint8Array [transformationType, viewNeedsUpdate, projectionNeedsUpdate, isOrthographic]} - transformationType indicates which method will be used (0 for spherical and 1 for direct)
+ * @field sphericalTransformationBuffer {float32array [yaw, pitch, radius, centerOn.x, centerOn.y, centerOn.z]}
+ * @field defaultTransformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
+ * @field projectionBuffer {float32array [zFar, zNear, fov, aR, orthographicSize]}
+ */
+
+const SPHERICAL = 0, DIRECT = 1, ORTHOGRAPHIC = 1, PERSPECTIVE = 0
+
+function getNotificationBuffer() {
+    const b = new Uint8Array(new SharedArrayBuffer(4))
+    b[0] = DIRECT
+    b[1] = 1
+    b[2] = 1
+    b[3] = PERSPECTIVE
+    return b
+}
 
 export default class CameraAPI {
-    static isOrthographic = false
+
     static metadata = new PostProcessing()
-    static position = vec3.create()
-    static viewMatrix = mat4.create()
-    static projectionMatrix = mat4.create()
-    static invViewMatrix = mat4.create()
-    static invProjectionMatrix = mat4.create()
-    static staticViewMatrix = mat4.create()
+    static position = SharedBufferAPI.allocateVector(3)
+    static viewMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    static projectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    static invViewMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    static invProjectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    static staticViewMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    static skyboxProjectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
 
-    static updateProjection(orthoSize = CameraAPI.metadata.size) {
-        const aR = CameraAPI.metadata.aspectRatio
-        if (CameraAPI.isOrthographic)
-            mat4.ortho(CameraAPI.projectionMatrix, -orthoSize, orthoSize, -orthoSize / aR, orthoSize / aR, CameraAPI.metadata.zNear, CameraAPI.metadata.zFar)
-        else
-            mat4.perspective(CameraAPI.projectionMatrix, CameraAPI.metadata.fov, aR, CameraAPI.metadata.zNear, CameraAPI.metadata.zFar)
+    static #projectionBuffer = SharedBufferAPI.allocateVector(5)
+    static #defaultTransformationBuffer = SharedBufferAPI.allocateVector(7)
+    static #sphericalTransformationBuffer = SharedBufferAPI.allocateVector(6)
+    static #notificationBuffers = getNotificationBuffer()
+    static #worker
+    static #initialized = false
 
-        mat4.invert(CameraAPI.invProjectionMatrix, CameraAPI.projectionMatrix)
-        SkyboxPass.projectionMatrix = mat4.perspective([], CameraAPI.metadata.fov, aR, .1, 1000)
+
+    static initialize() {
+        if (CameraAPI.#initialized)
+            return
+
+        CameraAPI.#initialized = true
+
+        const w = new Worker("./build/camera-worker.js")
+        CameraAPI.#worker = w
+        console.log(CameraAPI.viewMatrix, mat4.create())
+        w.postMessage([
+           CameraAPI.#notificationBuffers,
+           CameraAPI.position,
+           CameraAPI.viewMatrix,
+           CameraAPI.projectionMatrix,
+           CameraAPI.invViewMatrix,
+           CameraAPI.invProjectionMatrix,
+           CameraAPI.staticViewMatrix,
+           CameraAPI.#sphericalTransformationBuffer,
+           CameraAPI.#defaultTransformationBuffer,
+           CameraAPI.skyboxProjectionMatrix,
+           CameraAPI.#projectionBuffer
+        ])
     }
 
-    static #updateStaticViewMatrix() {
-        const matrix = mat4.copy(CameraAPI.staticViewMatrix, CameraAPI.viewMatrix)
-        matrix[12] = matrix[13] = matrix[14] = 0
-        return matrix
+
+    static get isOrthographic() {
+        return CameraAPI.#notificationBuffers[3] === ORTHOGRAPHIC
+    }
+
+    static set isOrthographic(data) {
+        CameraAPI.#notificationBuffers[3] = data ? ORTHOGRAPHIC : PERSPECTIVE
+        CameraAPI.#notificationBuffers[2] = 1
+    }
+
+    static get zFar() {
+        return CameraAPI.#projectionBuffer[0]
+    }
+
+    static get zNear() {
+        return CameraAPI.#projectionBuffer[1]
+    }
+
+    static get fov() {
+        return CameraAPI.#projectionBuffer[2]
+    }
+
+    static get aspectRatio() {
+        return CameraAPI.#projectionBuffer[3]
+    }
+
+    static get size() {
+        return CameraAPI.#projectionBuffer[4]
+    }
+
+    static set zFar(data) {
+        CameraAPI.#projectionBuffer[0] = data
+    }
+
+    static set zNear(data) {
+        CameraAPI.#projectionBuffer[1] = data
+    }
+
+    static set fov(data) {
+        CameraAPI.#projectionBuffer[2] = data
+    }
+
+    static set aspectRatio(data) {
+        CameraAPI.#projectionBuffer[3] = data
+    }
+
+    static set size(data) {
+        CameraAPI.#projectionBuffer[4] = data
+    }
+
+
+    static updateProjection() {
+        CameraAPI.#notificationBuffers[2] = 1
     }
 
     static directTransformation(translation, rotation) {
-        mat4.fromRotationTranslation(CameraAPI.invViewMatrix, rotation, translation)
-        mat4.invert(CameraAPI.viewMatrix, CameraAPI.invViewMatrix)
+        const nBuffer = CameraAPI.#notificationBuffers
+        nBuffer[0] = DIRECT
+        nBuffer[1] = 1
 
-        const m = CameraAPI.invViewMatrix
-        CameraAPI.position[0] = m[12]
-        CameraAPI.position[1] = m[13]
-        CameraAPI.position[2] = m[14]
-        CameraAPI.#updateStaticViewMatrix()
+        const buffer = CameraAPI.#defaultTransformationBuffer
+        buffer[0] = translation[0]
+        buffer[1] = translation[1]
+        buffer[2] = translation[2]
+        buffer[3] = rotation[0]
+        buffer[4] = rotation[1]
+        buffer[5] = rotation[2]
+        buffer[6] = rotation[3]
     }
 
     static sphericalTransformation(rotationVec, radius, centerOn) {
-        const [yaw, pitch] = rotationVec
+        const nBuffer = CameraAPI.#notificationBuffers
+        nBuffer[0] = SPHERICAL
+        nBuffer[1] = 1
 
-        const cosPitch = Math.cos(pitch)
-
-        CameraAPI.position[0] = radius * cosPitch * Math.cos(yaw) + centerOn[0]
-        CameraAPI.position[1] = radius * Math.sin(pitch) + centerOn[1]
-        CameraAPI.position[2] = radius * cosPitch * Math.sin(yaw) + centerOn[2]
-        mat4.lookAt(CameraAPI.viewMatrix, CameraAPI.position, centerOn, [0, 1, 0])
-        mat4.invert(CameraAPI.invViewMatrix, CameraAPI.viewMatrix)
-        CameraAPI.#updateStaticViewMatrix()
-
-        if (CameraAPI.isOrthographic)
-            CameraAPI.updateProjection(radius)
-
+        const buffer = CameraAPI.#sphericalTransformationBuffer
+        buffer[0] = rotationVec[0]
+        buffer[1] = rotationVec[1]
+        buffer[2] = radius
+        buffer[3] = centerOn[0]
+        buffer[4] = centerOn[1]
+        buffer[5] = centerOn[2]
     }
 
     static updateViewTarget(entity) {
@@ -68,10 +161,11 @@ export default class CameraAPI {
         if (!cameraObj)
             return
         CameraAPI.directTransformation(entity.translation, entity.rotationQuaternion)
-        CameraAPI.metadata.zFar = cameraObj.zFar
-        CameraAPI.metadata.zNear = cameraObj.zNear
-        CameraAPI.metadata.fov = cameraObj.fov
-        CameraAPI.metadata.aspectRatio = cameraObj.aspectRatio
+        CameraAPI.zFar = cameraObj.zFar
+        CameraAPI.zNear = cameraObj.zNear
+        CameraAPI.fov = cameraObj.fov
+        CameraAPI.aspectRatio = cameraObj.aspectRatio
+
         CameraAPI.metadata.distortion = cameraObj.distortion
         CameraAPI.metadata.distortionStrength = cameraObj.distortionStrength
         CameraAPI.metadata.chromaticAberration = cameraObj.chromaticAberration

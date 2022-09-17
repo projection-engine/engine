@@ -20,6 +20,7 @@ import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import SpritePass from "../../passes/rendering/SpritePass";
 import PhysicsPass from "../../passes/math/PhysicsPass";
 import WorkerController from "../../workers/WorkerController";
+import CameraAPI from "../camera/CameraAPI";
 
 export default class LoopAPI {
     static #initialized = false
@@ -29,6 +30,7 @@ export default class LoopAPI {
         if (LoopAPI.#initialized)
             return
 
+        CameraAPI.initialize()
         WorkerController.initialize()
         LoopAPI.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)

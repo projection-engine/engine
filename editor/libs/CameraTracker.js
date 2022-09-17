@@ -192,7 +192,7 @@ export default class CameraTracker {
     }
 
     static update(onlyRadiusUpdate) {
-        CameraAPI.metadata.size = CameraTracker.radius
+        CameraAPI.size = CameraTracker.radius
         CameraAPI.sphericalTransformation([CameraTracker.yaw, CameraTracker.pitch], CameraTracker.radius, CameraTracker.centerOn)
 
         if (CameraTracker.gizmoReference && !onlyRadiusUpdate) {

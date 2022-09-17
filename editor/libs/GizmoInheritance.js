@@ -62,7 +62,7 @@ export default class GizmoInheritance {
 
 
     #testClick() {
-        if (!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
+        if (!GizmoSystem.mainEntity )
             return
         const mX = GizmoAPI.translateMatrix(this.xGizmo)
         const mY = GizmoAPI.translateMatrix(this.yGizmo)
@@ -82,7 +82,7 @@ export default class GizmoInheritance {
     }
 
     drawGizmo() {
-        if (GizmoSystem.mainEntity?.lockedScaling && this.key === "scaling")
+        if (!GizmoSystem.mainEntity)
             return
 
         gpu.disable(gpu.CULL_FACE)

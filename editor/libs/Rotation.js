@@ -141,7 +141,7 @@ export default class Rotation {
 
 
     #testClick() {
-        if (!GizmoSystem.mainEntity || GizmoSystem.mainEntity?.lockedRotation)
+        if (!GizmoSystem.mainEntity)
             return
         const mX = this.#rotateMatrix("x", this.xGizmo)
         const mY = this.#rotateMatrix("y", this.yGizmo)
@@ -187,7 +187,7 @@ export default class Rotation {
     }
 
     drawGizmo() {
-        if (GizmoSystem.mainEntity.lockedRotation)
+        if (!GizmoSystem.mainEntity)
             return
 
         gpu.disable(gpu.CULL_FACE)

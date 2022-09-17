@@ -14,17 +14,8 @@ import WorkerController from "../workers/WorkerController";
 import UIAPI from "./UIAPI";
 import {TransformationAPI} from "../../production";
 
-function toObject(classes) {
-    const res = {}, s = classes.length
-    for (let i = 0; i < s; i++)
-        res[classes[i].id] = classes[i]
-
-    return res
-}
 
 let lightTimeout
-
-
 export default class EntityAPI {
     static lightsChanged = []
 

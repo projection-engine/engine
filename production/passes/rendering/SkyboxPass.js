@@ -8,7 +8,6 @@ import {mat4} from "gl-matrix";
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class SkyboxPass {
     static isReady = false
-    static projectionMatrix = mat4.perspective([], 1.57, 1, .1, 1000)
     static hasRendered = false
 
     static execute() {
@@ -36,7 +35,7 @@ export default class SkyboxPass {
                     {
                         cameraVec: CameraAPI.position,
                         viewMatrix: CameraAPI.viewMatrix,
-                        projectionMatrix: SkyboxPass.projectionMatrix,
+                        projectionMatrix: CameraAPI.skyboxProjectionMatrix,
                         transformMatrix: current.matrix,
                         normalMatrix: current.normalMatrix,
                         materialComponent: meshComponent

@@ -7,11 +7,11 @@ export default  [
     ]),
 
     Component.group("ROTATION", [
-        Component.array(["X", "Y", "Z"], "rotation", 3, .001, undefined, undefined, true, "lockedRotation")
+        Component.array(["X", "Y", "Z"], "rotation", 3, .001, undefined, undefined, true)
     ]),
 
     Component.group("SCALING", [
-        Component.array(["X", "Y", "Z"], "scaling", 3, .001, undefined, undefined, false, "lockedScaling")
+        Component.array(["X", "Y", "Z"], "scaling", 3, .001, undefined, undefined, false)
     ]),
 
 ]
