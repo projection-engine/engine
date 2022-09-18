@@ -1,6 +1,5 @@
 import {v4} from "uuid"
 import MaterialAPI from "../apis/rendering/MaterialAPI";
-import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 
 export default class MaterialInstanceController {
     id = v4()

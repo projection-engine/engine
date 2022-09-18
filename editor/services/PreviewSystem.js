@@ -2,7 +2,6 @@ import {mat4} from "gl-matrix"
 import MeshController from "../../production/instances/MeshController"
 import MaterialController from "../../production/instances/MaterialController"
 import MaterialAPI from "../../production/apis/rendering/MaterialAPI";
-import EntityAPI from "../../production/apis/EntityAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";

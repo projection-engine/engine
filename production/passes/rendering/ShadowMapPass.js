@@ -1,5 +1,4 @@
 import * as smShaders from "../../shaders/SHADOW_MAP.glsl"
-import FramebufferController from "../../instances/FramebufferController"
 import ProbeController from "../../instances/ProbeController"
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../../static/COMPONENTS.json"

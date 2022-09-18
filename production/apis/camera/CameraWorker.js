@@ -1,4 +1,4 @@
-import {mat4, vec3} from "gl-matrix";
+import {mat4} from "gl-matrix";
 
 /**
  * @field notificationBuffers {Uint8Array [transformationType, viewNeedsUpdate, projectionNeedsUpdate, isOrthographic]} - transformationType indicates which method will be used (0 for spherical and 1 for direct)

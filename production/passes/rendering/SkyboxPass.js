@@ -2,7 +2,6 @@ import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import MATERIAL_RENDERING_TYPES from "../../../static/MATERIAL_RENDERING_TYPES";
 import Engine from "../../Engine";
 import CameraAPI from "../../apis/camera/CameraAPI";
-import {mat4} from "gl-matrix";
 
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX

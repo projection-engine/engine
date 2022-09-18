@@ -1,12 +1,8 @@
-import {mat4, vec3} from "gl-matrix"
 import PostProcessing from "../../instances/PostProcessing";
 import COMPONENTS from "../../../static/COMPONENTS.json";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../../static/ENVIRONMENT";
-import SkyboxPass from "../../passes/rendering/SkyboxPass";
 import SharedBufferAPI from "../SharedBufferAPI";
-import GPU from "../../GPU";
-import WORKER_MESSAGES from "../../workers/WORKER_MESSAGES.json";
 
 /**
  * @field notificationBuffers {Uint8Array [transformationType, viewNeedsUpdate, projectionNeedsUpdate, isOrthographic]} - transformationType indicates which method will be used (0 for spherical and 1 for direct)

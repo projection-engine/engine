@@ -1,6 +1,5 @@
 import EntityAPI from "../apis/EntityAPI";
 import GPU from "../GPU";
-import Engine from "../Engine";
 import WORKER_MESSAGES from "./WORKER_MESSAGES.json"
 
 export default class WorkerController {

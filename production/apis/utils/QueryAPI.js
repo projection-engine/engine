@@ -1,4 +1,5 @@
 import Engine from "../../Engine";
+
 export default class QueryAPI {
     static getEntityByQueryID(id) {
         return Engine.queryMap.get(id)
