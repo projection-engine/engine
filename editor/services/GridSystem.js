@@ -13,14 +13,14 @@ export default class GridSystem {
     }
 
     static execute() {
-        if (Engine.params.gridVisibility && !CameraAPI.isOrthographic) {
-            GridSystem.shader.bindForUse({
-                viewMatrix: CameraAPI.viewMatrix,
-                projectionMatrix: CameraAPI.projectionMatrix,
-                gamma: CameraAPI.metadata.gamma,
-                exposure: CameraAPI.metadata.exposure
-            })
-            QuadAPI.draw()
-        }
+        if (!Engine.params.gridVisibility)
+            return
+        GridSystem.shader.bindForUse({
+            viewMatrix: CameraAPI.viewMatrix,
+            projectionMatrix: CameraAPI.skyboxProjectionMatrix,
+            gamma: CameraAPI.metadata.gamma,
+            exposure: CameraAPI.metadata.exposure
+        })
+        QuadAPI.draw()
     }
 }

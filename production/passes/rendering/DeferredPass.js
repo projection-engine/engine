@@ -22,7 +22,13 @@ export default class DeferredPass {
     static behaviourSampler
     static ambientSampler
 
+    static ready = false
+    static toScreenUniforms = {}
+
     static initialize() {
+        if (DeferredPass.ready)
+            return
+
         DeferredPass.gBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
         DeferredPass.gBuffer
             .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
@@ -38,15 +44,16 @@ export default class DeferredPass {
         DeferredPass.behaviourSampler = DeferredPass.gBuffer.colors[3]
         DeferredPass.ambientSampler = DeferredPass.gBuffer.colors[4]
 
+
         DeferredPass.deferredShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, shaderCode.vertex, shaderCode.fragment)
         DeferredPass.compositeFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
         DeferredPass.toScreenShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, shaderCode.vertex, shaderCode.toScreen)
+        DeferredPass.toScreenUniforms = {uSampler: DeferredPass.compositeFBO.colors[0]}
+        DeferredPass.ready = true
     }
 
     static drawFrame() {
-        DeferredPass.toScreenShader.bindForUse({
-            uSampler: DeferredPass.compositeFBO.colors[0]
-        })
+        DeferredPass.toScreenShader.bindForUse(DeferredPass.toScreenUniforms)
         QuadAPI.draw()
     }
 

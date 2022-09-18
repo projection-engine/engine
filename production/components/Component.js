@@ -14,7 +14,6 @@ export default class Component {
     __entity
 
     _props = []
-    _icon = ""
     _name = ""
     #entity
     get entity() {
@@ -82,9 +81,6 @@ export default class Component {
         return this._props
     }
 
-    get icon() {
-        return this._icon
-    }
 
     get name() {
         return this._name

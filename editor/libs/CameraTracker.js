@@ -27,9 +27,24 @@ export default class CameraTracker {
     static centerOn = [0, 0, 0]
     static radius = 1
     static gizmoReference
-    static cameraInitialized = false
-    static animated = false
 
+    static animated = false
+    static #initialized = false
+
+    static initialize(settings) {
+        if (CameraTracker.#initialized)
+            return
+        CameraTracker.#initialized = true
+        if (settings.cameraPosition)
+            CameraTracker.centerOn = settings.cameraPosition
+        if (typeof settings.yaw === "number")
+            CameraTracker.yaw = settings.yaw
+        if (typeof settings.pitch === "number")
+            CameraTracker.pitch = settings.pitch
+        if (typeof settings.radius === "number")
+            CameraTracker.radius = settings.radius
+        CameraTracker.update()
+    }
 
     static #incrementCameraPlacement(ctrlKey, increment) {
         if (ctrlKey) {
@@ -163,9 +178,7 @@ export default class CameraTracker {
     }
 
 
-
     static startTracking() {
-        console.log("IS TRACKING ", CameraTracker.#isTracking)
         if (CameraTracker.#isTracking)
             return
         CameraTracker.#isTracking = true
@@ -193,6 +206,8 @@ export default class CameraTracker {
 
     static update(onlyRadiusUpdate) {
         CameraAPI.size = CameraTracker.radius
+        if(CameraAPI.isOrthographic)
+        CameraAPI.updateProjection()
         CameraAPI.sphericalTransformation([CameraTracker.yaw, CameraTracker.pitch], CameraTracker.radius, CameraTracker.centerOn)
 
         if (CameraTracker.gizmoReference && !onlyRadiusUpdate) {

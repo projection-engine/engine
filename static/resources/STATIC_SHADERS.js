@@ -24,6 +24,7 @@ export default {
     },
 
     DEVELOPMENT: {
+        DEBUG_DEFERRED: "DEBUG_DEFERRED",
         LINE: "LINE",
         WIREFRAME: "WIREFRAME",
 

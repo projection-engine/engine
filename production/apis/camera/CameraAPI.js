@@ -53,7 +53,7 @@ export default class CameraAPI {
 
         const w = new Worker("./build/camera-worker.js")
         CameraAPI.#worker = w
-        console.log(CameraAPI.viewMatrix, mat4.create())
+
         w.postMessage([
            CameraAPI.#notificationBuffers,
            CameraAPI.position,

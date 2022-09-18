@@ -24,6 +24,7 @@ import Entity from "../production/instances/Entity";
 import TransformationAPI from "../production/apis/math/TransformationAPI";
 import CollisionMeshInfoSystem from "./services/CollisionMeshInfoSystem";
 import UIAPI from "../production/apis/UIAPI";
+import DEBUGGlsl from "./templates/DEBUG.glsl";
 
 function getCursor() {
     const entity = new Entity()
@@ -43,6 +44,7 @@ export default function initializer() {
     GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
     GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
     GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
+    GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.DEBUG_DEFERRED, DEBUGGlsl.vertex, DEBUGGlsl.fragment)
 
     GPU.allocateMesh(STATIC_MESHES.EDITOR.CAMERA, CAMERA)
     GPU.allocateMesh(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO, PLANE)

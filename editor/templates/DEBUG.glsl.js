@@ -1,56 +1,36 @@
-export const fragment = `#version 300 es
+const vertex = `#version 300 es
+layout (location = 0) in vec3 position;
+out vec2 texCoord; 
+void main() {
+    texCoord = position.xy * 0.5 + 0.5;
+    gl_Position = vec4(position, 1);
+}`
+const fragment = `#version 300 es
 precision mediump float;
-
-in vec3 normalVec;
-in vec3 tangent;
-in vec3 bitangent;
-in vec4 vPosition;
-
 in vec2 texCoord;
-in mat3 toTangentSpace;
-
-uniform sampler2D aoSampler;
-uniform int shadingModel;
-
+uniform sampler2D uSampler; 
+uniform int option;
 out vec4 fragColor;
 
-float linearize_Z(float depth){ 
+float linearize(float depth){ 
     float near = .1;
     float far = 1000.;
     return (2.*near ) / (far + near - depth*(far -near)) ;
 }
 
 void main(){
-    vec3 color = vec3(0.); 
+    vec4 samplerData = texture(uSampler, texCoord);
+    vec3 color = samplerData.rgb; 
     
-    switch (shadingModel) {
-        case 0:
-            color = normalVec;
-            break;
-        case 1: 
-            color = tangent;
-            break;
-        case 2:
-            color = vec3(linearize_Z(gl_FragCoord.z));
-            break;
-        case 3:
-            color = vec3(texture(aoSampler, texCoord).r);
-            break;
-        case 4:
-            color = bitangent;
-            break;
-       	case 5:
-            color = vec3(texCoord, 1.);
-            break;
-	   	default:
-	   		float dotP = min(1., max(0.5, dot(vec3(0., 10000., 0), normalVec)));
-			color = vec3(.5) * dotP;
-			break;
-    }
-  
+    if(option == 2)
+        color = vec3(linearize(samplerData.r));
+   
     fragColor = vec4(color, 1.);
 }
 `
 
 
-
+export default {
+    fragment,
+    vertex
+}

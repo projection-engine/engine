@@ -53,6 +53,7 @@ export default class Engine {
     }
 
     static stop() {
+        console.trace("STOPPING")
         cancelAnimationFrame(Engine.frameID)
         Engine.frameID = undefined
     }
