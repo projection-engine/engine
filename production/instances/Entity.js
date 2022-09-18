@@ -180,6 +180,7 @@ export default class Entity extends Movable {
                     return Array.from(value)
 
                 return value
-            })
+            },
+            4)
     }
 }

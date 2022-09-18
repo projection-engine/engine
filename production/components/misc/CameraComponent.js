@@ -5,7 +5,7 @@ export default class CameraComponent extends Component {
     _props = CAMERA_PROPS
     name = "CAMERA"
 
-    fov = 1.57
+    fov = Math.PI/2
     aspectRatio = 1
     zFar = 10000
     zNear = .1
