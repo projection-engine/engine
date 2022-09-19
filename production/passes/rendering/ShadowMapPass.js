@@ -8,6 +8,7 @@ import GPU from "../../GPU";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import PointLightComponent from "../../components/rendering/PointLightComponent";
+import DeferredPass from "./DeferredPass";
 
 export const VIEWS = {
     target: [
@@ -40,7 +41,7 @@ export default class ShadowMapPass {
     static ready = false
     static #lights2D = []
     static #lights3D = []
-
+static atlasRatio = 0
     static initialize() {
 
         ShadowMapPass.specularProbes = [
@@ -59,6 +60,7 @@ export default class ShadowMapPass {
             GPU.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
         ShadowMapPass.shadowsFrameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, ShadowMapPass.maxResolution, ShadowMapPass.maxResolution)
         ShadowMapPass.shadowsFrameBuffer.depthTexture()
+        DeferredPass.deferredUniforms.shadowMapTexture = ShadowMapPass.shadowsFrameBuffer.depthSampler
     }
 
 
@@ -75,7 +77,7 @@ export default class ShadowMapPass {
             ShadowMapPass.resolutionPerTexture = ShadowMapPass.maxResolution / shadowAtlasQuantity
             ShadowMapPass.changed = true
         }
-
+        ShadowMapPass.atlasRatio = ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture
     }
 
     static #generateToUpdateMap() {
@@ -105,7 +107,7 @@ export default class ShadowMapPass {
         if (lights2D.length > 0) {
             ShadowMapPass.shadowsFrameBuffer.startMapping()
             gpu.enable(gpu.SCISSOR_TEST)
-            const size = (ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture) ** 2
+            const size = ShadowMapPass.atlasRatio ** 2
             for (let face = 0; face < size; face++) {
                 if (face < lights2D.length) {
                     const currentLight = lights2D[face]
@@ -127,7 +129,7 @@ export default class ShadowMapPass {
                     currentLight.atlasFace = [currentColumn, 0]
                     ShadowMapPass.loopMeshes(ShadowMapPass.shadowMapShader, currentLight.lightView, currentLight.lightProjection, currentLight.fixedColor)
                 }
-                if (currentColumn > ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture) {
+                if (currentColumn > ShadowMapPass.atlasRatio) {
                     currentColumn = 0
                     currentRow += 1
                 } else

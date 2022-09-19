@@ -7,24 +7,33 @@ void main() {
 }`
 const fragment = `#version 300 es
 precision mediump float;
+#define THREASHOLD .0001
 in vec2 texCoord;
 uniform sampler2D uSampler; 
+uniform sampler2D positionSampler;
 uniform int option;
 out vec4 fragColor;
 
 float linearize(float depth){ 
     float near = .1;
     float far = 1000.;
-    return (2.*near ) / (far + near - depth*(far -near)) ;
+    return (2. * near ) / (far + near - depth*(far -near)) ;
 }
 
 void main(){
     vec4 samplerData = texture(uSampler, texCoord);
     vec3 color = samplerData.rgb; 
     
-    if(option == 2)
-        color = vec3(linearize(samplerData.r));
-   
+    if(option == 2){
+        if(samplerData.r <= THREASHOLD)    
+            discard;        
+        color = vec3(linearize(samplerData.r)) * 5.;
+    }
+    else{
+        vec3 fragPosition = texture(positionSampler, texCoord).rgb;
+        if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
+            discard;
+    }
     fragColor = vec4(color, 1.);
 }
 `

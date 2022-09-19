@@ -20,6 +20,7 @@ export default class SSRPass {
         SSRPass.sampler = SSRPass.FBO.colors[0]
         SSRPass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSR, ssGI.vShader, ssGI.fragment)
         SSRPass.prevFrame = LoopAPI.previousFrame.colors[0]
+        DeferredPass.deferredUniforms.screenSpaceReflections = SSRPass.sampler
     }
 
     static execute() {

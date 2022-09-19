@@ -39,6 +39,8 @@ export default class SSGIPass {
         SSGIPass.ssgiShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, ssGI.vShader, ssGI.ssGI)
         SSGIPass.lastFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
 
+        SSGIPass.sampler = upSampledBuffers[blurBuffers.length - 2].colors[0]
+        DeferredPass.deferredUniforms.screenSpaceGI = SSGIPass.sampler
     }
 
     static execute() {
@@ -61,7 +63,7 @@ export default class SSGIPass {
 
             SSGIPass.FBO.startMapping()
             SSGIPass.ssgiShader.bindForUse({
-                previousFrame:  SSGIPass.lastFrame,
+                previousFrame: SSGIPass.lastFrame,
                 gPosition: DeferredPass.positionSampler,
                 gNormal: SSGIPass.normalSampler,
                 projection: CameraAPI.projectionMatrix,
@@ -74,7 +76,7 @@ export default class SSGIPass {
             })
             QuadAPI.draw()
             SSGIPass.FBO.stopMapping()
-            SSGIPass.sampler = ScreenEffectsPass.blur(SSGIPass.FBO, 1, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
+            ScreenEffectsPass.blur(SSGIPass.FBO, 1, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
         }
     }
 }

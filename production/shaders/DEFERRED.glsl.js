@@ -22,7 +22,7 @@ uniform vec3 cameraVec;
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
 uniform mat3 settings;
 
-// dirLightQuantity,   shadowMapResolution, noShadowProcessing,
+// dirLightQuantity,   shadowMapResolution, 0,
 // shadowMapsQuantity, lightQuantity,       hasAO
 // pcfSamples,         0,                   0
  
@@ -63,10 +63,9 @@ void main() {
     float shadowMapsQuantity = settings[1][0];
     int dirLightQuantity = int(settings[0][0]);
     float shadowMapResolution = settings[0][1]; 
-    bool noShadowProcessing = settings[0][2] == 1.; 
+ 
     int lightQuantity = int(settings[1][1]);
-
-    ivec2 fragCoord = ivec2(gl_FragCoord.xy);
+ 
     vec3 fragPosition = texture(positionSampler, texCoord).rgb;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
         discard;
@@ -91,8 +90,6 @@ void main() {
         
         F0 = mix(F0, albedo, metallic);
         
-  
-    
         float shadows = dirLightQuantity > 0 || lightQuantity > 0?  0. : 1.0;
         float quantityToDivide = float(dirLightQuantity) + float(lightQuantity);
 
@@ -113,7 +110,7 @@ void main() {
                 N,
                 albedo
             );
-            if(directionalLightsData[i][2][2] == 1. && noShadowProcessing == false)
+            if(directionalLightsData[i][2][2] == 1.)
                 shadows += calculateShadows(fragPosLightSpace, atlasFace, shadowMapTexture, shadowMapsQuantity, shadowMapResolution, pcfSamples)/quantityToDivide;
             else
                 shadows += 1./quantityToDivide;            
@@ -125,7 +122,7 @@ void main() {
             float zNear = pointLightData[i][3][0];
             float zFar = pointLightData[i][3][1];
             vec3 positionPLight = vec3(pointLightData[i][0][0], pointLightData[i][0][1], pointLightData[i][0][2]);
-            if(currentLightData.a == 1. && i <= 2 && noShadowProcessing == false)
+            if(currentLightData.a == 1. && i <= 2)
                 shadows += pointLightShadow(fragPosition, positionPLight, i, vec2(zNear, zFar))/quantityToDivide;
             else
                 shadows += 1./quantityToDivide;            

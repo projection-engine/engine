@@ -12,6 +12,12 @@ export default class ConsoleAPI {
     static #registeredConsoles = []
     static #messages = []
     static #metadata = {errors: 0, logs: 0, warns: 0}
+    static #onMessageCallback
+
+    static initialize(onMessageCallback) {
+        if (onMessageCallback)
+            ConsoleAPI.#onMessageCallback = onMessageCallback
+    }
 
     static #updateConsoles() {
         const consoles = ConsoleAPI.#registeredConsoles
@@ -26,8 +32,9 @@ export default class ConsoleAPI {
     }
 
     static #pushMessages(type, messages, src) {
-        if(Engine.environment === ENVIRONMENT.PRODUCTION || Engine.environment === ENVIRONMENT.DEV)
-            return
+        if(ConsoleAPI.#onMessageCallback)
+            ConsoleAPI.#onMessageCallback()
+
         ConsoleAPI.#messages.push(...parseMessage(messages, type, src))
 
         ConsoleAPI.#metadata.errors += type === types.ERROR ? 1 : 0
@@ -47,7 +54,7 @@ export default class ConsoleAPI {
     }
 
     static clear() {
-        if(ConsoleAPI.#messages.length === 0)
+        if (ConsoleAPI.#messages.length === 0)
             return
         ConsoleAPI.#messages = []
         ConsoleAPI.#metadata = {errors: 0, logs: 0, warns: 0}
@@ -61,8 +68,9 @@ export default class ConsoleAPI {
 
     static log(...messages) {
         let src;
-        try { throw new Error(); }
-        catch (e) {
+        try {
+            throw new Error();
+        } catch (e) {
             const stack = e.stack.split("\n")
             src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
         }
@@ -73,8 +81,9 @@ export default class ConsoleAPI {
 
     static warn(...messages) {
         let src;
-        try { throw new Error(); }
-        catch (e) {
+        try {
+            throw new Error();
+        } catch (e) {
             const stack = e.stack.split("\n")
             src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
         }
@@ -84,12 +93,14 @@ export default class ConsoleAPI {
 
     static error(...messages) {
         let src;
-        try { throw new Error(); }
-        catch (e) {
+        try {
+            throw new Error();
+        } catch (e) {
             const stack = e.stack.split("\n")
             src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
         }
-
+        if (src.includes("file:///"))
+            src = "Internal error"
         ConsoleAPI.#pushMessages(types.ERROR, messages, src)
     }
 
@@ -99,6 +110,7 @@ export default class ConsoleAPI {
 }
 
 const isPlainObject = value => value?.constructor === Object;
+
 function parseMessage(messages, type, src) {
     let parts = []
     for (let i = 0; i < messages.length; i++) {

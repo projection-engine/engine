@@ -107,5 +107,7 @@ export default class ScreenEffectsPass {
             current.stopMapping()
         }
         return upSampledBuffers[q - 2].colors[0]
+
+
     }
 }

@@ -24,6 +24,7 @@ export default class DeferredPass {
 
     static ready = false
     static toScreenUniforms = {}
+    static deferredUniforms = {}
 
     static initialize() {
         if (DeferredPass.ready)
@@ -48,7 +49,22 @@ export default class DeferredPass {
         DeferredPass.deferredShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, shaderCode.vertex, shaderCode.fragment)
         DeferredPass.compositeFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
         DeferredPass.toScreenShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, shaderCode.vertex, shaderCode.toScreen)
-        DeferredPass.toScreenUniforms = {uSampler: DeferredPass.compositeFBO.colors[0]}
+        DeferredPass.toScreenUniforms.uSampler = DeferredPass.compositeFBO.colors[0]
+
+        Object.assign(DeferredPass.deferredUniforms, {
+            positionSampler: DeferredPass.positionSampler,
+            normalSampler: DeferredPass.normalSampler,
+            albedoSampler: DeferredPass.albedoSampler,
+            behaviourSampler: DeferredPass.behaviourSampler,
+            ambientSampler: DeferredPass.ambientSampler,
+
+            cameraVec: CameraAPI.position,
+
+            shadowCube0: ShadowMapPass.specularProbes[0].texture,
+            shadowCube1: ShadowMapPass.specularProbes[1].texture,
+            settings: new Float32Array(9)
+        })
+        DeferredPass.deferredUniforms.settings[2] = 1
         DeferredPass.ready = true
     }
 
@@ -96,42 +112,26 @@ export default class DeferredPass {
         } = Engine.data
         const {
             ao,
-            pcfSamples,
-            ssr,
-            ssgi
+            pcfSamples
         } = Engine.params
+
 
         onWrap(false)
         DeferredPass.compositeFBO.startMapping()
         onWrap(true)
-        const uniforms = {
-            screenSpaceGI: ssgi ? SSGIPass.sampler : undefined,
-            screenSpaceReflections: ssr ? SSRPass.sampler : undefined,
+        const U = DeferredPass.deferredUniforms
+        U.directionalLightsData = directionalLightsData
+        U.dirLightPOV = dirLightPOV
+        U.pointLightData = pointLightData
+        const settingsBuffer = U.settings
+        settingsBuffer[0] = maxTextures
+        settingsBuffer[1] = ShadowMapPass.maxResolution
+        settingsBuffer[3] = ShadowMapPass.atlasRatio
+        settingsBuffer[4] = pointLightsQuantity
+        settingsBuffer[5] = ao ? 1 : 0
+        settingsBuffer[6] = pcfSamples
 
-            positionSampler: DeferredPass.positionSampler,
-            normalSampler: DeferredPass.normalSampler,
-            albedoSampler: DeferredPass.albedoSampler,
-            behaviourSampler: DeferredPass.behaviourSampler,
-            ambientSampler: DeferredPass.ambientSampler,
-            aoSampler: AOPass.filteredSampler,
-            cameraVec: CameraAPI.position,
-            directionalLightsData,
-            dirLightPOV,
-            pointLightData,
-            settings: [
-                maxTextures, ShadowMapPass.maxResolution,
-                ShadowMapPass.ready ? 0 : 1,
-                ShadowMapPass.maxResolution / ShadowMapPass.resolutionPerTexture,
-                pointLightsQuantity, ao ? 1 : 0,
-                pcfSamples, 0, 0
-            ]
-        }
-        if (ShadowMapPass.ready) {
-            uniforms.shadowMapTexture = ShadowMapPass.shadowsFrameBuffer.depthSampler
-            uniforms.shadowCube0 = ShadowMapPass.specularProbes[0].texture
-            uniforms.shadowCube1 = ShadowMapPass.specularProbes[1].texture
-        }
-        DeferredPass.deferredShader.bindForUse(uniforms)
+        DeferredPass.deferredShader.bindForUse(U)
 
         QuadAPI.draw()
         DeferredPass.compositeFBO.stopMapping()

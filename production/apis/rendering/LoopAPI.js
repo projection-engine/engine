@@ -35,17 +35,16 @@ export default class LoopAPI {
         LoopAPI.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
-
         ScreenEffectsPass.initialize()
         DepthPass.initialize()
         CompositePass.initialize()
-        DeferredPass.initialize()
         AOPass.initialize()
         SSGIPass.initialize()
         SSRPass.initialize()
         DiffuseProbePass.initialize()
         ShadowMapPass.initialize()
         SpritePass.initialize()
+        DeferredPass.initialize()
         await PhysicsPass.initialize()
 
         LoopAPI.#initialized = true

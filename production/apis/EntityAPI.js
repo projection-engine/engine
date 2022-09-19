@@ -154,11 +154,9 @@ export default class EntityAPI {
                 return true
             } catch (runtimeError) {
                 console.error(runtimeError)
-                ConsoleAPI.error(`${runtimeError.name}: ${runtimeError.message}. (${src})`)
                 return false
             }
         } catch (syntaxError) {
-            ConsoleAPI.error(`${syntaxError.name}: ${syntaxError.message}. (${src})`)
             console.error(syntaxError)
             return false
         }

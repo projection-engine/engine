@@ -7,6 +7,7 @@ import DepthPass from "./DepthPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
+import DeferredPass from "./DeferredPass";
 
 export default class AOPass {
     static ready = false
@@ -59,6 +60,9 @@ export default class AOPass {
                 gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RGBA, gpu.FLOAT, noise)
                 AOPass.ready = true
             })
+
+
+        DeferredPass.deferredUniforms.aoSampler = AOPass.filteredSampler
     }
 
 
