@@ -66,7 +66,8 @@ export default class UIAPI {
         })
         Object.assign(el.style, obj)
         el.id = entity.queryKey
-        el.innerHTML = UI.uiLayoutData
+        const html = Engine.UILayouts.get(UI.uiLayoutID)
+        el.innerHTML = html ? html : ""
 
         el.setAttribute("data-enginewrapper", "-")
         el.setAttribute("data-engineentityid", entity.id)
@@ -116,12 +117,11 @@ export default class UIAPI {
         const el = UI.__element
         el.removeAttribute("style")
         const obj = {}
-        UI.wrapperStyles.forEach(([k, v]) => {
-            obj[k] = v
-        })
+        UI.wrapperStyles.forEach(([k, v]) => obj[k] = v)
         Object.assign(el.style, obj)
         el.id = entity.queryKey
-        el.innerHTML = UI.uiLayoutData
+        const html = Engine.UILayouts.get(UI.uiLayoutID)
+        el.innerHTML = html ? html : ""
     }
 
     static destroyUI() {
@@ -141,7 +141,7 @@ export default class UIAPI {
 
         if (UIAPI.#iframeParent) {
             UIAPI.#iframeParent.removeChild(UIAPI.#iframeParent.querySelector("iframe"))
-            UIAPI.#iframeParent= undefined
+            UIAPI.#iframeParent = undefined
         }
 
     }
