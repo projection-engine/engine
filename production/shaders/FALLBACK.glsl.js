@@ -1,72 +1,23 @@
-export const vertex = `#version 300 es
+import TEMPLATE_VERTEX_SHADER from "../../static/TEMPLATE_VERTEX_SHADER";
 
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 uvTexture;
-layout (location = 3) in vec3 tangentVec;
-
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 cameraVec;
-
-out vec3 normalVec;
-out vec3 tangent;
-out vec3 bitangent;
-
-out vec4 vPosition;
-out vec2 texCoord;
- 
-out mat3 toTangentSpace;
-out vec3 viewDirection;
- 
-
-void main(){
-    vPosition =  transformMatrix *   vec4(position, 1.0);
-    
-    vec3 T = normalize( mat3(transformMatrix)  * normalize(tangentVec));
-    vec3 N =  normalize(mat3(transformMatrix) * normal);
-    vec3 biTangent = cross(N, tangentVec); 
-    vec3 B =  normalize(mat3(transformMatrix) * biTangent);
-    B = dot(biTangent, B)  > 0. ? -B : B;
-    
-    bitangent = B;
-    tangent = T;
-    
-    toTangentSpace = mat3(T, B, N);
-    
-    viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
-    texCoord = uvTexture;
-    
-    normalVec = N; 
-   
-    gl_Position = projectionMatrix * viewMatrix * vPosition;
-}
-`
-export const fallbackVertex = `#version 300 es
-
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal; 
-
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix; 
-
-out vec3 normalVec;  
-out vec4 vPosition; 
-
-void main(){
-    vPosition =  transformMatrix *   vec4(position, 1.0);
-    vec3 N =  normalize(mat3(transformMatrix) * normal);
-    normalVec = N; 
-    gl_Position = projectionMatrix * viewMatrix * vPosition;
-}
-`
 export const fragment = `#version 300 es
 precision highp float;
-
+in vec2 texCoord;
 in vec4 vPosition;
-in vec3 normalVec; 
+in vec3 normalVec;
+in mat3 toTangentSpace;
+
+uniform mat3 settings;
+uniform mat3 rgbSamplerScales;
+uniform mat3 fallbackValues;
+
+uniform sampler2D albedo;
+uniform sampler2D normal;
+uniform sampler2D roughness;
+uniform sampler2D metallic;
+uniform sampler2D ao;
+uniform sampler2D emission;
+ 
  
 @import(ambientUniforms)
 
@@ -74,7 +25,7 @@ uniform vec3 cameraVec;
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
-layout (location = 3) out vec4 gBehaviour;
+layout (location = 3) out vec4 gBehaviour; // AO ROUGHNESS METALLIC
 layout (location = 4) out vec4 gAmbient;
 const float PI = 3.14159265359;
 
@@ -85,17 +36,42 @@ const float PI = 3.14159265359;
 
 void main(){  
     gPosition = vPosition;
-
-    gAlbedo = vec4(vec3(.5), 1.);
-    gBehaviour = vec4(1.,1.,0.,1.);
-    gNormal = vec4(normalVec, 1.);
+    gBehaviour =  vec4(vec3(0.), 1.);
+    vec3 emissionValue = vec3(0.);
+    
+    if(settings[1][2] == 1.)
+        emissionValue = texture(emission, texCoord).rgb * vec3(rgbSamplerScales[2][0], rgbSamplerScales[2][1], rgbSamplerScales[2][2]);
+    else
+        emissionValue = vec3(fallbackValues[2][0], fallbackValues[2][1], fallbackValues[2][2]);
+         
+    if(settings[0][0] == 1.)
+        gAlbedo = vec4(texture(albedo, texCoord).rgb * vec3(rgbSamplerScales[0][0], rgbSamplerScales[0][1], rgbSamplerScales[0][2]), 1.);
+    else
+        gAlbedo = vec4(fallbackValues[0][0], fallbackValues[0][1], fallbackValues[0][2], 1.); 
+    gAlbedo = vec4(gAlbedo.rgb + emissionValue, 1.);
+    
+    if(settings[0][1] == 1.)
+        gNormal = vec4(normalize(toTangentSpace * ((texture(normal, texCoord).rgb * 2.0)- 1.0)) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2]), 1.);
+    else
+        gNormal = vec4(normalVec, 1.);
+        
+    if(settings[0][2] == 1.)
+        gBehaviour.g = texture(roughness, texCoord).r * settings[2][2];
+    else
+        gBehaviour.g = fallbackValues[2][1];
+    
+    if(settings[1][0] == 1.)
+        gBehaviour.b = texture(metallic, texCoord).r * settings[2][1];
+    else
+        gBehaviour.b = fallbackValues[2][1];
+            
+    if(settings[1][0] == 1.)
+        gBehaviour.r = texture(ao, texCoord).r * settings[2][0];
     
     vec3 diffuse = vec3(0.);
     vec3 specular = vec3(0.);
-   
 
     gAmbient = vec4(computeAmbient(cameraVec, gAlbedo.rgb,  vPosition.rgb, normalVec, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, vPosition.rgb), 1.);
-
 }
 `
 
@@ -169,4 +145,9 @@ void main(){
 
     finalColor = vec4(Lo, 1.);
 }
- `
+`
+
+export default {
+ cubeMap: cubeMapShader,
+ fragment: fragment
+}

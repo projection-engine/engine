@@ -99,6 +99,7 @@ export default class ShaderController {
         gpu.shaderSource(shader, bundledCode)
         gpu.compileShader(shader)
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
+
         if (!compiled) {
             console.error(gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))

@@ -2,6 +2,7 @@ import {v4} from "uuid"
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import GPU from "../GPU";
 import MaterialAPI from "../apis/rendering/MaterialAPI";
+import {DEFAULT_MATRICES} from "../../static/SIMPLE_MATERIAL_TEMPLATE";
 
 export default class MaterialController {
     ready = false
@@ -56,7 +57,10 @@ export default class MaterialController {
         }
     }
 
-    set shader([shader, vertexShader, uniformData, onCompiled, settings]) {
+    set shader([shader, vertexShader, u, onCompiled, settings]) {
+        const uniformData = [...DEFAULT_MATRICES]
+        if (u)
+            uniformData.push(...u)
         if (this.ready)
             this.delete()
         this.ready = false
@@ -67,27 +71,20 @@ export default class MaterialController {
         GPU.destroyShader(this.id + "-CUBE-MAP")
 
         this._shader = GPU.allocateShader(this.id, vertexShader, shader)
-        if (uniformData) {
-            MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
-                if (onCompiled)
-                    onCompiled(message)
-                this.ready = true
-                this.instances.forEach(matInstance=> {
-                    matInstance.uniformData = this.uniformData
-                })
-            })
 
-        }
-        else {
-            this.uniformData = {}
+        MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
             if (onCompiled)
-                onCompiled()
+                onCompiled(message)
             this.ready = true
-        }
+            this.instances.forEach(matInstance => {
+                matInstance.uniformData = this.uniformData
+            })
+        })
     }
 
     use(additionalUniforms = {}, isCubeMap = false, uniforms = this.uniformData) {
         const shader = isCubeMap ? this._cubeMapShader : this._shader
+
         if (shader) {
             Object.assign(uniforms, additionalUniforms)
             shader.bindForUse(uniforms)
