@@ -45,29 +45,13 @@ export default class Movable extends Component {
         return this._translation
     }
 
-
     get rotationQuaternion() {
         return this._rotationQuat
-    }
-
-    set rotationQuaternion(q) {
-        this.__changedBuffer[0] = 1
-        quat.normalize(this._rotationQuat, q)
     }
 
     set rotation(data) {
         this.__changedBuffer[0] = 1
         quat.fromEuler(this._rotationQuat, data[0] * toDeg, data[1] * toDeg, data[2] * toDeg)
-    }
-
-    set translation(data) {
-        this.__changedBuffer[0] = 1
-        this._translation = data
-    }
-
-    set scaling(data) {
-        this.__changedBuffer[0] = 1
-        this._scaling = data
     }
 
     get changed() {

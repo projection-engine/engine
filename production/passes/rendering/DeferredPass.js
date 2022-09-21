@@ -7,7 +7,6 @@ import ShadowMapPass from "./ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
-import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import SSGIPass from "./SSGIPass";
 
 export default class DeferredPass {

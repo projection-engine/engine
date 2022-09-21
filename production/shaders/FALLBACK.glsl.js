@@ -1,5 +1,3 @@
-import TEMPLATE_VERTEX_SHADER from "../../static/TEMPLATE_VERTEX_SHADER";
-
 export const fragment = `#version 300 es
 precision highp float;
     
@@ -40,13 +38,13 @@ void main(){
     if(settings[1][2] == 1.)
         emissionValue = texture(emission, texCoord).rgb * vec3(rgbSamplerScales[2][0], rgbSamplerScales[2][1], rgbSamplerScales[2][2]);
     else
-        emissionValue = vec3(fallbackValues[2][0], fallbackValues[2][1], fallbackValues[2][2]);
+        emissionValue = vec3(fallbackValues[1][0], fallbackValues[1][1], fallbackValues[1][2]);
          
     if(settings[0][0] == 1.)
         gAlbedo = vec4(texture(albedo, texCoord).rgb * vec3(rgbSamplerScales[0][0], rgbSamplerScales[0][1], rgbSamplerScales[0][2]), 1.);
     else
         gAlbedo = vec4(fallbackValues[0][0], fallbackValues[0][1], fallbackValues[0][2], 1.); 
-    gAlbedo = vec4(gAlbedo.rgb, 1.);
+    gAlbedo = vec4(gAlbedo.rgb + emissionValue, 1.);
     
     if(settings[0][1] == 1.)
         gNormal = vec4(normalize(toTangentSpace * ((texture(normal, texCoord).rgb * 2.0)- 1.0)) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2]), 1.);

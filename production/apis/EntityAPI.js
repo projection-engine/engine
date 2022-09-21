@@ -26,6 +26,19 @@ export default class EntityAPI {
         EntityAPI.registerEntityComponents(entity)
     }
 
+    static linkEntities(child, parent) {
+        if (child.parent != null) {
+            WorkerController.updateEntityLinks(child, child.parent)
+            child.parent.children = child.parent.children.filter(c => c !== child)
+            child.parent = undefined
+        }
+        if (parent != null) {
+            child.parent = parent
+            parent.children.push(child)
+            WorkerController.updateEntityLinks(child, parent)
+        }
+    }
+
     static registerEntityComponents(entity) {
         if (Engine.environment !== ENVIRONMENT.DEV)
             PhysicsPass.registerRigidBody(entity)

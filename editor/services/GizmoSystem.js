@@ -57,7 +57,10 @@ export default class GizmoSystem {
         GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.ROTATION_GIZMO)
         GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.SCALE_GIZMO)
 
-        EMPTY_COMPONENT.scaling = [.2, .2, .2]
+        EMPTY_COMPONENT.scaling[0] = .2
+        EMPTY_COMPONENT.scaling[1] = .2
+        EMPTY_COMPONENT.scaling[2] = .2
+
         TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.matrix)
 
         GizmoSystem.lineShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)

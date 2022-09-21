@@ -14,6 +14,19 @@ export default class WorkerController {
         return WorkerController.#hasChangeBuffer[0] === 1
     }
 
+    static updateEntityLinks(child, parent) {
+        const parentWorker = WorkerController.threads[parent.__workerGroup]
+        const childWorker = WorkerController.threads[child.__workerGroup]
+        if(!parentWorker || !childWorker)
+            return
+        WorkerController.removeEntity(parent)
+        WorkerController.removeEntity(child)
+
+        WorkerController.registerEntity(parent)
+        WorkerController.registerEntity(child)
+    }
+
+
     static initialize() {
         if (WorkerController.#initialized)
             return
@@ -67,7 +80,7 @@ export default class WorkerController {
     }
 
     static execute() {
-        if(WorkerController.#hasChangeBuffer[0] === 1) {
+        if (WorkerController.#hasChangeBuffer[0] === 1) {
             EntityAPI.packageLights(true, true)
             WorkerController.#hasChangeBuffer[0] = 0
         }
