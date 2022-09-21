@@ -193,7 +193,7 @@ export default class GizmoSystem {
 
         GizmoSystem.tooltip.isChanging()
         GizmoSystem.totalMoved = 1
-        GizmoSystem.tooltip.textContent = `X ${targetBuffer[0].toFixed(2)}  |  Y ${targetBuffer[1].toFixed(2)}  |  Z ${targetBuffer[2].toFixed(2)}`
+        GizmoSystem.tooltip.innerText = `X ${targetBuffer[0].toFixed(2)}  |  Y ${targetBuffer[1].toFixed(2)}  |  Z ${targetBuffer[2].toFixed(2)}`
     }
 
 }

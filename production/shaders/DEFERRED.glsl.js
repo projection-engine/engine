@@ -38,6 +38,7 @@ uniform sampler2D depthSampler;
 uniform sampler2D shadowMapTexture;
 uniform sampler2D screenSpaceReflections;
 uniform sampler2D screenSpaceGI;
+uniform sampler2D brdfSampler;
 
 out vec4 finalColor;
 
@@ -57,7 +58,21 @@ out vec4 finalColor;
 
 @import(computePointLight)
 
+
+
+vec3 computeAmbientSSGI(float NdotV, float metallic, float roughness, vec3 albedo, vec3 F0, vec3 V){
+    vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
+    vec3 kD = (1.0 - F) * (1.0 - metallic);
+    vec2 brdf = texture(brdfSampler, vec2(NdotV, roughness)).rg;
+
+    return texture(screenSpaceGI, texCoord).rgb * albedo * kD ;
+}
+
 void main() {
+    vec3 fragPosition = texture(positionSampler, texCoord).rgb;
+    if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
+        discard;
+        
     float pcfSamples = settings[2][0]; 
     bool hasAO = settings[1][2] == 1.;
     float shadowMapsQuantity = settings[1][0];
@@ -66,9 +81,6 @@ void main() {
  
     int lightQuantity = int(settings[1][1]);
  
-    vec3 fragPosition = texture(positionSampler, texCoord).rgb;
-    if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
-        discard;
 
     vec3 albedo = texture(albedoSampler, texCoord).rgb;
     vec3 color;
@@ -129,11 +141,9 @@ void main() {
         }
       
         Lo = (Lo  + texture(screenSpaceReflections, texCoord).rgb)* shadows; 
-        vec4 GI = texture(screenSpaceGI, texCoord);
-		if(length(GI) >= 0.1 && GI.a > 0.) 
-			color = (ambient  + Lo + albedo*(GI.rgb)) * ao ;
-		else
-   			color = (ambient  + Lo) * ao ;
+ 
+        color = (ambient  + Lo + computeAmbientSSGI(NdotV, metallic, roughness, albedo, F0, V)) * ao ;
+ 
     }
     else
         color = albedo ;

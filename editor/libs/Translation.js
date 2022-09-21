@@ -24,23 +24,21 @@ export default class Translation extends GizmoInheritance {
 
     onMouseMove(event) {
         super.onMouseMove()
-        const position = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
-        this.moveEntities(position)
-        GizmoSystem.notify(GizmoSystem.mainEntity._translation)
-    }
-
-    moveEntities(vec) {
+        const vec = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
         let toApply, firstEntity = GizmoSystem.mainEntity
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
             toApply = vec
         else
-            toApply = vec4.transformQuat([], [...vec, 1], firstEntity.rotationQuaternion)
+            toApply = vec4.transformQuat([], [...vec, 1], firstEntity._rotationQuat)
         const entities = GizmoSystem.selectedEntities
         for (let i = 0; i < entities.length; i++) {
             const target = entities[i]
-            vec3.add(target.translation, target.translation, toApply)
+            vec3.add(target._translation, target._translation, toApply)
 
-            target.changed = true
+            target.__changedBuffer[0] = 1
         }
+        GizmoSystem.notify(GizmoSystem.mainEntity._translation)
     }
+
+
 }

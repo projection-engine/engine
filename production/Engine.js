@@ -1,6 +1,10 @@
 import CameraAPI from "./apis/camera/CameraAPI"
 import ENVIRONMENT from "../static/ENVIRONMENT"
 import LoopAPI from "./apis/rendering/LoopAPI";
+import DeferredPass from "./passes/rendering/DeferredPass";
+import SSGIPass from "./passes/rendering/SSGIPass";
+import SSRPass from "./passes/rendering/SSRPass";
+import AOPass from "./passes/rendering/AOPass";
 
 export default class Engine {
     static entitiesMap = new Map()
@@ -25,20 +29,45 @@ export default class Engine {
     static isReady = false
     static readAsset
 
+    static #initialized = false
 
-    static initialize() {
-        LoopAPI.initialize()
-            .then(() => {
-                new ResizeObserver(() => {
-                    const bBox = gpu.canvas.getBoundingClientRect()
-                    CameraAPI.aspectRatio = bBox.width / bBox.height
-                    CameraAPI.updateProjection()
-                }).observe(gpu.canvas)
-                Engine.isReady = true
-                Engine.start()
-            })
+    static async initialize() {
+        if(Engine.#initialized)
+            return
+        Engine.#initialized = true
+        await LoopAPI.initialize()
+        new ResizeObserver(() => {
+            const bBox = gpu.canvas.getBoundingClientRect()
+            CameraAPI.aspectRatio = bBox.width / bBox.height
+            CameraAPI.updateProjection()
+        }).observe(gpu.canvas)
+        Engine.isReady = true
+        Engine.start()
+
     }
 
+    static updateParams(data){
+        Engine.params = data
+        if(data.ssgi)
+            DeferredPass.deferredUniforms.screenSpaceGI = SSGIPass.sampler
+        else
+            DeferredPass.deferredUniforms.screenSpaceGI = undefined
+
+        if(data.ssr)
+            DeferredPass.deferredUniforms.screenSpaceReflections = SSRPass.sampler
+        else
+            DeferredPass.deferredUniforms.screenSpaceReflections = undefined
+
+        if(data.ao)
+            DeferredPass.deferredUniforms.aoSampler = AOPass.filteredSampler
+        else
+            DeferredPass.deferredUniforms.aoSampler = undefined
+
+        SSGIPass.settingsBuffer[0] = data.ssgiStepSize
+        SSGIPass.settingsBuffer[1] = data.ssgiNoiseScale + 100
+        SSGIPass.settingsBuffer[2] = data.ssgiBrightness
+
+    }
     static #callback() {
         Engine.then = performance.now()
         LoopAPI.loop(Engine.entities)
@@ -53,7 +82,7 @@ export default class Engine {
     }
 
     static stop() {
-        console.trace("STOPPING")
+        console.error("STOPPING")
         cancelAnimationFrame(Engine.frameID)
         Engine.frameID = undefined
     }

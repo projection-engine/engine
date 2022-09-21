@@ -46,7 +46,8 @@ export default class AOPass {
         AOPass.shader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO, shaderCode.vertex, shaderCode.fragment)
         AOPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, shaderCode.vertex, shaderCode.fragmentBlur)
 
-        const w = GPU.internalResolution.w / 4, h = GPU.internalResolution.h / 4
+        const w = 4, h = 4
+        console.log(w)
         GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, GPU.internalResolution)
             .then(({kernels, noise}) => {
                 AOPass.kernels = kernels
@@ -56,8 +57,8 @@ export default class AOPass {
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
-                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RGBA16F, w, h)
-                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RGBA, gpu.FLOAT, noise)
+                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, w, h)
+                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RG, gpu.FLOAT, noise)
                 AOPass.ready = true
             })
 

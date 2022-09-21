@@ -96,9 +96,8 @@ precision highp float;
 uniform sampler2D noise;
 uniform sampler2D gNormal;
 in vec2 texCoord;
- 
-out vec4 outColor;
-const float noiseScale = 1.5;
+uniform float noiseScale;
+out vec4 outColor; 
 
 float interleavedGradientNoise(vec2 n) {
     float f = 0.06711056 * n.x + 0.00583715 * n.y;
@@ -133,11 +132,11 @@ uniform sampler2D previousFrame;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal; 
 
-uniform float intensity;
 uniform mat4 projection;
 uniform mat4 viewMatrix;  
 uniform mat4 invViewMatrix;
-uniform float step;
+   
+uniform vec3 settings; // stepSize, noiseScale,  intensity
 uniform sampler2D noiseSampler;
 
 in vec2 texCoord;
@@ -154,11 +153,11 @@ void main(){
 
     vec3 hitPos = viewPos;
     float dDepth;  
-    vec2 jitter = texture(noiseSampler, texCoord).rg;
+    vec2 jitter = texture(noiseSampler, texCoord* settings.y).rg;
     jitter.x = clamp(jitter.x, 0., 1.);
     jitter.y = clamp(jitter.y, 0., 1.); 
 	jitter += .5;
-	float stepSize = 10.0 * step ;
+	float stepSize = 10.0 * settings.x ;
 	stepSize = stepSize * (jitter.x + jitter.y) + stepSize;
 
  	vec4 coords = RayMarch(normal, hitPos, dDepth, stepSize);
@@ -166,7 +165,7 @@ void main(){
 	
 	if(length(albedo) <= 0.)
 		discard; 
-    outColor = vec4(albedo * .3 * intensity, 1.);
+    outColor = vec4(albedo * .3 * settings.z, 1.);
 }
 `
 

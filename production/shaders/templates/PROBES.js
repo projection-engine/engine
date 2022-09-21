@@ -32,7 +32,7 @@ ${diffuse}
 
 vec3 computeAmbient(float NdotV, float metallic, float roughness, vec3 albedo, vec3 F0, vec3 V, vec3 N, float samples, sampler2D brdfSampler, vec3 elementPosition){
     vec3 specular = vec3(0.);
-    vec3 F    = fresnelSchlickRoughness(NdotV, F0, roughness);
+    vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
 
     vec3 prefilteredColor = textureLod(prefilteredMap, reflect(-V, N), roughness * samples).rgb;

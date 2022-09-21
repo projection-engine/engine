@@ -7,6 +7,8 @@ import ShadowMapPass from "./ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import QuadAPI from "../../apis/rendering/QuadAPI";
+import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
+import SSGIPass from "./SSGIPass";
 
 export default class DeferredPass {
     static gBuffer
@@ -54,14 +56,14 @@ export default class DeferredPass {
             albedoSampler: DeferredPass.albedoSampler,
             behaviourSampler: DeferredPass.behaviourSampler,
             ambientSampler: DeferredPass.ambientSampler,
-
             cameraVec: CameraAPI.position,
-
+            brdfSampler: GPU.BRDF,
             shadowCube0: ShadowMapPass.specularProbes[0].texture,
             shadowCube1: ShadowMapPass.specularProbes[1].texture,
             settings: new Float32Array(9)
         })
         DeferredPass.deferredUniforms.settings[2] = 1
+        SSGIPass.lastFrame = DeferredPass.compositeFBO.colors[0]
         DeferredPass.ready = true
     }
 
@@ -90,8 +92,7 @@ export default class DeferredPass {
                         viewMatrix: CameraAPI.viewMatrix,
                         projectionMatrix: CameraAPI.projectionMatrix,
                         transformMatrix: current.matrix,
-                        normalMatrix: current.normalMatrix,
-                        materialComponent: meshComponent
+                        normalMatrix: current.normalMatrix
                     })
             }
         )
@@ -120,6 +121,7 @@ export default class DeferredPass {
         U.directionalLightsData = directionalLightsData
         U.dirLightPOV = dirLightPOV
         U.pointLightData = pointLightData
+
         const settingsBuffer = U.settings
         settingsBuffer[0] = maxTextures
         settingsBuffer[1] = ShadowMapPass.maxResolution

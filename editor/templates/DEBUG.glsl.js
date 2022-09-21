@@ -21,6 +21,9 @@ float linearize(float depth){
 }
 
 void main(){
+     vec3 fragPosition = texture(positionSampler, texCoord).rgb;
+     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
+            discard;
     vec4 samplerData = texture(uSampler, texCoord);
     vec3 color = samplerData.rgb; 
     
@@ -29,11 +32,16 @@ void main(){
             discard;        
         color = vec3(linearize(samplerData.r)) * 5.;
     }
-    else{
-        vec3 fragPosition = texture(positionSampler, texCoord).rgb;
-        if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
-            discard;
+    else if (option == 9){
+        color = vec3(samplerData.b); 
     }
+    else if (option == 10){
+        color = vec3(samplerData.g);
+    }
+    else if (option == 11){
+        color = vec3(samplerData.r);
+    }
+
     fragColor = vec4(color, 1.);
 }
 `

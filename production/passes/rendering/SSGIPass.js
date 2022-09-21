@@ -22,7 +22,7 @@ export default class SSGIPass {
     static ssgiShader
     static lastFrame
     static normalSampler
-
+    static settingsBuffer = new Float32Array(3)
 
     static initialize() {
         const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h, 2)
@@ -37,7 +37,6 @@ export default class SSGIPass {
         SSGIPass.FBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
         SSGIPass.FBO.texture({linear: true})
         SSGIPass.ssgiShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, ssGI.vShader, ssGI.ssGI)
-        SSGIPass.lastFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
 
         SSGIPass.sampler = upSampledBuffers[blurBuffers.length - 2].colors[0]
         DeferredPass.deferredUniforms.screenSpaceGI = SSGIPass.sampler
@@ -47,15 +46,15 @@ export default class SSGIPass {
         const {
             ssgi,
             ssgiQuality,
-            ssgiBrightness,
-            ssgiStepSize
+            ssgiNoiseScale
         } = Engine.params
 
         if (ssgi) {
             SSGIPass.normalsFBO.startMapping()
             SSGIPass.normalsShader.bindForUse({
                 gNormal: DepthPass.normalSampler,
-                noise: AOPass.noiseSampler
+                noise: AOPass.noiseSampler,
+                noiseScale: ssgiNoiseScale
             })
             QuadAPI.draw()
             SSGIPass.normalsFBO.stopMapping()
@@ -69,9 +68,9 @@ export default class SSGIPass {
                 projection: CameraAPI.projectionMatrix,
                 viewMatrix: CameraAPI.viewMatrix,
                 invViewMatrix: CameraAPI.invViewMatrix,
-                step: ssgiStepSize,
+
                 maxSteps: ssgiQuality,
-                intensity: ssgiBrightness,
+                settings: SSGIPass.settingsBuffer,
                 noiseSampler: AOPass.noiseSampler
             })
             QuadAPI.draw()

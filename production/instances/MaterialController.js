@@ -58,6 +58,7 @@ export default class MaterialController {
     }
 
     set shader([shader, vertexShader, u, onCompiled, settings]) {
+
         const uniformData = [...DEFAULT_MATRICES]
         if (u)
             uniformData.push(...u)

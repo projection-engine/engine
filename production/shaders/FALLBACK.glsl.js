@@ -2,10 +2,13 @@ import TEMPLATE_VERTEX_SHADER from "../../static/TEMPLATE_VERTEX_SHADER";
 
 export const fragment = `#version 300 es
 precision highp float;
-in vec2 texCoord;
-in vec4 vPosition;
+    
+#define PI  3.14159265359 
 in vec3 normalVec;
-in mat3 toTangentSpace;
+in mat3 toTangentSpace; 
+in vec2 texCoord;
+in vec4 vPosition; 
+uniform vec3 cameraVec;
 
 uniform mat3 settings;
 uniform mat3 rgbSamplerScales;
@@ -18,25 +21,20 @@ uniform sampler2D metallic;
 uniform sampler2D ao;
 uniform sampler2D emission;
  
- 
 @import(ambientUniforms)
-
-uniform vec3 cameraVec;
+ 
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
-layout (location = 2) out vec4 gAlbedo;
+layout (location = 2) out vec4 gAlbedo;   
 layout (location = 3) out vec4 gBehaviour; // AO ROUGHNESS METALLIC
 layout (location = 4) out vec4 gAmbient;
-const float PI = 3.14159265359;
-
 
 @import(fresnelSchlickRoughness)
-
 @import(ambient)
 
 void main(){  
     gPosition = vPosition;
-    gBehaviour =  vec4(vec3(0.), 1.);
+    gBehaviour =  vec4(1., 0., 0., 1.);
     vec3 emissionValue = vec3(0.);
     
     if(settings[1][2] == 1.)
@@ -48,7 +46,7 @@ void main(){
         gAlbedo = vec4(texture(albedo, texCoord).rgb * vec3(rgbSamplerScales[0][0], rgbSamplerScales[0][1], rgbSamplerScales[0][2]), 1.);
     else
         gAlbedo = vec4(fallbackValues[0][0], fallbackValues[0][1], fallbackValues[0][2], 1.); 
-    gAlbedo = vec4(gAlbedo.rgb + emissionValue, 1.);
+    gAlbedo = vec4(gAlbedo.rgb, 1.);
     
     if(settings[0][1] == 1.)
         gNormal = vec4(normalize(toTangentSpace * ((texture(normal, texCoord).rgb * 2.0)- 1.0)) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2]), 1.);
@@ -68,6 +66,7 @@ void main(){
     if(settings[1][0] == 1.)
         gBehaviour.r = texture(ao, texCoord).r * settings[2][0];
     
+     
     vec3 diffuse = vec3(0.);
     vec3 specular = vec3(0.);
 

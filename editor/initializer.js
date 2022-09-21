@@ -32,7 +32,7 @@ function getCursor() {
     TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling, entity.matrix)
     return entity
 }
-export default function initializer() {
+export default async function initializer() {
 
     UIAPI.useIframe = true
     GPU.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
@@ -63,5 +63,5 @@ export default function initializer() {
     GizmoSystem.initialize()
     window.engineCursor = getCursor()
 
-    Engine.initialize()
+    await Engine.initialize()
 }

@@ -32,11 +32,11 @@ export default {
     original: FALLBACK_MATERIAL,
     uniformData: [
         ...DEFAULT_MATRICES,
-        {key: "albedo"},
-        {key: "normal"},
-        {key: "roughness"},
-        {key: "metallic"},
-        {key: "ao"},
-        {key: "emission"}
+        {key: "albedo", "type": "sampler2D"},
+        {key: "normal", "type": "sampler2D"},
+        {key: "roughness", "type": "sampler2D"},
+        {key: "metallic", "type": "sampler2D"},
+        {key: "ao", "type": "sampler2D"},
+        {key: "emission", "type": "sampler2D"}
     ]
 }
