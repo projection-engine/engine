@@ -47,7 +47,6 @@ export default class AOPass {
         AOPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, shaderCode.vertex, shaderCode.fragmentBlur)
 
         const w = 4, h = 4
-        console.log(w)
         GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, GPU.internalResolution)
             .then(({kernels, noise}) => {
                 AOPass.kernels = kernels
