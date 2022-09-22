@@ -5,7 +5,6 @@ import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 
 const vertex = `#version 300 es
 
@@ -118,7 +117,7 @@ export default class DepthPass {
             projectionInverse: CameraAPI.invProjectionMatrix,
             viewInverse: CameraAPI.invViewMatrix
         })
-        QuadAPI.draw()
+        GPU.quad.draw()
         DepthPass.normalFBO.stopMapping()
     }
 }

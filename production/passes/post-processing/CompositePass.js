@@ -3,7 +3,6 @@ import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 
 
 export default class CompositePass {
@@ -47,7 +46,7 @@ export default class CompositePass {
             inverseFilterTextureSize: [1 / window.gpu.drawingBufferWidth, 1 / window.gpu.drawingBufferHeight, 0],
             FXAAReduceMul: 1 / 8
         })
-        QuadAPI.draw()
+        GPU.quad.draw()
 
     }
 }

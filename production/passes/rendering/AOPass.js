@@ -6,7 +6,6 @@ import GPU from "../../GPU";
 import DepthPass from "./DepthPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 import DeferredPass from "./DeferredPass";
 
 export default class AOPass {
@@ -85,7 +84,7 @@ export default class AOPass {
                 ],
                 normalSampler: DepthPass.normalSampler
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             AOPass.framebuffer.stopMapping()
 
 
@@ -93,7 +92,7 @@ export default class AOPass {
             AOPass.blurShader.bindForUse({
                 aoSampler: AOPass.unfilteredSampler
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             AOPass.blurredFBO.stopMapping()
         }
     }

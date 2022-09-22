@@ -6,7 +6,6 @@ import GPU from "../../GPU";
 import DeferredPass from "./DeferredPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 
 
 export default class SSRPass {
@@ -42,7 +41,7 @@ export default class SSRPass {
                 stepSize: ssrStepSize,
                 maxSteps: ssrMaxSteps
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             SSRPass.FBO.stopMapping()
         }
     }

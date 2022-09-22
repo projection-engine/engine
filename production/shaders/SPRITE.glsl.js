@@ -12,9 +12,8 @@ void main(){
     bool alwaysFaceCamera = attributes.x == 1.; 
     bool keepSameSize = attributes.y == 1.;
     
-    texCoord = position.xy * 0.5 + 0.5;
-    mat4 m =  viewMatrix * transformationMatrix;    
- 
+    texCoord = uv;
+    mat4 m =  viewMatrix * transformationMatrix;  
     
     if(alwaysFaceCamera){ 
         m[0][0] = scale[0];
@@ -47,12 +46,7 @@ void main(){
         m = m * sc;
     }
     
-
-
-    vec4 transformed =projectionMatrix * m * vec4(position, 1.0);
-    transformed /= transformed.w;
-
-    gl_Position = vec4(transformed.xyz, 1.0);
+    gl_Position = projectionMatrix * m * vec4(position, 1.0);
 }
 `
 export const fragment = `#version 300 es
@@ -73,7 +67,9 @@ void main()
 }
 `
 export const vertex = `#version 300 es 
-layout (location = 0) in vec3 position; 
+layout (location = 0) in vec3 position;
+layout (location = 2) in vec2 uv;
+ 
 uniform mat4 transformationMatrix;
  
 ${BODY}
@@ -81,6 +77,7 @@ ${BODY}
 export const vertexInstanced = `#version 300 es
 layout (location = 0) in vec3 position;
 layout (location = 1) in mat4 transformationMatrix;
+layout (location = 2) in vec2 uv;
 
 ${BODY}
 `

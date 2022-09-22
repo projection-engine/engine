@@ -3,7 +3,6 @@ import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/camera/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../production/apis/rendering/QuadAPI";
 
 export default class GridSystem {
     static shader
@@ -21,6 +20,6 @@ export default class GridSystem {
             gamma: CameraAPI.metadata.gamma,
             exposure: CameraAPI.metadata.exposure
         })
-        QuadAPI.draw()
+        GPU.quad.draw()
     }
 }

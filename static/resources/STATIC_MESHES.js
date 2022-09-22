@@ -4,7 +4,7 @@ export default {
         SPHERE: "SPHERE",
         PLANE: "PLANE",
         CYLINDER: "CYLINDER",
-
+        QUAD: "QUAD"
     },
     EDITOR: {
         ROTATION_GIZMO: "ROTATION_GIZMO",

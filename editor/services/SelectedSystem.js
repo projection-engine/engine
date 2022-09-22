@@ -5,7 +5,6 @@ import CameraAPI from "../../production/apis/camera/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import QuadAPI from "../../production/apis/rendering/QuadAPI";
 
 
 export default class SelectedSystem {
@@ -57,7 +56,7 @@ export default class SelectedSystem {
             SelectedSystem.shaderSilhouette.bindForUse({
                 silhouette: SelectedSystem.silhouetteSampler
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
         }
     }
 }

@@ -7,7 +7,6 @@ import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/editor/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/rendering/SpritePass";
-import QuadAPI from "../../production/apis/rendering/QuadAPI";
 
 const SCALE = (new Array(3)).fill(.25)
 const SCALE_CURSOR = (new Array(3)).fill(.5)
@@ -33,7 +32,7 @@ export default class IconsSystem {
         canvas.height = 128
 
         // LOCKED ENTITY
-        ctx.fillStyle = "yellow"
+        ctx.fillStyle = "rgb(255, 69, 0)"
         ctx.arc(64, 64, 10, 0, Math.PI * 2)
         ctx.fill()
         GPU.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL).then(texture => {
@@ -42,7 +41,7 @@ export default class IconsSystem {
 
         ctx.clearRect(0, 0, 128, 128)
 
-        ctx.fillStyle = "rgb(255, 69, 0)"
+        ctx.fillStyle = "yellow"
         ctx.arc(64, 64, 10, 0, Math.PI * 2)
         ctx.fill()
         GPU.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL_ORANGE).then(texture => {
@@ -76,14 +75,13 @@ export default class IconsSystem {
             }
             gpu.disable(gpu.DEPTH_TEST)
 
-            QuadAPI.use()
 
             attr.scale = SCALE_CURSOR
             attr.transformationMatrix = window.engineCursor.matrix
             attr.iconSampler = IconsSystem.cursorTexture
             attr.attributes = [1, 1]
             SpritePass.shader.bindForUse(attr)
-            QuadAPI.drawQuad()
+            GPU.quad.draw()
 
             const size = selected?.length
             entitiesLoop: if (size > 0) {
@@ -97,7 +95,7 @@ export default class IconsSystem {
                     attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
 
                     SpritePass.shader.bindForUse(attr)
-                    QuadAPI.drawQuad()
+                    GPU.quad.draw()
                 }
             } else {
                 attr.attributes = [1, 1]
@@ -109,11 +107,11 @@ export default class IconsSystem {
                 attr.iconSampler = IconsSystem.textureYellow
 
                 SpritePass.shader.bindForUse(attr)
-                QuadAPI.drawQuad()
+                GPU.quad.draw()
             }
 
 
-            QuadAPI.finish()
+
             gpu.enable(gpu.DEPTH_TEST)
         }
 

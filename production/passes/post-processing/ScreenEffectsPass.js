@@ -5,7 +5,6 @@ import CameraAPI from "../../apis/camera/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 
 let shaderState
 export default class ScreenEffectsPass {
@@ -48,7 +47,7 @@ export default class ScreenEffectsPass {
                 sceneColor: ScreenEffectsPass.workerTexture,
                 threshold: bloomThreshold
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             op.stopMapping()
             ScreenEffectsPass.blurred = ScreenEffectsPass.blur(op, bloomStrength)
             if (!shaderState?.blurred)
@@ -64,7 +63,7 @@ export default class ScreenEffectsPass {
             }
         op.startMapping()
         ScreenEffectsPass.compositeShader.bindForUse(shaderState)
-        QuadAPI.draw()
+        GPU.quad.draw()
         op.stopMapping()
     }
 
@@ -81,7 +80,7 @@ export default class ScreenEffectsPass {
                 isWidth: true,
                 kernel
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             width.stopMapping()
 
             height.startMapping()
@@ -90,7 +89,7 @@ export default class ScreenEffectsPass {
                 resolution: [height.width, height.height],
                 isWidth: false
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             height.stopMapping()
         }
 
@@ -103,7 +102,7 @@ export default class ScreenEffectsPass {
                 resolution: [current.width, current.height],
                 bloomIntensity
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             current.stopMapping()
         }
         return upSampledBuffers[q - 2].colors[0]

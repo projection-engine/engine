@@ -6,7 +6,6 @@ import GPU from "../../GPU";
 import ShadowMapPass from "./ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 import SSGIPass from "./SSGIPass";
 
 export default class DeferredPass {
@@ -68,7 +67,7 @@ export default class DeferredPass {
 
     static drawFrame() {
         DeferredPass.toScreenShader.bindForUse(DeferredPass.toScreenUniforms)
-        QuadAPI.draw()
+        GPU.quad.draw()
     }
 
     static execute() {
@@ -130,8 +129,7 @@ export default class DeferredPass {
         settingsBuffer[6] = pcfSamples
 
         DeferredPass.deferredShader.bindForUse(U)
-
-        QuadAPI.draw()
+        GPU.quad.draw()
         DeferredPass.compositeFBO.stopMapping()
     }
 }

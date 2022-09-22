@@ -9,7 +9,6 @@ import ScreenEffectsPass from "../post-processing/ScreenEffectsPass";
 import DeferredPass from "./DeferredPass";
 import AOPass from "./AOPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import QuadAPI from "../../apis/rendering/QuadAPI";
 
 
 export default class SSGIPass {
@@ -56,7 +55,7 @@ export default class SSGIPass {
                 noise: AOPass.noiseSampler,
                 noiseScale: ssgiNoiseScale
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             SSGIPass.normalsFBO.stopMapping()
 
 
@@ -73,7 +72,7 @@ export default class SSGIPass {
                 settings: SSGIPass.settingsBuffer,
                 noiseSampler: AOPass.noiseSampler
             })
-            QuadAPI.draw()
+            GPU.quad.draw()
             SSGIPass.FBO.stopMapping()
             ScreenEffectsPass.blur(SSGIPass.FBO, 1, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
         }

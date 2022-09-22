@@ -10,8 +10,9 @@ import STATIC_MESHES from "../static/resources/STATIC_MESHES";
 import ICO_SPHERE from "../static/meshes/ICO_SPHERE_SM.json";
 import CYLINDER from "../static/meshes/CYLINDER_SM.json";
 import CUBE from "../static/meshes/CUBE_SM.json";
+import QUAD from "../static/meshes/QUAD.json";
 import PLANE from "../static/meshes/PLANE_SM.json";
-import QuadAPI from "./apis/rendering/QuadAPI";
+
 import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
 import TextureController from "./instances/TextureController";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
@@ -53,6 +54,7 @@ export default class GPU {
     static imageWorker
     static internalResolution = {w: screen.width, h: screen.height}
 
+    static quad
     static async initializeContext(canvas, [width, height], readAsset) {
         Engine.readAsset = readAsset
         GPU.internalResolution = {w: width, h: height}
@@ -116,7 +118,7 @@ export default class GPU {
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.CUBE, CUBE)
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.CYLINDER, CYLINDER)
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.PLANE, PLANE)
-
+        GPU.quad = GPU.allocateMesh(STATIC_MESHES.PRODUCTION.QUAD, QUAD)
 
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, width, height).texture().depthTest()
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, width, height).texture()
@@ -135,7 +137,7 @@ export default class GPU {
             FALLBACK_MATERIAL
         )
 
-        QuadAPI.initialize()
+
         LineAPI.initialize()
     }
 
