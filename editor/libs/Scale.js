@@ -5,10 +5,12 @@ import GizmoSystem from "../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GizmoInheritance from "./GizmoInheritance";
 
-const MOVEMENT_SCALE = .1
+const MOVEMENT_SCALE = .01
 export default class Scale extends GizmoInheritance {
     gridSize = .01
     key = "scaling"
+
+    static cache = [0, 0, 0]
 
     constructor() {
         super()
@@ -17,23 +19,32 @@ export default class Scale extends GizmoInheritance {
         this.yGizmo = mapGizmoMesh("y", "SCALE")
         this.zGizmo = mapGizmoMesh("z", "SCALE")
     }
-
+onMouseDown(event) {
+    super.onMouseDown(event);
+    Scale.cache = [0,0,0]
+}
 
     onMouseMove(event) {
         super.onMouseMove()
-        const vec = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE, this.gridSize)
+        const vec = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE)
         let toApply, firstEntity = GizmoSystem.mainEntity
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
-            toApply = vec
-        else
             toApply = vec4.transformQuat([], [...vec, 1], firstEntity._rotationQuat)
+        else
+            toApply = vec
+        vec3.add(Scale.cache, Scale.cache, toApply)
+        if (Math.abs(Scale.cache[0]) >= this.gridSize || Math.abs(Scale.cache[1]) >= this.gridSize || Math.abs(Scale.cache[2]) >= this.gridSize) {
 
-        const entities = GizmoSystem.selectedEntities
-        for (let i = 0; i < entities.length; i++) {
-            const target = entities[i]
-            vec3.add(target._scaling, target._scaling, toApply)
-            target.__changedBuffer[0] = 1
+            const entities = GizmoSystem.selectedEntities
+            for (let i = 0; i < entities.length; i++) {
+                const target = entities[i]
+                vec3.add(target._scaling, target._scaling, Scale.cache)
+                for (let j = 0; j < 3; j++)
+                    target._scaling[j] = Math.round(target._scaling[j] / this.gridSize) * this.gridSize
+                target.__changedBuffer[0] = 1
+            }
+            GizmoSystem.notify(GizmoSystem.mainEntity._scaling)
+            Scale.cache = [0, 0, 0]
         }
-        GizmoSystem.notify(GizmoSystem.mainEntity._scaling)
     }
 }

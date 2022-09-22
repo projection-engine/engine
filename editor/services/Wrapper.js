@@ -9,7 +9,7 @@ import CollisionMeshInfoSystem from "./CollisionMeshInfoSystem";
 
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
-        const {selected, transformationType, iconsVisibility} = Engine.params
+        const {selected, iconsVisibility} = Engine.params
         const {cameras} = Engine.data
 
         if (!isDuringFrameComposition && !isDuringBinging)
@@ -26,7 +26,7 @@ export default class Wrapper {
 
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
             CollisionMeshInfoSystem.execute(selected)
-            if(iconsVisibility) {
+            if (iconsVisibility) {
                 const attr = {
                     viewMatrix: CameraAPI.viewMatrix,
                     cameraPosition: CameraAPI.position,
@@ -44,7 +44,7 @@ export default class Wrapper {
                 }
             }
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
-            GizmoSystem.execute(transformationType)
+            GizmoSystem.execute()
             IconsSystem.execute(selected)
 
         }

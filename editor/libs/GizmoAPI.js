@@ -10,12 +10,13 @@ export default class GizmoAPI {
     static translateMatrix(entity) {
         if (!GizmoSystem.translation)
             return
-        const matrix = entity.matrix.slice(0)
-        GizmoAPI.applyTransformation(matrix, entity.rotationQuaternion, entity.translation, entity.scaling)
+        const matrix = mat4.copy([], entity.matrix)
+        GizmoAPI.applyTransformation(matrix, entity._rotationQuat, entity._translation, entity._scaling)
         return matrix
     }
 
     static applyTransformation(matrix, q, t, s){
+
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE)
             mat4.fromRotationTranslationScaleOrigin(
                 matrix,

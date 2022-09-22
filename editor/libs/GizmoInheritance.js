@@ -88,10 +88,9 @@ export default class GizmoInheritance {
         gpu.disable(gpu.CULL_FACE)
         DualAxisGizmo.drawGizmo()
 
-        if (this.updateTransformationRealtime) {
-            GizmoSystem.updateTranslation()
+        if (this.updateTransformationRealtime)
             GizmoSystem.transformationMatrix = GizmoAPI.translateMatrix(GizmoSystem.EMPTY_COMPONENT)
-        }
+
         const mX = GizmoAPI.translateMatrix(this.xGizmo)
         const mY = GizmoAPI.translateMatrix(this.yGizmo)
         const mZ = GizmoAPI.translateMatrix(this.zGizmo)

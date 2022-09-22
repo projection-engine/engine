@@ -46,7 +46,7 @@ export default class GizmoSystem {
     static rotationGizmo
     static lineShader
     static EMPTY_COMPONENT = EMPTY_COMPONENT
-
+    static transformationType = TRANSFORMATION_TYPE.GLOBAL
     static activeGizmoMatrix = M
 
     static initialize() {
@@ -57,11 +57,11 @@ export default class GizmoSystem {
         GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.ROTATION_GIZMO)
         GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.SCALE_GIZMO)
 
-        EMPTY_COMPONENT.scaling[0] = .2
-        EMPTY_COMPONENT.scaling[1] = .2
-        EMPTY_COMPONENT.scaling[2] = .2
+        EMPTY_COMPONENT._scaling[0] = .2
+        EMPTY_COMPONENT._scaling[1] = .2
+        EMPTY_COMPONENT._scaling[2] = .2
 
-        TransformationAPI.transform(EMPTY_COMPONENT.translation, EMPTY_COMPONENT.rotationQuaternion, EMPTY_COMPONENT.scaling, EMPTY_COMPONENT.matrix)
+        TransformationAPI.transform(EMPTY_COMPONENT._translation, EMPTY_COMPONENT._rotationQuat, EMPTY_COMPONENT._scaling, EMPTY_COMPONENT.matrix)
 
         GizmoSystem.lineShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)
         GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
@@ -81,14 +81,6 @@ export default class GizmoSystem {
             setTimeout(() => {
                 GizmoSystem.tooltip.finished()
             }, 250)
-    }
-
-    static updateTranslation() {
-        const main = GizmoSystem.mainEntity
-        if (!main)
-            return
-        const matrix = main.matrix
-        GizmoSystem.translation = [matrix[12], matrix[13], matrix[14]]
     }
 
     static drawToDepthSampler(mesh, transforms) {
@@ -130,8 +122,8 @@ export default class GizmoSystem {
         const main = GizmoSystem.selectedEntities[0]
         if ((WorkerController.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
             GizmoSystem.mainEntity = main
-            GizmoSystem.targetRotation = main.rotationQuaternion
-            GizmoSystem.updateTranslation()
+            GizmoSystem.targetRotation = main._rotationQuat
+            GizmoSystem.translation = main.absoluteTranslation
             GizmoSystem.transformationMatrix = GizmoAPI.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
 
 
@@ -144,12 +136,11 @@ export default class GizmoSystem {
         }
     }
 
-    static execute(transformationType = TRANSFORMATION_TYPE.GLOBAL) {
+    static execute( ) {
 
         if (GizmoSystem.selectedEntities.length > 0) {
             const t = GizmoSystem.targetGizmo
             GizmoSystem.#findMainEntity()
-            GizmoSystem.transformationType = transformationType
             if (t && GizmoSystem.translation != null) {
                 t.drawGizmo()
                 ScreenSpaceGizmo.drawGizmo()

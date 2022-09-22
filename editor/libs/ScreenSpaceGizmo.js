@@ -12,10 +12,9 @@ export default class ScreenSpaceGizmo {
     static cameraDistance
     static mouseDelta = {x: 0, y: 0}
 
-    static onMouseMove(event, damping = 1, gridStep = .001) {
+    static onMouseMove(event, damping = 1) {
         if (GizmoSystem.clickedAxis < 0)
             return [0, 0, 0]
-
         const cameraDistance = ScreenSpaceGizmo.cameraDistance ** 2
         const mouseAcceleration = cameraDistance * damping
         const mD = ScreenSpaceGizmo.mouseDelta
@@ -23,8 +22,8 @@ export default class ScreenSpaceGizmo {
         const x = Math.sign(mX) * mD.x + mX * mouseAcceleration
         const y = Math.sign(mY) * mD.y + mY * mouseAcceleration
         const ssP = ConversionAPI.toLinearWorldCoordinates(x, y).slice(0, 3)
-        for (let i = 0; i < 3; i++)
-            ssP[i] = (Math.round(ssP[i] / gridStep) * gridStep) * damping / cameraDistance
+        vec3.scale(ssP,ssP, 1 / cameraDistance)
+
         ScreenSpaceGizmo.mapToAxis(ssP)
 
         return ssP
@@ -62,7 +61,7 @@ export default class ScreenSpaceGizmo {
         }
     }
 
-    static onMouseDown( ) {
+    static onMouseDown() {
         ScreenSpaceGizmo.cameraDistance = Math.min(Math.max(vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position)), 50), 150)
 
         const b = gpu.canvas.getBoundingClientRect()
@@ -72,7 +71,7 @@ export default class ScreenSpaceGizmo {
 
 
     static drawGizmo() {
-        if (!GizmoSystem.transformationMatrix || GizmoSystem.clickedAxis >= 0 )
+        if (!GizmoSystem.transformationMatrix || GizmoSystem.clickedAxis >= 0)
             return
         GizmoAPI.drawGizmo(GizmoSystem.screenSpaceMesh, GizmoSystem.transformationMatrix, AXIS.SCREEN_SPACE, PICK_ID_SS_GIZMO, GizmoSystem.translation, GizmoSystem.clickedAxis)
     }

@@ -1,7 +1,9 @@
 import Entity from "../../production/instances/Entity"
 import TransformationAPI from "../../production/apis/math/TransformationAPI"
 import getPickerId from "../../production/utils/get-picker-id";
+import {quat, vec3} from "gl-matrix";
 
+const toDeg = 57.29
 export default function mapGizmoMesh(axis, type) {
     const e = new Entity(undefined)
     let s, t = [0, 0, 0], r, index
@@ -83,11 +85,12 @@ export default function mapGizmoMesh(axis, type) {
             break
         }
     }
-
+    const q =  quat.fromEuler([], toDeg * r[0], toDeg * r[1], toDeg * r[2])
     e.pickID = getPickerId(index)
-    e.translation = t
-    e.rotation = r
-    e.scaling = s
+    vec3.copy(e._translation, t)
+    vec3.copy(e._scaling, s)
+    quat.copy(e._rotationQuat, q)
+
     e.matrix = TransformationAPI.transform(t, e.rotationQuaternion, s)
 
     return e
