@@ -10,70 +10,56 @@ void main()
     texCoords = Position.xy * 0.5 + 0.5;
 }
 `
-// THANKS TO https://theorangeduck.com/page/pure-depth-ssao
+
 export const fragment = `#version 300 es
+
 precision highp float;
 
-#define T  1.
-#define B  0.2
-#define A  0.0075
-#define F  0.000001
-#define R  0.0002
+#define KERNELS 64
 
 in vec2 texCoords;
-uniform sampler2D depthSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D randomSampler;
-uniform mat3 settings;
-out vec4 outColor;
 
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D noiseSampler;
+uniform vec3 samples[KERNELS];
+uniform mat4 projection;
+uniform vec2 noiseScale;
+
+// parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
+int kernelSize = 64;
+float radius = 100.; 
+
+// tile noise texture over screen based on screen dimensions divided by noise size
+ 
+out vec4 fragColor;
 
 void main()
 {
-  float total_strength = T * settings[0][0];
-  float base  = B * settings[0][1];
-  float area  =A *  settings[0][2];
-  float falloff  =F *  settings[1][0];
-  float radius  = R * settings[1][2];
-  const int samples = 16;
-  
-  
-  vec3 sample_sphere[samples] = vec3[samples](
-      vec3( 0.5381, 0.1856,-0.4319), vec3( 0.1379, 0.2486, 0.4430),
-      vec3( 0.3371, 0.5679,-0.0057), vec3(-0.6999,-0.0451,-0.0019),
-      vec3( 0.0689,-0.1598,-0.8547), vec3( 0.0560, 0.0069,-0.1843),
-      vec3(-0.0146, 0.1402, 0.0762), vec3( 0.0100,-0.1924,-0.0344),
-      vec3(-0.3577,-0.5301,-0.4358), vec3(-0.3169, 0.1063, 0.0158),
-      vec3( 0.0103,-0.5869, 0.0046), vec3(-0.0897,-0.4940, 0.3287),
-      vec3( 0.7119,-0.0154,-0.0918), vec3(-0.0533, 0.0596,-0.5411),
-      vec3( 0.0352,-0.0631, 0.5460), vec3(-0.4776, 0.2847,-0.0271)
-  );
-  
-  vec3 random = normalize( texture(randomSampler, texCoords * 4.0).rgb );
-  
-  float depth = texture(depthSampler, texCoords).r;
- 
-  vec3 position = vec3(texCoords, depth);
-  vec3 normal = texture(normalSampler, texCoords).rgb;
-  
-  float radius_depth = radius/depth;
-  float occlusion = 0.0;
-  for(int i=0; i < samples; i++) {
-  
-    vec3 ray = radius_depth * reflect(sample_sphere[i], random);
-    vec3 hemi_ray = position + sign(dot(ray,normal)) * ray;
+    // get input for SSAO algorithm
+    vec3 fragPos = texture(gPosition, texCoords).xyz;
+    vec3 normal = normalize(texture(gNormal, texCoords).rgb);
+    vec3 randomVec = normalize(texture(noiseSampler, texCoords * noiseScale).xyz);
     
-    float occ_depth = texture(depthSampler, clamp(hemi_ray.xy, 0., 1.)).r;
-    float difference = depth - occ_depth;
+    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
+    vec3 bitangent = cross(normal, tangent);
+    mat3 TBN = mat3(tangent, bitangent, normal);
     
-    occlusion += step(falloff, difference) * (1.0-smoothstep(falloff, area, difference));
-  }
-  
-  float ao = 1.0 - total_strength * occlusion * (1.0 / float(samples));
-  
-  
-  
-  outColor = vec4(vec3(clamp(ao + base, 0., 1.)), 1.);
+    float occlusion = 0.0;
+    for(int i = 0; i < kernelSize; ++i){
+        vec3 samplePos = TBN * samples[i];
+        samplePos = fragPos + samplePos * radius;
+        vec4 offset = vec4(samplePos, 1.0);
+        offset = projection * offset; 
+        offset.xyz /= offset.w; 
+        offset.xyz = offset.xyz * 0.5 + 0.5;
+        float sampleDepth = texture(gPosition, offset.xy).z; 
+        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
+        occlusion += (sampleDepth >= samplePos.z  ? 1.0 : 0.0) * rangeCheck;           
+    }
+    occlusion = 1.0 - (occlusion / float(KERNELS));
+    
+    fragColor = vec4(pow(clamp(occlusion, 0., 2.), 3.),.0,.0, 1.);
 }
 `
 export const fragmentBlur = `#version 300 es
@@ -81,21 +67,21 @@ export const fragmentBlur = `#version 300 es
 precision highp float;
 out vec4 fragColor;
 in vec2 texCoords;
-uniform sampler2D aoSampler;
-
+uniform sampler2D sampler;
+const int upSampling = 2;
 void main() 
 {
-    vec2 texelSize = 1.0 / vec2(textureSize(aoSampler, 0));
-    float result = 0.0;
-    for (int x = -2; x < 2; ++x) 
+    vec2 texelSize = 1.0 / vec2(textureSize(sampler, 0));
+    vec3 result = vec3(0.);
+    for (int x = -upSampling; x < upSampling; ++x) 
     {
-        for (int y = -2; y < 2; ++y) 
-        {
+        for (int y = -upSampling; y < upSampling; ++y) 
+       {
             vec2 offset = vec2(float(x), float(y)) * texelSize;
-            result += texture(aoSampler, texCoords + offset).r;
+            result += texture(sampler, texCoords + offset).rgb;
         }
     }
-    fragColor = vec4(vec3(result / (4.0 * 4.0)), 1.);
+    fragColor = vec4(vec3(result / pow(float(upSampling * 2), 2.)), 1.);
 }  
 
 `

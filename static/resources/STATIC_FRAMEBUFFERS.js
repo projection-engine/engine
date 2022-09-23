@@ -13,5 +13,5 @@ export default {
     EDITOR: {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"
-    }
+    },
 }

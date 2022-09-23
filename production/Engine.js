@@ -67,8 +67,7 @@ export default class Engine {
             DeferredPass.deferredUniforms.aoSampler = undefined
 
         SSGIPass.settingsBuffer[0] = data.ssgiStepSize
-        SSGIPass.settingsBuffer[1] = data.ssgiNoiseScale + 100
-        SSGIPass.settingsBuffer[2] = data.ssgiBrightness
+        SSGIPass.settingsBuffer[1] = data.ssgiBrightness
 
     }
     static #callback() {

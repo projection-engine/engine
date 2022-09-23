@@ -54,7 +54,7 @@ export default class LoopAPI {
         const onWrap = Engine.params.onWrap
         const FBO = LoopAPI.previousFrame
         DepthPass.execute()
-        AOPass.execute()
+
 
         SpecularProbePass.execute()
         DiffuseProbePass.execute()
@@ -62,6 +62,7 @@ export default class LoopAPI {
 
         SSGIPass.execute()
         DeferredPass.execute()
+        AOPass.execute()
         DeferredPass.drawBuffer(
             entities,
             isDuringBinding => {

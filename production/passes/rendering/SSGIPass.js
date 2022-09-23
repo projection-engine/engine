@@ -21,16 +21,16 @@ export default class SSGIPass {
     static ssgiShader
     static lastFrame
     static normalSampler
-    static settingsBuffer = new Float32Array(3)
+    static settingsBuffer = new Float32Array(2)
 
     static initialize() {
-        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h, 2)
+        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPU.internalResolution.w, GPU.internalResolution.h, 2)
         SSGIPass.blurBuffers = blurBuffers
         SSGIPass.upSampledBuffers = upSampledBuffers
 
         SSGIPass.normalsShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, ssGI.vShader, ssGI.stochasticNormals)
         SSGIPass.normalsFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS)
-        SSGIPass.normalsFBO.texture({linear: true})
+        SSGIPass.normalsFBO.texture({precision: gpu.RGBA32F, linear: true})
         SSGIPass.normalSampler = SSGIPass.normalsFBO.colors[0]
 
         SSGIPass.FBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
@@ -39,13 +39,13 @@ export default class SSGIPass {
 
         SSGIPass.sampler = upSampledBuffers[blurBuffers.length - 2].colors[0]
         DeferredPass.deferredUniforms.screenSpaceGI = SSGIPass.sampler
+        SSGIPass.settingsBuffer[1] = 1
     }
 
     static execute() {
         const {
             ssgi,
-            ssgiQuality,
-            ssgiNoiseScale
+            ssgiQuality
         } = Engine.params
 
         if (ssgi) {
@@ -53,7 +53,7 @@ export default class SSGIPass {
             SSGIPass.normalsShader.bindForUse({
                 gNormal: DepthPass.normalSampler,
                 noise: AOPass.noiseSampler,
-                noiseScale: ssgiNoiseScale
+                noiseScale: AOPass.noiseScale,
             })
             GPU.quad.draw()
             SSGIPass.normalsFBO.stopMapping()
@@ -67,14 +67,14 @@ export default class SSGIPass {
                 projection: CameraAPI.projectionMatrix,
                 viewMatrix: CameraAPI.viewMatrix,
                 invViewMatrix: CameraAPI.invViewMatrix,
-
+                noiseScale: AOPass.noiseScale,
                 maxSteps: ssgiQuality,
                 settings: SSGIPass.settingsBuffer,
                 noiseSampler: AOPass.noiseSampler
             })
             GPU.quad.draw()
             SSGIPass.FBO.stopMapping()
-            ScreenEffectsPass.blur(SSGIPass.FBO, 1, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
+            ScreenEffectsPass.blur(SSGIPass.FBO, 1, 3, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
         }
     }
 }

@@ -8,7 +8,7 @@ import MATERIAL_RENDERING_TYPES from "../../../static/MATERIAL_RENDERING_TYPES";
 import DATA_TYPES from "../../../static/DATA_TYPES";
 import IMAGE_WORKER_ACTIONS from "../../../static/IMAGE_WORKER_ACTIONS";
 
-
+const SKYBOX = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class MaterialAPI {
 
     static draw(mesh, material) {
@@ -27,7 +27,7 @@ export default class MaterialAPI {
 
     static #getEnvironment(id, meshComponent) {
         const result = []
-        if(!meshComponent)
+        if (!meshComponent)
             return result
         if (meshComponent.diffuseProbeInfluence) {
             const diffuse = DiffuseProbePass.probes[id]
@@ -49,7 +49,8 @@ export default class MaterialAPI {
     }
 
     static drawMesh(id, mesh, material, meshComponent, uniforms, directDrawing = false) {
-        if (material.shadingType !== MATERIAL_RENDERING_TYPES.SKYBOX) {
+        const isNotSkybox = material.shadingType !== SKYBOX
+        if (isNotSkybox) {
             const ambient = MaterialAPI.#getEnvironment(id, meshComponent)
             uniforms.prefilteredMap = ambient[0]
             uniforms.ambientLODSamples = ambient[1]
@@ -62,7 +63,7 @@ export default class MaterialAPI {
         uniforms.aoSampler = AOPass.filteredSampler
         uniforms.elapsedTime = Engine.elapsed
 
-        material.use(uniforms, uniforms.useCubeMapShader)
+        material.use(uniforms, uniforms.useCubeMapShader && isNotSkybox)
 
         if (directDrawing)
             mesh.draw()
@@ -77,6 +78,7 @@ export default class MaterialAPI {
             dirLightPOV, pointLightsQuantity, pointLightData,
             maxTextures
         } = Engine.data
+        console.log(cubeMapPosition)
         MaterialAPI.loopMeshes(meshes, (mat, mesh, meshComponent, current) => {
             MaterialAPI.drawMesh(
                 current.id,
@@ -98,7 +100,6 @@ export default class MaterialAPI {
                     useCubeMapShader: true
                 })
         })
-        gpu.bindVertexArray(null)
     }
 
     static loopMeshes(entities, callback) {

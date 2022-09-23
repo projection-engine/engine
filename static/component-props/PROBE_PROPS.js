@@ -22,9 +22,5 @@ export default [
             label: "2048p",
             value: 2048,
         }
-    ]),
-
-    Component.group("MULTIPLIER", [
-        Component.array(["R", "G", "B"], "multiplier")
-    ]),
+    ])
 ]

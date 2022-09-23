@@ -27,7 +27,7 @@ uniform vec3 meshID;
 out vec4 fragDepth;
 
 void main(void){
-    fragDepth = vec4(vPosition.z/vPosition.w, meshID.r, meshID.g, 1.);  
+    fragDepth = vec4(gl_FragCoord.z, meshID.r, meshID.g, 1.);  
 }
 `
 const normal = `#version 300 es
@@ -75,7 +75,9 @@ export default class DepthPass {
             .texture({
                 precision: gpu.RGBA32F,
                 format: gpu.RGBA,
-                type: gpu.FLOAT
+                type: gpu.FLOAT,
+                repeat: false,
+                linear: false
             })
             .depthTest()
         DepthPass.depthSampler = DepthPass.framebuffer.colors[0]

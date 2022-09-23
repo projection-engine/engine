@@ -10,6 +10,7 @@ uniform vec3 cameraVec;
 
 uniform mat3 settings;
 uniform mat3 rgbSamplerScales;
+uniform mat3 linearSamplerScales;
 uniform mat3 fallbackValues;
 
 uniform sampler2D albedo;
@@ -29,7 +30,12 @@ layout (location = 4) out vec4 gAmbient;
 
 @import(fresnelSchlickRoughness)
 @import(ambient)
-
+float max3 (vec3 v) {
+  return max (max (v.x, v.y), v.z);
+}
+float min3 (vec3 v) {
+  return min (min (v.x, v.y), v.z);
+}
 void main(){  
     gPosition = vPosition;
     gBehaviour =  vec4(1., 0., 0., 1.);
@@ -51,18 +57,20 @@ void main(){
     else
         gNormal = vec4(normalVec, 1.);
         
+        
+        
     if(settings[0][2] == 1.)
-        gBehaviour.g = texture(roughness, texCoord).r * settings[2][2];
+        gBehaviour.g = max3(texture(roughness, texCoord).rgb  * vec3(linearSamplerScales[2][0], linearSamplerScales[2][1], linearSamplerScales[2][2]));
     else
         gBehaviour.g = fallbackValues[2][1];
     
     if(settings[1][0] == 1.)
-        gBehaviour.b = texture(metallic, texCoord).r * settings[2][1];
+        gBehaviour.b = max3(texture(metallic, texCoord).rgb * vec3(linearSamplerScales[1][0], linearSamplerScales[1][1], linearSamplerScales[1][2]));
     else
         gBehaviour.b = fallbackValues[2][1];
             
-    if(settings[1][0] == 1.)
-        gBehaviour.r = texture(ao, texCoord).r * settings[2][0];
+    if(settings[2][0] == 1.)
+        gBehaviour.r = max3(texture(ao, texCoord).rgb * vec3(linearSamplerScales[1][0], linearSamplerScales[1][1], linearSamplerScales[1][2]));
     
      
     vec3 diffuse = vec3(0.);
@@ -145,6 +153,6 @@ void main(){
 `
 
 export default {
- cubeMap: cubeMapShader,
- fragment: fragment
+    cubeMap: cubeMapShader,
+    fragment: fragment
 }

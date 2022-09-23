@@ -1,6 +1,6 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 
-export default function imageProcessorWorker(){
+export default function imageProcessorWorker() {
     const src = `
     self.onmessage = async ({data: {type, data, id}}) => {
         const IMAGE_WORKER_ACTIONS = ${JSON.stringify(IMAGE_WORKER_ACTIONS)}
@@ -66,11 +66,23 @@ export default function imageProcessorWorker(){
 
                     for (let i = 0; i < KERNEL_SIZE; i++) {
                         const scale = i / KERNEL_SIZE
-                        const m = (0.1 + 0.9 * scale * scale)
-                        const v = []
-                        v[0] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
-                        v[1] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
-                        v[2] = (2.0 * Math.random() / RAND_MAX - 1.0) * m
+                        const m = .1 + .9 * (scale ** 2)
+                       
+                        const v = new Float32Array(new SharedArrayBuffer(12))
+                        v[0] = (2.0 * Math.random() - 1.0) 
+                        v[1] = (2.0 * Math.random()  - 1.0)
+                        v[2] = Math.random()
+                        
+                         let x = v[0];
+                          let y = v[1];
+                          let z = v[2];
+                          let len = x * x + y * y + z * z;
+                          if (len > 0) 
+                            len = 1 / Math.sqrt(len);
+                         
+                          v[0] = v[0] * len * m;
+                          v[1] = v[1] * len* m;
+                          v[2] = v[2] * len* m;
 
                         kernels[i] = v
                     }
@@ -94,7 +106,7 @@ export default function imageProcessorWorker(){
                     self.postMessage({data: null, id})
                     break
             }
-
+            return
         }catch (error){
             console.error(error)
             self.postMessage({data: null, id})

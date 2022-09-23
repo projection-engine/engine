@@ -25,7 +25,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
     for(int i = 0; i < numBinarySearchSteps; i++)
     {
         projectedCoord = projection * vec4(hitCoord, 1.0);
-        // projectedCoord.xy /= projectedCoord.w;
+        projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
         depth = getViewPosition(projectedCoord.xy).z;
@@ -87,7 +87,6 @@ vec3 hash(vec3 a)
     return fract((a.xxy + a.yxx)*a.zyx);
 }
 `
-
 export const vShader = quadVertex
 
 export const stochasticNormals = `#version 300 es
@@ -96,9 +95,9 @@ precision highp float;
 uniform sampler2D noise;
 uniform sampler2D gNormal;
 in vec2 texCoord;
-uniform float noiseScale;
+uniform vec2 noiseScale;
 out vec4 outColor; 
-
+ 
 float interleavedGradientNoise(vec2 n) {
     float f = 0.06711056 * n.x + 0.00583715 * n.y;
     return fract(10000000.  * fract(f));
@@ -136,11 +135,11 @@ uniform mat4 projection;
 uniform mat4 viewMatrix;  
 uniform mat4 invViewMatrix;
    
-uniform vec3 settings; // stepSize, noiseScale,  intensity
+uniform vec2 settings; // stepSize,  intensity
+uniform vec2 noiseScale;
 uniform sampler2D noiseSampler;
 
-in vec2 texCoord;
-
+in vec2 texCoord; 
  
 ${METHODS}
  
@@ -153,11 +152,11 @@ void main(){
 
     vec3 hitPos = viewPos;
     float dDepth;  
-    vec2 jitter = texture(noiseSampler, texCoord* settings.y).rg;
+    vec2 jitter = texture(noiseSampler, texCoord * noiseScale).rg;
     jitter.x = clamp(jitter.x, 0., 1.);
-    jitter.y = clamp(jitter.y, 0., 1.); 
-	jitter += .5;
-	float stepSize = 10.0 * settings.x ;
+    jitter.y = clamp(jitter.y, 0., 1.);  
+  
+	float stepSize = settings.x ;
 	stepSize = stepSize * (jitter.x + jitter.y) + stepSize;
 
  	vec4 coords = RayMarch(normal, hitPos, dDepth, stepSize);
@@ -165,7 +164,7 @@ void main(){
 	
 	if(length(albedo) <= 0.)
 		discard; 
-    outColor = vec4(albedo * .3 * settings.z, 1.);
+    outColor = vec4(albedo * settings.y, 1.);
 }
 `
 
@@ -205,9 +204,7 @@ void main(){
  	vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth, stepSize);
     vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
-    float ReflectionMultiplier = pow(Metallic, falloff) * 
-                screenEdgefactor * 
-                -reflected.z;
+    float ReflectionMultiplier = pow(Metallic, falloff) * screenEdgefactor * -reflected.z;
 	vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
     vec3 SSR = tracedAlbedo * clamp(ReflectionMultiplier, 0.0, 0.9) ;
       

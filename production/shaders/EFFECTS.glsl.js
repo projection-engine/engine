@@ -124,35 +124,28 @@ precision mediump float;
 
 out vec4 fragColor;
 in vec2 vTexcoord;
-
-uniform vec2 resolution;
+ 
 uniform sampler2D blurred;
 uniform sampler2D nextSampler;
 uniform float bloomIntensity;
- 
+uniform float sampleScale;
 
-vec4 upsampleTent(vec2 texelSize, vec4 sampleScale)
+vec4 upsampleTent(vec2 texelSize)
 {
-    vec4 d = vec4(texelSize.x, texelSize.y, texelSize.x, texelSize.y) * vec4(1.0, 1.0, -1.0, 0.0) * sampleScale;
+    vec4 d = texelSize.xyxy  * vec4(-1, -1, +1, +1) * (sampleScale * 0.5);
 
     vec4 s;
-    s =  texture( blurred, vTexcoord - d.xy);
-    s += texture( blurred, vTexcoord - d.wy) * 2.0;
-    s += texture( blurred, vTexcoord - d.zy);
-
-    s += texture( blurred, vTexcoord - d.zw) * 2.0;
-    s += texture( blurred, vTexcoord) * 4.0;
-    s += texture( blurred, vTexcoord - d.xw) * 2.0;
-
-    s += texture( blurred, vTexcoord - d.zy);
-    s += texture( blurred, vTexcoord - d.wy) * 2.0;
-    s += texture( blurred, vTexcoord - d.xy);
+    s = texture(blurred, vTexcoord + d.xy);
+    s += texture(blurred, vTexcoord + d.zy);
+    s += texture(blurred, vTexcoord + d.xw);
+    s += texture(blurred, vTexcoord + d.zw);
 
     return s * (1.0 / 16.0);
 }
 
 void main(void){
-    fragColor = vec4(vec3(upsampleTent(1./resolution, vec4(2.)) + texture(nextSampler, vTexcoord)), bloomIntensity);
+    vec2 texelSize = 1.0 / vec2(textureSize(nextSampler, 0));
+    fragColor = vec4(vec3(upsampleTent(texelSize) + texture(nextSampler, vTexcoord)), bloomIntensity);
 }
 `
 

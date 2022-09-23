@@ -4,7 +4,7 @@ import cube from "../static/meshes/CUBE.json";
 import MaterialController from "./instances/MaterialController";
 
 import FALLBACK_MATERIAL from "../static/FALLBACK_MATERIAL";
-import imageProcessorWorker from "./apis/image-processor-worker";
+import imageProcessorWorker from "./workers/image-processor-worker";
 import {v4} from "uuid";
 import STATIC_MESHES from "../static/resources/STATIC_MESHES";
 import ICO_SPHERE from "../static/meshes/ICO_SPHERE_SM.json";

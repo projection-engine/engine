@@ -38,7 +38,7 @@ void main(){
     else if (option == 10){
         color = vec3(samplerData.g);
     }
-    else if (option == 11){
+    else if (option == 11 || option == 3){
         color = vec3(samplerData.r);
     }
 

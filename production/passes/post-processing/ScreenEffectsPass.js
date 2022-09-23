@@ -6,7 +6,6 @@ import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 
-let shaderState
 export default class ScreenEffectsPass {
     static workerTexture
     static outputFBO
@@ -17,10 +16,13 @@ export default class ScreenEffectsPass {
     static upSamplingShader
     static     brightShader
     static blurShader
+    static uniforms = {}
 
     static initialize() {
-        ScreenEffectsPass.resolution = [GPU.internalResolution.w, GPU.internalResolution.h]
         const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
+
+        ScreenEffectsPass.blurred = upSampledBuffers[blurBuffers.length - 2].colors[0]
+
         ScreenEffectsPass.blurBuffers = blurBuffers
         ScreenEffectsPass.upSampledBuffers = upSampledBuffers
 
@@ -30,6 +32,12 @@ export default class ScreenEffectsPass {
         ScreenEffectsPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, vertex, shaderCode.blurBox)
         ScreenEffectsPass.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
         ScreenEffectsPass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
+
+        ScreenEffectsPass.uniforms = {
+            blurred: ScreenEffectsPass.blurred,
+            resolution: ScreenEffectsPass.resolution,
+            sceneColor: ScreenEffectsPass.workerTexture
+        }
     }
 
     static execute() {
@@ -49,25 +57,19 @@ export default class ScreenEffectsPass {
             })
             GPU.quad.draw()
             op.stopMapping()
-            ScreenEffectsPass.blurred = ScreenEffectsPass.blur(op, bloomStrength)
-            if (!shaderState?.blurred)
-                shaderState.blurred = ScreenEffectsPass.blurred
+            ScreenEffectsPass.blur(op, bloomStrength)
         }
-        if (!shaderState)
-            shaderState = {
-                blurred: ScreenEffectsPass.blurred,
-                resolution: ScreenEffectsPass.resolution,
-                sceneColor: ScreenEffectsPass.workerTexture,
-                intensity: postProcessingStrength,
-                settings: postProcessingEffects
-            }
+
+        const u = ScreenEffectsPass.uniforms
+        u.settings = postProcessingEffects
+        u.intensity = postProcessingStrength
         op.startMapping()
-        ScreenEffectsPass.compositeShader.bindForUse(shaderState)
+        ScreenEffectsPass.compositeShader.bindForUse(u)
         GPU.quad.draw()
         op.stopMapping()
     }
 
-    static blur(fbo, bloomIntensity, blurBuffers = ScreenEffectsPass.blurBuffers, upSampledBuffers = ScreenEffectsPass.upSampledBuffers, kernel = 7) {
+    static blur(fbo, bloomIntensity, sampleScale = 2, blurBuffers = ScreenEffectsPass.blurBuffers, upSampledBuffers = ScreenEffectsPass.upSampledBuffers, kernel = 7) {
         const q = blurBuffers.length
 
         for (let level = 0; level < q; level++) {
@@ -100,7 +102,8 @@ export default class ScreenEffectsPass {
                 blurred: blurBuffers[index].height.colors[0],
                 nextSampler: blurBuffers[index + 1].height.colors[0],
                 resolution: [current.width, current.height],
-                bloomIntensity
+                bloomIntensity,
+                sampleScale
             })
             GPU.quad.draw()
             current.stopMapping()

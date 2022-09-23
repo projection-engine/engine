@@ -7,6 +7,8 @@ import DepthPass from "./DepthPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import DeferredPass from "./DeferredPass";
+import CameraAPI from "../../apis/camera/CameraAPI";
+import SSGIPass from "./SSGIPass";
 
 export default class AOPass {
     static ready = false
@@ -18,7 +20,7 @@ export default class AOPass {
     static blurShader
     static kernels
     static noiseSampler
-
+    static noiseScale = new Float32Array(2)
     static initialize() {
         AOPass.framebuffer = new FramebufferController()
         AOPass.framebuffer
@@ -43,10 +45,11 @@ export default class AOPass {
         AOPass.filteredSampler = AOPass.blurredFBO.colors[0]
 
         AOPass.shader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO, shaderCode.vertex, shaderCode.fragment)
+        console.log(AOPass.shader)
         AOPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, shaderCode.vertex, shaderCode.fragmentBlur)
 
         const w = 4, h = 4
-        GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, GPU.internalResolution)
+        GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w, h})
             .then(({kernels, noise}) => {
                 AOPass.kernels = kernels
                 AOPass.noiseSampler = gpu.createTexture()
@@ -55,34 +58,29 @@ export default class AOPass {
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
-                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, w, h)
+                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG32F, w, h)
                 gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RG, gpu.FLOAT, noise)
                 AOPass.ready = true
             })
-
+        AOPass.noiseScale[0] = window.outerWidth/w
+        AOPass.noiseScale[1] = window.outerHeight/h
 
         DeferredPass.deferredUniforms.aoSampler = AOPass.filteredSampler
     }
 
 
     static execute() {
-        const {
-            total_strength, base, area,
-            falloff, radius, samples,
-            ao
-        } = Engine.params
+        const {ao} = Engine.params
         if (ao && AOPass.ready) {
 
             AOPass.framebuffer.startMapping()
             AOPass.shader.bindForUse({
-                randomSampler: AOPass.noiseSampler,
-                depthSampler: DepthPass.depthSampler,
-                settings: [
-                    total_strength, base, area,
-                    falloff, radius, samples,
-                    0, 0, 0
-                ],
-                normalSampler: DepthPass.normalSampler
+                gPosition: DeferredPass.positionSampler,
+                gNormal: DeferredPass.normalSampler,
+                noiseSampler: AOPass.noiseSampler,
+                noiseScale: AOPass.noiseScale,
+                samples: AOPass.kernels,
+                projection: CameraAPI.projectionMatrix,
             })
             GPU.quad.draw()
             AOPass.framebuffer.stopMapping()
@@ -90,7 +88,7 @@ export default class AOPass {
 
             AOPass.blurredFBO.startMapping()
             AOPass.blurShader.bindForUse({
-                aoSampler: AOPass.unfilteredSampler
+                sampler: AOPass.unfilteredSampler
             })
             GPU.quad.draw()
             AOPass.blurredFBO.stopMapping()

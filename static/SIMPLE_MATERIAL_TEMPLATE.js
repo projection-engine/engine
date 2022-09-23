@@ -7,7 +7,7 @@ export const DEFAULT_MATRICES = [
             0, 0, 0, // ALBEDO, NORMAL, ROUGHNESS,
             0, 0, 0, // METALLIC, AO, EMISSION
 
-            1, 1, 1 // AO_SCALE, METALLIC_SCALE, ROUGHNESS_SCALE
+            0, 0, 0
         ]
     },
     {
@@ -18,7 +18,14 @@ export const DEFAULT_MATRICES = [
             1, 1, 1 // EMISSION_SCALE
         ]
     },
-
+    {
+        key: "linearSamplerScales",
+        data: [
+            1, 1, 1, // AO
+            1, 1, 1, // METALLIC
+            1, 1, 1 // ROUGHNESS
+        ]
+    },
     {
         key: "fallbackValues",
         data: [
