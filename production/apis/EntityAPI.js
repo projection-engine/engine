@@ -89,7 +89,7 @@ export default class EntityAPI {
     }
 
     static removeEntity(id) {
-        const entity = Engine.entitiesMap.get(id)
+        const entity = QueryAPI.getEntityByID(id)
         if (!entity)
             return
         const placementMap = Engine.dataEntity.get(id)

@@ -60,6 +60,8 @@ export default class CameraWorker {
             CameraWorker.frameID = requestAnimationFrame(callback)
         }
         CameraWorker.frameID = requestAnimationFrame(callback)
+
+
     }
 
     static #updateProjection() {

@@ -31,6 +31,7 @@ export default class CameraTracker {
     static #initialized = false
 
     static initialize(settings) {
+
         if (CameraTracker.#initialized)
             return
         CameraTracker.#initialized = true
@@ -126,17 +127,18 @@ export default class CameraTracker {
             case "mousemove": {
                 if (isFocused || isDoubleClick) {
                     if (!isDoubleClick) {
-                        if (event.movementY < 0)
-                            CameraTracker.pitch += CameraTracker.turnSpeed * Math.abs(event.movementY)
+                        const x = event.movementX
+                        const y = event.movementY
+                        if (y < 0)
+                            CameraTracker.pitch += CameraTracker.turnSpeed * Math.abs(y)
 
-                        else if (event.movementY >= 0)
-                            CameraTracker.pitch -= CameraTracker.turnSpeed * Math.abs(event.movementY)
+                        else if (y >= 0)
+                            CameraTracker.pitch -= CameraTracker.turnSpeed * Math.abs(y)
 
-
-                        if (event.movementX >= 0)
-                            CameraTracker.yaw += CameraTracker.turnSpeed * Math.abs(event.movementX)
-                        else if (event.movementX < 0)
-                            CameraTracker.yaw -= CameraTracker.turnSpeed * Math.abs(event.movementX)
+                        if (x >= 0)
+                            CameraTracker.yaw += CameraTracker.turnSpeed * Math.abs(x)
+                        else if (x < 0)
+                            CameraTracker.yaw -= CameraTracker.turnSpeed * Math.abs(x)
 
                     } else {
                         const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.movementSpeed * event.movementY, 0, -CameraTracker.movementSpeed * event.movementX])
@@ -205,8 +207,8 @@ export default class CameraTracker {
 
     static update(onlyRadiusUpdate) {
         CameraAPI.size = CameraTracker.radius
-        if(CameraAPI.isOrthographic)
-        CameraAPI.updateProjection()
+        if (CameraAPI.isOrthographic)
+            CameraAPI.updateProjection()
         CameraAPI.sphericalTransformation([CameraTracker.yaw, CameraTracker.pitch], CameraTracker.radius, CameraTracker.centerOn)
 
         if (CameraTracker.gizmoReference && !onlyRadiusUpdate) {

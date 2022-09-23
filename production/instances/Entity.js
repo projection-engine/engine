@@ -13,6 +13,7 @@ import CullingComponent from "../components/misc/CullingComponent";
 import EntityAPI from "../apis/EntityAPI";
 import UIComponent from "../components/misc/UIComponent";
 import Engine from "../Engine";
+import QueryAPI from "../apis/utils/QueryAPI";
 
 
 const TYPED_ATTRIBUTES = [
@@ -147,7 +148,7 @@ export default class Entity extends Movable {
             instance.__entity = this
             this.components.set(KEY, instance)
 
-            if (Engine.entitiesMap.get(this.id) != null) // initialized
+            if (QueryAPI.getEntityByID(this.id) != null) // initialized
                 EntityAPI.registerEntityComponents(this)
 
             return instance
@@ -158,7 +159,7 @@ export default class Entity extends Movable {
         const hasComponent = this.components.get(KEY) != null
         this.components.delete(KEY)
 
-        if (hasComponent && Engine.entitiesMap.get(this.id) != null)
+        if (hasComponent && QueryAPI.getEntityByID(this.id) != null)
             EntityAPI.registerEntityComponents(this)
     }
 

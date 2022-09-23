@@ -5,7 +5,7 @@ import GizmoSystem from "../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GizmoInheritance from "./GizmoInheritance";
 
-const MOVEMENT_SCALE = .01
+const MOVEMENT_SCALE = .001
 export default class Translation extends GizmoInheritance {
     tracking = false
     currentCoord = undefined
@@ -30,6 +30,7 @@ export default class Translation extends GizmoInheritance {
 
     onMouseMove(event) {
         super.onMouseMove()
+        const g = event.ctrlKey ? 1 : this.gridSize
         const vec = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE)
         let toApply, firstEntity = GizmoSystem.mainEntity
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
@@ -37,7 +38,7 @@ export default class Translation extends GizmoInheritance {
         else
             toApply = vec4.transformQuat([], [...vec, 1], firstEntity._rotationQuat)
         vec3.add(Translation.cache, Translation.cache, toApply)
-        if (Math.abs(Translation.cache[0]) >= this.gridSize || Math.abs(Translation.cache[1]) >= this.gridSize || Math.abs(Translation.cache[2]) >= this.gridSize) {
+        if (Math.abs(Translation.cache[0]) >= g || Math.abs(Translation.cache[1]) >= g || Math.abs(Translation.cache[2]) >= g) {
 
             const entities = GizmoSystem.selectedEntities
             for (let i = 0; i < entities.length; i++) {
@@ -45,12 +46,8 @@ export default class Translation extends GizmoInheritance {
 
                 vec3.add(target._translation, target._translation, Translation.cache)
 
-                for (let j = 0; j < 3; j++) {
-                    console.log(target._translation[j])
-                    target._translation[j] = Math.round(target._translation[j] / this.gridSize) * this.gridSize
-                }
-
-                console.log(target._translation)
+                for (let j = 0; j < 3; j++)
+                    target._translation[j] = Math.round(target._translation[j] / g) * g
                 target.__changedBuffer[0] = 1
             }
             GizmoSystem.notify(GizmoSystem.mainEntity._translation)

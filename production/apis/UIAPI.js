@@ -1,6 +1,7 @@
 import COMPONENTS from "../../static/COMPONENTS.json";
 import Engine from "../Engine";
 import InputEventsAPI from "./utils/InputEventsAPI";
+import QueryAPI from "./utils/QueryAPI";
 
 const STYLES = {
     position: "absolute",
@@ -56,7 +57,7 @@ export default class UIAPI {
 
     static createUIEntity(entity) {
         const UI = entity.components.get(COMPONENTS.UI)
-        if (!entity.active || !UI || Engine.queryMap.get(entity.queryKey) !== entity)
+        if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
             return
 
         const el = UIAPI.document.createElement("div")
@@ -111,7 +112,7 @@ export default class UIAPI {
 
     static updateUIEntity(entity) {
         const UI = entity.components.get(COMPONENTS.UI)
-        if (!entity.active || !UI || Engine.queryMap.get(entity.queryKey) !== entity || !UI.__element)
+        if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
             return
 
         const el = UI.__element
@@ -133,7 +134,7 @@ export default class UIAPI {
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
             const UI = entity.components.get(COMPONENTS.UI)
-            if (!entity.active || !UI || Engine.queryMap.get(entity.queryKey) !== entity)
+            if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
                 continue
             UI.__element = undefined
         }

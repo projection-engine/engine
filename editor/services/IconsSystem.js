@@ -7,6 +7,7 @@ import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/editor/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/rendering/SpritePass";
+import QueryAPI from "../../production/apis/utils/QueryAPI";
 
 const SCALE = (new Array(3)).fill(.25)
 const SCALE_CURSOR = (new Array(3)).fill(.5)
@@ -76,18 +77,11 @@ export default class IconsSystem {
             gpu.disable(gpu.DEPTH_TEST)
 
 
-            attr.scale = SCALE_CURSOR
-            attr.transformationMatrix = window.engineCursor.matrix
-            attr.iconSampler = IconsSystem.cursorTexture
-            attr.attributes = [1, 1]
-            SpritePass.shader.bindForUse(attr)
-            GPU.quad.draw()
-
             const size = selected?.length
             entitiesLoop: if (size > 0) {
                 attr.attributes = [1, 1]
                 for (let i = 0; i < size; i++) {
-                    const current = Engine.entitiesMap.get(selected[i])
+                    const current = QueryAPI.getEntityByID(selected[i])
                     if (!current)
                         continue
                     attr.scale = SCALE
@@ -99,7 +93,7 @@ export default class IconsSystem {
                 }
             } else {
                 attr.attributes = [1, 1]
-                const current = Engine.entitiesMap.get(SelectionStore.lockedEntity)
+                const current = QueryAPI.getEntityByID(SelectionStore.lockedEntity)
                 if (!current)
                     break entitiesLoop
                 attr.scale = SCALE

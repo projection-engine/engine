@@ -5,6 +5,7 @@ import DeferredPass from "./passes/rendering/DeferredPass";
 import SSGIPass from "./passes/rendering/SSGIPass";
 import SSRPass from "./passes/rendering/SSRPass";
 import AOPass from "./passes/rendering/AOPass";
+import {ConversionAPI} from "../production";
 
 export default class Engine {
     static entitiesMap = new Map()
@@ -36,8 +37,10 @@ export default class Engine {
             return
         Engine.#initialized = true
         await LoopAPI.initialize()
+        ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
+            ConversionAPI.canvasBBox = bBox
             CameraAPI.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
         }).observe(gpu.canvas)

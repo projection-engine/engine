@@ -25,7 +25,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
     for(int i = 0; i < numBinarySearchSteps; i++)
     {
         projectedCoord = projection * vec4(hitCoord, 1.0);
-        projectedCoord.xy /= projectedCoord.w;
+        // projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
  
         depth = getViewPosition(projectedCoord.xy).z;

@@ -9,21 +9,15 @@ import getPickerId from "../../production/utils/get-picker-id";
 
 const PICK_ID_SS_GIZMO = getPickerId(1)
 export default class ScreenSpaceGizmo {
-    static cameraDistance
-    static mouseDelta = {x: 0, y: 0}
 
     static onMouseMove(event, damping = 1) {
         if (GizmoSystem.clickedAxis < 0)
             return [0, 0, 0]
-        const cameraDistance = ScreenSpaceGizmo.cameraDistance ** 2
-        const mouseAcceleration = cameraDistance * damping
-        const mD = ScreenSpaceGizmo.mouseDelta
-        const mY = -event.movementY * 2, mX = event.movementX
-        const x = Math.sign(mX) * mD.x + mX * mouseAcceleration
-        const y = Math.sign(mY) * mD.y + mY * mouseAcceleration
-        const ssP = ConversionAPI.toLinearWorldCoordinates(x, y).slice(0, 3)
-        vec3.scale(ssP,ssP, 1 / cameraDistance)
-
+        const cameraDistance = 100
+        const x = event.movementX * cameraDistance * 1000
+        const y = event.movementY * cameraDistance * 1000
+        const ssP = ConversionAPI.toWorldCoordinates(x, y).slice(0, 3)
+        vec3.scale(ssP, ssP, 1/cameraDistance**2)
         ScreenSpaceGizmo.mapToAxis(ssP)
 
         return ssP
@@ -62,11 +56,6 @@ export default class ScreenSpaceGizmo {
     }
 
     static onMouseDown() {
-        ScreenSpaceGizmo.cameraDistance = Math.min(Math.max(vec3.length(vec3.sub([], GizmoSystem.translation, CameraAPI.position)), 50), 150)
-
-        const b = gpu.canvas.getBoundingClientRect()
-        ScreenSpaceGizmo.mouseDelta.x = b.width / 2
-        ScreenSpaceGizmo.mouseDelta.y = b.height / 2
     }
 
 

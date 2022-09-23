@@ -61,7 +61,6 @@ export default async function initializer() {
     PreviewSystem.initialize()
     BackgroundSystem.initialize()
     GizmoSystem.initialize()
-    window.engineCursor = getCursor()
 
     await Engine.initialize()
 }

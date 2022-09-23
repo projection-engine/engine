@@ -1,9 +1,14 @@
 import {vec4} from "gl-matrix"
 import CameraAPI from "../camera/CameraAPI";
+/**
+ * @field canvasBBox - Bounding box for canvas; updated on engine resize observer
+ */
 
 export default class ConversionAPI {
+    static canvasBBox
+
     static toQuadCoord(coords, quadSize) {
-        const target = gpu.canvas.getBoundingClientRect()
+        const target = ConversionAPI.canvasBBox
         const {x, y} = coords
         const {w, h} = quadSize
 
@@ -17,8 +22,9 @@ export default class ConversionAPI {
     }
 
     static toWorldCoordinates(x, y) {
+
         // NORMALIZED DEVICE SPACE
-        const bBox = gpu.canvas.getBoundingClientRect()
+        const bBox = ConversionAPI.canvasBBox
         let xNormalized = ((x - bBox.x) / bBox.width) * 2 - 1,
             yNormalized = -((y - bBox.y) / bBox.height) * 2 + 1
 
@@ -51,7 +57,7 @@ export default class ConversionAPI {
         vec4.transformMat4(target, target, CameraAPI.projectionMatrix)
 
         // NORMALIZED DEVICE SPACE
-        const bBox = gpu.canvas.getBoundingClientRect()
+        const bBox = ConversionAPI.canvasBBox
         const widthHalf = bBox.width / 2
         const heightHalf = bBox.height / 2
 

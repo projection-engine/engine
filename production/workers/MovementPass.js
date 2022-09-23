@@ -42,16 +42,9 @@ export class MovementPass {
     }
 
     static transform(entity) {
-
         entity.__changedBuffer[0] = 0
-
         mat4.fromRotationTranslationScale(entity.matrix, entity._rotationQuat, entity._translation, entity._scaling)
-
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
-
-        entity.absoluteTranslation[0] = entity.matrix[12]
-        entity.absoluteTranslation[1] = entity.matrix[13]
-        entity.absoluteTranslation[2] = entity.matrix[14]
 
         if (entity.parentMatrix)
             mat4.multiply(
@@ -59,6 +52,10 @@ export class MovementPass {
                 entity.parentMatrix,
                 entity.matrix
             )
+
+        entity.absoluteTranslation[0] = entity.matrix[12]
+        entity.absoluteTranslation[1] = entity.matrix[13]
+        entity.absoluteTranslation[2] = entity.matrix[14]
 
         MovementPass.normalMatrix(entity.normalMatrix, entity.matrix)
         if (entity.instancingGroupID)
