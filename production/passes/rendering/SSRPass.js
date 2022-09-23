@@ -7,6 +7,7 @@ import DeferredPass from "./DeferredPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import DepthPass from "./DepthPass";
+import SSGIPass from "./SSGIPass";
 
 
 export default class SSRPass {
@@ -32,9 +33,9 @@ export default class SSRPass {
         if (ssr) {
             SSRPass.FBO.startMapping()
             SSRPass.shader.bindForUse({
-                previousFrame: SSRPass.prevFrame, // ALBEDO
+                previousFrame: SSGIPass.lastFrame,
                 gPosition: DeferredPass.positionSampler,
-                gNormal: DepthPass.normalSampler,
+                gNormal: DeferredPass.normalSampler,
                 gBehaviour: DeferredPass.behaviourSampler,
                 projection: CameraAPI.projectionMatrix,
                 viewMatrix: CameraAPI.viewMatrix,

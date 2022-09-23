@@ -22,7 +22,7 @@ out vec3 viewDirection;
  
 
 void main(){
-    vPosition =  transformMatrix *   vec4(position, 1.0);
+    vPosition = transformMatrix *   vec4(position, 1.0);
     
     vec3 T = normalize( mat3(transformMatrix)  * normalize(tangentVec));
     vec3 N =  normalize(mat3(transformMatrix) * normal);
