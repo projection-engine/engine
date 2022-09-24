@@ -1,4 +1,4 @@
-import CameraAPI from "./apis/camera/CameraAPI"
+import CameraAPI from "./apis/CameraAPI"
 import ENVIRONMENT from "../static/ENVIRONMENT"
 import LoopAPI from "./apis/rendering/LoopAPI";
 import DeferredPass from "./passes/rendering/DeferredPass";

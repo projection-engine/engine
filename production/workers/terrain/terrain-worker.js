@@ -1,0 +1,71 @@
+import PrimitiveProcessor from "../../apis/PrimitiveProcessor";
+
+function sampleTexture(x, y, ctx, heightScale) {
+    const r = ctx.getImageData(x, y, 1, 1).data[0]
+    let height = (r / 255)
+    return height * heightScale
+}
+
+async function buildTerrain(base64, scale, dimension) {
+    const imageToLoad = await createImageBitmap(await (await fetch(base64)).blob())
+    const canvas = new OffscreenCanvas(imageToLoad.width, imageToLoad.height), ctx = canvas.getContext("2d")
+    ctx.drawImage(imageToLoad, 0, 0, imageToLoad.width, imageToLoad.height)
+
+    const vertexCount = imageToLoad.width
+
+    const count = vertexCount ** 2
+
+    let vertices = new Float32Array(count * 3),
+        uvs = new Float32Array(count * 2),
+        indices = new Float32Array(6 * (vertexCount - 1) * vertexCount),
+        vertexPointer = 0
+
+
+    for (let i = 0; i < vertexCount; i++) {
+        for (let j = 0; j < vertexCount; j++) {
+            vertices[vertexPointer * 3] = (j / (vertexCount - 1)) * dimension
+            vertices[vertexPointer * 3 + 1] = sampleTexture(j, i, ctx, scale)
+            vertices[vertexPointer * 3 + 2] = (i / (vertexCount - 1)) * dimension
+
+
+            uvs[vertexPointer * 2] = j / (vertexCount - 1)
+            uvs[vertexPointer * 2 + 1] = i / (vertexCount - 1)
+            vertexPointer++
+        }
+    }
+
+    let pointer = 0
+    for (let gz = 0; gz < vertexCount - 1; gz++) {
+        for (let gx = 0; gx < vertexCount - 1; gx++) {
+            const topLeft = (gz * vertexCount) + gx,
+                topRight = topLeft + 1,
+                bottomLeft = ((gz + 1) * vertexCount) + gx,
+                bottomRight = bottomLeft + 1
+
+
+            indices[pointer++] = topLeft
+            indices[pointer++] = bottomLeft
+            indices[pointer++] = topRight
+            indices[pointer++] = topRight
+            indices[pointer++] = bottomLeft
+            indices[pointer++] = bottomRight
+        }
+    }
+
+    const normals = PrimitiveProcessor.computeNormals(indices, vertices)
+    const tangents = PrimitiveProcessor.computeTangents(indices, vertices, uvs, normals)
+
+
+    return {
+        vertices,
+        uvs,
+        normals,
+        indices,
+        tangents
+    }
+
+}
+
+self.onmessage = event => {
+    console.log(event.data)
+}

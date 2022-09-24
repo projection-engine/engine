@@ -1,5 +1,5 @@
 import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 

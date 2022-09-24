@@ -1,7 +1,7 @@
 import * as shaderCode from "../../shaders/DEFERRED.glsl"
 import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/camera/CameraAPI";
+import CameraAPI from "../../apis/CameraAPI";
 import GPU from "../../GPU";
 import ShadowMapPass from "./ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";

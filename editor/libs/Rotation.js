@@ -6,7 +6,7 @@ import ConversionAPI from "../../production/apis/math/ConversionAPI"
 import mapGizmoMesh from "../utils/map-gizmo-mesh"
 import EngineStore from "../../../../src/editor/stores/EngineStore";
 import PickingAPI from "../../production/apis/utils/PickingAPI";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";

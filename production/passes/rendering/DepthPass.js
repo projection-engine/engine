@@ -1,7 +1,7 @@
 import COMPONENTS from "../../../static/COMPONENTS.json"
 import * as shaderCode from "../../shaders/DEFERRED.glsl"
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/camera/CameraAPI";
+import CameraAPI from "../../apis/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";

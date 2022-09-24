@@ -5,12 +5,12 @@ import Component from "../components/Component";
 import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./utils/QueryAPI";
 import InputEventsAPI from "./utils/InputEventsAPI";
-import CameraAPI from "./camera/CameraAPI";
+import CameraAPI from "./CameraAPI";
 import SpecularProbePass from "../passes/rendering/SpecularProbePass";
 import DiffuseProbePass from "../passes/rendering/DiffuseProbePass";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import PhysicsPass from "../passes/math/PhysicsPass";
-import WorkerController from "../workers/WorkerController";
+import MovementWorker from "../workers/movement/MovementWorker";
 import UIAPI from "./UIAPI";
 import {TransformationAPI} from "../../production";
 import DeferredPass from "../passes/rendering/DeferredPass";
@@ -23,20 +23,20 @@ export default class EntityAPI {
     static addEntity(entity) {
         Engine.entitiesMap.set(entity.id, entity)
         Engine.entities.push(entity)
-        WorkerController.registerEntity(entity)
+        MovementWorker.registerEntity(entity)
         EntityAPI.registerEntityComponents(entity)
     }
 
     static linkEntities(child, parent) {
         if (child.parent != null) {
-            WorkerController.updateEntityLinks(child, child.parent)
+            MovementWorker.updateEntityLinks(child, child.parent)
             child.parent.children = child.parent.children.filter(c => c !== child)
             child.parent = undefined
         }
         if (parent != null) {
             child.parent = parent
             parent.children.push(child)
-            WorkerController.updateEntityLinks(child, parent)
+            MovementWorker.updateEntityLinks(child, parent)
         }
     }
 
@@ -104,7 +104,7 @@ export default class EntityAPI {
         if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
             EntityAPI.packageLights()
 
-        WorkerController.removeEntity(entity)
+        MovementWorker.removeEntity(entity)
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
     }

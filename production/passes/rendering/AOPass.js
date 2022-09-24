@@ -1,14 +1,13 @@
 import * as shaderCode from "../../shaders/AO.glsl"
 import FramebufferController from "../../instances/FramebufferController"
 import IMAGE_WORKER_ACTIONS from "../../../static/IMAGE_WORKER_ACTIONS"
-import Engine from "../../Engine";
 import GPU from "../../GPU";
-import DepthPass from "./DepthPass";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import DeferredPass from "./DeferredPass";
-import CameraAPI from "../../apis/camera/CameraAPI";
+import CameraAPI from "../../apis/CameraAPI";
 import SSGIPass from "./SSGIPass";
+import ImageWorker from "../../workers/image/ImageWorker";
 
 const w = 4, h = 4
 export default class AOPass {
@@ -58,9 +57,7 @@ export default class AOPass {
         AOPass.noiseScale[0] = window.outerWidth / w
         AOPass.noiseScale[1] = window.outerHeight / h
         DeferredPass.deferredUniforms.aoSampler = AOPass.filteredSampler
-
-
-        GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w, h})
+        ImageWorker.request(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w, h})
             .then(({kernels, noise}) => {
                 AOPass.kernels = kernels
                 AOPass.noiseSampler = gpu.createTexture()

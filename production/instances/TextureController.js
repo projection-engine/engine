@@ -1,8 +1,8 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
-import GPU from "../GPU";
 import TEXTURE_WRAPPING from "../../static/texture/TEXTURE_WRAPPING";
 import TEXTURE_FILTERING from "../../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../../static/texture/TEXTURE_FORMATS";
+import ImageWorker from "../workers/image/ImageWorker";
 
 export default class TextureController {
     loaded = false
@@ -14,7 +14,7 @@ export default class TextureController {
         this.attributes = attributes
         if (typeof img === "string") {
             if (img.includes("data:image/")) {
-                const res = await GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
+                const res = await ImageWorker.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
                 res.naturalHeight = res.height
                 res.naturalWidth = res.width
                 this.attributes.img = res
@@ -36,13 +36,13 @@ export default class TextureController {
         const {
             img,
 
-            wrapS=TEXTURE_WRAPPING.REPEAT,
-            wrapT=TEXTURE_WRAPPING.REPEAT,
-            minFilter =  TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR,
-            magFilter =  TEXTURE_FILTERING.MAG.LINEAR,
+            wrapS = TEXTURE_WRAPPING.REPEAT,
+            wrapT = TEXTURE_WRAPPING.REPEAT,
+            minFilter = TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR,
+            magFilter = TEXTURE_FILTERING.MAG.LINEAR,
 
             internalFormat = TEXTURE_FORMATS.SRGBA.internalFormat,
-            format =  TEXTURE_FORMATS.SRGBA.format,
+            format = TEXTURE_FORMATS.SRGBA.format,
 
             width = img.naturalWidth,
             height = img.naturalHeight,
@@ -76,14 +76,14 @@ export default class TextureController {
     update(newImage) {
         if (this.loaded) {
             gpu.deleteTexture(this.texture)
-            GPU.imageWorker(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
+            ImageWorker.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
                 this.attributes.img = res
                 TextureController.#initializeTexture(this.attributes)
             })
         }
     }
 
-    static createTexture( width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind = true) {
+    static createTexture(width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind = true) {
         const texture = gpu.createTexture()
 
         gpu.bindTexture(gpu.TEXTURE_2D, texture)

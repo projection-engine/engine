@@ -1,6 +1,6 @@
 import * as shaderCode from "../templates/GRID.glsl"
 import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 

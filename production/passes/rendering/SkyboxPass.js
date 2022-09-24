@@ -1,7 +1,7 @@
 import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import MATERIAL_RENDERING_TYPES from "../../../static/MATERIAL_RENDERING_TYPES";
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/camera/CameraAPI";
+import CameraAPI from "../../apis/CameraAPI";
 
 
 const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX

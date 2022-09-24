@@ -1,6 +1,6 @@
 import MaterialAPI from "../../apis/rendering/MaterialAPI";
 import Engine from "../../Engine";
-import CameraAPI from "../../apis/camera/CameraAPI";
+import CameraAPI from "../../apis/CameraAPI";
 import GPU from "../../GPU";
 
 export default class ForwardPass {

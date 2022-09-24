@@ -1,8 +1,8 @@
-import PostProcessing from "../../instances/PostProcessing";
-import COMPONENTS from "../../../static/COMPONENTS.json";
-import Engine from "../../Engine";
-import ENVIRONMENT from "../../../static/ENVIRONMENT";
-import SharedBufferAPI from "../SharedBufferAPI";
+import PostProcessing from "../instances/PostProcessing";
+import COMPONENTS from "../../static/COMPONENTS.json";
+import Engine from "../Engine";
+import ENVIRONMENT from "../../static/ENVIRONMENT";
+import SharedBufferAPI from "./SharedBufferAPI";
 
 /**
  * @field notificationBuffers {Uint8Array [transformationType, viewNeedsUpdate, projectionNeedsUpdate, isOrthographic]} - transformationType indicates which method will be used (0 for spherical and 1 for direct)

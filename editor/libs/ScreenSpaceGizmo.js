@@ -3,7 +3,6 @@ import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ConversionAPI from "../../production/apis/math/ConversionAPI";
 import {vec3} from "gl-matrix";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
 import getPickerId from "../../production/utils/get-picker-id";
 
 

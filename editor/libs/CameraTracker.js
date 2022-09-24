@@ -1,4 +1,4 @@
-import CameraAPI from "../../production/apis/camera/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import InputEventsAPI from "../../production/apis/utils/InputEventsAPI";
 
 import KEYS from "../../static/KEYS";

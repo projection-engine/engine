@@ -6,7 +6,7 @@ import getPickerId from "../../production/utils/get-picker-id"
 import GizmoAPI from "../libs/GizmoAPI";
 import Movable from "../../production/instances/Movable";
 import TransformationAPI from "../../production/apis/math/TransformationAPI";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/DualAxisGizmo";
 import GPU from "../../production/GPU";
@@ -14,7 +14,7 @@ import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import DepthPass from "../../production/passes/rendering/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Entity from "../../production/instances/Entity";
-import WorkerController from "../../production/workers/WorkerController";
+import MovementWorker from "../../production/workers/movement/MovementWorker";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../production/apis/rendering/LineAPI";
@@ -120,7 +120,7 @@ export default class GizmoSystem {
 
     static #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if ((WorkerController.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
+        if ((MovementWorker.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
             GizmoSystem.mainEntity = main
             GizmoSystem.targetRotation = main._rotationQuat
             GizmoSystem.translation = main.absoluteTranslation

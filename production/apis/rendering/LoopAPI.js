@@ -19,8 +19,8 @@ import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import SpritePass from "../../passes/rendering/SpritePass";
 import PhysicsPass from "../../passes/math/PhysicsPass";
-import WorkerController from "../../workers/WorkerController";
-import CameraAPI from "../camera/CameraAPI";
+import MovementWorker from "../../workers/movement/MovementWorker";
+import CameraAPI from "../CameraAPI";
 
 export default class LoopAPI {
     static #initialized = false
@@ -31,7 +31,7 @@ export default class LoopAPI {
             return
 
         CameraAPI.initialize()
-        WorkerController.initialize()
+        MovementWorker.initialize()
         LoopAPI.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
@@ -93,7 +93,7 @@ export default class LoopAPI {
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
         PhysicsPass.execute(entities)
         ScriptingPass.execute()
-        WorkerController.execute()
+        MovementWorker.execute()
         LoopAPI.#rendering(entities)
         ScreenEffectsPass.execute()
         CompositePass.execute()

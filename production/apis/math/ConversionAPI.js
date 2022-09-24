@@ -1,5 +1,6 @@
 import {vec4} from "gl-matrix"
-import CameraAPI from "../camera/CameraAPI";
+import CameraAPI from "../CameraAPI";
+
 /**
  * @field canvasBBox - Bounding box for canvas; updated on engine resize observer
  */

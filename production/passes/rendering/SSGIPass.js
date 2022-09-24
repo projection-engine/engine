@@ -1,7 +1,6 @@
 import * as ssGI from "../../shaders/SCREEN_SPACE.glsl"
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
-import Engine from "../../Engine";
-import CameraAPI from "../../apis/camera/CameraAPI";
+import CameraAPI from "../../apis/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import DepthPass from "./DepthPass";

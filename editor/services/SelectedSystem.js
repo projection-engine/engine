@@ -1,7 +1,6 @@
 import * as shaderCode from "../templates/SELECTED.glsl"
 import COMPONENTS from "../../static/COMPONENTS.json"
-import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/camera/CameraAPI";
+import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";

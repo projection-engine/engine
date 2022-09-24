@@ -12,7 +12,6 @@ import PhysicsColliderComponent from "../components/physics/PhysicsColliderCompo
 import CullingComponent from "../components/misc/CullingComponent";
 import EntityAPI from "../apis/EntityAPI";
 import UIComponent from "../components/misc/UIComponent";
-import Engine from "../Engine";
 import QueryAPI from "../apis/utils/QueryAPI";
 
 

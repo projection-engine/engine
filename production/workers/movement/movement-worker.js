@@ -1,6 +1,11 @@
+import WORKER_MESSAGES from "../../../static/WORKER_MESSAGES.json"
 import {mat4} from "gl-matrix";
 
-export class MovementPass {
+/**
+ * @field controlBuffers {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.
+ */
+
+class MovementPass {
     static targets = []
     static controlBuffers
     static #initialized = false
@@ -95,5 +100,24 @@ export class MovementPass {
         previous[6] = (a31 * b05 - a32 * b04 + a33 * b03) * det
         previous[7] = (a32 * b02 - a30 * b05 - a33 * b01) * det
         previous[8] = (a30 * b04 - a31 * b02 + a33 * b00) * det
+    }
+}
+
+
+
+self.onmessage = (event) => {
+    const {type, payload} = event.data
+    switch (type) {
+        case WORKER_MESSAGES.INITIALIZE:
+            MovementPass.initialize(payload, self)
+            break
+        case WORKER_MESSAGES.REGISTER_ENTITY:
+            MovementPass.targets.push(payload)
+            break
+        case WORKER_MESSAGES.REMOVE_ENTITY:
+            MovementPass.targets = MovementPass.targets.filter(e => e.id !== payload)
+            break
+        default:
+            break
     }
 }
