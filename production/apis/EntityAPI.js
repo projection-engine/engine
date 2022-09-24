@@ -13,6 +13,7 @@ import PhysicsPass from "../passes/math/PhysicsPass";
 import WorkerController from "../workers/WorkerController";
 import UIAPI from "./UIAPI";
 import {TransformationAPI} from "../../production";
+import DeferredPass from "../passes/rendering/DeferredPass";
 
 
 let lightTimeout
@@ -130,18 +131,40 @@ export default class EntityAPI {
     }
 
     static packageLights(keepOld, force) {
+        const updateDeferred = () => {
+            const {
+                pointLightsQuantity,
+                maxTextures,
+                directionalLightsData,
+                dirLightPOV,
+                pointLightData
+            } = Engine.data
+
+            const U = DeferredPass.deferredUniforms
+            U.directionalLightsData = directionalLightsData
+            U.dirLightPOV = dirLightPOV
+            U.pointLightData = pointLightData
+
+            const settingsBuffer = U.settings
+            settingsBuffer[0] = maxTextures
+            settingsBuffer[4] = pointLightsQuantity
+        }
         if (force) {
             packagePointLights(keepOld)
             packageDirectionalLights(keepOld)
+            updateDeferred()
             return
         }
         clearTimeout(lightTimeout)
         lightTimeout = setTimeout(() => {
             packagePointLights(keepOld)
             packageDirectionalLights(keepOld)
+            updateDeferred()
+
         }, 50)
 
     }
+
 
     static linkScript(data, entity, scriptID, src) {
         const found = entity.scripts.findIndex(s => s.id === scriptID)

@@ -19,11 +19,21 @@ export default class SSGIPass {
     static FBO
     static normalsShader
     static ssgiShader
-    static lastFrame
+
     static normalSampler
     static settingsBuffer = new Float32Array(2)
+    static rayMarchSettings = new Float32Array(3)
+
+    static enabled = true
+    static normalUniforms = {}
+    static uniforms = {}
 
     static initialize() {
+
+        SSGIPass.rayMarchSettings[0] = 10
+        SSGIPass.rayMarchSettings[1] = 5
+        SSGIPass.rayMarchSettings[2] = 1.2
+
         const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPU.internalResolution.w, GPU.internalResolution.h, 2)
         SSGIPass.blurBuffers = blurBuffers
         SSGIPass.upSampledBuffers = upSampledBuffers
@@ -40,41 +50,37 @@ export default class SSGIPass {
         SSGIPass.sampler = upSampledBuffers[blurBuffers.length - 2].colors[0]
         DeferredPass.deferredUniforms.screenSpaceGI = SSGIPass.sampler
         SSGIPass.settingsBuffer[1] = 1
+
+
+        Object.assign(SSGIPass.normalUniforms, {
+            gNormal: DepthPass.normalSampler,
+            noiseScale: AOPass.noiseScale,
+        })
+        Object.assign(SSGIPass.uniforms, {
+            gNormal: SSGIPass.normalSampler,
+            projection: CameraAPI.projectionMatrix,
+            viewMatrix: CameraAPI.viewMatrix,
+            invViewMatrix: CameraAPI.invViewMatrix,
+            noiseScale: AOPass.noiseScale,
+            settings: SSGIPass.settingsBuffer,
+            rayMarchSettings: SSGIPass.rayMarchSettings
+        })
+
     }
 
     static execute() {
-        const {
-            ssgi,
-            ssgiQuality
-        } = Engine.params
+        if (!SSGIPass.enabled)
+            return
 
-        if (ssgi) {
-            SSGIPass.normalsFBO.startMapping()
-            SSGIPass.normalsShader.bindForUse({
-                gNormal: DepthPass.normalSampler,
-                noise: AOPass.noiseSampler,
-                noiseScale: AOPass.noiseScale,
-            })
-            GPU.quad.draw()
-            SSGIPass.normalsFBO.stopMapping()
+        SSGIPass.normalsFBO.startMapping()
+        SSGIPass.normalsShader.bindForUse(SSGIPass.normalUniforms)
+        GPU.quad.draw()
+        SSGIPass.normalsFBO.stopMapping()
 
-
-            SSGIPass.FBO.startMapping()
-            SSGIPass.ssgiShader.bindForUse({
-                previousFrame: SSGIPass.lastFrame,
-                gPosition: DeferredPass.positionSampler,
-                gNormal: SSGIPass.normalSampler,
-                projection: CameraAPI.projectionMatrix,
-                viewMatrix: CameraAPI.viewMatrix,
-                invViewMatrix: CameraAPI.invViewMatrix,
-                noiseScale: AOPass.noiseScale,
-                maxSteps: ssgiQuality,
-                settings: SSGIPass.settingsBuffer,
-                noiseSampler: AOPass.noiseSampler
-            })
-            GPU.quad.draw()
-            SSGIPass.FBO.stopMapping()
-            ScreenEffectsPass.blur(SSGIPass.FBO, 1, 3, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
-        }
+        SSGIPass.FBO.startMapping()
+        SSGIPass.ssgiShader.bindForUse(SSGIPass.uniforms)
+        GPU.quad.draw()
+        SSGIPass.FBO.stopMapping()
+        ScreenEffectsPass.blur(SSGIPass.FBO, 1, 3, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
     }
 }

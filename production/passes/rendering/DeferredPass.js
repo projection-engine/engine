@@ -7,6 +7,7 @@ import ShadowMapPass from "./ShadowMapPass";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import SSGIPass from "./SSGIPass";
+import SSRPass from "./SSRPass";
 
 export default class DeferredPass {
     static gBuffer
@@ -61,7 +62,14 @@ export default class DeferredPass {
             settings: new Float32Array(9)
         })
         DeferredPass.deferredUniforms.settings[2] = 1
-        SSGIPass.lastFrame = DeferredPass.compositeFBO.colors[0]
+        SSGIPass.uniforms.previousFrame = DeferredPass.compositeFBO.colors[0]
+        SSGIPass.uniforms.gPosition = DeferredPass.positionSampler
+
+        SSRPass.uniforms.previousFrame = DeferredPass.compositeFBO.colors[0]
+        SSRPass.uniforms.gPosition = DeferredPass.positionSampler
+        SSRPass.uniforms.gNormal = DeferredPass.normalSampler
+        SSRPass.uniforms.gBehaviour = DeferredPass.behaviourSampler
+
         DeferredPass.ready = true
     }
 
@@ -98,37 +106,11 @@ export default class DeferredPass {
     }
 
     static drawBuffer(entities, onWrap) {
-
-        const {
-            pointLightsQuantity,
-            maxTextures,
-            directionalLightsData,
-            dirLightPOV,
-            pointLightData
-        } = Engine.data
-        const {
-            ao,
-            pcfSamples
-        } = Engine.params
-
-
         onWrap(false)
         DeferredPass.compositeFBO.startMapping()
         onWrap(true)
-        const U = DeferredPass.deferredUniforms
-        U.directionalLightsData = directionalLightsData
-        U.dirLightPOV = dirLightPOV
-        U.pointLightData = pointLightData
 
-        const settingsBuffer = U.settings
-        settingsBuffer[0] = maxTextures
-        settingsBuffer[1] = ShadowMapPass.maxResolution
-        settingsBuffer[3] = ShadowMapPass.atlasRatio
-        settingsBuffer[4] = pointLightsQuantity
-        settingsBuffer[5] = ao ? 1 : 0
-        settingsBuffer[6] = pcfSamples
-
-        DeferredPass.deferredShader.bindForUse(U)
+        DeferredPass.deferredShader.bindForUse(DeferredPass.deferredUniforms)
         GPU.quad.draw()
         DeferredPass.compositeFBO.stopMapping()
     }

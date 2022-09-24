@@ -1,15 +1,17 @@
 import {vertex as quadVertex} from "./DEFERRED.glsl"
 
+const UNIFORMS = `
+uniform vec3 rayMarchSettings; // maxSteps, numBinarySearchSteps, DEPTH_THRESHOLD
 
-const METHODS = ` 
-uniform float maxSteps; 
+uniform mat4 projection;
+uniform mat4 viewMatrix;
+uniform sampler2D previousFrame;
+  
+`
 
-const float minRayStep = 0.1; 
-const int numBinarySearchSteps = 5;
-const float falloff = 3.0;
+const METHODS = `  
+${UNIFORMS}
 float Metallic;
-#define Scale vec3(.8)
-#define K 19.19
 out vec4 outColor;
 
 vec3 getViewPosition(vec2 coords){
@@ -19,7 +21,7 @@ vec3 getViewPosition(vec2 coords){
 vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
 {
     float depth;
-
+    int numBinarySearchSteps = int(rayMarchSettings.y);
     vec4 projectedCoord;
  
     for(int i = 0; i < numBinarySearchSteps; i++)
@@ -49,8 +51,10 @@ vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth, float stepSize){
     float depth;
     int steps;
     vec4 projectedCoord;
+    int maxSteps = int(rayMarchSettings.x);
+    float depthThreshold = rayMarchSettings.z;
  
-    for(int i = 0; i < int(maxSteps); i++)   {
+    for(int i = 0; i < maxSteps; i++)   {
         hitCoord += dir;
         projectedCoord = projection * vec4(hitCoord, 1.0);
         projectedCoord.xy /= projectedCoord.w;
@@ -62,8 +66,7 @@ vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth, float stepSize){
  
         dDepth = hitCoord.z - depth;
 
-        if((dir.z - dDepth) < 1.2)
-        {
+        if((dir.z - dDepth) < depthThreshold){
             if(dDepth <= 0.0)
             {   
                 vec4 Result;
@@ -82,8 +85,8 @@ vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth, float stepSize){
 
 vec3 hash(vec3 a)
 {
-    a = fract(a * Scale);
-    a += dot(a, a.yxz + K);
+    a = fract(a * vec3(.8) );
+    a += dot(a, a.yxz + 19.19);
     return fract((a.xxy + a.yxx)*a.zyx);
 }
 `
@@ -126,14 +129,9 @@ void main(){
 
 export const ssGI = `#version 300 es
 precision highp float;
-
-uniform sampler2D previousFrame;
+ 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal; 
-
-uniform mat4 projection;
-uniform mat4 viewMatrix;  
-uniform mat4 invViewMatrix;
    
 uniform vec2 settings; // stepSize,  intensity
 uniform vec2 noiseScale;
@@ -142,12 +140,20 @@ uniform sampler2D noiseSampler;
 in vec2 texCoord; 
  
 ${METHODS}
- 
+ vec3 aces(vec3 x) {
+  const float a = 2.51;
+  const float b = 0.03;
+  const float c = 2.43;
+  const float d = 0.59;
+  const float e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
 void main(){
  
  	vec3 normal = normalize(texture(gNormal, texCoord).rgb);
 	vec3 viewPos = getViewPosition(texCoord); 
-	// vec3 reflected = normalize(reflect(normalize(viewPos), normal));
+	vec3 reflected = normalize(reflect(normalize(viewPos), normal));
 
 
     vec3 hitPos = viewPos;
@@ -156,15 +162,12 @@ void main(){
     jitter.x = clamp(jitter.x, 0., 1.);
     jitter.y = clamp(jitter.y, 0., 1.);  
   
-	float stepSize = settings.x ;
-	stepSize = stepSize * (jitter.x + jitter.y) + stepSize;
+	float stepSize = settings.x * (jitter.x + jitter.y) + settings.x;
 
- 	vec4 coords = RayMarch(normal, hitPos, dDepth, stepSize);
-	vec3 albedo = texture(previousFrame, coords.xy).rgb;
-	
-	if(length(albedo) <= 0.)
-		discard; 
-    outColor = vec4(albedo * settings.y, 1.);
+ 	vec4 coords = RayMarch(normal + reflected, hitPos, dDepth, stepSize);
+	vec3 tracedAlbedo = aces(texture(previousFrame, coords.xy).rgb);
+ 
+    outColor = vec4(tracedAlbedo * settings.y, 1.);
 }
 `
 
@@ -172,16 +175,20 @@ void main(){
 export const fragment = `#version 300 es
 precision highp float;
 
-uniform sampler2D previousFrame;
+
+uniform mat4 invViewMatrix;
+
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gBehaviour;  
+const float falloff = 3.0;
+const float minRayStep = 0.1; 
 
-uniform mat4 projection;
-uniform mat4 viewMatrix;  
-uniform mat4 invViewMatrix;
 in vec2 texCoord;
  
+#define CLAMP_MIN .1
+#define CLAMP_MAX .9
+
 uniform float stepSize;
 ${METHODS}
 
@@ -202,13 +209,12 @@ void main(){
     float dDepth;
      vec3 jitt = mix(vec3(0.0), vec3(hash(viewPos)), roughness);
  	vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth, stepSize);
-    vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5) - coords.xy));
+    vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float ReflectionMultiplier = pow(Metallic, falloff) * screenEdgefactor * -reflected.z;
-	vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
-    vec3 SSR = tracedAlbedo * clamp(ReflectionMultiplier, 0.0, 0.9) ;
+	vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb; 
       
-    outColor = vec4(SSR, Metallic);
+    outColor = vec4(tracedAlbedo * clamp(ReflectionMultiplier, 0.0, 0.9) , 1.);
 }
 
 

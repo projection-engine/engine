@@ -10,8 +10,9 @@ import DeferredPass from "./DeferredPass";
 import CameraAPI from "../../apis/camera/CameraAPI";
 import SSGIPass from "./SSGIPass";
 
+const w = 4, h = 4
 export default class AOPass {
-    static ready = false
+    static #ready = false
     static framebuffer
     static blurredFBO
     static filteredSampler
@@ -21,7 +22,14 @@ export default class AOPass {
     static kernels
     static noiseSampler
     static noiseScale = new Float32Array(2)
+    static uniforms = {}
+    static settings = new Float32Array(2)
+    static enabled = true
+
     static initialize() {
+        AOPass.settings[0] = 100 // RADIUS
+        AOPass.settings[1] = 2 // STRENGTH
+
         AOPass.framebuffer = new FramebufferController()
         AOPass.framebuffer
             .texture({
@@ -47,8 +55,11 @@ export default class AOPass {
         AOPass.shader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO, shaderCode.vertex, shaderCode.fragment)
         console.log(AOPass.shader)
         AOPass.blurShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, shaderCode.vertex, shaderCode.fragmentBlur)
+        AOPass.noiseScale[0] = window.outerWidth / w
+        AOPass.noiseScale[1] = window.outerHeight / h
+        DeferredPass.deferredUniforms.aoSampler = AOPass.filteredSampler
 
-        const w = 4, h = 4
+
         GPU.imageWorker(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w, h})
             .then(({kernels, noise}) => {
                 AOPass.kernels = kernels
@@ -60,39 +71,41 @@ export default class AOPass {
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
                 gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG32F, w, h)
                 gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RG, gpu.FLOAT, noise)
-                AOPass.ready = true
-            })
-        AOPass.noiseScale[0] = window.outerWidth/w
-        AOPass.noiseScale[1] = window.outerHeight/h
+                Object.assign(
+                    AOPass.uniforms,
+                    {
+                        gPosition: DeferredPass.positionSampler,
+                        gNormal: DeferredPass.normalSampler,
+                        noiseSampler: AOPass.noiseSampler,
+                        noiseScale: AOPass.noiseScale,
+                        samples: AOPass.kernels,
+                        projection: CameraAPI.projectionMatrix,
+                        settings: AOPass.settings,
+                        sampler: AOPass.unfilteredSampler // blur
+                    }
+                )
+                SSGIPass.uniforms.noiseSampler = AOPass.noiseSampler
+                SSGIPass.normalUniforms.noise = AOPass.noiseSampler
+                AOPass.#ready = true
 
-        DeferredPass.deferredUniforms.aoSampler = AOPass.filteredSampler
+            })
+
+
     }
 
 
     static execute() {
-        const {ao} = Engine.params
-        if (ao && AOPass.ready) {
+        if (!AOPass.enabled || !AOPass.#ready)
+            return
+        AOPass.framebuffer.startMapping()
+        AOPass.shader.bindForUse(AOPass.uniforms)
+        GPU.quad.draw()
+        AOPass.framebuffer.stopMapping()
 
-            AOPass.framebuffer.startMapping()
-            AOPass.shader.bindForUse({
-                gPosition: DeferredPass.positionSampler,
-                gNormal: DeferredPass.normalSampler,
-                noiseSampler: AOPass.noiseSampler,
-                noiseScale: AOPass.noiseScale,
-                samples: AOPass.kernels,
-                projection: CameraAPI.projectionMatrix,
-            })
-            GPU.quad.draw()
-            AOPass.framebuffer.stopMapping()
-
-
-            AOPass.blurredFBO.startMapping()
-            AOPass.blurShader.bindForUse({
-                sampler: AOPass.unfilteredSampler
-            })
-            GPU.quad.draw()
-            AOPass.blurredFBO.stopMapping()
-        }
+        AOPass.blurredFBO.startMapping()
+        AOPass.blurShader.bindForUse(AOPass.uniforms)
+        GPU.quad.draw()
+        AOPass.blurredFBO.stopMapping()
     }
 
 }

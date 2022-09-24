@@ -12,11 +12,8 @@ void main()
 `
 
 export const fragment = `#version 300 es
-
 precision highp float;
-
 #define KERNELS 64
-
 in vec2 texCoords;
 
 uniform sampler2D gPosition;
@@ -25,10 +22,8 @@ uniform sampler2D noiseSampler;
 uniform vec3 samples[KERNELS];
 uniform mat4 projection;
 uniform vec2 noiseScale;
-
-// parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
-int kernelSize = 64;
-float radius = 100.; 
+uniform vec2 settings; // RADIUS, POWER
+ 
 
 // tile noise texture over screen based on screen dimensions divided by noise size
  
@@ -36,7 +31,9 @@ out vec4 fragColor;
 
 void main()
 {
-    // get input for SSAO algorithm
+    float radius = settings.x;
+    float power = settings.y; 
+    
     vec3 fragPos = texture(gPosition, texCoords).xyz;
     vec3 normal = normalize(texture(gNormal, texCoords).rgb);
     vec3 randomVec = normalize(texture(noiseSampler, texCoords * noiseScale).xyz);
@@ -46,7 +43,7 @@ void main()
     mat3 TBN = mat3(tangent, bitangent, normal);
     
     float occlusion = 0.0;
-    for(int i = 0; i < kernelSize; ++i){
+    for(int i = 0; i < KERNELS; ++i){
         vec3 samplePos = TBN * samples[i];
         samplePos = fragPos + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
@@ -59,7 +56,7 @@ void main()
     }
     occlusion = 1.0 - (occlusion / float(KERNELS));
     
-    fragColor = vec4(pow(clamp(occlusion, 0., 2.), 3.),.0,.0, 1.);
+    fragColor = vec4(pow(clamp(occlusion, 0., 1.), power),.0,.0, 1.);
 }
 `
 export const fragmentBlur = `#version 300 es
