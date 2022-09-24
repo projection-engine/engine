@@ -11,8 +11,8 @@ function groupInto(size, mainArray) {
 }
 
 export default class PrimitiveProcessor {
-    static computeNormals(indices, vertices, defaultArray) {
-        if (!Array.isArray(indices) || !Array.isArray(vertices))
+    static computeNormals(indices, vertices) {
+        if (!indices || !vertices)
             return []
         const faces = groupInto(3, indices)
         const positions = groupInto(3, vertices)
@@ -21,7 +21,7 @@ export default class PrimitiveProcessor {
 
 
         for (let i = 0; i < quantity; ++i)
-            normals[i] = defaultArray ? [0,0,0] : new Float32Array(3)
+            normals[i] = [0, 0, 0]
 
         for (let i = 0; i < faces.length; ++i) {
             let f = faces[i], p = 0, c = f[f.length - 1], n = f[0]
@@ -57,11 +57,11 @@ export default class PrimitiveProcessor {
             }
         }
 
-        return defaultArray ? normals.flat() : normals
+        return normals.flat()
     }
 
-    static computeTangents(indices, vertices, uvs, normals, defaultArray) {
-        if (!Array.isArray(indices) || !Array.isArray(vertices) || !Array.isArray(uvs) || !Array.isArray(normals))
+    static computeTangents(indices, vertices, uvs, normals) {
+        if (!indices || !vertices || !uvs || !normals)
             return []
         const norm = groupInto(3, normals)
 
@@ -72,7 +72,7 @@ export default class PrimitiveProcessor {
             triangles = groupInto(3, indices)
 
         for (let i = 0; i < groupedVertices.length; ++i) {
-            tangents[i] = defaultArray ? [0, 0, 0] : new Float32Array(3)
+            tangents[i] = [0, 0, 0]
         }
         for (let i = 0; i < triangles.length; i++) {
             let i0 = triangles[i][0],
@@ -124,18 +124,11 @@ export default class PrimitiveProcessor {
             vec3.scale(nCop, n, vec3.dot(n, t0))
             vec3.sub(t, t0, nCop)
             vec3.normalize(t, t)
-            if (!defaultArray) {
-
-                tangentArray[i] = new Float32Array(3)
-                tangentArray[i][0] = t[0]
-                tangentArray[i][1] = t[1]
-                tangentArray[i][2] = t[2]
-            } else
-                tangentArray[i] = [t[0], t[1], t[2]]
+            tangentArray[i] = [t[0], t[1], t[2]]
 
         }
 
-        return defaultArray ? tangentArray.flat() : tangentArray
+        return tangentArray.flat()
     }
 
     static computeBoundingBox(vertices) {

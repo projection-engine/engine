@@ -1,18 +1,22 @@
 import PrimitiveProcessor from "../../apis/PrimitiveProcessor";
 
-function sampleTexture(x, y, ctx, heightScale) {
-    const r = ctx.getImageData(x, y, 1, 1).data[0]
+
+function sampleTexture(x, y, buffer, heightScale, canvasSize) {
+    const r = buffer[y * (canvasSize * 4) + x * 4]
+
     let height = (r / 255)
     return height * heightScale
 }
 
 async function buildTerrain(base64, scale, dimension) {
-    const imageToLoad = await createImageBitmap(await (await fetch(base64)).blob())
+    const fetchData = await fetch(base64)
+    const blob = await fetchData.blob()
+    const imageToLoad = await createImageBitmap(blob)
     const canvas = new OffscreenCanvas(imageToLoad.width, imageToLoad.height), ctx = canvas.getContext("2d")
+    ctx.imageSmoothingEnabled = true
     ctx.drawImage(imageToLoad, 0, 0, imageToLoad.width, imageToLoad.height)
-
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
     const vertexCount = imageToLoad.width
-
     const count = vertexCount ** 2
 
     let vertices = new Float32Array(count * 3),
@@ -20,19 +24,20 @@ async function buildTerrain(base64, scale, dimension) {
         indices = new Float32Array(6 * (vertexCount - 1) * vertexCount),
         vertexPointer = 0
 
+    const OFFSET = dimension/2
 
     for (let i = 0; i < vertexCount; i++) {
         for (let j = 0; j < vertexCount; j++) {
-            vertices[vertexPointer * 3] = (j / (vertexCount - 1)) * dimension
-            vertices[vertexPointer * 3 + 1] = sampleTexture(j, i, ctx, scale)
-            vertices[vertexPointer * 3 + 2] = (i / (vertexCount - 1)) * dimension
-
+            vertices[vertexPointer * 3] = (j / (vertexCount - 1)) * dimension - OFFSET
+            vertices[vertexPointer * 3 + 1] = sampleTexture(j, i, imageData, scale, canvas.width)
+            vertices[vertexPointer * 3 + 2] = (i / (vertexCount - 1)) * dimension - OFFSET
 
             uvs[vertexPointer * 2] = j / (vertexCount - 1)
             uvs[vertexPointer * 2 + 1] = i / (vertexCount - 1)
             vertexPointer++
         }
     }
+
 
     let pointer = 0
     for (let gz = 0; gz < vertexCount - 1; gz++) {
@@ -51,21 +56,31 @@ async function buildTerrain(base64, scale, dimension) {
             indices[pointer++] = bottomRight
         }
     }
-
     const normals = PrimitiveProcessor.computeNormals(indices, vertices)
+
     const tangents = PrimitiveProcessor.computeTangents(indices, vertices, uvs, normals)
+    console.log(tangents)
 
+    const builtNormals = Float32Array.from(normals)
+    const builtTangents = Float32Array.from(tangents)
 
-    return {
-        vertices,
-        uvs,
-        normals,
-        indices,
-        tangents
-    }
+    return [
+        {
+            vertices,
+            uvs,
+            normals: builtNormals,
+            indices,
+            tangents: builtTangents
+        },
+        [vertices.buffer, uvs.buffer, indices.buffer, builtNormals.buffer, builtTangents.buffer]
+    ]
 
 }
 
 self.onmessage = event => {
-    console.log(event.data)
+    const {base64, scale, dimensions} = event.data
+    buildTerrain(base64, scale, dimensions).then(data => {
+        console.log(data)
+        self.postMessage(data[0], data[1])
+    })
 }

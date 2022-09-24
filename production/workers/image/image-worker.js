@@ -93,10 +93,13 @@ self.onmessage = async ({data: {type, data, id}}) => {
                     noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0
                     noiseTextureData[index + 2] = 0
                 }
-                self.postMessage({data: {
+                self.postMessage(
+                    {data: {
                         noise: noiseTextureData,
                         kernels
-                    }, id}, [noiseTextureData.buffer, ...kernels.map(k => k.buffer)])
+                    }, id},
+                    [noiseTextureData.buffer, ...kernels.map(k => k.buffer)]
+                )
                 break
             }
             default:

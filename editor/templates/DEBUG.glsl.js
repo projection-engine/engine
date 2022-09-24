@@ -7,7 +7,7 @@ void main() {
 }`
 const fragment = `#version 300 es
 precision mediump float;
-#define THREASHOLD .0001
+#define THRESHOLD .0001
 in vec2 texCoord;
 uniform sampler2D uSampler; 
 uniform sampler2D positionSampler;
@@ -28,7 +28,7 @@ void main(){
     vec3 color = samplerData.rgb; 
     
     if(option == 2){
-        if(samplerData.r <= THREASHOLD)    
+        if(samplerData.r <= THRESHOLD)    
             discard;        
         color = vec3(linearize(samplerData.r)) * 5.;
     }

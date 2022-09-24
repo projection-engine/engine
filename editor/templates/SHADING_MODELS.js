@@ -14,5 +14,6 @@ export default {
     AMBIENT: 12,
     POSITION: 13,
     SSGI: 14,
-    STOCHASTIC: 15
+    STOCHASTIC: 15,
+    HEIGHT_MAP: 16
 }
