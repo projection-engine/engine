@@ -1,12 +1,12 @@
 import {vec3, vec4} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
-import mapGizmoMesh from "../utils/map-gizmo-mesh"
-import GizmoSystem from "../services/GizmoSystem";
+import TRANSFORMATION_TYPE from "../../../../../src/editor/data/TRANSFORMATION_TYPE"
+import mapGizmoMesh from "../../utils/map-gizmo-mesh"
+import GizmoSystem from "../../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
-import GizmoInheritance from "./GizmoInheritance";
+import Inheritance from "../Inheritance";
 
 const MOVEMENT_SCALE = .001
-export default class Translation extends GizmoInheritance {
+export default class Translation extends Inheritance {
     tracking = false
     currentCoord = undefined
     gridSize = .01

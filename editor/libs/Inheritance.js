@@ -3,12 +3,12 @@ import EngineStore from "../../../../src/editor/stores/EngineStore";
 
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
-import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
-import DualAxisGizmo from "./DualAxisGizmo";
+import ScreenSpaceGizmo from "./transformation/ScreenSpaceGizmo";
+import DualAxisGizmo from "./transformation/DualAxisGizmo";
 import {ConversionAPI, DepthPass, PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
 
-export default class GizmoInheritance {
+export default class Inheritance {
     tracking = false
     xGizmo
     yGizmo

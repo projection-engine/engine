@@ -39,13 +39,13 @@ export default class PickingAPI {
         return dd
     }
 
-    static readUV(x, y) {
+    static readUV(x, y, imageWidth, imageHeight) {
         const w = window.gpu.canvas.width, h = window.gpu.canvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
         const uv = PickingAPI.readPixels(DepthPass.framebuffer.FBO, 2, coords)
         const texCoords = {
-            x: (uv[0] * w) -0.5,
-            y: ((1-uv[1]) * h) -0.5,
+            x: (uv[0] * imageWidth) -0.5,
+            y: (uv[1] * imageHeight) -0.5,
         }
         return {
             uv,
