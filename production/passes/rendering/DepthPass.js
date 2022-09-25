@@ -5,65 +5,14 @@ import CameraAPI from "../../apis/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import DEPTH_PASSGlsl from "../../shaders/DEPTH_PASS.glsl";
 
-const vertex = `#version 300 es
-
-layout (location = 0) in vec3 position;
-
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
-out vec4 vPosition; 
-void main() { 
-    vPosition = projectionMatrix * viewMatrix * transformMatrix * vec4(position , 1.) ;
-    gl_Position = vPosition;
-}
-`
-const frag = `#version 300 es
-precision highp  float;
-
-in vec4 vPosition;
-uniform vec3 meshID;
-out vec4 fragDepth;
-
-void main(void){
-    fragDepth = vec4(gl_FragCoord.z, meshID.r, meshID.g, 1.);  
-}
-`
-const normal = `#version 300 es
-precision highp  float;
- 
-#define THRESHOLD .0000001
-in vec2 texCoord;  
-uniform sampler2D depthSampler;
-uniform mat4 projectionInverse;
-uniform mat4 viewInverse; 
-out vec4 fragNormal;
-
- 
-vec3 reconstructPosition(vec2 uv, float z, mat4 InvVP)
-{
-  float x = uv.x * 2. - 1.;
-  float y = (1.0 - uv.y) * 2. - 1.;
-  vec4 position_s = vec4(x, y, z, 1.);
-  vec4 position_v =  InvVP * position_s;
-  return position_v.xyz / position_v.w;
-}
- 
-
-void main(void){ 
-    float depth = texture(depthSampler, texCoord).r;
-    if(depth <= THRESHOLD)
-        discard;
-    vec3 P0 = reconstructPosition(texCoord, depth, viewInverse * projectionInverse);   
-    vec3 normal = normalize(cross(dFdx(P0), dFdy(P0)));
- 
-    fragNormal = vec4(normalize(normal) , 1.);
-}`
 export default class DepthPass {
     static framebuffer
     static normalFBO
     static depthSampler
+    static IDSampler
+    static UVSampler
     static normalSampler
 
     static shader
@@ -73,21 +22,27 @@ export default class DepthPass {
         DepthPass.framebuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEPTH)
         DepthPass.framebuffer
             .texture({
-                precision: gpu.RGBA32F,
-                format: gpu.RGBA,
+                precision: gpu.R32F,
+                format: gpu.RED,
                 type: gpu.FLOAT,
                 repeat: false,
-                linear: false
-            })
+                linear: false,
+                attachment: 0
+            }) // DEPTH
+            .texture({attachment: 1}) // ID
+            .texture({attachment: 2}) // UV
             .depthTest()
         DepthPass.depthSampler = DepthPass.framebuffer.colors[0]
+        DepthPass.IDSampler = DepthPass.framebuffer.colors[1]
+        DepthPass.UVSampler = DepthPass.framebuffer.colors[2]
+
 
         DepthPass.normalFBO = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.RECONSTRUCTED_NORMALS)
         DepthPass.normalFBO.texture()
         DepthPass.normalSampler = DepthPass.normalFBO.colors[0]
 
-        DepthPass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEPTH, vertex, frag)
-        DepthPass.normalShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.NORMAL_RECONSTRUCTION, shaderCode.vertex, normal)
+        DepthPass.shader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DEPTH, DEPTH_PASSGlsl.depthVertex, DEPTH_PASSGlsl.depthFragment)
+        DepthPass.normalShader =  GPU.allocateShader(STATIC_SHADERS.PRODUCTION.NORMAL_RECONSTRUCTION, shaderCode.vertex, DEPTH_PASSGlsl.normalReconstructionFragment)
     }
 
     static execute() {
@@ -101,7 +56,7 @@ export default class DepthPass {
             const mesh = GPU.meshes.get(entity.components.get(COMPONENTS.MESH).meshID)
             if (!mesh)
                 continue
-            mesh.useForDepth()
+
             DepthPass.shader.bindForUse({
                 viewMatrix: CameraAPI.viewMatrix,
                 transformMatrix: entity.matrix,

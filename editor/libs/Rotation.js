@@ -13,6 +13,7 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../production/GPU";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import {DepthPass} from "../../production";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 
@@ -34,15 +35,10 @@ export default class Rotation {
 
     onMouseDown(event) {
         GizmoSystem.onMouseDown()
-        const w = gpu.canvas.width, h = gpu.canvas.height
-        const x = event.clientX
-        const y = event.clientY
+        this.x = event.clientX
+        this.y = event.clientY
 
-        this.currentCoord = ConversionAPI.toQuadCoord({x, y}, {w, h})
-        this.currentCoord.clientX = x
-        this.currentCoord.clientY = y
         this.currentIncrement = 0
-        ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
     }
 
@@ -147,9 +143,8 @@ export default class Rotation {
         const mY = this.#rotateMatrix("y", this.yGizmo)
         const mZ = this.#rotateMatrix("z", this.zGizmo)
 
-        const FBO = GizmoSystem.drawToDepthSampler(GizmoSystem.rotationGizmoMesh, [mX, mY, mZ])
-        const dd = PickingAPI.depthPick(FBO, this.currentCoord)
-        const pickID = Math.round(255 * dd[0])
+        GizmoSystem.drawToDepthSampler(GizmoSystem.rotationGizmoMesh, [mX, mY, mZ])
+        const pickID = PickingAPI.readEntityID(this.x, this.y)
         GizmoSystem.clickedAxis = pickID
 
         if (pickID === 0)

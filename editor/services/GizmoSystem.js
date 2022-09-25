@@ -115,7 +115,6 @@ export default class GizmoSystem {
         FBO.stopMapping()
 
         gpu.enable(gpu.CULL_FACE)
-        return FBO
     }
 
     static #findMainEntity() {
@@ -136,7 +135,7 @@ export default class GizmoSystem {
         }
     }
 
-    static execute( ) {
+    static execute() {
 
         if (GizmoSystem.selectedEntities.length > 0) {
             const t = GizmoSystem.targetGizmo

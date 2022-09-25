@@ -93,15 +93,12 @@ export default class FramebufferController {
             type,
 
             linear,
-            repeat,
-            flip
+            repeat
         } = {...this.fallback, ...obj}
 
 
         this.use()
         const texture = gpu.createTexture()
-        if (flip === true) gpu.pixelStorei(gpu.UNPACK_FLIP_Y_WEBGL, true)
-
         gpu.bindTexture(gpu.TEXTURE_2D, texture)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, linear ? gpu.LINEAR : gpu.NEAREST)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, linear ? gpu.LINEAR : gpu.NEAREST)

@@ -15,5 +15,7 @@ export default {
     POSITION: 13,
     SSGI: 14,
     STOCHASTIC: 15,
-    HEIGHT_MAP: 16
+
+    UV: 16,
+    ID: 17
 }

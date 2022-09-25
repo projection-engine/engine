@@ -6,6 +6,7 @@ export default class PickingAPI {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, depthFBO.FBO)
+        gpu.readBuffer(gpu.COLOR_ATTACHMENT1)
         let dd = new Float32Array(w * h * 4)
         gpu.readPixels(
             end.x > start.x ? start.x : end.x,
@@ -21,8 +22,9 @@ export default class PickingAPI {
         return dd
     }
 
-    static depthPick(depthFBO, coords) {
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, depthFBO.FBO)
+    static readPixels(framebuffer, attachment = 0, coords) {
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, framebuffer)
+        gpu.readBuffer(gpu.COLOR_ATTACHMENT0 + attachment)
         let dd = new Float32Array(4)
         gpu.readPixels(
             coords.x,
@@ -36,11 +38,27 @@ export default class PickingAPI {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         return dd
     }
-    static readPixelData(x, y) {
+
+    static readUV(x, y) {
         const w = window.gpu.canvas.width, h = window.gpu.canvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
-        const picked = PickingAPI.depthPick(DepthPass.framebuffer, coords)
-        return Math.round((picked[1] + picked[2]) * 255)
+        const uv = PickingAPI.readPixels(DepthPass.framebuffer.FBO, 2, coords)
+        const texCoords = {
+            x: (uv[0] * w) -0.5,
+            y: ((1-uv[1]) * h) -0.5,
+        }
+        return {
+            uv,
+            texCoords
+        }
+    }
+
+    static readEntityID(x, y) {
+        const w = window.gpu.canvas.width, h = window.gpu.canvas.height
+        const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
+        const picked = PickingAPI.readPixels(DepthPass.framebuffer.FBO, 1, coords)
+
+        return Math.round((picked[0] + picked[1] + picked[2]) * 255)
     }
 
 

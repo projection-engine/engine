@@ -5,7 +5,7 @@ import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import DualAxisGizmo from "./DualAxisGizmo";
-import {ConversionAPI, PickingAPI} from "../../production";
+import {ConversionAPI, DepthPass, PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
 
 export default class GizmoInheritance {
@@ -33,12 +33,9 @@ export default class GizmoInheritance {
 
     onMouseDown(event) {
         GizmoSystem.onMouseDown()
-        const w = gpu.canvas.width, h = gpu.canvas.height
-        const x = event.clientX
-        const y = event.clientY
+        this.x = event.clientX
+        this.y = event.clientY
 
-        this.currentCoord = ConversionAPI.toQuadCoord({x, y}, {w, h})
-        ScreenSpaceGizmo.onMouseDown(event)
         this.#testClick()
     }
 
@@ -67,9 +64,9 @@ export default class GizmoInheritance {
         const mX = GizmoAPI.translateMatrix(this.xGizmo)
         const mY = GizmoAPI.translateMatrix(this.yGizmo)
         const mZ = GizmoAPI.translateMatrix(this.zGizmo)
-        const FBO = GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
-        const dd = PickingAPI.depthPick(FBO, this.currentCoord)
-        const pickID = Math.round(255 * dd[0])
+        GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
+        const pickID = PickingAPI.readEntityID(this.x, this.y)
+        console.log(pickID)
         GizmoSystem.clickedAxis = pickID
 
         if (pickID === 0)

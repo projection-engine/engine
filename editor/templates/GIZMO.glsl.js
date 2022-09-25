@@ -261,10 +261,14 @@ precision highp float;
 
 uniform vec3 uID;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 gDepth;
+layout (location = 1) out vec4 gID;
+layout (location = 2) out vec4 gUV;
 
 void main() {
-    fragColor = vec4(uID, 1.);
+    gDepth = vec4(1.);
+    gUV = vec4(1.);
+    gID = vec4(uID, 1.);
 }
 `
 

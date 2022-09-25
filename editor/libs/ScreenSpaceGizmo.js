@@ -54,10 +54,6 @@ export default class ScreenSpaceGizmo {
         }
     }
 
-    static onMouseDown() {
-    }
-
-
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix || GizmoSystem.clickedAxis >= 0)
             return

@@ -225,8 +225,8 @@ export default class GPU {
     }
 
     static reallocateFramebuffer(id, width, height) {
-        InstanceController.destroyFramebuffer(id)
-        return InstanceController.allocateFramebuffer(id, width, height)
+        // InstanceController.destroyFramebuffer(id)
+        // return InstanceController.allocateFramebuffer(id, width, height)
     }
 
     static allocateInstancedGroup(id) {

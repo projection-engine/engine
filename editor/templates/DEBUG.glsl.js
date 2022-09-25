@@ -30,7 +30,7 @@ void main(){
     if(option == 2){
         if(samplerData.r <= THRESHOLD)    
             discard;        
-        color = vec3(linearize(samplerData.r)) * 5.;
+        color = vec3(linearize(samplerData.r)) * 2.;
     }
     else if (option == 9){
         color = vec3(samplerData.b); 

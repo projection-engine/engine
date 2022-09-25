@@ -3,18 +3,23 @@ export default class DrawingAPI {
     brushImage = null
     currentImage = null
     callback
-    brushColor = "#555"
-    brushSize = 10
+    _opacity =  .01
+    _intensity = 1
 
-    set brushFalloff(data) {
-        const ctx = this.ctx
-        const gradient = ctx.createLinearGradient(0, 0, this.brushSize / 2, this.brushSize / 2)
-        gradient.addColorStop(0, "White");
-        gradient.addColorStop(0.3, "rgba(128, 128, 256, .5)");
-        gradient.addColorStop(0.4, "rgba(128, 128, 256, .5)");
-        gradient.addColorStop(1, "White");
-        ctx.strokeStyle = gradient
+    set opacity(data) {
+        const D = this._intensity * 255
+        this.ctx.strokeStyle = `rgba(${D}, ${D}, ${D}, ${data * .1})`
+        this._opacity = data * .1
+    }
 
+    set brushSize(data) {
+        this.ctx.lineWidth = data
+    }
+
+    set brushIntensity(data) {
+        this._intensity = data
+        const D = data * 255
+        this.ctx.strokeStyle = `rgba(${D}, ${D}, ${D}, ${this._opacity})`
     }
 
     constructor(canvas, image, callback) {
@@ -26,12 +31,11 @@ export default class DrawingAPI {
         this.currentImage = new Image();
 
 
-        this.currentImage.onload = () => {
-            ctx.drawImage(this.currentImage, 0, 0, canvas.width, canvas.height)
-            ctx.strokeStyle = this.brushColor
-            this.brushFalloff = .3
-        }
+        this.currentImage.onload = () => ctx.drawImage(this.currentImage, 0, 0, canvas.width, canvas.height)
+
         this.ctx = ctx
+        ctx.globalCompositeOperation = "source-over";
+        this.ctx.lineJoin = "round"
         this.currentImage.src = image
 
         this.handlerBound = this.handler.bind(this)
@@ -53,8 +57,12 @@ export default class DrawingAPI {
                 clearInterval(this.interval)
                 this.interval = setInterval(() => this.callback(), 1000)
                 this.boundings = this.canvas.getBoundingClientRect()
+                this.ctx.beginPath()
+
                 this.X = e.clientX - this.boundings.left;
                 this.Y = e.clientY - this.boundings.top;
+
+                this.ctx.moveTo(this.X, this.Y)
                 this.canvas.addEventListener("mousemove", this.handlerBound)
                 break
             case "mouseup":
@@ -63,19 +71,13 @@ export default class DrawingAPI {
                 this.canvas.removeEventListener("mousemove", this.handlerBound)
                 break
             case "mousemove":
+                console.log(this)
                 const newX = e.clientX - this.boundings.left
                 const newY = e.clientY - this.boundings.top
                 const ctx = this.ctx
 
-                const gradient = ctx.createRadialGradient(newX, newY, this.brushSize / 2, newX, newY, this.brushSize);
-
-                gradient.addColorStop(1, 'white');
-                gradient.addColorStop(0, 'rgba(255, 0,0,.2)');
-
-                ctx.fillStyle = gradient
-                ctx.beginPath()
-                ctx.arc(newX, newY, this.brushSize, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.lineTo(newX, newY)
+                ctx.stroke();
 
                 this.X = newX
                 this.Y = newY

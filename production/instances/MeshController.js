@@ -97,17 +97,12 @@ export default class MeshController {
     }
 
 
-    useForDepth() {
-        gpu.bindVertexArray(this.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
-
-        this.vertexVBO.enable()
-    }
 
     draw() {
         this.use()
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
+
     drawLines() {
         this.use()
         gpu.drawElements(gpu.LINES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
