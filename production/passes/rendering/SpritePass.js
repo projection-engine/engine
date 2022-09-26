@@ -6,10 +6,8 @@ import COMPONENTS from "../../../static/COMPONENTS.json";
 
 export default class SpritePass {
     static shader
-    static shaderInstanced
-
     static initialize() {
-        SpritePass.shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE)
+        SpritePass.shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
     }
 
     static execute() {

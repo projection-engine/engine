@@ -152,8 +152,7 @@ ${METHODS}
 void main(){
  
  	vec3 normal = normalize(texture(gNormal, texCoord).rgb);
-	vec3 viewPos = getViewPosition(texCoord); 
-	vec3 reflected = normalize(reflect(normalize(viewPos), normal));
+	vec3 viewPos = getViewPosition(texCoord);  
 
 
     vec3 hitPos = viewPos;
@@ -164,7 +163,7 @@ void main(){
   
 	float stepSize = settings.x * (jitter.x + jitter.y) + settings.x;
 
- 	vec4 coords = RayMarch(normal + reflected, hitPos, dDepth, stepSize);
+ 	vec4 coords = RayMarch(normal, hitPos, dDepth, stepSize);
 	vec3 tracedAlbedo = aces(texture(previousFrame, coords.xy).rgb);
  
     outColor = vec4(tracedAlbedo * settings.y, 1.);
