@@ -8,5 +8,6 @@
   "PHYSICS_COLLIDER": "PHYSICS_COLLIDER",
   "RIGID_BODY": "RigidBody",
   "CULLING": "CullingComponent",
-  "UI": "UI"
+  "UI": "UI",
+  "TERRAIN": "TERRAIN"
 }

@@ -1,5 +1,5 @@
 import Component from "../Component"
-import FALLBACK_MATERIAL from "../../../static/FALLBACK_MATERIAL";
+import FALLBACK_MATERIAL from "../../../static/materials/FALLBACK_MATERIAL";
 import MESH_PROPS from "../../../static/component-props/MESH_PROPS";
 
 export default class MeshComponent extends Component {

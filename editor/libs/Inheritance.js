@@ -66,7 +66,6 @@ export default class Inheritance {
         const mZ = GizmoAPI.translateMatrix(this.zGizmo)
         GizmoSystem.drawToDepthSampler(this.xyz, [mX, mY, mZ])
         const pickID = PickingAPI.readEntityID(this.x, this.y)
-        console.log(pickID)
         GizmoSystem.clickedAxis = pickID
 
         if (pickID === 0)

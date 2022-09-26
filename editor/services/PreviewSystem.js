@@ -5,7 +5,7 @@ import MaterialAPI from "../../production/apis/rendering/MaterialAPI";
 import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
+import FALLBACK_MATERIAL from "../../static/materials/FALLBACK_MATERIAL";
 import FramebufferController from "../../production/instances/FramebufferController";
 
 

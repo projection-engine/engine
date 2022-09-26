@@ -1,4 +1,4 @@
-import FALLBACK_MATERIAL from "./FALLBACK_MATERIAL";
+import FALLBACK_MATERIAL from "./materials/FALLBACK_MATERIAL";
 
 export const DEFAULT_MATRICES = [
     {

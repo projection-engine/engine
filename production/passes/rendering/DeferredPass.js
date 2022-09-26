@@ -83,6 +83,7 @@ export default class DeferredPass {
 
 
         DeferredPass.gBuffer.startMapping()
+
         MaterialAPI.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {

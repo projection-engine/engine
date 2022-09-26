@@ -79,7 +79,7 @@ export default class MaterialAPI {
             dirLightPOV, pointLightsQuantity, pointLightData,
             maxTextures
         } = Engine.data
-        console.log(cubeMapPosition)
+
         MaterialAPI.loopMeshes(meshes, (mat, mesh, meshComponent, current) => {
             MaterialAPI.drawMesh(
                 current.id,

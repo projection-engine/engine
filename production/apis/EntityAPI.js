@@ -84,6 +84,11 @@ export default class EntityAPI {
         if (!entity.components.get(COMPONENTS.PROBE))
             EntityAPI.#removeUnusedProbes(entity)
 
+        if (!entity.components.get(COMPONENTS.TERRAIN)) {
+            data.terrain.push(entity)
+            placementMap.terrain = true
+        }
+
         Engine.dataEntity.set(entity.id, placementMap)
         if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
             EntityAPI.packageLights()

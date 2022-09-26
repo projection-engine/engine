@@ -9,7 +9,8 @@ export default class Component {
         BOOLEAN: "bool",
         IMAGE: "image",
         MESH: "mesh",
-        MATERIAL: "material"
+        MATERIAL: "material",
+        TERRAIN: "terrain"
     })
     __entity
 
@@ -71,6 +72,9 @@ export default class Component {
     }
     static materialInstance(label, key) {
         return {type: Component.propTypes.MATERIAL, label, key}
+    }
+    static terrainInstance(label, key) {
+        return {type: Component.propTypes.TERRAIN, label, key}
     }
     static meshInstance(label, key) {
         return {type: Component.propTypes.MESH, label, key}

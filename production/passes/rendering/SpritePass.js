@@ -9,8 +9,7 @@ export default class SpritePass {
     static shaderInstanced
 
     static initialize() {
-        SpritePass.shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
-        SpritePass.shaderInstanced = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE_INSTANCED)
+        SpritePass.shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE)
     }
 
     static execute() {

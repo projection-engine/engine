@@ -1,4 +1,26 @@
-const BODY = `
+
+export const fragment = `#version 300 es
+precision mediump float;
+in vec2 texCoord;
+
+uniform sampler2D iconSampler;
+out vec4 finalColor;
+
+void main()
+{
+    vec4 color = texture(iconSampler, texCoord).rgba;
+    if(color.a <= .1)
+        discard;
+    else
+        finalColor = vec4(color);
+}
+`
+
+export const vertex = `#version 300 es 
+layout (location = 0) in vec3 position;
+ 
+uniform mat4 transformationMatrix;
+ 
 #define SIZE .2
 uniform vec3 cameraPosition;
 uniform mat4 viewMatrix;
@@ -12,7 +34,7 @@ void main(){
     bool alwaysFaceCamera = attributes.x == 1.; 
     bool keepSameSize = attributes.y == 1.;
     
-    texCoord = uv;
+    texCoord = position.xy * .5 + .5;
     mat4 m =  viewMatrix * transformationMatrix;  
     
     if(alwaysFaceCamera){ 
@@ -49,42 +71,9 @@ void main(){
     gl_Position = projectionMatrix * m * vec4(position, 1.0);
 }
 `
-export const fragment = `#version 300 es
-
-precision mediump float;
-in vec2 texCoord;
-
-uniform sampler2D iconSampler;
-out vec4 finalColor;
-
-void main()
-{
-    vec4 color = texture(iconSampler, texCoord).rgba;
-    if(color.a <= .1)
-        discard;
-    else
-        finalColor = vec4(color);
-}
-`
-export const vertex = `#version 300 es 
-layout (location = 0) in vec3 position;
-layout (location = 2) in vec2 uv;
- 
-uniform mat4 transformationMatrix;
- 
-${BODY}
-`
-export const vertexInstanced = `#version 300 es
-layout (location = 0) in vec3 position;
-layout (location = 1) in mat4 transformationMatrix;
-layout (location = 2) in vec2 uv;
-
-${BODY}
-`
 
 
 export default {
     vertex,
-    vertexInstanced,
     fragment
 }

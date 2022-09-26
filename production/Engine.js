@@ -23,7 +23,8 @@ export default class Engine {
         specularProbes: [],
         cameras: [],
         diffuseProbes: [],
-        sprites: []
+        sprites: [],
+        terrain: []
     }
     static params = {}
     static then = 0

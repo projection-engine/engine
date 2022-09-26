@@ -35,6 +35,7 @@ export default class LoopAPI {
         LoopAPI.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
+
         ScreenEffectsPass.initialize()
         DepthPass.initialize()
         CompositePass.initialize()
@@ -77,6 +78,7 @@ export default class LoopAPI {
         DeferredPass.drawFrame()
         GPU.copyTexture(FBO, DeferredPass.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardPass.execute()
+
         SpritePass.execute()
         if (onWrap != null)
             onWrap.execute(true)

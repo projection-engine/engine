@@ -13,6 +13,7 @@ import CullingComponent from "../components/misc/CullingComponent";
 import EntityAPI from "../apis/EntityAPI";
 import UIComponent from "../components/misc/UIComponent";
 import QueryAPI from "../apis/utils/QueryAPI";
+import TerrainComponent from "../components/rendering/TerrainComponent";
 
 
 const TYPED_ATTRIBUTES = [
@@ -99,6 +100,8 @@ export default class Entity extends Movable {
         [COMPONENTS.RIGID_BODY]: RigidBodyComponent,
         [COMPONENTS.CULLING]: CullingComponent,
         [COMPONENTS.UI]: UIComponent,
+
+        [COMPONENTS.TERRAIN]: TerrainComponent,
     }
 
     static parseEntityObject(entity) {
