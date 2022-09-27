@@ -1,7 +1,7 @@
 export default [
     {
         key: "multipliers",
-        data: [1,1,1]
+        data: (new Array(16)).fill(1)
     },
     {
         key: "layerController",

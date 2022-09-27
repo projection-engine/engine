@@ -1,8 +1,8 @@
 export default function getTerrainMaterial(layers) {
-    const multiplierType = layers === 1 ? "vec3" : "mat3"
+    const multiplierType = layers === 0 ? "vec3" : "mat3"
     let samplers = ""
     let samplersData = ""
-    for (let i = 0; i < layers; i++) {
+    for (let i = 0; i <= layers; i++) {
         samplers += `
         
       uniform sampler2D albedo${i};
@@ -12,7 +12,7 @@ export default function getTerrainMaterial(layers) {
         let currentMultiplier
         switch (i) {
             case 0:
-                if (layers > 1)
+                if (layers === 0)
                     currentMultiplier = `multipliers`
                 else
                     currentMultiplier = `vec3(multipliers[0][0],multipliers[0][1],multipliers[0][2])`
@@ -25,16 +25,15 @@ export default function getTerrainMaterial(layers) {
                 break
         }
         samplersData += `
-            vec3 currentMultiplier = ${currentMultiplier};        
-            float layerMultiplier = layerData.${i === 0 ? "x" : i === 1 ? "y" : "z"};
-            gAlbedo += vec4(texture(albedo${i}, texCoord).rgb * layerMultiplier * currentMultiplier.x;
-            gNormal += vec4(normalize(toTangentSpace * ((texture(normal${i}, texCoord).rgb * 2.0)- 1.0)) * layerMultiplier * currentMultiplier.y;
-            gBehaviour.g += texture(roughness${i}, texCoord).r  * layerMultiplier * currentMultiplier.z;
+            ${i === 0 ? "vec3" : ""}  currentMultiplier = ${currentMultiplier};        
+            ${i === 0 ? "float" : ""} layerMultiplier = layerData.${i === 0 ? "x" : i === 1 ? "y" : "z"};
+            gAlbedo ${i > 0 ? "+" : ""}= vec4(texture(albedo${i}, texCoord).rgb * layerMultiplier * currentMultiplier.x, 1.);
+            gNormal ${i > 0 ? "+" : ""}= vec4(normalize(toTangentSpace * ((texture(normal${i}, texCoord).rgb * 2.0)- 1.0)) * layerMultiplier * currentMultiplier.y, 1.);
+            gBehaviour.g ${i > 0 ? "+" : ""}= texture(roughness${i}, texCoord).r  * layerMultiplier * currentMultiplier.z;
         `
     }
 
-    return `
-        #version 300 es
+    return `#version 300 es
         precision highp float;
         
         in vec3 normalVec;
@@ -57,8 +56,12 @@ export default function getTerrainMaterial(layers) {
             gPosition = vPosition;
             gAmbient = vec4(0., 0., 0., 1.);
             gBehaviour =  vec4(1., 0., 0., 1.); 
-            vec3 layerData = texture(layerController, texCoords).rgb; 
+            vec3 layerData = texture(layerController, texCoord).rgb; 
             ${samplersData}
+            
+            gAlbedo /=${layers + 1}.;
+            gNormal/=${layers + 1}.;
+            gBehaviour.g /= ${layers + 1}.; 
         }
 `
 }

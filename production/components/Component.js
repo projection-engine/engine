@@ -70,8 +70,8 @@ export default class Component {
     static imageTexture(label, key) {
         return {type: Component.propTypes.IMAGE, label, key}
     }
-    static materialInstance(label, key) {
-        return {type: Component.propTypes.MATERIAL, label, key}
+    static materialInstance(label, key, terrainMaterials) {
+        return {type: Component.propTypes.MATERIAL, label, key, terrainMaterials}
     }
     static terrainInstance(label, key) {
         return {type: Component.propTypes.TERRAIN, label, key}

@@ -84,7 +84,7 @@ export default class EntityAPI {
         if (!entity.components.get(COMPONENTS.PROBE))
             EntityAPI.#removeUnusedProbes(entity)
 
-        if (!entity.components.get(COMPONENTS.TERRAIN)) {
+        if (entity.components.get(COMPONENTS.TERRAIN) != null) {
             data.terrain.push(entity)
             placementMap.terrain = true
         }

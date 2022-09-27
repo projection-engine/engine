@@ -79,11 +79,8 @@ export default class DeferredPass {
     }
 
     static execute() {
-        const {meshes} = Engine.data
-
-
+        const {meshes, terrain} = Engine.data
         DeferredPass.gBuffer.startMapping()
-
         MaterialAPI.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
@@ -103,6 +100,25 @@ export default class DeferredPass {
                     })
             }
         )
+
+        MaterialAPI.loopTerrain(
+            terrain,
+            (mat, mesh, meshComponent, current) => {
+                MaterialAPI.drawMesh(
+                    current.id,
+                    mesh,
+                    mat,
+                    meshComponent,
+                    {
+                        cameraVec: CameraAPI.position,
+                        viewMatrix: CameraAPI.viewMatrix,
+                        projectionMatrix: CameraAPI.projectionMatrix,
+                        transformMatrix: current.matrix,
+                        normalMatrix: current.normalMatrix
+                    })
+            }
+        )
+
         DeferredPass.gBuffer.stopMapping()
     }
 

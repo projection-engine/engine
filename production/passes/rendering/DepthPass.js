@@ -7,6 +7,9 @@ import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import DEPTH_PASSGlsl from "../../shaders/DEPTH_PASS.glsl";
 
+const MESH = COMPONENTS.MESH
+const T = COMPONENTS.TERRAIN
+
 export default class DepthPass {
     static framebuffer
     static normalFBO
@@ -47,24 +50,45 @@ export default class DepthPass {
 
     static execute() {
         const meshes = Engine.data.meshes
+        const terrain = Engine.data.terrain
+        const mSize = meshes.length
+        const tSize = terrain.length
+        const M = GPU.meshes
+        const U = {
+            viewMatrix: CameraAPI.viewMatrix,
+            projectionMatrix: CameraAPI.projectionMatrix,
+        }
+        const S = DepthPass.shader
         // DEPTH && ID
         DepthPass.framebuffer.startMapping()
-        for (let i = 0; i < meshes.length; i++) {
+        for (let i = 0; i < tSize; i++) {
+            const entity = terrain[i]
+            if (!entity.active)
+                continue
+
+            const mesh = M.get(entity.components.get(T).terrainID)
+            if (!mesh)
+                continue
+            U.transformMatrix = entity.matrix
+            U.meshID = entity.pickID
+            S.bindForUse(U)
+            mesh.draw()
+        }
+
+        for (let i = 0; i < mSize; i++) {
             const entity = meshes[i]
             if (!entity.active)
                 continue
-            const mesh = GPU.meshes.get(entity.components.get(COMPONENTS.MESH).meshID)
+            const mesh = M.get(entity.components.get(MESH).meshID)
             if (!mesh)
                 continue
 
-            DepthPass.shader.bindForUse({
-                viewMatrix: CameraAPI.viewMatrix,
-                transformMatrix: entity.matrix,
-                projectionMatrix: CameraAPI.projectionMatrix,
-                meshID: entity.pickID
-            })
+            U.transformMatrix = entity.matrix
+            U.meshID = entity.pickID
+            S.bindForUse(U)
             mesh.draw()
         }
+
         DepthPass.framebuffer.stopMapping()
 
         // NORMALS

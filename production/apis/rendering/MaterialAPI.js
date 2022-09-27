@@ -123,6 +123,25 @@ export default class MaterialAPI {
         }
     }
 
+    static loopTerrain(entities, callback) {
+        const l = entities.length
+        const materials = GPU.materials
+        const meshes = GPU.meshes
+
+        for (let m = 0; m < l; m++) {
+            const current = entities[m]
+
+            if (!current.active)
+                continue
+            const terrainComponent = current.components.get(COMPONENTS.TERRAIN)
+            const mesh = meshes.get(terrainComponent.terrainID)
+            const mat = materials.get(terrainComponent.materialID)
+
+            if (!mesh || !mat || !mat.ready)
+                continue
+            callback(mat, mesh, terrainComponent, current)
+        }
+    }
 
     static async updateMaterialUniforms(data, material) {
         return await Promise.all(data.map(k => {
