@@ -2,7 +2,7 @@ import {v4} from "uuid"
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import GPU from "../GPU";
 import MaterialAPI from "../apis/rendering/MaterialAPI";
-import {DEFAULT_MATRICES} from "../../static/SIMPLE_MATERIAL_TEMPLATE";
+import {DEFAULT_MATRICES} from "../materials/simple/SIMPLE_MATERIAL_UNIFORMS";
 
 export default class MaterialController {
     ready = false
