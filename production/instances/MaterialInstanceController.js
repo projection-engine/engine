@@ -16,6 +16,7 @@ export default class MaterialInstanceController {
         this.uniforms = materialReference.uniforms
         this.id = id
         this.settings = materialReference.settings
+        console.log(uniformData)
         MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
             resolve(this)
             this.ready = true

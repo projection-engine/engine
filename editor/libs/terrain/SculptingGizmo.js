@@ -1,5 +1,4 @@
 import {PickingAPI} from "../../../production";
-import TerrainWorker from "../../../workers/terrain/TerrainWorker";
 
 const MOUSE_LEFT = 0
 export default class SculptingGizmo {
@@ -17,31 +16,34 @@ export default class SculptingGizmo {
         this.ctx.strokeStyle = `rgb(${d}, ${d}, ${d}, ${brushScale})`
         this.ctx.fillStyle = `rgb(${d}, ${d}, ${d}, ${brushScale})`
     }
+    updateImage(image){
+        this.currentImage = new Image();
+        this.currentImage.onload = () => {
+            this.canvas.width = this.currentImage.naturalWidth
+            this.canvas.height = this.currentImage.naturalHeight
+            this.ctx.drawImage(this.currentImage, 0, 0, this.canvas.width, this.canvas.height)
+        }
+        this.currentImage.src = image
+    }
+
     constructor(image) {
 
-        this.#worker = new Worker("./build/sculpting-worker.js")
-        const canvas = document.createElement("canvas")
-
-        this.ctx = canvas.getContext("2d")
+        // this.#worker = new Worker("./build/sculpting-worker.js")
+        this.canvas = document.createElement("canvas")
+        this.ctx = this.canvas.getContext("2d")
         this.ctx.lineJoin = "round"
         this.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
         this.ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        this.ctx.globalCompositeOperation = 'destination-atop';
+        // this.ctx.globalCompositeOperation = 'destination-atop';
 
 
-        this.currentImage = new Image();
-        this.currentImage.onload = () => {
-            canvas.width = this.currentImage.naturalWidth
-            canvas.height = this.currentImage.naturalHeight
-            this.ctx.drawImage(this.currentImage, 0, 0, canvas.width, canvas.height)
-        }
-        this.currentImage.src = image
+        this.updateImage(image)
 
         this.handlerBound = this.handler.bind(this)
 
         gpu.canvas.addEventListener("mousedown", this.handlerBound)
         document.addEventListener("mouseup", this.handlerBound)
-        this.canvas = canvas
+
     }
 
     destroy() {
@@ -61,7 +63,7 @@ export default class SculptingGizmo {
                 this.ctx.beginPath()
                 const {texCoords} = PickingAPI.readUV(e.clientX, e.clientY, this.currentImage.naturalWidth, this.currentImage.naturalHeight)
                 this.ctx.moveTo(texCoords.x, texCoords.y)
-                this.ctx.globalCompositeOperation = 'destination-atop';
+                // this.ctx.globalCompositeOperation = 'destination-atop';
                 document.addEventListener("mousemove", this.handlerBound)
                 this.wasDown = true
                 break
@@ -79,7 +81,7 @@ export default class SculptingGizmo {
                 const {texCoords} = PickingAPI.readUV(e.clientX, e.clientY, this.currentImage.naturalWidth, this.currentImage.naturalHeight)
                 ctx.lineTo(texCoords.x, texCoords.y)
 
-                ctx.fill();
+                // ctx.fill();
                 ctx.stroke();
 
                 break

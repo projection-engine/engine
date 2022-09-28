@@ -56,12 +56,10 @@ async function buildTerrain(base64, scale, dimension) {
             indices[pointer++] = bottomRight
         }
     }
-    const normals = PrimitiveProcessor.computeNormals(indices, vertices)
+    const normal = PrimitiveProcessor.computeNormals(indices, vertices)
+    const tangents = PrimitiveProcessor.computeTangents(indices, vertices, uvs, normal)
 
-    const tangents = PrimitiveProcessor.computeTangents(indices, vertices, uvs, normals)
-    console.log(tangents)
-
-    const builtNormals = Float32Array.from(normals)
+    const builtNormals = Float32Array.from(normal)
     const builtTangents = Float32Array.from(tangents)
 
     return [

@@ -27,41 +27,45 @@ export default function getTerrainMaterial(layers) {
         samplersData += `
             ${i === 0 ? "vec3" : ""}  currentMultiplier = ${currentMultiplier};        
             ${i === 0 ? "float" : ""} layerMultiplier = layerData.${i === 0 ? "x" : i === 1 ? "y" : "z"};
-            gAlbedo ${i > 0 ? "+" : ""}= vec4(texture(albedo${i}, texCoord).rgb * layerMultiplier * currentMultiplier.x, 1.);
-            gNormal ${i > 0 ? "+" : ""}= vec4(normalize(toTangentSpace * ((texture(normal${i}, texCoord).rgb * 2.0)- 1.0)) * layerMultiplier * currentMultiplier.y, 1.);
-            gBehaviour.g ${i > 0 ? "+" : ""}= texture(roughness${i}, texCoord).r  * layerMultiplier * currentMultiplier.z;
+            gAlbedo.rgb ${i > 0 ? "+" : ""}= texture(albedo${i}, texCoord).rgb * layerMultiplier;
+            gNormal.rgb ${i > 0 ? "+" : ""}= normalize(toTangentSpace * ((texture(normal${i}, texCoord).rgb * 2.0)- 1.0)) * layerMultiplier;
+            gBehaviour.g ${i > 0 ? "+" : ""}= texture(roughness${i}, texCoord).r  * layerMultiplier;
         `
     }
 
-    return `#version 300 es
-        precision highp float;
-        
-        in vec3 normalVec;
-        in mat3 toTangentSpace; 
-        in vec2 texCoord;
-        in vec4 vPosition; 
-        
-        uniform sampler2D layerController;
-        uniform ${multiplierType} multipliers;
-        ${samplers}
-        
-        layout (location = 0) out vec4 gPosition;
-        layout (location = 1) out vec4 gNormal;
-        layout (location = 2) out vec4 gAlbedo;   
-        layout (location = 3) out vec4 gBehaviour; // AO ROUGHNESS METALLIC
-        layout (location = 4) out vec4 gAmbient;
-        
-        
-        void main(){  
-            gPosition = vPosition;
-            gAmbient = vec4(0., 0., 0., 1.);
-            gBehaviour =  vec4(1., 0., 0., 1.); 
-            vec3 layerData = texture(layerController, texCoord).rgb; 
-            ${samplersData}
-            
-            gAlbedo /=${layers + 1}.;
-            gNormal/=${layers + 1}.;
-            gBehaviour.g /= ${layers + 1}.; 
-        }
+    return `
+#version 300 es
+
+precision highp float;
+
+in vec3 normalVec;
+in mat3 toTangentSpace; 
+in vec2 texCoord;
+in vec4 vPosition; 
+
+uniform sampler2D layerController;
+uniform ${multiplierType} multipliers;
+${samplers}
+
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gAlbedo;   
+layout (location = 3) out vec4 gBehaviour; 
+layout (location = 4) out vec4 gAmbient;
+
+
+void main(){  
+    gPosition = vPosition;
+    gAlbedo = vec4(0., 0., 0., 1.);
+    gNormal = vec4(0., 0., 0., 1.);
+    gAmbient = vec4(0., 0., 0., 1.);
+    gBehaviour =  vec4(1., 0., 0., 1.); 
+    vec3 layerData = texture(layerController, texCoord).rgb; 
+    ${samplersData}
+
+    gAlbedo.rgb /=${layers + 1}.;
+    gNormal.rgb /=${layers + 1}.;
+    gBehaviour.g /= ${layers + 1}.; 
+}
 `
 }

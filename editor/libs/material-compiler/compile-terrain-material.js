@@ -1,6 +1,7 @@
 import FALLBACK_MATERIAL from "../../../production/materials/simple/FALLBACK_MATERIAL";
 import TERRAIN_LAYERED from "../../../production/materials/terrain-layered/TERRAIN_MATERIAL";
 import TERRAIN_MATERIAL_UNIFORMS from "../../../static/templates/TERRAIN_MATERIAL_UNIFORMS";
+import DATA_TYPES from "../../../static/DATA_TYPES";
 
 export default function compileTerrainMaterial(layers, layerController) {
     const multipliers = {
@@ -28,18 +29,18 @@ export default function compileTerrainMaterial(layers, layerController) {
         uniforms.push(
             {
                 key: "albedo" + i,
-                type: "sampler",
+                type:  DATA_TYPES.TEXTURE,
                 data: albedo
             },
 
             {
                 key: "normal" + i,
-                type: "sampler",
+                type: DATA_TYPES.TEXTURE,
                 data: normal
             },
             {
                 key: "roughness" + i,
-                type: "sampler",
+                type: DATA_TYPES.TEXTURE,
                 data: roughness
             },
         )

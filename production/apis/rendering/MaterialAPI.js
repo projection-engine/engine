@@ -144,6 +144,7 @@ export default class MaterialAPI {
     }
 
     static async updateMaterialUniforms(data, material) {
+        console.trace(data)
         return await Promise.all(data.map(k => {
             return new Promise(async resolve => {
                 switch (k.type) {

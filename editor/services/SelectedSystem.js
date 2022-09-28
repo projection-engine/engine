@@ -35,7 +35,12 @@ export default class SelectedSystem {
             const current = QueryAPI.getEntityByID(selected[m])
             if (!current || !current.active)
                 continue
-            const mesh = GPU.meshes.get(current.components.get(COMPONENTS.MESH)?.meshID)
+            const components = current.components
+
+            const mMeshID = components.get(COMPONENTS.MESH)?.meshID
+            const tTerrainID = components.get(COMPONENTS.TERRAIN)?.terrainID
+
+            const mesh = GPU.meshes.get(mMeshID || tTerrainID)
             if (!mesh)
                 continue
             SelectedSystem.shader.bindForUse({

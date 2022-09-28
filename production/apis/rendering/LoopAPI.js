@@ -30,8 +30,6 @@ export default class LoopAPI {
         if (LoopAPI.#initialized)
             return
 
-        CameraAPI.initialize()
-        MovementWorker.initialize()
         LoopAPI.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)

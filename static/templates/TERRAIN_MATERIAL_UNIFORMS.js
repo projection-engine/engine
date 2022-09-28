@@ -1,3 +1,5 @@
+import DATA_TYPES from "../DATA_TYPES";
+
 export default [
     {
         key: "multipliers",
@@ -5,6 +7,6 @@ export default [
     },
     {
         key: "layerController",
-        type: "sampler"
+        type: DATA_TYPES.TEXTURE
     }
 ]
