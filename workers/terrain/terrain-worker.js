@@ -1,4 +1,4 @@
-import PrimitiveProcessor from "../../apis/PrimitiveProcessor";
+import PrimitiveProcessor from "../../production/apis/PrimitiveProcessor";
 
 
 function sampleTexture(x, y, buffer, heightScale, canvasSize) {

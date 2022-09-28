@@ -19,7 +19,7 @@ import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import SpritePass from "../../passes/rendering/SpritePass";
 import PhysicsPass from "../../passes/math/PhysicsPass";
-import MovementWorker from "../../workers/movement/MovementWorker";
+import MovementWorker from "../../../workers/movement/MovementWorker";
 import CameraAPI from "../CameraAPI";
 
 export default class LoopAPI {

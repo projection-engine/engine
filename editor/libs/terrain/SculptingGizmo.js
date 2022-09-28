@@ -1,5 +1,5 @@
 import {PickingAPI} from "../../../production";
-import TerrainWorker from "../../../production/workers/terrain/TerrainWorker";
+import TerrainWorker from "../../../workers/terrain/TerrainWorker";
 
 const MOUSE_LEFT = 0
 export default class SculptingGizmo {
@@ -8,14 +8,26 @@ export default class SculptingGizmo {
     currentImage = null
     callback
 
-    updateMesh = () => null
+    #worker
 
+    updateMesh = () => null
+    updateSettings(brushSize, brushScale, brushStrength){
+        this.ctx.lineWidth = brushSize
+        const d = brushStrength * 255
+        this.ctx.strokeStyle = `rgb(${d}, ${d}, ${d}, ${brushScale})`
+        this.ctx.fillStyle = `rgb(${d}, ${d}, ${d}, ${brushScale})`
+    }
     constructor(image) {
+
+        this.#worker = new Worker("./build/sculpting-worker.js")
         const canvas = document.createElement("canvas")
 
         this.ctx = canvas.getContext("2d")
         this.ctx.lineJoin = "round"
-        this.ctx.strokeStyle = "rgb(255, 0, 0)"
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        this.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        this.ctx.globalCompositeOperation = 'destination-atop';
+
 
         this.currentImage = new Image();
         this.currentImage.onload = () => {
@@ -39,6 +51,7 @@ export default class SculptingGizmo {
     }
 
     handler(e) {
+
         switch (e.type) {
             case "mousedown": {
                 if (e.button !== MOUSE_LEFT || e.target !== gpu.canvas)
@@ -48,6 +61,7 @@ export default class SculptingGizmo {
                 this.ctx.beginPath()
                 const {texCoords} = PickingAPI.readUV(e.clientX, e.clientY, this.currentImage.naturalWidth, this.currentImage.naturalHeight)
                 this.ctx.moveTo(texCoords.x, texCoords.y)
+                this.ctx.globalCompositeOperation = 'destination-atop';
                 document.addEventListener("mousemove", this.handlerBound)
                 this.wasDown = true
                 break
@@ -64,6 +78,8 @@ export default class SculptingGizmo {
                 const ctx = this.ctx
                 const {texCoords} = PickingAPI.readUV(e.clientX, e.clientY, this.currentImage.naturalWidth, this.currentImage.naturalHeight)
                 ctx.lineTo(texCoords.x, texCoords.y)
+
+                ctx.fill();
                 ctx.stroke();
 
                 break

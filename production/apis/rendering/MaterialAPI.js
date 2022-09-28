@@ -7,7 +7,7 @@ import DiffuseProbePass from "../../passes/rendering/DiffuseProbePass";
 import MATERIAL_RENDERING_TYPES from "../../../static/MATERIAL_RENDERING_TYPES";
 import DATA_TYPES from "../../../static/DATA_TYPES";
 import IMAGE_WORKER_ACTIONS from "../../../static/IMAGE_WORKER_ACTIONS";
-import ImageWorker from "../../workers/image/ImageWorker";
+import ImageWorker from "../../../workers/image/ImageWorker";
 
 const SKYBOX = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class MaterialAPI {

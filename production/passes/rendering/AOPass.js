@@ -7,7 +7,7 @@ import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import DeferredPass from "./DeferredPass";
 import CameraAPI from "../../apis/CameraAPI";
 import SSGIPass from "./SSGIPass";
-import ImageWorker from "../../workers/image/ImageWorker";
+import ImageWorker from "../../../workers/image/ImageWorker";
 
 const w = 4, h = 4
 export default class AOPass {

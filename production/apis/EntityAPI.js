@@ -10,7 +10,7 @@ import SpecularProbePass from "../passes/rendering/SpecularProbePass";
 import DiffuseProbePass from "../passes/rendering/DiffuseProbePass";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import PhysicsPass from "../passes/math/PhysicsPass";
-import MovementWorker from "../workers/movement/MovementWorker";
+import MovementWorker from "../../workers/movement/MovementWorker";
 import UIAPI from "./UIAPI";
 import {TransformationAPI} from "../../production";
 import DeferredPass from "../passes/rendering/DeferredPass";

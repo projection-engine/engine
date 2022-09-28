@@ -1,4 +1,4 @@
-import WORKER_MESSAGES from "../../../static/WORKER_MESSAGES.json"
+import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
 import {mat4} from "gl-matrix";
 
 /**

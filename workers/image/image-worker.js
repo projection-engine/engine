@@ -1,4 +1,4 @@
-import IMAGE_WORKER_ACTIONS from "../../../static/IMAGE_WORKER_ACTIONS";
+import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS";
 
 self.onmessage = async ({data: {type, data, id}}) => {
     try{

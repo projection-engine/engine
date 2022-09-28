@@ -14,7 +14,7 @@ import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import DepthPass from "../../production/passes/rendering/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Entity from "../../production/instances/Entity";
-import MovementWorker from "../../production/workers/movement/MovementWorker";
+import MovementWorker from "../../workers/movement/MovementWorker";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../production/apis/rendering/LineAPI";

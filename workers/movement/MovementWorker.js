@@ -1,6 +1,6 @@
-import EntityAPI from "../../apis/EntityAPI";
-import GPU from "../../GPU";
-import WORKER_MESSAGES from "../../../static/WORKER_MESSAGES.json"
+import EntityAPI from "../../production/apis/EntityAPI";
+import GPU from "../../production/GPU";
+import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
 
 export default class MovementWorker {
     static #hasChangeBuffer = new Uint8Array(new SharedArrayBuffer(1))
