@@ -8,4 +8,5 @@ export default class TerrainComponent extends Component {
 
     terrainID
     materialID = TERRAIN_MATERIAL + 1
+    hasCollision = false
 }

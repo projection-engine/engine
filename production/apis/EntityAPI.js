@@ -9,11 +9,11 @@ import CameraAPI from "./CameraAPI";
 import SpecularProbePass from "../passes/rendering/SpecularProbePass";
 import DiffuseProbePass from "../passes/rendering/DiffuseProbePass";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
-import PhysicsPass from "../passes/math/PhysicsPass";
 import MovementWorker from "../../workers/movement/MovementWorker";
 import UIAPI from "./UIAPI";
 import {TransformationAPI} from "../../production";
 import DeferredPass from "../passes/rendering/DeferredPass";
+import PhysicsAPI from "./PhysicsAPI";
 
 
 let lightTimeout
@@ -42,7 +42,7 @@ export default class EntityAPI {
 
     static registerEntityComponents(entity) {
         if (Engine.environment !== ENVIRONMENT.DEV)
-            PhysicsPass.registerRigidBody(entity)
+            PhysicsAPI.registerRigidBody(entity)
         const data = Engine.data
         Engine.queryMap.set(entity.queryKey, entity)
 
@@ -104,7 +104,7 @@ export default class EntityAPI {
         Engine.entitiesMap.delete(id)
         Engine.entities = Engine.entities.filter(e => e.id !== id)
 
-        PhysicsPass.removeRigidBody(entity)
+        PhysicsAPI.removeRigidBody(entity)
         EntityAPI.#removeUnusedProbes(entity)
         if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
             EntityAPI.packageLights()
@@ -174,10 +174,10 @@ export default class EntityAPI {
     static linkScript(data, entity, scriptID, src) {
         const found = entity.scripts.findIndex(s => s.id === scriptID)
         try {
-            const generator = new Function("UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI", data.toString())
+            const generator = new Function("PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI", data.toString())
 
             try {
-                const Instance = generator(UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI)
+                const Instance = generator(PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI)
                 const newClass = new Instance(entity)
                 newClass.entity = entity
 

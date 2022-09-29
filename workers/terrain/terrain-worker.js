@@ -1,21 +1,15 @@
 import PrimitiveProcessor from "../../production/apis/PrimitiveProcessor";
+import getImageData from "../utils/get-image-data";
 
 
 function sampleTexture(x, y, buffer, heightScale, canvasSize) {
     const r = buffer[y * (canvasSize * 4) + x * 4]
-
     let height = (r / 255)
     return height * heightScale
 }
 
 async function buildTerrain(base64, scale, dimension) {
-    const fetchData = await fetch(base64)
-    const blob = await fetchData.blob()
-    const imageToLoad = await createImageBitmap(blob)
-    const canvas = new OffscreenCanvas(imageToLoad.width, imageToLoad.height), ctx = canvas.getContext("2d")
-    ctx.imageSmoothingEnabled = true
-    ctx.drawImage(imageToLoad, 0, 0, imageToLoad.width, imageToLoad.height)
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+    const {imageToLoad, imageData, canvas} = getImageData(base64)
     const vertexCount = imageToLoad.width
     const count = vertexCount ** 2
 
@@ -24,7 +18,7 @@ async function buildTerrain(base64, scale, dimension) {
         indices = new Float32Array(6 * (vertexCount - 1) * vertexCount),
         vertexPointer = 0
 
-    const OFFSET = dimension/2
+    const OFFSET = dimension / 2
 
     for (let i = 0; i < vertexCount; i++) {
         for (let j = 0; j < vertexCount; j++) {
@@ -77,8 +71,5 @@ async function buildTerrain(base64, scale, dimension) {
 
 self.onmessage = event => {
     const {base64, scale, dimensions} = event.data
-    buildTerrain(base64, scale, dimensions).then(data => {
-        console.log(data)
-        self.postMessage(data[0], data[1])
-    })
+    buildTerrain(base64, scale, dimensions).then(data => self.postMessage(data[0], data[1]))
 }

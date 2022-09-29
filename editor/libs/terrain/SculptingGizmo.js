@@ -7,8 +7,6 @@ export default class SculptingGizmo {
     currentImage = null
     callback
 
-    #worker
-
     updateMesh = () => null
     updateSettings(brushSize, brushScale, brushStrength){
         this.ctx.lineWidth = brushSize
@@ -28,14 +26,10 @@ export default class SculptingGizmo {
 
     constructor(image) {
 
-        // this.#worker = new Worker("./build/sculpting-worker.js")
         this.canvas = document.createElement("canvas")
         this.ctx = this.canvas.getContext("2d")
         this.ctx.lineJoin = "round"
         this.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-        this.ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        // this.ctx.globalCompositeOperation = 'destination-atop';
-
 
         this.updateImage(image)
 
@@ -63,7 +57,7 @@ export default class SculptingGizmo {
                 this.ctx.beginPath()
                 const {texCoords} = PickingAPI.readUV(e.clientX, e.clientY, this.currentImage.naturalWidth, this.currentImage.naturalHeight)
                 this.ctx.moveTo(texCoords.x, texCoords.y)
-                // this.ctx.globalCompositeOperation = 'destination-atop';
+
                 document.addEventListener("mousemove", this.handlerBound)
                 this.wasDown = true
                 break
@@ -79,11 +73,9 @@ export default class SculptingGizmo {
             case "mousemove": {
                 const ctx = this.ctx
                 const {texCoords} = PickingAPI.readUV(e.clientX, e.clientY, this.currentImage.naturalWidth, this.currentImage.naturalHeight)
+
                 ctx.lineTo(texCoords.x, texCoords.y)
-
-                // ctx.fill();
                 ctx.stroke();
-
                 break
             }
             default:

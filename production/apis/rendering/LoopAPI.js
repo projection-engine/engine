@@ -18,9 +18,9 @@ import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 import SpritePass from "../../passes/rendering/SpritePass";
-import PhysicsPass from "../../passes/math/PhysicsPass";
+import PhysicsPass from "../../passes/misc/PhysicsPass";
 import MovementWorker from "../../../workers/movement/MovementWorker";
-import CameraAPI from "../CameraAPI";
+import PhysicsAPI from "../PhysicsAPI";
 
 export default class LoopAPI {
     static #initialized = false
@@ -44,7 +44,7 @@ export default class LoopAPI {
         ShadowMapPass.initialize()
         SpritePass.initialize()
         DeferredPass.initialize()
-        await PhysicsPass.initialize()
+        await PhysicsAPI.initialize()
 
         LoopAPI.#initialized = true
     }
