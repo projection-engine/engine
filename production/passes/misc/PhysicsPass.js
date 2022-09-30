@@ -1,8 +1,6 @@
-import Ammo from "ammo-electron-build"
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../../static/ENVIRONMENT";
 import COMPONENTS from "../../../static/COMPONENTS.json";
-import COLLISION_TYPES from "../../../static/COLLISION_TYPES";
 import PhysicsAPI from "../../apis/PhysicsAPI";
 
 const DEV_ENV = ENVIRONMENT.DEV, COMP = COMPONENTS.RIGID_BODY

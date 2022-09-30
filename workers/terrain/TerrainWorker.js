@@ -1,5 +1,3 @@
-import {v4} from "uuid";
-
 export default class TerrainWorker {
     static #initialized = false
     static #worker

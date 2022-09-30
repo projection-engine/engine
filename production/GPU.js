@@ -5,7 +5,7 @@ import MaterialController from "./instances/MaterialController";
 
 import FALLBACK_MATERIAL from "./materials/simple/FALLBACK_MATERIAL";
 import STATIC_MESHES from "../static/resources/STATIC_MESHES";
-import ICO_SPHERE from "../static/meshes/ICO_SPHERE_SM.json";
+import SPHERE from "../static/meshes/SPHERE.json";
 import CYLINDER from "../static/meshes/CYLINDER_SM.json";
 import CUBE from "../static/meshes/CUBE_SM.json";
 import QUAD from "../static/meshes/QUAD.json";
@@ -21,9 +21,8 @@ import TEXTURE_FILTERING from "../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../static/texture/TEXTURE_FORMATS";
 import LineAPI from "./apis/rendering/LineAPI";
 import FramebufferController from "./instances/FramebufferController";
-import InstancingController from "./instances/InstancingController";
 import MeshController from "./instances/MeshController";
-import ShaderController, {trimString} from "./instances/ShaderController";
+import ShaderController from "./instances/ShaderController";
 import Engine from "./Engine";
 import MaterialInstanceController from "./instances/MaterialInstanceController";
 import FALLBACKGlsl from "./materials/simple/SIMPLE_MATERIAL.glsl";
@@ -109,7 +108,7 @@ export default class GPU {
         GPU.cubeBuffer = new VBOController(0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         GPU.quad = GPU.allocateMesh(STATIC_MESHES.PRODUCTION.QUAD, QUAD)
 
-        GPU.allocateMesh(STATIC_MESHES.PRODUCTION.SPHERE, ICO_SPHERE)
+        GPU.allocateMesh(STATIC_MESHES.PRODUCTION.SPHERE, SPHERE)
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.CUBE, CUBE)
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.CYLINDER, CYLINDER)
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.PLANE, PLANE)

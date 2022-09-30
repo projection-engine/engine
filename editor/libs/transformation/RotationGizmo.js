@@ -2,7 +2,6 @@ import * as gizmoShaderCode from "../../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../../src/editor/data/TRANSFORMATION_TYPE"
-import ConversionAPI from "../../../production/apis/math/ConversionAPI"
 import mapGizmoMesh from "../../utils/map-gizmo-mesh"
 import EngineStore from "../../../../../src/editor/stores/EngineStore";
 import PickingAPI from "../../../production/apis/utils/PickingAPI";
@@ -13,11 +12,10 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../../production/GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import {DepthPass} from "../../../production";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 
-export default class Rotation {
+export default class RotationGizmo {
     tracking = false
     currentRotation = [0, 0, 0]
     gridSize = .1
@@ -102,6 +100,10 @@ export default class Rotation {
     }
 
     rotateElement(vec, screenSpace) {
+        const targets = GizmoSystem.selectedEntities, SIZE = targets.length
+        if(SIZE === 1 && GizmoSystem.mainEntity.lockedRotation)
+            return
+
         GizmoSystem.totalMoved += vec[0] + vec[1] + vec[2]
         const quatA = quat.create()
         if (screenSpace)
@@ -115,9 +117,10 @@ export default class Rotation {
         if (vec[2] !== 0)
             quat.rotateZ(quatA, quatA, vec[2])
 
-        const SIZE = GizmoSystem.selectedEntities.length
         for (let i = 0; i < SIZE; i++) {
-            const target = GizmoSystem.selectedEntities[i]
+            const target = targets[i]
+            if(target.lockedRotation)
+                continue
             if (screenSpace) {
                 quat.copy(target.rotationQuaternion, quatA)
                 continue

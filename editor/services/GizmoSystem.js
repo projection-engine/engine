@@ -1,6 +1,6 @@
-import Translation from "../libs/transformation/Translation"
-import Rotation from "../libs/transformation/Rotation"
-import Scale from "../libs/transformation/Scale"
+import TranslationGizmo from "../libs/transformation/TranslationGizmo"
+import RotationGizmo from "../libs/transformation/RotationGizmo"
+import ScalingGizmo from "../libs/transformation/ScalingGizmo"
 import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
 import getPickerId from "../../production/utils/get-picker-id"
 import GizmoAPI from "../libs/GizmoAPI";
@@ -66,9 +66,9 @@ export default class GizmoSystem {
         GizmoSystem.lineShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)
         GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
         GizmoSystem.gizmoShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.GIZMO)
-        GizmoSystem.translationGizmo = new Translation()
-        GizmoSystem.scaleGizmo = new Scale()
-        GizmoSystem.rotationGizmo = new Rotation()
+        GizmoSystem.translationGizmo = new TranslationGizmo()
+        GizmoSystem.scaleGizmo = new ScalingGizmo()
+        GizmoSystem.rotationGizmo = new RotationGizmo()
     }
 
     static onMouseDown() {
@@ -144,7 +144,7 @@ export default class GizmoSystem {
                 t.drawGizmo()
                 ScreenSpaceGizmo.drawGizmo()
             }
-            if (t instanceof Translation) {
+            if (t instanceof TranslationGizmo) {
                 const c = GizmoSystem.clickedAxis
                 const o = {
                     viewMatrix: CameraAPI.viewMatrix,

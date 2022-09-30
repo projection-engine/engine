@@ -6,26 +6,23 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import Inheritance from "../Inheritance";
 
 const MOVEMENT_SCALE = .001
-export default class Translation extends Inheritance {
-    tracking = false
-    currentCoord = undefined
+export default class ScalingGizmo extends Inheritance {
     gridSize = .01
-    key = "translation"
+    key = "scaling"
 
     static cache = [0, 0, 0]
 
     constructor() {
         super()
-        this.xyz = GizmoSystem.translationGizmoMesh
-        this.xGizmo = mapGizmoMesh("x", "TRANSLATION")
-        this.yGizmo = mapGizmoMesh("y", "TRANSLATION")
-        this.zGizmo = mapGizmoMesh("z", "TRANSLATION")
-        this.updateTransformationRealtime = true
+        this.xyz = GizmoSystem.scaleGizmoMesh
+        this.xGizmo = mapGizmoMesh("x", "SCALE")
+        this.yGizmo = mapGizmoMesh("y", "SCALE")
+        this.zGizmo = mapGizmoMesh("z", "SCALE")
     }
 
     onMouseDown(event) {
         super.onMouseDown(event);
-        Translation.cache = [0, 0, 0]
+        ScalingGizmo.cache = [0, 0, 0]
     }
 
     onMouseMove(event) {
@@ -34,26 +31,27 @@ export default class Translation extends Inheritance {
         const vec = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE)
         let toApply, firstEntity = GizmoSystem.mainEntity
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
-            toApply = vec
-        else
             toApply = vec4.transformQuat([], [...vec, 1], firstEntity._rotationQuat)
-        vec3.add(Translation.cache, Translation.cache, toApply)
-        if (Math.abs(Translation.cache[0]) >= g || Math.abs(Translation.cache[1]) >= g || Math.abs(Translation.cache[2]) >= g) {
+        else
+            toApply = vec
+        vec3.add(ScalingGizmo.cache, ScalingGizmo.cache, toApply)
+        if (Math.abs(ScalingGizmo.cache[0]) >= g || Math.abs(ScalingGizmo.cache[1]) >= g || Math.abs(ScalingGizmo.cache[2]) >= g) {
 
             const entities = GizmoSystem.selectedEntities
-            for (let i = 0; i < entities.length; i++) {
+            const SIZE = entities.length
+            if (SIZE === 1 && entities[0].lockedScaling)
+                return
+            for (let i = 0; i < SIZE; i++) {
                 const target = entities[i]
-
-                vec3.add(target._translation, target._translation, Translation.cache)
-
+                if (target.lockedScaling)
+                    continue
+                vec3.add(target._scaling, target._scaling, ScalingGizmo.cache)
                 for (let j = 0; j < 3; j++)
-                    target._translation[j] = Math.round(target._translation[j] / g) * g
+                    target._scaling[j] = Math.round(target._scaling[j] / g) * g
                 target.__changedBuffer[0] = 1
             }
-            GizmoSystem.notify(GizmoSystem.mainEntity._translation)
-            Translation.cache = [0, 0, 0]
+            GizmoSystem.notify(GizmoSystem.mainEntity._scaling)
+            ScalingGizmo.cache = [0, 0, 0]
         }
     }
-
-
 }

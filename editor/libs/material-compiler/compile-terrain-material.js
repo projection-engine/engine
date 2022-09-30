@@ -1,4 +1,3 @@
-import FALLBACK_MATERIAL from "../../../production/materials/simple/FALLBACK_MATERIAL";
 import TERRAIN_LAYERED from "../../../production/materials/terrain-layered/TERRAIN_MATERIAL";
 import TERRAIN_MATERIAL_UNIFORMS from "../../../static/templates/TERRAIN_MATERIAL_UNIFORMS";
 import DATA_TYPES from "../../../static/DATA_TYPES";

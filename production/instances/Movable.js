@@ -24,6 +24,9 @@ export default class Movable extends Component {
     collisionTransformationMatrix = SharedBufferAPI.allocateMatrix(4, true)
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
+    lockedRotation = false
+    lockedTranslation = false
+    lockedScaling = false
 
     normalMatrix = SharedBufferAPI.allocateMatrix(3)
     absoluteTranslation = SharedBufferAPI.allocateVector(3)

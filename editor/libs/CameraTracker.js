@@ -95,86 +95,93 @@ export default class CameraTracker {
     }
 
     static #handleInput(event) {
-        switch (event.type) {
-            case "wheel": {
-                const forward = event.deltaY < 0
-                const distance = (forward ? 1 : -1) * CameraTracker.scrollSpeed
+        try {
+            switch (event.type) {
+                case "wheel": {
+                    const forward = event.deltaY < 0
+                    const distance = (forward ? 1 : -1) * CameraTracker.scrollSpeed
 
-                if (CameraTracker.animated) {
-                    const s = Math.sign(CameraTracker.increment)
-                    if (Math.sign(distance) !== s)
-                        CameraTracker.increment = 0
-                    CameraTracker.increment += distance
-                    if (interval)
-                        clearInterval(interval)
-                    let percentage = Math.abs(CameraTracker.increment / CameraTracker.scrollDelay)
-
-                    interval = setInterval(() => {
-                        if (s < 0 && CameraTracker.increment <= 0 || s > 0 && CameraTracker.increment >= 0) {
-                            const increment = -CameraTracker.increment * percentage
-                            CameraTracker.#incrementCameraPlacement(event.ctrlKey, increment)
-                            if (s > 0)
-                                CameraTracker.increment -= percentage
-                            else
-                                CameraTracker.increment += percentage
-                        } else
+                    if (CameraTracker.animated) {
+                        const s = Math.sign(CameraTracker.increment)
+                        if (Math.sign(distance) !== s)
+                            CameraTracker.increment = 0
+                        CameraTracker.increment += distance
+                        if (interval)
                             clearInterval(interval)
-                    }, 1)
-                } else
-                    CameraTracker.#incrementCameraPlacement(event.ctrlKey, -distance)
-                break
-            }
-            case "mousemove": {
-                if (isFocused || isDoubleClick) {
-                    if (!isDoubleClick) {
-                        const x = event.movementX
-                        const y = event.movementY
-                        if (y < 0)
-                            CameraTracker.pitch += CameraTracker.turnSpeed * Math.abs(y)
+                        let percentage = Math.abs(CameraTracker.increment / CameraTracker.scrollDelay)
 
-                        else if (y >= 0)
-                            CameraTracker.pitch -= CameraTracker.turnSpeed * Math.abs(y)
+                        interval = setInterval(() => {
+                            if (s < 0 && CameraTracker.increment <= 0 || s > 0 && CameraTracker.increment >= 0) {
+                                const increment = -CameraTracker.increment * percentage
+                                CameraTracker.#incrementCameraPlacement(event.ctrlKey, increment)
+                                if (s > 0)
+                                    CameraTracker.increment -= percentage
+                                else
+                                    CameraTracker.increment += percentage
+                            } else
+                                clearInterval(interval)
+                        }, 1)
+                    } else
+                        CameraTracker.#incrementCameraPlacement(event.ctrlKey, -distance)
+                    break
+                }
+                case "mousemove": {
+                    if (isFocused || isDoubleClick) {
+                        if (!isDoubleClick) {
+                            const x = event.movementX
+                            const y = event.movementY
+                            if (y < 0)
+                                CameraTracker.pitch += CameraTracker.turnSpeed * Math.abs(y)
 
-                        if (x >= 0)
-                            CameraTracker.yaw += CameraTracker.turnSpeed * Math.abs(x)
-                        else if (x < 0)
-                            CameraTracker.yaw -= CameraTracker.turnSpeed * Math.abs(x)
+                            else if (y >= 0)
+                                CameraTracker.pitch -= CameraTracker.turnSpeed * Math.abs(y)
 
-                    } else {
-                        const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.movementSpeed * event.movementY, 0, -CameraTracker.movementSpeed * event.movementX])
+                            if (x >= 0)
+                                CameraTracker.yaw += CameraTracker.turnSpeed * Math.abs(x)
+                            else if (x < 0)
+                                CameraTracker.yaw -= CameraTracker.turnSpeed * Math.abs(x)
 
-                        CameraTracker.centerOn[0] += newPosition[0]
-                        CameraTracker.centerOn[1] -= ctrl ? CameraTracker.movementSpeed * event.movementY : newPosition[1]
-                        CameraTracker.centerOn[2] += newPosition[2]
+                        } else {
+                            const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.movementSpeed * event.movementY, 0, -CameraTracker.movementSpeed * event.movementX])
+
+                            CameraTracker.centerOn[0] += newPosition[0]
+                            CameraTracker.centerOn[1] -= ctrl ? CameraTracker.movementSpeed * event.movementY : newPosition[1]
+                            CameraTracker.centerOn[2] += newPosition[2]
+                        }
+                        CameraTracker.update(isDoubleClick)
                     }
-                    CameraTracker.update(isDoubleClick)
+                    break
                 }
-                break
-            }
-            case "mousedown":
-                if (holding) {
-                    document.body.requestPointerLock()
-                    isDoubleClick = true
-                }
-                if (event.button === BUTTON_MIDDLE) {
-                    isFocused = true
-                } else
-                    holding = true
-                break
-            case "mouseup":
-                holding = false
-                ctrl = false
-                isFocused = false
-                isDoubleClick = false
+                case "mousedown":
+                    if (holding) {
+                        document.body.requestPointerLock()
+                        isDoubleClick = true
+                    }
+                    if (event.button === BUTTON_MIDDLE) {
+                        InputEventsAPI.lockPointer()
+                        isFocused = true
+                    } else
+                        holding = true
+                    break
+                case "mouseup":
 
-                break
-            case "keyup":
-            case "keydown":
-                if (event.code === KEYS.ControlLeft || event.code === KEYS.ControlRight)
-                    ctrl = event.type === "keydown"
-                break
-            default:
-                break
+                    document.exitPointerLock()
+                    holding = false
+                    ctrl = false
+                    isFocused = false
+                    isDoubleClick = false
+
+                    break
+                case "keyup":
+                case "keydown":
+                    if (event.code === KEYS.ControlLeft || event.code === KEYS.ControlRight)
+                        ctrl = event.type === "keydown"
+                    break
+                default:
+                    break
+            }
+        } catch (err) {
+            console.warn(err)
         }
     }
 

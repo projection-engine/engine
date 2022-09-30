@@ -3,9 +3,8 @@ import EngineStore from "../../../../src/editor/stores/EngineStore";
 
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
-import ScreenSpaceGizmo from "./transformation/ScreenSpaceGizmo";
 import DualAxisGizmo from "./transformation/DualAxisGizmo";
-import {ConversionAPI, DepthPass, PickingAPI} from "../../production";
+import {PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
 
 export default class Inheritance {
