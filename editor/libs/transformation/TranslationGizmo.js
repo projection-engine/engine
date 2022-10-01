@@ -8,7 +8,7 @@ import Inheritance from "../Inheritance";
 const MOVEMENT_SCALE = .001
 export default class TranslationGizmo extends Inheritance {
     tracking = false
-    gridSize = .01
+    gridSize = 1
     key = "translation"
 
     static cache = [0, 0, 0]

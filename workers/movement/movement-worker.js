@@ -5,6 +5,8 @@ import {mat4} from "gl-matrix";
  * @field controlBuffers {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.
  */
 
+const MIN_SCALE = 5e-10
+
 class MovementPass {
     static targets = []
     static controlBuffers
@@ -48,7 +50,14 @@ class MovementPass {
 
     static transform(entity) {
         entity.__changedBuffer[0] = 0
-        mat4.fromRotationTranslationScale(entity.matrix, entity._rotationQuat, entity._translation, entity._scaling)
+        const scaling = entity._scaling
+        if (scaling[0] === 0)
+            scaling[0] = MIN_SCALE
+        if (scaling[1] === 0)
+            scaling[1] = MIN_SCALE
+        if (scaling[2] === 0)
+            scaling[2] = MIN_SCALE
+        mat4.fromRotationTranslationScale(entity.matrix, entity._rotationQuat, entity._translation, scaling)
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
 
         if (entity.parentMatrix)
@@ -102,7 +111,6 @@ class MovementPass {
         previous[8] = (a30 * b04 - a31 * b02 + a33 * b00) * det
     }
 }
-
 
 
 self.onmessage = (event) => {

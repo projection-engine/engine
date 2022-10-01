@@ -31,7 +31,6 @@ import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import ImageWorker from "../workers/image/ImageWorker";
 import TerrainWorker from "../workers/terrain/TerrainWorker";
 import FOLIAGE_SPRITEGlsl from "./shaders/FOLIAGE_SPRITE.glsl";
-import TERRAINGlsl from "./shaders/TERRAIN.glsl";
 import TERRAIN_MATERIAL from "./materials/terrain-layered/TERRAIN_MATERIAL";
 import getTerrainMaterial from "./materials/terrain-layered/get-terrain-material";
 import CameraAPI from "./apis/CameraAPI";
@@ -114,7 +113,6 @@ export default class GPU {
         GPU.allocateMesh(STATIC_MESHES.PRODUCTION.PLANE, PLANE)
 
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, FOLIAGE_SPRITEGlsl.vertex, FOLIAGE_SPRITEGlsl.fragment)
-        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.TERRAIN_LAYERED, TERRAINGlsl.vertex, TERRAINGlsl.fragment)
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, width, height).texture().depthTest()
         GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, width, height).texture()
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)

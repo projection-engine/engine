@@ -2,11 +2,11 @@ import ConversionAPI from "../math/ConversionAPI";
 import DepthPass from "../../passes/rendering/DepthPass";
 
 export default class PickingAPI {
-    static readBlock(depthFBO, start, end) {
+    static readBlock(start, end) {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, depthFBO.FBO)
-        gpu.readBuffer(gpu.COLOR_ATTACHMENT1)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, DepthPass.framebuffer.FBO)
+        gpu.readBuffer(gpu.COLOR_ATTACHMENT0 + 1)
         let dd = new Float32Array(w * h * 4)
         gpu.readPixels(
             end.x > start.x ? start.x : end.x,

@@ -44,8 +44,7 @@ export default class Entity extends Movable {
         if (this.components.get(COMPONENTS.POINT_LIGHT) || this.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
             EntityAPI.packageLights(true)
             this.needsLightUpdate = true
-        }
-        else
+        } else
             EntityAPI.registerEntityComponents(this)
     }
 
@@ -166,11 +165,17 @@ export default class Entity extends Movable {
     }
 
     static serializeComplexObject(obj) {
+        const visited = new WeakSet();
         return JSON.stringify(
             obj,
             (key, value) => {
                 if (key.startsWith("#") || key.startsWith("__"))
                     return undefined
+                if (typeof value === "object" && value !== null) {
+                    if (visited.has(value))
+                        return
+                    visited.add(value);
+                }
                 if (value instanceof Int8Array ||
                     value instanceof Uint8Array ||
                     value instanceof Uint8ClampedArray ||
@@ -181,7 +186,6 @@ export default class Entity extends Movable {
                     value instanceof Float32Array ||
                     value instanceof Float64Array)
                     return Array.from(value)
-
                 return value
             },
             4)

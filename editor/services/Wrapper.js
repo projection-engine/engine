@@ -6,6 +6,7 @@ import BackgroundSystem from "./BackgroundSystem"
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
 import CollisionMeshInfoSystem from "./CollisionMeshInfoSystem";
+import {TransformationAPI} from "../../production";
 
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
@@ -35,10 +36,14 @@ export default class Wrapper {
                     sameSize: false,
                     highlight: false
                 }
-                for (let i = 0; i < cameras.length; i++) {
-                    attr.highlight = IconsSystem.selectedMap.get(cameras[i].id) != null
-                    attr.transformMatrix = cameras[i].matrix
 
+                for (let i = 0; i < cameras.length; i++) {
+                    const current = cameras[i]
+                    attr.highlight = IconsSystem.selectedMap.get(current.id) != null
+                    if (current.__changedBuffer[1] === 1 || !current.cacheIconMatrix)
+                        current.cacheIconMatrix = TransformationAPI.transform(current._translation, current._rotationQuat, [0.8578777313232422, 0.5202516317367554, 0.2847398519515991])
+
+                    attr.transformMatrix = current.cacheIconMatrix
                     IconsSystem.shader.bindForUse(attr)
                     IconsSystem.cameraMesh.draw()
                 }

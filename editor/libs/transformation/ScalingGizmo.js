@@ -7,7 +7,7 @@ import Inheritance from "../Inheritance";
 
 const MOVEMENT_SCALE = .001
 export default class ScalingGizmo extends Inheritance {
-    gridSize = .01
+    gridSize =1
     key = "scaling"
 
     static cache = [0, 0, 0]

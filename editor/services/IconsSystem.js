@@ -20,7 +20,6 @@ export default class IconsSystem {
     static textureYellow
     static cursorTexture
 
-
     static initialize() {
         IconsSystem.cameraMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.CAMERA)
         IconsSystem.selectedMap = SelectionStore.map
@@ -66,6 +65,7 @@ export default class IconsSystem {
     static execute(selected) {
         const {iconsVisibility} = Engine.params
         if (iconsVisibility) {
+
             const attr = {
                 viewMatrix: CameraAPI.viewMatrix,
                 cameraPosition: CameraAPI.position,
