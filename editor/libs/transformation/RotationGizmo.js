@@ -14,7 +14,7 @@ import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 
 const toDeg = 57.29, toRad = Math.PI / 180
-const MOVEMENT_SCALE = .001
+
 export default class RotationGizmo {
     tracking = false
     currentRotation = [0, 0, 0]
@@ -73,7 +73,7 @@ export default class RotationGizmo {
         }
 
         const g = event.ctrlKey ? toRad : this.gridSize * toRad
-        this.currentIncrement += event.movementX *MOVEMENT_SCALE
+        this.currentIncrement += event.movementX *GizmoSystem.sensitivity
         const mappedValue = Math.round(this.currentIncrement / g) * g
         if (Math.abs(mappedValue) > 0)
             this.currentIncrement = 0

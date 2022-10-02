@@ -39,6 +39,8 @@ export default class Wrapper {
 
                 for (let i = 0; i < cameras.length; i++) {
                     const current = cameras[i]
+                    if (!current.active)
+                        continue
                     attr.highlight = IconsSystem.selectedMap.get(current.id) != null
                     if (current.__changedBuffer[1] === 1 || !current.cacheIconMatrix)
                         current.cacheIconMatrix = TransformationAPI.transform(current._translation, current._rotationQuat, [0.8578777313232422, 0.5202516317367554, 0.2847398519515991])

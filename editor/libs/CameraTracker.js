@@ -6,6 +6,7 @@ import {v4} from "uuid";
 import {vec3} from "gl-matrix";
 import GizmoAPI from "./GizmoAPI";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
+import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
 
 let interval, ctrl, holding, isFocused, isDoubleClick, timeout
 const BUTTON_MIDDLE = 1
@@ -250,5 +251,33 @@ export default class CameraTracker {
         }
         document.body.addEventListener("mousemove", handleMouseMove)
         document.body.addEventListener("mouseup", handleMouseUp, {once: true})
+    }
+    static rotate(direction){
+        function updateCameraPlacement(yaw, pitch) {
+            CameraAPI.updateProjection()
+            CameraTracker.yaw = yaw
+            CameraTracker.pitch = pitch
+            CameraTracker.update()
+        }
+        switch (direction){
+            case CAMERA_ROTATIONS.TOP:
+                updateCameraPlacement(0, Math.PI / 2 - .001)
+                break
+            case CAMERA_ROTATIONS.BOTTOM:
+                updateCameraPlacement(0, -Math.PI / 2- .001)
+                break
+            case CAMERA_ROTATIONS.LEFT:
+                updateCameraPlacement(Math.PI, 0)
+                break
+            case CAMERA_ROTATIONS.RIGHT:
+                updateCameraPlacement(0, 0)
+                break
+            case CAMERA_ROTATIONS.FRONT:
+                updateCameraPlacement(Math.PI / 2, 0)
+                break
+            case CAMERA_ROTATIONS.BACK:
+                updateCameraPlacement(Math.PI * 1.5, 0)
+                break
+        }
     }
 }

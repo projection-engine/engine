@@ -5,7 +5,6 @@ import GizmoSystem from "../../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import Inheritance from "../Inheritance";
 
-const MOVEMENT_SCALE = .001
 export default class ScalingGizmo extends Inheritance {
     gridSize =1
     key = "scaling"
@@ -28,7 +27,7 @@ export default class ScalingGizmo extends Inheritance {
     onMouseMove(event) {
         super.onMouseMove()
         const g = event.ctrlKey ? 1 : this.gridSize
-        const vec = ScreenSpaceGizmo.onMouseMove(event, MOVEMENT_SCALE)
+        const vec = ScreenSpaceGizmo.onMouseMove(event, GizmoSystem.sensitivity)
         let toApply, firstEntity = GizmoSystem.mainEntity
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || GizmoSystem.selectedEntities.length > 1)
             toApply = vec4.transformQuat([], [...vec, 1], firstEntity._rotationQuat)

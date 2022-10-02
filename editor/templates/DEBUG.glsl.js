@@ -40,7 +40,7 @@ void main(){
     }
     else if (option == 11 || option == 3){
         color = vec3(samplerData.r);
-    }
+    }   
 
     fragColor = vec4(color, 1.);
 }

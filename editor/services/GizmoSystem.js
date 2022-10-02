@@ -32,6 +32,7 @@ export default class GizmoSystem {
     static gizmoShader
     static selectedEntities = []
     static clickedAxis
+    static sensitivity = .001
 
     static totalMoved = 0
     static wasOnGizmo
