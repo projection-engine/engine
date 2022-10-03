@@ -41,8 +41,8 @@ export default class Component {
         return {label, max, min, increment, type: Component.propTypes.NUMBER, key, isAngle, realtime, disabledIf}
     }
 
-    static array(labels, key, precision, increment, max, min, isAngle, disabledIf) {
-        return {labels, max, min, precision, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle}
+    static array(labels, key, precision, increment, max, min, isAngle, disabledIf, defaultValue) {
+        return {labels, max, min, precision, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle, defaultValue}
     }
 
     static string(label, key) {
