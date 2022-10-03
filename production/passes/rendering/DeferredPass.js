@@ -71,6 +71,12 @@ export default class DeferredPass {
         SSRPass.uniforms.gBehaviour = DeferredPass.behaviourSampler
 
         DeferredPass.ready = true
+
+        DeferredPass.uniforms = {
+            cameraVec: CameraAPI.position,
+            viewMatrix: CameraAPI.viewMatrix,
+            projectionMatrix: CameraAPI.projectionMatrix
+        }
     }
 
     static drawFrame() {
@@ -80,42 +86,31 @@ export default class DeferredPass {
 
     static execute() {
         const {meshes, terrain} = Engine.data
+        const u = DeferredPass.uniforms
+
         DeferredPass.gBuffer.startMapping()
         MaterialAPI.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
                 if (!mat.isDeferredShaded)
                     return
+                u.transformMatrix = current.matrix
+                u.normalMatrix = current.normalMatrix
+
                 MaterialAPI.drawMesh(
                     current.id,
                     mesh,
                     mat,
                     meshComponent,
-                    {
-                        cameraVec: CameraAPI.position,
-                        viewMatrix: CameraAPI.viewMatrix,
-                        projectionMatrix: CameraAPI.projectionMatrix,
-                        transformMatrix: current.matrix,
-                        normalMatrix: current.normalMatrix
-                    })
+                    u)
             }
         )
 
         MaterialAPI.loopTerrain(
             terrain,
             (mat, mesh, meshComponent, current) => {
-                MaterialAPI.drawMesh(
-                    current.id,
-                    mesh,
-                    mat,
-                    meshComponent,
-                    {
-                        cameraVec: CameraAPI.position,
-                        viewMatrix: CameraAPI.viewMatrix,
-                        projectionMatrix: CameraAPI.projectionMatrix,
-                        transformMatrix: current.matrix,
-                        normalMatrix: current.normalMatrix
-                    })
+                u.transformMatrix = current.matrix
+                MaterialAPI.drawMesh(current.id, mesh, mat, meshComponent, u)
             }
         )
 

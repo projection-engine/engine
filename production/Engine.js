@@ -1,13 +1,21 @@
 import CameraAPI from "./apis/CameraAPI"
 import ENVIRONMENT from "../static/ENVIRONMENT"
-import LoopAPI from "./apis/rendering/LoopAPI";
+import Loop from "./Loop";
 import DeferredPass from "./passes/rendering/DeferredPass";
 import SSGIPass from "./passes/rendering/SSGIPass";
 import SSRPass from "./passes/rendering/SSRPass";
 import AOPass from "./passes/rendering/AOPass";
 import {ConversionAPI} from "../production";
 import ShadowMapPass from "./passes/rendering/ShadowMapPass";
+import getPassesTemplate from "./utils/get-passes-template";
 
+const METRICS = {
+    frameRate: 0,
+    frameTime: 0,
+    CPU: 0,
+    GPU: 0,
+    passes: getPassesTemplate()
+}
 export default class Engine {
     static entitiesMap = new Map()
     static dataEntity = new Map()
@@ -28,9 +36,11 @@ export default class Engine {
     }
     static params = {}
     static then = 0
+    static elapsed = 0
     static frameID
     static isReady = false
     static readAsset
+    static metrics = METRICS
 
     static #initialized = false
 
@@ -38,7 +48,7 @@ export default class Engine {
         if (Engine.#initialized)
             return
         Engine.#initialized = true
-        await LoopAPI.initialize()
+        await Loop.initialize()
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
@@ -78,18 +88,25 @@ export default class Engine {
 
         AOPass.enabled = data.SSAO.enabled
         DeferredPass.deferredUniforms.aoSampler = data.SSAO.enabled ? AOPass.filteredSampler : undefined
+
         const settingsBuffer = DeferredPass.deferredUniforms.settings
         settingsBuffer[6] = data.pcfSamples
         settingsBuffer[5] = data.SSAO.enabled ? 1 : 0
         settingsBuffer[1] = ShadowMapPass.maxResolution
         settingsBuffer[3] = ShadowMapPass.atlasRatio
-
     }
 
     static #callback() {
-        Engine.then = performance.now()
-        LoopAPI.loop(Engine.entities)
-        Engine.elapsed = performance.now() - Engine.then
+        const now = performance.now()
+        const el = now - Engine.then
+        Engine.elapsed = el
+        Engine.then = now
+
+        METRICS.frameRate = Math.round(1000 / el)
+        METRICS.frameTime = el
+
+        Loop.loop(Engine.entities)
+
         Engine.frameID = requestAnimationFrame(() => Engine.#callback())
 
     }
