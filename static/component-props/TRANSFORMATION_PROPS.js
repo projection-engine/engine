@@ -9,7 +9,7 @@ export default  [
 
     Component.group("ROTATION", [
         Component.boolean("LOCKED", "lockedRotation"),
-        Component.array(["X", "Y", "Z", "W"], "_rotationQuat", 3, .001, undefined, undefined, false, "lockedRotation", [0,0,0,1])
+        Component.array(["X", "Y", "Z", "W"], "_rotationQuat", 3, .001, undefined, undefined, false, "lockedRotation", [0,0,0, 1])
     ]),
 
     Component.group("SCALING_LOCAL", [

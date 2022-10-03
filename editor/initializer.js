@@ -26,12 +26,7 @@ import CollisionMeshInfoSystem from "./services/CollisionMeshInfoSystem";
 import UIAPI from "../production/apis/UIAPI";
 import DEBUGGlsl from "./templates/DEBUG.glsl";
 
-function getCursor() {
-    const entity = new Entity()
-    entity.scaling = (new Array(3)).fill(.075)
-    TransformationAPI.transform(entity.translation, [0, 0, 0, 1], entity.scaling, entity.matrix)
-    return entity
-}
+
 export default async function initializer() {
 
     UIAPI.useIframe = true

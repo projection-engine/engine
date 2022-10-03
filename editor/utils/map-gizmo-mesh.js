@@ -91,7 +91,7 @@ export default function mapGizmoMesh(axis, type) {
     vec3.copy(e._scaling, s)
     quat.copy(e._rotationQuat, q)
 
-    e.matrix = TransformationAPI.transform(t, e.rotationQuaternion, s)
+    e.matrix = TransformationAPI.transform(t, e._rotationQuat, s)
 
     return e
 }
