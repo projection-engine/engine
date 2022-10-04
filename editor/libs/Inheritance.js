@@ -6,6 +6,7 @@ import AXIS from "../data/AXIS";
 import DualAxisGizmo from "./transformation/DualAxisGizmo";
 import {PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
+import ActionHistoryAPI from "../../../../src/editor/libs/ActionHistoryAPI";
 
 export default class Inheritance {
     tracking = false
@@ -21,7 +22,7 @@ export default class Inheritance {
     onMouseMove() {
         if (!this.started && GizmoSystem.mainEntity) {
             this.started = true
-            EngineStore.saveEntity(
+            ActionHistoryAPI.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 this.key,
@@ -43,7 +44,7 @@ export default class Inheritance {
         GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
-            EngineStore.saveEntity(
+            ActionHistoryAPI.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 this.key,

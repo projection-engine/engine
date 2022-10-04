@@ -12,6 +12,7 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../../production/GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import ActionHistoryAPI from "../../../../../src/editor/libs/ActionHistoryAPI";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 
@@ -44,7 +45,7 @@ export default class RotationGizmo {
         GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
-            EngineStore.saveEntity(
+            ActionHistoryAPI.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 "rotationQuaternion",
@@ -64,7 +65,7 @@ export default class RotationGizmo {
     onMouseMove(event) {
         if (!this.started) {
             this.started = true
-            EngineStore.saveEntity(
+            ActionHistoryAPI.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
                 "rotationQuaternion",
