@@ -102,7 +102,7 @@ export default class Engine {
         Engine.elapsed = el
         Engine.then = now
 
-        METRICS.frameRate = Math.round(1000 / el)
+        METRICS.frameRate = 1000 / el
         METRICS.frameTime = el
 
         Loop.loop(Engine.entities)

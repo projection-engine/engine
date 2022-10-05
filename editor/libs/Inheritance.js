@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix"
-import EngineStore from "../../../../src/editor/stores/EngineStore";
 
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";

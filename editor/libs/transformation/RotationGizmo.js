@@ -3,7 +3,6 @@ import * as gizmoShaderCode from "../../templates/GIZMO.glsl"
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../../src/editor/data/TRANSFORMATION_TYPE"
 import mapGizmoMesh from "../../utils/map-gizmo-mesh"
-import EngineStore from "../../../../../src/editor/stores/EngineStore";
 import PickingAPI from "../../../production/apis/utils/PickingAPI";
 import CameraAPI from "../../../production/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
@@ -48,8 +47,8 @@ export default class RotationGizmo {
             ActionHistoryAPI.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
-                "rotationQuaternion",
-                GizmoSystem.mainEntity.rotationQuaternion
+                "_rotationQuat",
+                GizmoSystem.mainEntity._rotationQuat
             )
 
         }
@@ -68,14 +67,15 @@ export default class RotationGizmo {
             ActionHistoryAPI.saveEntity(
                 GizmoSystem.mainEntity.id,
                 undefined,
-                "rotationQuaternion",
-                GizmoSystem.mainEntity.rotationQuaternion
+                "_rotationQuat",
+                GizmoSystem.mainEntity._rotationQuat
             )
         }
 
         const g = event.ctrlKey ? toRad : this.gridSize * toRad
         this.currentIncrement += event.movementX *GizmoSystem.sensitivity
         const mappedValue = Math.round(this.currentIncrement / g) * g
+
         if (Math.abs(mappedValue) > 0)
             this.currentIncrement = 0
 
@@ -101,6 +101,7 @@ export default class RotationGizmo {
     }
 
     rotateElement(vec, screenSpace) {
+        console.log(vec)
         const targets = GizmoSystem.selectedEntities, SIZE = targets.length
         if(SIZE === 1 && GizmoSystem.mainEntity.lockedRotation)
             return
@@ -123,7 +124,7 @@ export default class RotationGizmo {
             if(target.lockedRotation)
                 continue
             if (screenSpace) {
-                quat.copy(target.rotationQuaternion, quatA)
+                quat.copy(target._rotationQuat, quatA)
                 continue
             }
             if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1) {
@@ -132,9 +133,9 @@ export default class RotationGizmo {
                         translated = vec3.sub([], target.translation, target.pivotPoint)
                     vec3.add(target.translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
                 }
-                quat.multiply(target.rotationQuaternion, quatA, target.rotationQuaternion)
+                quat.multiply(target._rotationQuat, quatA, target._rotationQuat)
             } else
-                quat.multiply(target.rotationQuaternion, target.rotationQuaternion, quatA)
+                quat.multiply(target._rotationQuat, target._rotationQuat, quatA)
             target.changed = true
         }
     }
@@ -180,7 +181,7 @@ export default class RotationGizmo {
                     break
             }
         } else if (axis !== undefined)
-            return mat4.fromRotationTranslationScale([], quat.multiply([], GizmoSystem.targetRotation, entity.rotationQuaternion), GizmoSystem.translation, entity.scaling)
+            return mat4.fromRotationTranslationScale([], quat.multiply([], GizmoSystem.targetRotation, entity._rotationQuat), GizmoSystem.translation, entity.scaling)
 
         return matrix
     }

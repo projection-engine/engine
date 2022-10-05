@@ -21,7 +21,6 @@ import SpritePass from "./passes/rendering/SpritePass";
 import PhysicsPass from "./passes/misc/PhysicsPass";
 import MovementWorker from "../workers/movement/MovementWorker";
 import PhysicsAPI from "./apis/PhysicsAPI";
-import PASS_KEYS from "../static/metrics/PASS_KEYS";
 
 export default class Loop {
     static #initialized = false

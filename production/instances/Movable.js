@@ -1,5 +1,3 @@
-import {quat} from "gl-matrix"
-import TransformationAPI from "../apis/math/TransformationAPI"
 import TRANSFORMATION_PROPS from "../../static/component-props/TRANSFORMATION_PROPS";
 import Component from "../components/Component";
 import SharedBufferAPI from "../apis/SharedBufferAPI";

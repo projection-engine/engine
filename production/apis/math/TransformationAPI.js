@@ -14,7 +14,7 @@ export default class TransformationAPI {
     static extractTransformations(mat) {
         return {
             translation: mat4.getTranslation([], mat),
-            rotationQuaternion: quat.normalize([], mat4.getRotation([], mat)),
+            _rotationQuat: quat.normalize([], mat4.getRotation([], mat)),
             scaling: mat4.getScaling([], mat)
         }
     }

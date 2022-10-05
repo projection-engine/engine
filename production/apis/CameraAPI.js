@@ -156,7 +156,7 @@ export default class CameraAPI {
 
         if (!cameraObj)
             return
-        CameraAPI.directTransformation(entity.translation, entity.rotationQuaternion)
+        CameraAPI.directTransformation(entity.translation, entity._rotationQuat)
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear
         CameraAPI.fov = cameraObj.fov

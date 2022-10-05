@@ -48,13 +48,13 @@ export default class DualAxisGizmo {
         const matrix = entity.matrix.slice(0)
 
         const translation = entity.translation,
-            rotationQuaternion = entity.rotationQuaternion,
+            _rotationQuat = entity._rotationQuat,
             scale = entity.scaling
         const translated = GizmoSystem.translation
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE)
             mat4.fromRotationTranslationScaleOrigin(
                 matrix,
-                quat.multiply([], GizmoSystem.targetRotation, rotationQuaternion),
+                quat.multiply([], GizmoSystem.targetRotation, _rotationQuat),
                 vec3.add([], translated, translation),
                 scale,
                 translation
