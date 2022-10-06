@@ -55,13 +55,14 @@ export default class GPU {
 
     static cubeBuffer
     static BRDF
-    static internalResolution = {w: screen.width, h: screen.height}
+    static internalResolution = {w: window.outerWidth, h: window.outerHeight}
 
     static quad
 
     static async initializeContext(canvas, [width, height], readAsset) {
         Engine.readAsset = readAsset
         GPU.internalResolution = {w: width, h: height}
+
         if (GPU.context)
             return
         const gpu = canvas.getContext("webgl2", {
