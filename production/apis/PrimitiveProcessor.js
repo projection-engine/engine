@@ -3,9 +3,8 @@ import {vec3} from "gl-matrix";
 
 function groupInto(size, mainArray) {
     let arrayOfArrays = [];
-    for (let i = 0; i < mainArray.length; i += size) {
+    for (let i = 0; i < mainArray.length; i += size)
         arrayOfArrays.push(mainArray.slice(i, i + size));
-    }
 
     return arrayOfArrays
 }
