@@ -1,7 +1,6 @@
 import CameraAPI from "../../production/apis/CameraAPI";
 import InputEventsAPI from "../../production/apis/utils/InputEventsAPI";
 
-import KEYS from "../../static/KEYS";
 import {v4} from "uuid";
 import {vec3} from "gl-matrix";
 import GizmoAPI from "./GizmoAPI";
@@ -175,7 +174,7 @@ export default class CameraTracker {
                     break
                 case "keyup":
                 case "keydown":
-                    if (event.code === KEYS.ControlLeft || event.code === KEYS.ControlRight)
+                    if (event.code === "ControlLeft"|| event.code === "ControlRight")
                         ctrl = event.type === "keydown"
                     break
                 default:
