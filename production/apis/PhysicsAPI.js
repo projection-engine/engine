@@ -1,4 +1,5 @@
-import Ammo from "ammo-electron-build";
+import Ammo from "../../ammo/ammo.wasm";
+
 import COMPONENTS from "../../static/COMPONENTS.json";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import getImageData from "../../workers/utils/get-image-data";
@@ -9,13 +10,6 @@ const COLLISION = "COLLISION",
     SOLVER = "SOLVER",
     GRAVITY = "GRAVITY"
 const COMP = COMPONENTS.RIGID_BODY
-
-function sampleTexture(x, y, buffer, heightScale, canvasSize) {
-    const r = buffer[y * (canvasSize * 4) + x * 4]
-    let height = (r / 255)
-    return height * heightScale
-}
-
 
 export default class PhysicsAPI {
     static #gravity = [0, 0, 0]
@@ -29,6 +23,7 @@ export default class PhysicsAPI {
 
     static async initialize() {
         const ammo = await Ammo()
+        console.log(ammo)
         const wS = PhysicsAPI.worldSettings
         PhysicsAPI.ammo = ammo
         wS.set(COLLISION, new ammo.btDefaultCollisionConfiguration())
