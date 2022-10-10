@@ -22,6 +22,7 @@ import PhysicsPass from "./passes/misc/PhysicsPass";
 import MovementWorker from "../workers/movement/MovementWorker";
 import PhysicsAPI from "./apis/PhysicsAPI";
 
+let METRICS
 export default class Loop {
     static #initialized = false
     static previousFrame
@@ -30,6 +31,7 @@ export default class Loop {
         if (Loop.#initialized)
             return
 
+        METRICS = Engine.metrics
         Loop.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
         GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
@@ -90,11 +92,20 @@ export default class Loop {
             return
 
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-        PhysicsPass.execute(entities)
+
+        let start = performance.now()
         ScriptingPass.execute()
+        METRICS.scripting = performance.now() - start
+
+        start = performance.now()
+        PhysicsPass.execute(entities)
         MovementWorker.execute()
+        METRICS.simulation = performance.now() - start
+
+        start = performance.now()
         Loop.#rendering(entities)
         ScreenEffectsPass.execute()
         CompositePass.execute()
+        METRICS.rendering = performance.now() - start
     }
 }

@@ -12,9 +12,10 @@ import getPassesTemplate from "./utils/get-passes-template";
 const METRICS = {
     frameRate: 0,
     frameTime: 0,
-    CPU: 0,
-    GPU: 0,
-    passes: getPassesTemplate()
+    rendering: 0,
+    scripting: 0,
+    simulation: 0,
+    singleLoop: 0
 }
 export default class Engine {
     static entitiesMap = new Map()
