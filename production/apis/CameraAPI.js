@@ -3,22 +3,24 @@ import COMPONENTS from "../../static/COMPONENTS.json";
 import Engine from "../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import SharedBufferAPI from "./SharedBufferAPI";
+import {vec3, vec4} from "gl-matrix";
 
 /**
- * @field notificationBuffers {Uint8Array [transformationType, viewNeedsUpdate, projectionNeedsUpdate, isOrthographic]} - transformationType indicates which method will be used (0 for spherical and 1 for direct)
- * @field sphericalTransformationBuffer {float32array [yaw, pitch, radius, centerOn.x, centerOn.y, centerOn.z]}
- * @field defaultTransformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
+ * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, smoothing]}
+ * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
  * @field projectionBuffer {float32array [zFar, zNear, fov, aR, orthographicSize]}
  */
 
-const SPHERICAL = 0, DIRECT = 1, ORTHOGRAPHIC = 1, PERSPECTIVE = 0
+const ORTHOGRAPHIC = 1, PERSPECTIVE = 0
+let notificationBuffers
 
 function getNotificationBuffer() {
-    const b = new Uint8Array(new SharedArrayBuffer(4))
-    b[0] = DIRECT
+    const b = SharedBufferAPI.allocateVector(5, 0)
+    b[0] = 1
     b[1] = 1
-    b[2] = 1
-    b[3] = PERSPECTIVE
+    b[2] = PERSPECTIVE
+    b[3] = 0
+    b[4] = .001
     return b
 }
 
@@ -32,47 +34,56 @@ export default class CameraAPI {
     static invProjectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
     static staticViewMatrix = SharedBufferAPI.allocateMatrix(4, true)
     static skyboxProjectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
-
     static #projectionBuffer = SharedBufferAPI.allocateVector(5)
-    static #defaultTransformationBuffer = SharedBufferAPI.allocateVector(7)
-    static #sphericalTransformationBuffer = SharedBufferAPI.allocateVector(6)
+    static translationBuffer = SharedBufferAPI.allocateVector(3)
+    static rotationBuffer = SharedBufferAPI.allocateVector(4, 0, true)
     static #notificationBuffers = getNotificationBuffer()
     static #worker
     static #initialized = false
 
-
     static initialize() {
         if (CameraAPI.#initialized)
             return
-
         CameraAPI.#initialized = true
 
         const w = new Worker("./build/camera-worker.js")
         CameraAPI.#worker = w
-
+        notificationBuffers = CameraAPI.#notificationBuffers
         w.postMessage([
-           CameraAPI.#notificationBuffers,
-           CameraAPI.position,
-           CameraAPI.viewMatrix,
-           CameraAPI.projectionMatrix,
-           CameraAPI.invViewMatrix,
-           CameraAPI.invProjectionMatrix,
-           CameraAPI.staticViewMatrix,
-           CameraAPI.#sphericalTransformationBuffer,
-           CameraAPI.#defaultTransformationBuffer,
-           CameraAPI.skyboxProjectionMatrix,
-           CameraAPI.#projectionBuffer
+            notificationBuffers,
+            CameraAPI.position,
+            CameraAPI.viewMatrix,
+            CameraAPI.projectionMatrix,
+            CameraAPI.invViewMatrix,
+            CameraAPI.invProjectionMatrix,
+            CameraAPI.staticViewMatrix,
+            CameraAPI.translationBuffer,
+            CameraAPI.rotationBuffer,
+            CameraAPI.skyboxProjectionMatrix,
+            CameraAPI.#projectionBuffer
         ])
     }
 
 
+    static get didChange() {
+        return notificationBuffers[3]
+    }
+
     static get isOrthographic() {
-        return CameraAPI.#notificationBuffers[3] === ORTHOGRAPHIC
+        return notificationBuffers[2] === ORTHOGRAPHIC
     }
 
     static set isOrthographic(data) {
-        CameraAPI.#notificationBuffers[3] = data ? ORTHOGRAPHIC : PERSPECTIVE
-        CameraAPI.#notificationBuffers[2] = 1
+        notificationBuffers[2] = data ? ORTHOGRAPHIC : PERSPECTIVE
+        notificationBuffers[1] = 1
+    }
+
+    static get smoothing() {
+        return notificationBuffers[4]
+    }
+
+    static set smoothing(data) {
+        notificationBuffers[4] = data
     }
 
     static get zFar() {
@@ -117,50 +128,35 @@ export default class CameraAPI {
 
 
     static updateProjection() {
-        CameraAPI.#notificationBuffers[2] = 1
+        notificationBuffers[1] = 1
     }
 
-    static directTransformation(translation, rotation) {
-        const nBuffer = CameraAPI.#notificationBuffers
-        nBuffer[0] = DIRECT
-        nBuffer[1] = 1
-
-        const buffer = CameraAPI.#defaultTransformationBuffer
-        buffer[0] = translation[0]
-        buffer[1] = translation[1]
-        buffer[2] = translation[2]
-        buffer[3] = rotation[0]
-        buffer[4] = rotation[1]
-        buffer[5] = rotation[2]
-        buffer[6] = rotation[3]
+    static updateView() {
+        notificationBuffers[0] = 1
     }
 
-    static sphericalTransformation(rotationVec, radius, centerOn) {
-        const nBuffer = CameraAPI.#notificationBuffers
-        nBuffer[0] = SPHERICAL
-        nBuffer[1] = 1
-
-        const buffer = CameraAPI.#sphericalTransformationBuffer
-        buffer[0] = rotationVec[0]
-        buffer[1] = rotationVec[1]
-        buffer[2] = radius
-        buffer[3] = centerOn[0]
-        buffer[4] = centerOn[1]
-        buffer[5] = centerOn[2]
+    static update(translation, rotation) {
+        if (translation != null)
+            vec3.copy(CameraAPI.translationBuffer, translation)
+        if (rotation != null)
+            vec4.copy(CameraAPI.rotationBuffer, rotation)
+        notificationBuffers[0] = 1
     }
+
 
     static updateViewTarget(entity) {
         if (!entity?.components || Engine.environment === ENVIRONMENT.DEV)
             return
         const cameraObj = entity.components.get(COMPONENTS.CAMERA)
-
         if (!cameraObj)
             return
-        CameraAPI.directTransformation(entity.translation, entity._rotationQuat)
+
+
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear
         CameraAPI.fov = cameraObj.fov
         CameraAPI.aspectRatio = cameraObj.aspectRatio
+        CameraAPI.isOrthographic = cameraObj.ortho
 
         CameraAPI.metadata.distortion = cameraObj.distortion
         CameraAPI.metadata.distortionStrength = cameraObj.distortionStrength
@@ -173,9 +169,9 @@ export default class CameraAPI {
         CameraAPI.metadata.bloomThreshold = cameraObj.bloomThreshold
         CameraAPI.metadata.gamma = cameraObj.gamma
         CameraAPI.metadata.exposure = cameraObj.exposure
-        CameraAPI.isOrthographic = cameraObj.ortho
         CameraAPI.metadata.size = cameraObj.size
 
+        CameraAPI.update(entity._translation, entity._rotationQuat)
         CameraAPI.updateProjection()
     }
 }

@@ -1,18 +1,21 @@
-import {mat4} from "gl-matrix";
+import {mat4, quat, vec3, vec4} from "gl-matrix";
+import TransformationAPI from "../../production/apis/math/TransformationAPI";
+
 
 /**
- * @field notificationBuffers {Uint8Array [transformationType, viewNeedsUpdate, projectionNeedsUpdate, isOrthographic]} - transformationType indicates which method will be used (0 for spherical and 1 for direct)
- * @field sphericalTransformationBuffer {float32array [yaw, pitch, radius, centerOn.x, centerOn.y, centerOn.z]}
- * @field defaultTransformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
+ * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, smoothing]}
+ * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
  * @field projectionBuffer {float32array [zFar, zNear, fov, aR, orthographicSize]}
  */
 
 
-const SPHERICAL = 0, ORTHOGRAPHIC = 1
+const ORTHOGRAPHIC = 1
+let needsUpdate = false, then = 0, elapsed = 0
+let nBuffer
 export default class CameraWorker {
+    static #translationBuffer
+    static #rotationBuffer
 
-    static #defaultTransformationBuffer
-    static #sphericalTransformationBuffer
     static #notificationBuffers
     static #position
     static #viewMatrix
@@ -24,6 +27,8 @@ export default class CameraWorker {
     static #projectionBuffer
     static #skyboxProjectionMatrix
     static frameID
+    static currentTranslation = vec3.create()
+    static currentRotation = quat.create()
 
     static initialize(
         notificationBuffers,
@@ -33,39 +38,37 @@ export default class CameraWorker {
         invViewMatrix,
         invProjectionMatrix,
         staticViewMatrix,
-        sphericalTransformationBuffer,
-        defaultTransformationBuffer,
+        translationBuffer,
+        rotationBuffer,
         skyboxProjectionMatrix,
         projectionBuffer
     ) {
-
-
         if (CameraWorker.#initialized)
             return
         CameraWorker.#projectionBuffer = projectionBuffer
         CameraWorker.#initialized = true
-        CameraWorker.#sphericalTransformationBuffer = sphericalTransformationBuffer
-        CameraWorker.#notificationBuffers = notificationBuffers
+        nBuffer = CameraWorker.#notificationBuffers = notificationBuffers
         CameraWorker.#position = position
         CameraWorker.#viewMatrix = viewMatrix
         CameraWorker.#projectionMatrix = projectionMatrix
         CameraWorker.#invViewMatrix = invViewMatrix
         CameraWorker.#invProjectionMatrix = invProjectionMatrix
         CameraWorker.#staticViewMatrix = staticViewMatrix
-        CameraWorker.#defaultTransformationBuffer = defaultTransformationBuffer
+        CameraWorker.#translationBuffer = translationBuffer
+        CameraWorker.#rotationBuffer = rotationBuffer
         CameraWorker.#skyboxProjectionMatrix = skyboxProjectionMatrix
+        vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
+        // quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
 
         const callback = () => {
             CameraWorker.execute()
             CameraWorker.frameID = requestAnimationFrame(callback)
         }
         CameraWorker.frameID = requestAnimationFrame(callback)
-
-
     }
 
     static #updateProjection() {
-        const isOrthographic = CameraWorker.#notificationBuffers[3] === ORTHOGRAPHIC
+        const isOrthographic = nBuffer[2] === ORTHOGRAPHIC
 
         const buffer = CameraWorker.#projectionBuffer
         const orthoSize = buffer[4]
@@ -89,12 +92,8 @@ export default class CameraWorker {
         return matrix
     }
 
-    static #directTransformation() {
-        const buffer = CameraWorker.#defaultTransformationBuffer
-        const translation = [buffer[0], buffer[1], buffer[2]]
-        const rotation = [buffer[3], buffer[4], buffer[5], buffer[6]]
-
-        mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, rotation, translation)
+    static #updateView() {
+        mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, CameraWorker.#rotationBuffer, CameraWorker.currentTranslation)
         mat4.invert(CameraWorker.#viewMatrix, CameraWorker.#invViewMatrix)
 
         const m = CameraWorker.#invViewMatrix
@@ -104,37 +103,33 @@ export default class CameraWorker {
         CameraWorker.#updateStaticViewMatrix()
     }
 
-    static #sphericalTransformation() {
-        const buffer = CameraWorker.#sphericalTransformationBuffer
-
-        const yaw = buffer[0]
-        const pitch = buffer[1]
-        const radius = buffer[2]
-        const centerOn = [buffer[3], buffer[4], buffer[5]]
-
-        const cosPitch = Math.cos(pitch)
-
-        CameraWorker.#position[0] = radius * cosPitch * Math.cos(yaw) + centerOn[0]
-        CameraWorker.#position[1] = radius * Math.sin(pitch) + centerOn[1]
-        CameraWorker.#position[2] = radius * cosPitch * Math.sin(yaw) + centerOn[2]
-        mat4.lookAt(CameraWorker.#viewMatrix, CameraWorker.#position, centerOn, [0, 1, 0])
-        mat4.invert(CameraWorker.#invViewMatrix, CameraWorker.#viewMatrix)
-        CameraWorker.#updateStaticViewMatrix()
-
-
-    }
-
     static execute() {
-        if (CameraWorker.#notificationBuffers[1] === 1) {
-            if (CameraWorker.#notificationBuffers[0] === SPHERICAL)
-                CameraWorker.#sphericalTransformation()
+        const now = performance.now()
+        elapsed = now - then
+        then = now
+
+
+        nBuffer[3] = 0
+        if (needsUpdate) {
+            const increment = 1 - Math.pow(.001, elapsed  * nBuffer[4])
+            const changed = TransformationAPI.linearInterpolation(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, increment)
+
+            if (changed)
+                CameraWorker.#updateView()
             else
-                CameraWorker.#directTransformation()
-            CameraWorker.#notificationBuffers[1] = 0 // needsUpdate
+                needsUpdate = false
         }
-        if (CameraWorker.#notificationBuffers[2] === 1) {
+        if (nBuffer[0] === 1) {
+            needsUpdate = true
+            CameraWorker.#updateView()
+            nBuffer[0] = 0
+            nBuffer[3] = 1
+        }
+        if (nBuffer[1] === 1) {
             CameraWorker.#updateProjection()
-            CameraWorker.#notificationBuffers[2] = 0 // needsUpdate
+            nBuffer[1] = 0
+            nBuffer[3] = 1
         }
+
     }
 }

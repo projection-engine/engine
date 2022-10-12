@@ -2,180 +2,217 @@ import CameraAPI from "../../production/apis/CameraAPI";
 import InputEventsAPI from "../../production/apis/utils/InputEventsAPI";
 
 import {v4} from "uuid";
-import {vec3} from "gl-matrix";
+import {quat, vec3, vec4} from "gl-matrix";
 import GizmoAPI from "./GizmoAPI";
 import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
 
-let interval, ctrl, holding, isFocused, isDoubleClick, timeout
-const BUTTON_MIDDLE = 1
-
+let holding, toApplyTranslation
+const toDeg = 180 / Math.PI, halfPI = Math.PI/2
+const MOUSE_RIGHT = 2, MOUSE_LEFT = 0
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
 export default class CameraTracker {
     static #isTracking = false
     static #id = v4()
+    static xRotation = 0
+    static yRotation = 0
 
-    static movementSpeed = 0.01
-    static scrollSpeed = .5
-    static scrollDelay = 100
-    static turnSpeed = .01
+    static movementSpeed = 0.1
+    static turnSpeed = .1
 
-    static increment = 0
-
-    static yaw = 1.5
-    static pitch = 0
-    static centerOn = [0, 0, 0]
-    static radius = 1
     static gizmoReference
 
-    static animated = false
+    static toApplyTranslation = vec4.create()
+    static currentTranslation = vec4.create()
     static #initialized = false
+    static rotationChanged = false
+    static forceUpdate = false
+    static movementKeys = {
+        forward: "KeyW",
+        backward: "KeyS",
+        left: "KeyA",
+        right: "KeyD",
+        invertDirection: false,
+        fasterJonny: "ShiftLeft"
+
+    }
+    static #keysOnHold = {
+        forward: false,
+        backward: false,
+        left: false,
+        right: false,
+
+        mouseLeft: false,
+        mouseRight: false,
+        fasterJonny: false
+    }
 
     static initialize(settings) {
-
+        console.log(settings)
         if (CameraTracker.#initialized)
             return
+        toApplyTranslation = CameraTracker.toApplyTranslation
+
         CameraTracker.#initialized = true
-        if (settings.cameraPosition)
-            CameraTracker.centerOn = settings.cameraPosition
-        if (typeof settings.yaw === "number")
-            CameraTracker.yaw = settings.yaw
-        if (typeof settings.pitch === "number")
-            CameraTracker.pitch = settings.pitch
-        if (typeof settings.radius === "number")
-            CameraTracker.radius = settings.radius
-        CameraTracker.update()
+
+        if (settings.camera.cameraRotation) {
+            CameraTracker.xRotation = settings.camera.cameraRotation[0]
+            CameraTracker.yRotation = settings.camera.cameraRotation[1]
+            CameraTracker.rotationChanged = true
+        }
+        if (settings.camera.cameraTranslation) {
+            vec4.copy(toApplyTranslation, settings.camera.cameraTranslation)
+            CameraTracker.forceUpdate = true
+        }
     }
 
-    static #incrementCameraPlacement(ctrlKey, increment) {
-        if (ctrlKey) {
-            const cosPitch = Math.cos(CameraTracker.pitch)
-            const position = []
-            position[0] = increment * cosPitch * Math.cos(CameraTracker.yaw)
-            position[1] = increment * Math.sin(CameraTracker.pitch)
-            position[2] = increment * cosPitch * Math.sin(CameraTracker.yaw)
 
-            vec3.add(CameraTracker.centerOn, CameraTracker.centerOn, position)
-            CameraTracker.update(true)
+    static updateFrame() {
+        if (CameraAPI.didChange && CameraTracker.gizmoReference)
+            CameraTracker.gizmoReference.style.transform = `translateZ(calc(var(--cube-size) * -3)) matrix3d(${CameraAPI.staticViewMatrix})`
+        const map = CameraTracker.#keysOnHold
+        let changed = CameraTracker.forceUpdate
 
-        } else {
-            CameraTracker.radius += increment
-            CameraTracker.update(true)
+        if (!changed) {
+            toApplyTranslation[0] = 0
+            toApplyTranslation[1] = 0
+            toApplyTranslation[2] = 0
+            toApplyTranslation[3] = 1
         }
-        if (!GizmoAPI.tooltip)
-            GizmoAPI.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-        if (GizmoAPI.tooltip) {
-            GizmoAPI.tooltip.isChanging()
-            GizmoAPI.tooltip.textContent = `X ${CameraTracker.centerOn[0].toFixed(2)}  |  Y ${CameraTracker.centerOn[1].toFixed(2)}  |  Z ${CameraTracker.centerOn[2].toFixed(2)}  |  Radius ${CameraTracker.radius.toFixed(0)}`
+
+        const multiplier = map.fasterJonny ? 10 * CameraTracker.movementSpeed : CameraTracker.movementSpeed
+        if (map.left) {
+            toApplyTranslation[0] -= multiplier
+            changed = true
         }
-        clearTimeout(timeout)
-        timeout = setTimeout(() => {
-            if (!GizmoAPI.tooltip)
-                GizmoAPI.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-            if (GizmoAPI.tooltip)
-                GizmoAPI.tooltip.finished()
-        }, 500)
+        if (map.right) {
+            toApplyTranslation[0] += multiplier
+            changed = true
+        }
+        if (map.backward) {
+            toApplyTranslation[2] += multiplier
+            changed = true
+        }
+        if (map.forward) {
+            toApplyTranslation[2] -= multiplier
+            changed = true
+        }
+
+        if (CameraTracker.rotationChanged) {
+            const pitch = quat.fromEuler([], CameraTracker.yRotation * toDeg , 0, 0)
+            const yaw = quat.fromEuler([], 0, CameraTracker.xRotation * toDeg, 0)
+            quat.copy(CameraAPI.rotationBuffer, pitch)
+            CameraTracker.rotationChanged = false
+            quat.multiply(CameraAPI.rotationBuffer, yaw, CameraAPI.rotationBuffer)
+            changed = true
+        }
+
+        if (changed) {
+
+            CameraTracker.forceUpdate = false
+            vec3.copy(CameraTracker.currentTranslation, CameraAPI.translationBuffer)
+            vec4.transformQuat(toApplyTranslation, toApplyTranslation, CameraAPI.rotationBuffer)
+            vec3.add(CameraAPI.translationBuffer, CameraAPI.translationBuffer, toApplyTranslation)
+            CameraAPI.updateView()
+
+        }
     }
 
-    static rotateY(angle, vec) {
-        const matrix = new Array(4)
-        for (let i = 0; i < 4; i++) {
-            matrix[i] = new Array(4).fill(0)
+    static forceRotationTracking() {
+        if (!holding) {
+            document.body.requestPointerLock()
+            document.addEventListener("mousemove", CameraTracker.#handleInput)
+            holding = true
         }
-        matrix[0][0] = Math.cos(angle)
-        matrix[0][2] = Math.sin(angle)
-        matrix[2][0] = -Math.sin(angle)
-        matrix[1][1] = 1
-        matrix[2][2] = Math.cos(angle)
-        matrix[3][3] = 1
-        return [
-            vec[0] * matrix[0][0] + vec[1] * matrix[1][0] + vec[2] * matrix[2][0],
-            vec[0] * matrix[0][1] + vec[1] * matrix[1][1] + vec[2] * matrix[2][1],
-            vec[0] * matrix[0][2] + vec[1] * matrix[1][2] + vec[2] * matrix[2][2]
-        ]
+        CameraTracker.#keysOnHold.mouseLeft = true
     }
 
     static #handleInput(event) {
+        const keys = CameraTracker.movementKeys
+        const map = CameraTracker.#keysOnHold
         try {
             switch (event.type) {
-                case "wheel": {
-                    const forward = event.deltaY < 0
-                    const distance = (forward ? 1 : -1) * CameraTracker.scrollSpeed
-
-                    if (CameraTracker.animated) {
-                        const s = Math.sign(CameraTracker.increment)
-                        if (Math.sign(distance) !== s)
-                            CameraTracker.increment = 0
-                        CameraTracker.increment += distance
-                        if (interval)
-                            clearInterval(interval)
-                        let percentage = Math.abs(CameraTracker.increment / CameraTracker.scrollDelay)
-
-                        interval = setInterval(() => {
-                            if (s < 0 && CameraTracker.increment <= 0 || s > 0 && CameraTracker.increment >= 0) {
-                                const increment = -CameraTracker.increment * percentage
-                                CameraTracker.#incrementCameraPlacement(event.ctrlKey, increment)
-                                if (s > 0)
-                                    CameraTracker.increment -= percentage
-                                else
-                                    CameraTracker.increment += percentage
-                            } else
-                                clearInterval(interval)
-                        }, 1)
-                    } else
-                        CameraTracker.#incrementCameraPlacement(event.ctrlKey, -distance)
-                    break
-                }
                 case "mousemove": {
-                    if (isFocused || isDoubleClick) {
-                        if (!isDoubleClick) {
-                            const x = event.movementX
-                            const y = event.movementY
-                            if (y < 0)
-                                CameraTracker.pitch += CameraTracker.turnSpeed * Math.abs(y)
-
-                            else if (y >= 0)
-                                CameraTracker.pitch -= CameraTracker.turnSpeed * Math.abs(y)
-
-                            if (x >= 0)
-                                CameraTracker.yaw += CameraTracker.turnSpeed * Math.abs(x)
-                            else if (x < 0)
-                                CameraTracker.yaw -= CameraTracker.turnSpeed * Math.abs(x)
-
-                        } else {
-                            const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [ctrl ? 0 : CameraTracker.movementSpeed * event.movementY, 0, -CameraTracker.movementSpeed * event.movementX])
-
-                            CameraTracker.centerOn[0] += newPosition[0]
-                            CameraTracker.centerOn[1] -= ctrl ? CameraTracker.movementSpeed * event.movementY : newPosition[1]
-                            CameraTracker.centerOn[2] += newPosition[2]
-                        }
-                        CameraTracker.update(isDoubleClick)
+                    if (map.mouseLeft && map.mouseRight || event.ctrlKey) {
+                        const multiplier = map.fasterJonny ? 10 * CameraTracker.movementSpeed : CameraTracker.movementSpeed
+                        toApplyTranslation[0] = -event.movementX * multiplier
+                        toApplyTranslation[1] = event.movementY * multiplier
+                        toApplyTranslation[2] = 0
+                        toApplyTranslation[3] = 1
+                        CameraTracker.forceUpdate = true
+                    } else {
+                        CameraTracker.rotationChanged = true
+                        let multiplier = -1
+                        if (CameraTracker.movementKeys.invertDirection)
+                            multiplier = 1
+                        CameraTracker.xRotation += multiplier * event.movementX * CameraTracker.turnSpeed
+                        CameraTracker.yRotation += multiplier * event.movementY * CameraTracker.turnSpeed
+                        CameraTracker.yRotation = clamp(CameraTracker.yRotation, -halfPI, halfPI)
                     }
                     break
                 }
                 case "mousedown":
-                    if (holding) {
+                    if (event.button === MOUSE_LEFT)
+                        map.mouseLeft = true
+                    if (event.button === MOUSE_RIGHT)
+                        map.mouseRight = true
+
+                    if (!holding && map.mouseRight === true) {
                         document.body.requestPointerLock()
-                        isDoubleClick = true
-                    }
-                    if (event.button === BUTTON_MIDDLE) {
-                        InputEventsAPI.lockPointer()
-                        isFocused = true
-                    } else
+                        document.addEventListener("mousemove", CameraTracker.#handleInput)
                         holding = true
+                    }
+
+
+
                     break
                 case "mouseup":
-
                     document.exitPointerLock()
-                    holding = false
-                    ctrl = false
-                    isFocused = false
-                    isDoubleClick = false
-
+                    if (event.button === MOUSE_LEFT)
+                        map.mouseLeft = false
+                    if (event.button === MOUSE_RIGHT)
+                        map.mouseRight = false
+                    if (!keys.mouseRight && !keys.mouseLeft) {
+                        document.removeEventListener("mousemove", CameraTracker.#handleInput)
+                        holding = false
+                    }
                     break
                 case "keyup":
+                    switch (event.code) {
+                        case keys.forward:
+                            map.forward = false
+                            break
+                        case keys.backward:
+                            map.backward = false
+                            break
+                        case keys.left:
+                            map.left = false
+                            break
+                        case keys.right:
+                            map.right = false
+                            break
+                        case keys.fasterJonny:
+                            map.fasterJonny = false
+                    }
+                    break
                 case "keydown":
-                    if (event.code === "ControlLeft"|| event.code === "ControlRight")
-                        ctrl = event.type === "keydown"
+                    switch (event.code) {
+                        case keys.forward:
+                            map.forward = true
+                            break
+                        case keys.backward:
+                            map.backward = true
+                            break
+                        case keys.left:
+                            map.left = true
+                            break
+                        case keys.right:
+                            map.right = true
+                            break
+                        case keys.fasterJonny:
+                            map.fasterJonny = true
+                            break
+                    }
                     break
                 default:
                     break
@@ -185,7 +222,6 @@ export default class CameraTracker {
         }
     }
 
-
     static startTracking() {
         if (CameraTracker.#isTracking)
             return
@@ -194,9 +230,7 @@ export default class CameraTracker {
         InputEventsAPI.listenTo(events.KEY_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
         InputEventsAPI.listenTo(events.KEY_UP, CameraTracker.#handleInput, CameraTracker.#id)
         InputEventsAPI.listenTo(events.MOUSE_UP, CameraTracker.#handleInput)
-        InputEventsAPI.listenTo(events.MOUSE_MOVE, CameraTracker.#handleInput)
         InputEventsAPI.listenTo(events.MOUSE_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
-        InputEventsAPI.listenTo(events.WHEEL, CameraTracker.#handleInput, CameraTracker.#id)
     }
 
     static stopTracking() {
@@ -207,63 +241,24 @@ export default class CameraTracker {
         InputEventsAPI.removeEvent(events.KEY_DOWN, CameraTracker.#id)
         InputEventsAPI.removeEvent(events.KEY_UP, CameraTracker.#id)
         InputEventsAPI.removeEvent(events.MOUSE_UP, CameraTracker.#id)
-        InputEventsAPI.removeEvent(events.MOUSE_MOVE, CameraTracker.#id)
         InputEventsAPI.removeEvent(events.MOUSE_DOWN, CameraTracker.#id)
-        InputEventsAPI.removeEvent(events.WHEEL, CameraTracker.#id)
     }
 
-    static update(onlyRadiusUpdate) {
-        CameraAPI.size = CameraTracker.radius
-        if (CameraAPI.isOrthographic)
-            CameraAPI.updateProjection()
-        CameraAPI.sphericalTransformation([CameraTracker.yaw, CameraTracker.pitch], CameraTracker.radius, CameraTracker.centerOn)
 
-        if (CameraTracker.gizmoReference && !onlyRadiusUpdate) {
-            const transformationMatrix = CameraAPI.staticViewMatrix
-            CameraTracker.gizmoReference.style.transform = `translateZ(calc(var(--cube-size) * -3)) matrix3d(${transformationMatrix})`
-        }
-    }
-
-    static transformCamera(e, type) {
-        const handleMouseMove = (event) => {
-
-            if (!document.pointerLockElement)
-                document.body.requestPointerLock()
-
-            if (type === 1) {
-                const newPosition = CameraTracker.rotateY(CameraTracker.yaw, [0, 0, -CameraTracker.movementSpeed * event.movementX])
-
-                CameraTracker.centerOn[0] += newPosition[0]
-                CameraTracker.centerOn[1] -= CameraTracker.movementSpeed * event.movementY
-                CameraTracker.centerOn[2] += newPosition[2]
-
-                CameraTracker.update()
-            } else {
-                CameraTracker.radius += CameraTracker.movementSpeed * event.movementX
-                CameraTracker.update()
-            }
-        }
-
-        const handleMouseUp = () => {
-            document.exitPointerLock()
-            document.body.removeEventListener("mousemove", handleMouseMove)
-        }
-        document.body.addEventListener("mousemove", handleMouseMove)
-        document.body.addEventListener("mouseup", handleMouseUp, {once: true})
-    }
-    static rotate(direction){
+    static rotate(direction) {
         function updateCameraPlacement(yaw, pitch) {
             CameraAPI.updateProjection()
             CameraTracker.yaw = yaw
             CameraTracker.pitch = pitch
-            CameraTracker.update()
+            CameraAPI.updateView()
         }
-        switch (direction){
+
+        switch (direction) {
             case CAMERA_ROTATIONS.TOP:
                 updateCameraPlacement(0, Math.PI / 2 - .001)
                 break
             case CAMERA_ROTATIONS.BOTTOM:
-                updateCameraPlacement(0, -Math.PI / 2- .001)
+                updateCameraPlacement(0, -Math.PI / 2 - .001)
                 break
             case CAMERA_ROTATIONS.LEFT:
                 updateCameraPlacement(Math.PI, 0)

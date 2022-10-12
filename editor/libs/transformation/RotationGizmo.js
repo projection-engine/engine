@@ -101,7 +101,6 @@ export default class RotationGizmo {
     }
 
     rotateElement(vec, screenSpace) {
-        console.log(vec)
         const targets = GizmoSystem.selectedEntities, SIZE = targets.length
         if(SIZE === 1 && GizmoSystem.mainEntity.lockedRotation)
             return
@@ -127,14 +126,13 @@ export default class RotationGizmo {
                 quat.copy(target._rotationQuat, quatA)
                 continue
             }
-            if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1) {
-                if (vec3.len(target.pivotPoint) > 0) {
-                    const rotationMatrix = mat4.fromQuat([], quatA),
-                        translated = vec3.sub([], target.translation, target.pivotPoint)
-                    vec3.add(target.translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
-                }
+
+            const rotationMatrix = mat4.fromQuat([], quatA),
+                translated = vec3.sub([], target.translation, target.pivotPoint)
+            vec3.add(target._translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
+            if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1)
                 quat.multiply(target._rotationQuat, quatA, target._rotationQuat)
-            } else
+            else
                 quat.multiply(target._rotationQuat, target._rotationQuat, quatA)
             target.changed = true
         }

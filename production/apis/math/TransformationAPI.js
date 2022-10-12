@@ -1,7 +1,7 @@
 import {mat4, quat} from "gl-matrix"
 
 const toDeg = 57.2957795131
-
+const THRESHOLD = .001
 const quaternion = [0, 0, 0, 1]
 export default class TransformationAPI {
     static transform(translation, rotate, scale, matrix) {
@@ -19,13 +19,16 @@ export default class TransformationAPI {
         }
     }
 
-    static linearInterpolation(target, arr, arr1, t) {
-        const out = target || []
-        if (arr.length !== arr1.length)
-            return out
-        for (let i = 0; i < arr.length; i++)
-            out[i] = arr[i] * t + arr1[i] * (1 - t)
-        return out
+    static linearInterpolation(target, current, ideal, alpha) {
+        const S = current.length
+        let changed = false
+        for (let i = 0; i < S; i++) {
+            const increment = (ideal[i] - current[i]) * alpha
+            target[i] = current[i] + increment
+
+            changed = changed || Math.abs(increment) > THRESHOLD
+        }
+        return changed
     }
 
     static getEuler(q) {

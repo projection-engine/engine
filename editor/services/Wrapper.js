@@ -7,12 +7,13 @@ import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
 import CollisionMeshInfoSystem from "./CollisionMeshInfoSystem";
 import {TransformationAPI} from "../../production";
+import CameraTracker from "../libs/CameraTracker";
 
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
         const {selected, iconsVisibility} = Engine.params
         const {cameras} = Engine.data
-
+        CameraTracker.updateFrame()
         if (!isDuringFrameComposition && !isDuringBinging)
             SelectedSystem.drawToBuffer(selected)
         else if (!isDuringFrameComposition) {

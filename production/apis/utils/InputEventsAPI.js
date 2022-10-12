@@ -2,7 +2,7 @@ function getTarget(key) {
     const events = InputEventsAPI.EVENTS
     if (key === events.MOUSE_DOWN || key === events.CLICK || key === events.DOUBLE_CLICK || key === events.WHEEL)
         return InputEventsAPI.targetElement
-    return document.body
+    return document
 }
 
 export default class InputEventsAPI {
