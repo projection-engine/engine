@@ -8,7 +8,7 @@ import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTA
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
 
 let holding, toApplyTranslation
-const toDeg = 180 / Math.PI, halfPI = Math.PI/2
+const toDeg = 180 / Math.PI, halfPI = Math.PI / 2
 const MOUSE_RIGHT = 2, MOUSE_LEFT = 0
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
 export default class CameraTracker {
@@ -99,7 +99,7 @@ export default class CameraTracker {
         }
 
         if (CameraTracker.rotationChanged) {
-            const pitch = quat.fromEuler([], CameraTracker.yRotation * toDeg , 0, 0)
+            const pitch = quat.fromEuler([], CameraTracker.yRotation * toDeg, 0, 0)
             const yaw = quat.fromEuler([], 0, CameraTracker.xRotation * toDeg, 0)
             quat.copy(CameraAPI.rotationBuffer, pitch)
             CameraTracker.rotationChanged = false
@@ -133,6 +133,8 @@ export default class CameraTracker {
         try {
             switch (event.type) {
                 case "mousemove": {
+                    if (!document.pointerLockElement)
+                        document.body.requestPointerLock()
                     if (map.mouseLeft && map.mouseRight || event.ctrlKey) {
                         const multiplier = map.fasterJonny ? 10 * CameraTracker.movementSpeed : CameraTracker.movementSpeed
                         toApplyTranslation[0] = -event.movementX * multiplier
@@ -158,11 +160,10 @@ export default class CameraTracker {
                         map.mouseRight = true
 
                     if (!holding && map.mouseRight === true) {
-                        document.body.requestPointerLock()
+
                         document.addEventListener("mousemove", CameraTracker.#handleInput)
                         holding = true
                     }
-
 
 
                     break
@@ -248,28 +249,30 @@ export default class CameraTracker {
     static rotate(direction) {
         function updateCameraPlacement(yaw, pitch) {
             CameraAPI.updateProjection()
-            CameraTracker.yaw = yaw
-            CameraTracker.pitch = pitch
-            CameraAPI.updateView()
+            CameraTracker.yRotation = pitch
+            CameraTracker.xRotation =  yaw
+            CameraTracker.rotationChanged = true
         }
 
+        vec4.copy(CameraAPI.rotationBuffer, [0, 0, 0, 1])
+        console.log(CameraAPI.rotationBuffer)
         switch (direction) {
             case CAMERA_ROTATIONS.TOP:
-                updateCameraPlacement(0, Math.PI / 2 - .001)
-                break
-            case CAMERA_ROTATIONS.BOTTOM:
                 updateCameraPlacement(0, -Math.PI / 2 - .001)
                 break
-            case CAMERA_ROTATIONS.LEFT:
-                updateCameraPlacement(Math.PI, 0)
-                break
-            case CAMERA_ROTATIONS.RIGHT:
-                updateCameraPlacement(0, 0)
-                break
-            case CAMERA_ROTATIONS.FRONT:
-                updateCameraPlacement(Math.PI / 2, 0)
+            case CAMERA_ROTATIONS.BOTTOM:
+                updateCameraPlacement(0, Math.PI / 2 - .001)
                 break
             case CAMERA_ROTATIONS.BACK:
+                updateCameraPlacement(Math.PI, 0)
+                break
+            case CAMERA_ROTATIONS.FRONT:
+                updateCameraPlacement(0, 0)
+                break
+            case CAMERA_ROTATIONS.RIGHT:
+                updateCameraPlacement(Math.PI / 2, 0)
+                break
+            case CAMERA_ROTATIONS.LEFT:
                 updateCameraPlacement(Math.PI * 1.5, 0)
                 break
         }

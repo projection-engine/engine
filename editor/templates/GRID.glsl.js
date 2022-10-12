@@ -4,7 +4,6 @@ layout (location = 0) in vec3 position;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-
 out vec3 nearPoint;
 out vec3 farPoint;
 
@@ -31,17 +30,15 @@ void main(){
 
 export const fragment = `#version 300 es
 precision mediump float;
-
-const float far = 100.0;
-const float near = .01; 
+ 
 
 in vec3 nearPoint;
 in vec3 farPoint;
 
 in mat4 fragView;
 in mat4 fragProj;
-uniform float gamma;
-uniform float exposure;
+ 
+uniform vec4 settings; // [gamma, exposure, far, near]
 out vec4 finalColor;
 
 
@@ -52,8 +49,8 @@ vec4 grid(vec3 fragPos3D, float scale, bool lighter,  vec3 verticalAxisColor, ve
     float line = min(grid.x, grid.y);
     float minimumz = min(derivative.y, 1.);
     float minimumx = min(derivative.x, 1.);
-    float baseColor = 0.2;
-    vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(lighter ?  line : line - .25, 1.));
+    float baseColor = 0.325;
+    vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(lighter ?  line : line - .15, 1.));
     
     float comparison = .3;
   
@@ -77,8 +74,8 @@ float computeDepth(vec3 pos) {
 float computeLinearDepth(vec3 pos) {
     vec4 clip_space_pos = fragProj * fragView * vec4(pos.xyz, 1.0);
     float clip_space_depth = (clip_space_pos.z / clip_space_pos.w) * 2.0 - 1.0; 
-    float linearDepth = (2.0 * near * far) / (far + near - clip_space_depth * (far - near)); 
-    return linearDepth / far;
+    float linearDepth = (2.0 *  settings.w * 100.) / (100. + settings.w - clip_space_depth * (100. -  settings.w)); 
+    return linearDepth / 100.;
 }
 
 void main() {
@@ -98,9 +95,9 @@ void main() {
      ) * float(t > 0.);
       
    
-    finalColor.rgb = vec3(1.0) - exp(-finalColor.rgb * exposure * .75);
-    finalColor.rgb = pow(finalColor.rgb, vec3(gamma));
+    finalColor.rgb = vec3(1.0) - exp(-finalColor.rgb * settings.y * .75);
+    finalColor.rgb = pow(finalColor.rgb, vec3(settings.x));
     
-    finalColor.a *= min(fading, .2);
+    finalColor.a *= fading;
 }
 `

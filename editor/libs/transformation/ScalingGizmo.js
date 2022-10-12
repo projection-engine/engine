@@ -4,6 +4,7 @@ import mapGizmoMesh from "../../utils/map-gizmo-mesh"
 import GizmoSystem from "../../services/GizmoSystem";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import Inheritance from "../Inheritance";
+import GIZMOS from "../../../../../src/editor/data/GIZMOS";
 
 export default class ScalingGizmo extends Inheritance {
     gridSize =1
@@ -26,6 +27,7 @@ export default class ScalingGizmo extends Inheritance {
 
     onMouseMove(event) {
         super.onMouseMove()
+
         const g = event.ctrlKey ? 1 : this.gridSize
         const vec = ScreenSpaceGizmo.onMouseMove(event, GizmoSystem.sensitivity)
         let toApply, firstEntity = GizmoSystem.mainEntity

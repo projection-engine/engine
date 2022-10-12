@@ -19,10 +19,13 @@ import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTA
 import AXIS from "../data/AXIS";
 import LineAPI from "../../production/apis/rendering/LineAPI";
 import {mat4} from "gl-matrix";
+import GIZMOS from "../../../../src/editor/data/GIZMOS";
 
 const M = mat4.create()
 const EMPTY_COMPONENT = new Movable()
 export default class GizmoSystem {
+    static gizmoType
+    static targetGizmoKey
     static mainEntity
     static transformationMatrix
     static translation
@@ -139,6 +142,8 @@ export default class GizmoSystem {
     static execute() {
 
         if (GizmoSystem.selectedEntities.length > 0) {
+            if (GizmoSystem.gizmoType === GIZMOS.PIVOT && GizmoSystem.targetGizmoKey === GIZMOS.SCALE || GizmoSystem.gizmoType === GIZMOS.PIVOT && GizmoSystem.targetGizmoKey === GIZMOS.ROTATION)
+                return;
             const t = GizmoSystem.targetGizmo
             GizmoSystem.#findMainEntity()
             if (t && GizmoSystem.translation != null) {
