@@ -1,6 +1,6 @@
 import NODE_TYPES from "./templates/NODE_TYPES"
 import MATERIAL_RENDERING_TYPES from "../../../static/MATERIAL_RENDERING_TYPES";
-import cloneClass from "../../../../../src/editor/utils/clone-class";
+import cloneClass from "../../../../../src/utils/clone-class";
 import compileFragmentShader from "./utils/compile-fragment-shader";
 import getVertexShader from "./utils/get-vertex-shader";
 

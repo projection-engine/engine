@@ -6,7 +6,7 @@ import InputEventsAPI from "./production/apis/utils/InputEventsAPI";
 import GPU from "./production/GPU";
 import Engine from "./production/Engine";
 import EntityAPI from "./production/apis/EntityAPI";
-import KEYS from "../../src/editor/data/KEYS";
+import KEYS from "../../src/data/KEYS";
 import DiffuseProbePass from "./production/passes/rendering/DiffuseProbePass";
 import SpecularProbePass from "./production/passes/rendering/SpecularProbePass";
 import ENVIRONMENT from "./static/ENVIRONMENT";

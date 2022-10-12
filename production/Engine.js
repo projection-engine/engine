@@ -7,7 +7,6 @@ import SSRPass from "./passes/rendering/SSRPass";
 import AOPass from "./passes/rendering/AOPass";
 import {ConversionAPI} from "../production";
 import ShadowMapPass from "./passes/rendering/ShadowMapPass";
-import getPassesTemplate from "./utils/get-passes-template";
 
 const METRICS = {
     frameRate: 0,

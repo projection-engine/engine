@@ -3,8 +3,6 @@ import InputEventsAPI from "../../production/apis/utils/InputEventsAPI";
 
 import {v4} from "uuid";
 import {quat, vec3, vec4} from "gl-matrix";
-import GizmoAPI from "./GizmoAPI";
-import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
 
 let holding, toApplyTranslation

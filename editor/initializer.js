@@ -1,9 +1,9 @@
 import GPU from "../production/GPU";
-import pointLightIcon from "../../../src/editor/data/icons/point_light.png";
+import pointLightIcon from "../../../src/data/icons/point_light.png";
 import STATIC_TEXTURES from "../static/resources/STATIC_TEXTURES";
-import directionalLightIcon from "../../../src/editor/data/icons/directional_light.png";
-import probeIcon from "../../../src/editor/data/icons/probe.png";
-import circle from "../../../src/editor/data/icons/circle.png";
+import directionalLightIcon from "../../../src/data/icons/directional_light.png";
+import probeIcon from "../../../src/data/icons/probe.png";
+import circle from "../../../src/data/icons/circle.png";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 import * as gizmoShaderCode from "./templates/GIZMO.glsl";
 import STATIC_MESHES from "../static/resources/STATIC_MESHES";

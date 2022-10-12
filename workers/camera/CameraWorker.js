@@ -1,4 +1,4 @@
-import {mat4, quat, vec3, vec4} from "gl-matrix";
+import {mat4, quat, vec3} from "gl-matrix";
 import TransformationAPI from "../../production/apis/math/TransformationAPI";
 
 

@@ -4,7 +4,7 @@ import GPU from "../../production/GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import SelectionStore from "../../../../src/editor/stores/SelectionStore";
+import SelectionStore from "../../../../src/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/rendering/SpritePass";
 import QueryAPI from "../../production/apis/utils/QueryAPI";

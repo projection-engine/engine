@@ -1,7 +1,7 @@
 import * as gizmoShaderCode from "../../templates/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../../src/editor/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../../src/data/TRANSFORMATION_TYPE"
 import mapGizmoMesh from "../../utils/map-gizmo-mesh"
 import PickingAPI from "../../../production/apis/utils/PickingAPI";
 import CameraAPI from "../../../production/apis/CameraAPI";
@@ -11,7 +11,7 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../../production/GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import ActionHistoryAPI from "../../../../../src/editor/libs/ActionHistoryAPI";
+import ActionHistoryAPI from "../../../../../src/libs/ActionHistoryAPI";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 

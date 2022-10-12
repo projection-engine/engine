@@ -5,7 +5,7 @@ import AXIS from "../data/AXIS";
 import DualAxisGizmo from "./transformation/DualAxisGizmo";
 import {PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
-import ActionHistoryAPI from "../../../../src/editor/libs/ActionHistoryAPI";
+import ActionHistoryAPI from "../../../../src/libs/ActionHistoryAPI";
 
 export default class Inheritance {
     tracking = false

@@ -1,7 +1,7 @@
 import TranslationGizmo from "../libs/transformation/TranslationGizmo"
 import RotationGizmo from "../libs/transformation/RotationGizmo"
 import ScalingGizmo from "../libs/transformation/ScalingGizmo"
-import TRANSFORMATION_TYPE from "../../../../src/editor/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../src/data/TRANSFORMATION_TYPE"
 import getPickerId from "../../production/utils/get-picker-id"
 import GizmoAPI from "../libs/GizmoAPI";
 import Movable from "../../production/instances/Movable";
@@ -15,11 +15,11 @@ import DepthPass from "../../production/passes/rendering/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Entity from "../../production/instances/Entity";
 import MovementWorker from "../../workers/movement/MovementWorker";
-import INFORMATION_CONTAINER from "../../../../src/editor/data/INFORMATION_CONTAINER";
+import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../production/apis/rendering/LineAPI";
 import {mat4} from "gl-matrix";
-import GIZMOS from "../../../../src/editor/data/GIZMOS";
+import GIZMOS from "../../../../src/data/GIZMOS";
 
 const M = mat4.create()
 const EMPTY_COMPONENT = new Movable()
