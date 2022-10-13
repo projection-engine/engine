@@ -62,6 +62,8 @@ export default class RotationGizmo {
 
 
     onMouseMove(event) {
+        if(!GizmoSystem.mainEntity)
+            return
         if (!this.started) {
             this.started = true
             ActionHistoryAPI.saveEntity(

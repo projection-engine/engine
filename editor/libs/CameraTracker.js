@@ -1,5 +1,4 @@
 import CameraAPI from "../../production/apis/CameraAPI";
-import InputEventsAPI from "../../production/apis/utils/InputEventsAPI";
 
 import {v4} from "uuid";
 import {quat, vec3, vec4} from "gl-matrix";
