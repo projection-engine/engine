@@ -225,22 +225,20 @@ export default class CameraTracker {
         if (CameraTracker.#isTracking)
             return
         CameraTracker.#isTracking = true
-        const events = InputEventsAPI.EVENTS
-        InputEventsAPI.listenTo(events.KEY_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
-        InputEventsAPI.listenTo(events.KEY_UP, CameraTracker.#handleInput, CameraTracker.#id)
-        InputEventsAPI.listenTo(events.MOUSE_UP, CameraTracker.#handleInput)
-        InputEventsAPI.listenTo(events.MOUSE_DOWN, CameraTracker.#handleInput, CameraTracker.#id)
+        document.addEventListener("keydown", CameraTracker.#handleInput)
+        document.addEventListener("keyup", CameraTracker.#handleInput)
+        document.addEventListener("mouseup", CameraTracker.#handleInput)
+        gpu.canvas.addEventListener("mousedown", CameraTracker.#handleInput)
     }
 
     static stopTracking() {
         if (!CameraTracker.#isTracking)
             return
         CameraTracker.#isTracking = false
-        const events = InputEventsAPI.EVENTS
-        InputEventsAPI.removeEvent(events.KEY_DOWN, CameraTracker.#id)
-        InputEventsAPI.removeEvent(events.KEY_UP, CameraTracker.#id)
-        InputEventsAPI.removeEvent(events.MOUSE_UP, CameraTracker.#id)
-        InputEventsAPI.removeEvent(events.MOUSE_DOWN, CameraTracker.#id)
+        document.removeEventListener("keydown", CameraTracker.#handleInput)
+        document.removeEventListener("keyup", CameraTracker.#handleInput)
+        document.removeEventListener("mouseup", CameraTracker.#handleInput)
+        gpu.canvas.removeEventListener("mousedown", CameraTracker.#handleInput)
     }
 
 
@@ -253,7 +251,7 @@ export default class CameraTracker {
         }
 
         vec4.copy(CameraAPI.rotationBuffer, [0, 0, 0, 1])
-        console.log(CameraAPI.rotationBuffer)
+
         switch (direction) {
             case CAMERA_ROTATIONS.TOP:
                 updateCameraPlacement(0, -Math.PI / 2 - .001)
