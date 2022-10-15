@@ -1,10 +1,11 @@
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
-import {mat4, quat} from "gl-matrix";
+import {mat4, quat, vec2, vec3} from "gl-matrix";
 
 /**
  * @field controlBuffers {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.
  */
 
+const cachePivot = vec3.create()
 const MIN_SCALE = 5e-10
 const cache = quat.create()
 class MovementPass {
@@ -36,7 +37,6 @@ class MovementPass {
 
         for (let i = 0; i < size; i++) {
             const current = entities[i]
-
             if (!current.__changedBuffer[0] && (!current.parentChangedBuffer || !current.parentChangedBuffer[1])) {
                 current.__changedBuffer[1] = 0
                 continue

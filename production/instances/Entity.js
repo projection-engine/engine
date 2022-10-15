@@ -23,7 +23,8 @@ const TYPED_ATTRIBUTES = [
     "matrix",
     "absoluteTranslation",
     "_scaling",
-    "baseTransformationMatrix"
+    "baseTransformationMatrix",
+    "pivotPoint"
 ]
 
 export default class Entity extends Movable {
@@ -73,7 +74,6 @@ export default class Entity extends Movable {
         Array.from(this.components.entries())
             .forEach(([k, v]) => {
                 parsedComponents[k] = v
-
             })
         temp.components = parsedComponents
         return temp

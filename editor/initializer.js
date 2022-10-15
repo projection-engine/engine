@@ -20,7 +20,7 @@ import SelectedSystem from "./services/SelectedSystem";
 import PreviewSystem from "./services/PreviewSystem";
 import BackgroundSystem from "./services/BackgroundSystem";
 import GizmoSystem from "./services/GizmoSystem";
-import CollisionMeshInfoSystem from "./services/CollisionMeshInfoSystem";
+import CollisionVisualizationSystem from "./services/CollisionVisualizationSystem";
 import UIAPI from "../production/apis/UIAPI";
 import DEBUGGlsl from "./templates/DEBUG.glsl";
 
@@ -47,7 +47,7 @@ export default async function initializer() {
 
     Engine.environment = ENVIRONMENT.DEV
 
-    CollisionMeshInfoSystem.initialize()
+    CollisionVisualizationSystem.initialize()
     GridSystem.initialize()
     IconsSystem.initialize()
     SelectedSystem.initialize()

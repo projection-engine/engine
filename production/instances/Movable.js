@@ -16,9 +16,10 @@ export default class Movable extends Component {
     _scaling = SharedBufferAPI.allocateVector(3, 1)
     pivotPoint = SharedBufferAPI.allocateVector(3)
 
+
     matrix = SharedBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    collisionTransformationMatrix = SharedBufferAPI.allocateMatrix(4, true)
+
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
     lockedRotation = false

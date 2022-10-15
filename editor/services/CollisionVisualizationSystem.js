@@ -11,15 +11,15 @@ import {mat4, vec3} from "gl-matrix";
 const EMPTY_MATRIX = mat4.create()
 
 
-export default class CollisionMeshInfoSystem {
+export default class CollisionVisualizationSystem {
     static cube
     static sphere
     static shader
 
     static initialize() {
-        CollisionMeshInfoSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
-        CollisionMeshInfoSystem.cube = GPU.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
-        CollisionMeshInfoSystem.sphere = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
+        CollisionVisualizationSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
+        CollisionVisualizationSystem.cube = GPU.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
+        CollisionVisualizationSystem.sphere = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
 
     }
 
@@ -37,18 +37,17 @@ export default class CollisionMeshInfoSystem {
         for (let i = 0; i < size; i++) {
             const entity = entities.get(selected[i])
 
-            if (!entity?.active || !entity.collisionTransformationMatrix)
+            if (!entity?.active)
                 continue
             const collision = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
             if (!collision)
                 continue
-            if (entity.changesApplied || !entity.collisionUpdated) {
+            if (entity.changesApplied || !entity.__collisionTransformationMatrix) {
                 entity.collisionUpdated = true
-                const m = mat4.copy(entity.collisionTransformationMatrix, EMPTY_MATRIX)
+                const m = entity.__collisionTransformationMatrix || mat4.clone(EMPTY_MATRIX)
                 const translation = vec3.add([], collision.center, entity.absoluteTranslation)
                 let scale
                 const rotation = entity._rotationQuat
-
                 if (collision.collisionType === COLLISION_TYPES.BOX)
                     scale = collision.size
                 else {
@@ -56,15 +55,16 @@ export default class CollisionMeshInfoSystem {
                     scale = [r, r, r]
                 }
                 mat4.fromRotationTranslationScale(m, rotation, translation, scale)
+                entity.__collisionTransformationMatrix = m
             }
             obj.transformMatrix = entity.collisionTransformationMatrix
-            CollisionMeshInfoSystem.shader.bindForUse(obj)
+            CollisionVisualizationSystem.shader.bindForUse(obj)
             switch (collision.collisionType) {
                 case COLLISION_TYPES.SPHERE:
-                    CollisionMeshInfoSystem.sphere.draw()
+                    CollisionVisualizationSystem.sphere.draw()
                     break
                 case COLLISION_TYPES.BOX:
-                    CollisionMeshInfoSystem.cube.draw()
+                    CollisionVisualizationSystem.cube.draw()
                     break
             }
         }

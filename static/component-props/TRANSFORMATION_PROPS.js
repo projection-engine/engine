@@ -1,20 +1,25 @@
 import Component from "../../production/components/Component";
 
-export default  [
+export default [
+
+    Component.group("PIVOT_POINT", [
+        Component.array(["X", "Y", "Z"], "pivotPoint", 3, .001, undefined, undefined, false, undefined, [0, 0, 0])
+    ]),
 
     Component.group("TRANSLATION", [
         Component.boolean("LOCKED", "lockedTranslation"),
-        Component.array(["X", "Y", "Z"], "_translation", 3, .001, undefined, undefined, false, "lockedTranslation", [0,0,0])
+        Component.array(["X", "Y", "Z"], "_translation", 3, .001, undefined, undefined, false, "lockedTranslation", [0, 0, 0])
     ]),
 
     Component.group("ROTATION", [
         Component.boolean("LOCKED", "lockedRotation"),
-        Component.array(["X", "Y", "Z", "W"], "_rotationQuat", 3, .001, undefined, undefined, false, "lockedRotation", [0,0,0, 1])
+        Component.array(["X", "Y", "Z", "W"], "_rotationQuat", 3, .001, undefined, undefined, false, "lockedRotation", [0, 0, 0, 1])
     ]),
 
     Component.group("SCALING_LOCAL", [
         Component.boolean("LOCKED", "lockedScaling"),
-        Component.array(["X", "Y", "Z"], "_scaling", 3, .001, undefined, undefined, false, "lockedScaling", [0,0,0])
+        Component.array(["X", "Y", "Z"], "_scaling", 3, .001, undefined, undefined, false, "lockedScaling", [0, 0, 0])
     ]),
+
 
 ]

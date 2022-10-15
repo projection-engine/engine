@@ -8,9 +8,11 @@ import SelectionStore from "../../../../src/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/rendering/SpritePass";
 import QueryAPI from "../../production/apis/utils/QueryAPI";
+import {mat4, vec3} from "gl-matrix";
+import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 
 const SCALE = (new Array(3)).fill(.25)
-const SCALE_CURSOR = (new Array(3)).fill(.5)
+const EMPTY_MATRIX = mat4.create()
 
 export default class IconsSystem {
     static cameraMesh
@@ -18,7 +20,6 @@ export default class IconsSystem {
     static selectedMap
     static textureOrange
     static textureYellow
-    static cursorTexture
 
     static initialize() {
         IconsSystem.cameraMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.CAMERA)
@@ -48,19 +49,20 @@ export default class IconsSystem {
             IconsSystem.textureOrange = texture.texture
         })
 
-        ctx.clearRect(0, 0, 128, 128)
-
-        ctx.lineWidth = 5
-        ctx.strokeStyle = "white"
-        ctx.arc(64, 64, 10, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.stroke()
-
-        GPU.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.CURSOR).then(texture => {
-            IconsSystem.cursorTexture = texture.texture
-        })
     }
 
+    static getMatrix(entity) {
+        if (entity.changesApplied || !entity.__cacheCenterMatrix || entity.__pivotChanged) {
+            entity.__pivotChanged = false
+            const m = !entity.__cacheCenterMatrix ? mat4.clone(EMPTY_MATRIX) : entity.__cacheCenterMatrix
+
+            m[12] = entity.pivotPoint[0]
+            m[13] = entity.pivotPoint[1]
+            m[14] = entity.pivotPoint[2]
+
+            entity.__cacheCenterMatrix = m
+        }
+    }
 
     static execute(selected) {
         const {iconsVisibility} = Engine.params
@@ -76,35 +78,23 @@ export default class IconsSystem {
             }
             gpu.disable(gpu.DEPTH_TEST)
 
-
             const size = selected?.length
-            entitiesLoop: if (size > 0) {
+            if (size > 0) {
+
                 attr.attributes = [1, 1]
                 for (let i = 0; i < size; i++) {
                     const current = QueryAPI.getEntityByID(selected[i])
                     if (!current)
                         continue
                     attr.scale = SCALE
-                    attr.transformationMatrix = current.matrix
+                    IconsSystem.getMatrix(current)
+                    attr.transformationMatrix = current.__cacheCenterMatrix
                     attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
 
                     SpritePass.shader.bindForUse(attr)
                     GPU.quad.draw()
                 }
-            } else {
-                attr.attributes = [1, 1]
-                const current = QueryAPI.getEntityByID(SelectionStore.lockedEntity)
-                if (!current)
-                    break entitiesLoop
-                attr.scale = SCALE
-                attr.transformationMatrix = current.matrix
-                attr.iconSampler = IconsSystem.textureYellow
-
-                SpritePass.shader.bindForUse(attr)
-                GPU.quad.draw()
             }
-
-
 
             gpu.enable(gpu.DEPTH_TEST)
         }

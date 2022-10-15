@@ -5,7 +5,7 @@ import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
-import CollisionMeshInfoSystem from "./CollisionMeshInfoSystem";
+import CollisionVisualizationSystem from "./CollisionVisualizationSystem";
 import {TransformationAPI} from "../../production";
 import CameraTracker from "../libs/CameraTracker";
 
@@ -27,7 +27,7 @@ export default class Wrapper {
             SelectedSystem.drawSilhouette(selected)
 
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
-            CollisionMeshInfoSystem.execute(selected)
+            CollisionVisualizationSystem.execute(selected)
             if (iconsVisibility) {
                 const attr = {
                     viewMatrix: CameraAPI.viewMatrix,

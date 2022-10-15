@@ -67,7 +67,8 @@ export default class MovementWorker {
                 parent: undefined,
                 parentMatrix: entity.parent?.matrix,
                 parentChangedBuffer: entity.parent?.__changedBuffer,
-                components: undefined
+                components: undefined,
+                pivotPoint: entity.pivotPoint
             }
         })
 

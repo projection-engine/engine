@@ -129,9 +129,9 @@ export default class RotationGizmo {
                 continue
             }
 
-            const rotationMatrix = mat4.fromQuat([], quatA),
-                translated = vec3.sub([], target.translation, target.pivotPoint)
-            vec3.add(target._translation, vec3.transformMat4([], translated, rotationMatrix), target.pivotPoint)
+            const translated = vec3.sub([], target._translation, target.pivotPoint)
+            vec3.add(target._translation, vec3.transformQuat([], translated, quatA), target.pivotPoint)
+
             if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL || SIZE > 1)
                 quat.multiply(target._rotationQuat, quatA, target._rotationQuat)
             else

@@ -18,14 +18,13 @@ import MovementWorker from "../../workers/movement/MovementWorker";
 import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../production/apis/rendering/LineAPI";
-import {mat4} from "gl-matrix";
+import {mat4, vec3} from "gl-matrix";
 import GIZMOS from "../../../../src/data/GIZMOS";
+import IconsSystem from "./IconsSystem";
 
 const M = mat4.create()
 const EMPTY_COMPONENT = new Movable()
 export default class GizmoSystem {
-    static gizmoType
-    static targetGizmoKey
     static mainEntity
     static transformationMatrix
     static translation
@@ -36,7 +35,6 @@ export default class GizmoSystem {
     static selectedEntities = []
     static clickedAxis
     static sensitivity = .001
-
     static totalMoved = 0
     static wasOnGizmo
     static rotationGizmoMesh
@@ -126,7 +124,7 @@ export default class GizmoSystem {
         if ((MovementWorker.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
             GizmoSystem.mainEntity = main
             GizmoSystem.targetRotation = main._rotationQuat
-            GizmoSystem.translation = main.absoluteTranslation
+            GizmoSystem.translation = main.pivotPoint
             GizmoSystem.transformationMatrix = GizmoAPI.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
 
 
@@ -142,11 +140,14 @@ export default class GizmoSystem {
     static execute() {
 
         if (GizmoSystem.selectedEntities.length > 0) {
-            if (GizmoSystem.gizmoType === GIZMOS.PIVOT && GizmoSystem.targetGizmoKey === GIZMOS.SCALE || GizmoSystem.gizmoType === GIZMOS.PIVOT && GizmoSystem.targetGizmoKey === GIZMOS.ROTATION)
-                return;
             const t = GizmoSystem.targetGizmo
             GizmoSystem.#findMainEntity()
             if (t && GizmoSystem.translation != null) {
+                if (GizmoSystem.mainEntity.__pivotChanged) {
+                    GizmoSystem.translation = GizmoSystem.mainEntity.pivotPoint
+                    IconsSystem.getMatrix(GizmoSystem.mainEntity)
+                }
+
                 t.drawGizmo()
                 ScreenSpaceGizmo.drawGizmo()
             }
@@ -158,7 +159,6 @@ export default class GizmoSystem {
                     projectionMatrix: CameraAPI.projectionMatrix
                 }
                 if (c === AXIS.X) {
-
                     o.axis = [1, 0, 0]
                     GizmoSystem.lineShader.bindForUse(o)
                     LineAPI.draw(o.axis)
