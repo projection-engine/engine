@@ -134,7 +134,8 @@ export default class PrimitiveProcessor {
         if (vertices && vertices.length > 0) {
             const toVector = groupInto(3, vertices)
             let min = [], max = []
-            for (let i = 0; i < toVector.length; i++) {
+            const size = toVector.length
+            for (let i = 0; i < size; i++) {
                 const current = toVector[i]
                 if (!min[0] || current[0] < min[0])
                     min[0] = current[0]

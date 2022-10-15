@@ -194,6 +194,8 @@ export default class CameraTracker {
                     }
                     break
                 case "keydown":
+                    if (!document.pointerLockElement)
+                        return
                     switch (event.code) {
                         case keys.forward:
                             map.forward = true
@@ -212,6 +214,15 @@ export default class CameraTracker {
                             break
                     }
                     break
+                case "pointerlockchange":
+                    if (!document.pointerLockElement) {
+                        const map = CameraTracker.#keysOnHold
+                        map.forward = false
+                        map.backward = false
+                        map.left = false
+                        map.right = false
+                        map.fasterJonny = false
+                    }
                 default:
                     break
             }
@@ -224,6 +235,7 @@ export default class CameraTracker {
         if (CameraTracker.#isTracking)
             return
         CameraTracker.#isTracking = true
+        document.addEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.addEventListener("keydown", CameraTracker.#handleInput)
         document.addEventListener("keyup", CameraTracker.#handleInput)
         document.addEventListener("mouseup", CameraTracker.#handleInput)
@@ -234,6 +246,7 @@ export default class CameraTracker {
         if (!CameraTracker.#isTracking)
             return
         CameraTracker.#isTracking = false
+        document.removeEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.removeEventListener("keydown", CameraTracker.#handleInput)
         document.removeEventListener("keyup", CameraTracker.#handleInput)
         document.removeEventListener("mouseup", CameraTracker.#handleInput)
@@ -245,7 +258,7 @@ export default class CameraTracker {
         function updateCameraPlacement(yaw, pitch) {
             CameraAPI.updateProjection()
             CameraTracker.yRotation = pitch
-            CameraTracker.xRotation =  yaw
+            CameraTracker.xRotation = yaw
             CameraTracker.rotationChanged = true
         }
 
