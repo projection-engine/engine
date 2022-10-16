@@ -5,7 +5,6 @@ import AXIS from "../data/AXIS";
 import DualAxisGizmo from "./transformation/DualAxisGizmo";
 import {PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
-import ActionHistoryAPI from "../../../../src/libs/ActionHistoryAPI";
 
 export default class Inheritance {
     tracking = false
@@ -21,11 +20,10 @@ export default class Inheritance {
     onMouseMove() {
         if (!this.started && GizmoSystem.mainEntity) {
             this.started = true
-            ActionHistoryAPI.saveEntity(
-                GizmoSystem.mainEntity.id,
-                undefined,
-                this.key,
-                GizmoSystem.mainEntity[this.key]
+            GizmoSystem.save(
+                GizmoSystem.selectedEntities.map(v => v.id),
+                GizmoSystem.selectedEntities.map(v => [...v[this.key]]),
+                this.key
             )
         }
     }
@@ -43,11 +41,10 @@ export default class Inheritance {
         GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
-            ActionHistoryAPI.saveEntity(
-                GizmoSystem.mainEntity.id,
-                undefined,
-                this.key,
-                GizmoSystem.mainEntity[this.key]
+            GizmoSystem.save(
+                GizmoSystem.selectedEntities.map(v => v.id),
+                GizmoSystem.selectedEntities.map(v => [...v[this.key]]),
+                this.key
             )
         }
         this.tracking = false
@@ -98,7 +95,7 @@ export default class Inheritance {
         if (this.tracking && GizmoSystem.clickedAxis === AXIS.Z || !this.tracking)
             GizmoAPI.drawGizmo(this.xyz, mZ, AXIS.Z, this.zGizmo.pickID)
 
-        if (this.key !== "scaling" && this.tracking) {
+        if (this.key !== "_scaling" && this.tracking) {
             const c = mat4.create()
             GizmoAPI.applyTransformation(c, [0,0,0,1], [0,0,0],  [1, 1, 1])
             GizmoSystem.activeGizmoMatrix = c

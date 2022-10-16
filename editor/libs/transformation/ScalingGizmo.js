@@ -7,7 +7,7 @@ import Inheritance from "../Inheritance";
 
 export default class ScalingGizmo extends Inheritance {
     gridSize = 1
-    key = "scaling"
+    key = "_scaling"
 
     static cache = [0, 0, 0]
 

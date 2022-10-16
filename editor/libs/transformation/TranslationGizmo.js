@@ -8,7 +8,7 @@ import Inheritance from "../Inheritance";
 export default class TranslationGizmo extends Inheritance {
     tracking = false
     gridSize = 1
-    key = "translation"
+    key = "_translation"
 
     static cache = [0, 0, 0]
 

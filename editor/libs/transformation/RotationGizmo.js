@@ -11,7 +11,6 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../../production/GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
-import ActionHistoryAPI from "../../../../../src/libs/ActionHistoryAPI";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 
@@ -44,13 +43,11 @@ export default class RotationGizmo {
         GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
-            ActionHistoryAPI.saveEntity(
-                GizmoSystem.mainEntity.id,
-                undefined,
-                "_rotationQuat",
-                GizmoSystem.mainEntity._rotationQuat
+            GizmoSystem.save(
+                GizmoSystem.selectedEntities.map(v => v.id),
+                GizmoSystem.selectedEntities.map(v => [...v._rotationQuat]),
+                "_rotationQuat"
             )
-
         }
         document.exitPointerLock()
 
@@ -62,20 +59,19 @@ export default class RotationGizmo {
 
 
     onMouseMove(event) {
-        if(!GizmoSystem.mainEntity)
+        if (!GizmoSystem.mainEntity)
             return
         if (!this.started) {
             this.started = true
-            ActionHistoryAPI.saveEntity(
-                GizmoSystem.mainEntity.id,
-                undefined,
-                "_rotationQuat",
-                GizmoSystem.mainEntity._rotationQuat
+            GizmoSystem.save(
+                GizmoSystem.selectedEntities.map(v => v.id),
+                GizmoSystem.selectedEntities.map(v => [...v._rotationQuat]),
+                "_rotationQuat"
             )
         }
 
         const g = event.ctrlKey ? toRad : this.gridSize * toRad
-        this.currentIncrement += event.movementX *GizmoSystem.sensitivity
+        this.currentIncrement += event.movementX * GizmoSystem.sensitivity
         const mappedValue = Math.round(this.currentIncrement / g) * g
 
         if (Math.abs(mappedValue) > 0)
@@ -104,7 +100,7 @@ export default class RotationGizmo {
 
     rotateElement(vec, screenSpace) {
         const targets = GizmoSystem.selectedEntities, SIZE = targets.length
-        if(SIZE === 1 && GizmoSystem.mainEntity.lockedRotation)
+        if (SIZE === 1 && GizmoSystem.mainEntity.lockedRotation)
             return
 
         GizmoSystem.totalMoved += vec[0] + vec[1] + vec[2]
@@ -122,7 +118,7 @@ export default class RotationGizmo {
 
         for (let i = 0; i < SIZE; i++) {
             const target = targets[i]
-            if(target.lockedRotation)
+            if (target.lockedRotation)
                 continue
             if (screenSpace) {
                 quat.copy(target._rotationQuat, quatA)

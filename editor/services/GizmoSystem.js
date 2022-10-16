@@ -71,6 +71,7 @@ export default class GizmoSystem {
         GizmoSystem.scaleGizmo = new ScalingGizmo()
         GizmoSystem.rotationGizmo = new RotationGizmo()
     }
+    static save(){}
 
     static onMouseDown() {
         if (!GizmoSystem.tooltip)
