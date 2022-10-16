@@ -1,5 +1,5 @@
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
-import {mat4, quat, vec2, vec3} from "gl-matrix";
+import {mat4, quat, vec3} from "gl-matrix";
 
 /**
  * @field controlBuffers {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.

@@ -34,6 +34,15 @@ export const DEFAULT_MATRICES = [
             .5, .5, 0 // ROUGHNESS, METALLIC
         ]
     },
+    {
+        key: "uvScales",
+        data: [
+            1, 1, 1, 1, // [ALBEDO], [NORMAL]
+            1, 1, 1, 1, // [ROUGHNESS], [METALLIC]
+            1, 1, 1, 1, // [AO], [EMISSION]
+            0, 0, 0, 0  // EMPTY
+        ]
+    }
 ]
 export default {
     original: FALLBACK_MATERIAL,
@@ -44,6 +53,6 @@ export default {
         {key: "roughness", "type": "sampler2D"},
         {key: "metallic", "type": "sampler2D"},
         {key: "ao", "type": "sampler2D"},
-        {key: "emission", "type": "sampler2D"}
+        {key: "emission", "type": "sampler2D"},
     ]
 }

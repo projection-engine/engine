@@ -88,7 +88,6 @@ export default class DepthPass {
             S.bindForUse(U)
             mesh.draw()
         }
-
         DepthPass.framebuffer.stopMapping()
 
         // NORMALS

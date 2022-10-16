@@ -18,8 +18,7 @@ import MovementWorker from "../../workers/movement/MovementWorker";
 import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../production/apis/rendering/LineAPI";
-import {mat4, vec3} from "gl-matrix";
-import GIZMOS from "../../../../src/data/GIZMOS";
+import {mat4} from "gl-matrix";
 import IconsSystem from "./IconsSystem";
 
 const M = mat4.create()

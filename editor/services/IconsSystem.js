@@ -8,8 +8,7 @@ import SelectionStore from "../../../../src/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../production/passes/rendering/SpritePass";
 import QueryAPI from "../../production/apis/utils/QueryAPI";
-import {mat4, vec3} from "gl-matrix";
-import COLLISION_TYPES from "../../static/COLLISION_TYPES";
+import {mat4} from "gl-matrix";
 
 const SCALE = (new Array(3)).fill(.25)
 const EMPTY_MATRIX = mat4.create()
@@ -66,8 +65,9 @@ export default class IconsSystem {
 
     static execute(selected) {
         const {iconsVisibility} = Engine.params
-        if (iconsVisibility) {
 
+
+        if (iconsVisibility) {
             const attr = {
                 viewMatrix: CameraAPI.viewMatrix,
                 cameraPosition: CameraAPI.position,
