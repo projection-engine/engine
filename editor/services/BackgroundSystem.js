@@ -1,4 +1,4 @@
-import * as shaderCode from "../templates/SKYBOX.glsl"
+import * as shaderCode from "../shaders/SKYBOX.glsl"
 import Engine from "../../production/Engine";
 import CameraAPI from "../../production/apis/CameraAPI";
 import MeshController from "../../production/instances/MeshController";

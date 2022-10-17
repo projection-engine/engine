@@ -1,4 +1,4 @@
-import * as gizmoShaderCode from "../../templates/GIZMO.glsl"
+import * as gizmoShaderCode from "../../shaders/GIZMO.glsl"
 
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../../src/data/TRANSFORMATION_TYPE"

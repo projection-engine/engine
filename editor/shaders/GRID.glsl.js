@@ -31,13 +31,13 @@ void main(){
 export const fragment = `#version 300 es
 precision mediump float;
  
-
 in vec3 nearPoint;
 in vec3 farPoint;
 
 in mat4 fragView;
 in mat4 fragProj;
  
+uniform vec3 visualSettings; // [gridOpacity, gridSize, showGridSubdivision]
 uniform vec4 settings; // [gamma, exposure, far, near]
 out vec4 finalColor;
 
@@ -49,7 +49,7 @@ vec4 grid(vec3 fragPos3D, float scale, bool lighter,  vec3 verticalAxisColor, ve
     float line = min(grid.x, grid.y);
     float minimumz = min(derivative.y, 1.);
     float minimumx = min(derivative.x, 1.);
-    float baseColor = 0.325;
+    float baseColor = visualSettings.x * 0.325;
     vec4 color = vec4(baseColor, baseColor,baseColor, 1.0 - min(lighter ?  line : line - .15, 1.));
     
     float comparison = .3;
@@ -88,10 +88,10 @@ void main() {
     vec3 verticalAxisColor = vec3(.0, .0, 10.);
     vec3 horizontalAxisColor = vec3(10., .0, .0);
     
-
+    float size = 1./visualSettings.y;
     finalColor = (
-        grid(fragPos3D* .2, 2., true,  verticalAxisColor, horizontalAxisColor) +
-        grid(fragPos3D * .2, 1., false,  verticalAxisColor, horizontalAxisColor)
+        grid(fragPos3D, size, true,  verticalAxisColor, horizontalAxisColor) +
+        (visualSettings.z == 1. ? grid(fragPos3D, size * .5,  false,  verticalAxisColor, horizontalAxisColor) : vec4(0.))
      ) * float(t > 0.);
       
    

@@ -32,19 +32,19 @@ export const VIEWS = {
 export default class ShadowMapPass {
     static changed = false
     static maxCubeMaps = 2
-    static specularProbes = []
+    static cubeMaps = []
     static resolutionPerTexture = 1024
     static maxResolution = 4096
     static shadowMapShader
     static shadowMapOmniShader
     static shadowsFrameBuffer
     static ready = false
-    static #lights2D = []
-    static #lights3D = []
+    static lights2D = []
+    static lights3D = []
 static atlasRatio = 0
     static initialize() {
 
-        ShadowMapPass.specularProbes = [
+        ShadowMapPass.cubeMaps = [
             new ProbeController(512, true),
             new ProbeController(512, true)
         ]
@@ -52,7 +52,6 @@ static atlasRatio = 0
         ShadowMapPass.shadowMapShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
         ShadowMapPass.shadowMapOmniShader = GPU.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
         ShadowMapPass.ready = true
-
     }
 
     static allocateData() {
@@ -63,16 +62,13 @@ static atlasRatio = 0
         DeferredPass.deferredUniforms.shadowMapTexture = ShadowMapPass.shadowsFrameBuffer.depthSampler
     }
 
-
-    static allocateBuffers(
-        shadowAtlasQuantity,
-        shadowMapResolution
-    ) {
+    static allocateBuffers(shadowAtlasQuantity, shadowMapResolution) {
         if (ShadowMapPass.maxResolution !== shadowMapResolution && shadowMapResolution) {
             ShadowMapPass.maxResolution = shadowMapResolution
             ShadowMapPass.allocateData()
             ShadowMapPass.changed = true
         }
+
         if (ShadowMapPass.maxResolution / shadowAtlasQuantity !== ShadowMapPass.resolutionPerTexture && shadowAtlasQuantity) {
             ShadowMapPass.resolutionPerTexture = ShadowMapPass.maxResolution / shadowAtlasQuantity
             ShadowMapPass.changed = true
@@ -87,9 +83,9 @@ static atlasRatio = 0
             if(!arr[i].shadowMap)
                 continue
             if (arr[i] instanceof PointLightComponent)
-                ShadowMapPass.#lights3D.push({...arr[i], translation: arr[i].__entity.translation})
+                ShadowMapPass.lights3D.push({...arr[i], translation: arr[i].__entity.translation})
             else
-                ShadowMapPass.#lights2D.push(arr[i])
+                ShadowMapPass.lights2D.push(arr[i])
         }
 
     }
@@ -99,8 +95,8 @@ static atlasRatio = 0
             return;
 
         ShadowMapPass.#generateToUpdateMap()
-        const lights2D = ShadowMapPass.#lights2D
-        const lights3D = ShadowMapPass.#lights3D
+        const lights2D = ShadowMapPass.lights2D
+        const lights3D = ShadowMapPass.lights3D
 
         gpu.cullFace(gpu.FRONT)
         let currentColumn = 0, currentRow = 0
@@ -139,13 +135,15 @@ static atlasRatio = 0
             ShadowMapPass.shadowsFrameBuffer.stopMapping()
         }
 
+        console.log(lights3D, ShadowMapPass.maxCubeMaps)
         if (lights3D.length > 0) {
             gpu.viewport(0, 0, 512, 512)
             for (let i = 0; i < ShadowMapPass.maxCubeMaps; i++) {
                 const current = lights3D[i]
                 if (!current)
                     continue
-                ShadowMapPass.specularProbes[i]
+                console.log(ShadowMapPass.cubeMaps[i])
+                ShadowMapPass.cubeMaps[i]
                     .draw((yaw, pitch, perspective, index) => {
                             const target = vec3.add([], current.translation, VIEWS.target[index])
                             ShadowMapPass.loopMeshes(
@@ -164,8 +162,8 @@ static atlasRatio = 0
         }
         gpu.cullFace(gpu.BACK)
         ShadowMapPass.changed = false
-        ShadowMapPass.#lights2D = []
-        ShadowMapPass.#lights3D = []
+        ShadowMapPass.lights2D = []
+        ShadowMapPass.lights3D = []
         EntityAPI.lightsChanged = []
     }
 

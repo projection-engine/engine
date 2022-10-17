@@ -57,8 +57,8 @@ export default class DeferredPass {
             ambientSampler: DeferredPass.ambientSampler,
             cameraVec: CameraAPI.position,
             brdfSampler: GPU.BRDF,
-            shadowCube0: ShadowMapPass.specularProbes[0].texture,
-            shadowCube1: ShadowMapPass.specularProbes[1].texture,
+            shadowCube0: ShadowMapPass.cubeMaps[0].texture,
+            shadowCube1: ShadowMapPass.cubeMaps[1].texture,
             settings: new Float32Array(9)
         })
         DeferredPass.deferredUniforms.settings[2] = 1

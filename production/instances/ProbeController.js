@@ -110,7 +110,7 @@ export default class ProbeController {
         let resolution = asIrradiance ? 32 : this.#res, texture
 
         const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
-
+        MeshController.finishIfUsed()
         gpu.bindVertexArray(null)
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.#frameBuffer)
         gpu.viewport(0, 0, resolution, resolution)
@@ -119,7 +119,6 @@ export default class ProbeController {
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
         gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, resolution, resolution)
         gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, rbo)
-
 
         if (!asIrradiance) {
             if (!this.texture || this.#resChanged)
@@ -130,7 +129,6 @@ export default class ProbeController {
         } else {
             if (!this.irradianceTexture)
                 this.irradianceTexture = this.#initializeTexture(resolution)
-
             texture = this.irradianceTexture
         }
 

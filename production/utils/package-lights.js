@@ -5,10 +5,9 @@ import {EntityAPI} from "../../production";
 
 export function packagePointLights(keepOld) {
     const pointLights = Engine.data.pointLights
-    let pointLightsQuantity = 0,
-        pointLightData =  keepOld ? Engine.data.pointLightData : [],
+    let pointLightData = keepOld ? Engine.data.pointLightData : [],
         activeOffset = 0
-    if(!pointLightData)
+    if (!pointLightData)
         pointLightData = []
 
     if (pointLights)
@@ -20,9 +19,8 @@ export function packagePointLights(keepOld) {
                 continue
             }
 
-            if (!current.changesApplied && !current.needsLightUpdate)
+            if (!current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
-            pointLightsQuantity++
             const component = current.components.get(COMPONENTS.POINT_LIGHT)
 
             if (!pointLightData[i - activeOffset])
@@ -49,17 +47,17 @@ export function packagePointLights(keepOld) {
             EntityAPI.lightsChanged.push(component)
         }
 
-    Engine.data.pointLightsQuantity = pointLightsQuantity
+
+    Engine.data.pointLightsQuantity = pointLightData.length
     Engine.data.pointLightData = pointLightData
 }
 
 export function packageDirectionalLights(keepOld) {
-    let maxTextures = 0,
-        directionalLightsData = keepOld ? Engine.data.directionalLightsData : [],
+    let directionalLightsData = keepOld ? Engine.data.directionalLightsData : [],
         dirLightPOV = keepOld ? Engine.data.dirLightPOV : [],
         activeOffset = 0,
         directionalLights = Engine.data.directionalLights
-    if(!directionalLightsData || !dirLightPOV) {
+    if (!directionalLightsData || !dirLightPOV) {
         directionalLightsData = []
         dirLightPOV = []
     }
@@ -70,8 +68,8 @@ export function packageDirectionalLights(keepOld) {
                 activeOffset++
                 continue
             }
-            maxTextures++
-            if (!current.changesApplied && !current.needsLightUpdate)
+
+            if (!current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
             current.needsLightUpdate = false
             const component = current.components.get(COMPONENTS.DIRECTIONAL_LIGHT)
@@ -102,7 +100,7 @@ export function packageDirectionalLights(keepOld) {
             EntityAPI.lightsChanged.push(component)
         }
 
-    Engine.data.maxTextures = maxTextures
+    Engine.data.maxTextures = directionalLightsData.length
     Engine.data.directionalLightsData = directionalLightsData
     Engine.data.dirLightPOV = dirLightPOV
 }

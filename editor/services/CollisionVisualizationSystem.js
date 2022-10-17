@@ -3,7 +3,7 @@ import GPU from "../../production/GPU";
 import COMPONENTS from "../../static/COMPONENTS.json";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import WIREFRAMEGlsl from "../templates/WIREFRAME.glsl";
+import WIREFRAMEGlsl from "../shaders/WIREFRAME.glsl";
 import CameraAPI from "../../production/apis/CameraAPI";
 import Engine from "../../production/Engine";
 import {mat4, vec3} from "gl-matrix";

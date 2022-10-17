@@ -54,14 +54,16 @@ export default class EntityAPI {
             data.pointLights.push(entity)
             placementMap.pointLights = true
         }
-        if (entity.components.get(COMPONENTS.MESH)) {
-            data.meshes.push(entity)
-            placementMap.meshes = true
-        }
         if (entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
             data.directionalLights.push(entity)
             placementMap.directionalLights = true
         }
+
+        if (entity.components.get(COMPONENTS.MESH)) {
+            data.meshes.push(entity)
+            placementMap.meshes = true
+        }
+
         if (entity.components.get(COMPONENTS.PROBE) && entity.components.get(COMPONENTS.PROBE).specularProbe) {
             data.specularProbes.push(entity)
             placementMap.specularProbes = true
@@ -90,8 +92,8 @@ export default class EntityAPI {
         }
 
         Engine.dataEntity.set(entity.id, placementMap)
-        if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
-            EntityAPI.packageLights()
+        if (entity.components.get(COMPONENTS.POINT_LIGHT) || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT))
+            EntityAPI.packageLights(false, true)
     }
 
     static removeEntity(id) {
@@ -106,12 +108,14 @@ export default class EntityAPI {
 
         PhysicsAPI.removeRigidBody(entity)
         EntityAPI.#removeUnusedProbes(entity)
-        if (entity.components.get(COMPONENTS.POINT_LIGHT) != null || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) != null)
-            EntityAPI.packageLights()
 
         MovementWorker.removeEntity(entity)
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
+
+        if (entity.components.get(COMPONENTS.POINT_LIGHT) || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT))
+            EntityAPI.packageLights(false, true)
+
     }
 
 
@@ -171,7 +175,7 @@ export default class EntityAPI {
     }
 
 
-    static linkScript(data, entity, scriptID, src) {
+    static linkScript(data, entity, scriptID) {
         const found = entity.scripts.findIndex(s => s.id === scriptID)
         try {
             const generator = new Function("PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI", data.toString())

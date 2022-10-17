@@ -1,4 +1,4 @@
-import * as shaderCode from "../templates/SELECTED.glsl"
+import * as shaderCode from "../shaders/SELECTED.glsl"
 import COMPONENTS from "../../static/COMPONENTS.json"
 import CameraAPI from "../../production/apis/CameraAPI";
 import GPU from "../../production/GPU";

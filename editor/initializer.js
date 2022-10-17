@@ -5,7 +5,7 @@ import directionalLightIcon from "../../../src/data/icons/directional_light.png"
 import probeIcon from "../../../src/data/icons/probe.png";
 import circle from "../../../src/data/icons/circle.png";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
-import * as gizmoShaderCode from "./templates/GIZMO.glsl";
+import * as gizmoShaderCode from "./shaders/GIZMO.glsl";
 import STATIC_MESHES from "../static/resources/STATIC_MESHES";
 import CAMERA from "./data/CAMERA.json";
 import PLANE from "./data/DUAL_AXIS_GIZMO.json";
@@ -22,7 +22,7 @@ import BackgroundSystem from "./services/BackgroundSystem";
 import GizmoSystem from "./services/GizmoSystem";
 import CollisionVisualizationSystem from "./services/CollisionVisualizationSystem";
 import UIAPI from "../production/apis/UIAPI";
-import DEBUGGlsl from "./templates/DEBUG.glsl";
+import DEBUGGlsl from "./shaders/DEBUG.glsl";
 
 
 export default async function initializer() {
