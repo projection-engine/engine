@@ -43,11 +43,7 @@ export default class RotationGizmo {
         GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
-            GizmoSystem.save(
-                GizmoSystem.selectedEntities.map(v => v.id),
-                GizmoSystem.selectedEntities.map(v => [...v._rotationQuat]),
-                "_rotationQuat"
-            )
+            GizmoSystem.save("_rotationQuat")
         }
         document.exitPointerLock()
 
@@ -63,11 +59,7 @@ export default class RotationGizmo {
             return
         if (!this.started) {
             this.started = true
-            GizmoSystem.save(
-                GizmoSystem.selectedEntities.map(v => v.id),
-                GizmoSystem.selectedEntities.map(v => [...v._rotationQuat]),
-                "_rotationQuat"
-            )
+            GizmoSystem.save("_rotationQuat")
         }
 
         const g = event.ctrlKey ? toRad : this.gridSize * toRad

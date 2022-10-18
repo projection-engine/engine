@@ -20,11 +20,7 @@ export default class Inheritance {
     onMouseMove() {
         if (!this.started && GizmoSystem.mainEntity) {
             this.started = true
-            GizmoSystem.save(
-                GizmoSystem.selectedEntities.map(v => v.id),
-                GizmoSystem.selectedEntities.map(v => [...v[this.key]]),
-                this.key
-            )
+            GizmoSystem.save(this.key)
         }
     }
 
@@ -41,11 +37,7 @@ export default class Inheritance {
         GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
-            GizmoSystem.save(
-                GizmoSystem.selectedEntities.map(v => v.id),
-                GizmoSystem.selectedEntities.map(v => [...v[this.key]]),
-                this.key
-            )
+            GizmoSystem.save(this.key)
         }
         this.tracking = false
         this.started = false
@@ -55,7 +47,7 @@ export default class Inheritance {
 
 
     #testClick() {
-        if (!GizmoSystem.mainEntity )
+        if (!GizmoSystem.mainEntity)
             return
         const mX = GizmoAPI.translateMatrix(this.xGizmo)
         const mY = GizmoAPI.translateMatrix(this.yGizmo)
@@ -97,7 +89,7 @@ export default class Inheritance {
 
         if (this.key !== "_scaling" && this.tracking) {
             const c = mat4.create()
-            GizmoAPI.applyTransformation(c, [0,0,0,1], [0,0,0],  [1, 1, 1])
+            GizmoAPI.applyTransformation(c, [0, 0, 0, 1], [0, 0, 0], [1, 1, 1])
             GizmoSystem.activeGizmoMatrix = c
         }
         gpu.enable(gpu.CULL_FACE)

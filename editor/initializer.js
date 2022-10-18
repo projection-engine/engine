@@ -23,6 +23,7 @@ import GizmoSystem from "./services/GizmoSystem";
 import CollisionVisualizationSystem from "./services/CollisionVisualizationSystem";
 import UIAPI from "../production/apis/UIAPI";
 import DEBUGGlsl from "./shaders/DEBUG.glsl";
+import ActionHistoryAPI from "../../../src/libs/ActionHistoryAPI";
 
 
 export default async function initializer() {
@@ -53,7 +54,7 @@ export default async function initializer() {
     SelectedSystem.initialize()
     PreviewSystem.initialize()
     BackgroundSystem.initialize()
-    GizmoSystem.initialize()
+    GizmoSystem.initialize(ActionHistoryAPI.pushGroupChange)
 
     await Engine.initialize()
 }

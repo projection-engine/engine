@@ -49,9 +49,10 @@ export default class GizmoSystem {
     static EMPTY_COMPONENT = EMPTY_COMPONENT
     static transformationType = TRANSFORMATION_TYPE.GLOBAL
     static activeGizmoMatrix = M
+    static #onSave
 
-    static initialize() {
-
+    static initialize(onSave) {
+        GizmoSystem.#onSave = onSave
         GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
         GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO)
         GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO)
@@ -71,7 +72,13 @@ export default class GizmoSystem {
         GizmoSystem.scaleGizmo = new ScalingGizmo()
         GizmoSystem.rotationGizmo = new RotationGizmo()
     }
-    static save(){}
+
+    static save(key) {
+        const changes = GizmoSystem.selectedEntities.map(e => ({id: e.id, value: [...e[key]], key}))
+        if(key === "_translation")
+            changes.push(...GizmoSystem.selectedEntities.map(e => ({id: e.id, key: "pivotPoint", value: [...e.pivotPoint]})))
+        GizmoSystem.#onSave(changes)
+    }
 
     static onMouseDown() {
         if (!GizmoSystem.tooltip)

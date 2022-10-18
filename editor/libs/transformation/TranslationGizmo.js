@@ -49,8 +49,10 @@ export default class TranslationGizmo extends Inheritance {
                     target.__pivotChanged = true
                     continue
                 }
+
                 vec3.add(target.pivotPoint, target.pivotPoint, TranslationGizmo.cache)
                 vec3.add(target._translation, target._translation, TranslationGizmo.cache)
+
                 target._translation[0] = Math.round(target._translation[0] / g) * g
                 target._translation[1] = Math.round(target._translation[1] / g) * g
                 target._translation[2] = Math.round(target._translation[2] / g) * g
