@@ -63,7 +63,7 @@ export default class GizmoSystem {
         EMPTY_COMPONENT._scaling[1] = .2
         EMPTY_COMPONENT._scaling[2] = .2
 
-        TransformationAPI.transform(EMPTY_COMPONENT._translation, EMPTY_COMPONENT._rotationQuat, EMPTY_COMPONENT._scaling, EMPTY_COMPONENT.matrix)
+        TransformationAPI.transformMovable(EMPTY_COMPONENT)
 
         GizmoSystem.lineShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)
         GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)

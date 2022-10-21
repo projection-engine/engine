@@ -14,6 +14,7 @@ import UIAPI from "./UIAPI";
 import {TransformationAPI} from "../../production";
 import DeferredPass from "../passes/rendering/DeferredPass";
 import PhysicsAPI from "./PhysicsAPI";
+import Entity from "../instances/Entity";
 
 
 let lightTimeout
@@ -21,10 +22,15 @@ export default class EntityAPI {
     static lightsChanged = []
 
     static addEntity(entity) {
-        Engine.entitiesMap.set(entity.id, entity)
-        Engine.entities.push(entity)
-        MovementWorker.registerEntity(entity)
-        EntityAPI.registerEntityComponents(entity)
+        let target = entity || new Entity()
+        Engine.entitiesMap.set(target.id, target)
+        Engine.entities.push(target)
+
+        MovementWorker.removeEntity(target)
+        MovementWorker.registerEntity(target)
+        EntityAPI.registerEntityComponents(target)
+
+        return entity
     }
 
     static linkEntities(child, parent) {
@@ -120,7 +126,6 @@ export default class EntityAPI {
 
 
     static #removeUnusedProbes(entity) {
-
         const specularProbes = SpecularProbePass.specularProbes
         const diffuseProbes = DiffuseProbePass.diffuseProbes
         const s = SpecularProbePass.probes

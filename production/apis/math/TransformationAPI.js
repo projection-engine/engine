@@ -1,54 +1,26 @@
-import {mat4, quat} from "gl-matrix"
+import {glMatrix, mat3, mat4, quat, vec2, vec3, vec4} from "gl-matrix"
 
 const toDeg = 57.2957795131
-const THRESHOLD = .001
-const quaternion = [0, 0, 0, 1]
+const quaternion = quat.create()
+
 export default class TransformationAPI {
-    static transform(translation, rotate, scale, matrix) {
-        quat.normalize(quaternion, rotate.length > 3 ? rotate : quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg))
+    static utils = glMatrix
+    static mat4 = mat4
+    static mat3 = mat3
+    static quat = quat
+    static vec3 = vec3
+    static vec2 = vec2
+    static vec4 = vec4
+
+    static transformMovable(movable) {
+        const translation = movable._translation,rotate = movable._rotationQuat, scale = movable._scaling, matrix = movable.matrix
+        TransformationAPI.quat.normalize(quaternion, rotate.length > 3 ? rotate : TransformationAPI.quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg))
         if (matrix)
-            return mat4.fromRotationTranslationScale(matrix, quaternion, translation, scale)
-        return mat4.fromRotationTranslationScale([], quaternion, translation, scale)
+            return TransformationAPI.mat4.fromRotationTranslationScale(matrix, quaternion, translation, scale)
+        return TransformationAPI.mat4.fromRotationTranslationScale([], quaternion, translation, scale)
     }
 
-    static extractTransformations(mat) {
-        return {
-            translation: mat4.getTranslation([], mat),
-            _rotationQuat: quat.normalize([], mat4.getRotation([], mat)),
-            scaling: mat4.getScaling([], mat)
-        }
-    }
 
-    static linearInterpolation(target, current, ideal, alpha) {
-        const S = current.length
-        let changed = false
-        for (let i = 0; i < S; i++) {
-            const increment = (ideal[i] - current[i]) * alpha
-            target[i] = current[i] + increment
 
-            changed = changed || Math.abs(increment) > THRESHOLD
-        }
-        return changed
-    }
-
-    static getEuler(q) {
-        const angles = []
-
-        const sinr_cosp = 2 * (q[3] * q[0] + q[1] * q[2])
-        const cosr_cosp = 1 - 2 * (q[0] * q[0] + q[1] * q[1])
-        angles[0] = Math.atan2(sinr_cosp, cosr_cosp)
-
-        const sinp = 2 * (q[3] * q[1] - q[2] * q[0])
-        if (Math.abs(sinp) >= 1)
-            angles[1] = 3.14 * sinp / Math.abs(sinp)
-        else
-            angles[1] = Math.asin(sinp)
-
-        const siny_cosp = 2 * (q[3] * q[2] + q[0] * q[1])
-        const cosy_cosp = 1 - 2 * (q[1] * q[1] + q[2] * q[2])
-        angles[2] = Math.atan2(siny_cosp, cosy_cosp)
-
-        return angles
-    }
 
 }

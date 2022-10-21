@@ -57,6 +57,7 @@ export default class Engine {
             CameraAPI.updateProjection()
         }).observe(gpu.canvas)
         Engine.isReady = true
+        Engine.start()
     }
 
     static updateParams(data) {

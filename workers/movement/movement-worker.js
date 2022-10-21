@@ -5,9 +5,9 @@ import {mat4, quat, vec3} from "gl-matrix";
  * @field controlBuffers {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.
  */
 
-const cachePivot = vec3.create()
 const MIN_SCALE = 5e-10
 const cache = quat.create()
+
 class MovementPass {
     static targets = []
     static controlBuffers
@@ -62,12 +62,18 @@ class MovementPass {
         mat4.fromRotationTranslationScale(entity.matrix, cache, entity._translation, scaling)
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
 
-        if (entity.parentMatrix)
+        if (entity.parentTranslation)
             mat4.multiply(
                 entity.matrix,
-                entity.parentMatrix,
+                mat4.fromRotationTranslationScale(
+                    [],
+                    entity.parentRotation,
+                    entity.parentTranslation,
+                    [1, 1, 1]
+                ),
                 entity.matrix
             )
+
 
         entity.absoluteTranslation[0] = entity.matrix[12]
         entity.absoluteTranslation[1] = entity.matrix[13]

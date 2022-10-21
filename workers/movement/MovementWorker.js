@@ -15,14 +15,12 @@ export default class MovementWorker {
     }
 
     static updateEntityLinks(child, parent) {
-        const parentWorker = MovementWorker.threads[parent.__workerGroup]
-        const childWorker = MovementWorker.threads[child.__workerGroup]
-        if(!parentWorker || !childWorker)
-            return
-        MovementWorker.removeEntity(parent)
-        MovementWorker.removeEntity(child)
+        if(parent) {
+            MovementWorker.removeEntity(parent)
+            MovementWorker.registerEntity(parent)
+        }
 
-        MovementWorker.registerEntity(parent)
+        MovementWorker.removeEntity(child)
         MovementWorker.registerEntity(child)
     }
 
@@ -65,7 +63,10 @@ export default class MovementWorker {
                 ...entity,
                 children: undefined,
                 parent: undefined,
-                parentMatrix: entity.parent?.matrix,
+
+                parentTranslation: entity.parent?._translation,
+                parentRotation: entity.parent?._rotationQuat,
+
                 parentChangedBuffer: entity.parent?.__changedBuffer,
                 components: undefined,
                 pivotPoint: entity.pivotPoint

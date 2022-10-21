@@ -9,6 +9,7 @@ import CollisionVisualizationSystem from "./CollisionVisualizationSystem";
 import {TransformationAPI} from "../../production";
 import CameraTracker from "../libs/CameraTracker";
 
+const CAMERA_SCALE = [0.8578777313232422, 0.5202516317367554, 0.2847398519515991]
 export default class Wrapper {
     static execute(isDuringFrameComposition, isDuringBinging) {
         const {selected, iconsVisibility} = Engine.params
@@ -44,7 +45,7 @@ export default class Wrapper {
                         continue
                     attr.highlight = IconsSystem.selectedMap.get(current.id) != null
                     if (current.__changedBuffer[1] === 1 || !current.cacheIconMatrix)
-                        current.cacheIconMatrix = TransformationAPI.transform(current._translation, current._rotationQuat, [0.8578777313232422, 0.5202516317367554, 0.2847398519515991])
+                        current.cacheIconMatrix = TransformationAPI.mat4.fromRotationTranslationScale([], current._rotationQuat, current._translation, CAMERA_SCALE)
 
                     attr.transformMatrix = current.cacheIconMatrix
                     IconsSystem.shader.bindForUse(attr)

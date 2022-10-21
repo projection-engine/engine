@@ -1,9 +1,9 @@
-import {mat4, quat, vec3} from "gl-matrix";
+import {glMatrix, mat4, quat, vec3, vec4} from "gl-matrix";
 import TransformationAPI from "../../production/apis/math/TransformationAPI";
 
 
 /**
- * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, smoothing]}
+ * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, translationSmoothing, rotationSmoothing]}
  * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
  * @field projectionBuffer {float32array [zFar, zNear, fov, aR, orthographicSize]}
  */
@@ -27,8 +27,8 @@ export default class CameraWorker {
     static #projectionBuffer
     static #skyboxProjectionMatrix
     static frameID
-    static currentTranslation = vec3.create()
-    static currentRotation = quat.create()
+    static currentTranslation = TransformationAPI.vec3.create()
+    static currentRotation = TransformationAPI.quat.create()
 
     static initialize(
         notificationBuffers,
@@ -57,8 +57,8 @@ export default class CameraWorker {
         CameraWorker.#translationBuffer = translationBuffer
         CameraWorker.#rotationBuffer = rotationBuffer
         CameraWorker.#skyboxProjectionMatrix = skyboxProjectionMatrix
-        vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
-        // quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
+        TransformationAPI.vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
+        TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
 
         const callback = () => {
             CameraWorker.execute()
@@ -93,7 +93,7 @@ export default class CameraWorker {
     }
 
     static #updateView() {
-        mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, CameraWorker.#rotationBuffer, CameraWorker.currentTranslation)
+        mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, CameraWorker.currentRotation, CameraWorker.currentTranslation)
         mat4.invert(CameraWorker.#viewMatrix, CameraWorker.#invViewMatrix)
 
         const m = CameraWorker.#invViewMatrix
@@ -108,14 +108,16 @@ export default class CameraWorker {
         elapsed = now - then
         then = now
 
-
         nBuffer[3] = 0
         if (needsUpdate) {
-            const increment = 1 - Math.pow(.001, elapsed  * nBuffer[4])
-            const changed = TransformationAPI.linearInterpolation(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, increment)
-
-            if (changed)
+            const incrementTranslation = 1 - Math.pow(.001, elapsed  * nBuffer[4])
+            const incrementRotation = 1 - Math.pow(.001, elapsed  * nBuffer[5])
+            vec3.lerp(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, incrementTranslation)
+            quat.slerp(CameraWorker.currentRotation, CameraWorker.currentRotation, CameraWorker.#rotationBuffer, incrementRotation)
+            if (!vec3.equals(CameraWorker.currentTranslation, CameraWorker.#translationBuffer) || !quat.equals(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)) {
                 CameraWorker.#updateView()
+                nBuffer[3] = 1
+            }
             else
                 needsUpdate = false
         }
