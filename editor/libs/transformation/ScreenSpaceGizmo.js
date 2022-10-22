@@ -1,9 +1,9 @@
 import GizmoAPI from "../GizmoAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";
-import ConversionAPI from "../../../production/apis/math/ConversionAPI";
+import ConversionAPI from "../../../lib/apis/math/ConversionAPI";
 import {vec3} from "gl-matrix";
-import getPickerId from "../../../production/utils/get-picker-id";
+import getPickerId from "../../../utils/get-picker-id";
 
 
 const PICK_ID_SS_GIZMO = getPickerId(1)

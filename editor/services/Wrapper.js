@@ -3,11 +3,11 @@ import IconsSystem from "./IconsSystem"
 import GizmoSystem from "./GizmoSystem"
 import SelectedSystem from "./SelectedSystem"
 import BackgroundSystem from "./BackgroundSystem"
-import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
+import Engine from "../../Engine";
+import CameraAPI from "../../lib/apis/CameraAPI";
 import CollisionVisualizationSystem from "./CollisionVisualizationSystem";
-import {TransformationAPI} from "../../production";
 import CameraTracker from "../libs/CameraTracker";
+import TransformationAPI from "../../lib/apis/math/TransformationAPI";
 
 const CAMERA_SCALE = [0.8578777313232422, 0.5202516317367554, 0.2847398519515991]
 export default class Wrapper {

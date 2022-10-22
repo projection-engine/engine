@@ -3,12 +3,12 @@ import * as gizmoShaderCode from "../../shaders/GIZMO.glsl"
 import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../../src/data/TRANSFORMATION_TYPE"
 import mapGizmoMesh from "../../utils/map-gizmo-mesh"
-import PickingAPI from "../../../production/apis/utils/PickingAPI";
-import CameraAPI from "../../../production/apis/CameraAPI";
+import PickingAPI from "../../../lib/apis/utils/PickingAPI";
+import CameraAPI from "../../../lib/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
-import GPU from "../../../production/GPU";
+import GPU from "../../../GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
 
@@ -154,6 +154,7 @@ export default class RotationGizmo {
         matrix[12] += GizmoSystem.translation[0]
         matrix[13] += GizmoSystem.translation[1]
         matrix[14] += GizmoSystem.translation[2]
+
         if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.GLOBAL && axis !== undefined) {
             switch (axis) {
                 case "x":
@@ -168,7 +169,7 @@ export default class RotationGizmo {
                 default:
                     break
             }
-        } else if (axis !== undefined)
+        } else if (axis !== undefined )
             return mat4.fromRotationTranslationScale([], quat.multiply([], GizmoSystem.targetRotation, entity._rotationQuat), GizmoSystem.translation, entity.scaling)
 
         return matrix

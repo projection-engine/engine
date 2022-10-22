@@ -2,31 +2,32 @@ import TranslationGizmo from "../libs/transformation/TranslationGizmo"
 import RotationGizmo from "../libs/transformation/RotationGizmo"
 import ScalingGizmo from "../libs/transformation/ScalingGizmo"
 import TRANSFORMATION_TYPE from "../../../../src/data/TRANSFORMATION_TYPE"
-import getPickerId from "../../production/utils/get-picker-id"
+import getPickerId from "../../utils/get-picker-id"
 import GizmoAPI from "../libs/GizmoAPI";
-import Movable from "../../production/instances/Movable";
-import TransformationAPI from "../../production/apis/math/TransformationAPI";
-import CameraAPI from "../../production/apis/CameraAPI";
+import Movable from "../../lib/instances/Movable";
+import TransformationAPI from "../../lib/apis/math/TransformationAPI";
+import CameraAPI from "../../lib/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/transformation/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/transformation/DualAxisGizmo";
-import GPU from "../../production/GPU";
+import GPU from "../../GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import DepthPass from "../../production/passes/rendering/DepthPass";
+import DepthPass from "../../lib/passes/rendering/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import Entity from "../../production/instances/Entity";
 import MovementWorker from "../../workers/movement/MovementWorker";
 import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
-import LineAPI from "../../production/apis/rendering/LineAPI";
-import {mat4} from "gl-matrix";
+import LineAPI from "../../lib/apis/rendering/LineAPI";
+import {mat4, vec3} from "gl-matrix";
 import IconsSystem from "./IconsSystem";
 
+const VEC_CACHE = vec3.create()
 const M = mat4.create()
 const EMPTY_COMPONENT = new Movable()
 export default class GizmoSystem {
     static mainEntity
     static transformationMatrix
     static translation
+
     static targetRotation
     static targetGizmo
     static toBufferShader
@@ -75,8 +76,12 @@ export default class GizmoSystem {
 
     static save(key) {
         const changes = GizmoSystem.selectedEntities.map(e => ({id: e.id, value: [...e[key]], key}))
-        if(key === "_translation")
-            changes.push(...GizmoSystem.selectedEntities.map(e => ({id: e.id, key: "pivotPoint", value: [...e.pivotPoint]})))
+        if (key === "_translation")
+            changes.push(...GizmoSystem.selectedEntities.map(e => ({
+                id: e.id,
+                key: "pivotPoint",
+                value: [...e.pivotPoint]
+            })))
         GizmoSystem.#onSave(changes)
     }
 
@@ -128,33 +133,46 @@ export default class GizmoSystem {
 
     static #findMainEntity() {
         const main = GizmoSystem.selectedEntities[0]
-        if ((MovementWorker.hasUpdatedItem || GizmoSystem.mainEntity !== main) && main instanceof Entity) {
-            GizmoSystem.mainEntity = main
-            GizmoSystem.targetRotation = main._rotationQuat
-            GizmoSystem.translation = main.pivotPoint
-            GizmoSystem.transformationMatrix = GizmoAPI.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
-
-
-        } else if (!main) {
+        if (!main) {
             GizmoSystem.targetGizmo = undefined
             GizmoSystem.selectedEntities = []
             GizmoSystem.mainEntity = undefined
             GizmoSystem.transformationMatrix = undefined
             GizmoSystem.translation = undefined
         }
+        else if (MovementWorker.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
+            main.__pivotChanged = true
+            GizmoSystem.mainEntity = main
+            GizmoSystem.updatePivot(main)
+            GizmoSystem.targetRotation = main._rotationQuat
+            GizmoSystem.transformationMatrix = GizmoAPI.translateMatrix(EMPTY_COMPONENT, GizmoSystem.transformationType)
+        }
+    }
+
+    static updatePivot(m) {
+        if (m.parent) {
+            vec3.add(VEC_CACHE, m.pivotPoint, m.parent._translation)
+
+            GizmoSystem.translation = VEC_CACHE
+
+        } else
+            GizmoSystem.translation = m.pivotPoint
     }
 
     static execute() {
+        if (!GizmoSystem.selectedEntities.length && !GizmoSystem.translation)
+            return
 
         if (GizmoSystem.selectedEntities.length > 0) {
             const t = GizmoSystem.targetGizmo
             GizmoSystem.#findMainEntity()
-            if (t && GizmoSystem.translation != null) {
-                if (GizmoSystem.mainEntity.__pivotChanged) {
-                    GizmoSystem.translation = GizmoSystem.mainEntity.pivotPoint
-                    IconsSystem.getMatrix(GizmoSystem.mainEntity)
-                }
 
+            if (t && GizmoSystem.translation != null) {
+                const m = GizmoSystem.mainEntity
+                if (m.__pivotChanged) {
+                    GizmoSystem.updatePivot(m)
+                    IconsSystem.getMatrix(m)
+                }
                 t.drawGizmo()
                 ScreenSpaceGizmo.drawGizmo()
             }

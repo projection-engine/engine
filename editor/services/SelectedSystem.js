@@ -1,10 +1,10 @@
 import * as shaderCode from "../shaders/SELECTED.glsl"
-import COMPONENTS from "../../static/COMPONENTS.json"
-import CameraAPI from "../../production/apis/CameraAPI";
-import GPU from "../../production/GPU";
+import COMPONENTS from "../../static/COMPONENTS.js"
+import CameraAPI from "../../lib/apis/CameraAPI";
+import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import QueryAPI from "../../production/apis/utils/QueryAPI";
+import QueryAPI from "../../lib/apis/utils/QueryAPI";
 
 
 export default class SelectedSystem {

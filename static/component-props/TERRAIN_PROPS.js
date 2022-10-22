@@ -1,4 +1,4 @@
-import Component from "../../production/components/Component";
+import Component from "../../lib/components/Component";
 
 export default [
     Component.terrainInstance("TERRAIN", "terrainID"),

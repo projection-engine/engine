@@ -1,6 +1,6 @@
-import Entity from "../../production/instances/Entity"
-import TransformationAPI from "../../production/apis/math/TransformationAPI"
-import getPickerId from "../../production/utils/get-picker-id";
+import Entity from "../../lib/instances/Entity"
+import TransformationAPI from "../../lib/apis/math/TransformationAPI"
+import getPickerId from "../../utils/get-picker-id";
 
 const toDeg = 57.29
 export default function mapGizmoMesh(axis, type) {

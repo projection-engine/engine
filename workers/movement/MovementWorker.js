@@ -1,5 +1,5 @@
-import EntityAPI from "../../production/apis/EntityAPI";
-import GPU from "../../production/GPU";
+import EntityAPI from "../../lib/apis/EntityAPI";
+import GPU from "../../GPU";
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
 
 export default class MovementWorker {
@@ -63,16 +63,15 @@ export default class MovementWorker {
                 ...entity,
                 children: undefined,
                 parent: undefined,
+                parentUnscaled: entity.parent?.unscaledMatrix,
 
-                parentTranslation: entity.parent?._translation,
-                parentRotation: entity.parent?._rotationQuat,
 
                 parentChangedBuffer: entity.parent?.__changedBuffer,
                 components: undefined,
                 pivotPoint: entity.pivotPoint
             }
         })
-
+        entity.changed = true
         entity.__workerGroup = MovementWorker.#currentWorkerIndex
         if (MovementWorker.#currentWorkerIndex >= MovementWorker.threads.length - 1)
             MovementWorker.#currentWorkerIndex = 0

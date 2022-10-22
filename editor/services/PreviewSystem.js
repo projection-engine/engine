@@ -1,12 +1,12 @@
 import {mat4} from "gl-matrix"
-import MeshController from "../../production/instances/MeshController"
-import MaterialController from "../../production/instances/MaterialController"
-import MaterialAPI from "../../production/apis/rendering/MaterialAPI";
-import GPU from "../../production/GPU";
+import MeshController from "../../lib/instances/MeshController"
+import MaterialController from "../../lib/instances/MaterialController"
+import MaterialAPI from "../../lib/apis/rendering/MaterialAPI";
+import GPU from "../../GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import FALLBACK_MATERIAL from "../../production/materials/simple/FALLBACK_MATERIAL";
-import FramebufferController from "../../production/instances/FramebufferController";
+import FALLBACK_MATERIAL from "../../templates/materials/simple/FALLBACK_MATERIAL";
+import FramebufferController from "../../lib/instances/FramebufferController";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {

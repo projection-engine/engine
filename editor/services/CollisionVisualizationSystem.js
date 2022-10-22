@@ -1,11 +1,11 @@
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import GPU from "../../production/GPU";
-import COMPONENTS from "../../static/COMPONENTS.json";
+import GPU from "../../GPU";
+import COMPONENTS from "../../static/COMPONENTS.js";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import WIREFRAMEGlsl from "../shaders/WIREFRAME.glsl";
-import CameraAPI from "../../production/apis/CameraAPI";
-import Engine from "../../production/Engine";
+import CameraAPI from "../../lib/apis/CameraAPI";
+import Engine from "../../Engine";
 import {mat4, vec3} from "gl-matrix";
 
 const EMPTY_MATRIX = mat4.create()

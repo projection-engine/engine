@@ -1,4 +1,4 @@
-import Component from "../../production/components/Component";
+import Component from "../../lib/components/Component";
 
 export default  [
     Component.number("FOV", "fov", 3.054236111111111, 0.1745277777777778, .1, true),

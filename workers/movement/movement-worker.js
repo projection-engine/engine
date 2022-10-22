@@ -1,5 +1,5 @@
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
-import {mat4, quat, vec3} from "gl-matrix";
+import {mat4, quat} from "gl-matrix";
 
 /**
  * @field controlBuffers {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.
@@ -7,7 +7,7 @@ import {mat4, quat, vec3} from "gl-matrix";
 
 const MIN_SCALE = 5e-10
 const cache = quat.create()
-
+const SCALING_UNIT = [1,1,1]
 class MovementPass {
     static targets = []
     static controlBuffers
@@ -58,21 +58,24 @@ class MovementPass {
         if (scaling[2] === 0)
             scaling[2] = MIN_SCALE
 
+
         quat.normalize(cache, entity._rotationQuat)
         mat4.fromRotationTranslationScale(entity.matrix, cache, entity._translation, scaling)
+        mat4.fromRotationTranslationScale(entity.unscaledMatrix, cache, entity._translation, SCALING_UNIT)
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
 
-        if (entity.parentTranslation)
+        if (entity.parentUnscaled) {
             mat4.multiply(
                 entity.matrix,
-                mat4.fromRotationTranslationScale(
-                    [],
-                    entity.parentRotation,
-                    entity.parentTranslation,
-                    [1, 1, 1]
-                ),
+                entity.parentUnscaled,
                 entity.matrix
             )
+            mat4.multiply(
+                entity.unscaledMatrix,
+                entity.parentUnscaled,
+                entity.unscaledMatrix
+            )
+        }
 
 
         entity.absoluteTranslation[0] = entity.matrix[12]

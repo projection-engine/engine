@@ -1,9 +1,9 @@
 import * as shaderCode from "../shaders/SKYBOX.glsl"
-import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
-import MeshController from "../../production/instances/MeshController";
-import GPU from "../../production/GPU";
-import SkyboxPass from "../../production/passes/rendering/SkyboxPass";
+import Engine from "../../Engine";
+import CameraAPI from "../../lib/apis/CameraAPI";
+import MeshController from "../../lib/instances/MeshController";
+import GPU from "../../GPU";
+import SkyboxPass from "../../lib/passes/rendering/SkyboxPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 

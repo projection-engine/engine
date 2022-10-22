@@ -1,10 +1,9 @@
 import {mat4} from "gl-matrix"
-
 import GizmoSystem from "../services/GizmoSystem";
 import AXIS from "../data/AXIS";
 import DualAxisGizmo from "./transformation/DualAxisGizmo";
-import {PickingAPI} from "../../production";
 import GizmoAPI from "./GizmoAPI";
+import PickingAPI from "../../lib/apis/utils/PickingAPI";
 
 export default class Inheritance {
     tracking = false

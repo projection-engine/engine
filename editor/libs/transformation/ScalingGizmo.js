@@ -39,8 +39,8 @@ export default class ScalingGizmo extends Inheritance {
         let reversed
         if (isGlobal)
             reversed = vec3.scale([], ScalingGizmo.cache, -1)
-        if (Math.abs(ScalingGizmo.cache[0]) >= g || Math.abs(ScalingGizmo.cache[1]) >= g || Math.abs(ScalingGizmo.cache[2]) >= g) {
 
+        if (Math.abs(ScalingGizmo.cache[0]) >= g || Math.abs(ScalingGizmo.cache[1]) >= g || Math.abs(ScalingGizmo.cache[2]) >= g) {
             const entities = GizmoSystem.selectedEntities
             const SIZE = entities.length
             if (SIZE === 1 && entities[0].lockedScaling)
@@ -51,11 +51,8 @@ export default class ScalingGizmo extends Inheritance {
                     continue
 
                 vec3.add(target._scaling, target._scaling, ScalingGizmo.cache)
-
                 if (isGlobal && event.altKey)
                     vec3.add(target._translation, target._translation, reversed)
-
-
                 for (let j = 0; j < 3; j++)
                     target._scaling[j] = Math.round(target._scaling[j] / g) * g
                 target.__changedBuffer[0] = 1

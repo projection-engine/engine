@@ -1,7 +1,7 @@
 import * as shaderCode from "../shaders/GRID.glsl"
-import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
-import GPU from "../../production/GPU";
+import Engine from "../../Engine";
+import CameraAPI from "../../lib/apis/CameraAPI";
+import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import {vec3, vec4} from "gl-matrix";
 

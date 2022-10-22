@@ -45,13 +45,14 @@ export default class TranslationGizmo extends Inheritance {
                 const target = entities[i]
                 if (target.lockedTranslation)
                     continue
+
+                vec3.add(target.pivotPoint, target.pivotPoint, TranslationGizmo.cache)
                 if (SIZE === 1 && event.altKey) {
                     target.__pivotChanged = true
                     continue
                 }
-
-                vec3.add(target.pivotPoint, target.pivotPoint, TranslationGizmo.cache)
                 vec3.add(target._translation, target._translation, TranslationGizmo.cache)
+
 
                 target._translation[0] = Math.round(target._translation[0] / g) * g
                 target._translation[1] = Math.round(target._translation[1] / g) * g
@@ -60,7 +61,8 @@ export default class TranslationGizmo extends Inheritance {
                 target.pivotPoint[0] = Math.round(target.pivotPoint[0] / g) * g
                 target.pivotPoint[1] = Math.round(target.pivotPoint[1] / g) * g
                 target.pivotPoint[2] = Math.round(target.pivotPoint[2] / g) * g
-
+                if(i === 0 && target.parent != null)
+                target.__pivotChanged = true
                 target.__changedBuffer[0] = 1
             }
             GizmoSystem.notify(GizmoSystem.mainEntity._translation)

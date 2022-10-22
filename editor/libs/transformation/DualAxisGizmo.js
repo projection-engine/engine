@@ -1,12 +1,11 @@
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";
-import {mat4, quat, vec3} from "gl-matrix";
-import CameraAPI from "../../../production/apis/CameraAPI";
+import CameraAPI from "../../../lib/apis/CameraAPI";
 import mapGizmoMesh from "../../utils/map-gizmo-mesh";
-import TRANSFORMATION_TYPE from "../../../../../src/data/TRANSFORMATION_TYPE";
-import getPickerId from "../../../production/utils/get-picker-id";
+import getPickerId from "../../../utils/get-picker-id";
 import STATIC_MESHES from "../../../static/resources/STATIC_MESHES";
-import GPU from "../../../production/GPU";
+import GPU from "../../../GPU";
+import GizmoAPI from "../GizmoAPI";
 
 export const XZ_ID = getPickerId(AXIS.XZ), XY_ID = getPickerId(AXIS.XY), ZY_ID = getPickerId(AXIS.ZY)
 export default class DualAxisGizmo {
@@ -41,33 +40,7 @@ export default class DualAxisGizmo {
         GizmoSystem.dualAxisGizmoMesh.draw()
     }
 
-    static #translateMatrix(entity) {
 
-        if (!GizmoSystem.translation)
-            return
-        const matrix = entity.matrix.slice(0)
-
-        const translation = entity.translation,
-            _rotationQuat = entity._rotationQuat,
-            scale = entity.scaling
-        const translated = GizmoSystem.translation
-        if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE)
-            mat4.fromRotationTranslationScaleOrigin(
-                matrix,
-                quat.multiply([], GizmoSystem.targetRotation, _rotationQuat),
-                vec3.add([], translated, translation),
-                scale,
-                translation
-            )
-        else {
-            matrix[12] += translated[0]
-            matrix[13] += translated[1]
-            matrix[14] += translated[2]
-        }
-
-
-        return matrix
-    }
 
     static drawGizmo() {
         if (!GizmoSystem.transformationMatrix)
@@ -78,7 +51,7 @@ export default class DualAxisGizmo {
         const gizmos = DualAxisGizmo.gizmos
 
         if (clicked === AXIS.XY || notSelected) {
-            DualAxisGizmo.matrixXY = DualAxisGizmo.#translateMatrix(gizmos.XY)
+            DualAxisGizmo.matrixXY = GizmoAPI.translateMatrix(gizmos.XY)
             DualAxisGizmo.#draw(
                 XY_ID,
                 AXIS.XY,
@@ -87,7 +60,7 @@ export default class DualAxisGizmo {
         }
 
         if (clicked === AXIS.XZ || notSelected) {
-            DualAxisGizmo.matrixXZ = DualAxisGizmo.#translateMatrix(gizmos.XZ)
+            DualAxisGizmo.matrixXZ = GizmoAPI.translateMatrix(gizmos.XZ)
             DualAxisGizmo.#draw(
                 XZ_ID,
                 AXIS.XZ,
@@ -96,7 +69,7 @@ export default class DualAxisGizmo {
         }
 
         if (clicked === AXIS.ZY || notSelected) {
-            DualAxisGizmo.matrixZY = DualAxisGizmo.#translateMatrix(gizmos.ZY)
+            DualAxisGizmo.matrixZY = GizmoAPI.translateMatrix(gizmos.ZY)
             DualAxisGizmo.#draw(
                 ZY_ID,
                 AXIS.ZY,

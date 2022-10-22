@@ -1,4 +1,4 @@
-import GPU from "../production/GPU";
+import GPU from "../GPU";
 import pointLightIcon from "../../../src/data/icons/point_light.png";
 import STATIC_TEXTURES from "../static/resources/STATIC_TEXTURES";
 import directionalLightIcon from "../../../src/data/icons/directional_light.png";
@@ -12,7 +12,7 @@ import PLANE from "./data/DUAL_AXIS_GIZMO.json";
 import ROTATION_GIZMO from "./data/ROTATION_GIZMO.json";
 import SCALE_GIZMO from "./data/SCALE_GIZMO.json";
 import TRANSLATION_GIZMO from "./data/TRANSLATION_GIZMO.json";
-import Engine from "../production/Engine";
+import Engine from "../Engine";
 import ENVIRONMENT from "../static/ENVIRONMENT";
 import GridSystem from "./services/GridSystem";
 import IconsSystem from "./services/IconsSystem";
@@ -21,7 +21,7 @@ import PreviewSystem from "./services/PreviewSystem";
 import BackgroundSystem from "./services/BackgroundSystem";
 import GizmoSystem from "./services/GizmoSystem";
 import CollisionVisualizationSystem from "./services/CollisionVisualizationSystem";
-import UIAPI from "../production/apis/UIAPI";
+import UIAPI from "../lib/apis/UIAPI";
 import DEBUGGlsl from "./shaders/DEBUG.glsl";
 import ActionHistoryAPI from "../../../src/libs/ActionHistoryAPI";
 

@@ -1,4 +1,4 @@
-import CameraAPI from "../../production/apis/CameraAPI";
+import CameraAPI from "../../lib/apis/CameraAPI";
 
 import {v4} from "uuid";
 import {quat, vec3, vec4} from "gl-matrix";
@@ -45,7 +45,6 @@ export default class CameraTracker {
     }
 
     static initialize(settings) {
-        console.log(settings)
         if (CameraTracker.#initialized)
             return
         toApplyTranslation = CameraTracker.toApplyTranslation

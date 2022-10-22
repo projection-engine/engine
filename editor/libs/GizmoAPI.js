@@ -2,7 +2,7 @@ import {mat4, quat, vec3} from "gl-matrix"
 import TRANSFORMATION_TYPE from "../../../../src/data/TRANSFORMATION_TYPE"
 
 import GizmoSystem from "../services/GizmoSystem";
-import CameraAPI from "../../production/apis/CameraAPI";
+import CameraAPI from "../../lib/apis/CameraAPI";
 
 export default class GizmoAPI {
     static tooltip
@@ -10,18 +10,19 @@ export default class GizmoAPI {
     static translateMatrix(entity) {
         if (!GizmoSystem.translation)
             return
-
         const matrix = mat4.copy([], entity.matrix)
         GizmoAPI.applyTransformation(matrix, entity._rotationQuat, entity._translation, entity._scaling)
+
         return matrix
     }
 
     static applyTransformation(matrix, q, t, s){
-
-        if (GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE)
+        const m = GizmoSystem.mainEntity
+        const isRelative = GizmoSystem.transformationType === TRANSFORMATION_TYPE.RELATIVE
+        if (isRelative || m.parent)
             mat4.fromRotationTranslationScaleOrigin(
                 matrix,
-                quat.multiply([], GizmoSystem.targetRotation, q),
+                quat.multiply([], isRelative ? GizmoSystem.targetRotation : m.parent._rotationQuat, q),
                 vec3.add([], GizmoSystem.translation, t),
                 s,
                 t

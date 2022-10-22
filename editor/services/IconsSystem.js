@@ -1,13 +1,13 @@
-import Engine from "../../production/Engine";
-import CameraAPI from "../../production/apis/CameraAPI";
-import GPU from "../../production/GPU";
+import Engine from "../../Engine";
+import CameraAPI from "../../lib/apis/CameraAPI";
+import GPU from "../../GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
-import SpritePass from "../../production/passes/rendering/SpritePass";
-import QueryAPI from "../../production/apis/utils/QueryAPI";
+import SpritePass from "../../lib/passes/rendering/SpritePass";
+import QueryAPI from "../../lib/apis/utils/QueryAPI";
 import {mat4} from "gl-matrix";
 
 const SCALE = (new Array(3)).fill(.25)
@@ -51,6 +51,7 @@ export default class IconsSystem {
     }
 
     static getMatrix(entity) {
+
         if (entity.changesApplied || !entity.__cacheCenterMatrix || entity.__pivotChanged) {
             entity.__pivotChanged = false
             const m = !entity.__cacheCenterMatrix ? mat4.clone(EMPTY_MATRIX) : entity.__cacheCenterMatrix
@@ -58,6 +59,12 @@ export default class IconsSystem {
             m[12] = entity.pivotPoint[0]
             m[13] = entity.pivotPoint[1]
             m[14] = entity.pivotPoint[2]
+            const translation = entity.parent?._translation
+            if(translation){
+                m[12] += translation[0]
+                m[13] += translation[1]
+                m[14] += translation[2]
+            }
 
             entity.__cacheCenterMatrix = m
         }

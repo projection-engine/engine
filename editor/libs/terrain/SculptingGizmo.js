@@ -1,4 +1,4 @@
-import {PickingAPI} from "../../../production";
+import PickingAPI from "../../../lib/apis/utils/PickingAPI";
 
 const MOUSE_LEFT = 0
 export default class SculptingGizmo {
