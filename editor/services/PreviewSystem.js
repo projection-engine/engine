@@ -1,12 +1,12 @@
 import {mat4} from "gl-matrix"
-import MeshController from "../../lib/instances/MeshController"
-import MaterialController from "../../lib/instances/MaterialController"
+import Mesh from "../../lib/instances/Mesh"
+import Material from "../../lib/instances/Material"
 import MaterialAPI from "../../lib/apis/rendering/MaterialAPI";
 import GPU from "../../GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import FALLBACK_MATERIAL from "../../templates/materials/simple/FALLBACK_MATERIAL";
-import FramebufferController from "../../lib/instances/FramebufferController";
+import Framebuffer from "../../lib/instances/Framebuffer";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {
@@ -47,7 +47,7 @@ export default class PreviewSystem {
         let response
 
         PreviewSystem.frameBuffer.startMapping()
-        if (meshEntity && materialMesh instanceof MeshController) {
+        if (meshEntity && materialMesh instanceof Mesh) {
             const maxX = materialMesh.maxBoundingBox[0] - materialMesh.minBoundingBox[0],
                 maxY = materialMesh.maxBoundingBox[1] - materialMesh.minBoundingBox[1],
                 maxZ = materialMesh.maxBoundingBox[2] - materialMesh.minBoundingBox[2]
@@ -86,7 +86,7 @@ export default class PreviewSystem {
                     pointLightData: pointLightData,
                     useCubeMapShader: true
                 })
-        } else if (materialMesh instanceof MaterialController) {
+        } else if (materialMesh instanceof Material) {
             const [viewMatrix, cameraVec] = PreviewSystem.cameraData
             MaterialAPI.drawMesh(
                 undefined,
@@ -110,7 +110,7 @@ export default class PreviewSystem {
         }
         PreviewSystem.frameBuffer.stopMapping()
 
-        response = FramebufferController.toImage(PreviewSystem.frameBuffer.FBO)
+        response = Framebuffer.toImage(PreviewSystem.frameBuffer.FBO)
 
         return response
     }

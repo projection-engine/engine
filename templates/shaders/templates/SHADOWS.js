@@ -59,10 +59,10 @@ float pointLightShadow(vec3 fragPosition, vec3 lightPos, int index, vec2 shadowC
     }else{
         vec3 lightToFrag = normalize(lightPos - fragPosition); 
         float depth;
-        if(index == 0 )
+        if(index == 0)
             depth = texture(shadowCube0, -lightToFrag).r ;
         else
-            depth = texture(shadowCube1,-lightToFrag).r ;
+            depth = texture(shadowCube1, -lightToFrag).r ;
         depth += 0.05;
         float fromLightToFrag = (length(fragPosition - lightPos) - shadowClipNearFar.x)  / (shadowClipNearFar.y - shadowClipNearFar.x);
         

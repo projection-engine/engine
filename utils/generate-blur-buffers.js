@@ -1,4 +1,4 @@
-import FramebufferController from "../lib/instances/FramebufferController"
+import Framebuffer from "../lib/instances/Framebuffer"
 
 export default function generateBlurBuffers(quantity, w, h, downscaleStrength=2){
     const blurBuffers = [],
@@ -7,8 +7,8 @@ export default function generateBlurBuffers(quantity, w, h, downscaleStrength=2)
     let pW = w, pH = h
     for (let i = 0; i < quantity; i++) {
         const [wW, hH] = [pW / downscaleStrength, pH / downscaleStrength]
-        const wBlurFrameBuffer = new FramebufferController( wW, hH).texture({linear: true})
-        const hBlurFrameBuffer = new FramebufferController( wW, hH).texture({linear: true})
+        const wBlurFrameBuffer = new Framebuffer( wW, hH).texture({linear: true})
+        const hBlurFrameBuffer = new Framebuffer( wW, hH).texture({linear: true})
         blurBuffers.push({
             height: hBlurFrameBuffer,
             width: wBlurFrameBuffer
@@ -19,7 +19,7 @@ export default function generateBlurBuffers(quantity, w, h, downscaleStrength=2)
 
     for (let i = 0; i < quantity; i++) {
         const [wW, hH] = [pW * downscaleStrength, pH * downscaleStrength]
-        const b = new FramebufferController(wW, hH).texture({linear: true})
+        const b = new Framebuffer(wW, hH).texture({linear: true})
         upSampledBuffers.push(b)
         pW = wW
         pH = hH

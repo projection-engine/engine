@@ -40,7 +40,6 @@ export function packagePointLights(keepOld) {
             currentVector[8] = attenuation[0]
             currentVector[9] = attenuation[1]
             currentVector[10] = attenuation[2]
-
             currentVector[11] = component.zFar
             currentVector[12] = component.zNear
             currentVector[13] = component.shadowMap ? 1 : 0

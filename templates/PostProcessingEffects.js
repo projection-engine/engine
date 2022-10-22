@@ -1,4 +1,4 @@
-export default class PostProcessing {
+export default class PostProcessingEffects {
     zNear = .1
     zFar = 1000
     fov = Math.PI / 2

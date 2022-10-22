@@ -59,8 +59,6 @@ out vec4 finalColor;
 
 @import(computePointLight)
 
-
-
 vec3 computeAmbientSSGI(float NdotV, float metallic, float roughness, vec3 albedo, vec3 F0, vec3 V){
     vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
@@ -135,7 +133,7 @@ void main() {
             float zNear = pointLightData[i][3][0];
             float zFar = pointLightData[i][3][1];
             vec3 positionPLight = vec3(pointLightData[i][0][0], pointLightData[i][0][1], pointLightData[i][0][2]);
-            if(currentLightData.a == 1. && i <= 2)
+            if(pointLightData[i][3][1] == 1.)
                 shadows += pointLightShadow(fragPosition, positionPLight, i, vec2(zNear, zFar))/quantityToDivide;
             else
                 shadows += 1./quantityToDivide;            
