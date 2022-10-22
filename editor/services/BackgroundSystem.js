@@ -2,19 +2,20 @@ import * as shaderCode from "../shaders/SKYBOX.glsl"
 import Engine from "../../Engine";
 import CameraAPI from "../../lib/apis/CameraAPI";
 import Mesh from "../../lib/instances/Mesh";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import SkyboxPass from "../../lib/passes/rendering/SkyboxPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import ShadowMapPass from "../../lib/passes/rendering/ShadowMapPass";
 import DeferredPass from "../../lib/passes/rendering/DeferredPass";
 import DiffuseProbePass from "../../lib/passes/rendering/DiffuseProbePass";
+import GPUController from "../../GPUController";
 
 
 export default class BackgroundSystem {
     static shader
 
     static initialize() {
-        BackgroundSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.fragment)
+        BackgroundSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.fragment)
     }
 
     static execute() {
@@ -26,7 +27,7 @@ export default class BackgroundSystem {
 
         Mesh.finishIfUsed()
         gpu.depthMask(false)
-        GPU.cubeBuffer.enable()
+        GPUResources.cubeBuffer.enable()
         BackgroundSystem.shader.bindForUse({
             projectionMatrix: CameraAPI.skyboxProjectionMatrix,
             viewMatrix: CameraAPI.viewMatrix,
@@ -35,7 +36,7 @@ export default class BackgroundSystem {
             // debugSampler: Object.values(DiffuseProbePass.diffuseProbes)[0]?.prefiltered
         })
         gpu.drawArrays(gpu.TRIANGLES, 0, 36)
-        GPU.cubeBuffer.disable()
+        GPUResources.cubeBuffer.disable()
 
         gpu.depthMask(true)
 

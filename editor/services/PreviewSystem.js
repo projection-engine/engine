@@ -2,11 +2,12 @@ import {mat4} from "gl-matrix"
 import Mesh from "../../lib/instances/Mesh"
 import Material from "../../lib/instances/Material"
 import MaterialAPI from "../../lib/apis/rendering/MaterialAPI";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import FALLBACK_MATERIAL from "../../templates/materials/simple/FALLBACK_MATERIAL";
 import Framebuffer from "../../lib/instances/Framebuffer";
+import GPUController from "../../GPUController";
 
 
 function getCameraData(pitch, yaw, radius, centerOn) {
@@ -40,7 +41,7 @@ export default class PreviewSystem {
     ]
 
     static initialize() {
-        PreviewSystem.frameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.PREVIEW, 300, 300).texture()
+        PreviewSystem.frameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.PREVIEW, 300, 300).texture()
     }
 
     static execute(materialMesh, meshEntity) {
@@ -70,7 +71,7 @@ export default class PreviewSystem {
             MaterialAPI.drawMesh(
                 undefined,
                 materialMesh,
-                GPU.materials.get(FALLBACK_MATERIAL),
+                GPUResources.materials.get(FALLBACK_MATERIAL),
                 undefined,
                 {
                     cameraVec: cam[1],
@@ -90,7 +91,7 @@ export default class PreviewSystem {
             const [viewMatrix, cameraVec] = PreviewSystem.cameraData
             MaterialAPI.drawMesh(
                 undefined,
-                GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
+                GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
                 materialMesh,
                 undefined,
                 {

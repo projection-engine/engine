@@ -1,5 +1,5 @@
 import EntityAPI from "../../lib/apis/EntityAPI";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
 
 export default class MovementWorker {
@@ -36,7 +36,7 @@ export default class MovementWorker {
             MovementWorker.threads.push(w)
             w.onmessage = (event) => {
                 if (typeof event.data === "string")
-                    MovementWorker.instancingNeedsUpdate.set(event.data, GPU.instancingGroup.get(event.data))
+                    MovementWorker.instancingNeedsUpdate.set(event.data, GPUResources.instancingGroup.get(event.data))
             }
             w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: MovementWorker.#hasChangeBuffer})
         }

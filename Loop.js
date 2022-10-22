@@ -14,13 +14,14 @@ import ScreenEffectsPass from "./lib/passes/post-processing/ScreenEffectsPass";
 import CompositePass from "./lib/passes/post-processing/CompositePass";
 import SkyboxPass from "./lib/passes/rendering/SkyboxPass";
 import Engine from "./Engine";
-import GPU from "./GPU";
+import GPUResources from "./GPUResources";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "./static/resources/STATIC_SHADERS";
 import SpritePass from "./lib/passes/rendering/SpritePass";
 import PhysicsPass from "./lib/passes/misc/PhysicsPass";
 import MovementWorker from "./workers/movement/MovementWorker";
 import PhysicsAPI from "./lib/apis/PhysicsAPI";
+import GPUController from "./GPUController";
 
 let METRICS
 export default class Loop {
@@ -32,9 +33,9 @@ export default class Loop {
             return
 
         METRICS = Engine.metrics
-        Loop.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
-        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
-        GPU.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
+        Loop.previousFrame = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
+        GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
+        GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
 
         ScreenEffectsPass.initialize()
         DepthPass.initialize()
@@ -75,7 +76,7 @@ export default class Loop {
 
         FBO.startMapping()
         DeferredPass.drawFrame()
-        GPU.copyTexture(FBO, DeferredPass.gBuffer, gpu.DEPTH_BUFFER_BIT)
+        GPUController.copyTexture(FBO, DeferredPass.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardPass.execute()
 
         SpritePass.execute()

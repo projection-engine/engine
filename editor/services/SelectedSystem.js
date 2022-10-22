@@ -1,10 +1,11 @@
 import * as shaderCode from "../shaders/SELECTED.glsl"
 import COMPONENTS from "../../static/COMPONENTS.js"
 import CameraAPI from "../../lib/apis/CameraAPI";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import QueryAPI from "../../lib/apis/utils/QueryAPI";
+import GPUController from "../../GPUController";
 
 
 export default class SelectedSystem {
@@ -14,9 +15,9 @@ export default class SelectedSystem {
     static silhouetteSampler
 
     static initialize() {
-        SelectedSystem.shaderSilhouette = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE, shaderCode.vertexSilhouette, shaderCode.fragmentSilhouette)
-        SelectedSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE_OUTLINE, shaderCode.vertex, shaderCode.fragment)
-        SelectedSystem.frameBuffer = GPU.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.OUTLINE).texture({
+        SelectedSystem.shaderSilhouette = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE, shaderCode.vertexSilhouette, shaderCode.fragmentSilhouette)
+        SelectedSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE_OUTLINE, shaderCode.vertex, shaderCode.fragment)
+        SelectedSystem.frameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.OUTLINE).texture({
             precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT
@@ -40,7 +41,7 @@ export default class SelectedSystem {
             const mMeshID = components.get(COMPONENTS.MESH)?.meshID
             const tTerrainID = components.get(COMPONENTS.TERRAIN)?.terrainID
 
-            const mesh = GPU.meshes.get(mMeshID || tTerrainID)
+            const mesh = GPUResources.meshes.get(mMeshID || tTerrainID)
             if (!mesh)
                 continue
             SelectedSystem.shader.bindForUse({
@@ -61,7 +62,7 @@ export default class SelectedSystem {
             SelectedSystem.shaderSilhouette.bindForUse({
                 silhouette: SelectedSystem.silhouetteSampler
             })
-            GPU.quad.draw()
+            GPUResources.quad.draw()
         }
     }
 }

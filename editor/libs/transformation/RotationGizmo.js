@@ -8,9 +8,10 @@ import CameraAPI from "../../../lib/apis/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
-import GPU from "../../../GPU";
+import GPUResources from "../../../GPUResources";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 import STATIC_SHADERS from "../../../static/resources/STATIC_SHADERS";
+import GPUController from "../../../GPUController";
 
 const toDeg = 57.29, toRad = Math.PI / 180
 
@@ -23,11 +24,11 @@ export default class RotationGizmo {
     currentIncrement = 0
 
     constructor() {
-        this.gizmoShader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.ROTATION_GIZMO, gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
+        this.gizmoShader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.ROTATION_GIZMO, gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
         this.xGizmo = mapGizmoMesh("x", "ROTATION")
         this.yGizmo = mapGizmoMesh("y", "ROTATION")
         this.zGizmo = mapGizmoMesh("z", "ROTATION")
-        this.texture = GPU.textures.get(STATIC_TEXTURES.ROTATION_GIZMO)
+        this.texture = GPUResources.textures.get(STATIC_TEXTURES.ROTATION_GIZMO)
     }
 
     onMouseDown(event) {

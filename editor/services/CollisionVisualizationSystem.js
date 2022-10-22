@@ -1,5 +1,5 @@
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import COMPONENTS from "../../static/COMPONENTS.js";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -7,6 +7,7 @@ import WIREFRAMEGlsl from "../shaders/WIREFRAME.glsl";
 import CameraAPI from "../../lib/apis/CameraAPI";
 import Engine from "../../Engine";
 import {mat4, vec3} from "gl-matrix";
+import GPUController from "../../GPUController";
 
 const EMPTY_MATRIX = mat4.create()
 
@@ -17,9 +18,9 @@ export default class CollisionVisualizationSystem {
     static shader
 
     static initialize() {
-        CollisionVisualizationSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
-        CollisionVisualizationSystem.cube = GPU.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
-        CollisionVisualizationSystem.sphere = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
+        CollisionVisualizationSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
+        CollisionVisualizationSystem.cube = GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
+        CollisionVisualizationSystem.sphere = GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
 
     }
 

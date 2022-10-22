@@ -1,9 +1,10 @@
 import * as shaderCode from "../shaders/GRID.glsl"
 import Engine from "../../Engine";
 import CameraAPI from "../../lib/apis/CameraAPI";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import {vec3, vec4} from "gl-matrix";
+import GPUController from "../../GPUController";
 
 const uniforms = {}
 export default class GridSystem {
@@ -12,7 +13,7 @@ export default class GridSystem {
     static metadataBuffer = vec3.create()
 
     static initialize() {
-        GridSystem.shader = GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GRID, shaderCode.vertex, shaderCode.fragment)
+        GridSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.GRID, shaderCode.vertex, shaderCode.fragment)
         Object.assign(uniforms, {
             viewMatrix: CameraAPI.viewMatrix,
             projectionMatrix: CameraAPI.projectionMatrix,
@@ -25,6 +26,6 @@ export default class GridSystem {
         if (!Engine.params.gridVisibility)
             return
         GridSystem.shader.bindForUse(uniforms)
-        GPU.quad.draw()
+        GPUResources.quad.draw()
     }
 }

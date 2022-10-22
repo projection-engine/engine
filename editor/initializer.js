@@ -1,4 +1,4 @@
-import GPU from "../GPU";
+import GPUResources from "../GPUResources";
 import pointLightIcon from "../../../src/data/icons/point_light.png";
 import STATIC_TEXTURES from "../static/resources/STATIC_TEXTURES";
 import directionalLightIcon from "../../../src/data/icons/directional_light.png";
@@ -24,27 +24,28 @@ import CollisionVisualizationSystem from "./services/CollisionVisualizationSyste
 import UIAPI from "../lib/apis/UIAPI";
 import DEBUGGlsl from "./shaders/DEBUG.glsl";
 import ActionHistoryAPI from "../../../src/libs/ActionHistoryAPI";
+import GPUController from "../GPUController";
 
 
 export default async function initializer() {
 
     UIAPI.useIframe = true
-    GPU.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
-    GPU.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
-    GPU.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()
-    GPU.allocateTexture(circle, STATIC_TEXTURES.ROTATION_GIZMO).catch()
+    GPUController.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
+    GPUController.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
+    GPUController.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()
+    GPUController.allocateTexture(circle, STATIC_TEXTURES.ROTATION_GIZMO).catch()
 
-    GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.LINE, gizmoShaderCode.lineVertex, gizmoShaderCode.lineFragment)
-    GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
-    GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
-    GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
-    GPU.allocateShader(STATIC_SHADERS.DEVELOPMENT.DEBUG_DEFERRED, DEBUGGlsl.vertex, DEBUGGlsl.fragment)
+    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.LINE, gizmoShaderCode.lineVertex, gizmoShaderCode.lineFragment)
+    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
+    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
+    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
+    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.DEBUG_DEFERRED, DEBUGGlsl.vertex, DEBUGGlsl.fragment)
 
-    GPU.allocateMesh(STATIC_MESHES.EDITOR.CAMERA, CAMERA)
-    GPU.allocateMesh(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO, PLANE)
-    GPU.allocateMesh(STATIC_MESHES.EDITOR.ROTATION_GIZMO, ROTATION_GIZMO)
-    GPU.allocateMesh(STATIC_MESHES.EDITOR.SCALE_GIZMO, SCALE_GIZMO)
-    GPU.allocateMesh(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
+    GPUController.allocateMesh(STATIC_MESHES.EDITOR.CAMERA, CAMERA)
+    GPUController.allocateMesh(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO, PLANE)
+    GPUController.allocateMesh(STATIC_MESHES.EDITOR.ROTATION_GIZMO, ROTATION_GIZMO)
+    GPUController.allocateMesh(STATIC_MESHES.EDITOR.SCALE_GIZMO, SCALE_GIZMO)
+    GPUController.allocateMesh(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
 
     Engine.environment = ENVIRONMENT.DEV
 

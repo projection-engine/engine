@@ -9,7 +9,7 @@ import TransformationAPI from "../../lib/apis/math/TransformationAPI";
 import CameraAPI from "../../lib/apis/CameraAPI";
 import ScreenSpaceGizmo from "../libs/transformation/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/transformation/DualAxisGizmo";
-import GPU from "../../GPU";
+import GPUResources from "../../GPUResources";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import DepthPass from "../../lib/passes/rendering/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -54,11 +54,11 @@ export default class GizmoSystem {
 
     static initialize(onSave) {
         GizmoSystem.#onSave = onSave
-        GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
-        GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO)
-        GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO)
-        GizmoSystem.rotationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.ROTATION_GIZMO)
-        GizmoSystem.scaleGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.SCALE_GIZMO)
+        GizmoSystem.screenSpaceMesh = GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
+        GizmoSystem.dualAxisGizmoMesh = GPUResources.meshes.get(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO)
+        GizmoSystem.translationGizmoMesh = GPUResources.meshes.get(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO)
+        GizmoSystem.rotationGizmoMesh = GPUResources.meshes.get(STATIC_MESHES.EDITOR.ROTATION_GIZMO)
+        GizmoSystem.scaleGizmoMesh = GPUResources.meshes.get(STATIC_MESHES.EDITOR.SCALE_GIZMO)
 
         EMPTY_COMPONENT._scaling[0] = .2
         EMPTY_COMPONENT._scaling[1] = .2
@@ -66,9 +66,9 @@ export default class GizmoSystem {
 
         TransformationAPI.transformMovable(EMPTY_COMPONENT)
 
-        GizmoSystem.lineShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)
-        GizmoSystem.toBufferShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
-        GizmoSystem.gizmoShader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.GIZMO)
+        GizmoSystem.lineShader = GPUResources.shaders.get(STATIC_SHADERS.DEVELOPMENT.LINE)
+        GizmoSystem.toBufferShader = GPUResources.shaders.get(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER)
+        GizmoSystem.gizmoShader = GPUResources.shaders.get(STATIC_SHADERS.DEVELOPMENT.GIZMO)
         GizmoSystem.translationGizmo = new TranslationGizmo()
         GizmoSystem.scaleGizmo = new ScalingGizmo()
         GizmoSystem.rotationGizmo = new RotationGizmo()
