@@ -16,7 +16,7 @@ export default class BackgroundSystem {
     static shader
 
     static initialize() {
-        BackgroundSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.debug)
+        BackgroundSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.fragment)
     }
 
     static execute() {

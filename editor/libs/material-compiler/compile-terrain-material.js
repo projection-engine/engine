@@ -1,4 +1,4 @@
-import TERRAIN_LAYERED from "../../../templates/materials/terrain-layered/TERRAIN_MATERIAL";
+import TERRAIN_LAYERED from "../../../static/TERRAIN_MATERIAL";
 import TERRAIN_MATERIAL_UNIFORMS from "../../../static/templates/TERRAIN_MATERIAL_UNIFORMS";
 import DATA_TYPES from "../../../static/DATA_TYPES";
 

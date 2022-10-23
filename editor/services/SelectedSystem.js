@@ -30,7 +30,6 @@ export default class SelectedSystem {
         if (length === 0)
             return
 
-        gpu.disable(gpu.DEPTH_TEST)
         SelectedSystem.frameBuffer.startMapping()
         for (let m = 0; m < length; m++) {
             const current = QueryAPI.getEntityByID(selected[m])
@@ -45,14 +44,15 @@ export default class SelectedSystem {
             if (!mesh)
                 continue
             SelectedSystem.shader.bindForUse({
+                meshIndex: m,
                 projectionMatrix: CameraAPI.projectionMatrix,
                 transformMatrix: current.matrix,
-                viewMatrix: CameraAPI.viewMatrix
+                viewMatrix: CameraAPI.viewMatrix,
+
             })
             mesh.draw()
         }
         SelectedSystem.frameBuffer.stopMapping()
-        gpu.enable(gpu.DEPTH_TEST)
 
     }
 

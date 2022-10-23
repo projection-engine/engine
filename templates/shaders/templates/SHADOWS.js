@@ -42,9 +42,9 @@ float calculateShadows (vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shado
     float response = 1.0;
     vec3 pos = (fragPosLightSpace.xyz / fragPosLightSpace.w)* 0.5 + 0.5;
 
-    if (pos.z > 1.0){
+    if (pos.z > 1.0)
         pos.z = 1.0;
-    }
+    
     float bias = 0.0001;
     float compare = pos.z - bias;
 
@@ -63,10 +63,11 @@ float pointLightShadow(vec3 fragPosition, vec3 lightPos, int index, vec2 shadowC
             depth = texture(shadowCube0, -lightToFrag).r ;
         else
             depth = texture(shadowCube1, -lightToFrag).r ;
-        depth += 0.05;
+        float bias = 0.0001;
+
         float fromLightToFrag = (length(fragPosition - lightPos) - shadowClipNearFar.x)  / (shadowClipNearFar.y - shadowClipNearFar.x);
         
-        return  fromLightToFrag > depth ? 0. : 1.; 
+        return  fromLightToFrag >= depth - bias ? 0. : 1.; 
     }
 }
 `

@@ -146,7 +146,7 @@ void main(){
             color = vec3(0., 0., 1.);
             break;
         case ${AXIS.XZ}:
-                    color = vec3(0., 0., 1.);
+            color = vec3(0., 0., 1.);
             
         break;
         case ${AXIS.XY}:
@@ -319,9 +319,7 @@ void main(){
     vec3 color = vec3(0., 0., 1.);
 
     if(highlight)
-        color = vec3(1., 1., 0.);
-
-    
+        color = vec3(1., 1., 0.); 
     fragColor = vec4(color, .95);
 }
 `
