@@ -11,7 +11,7 @@ import ScreenSpaceGizmo from "../libs/transformation/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/transformation/DualAxisGizmo";
 import GPUResources from "../../GPUResources";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import DepthPass from "../../lib/passes/rendering/DepthPass";
+import DepthPass from "../../lib/passes/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import MovementWorker from "../../workers/movement/MovementWorker";
 import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";

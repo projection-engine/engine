@@ -3,19 +3,20 @@ import Engine from "../../Engine";
 import CameraAPI from "../../lib/apis/CameraAPI";
 import Mesh from "../../lib/instances/Mesh";
 import GPUResources from "../../GPUResources";
-import SkyboxPass from "../../lib/passes/rendering/SkyboxPass";
+import SkyboxPass from "../../lib/passes/SkyboxPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import ShadowMapPass from "../../lib/passes/rendering/ShadowMapPass";
-import DeferredPass from "../../lib/passes/rendering/DeferredPass";
-import DiffuseProbePass from "../../lib/passes/rendering/DiffuseProbePass";
+import DirectionalShadows from "../../lib/passes/DirectionalShadows";
+import DeferredPass from "../../lib/passes/DeferredPass";
+import DiffuseProbePass from "../../lib/passes/DiffuseProbePass";
 import GPUController from "../../GPUController";
+import OmnidirectionalShadows from "../../lib/passes/OmnidirectionalShadows";
 
 
 export default class BackgroundSystem {
     static shader
 
     static initialize() {
-        BackgroundSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.fragment)
+        BackgroundSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, shaderCode.vertex, shaderCode.debug)
     }
 
     static execute() {
@@ -33,7 +34,7 @@ export default class BackgroundSystem {
             viewMatrix: CameraAPI.viewMatrix,
             gamma: gamma,
             color: backgroundColor,
-            // debugSampler: Object.values(DiffuseProbePass.diffuseProbes)[0]?.prefiltered
+            debugSampler: OmnidirectionalShadows.cubeMaps[0].texture
         })
         gpu.drawArrays(gpu.TRIANGLES, 0, 36)
         GPUResources.cubeBuffer.disable()

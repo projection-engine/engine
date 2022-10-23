@@ -1,27 +1,28 @@
-import AOPass from "./lib/passes/rendering/AOPass";
-import DeferredPass from "./lib/passes/rendering/DeferredPass";
-import ForwardPass from "./lib/passes/rendering/ForwardPass";
-import DepthPass from "./lib/passes/rendering/DepthPass";
-import SSGIPass from "./lib/passes/rendering/SSGIPass";
-import SSRPass from "./lib/passes/rendering/SSRPass";
-import ShadowMapPass from "./lib/passes/rendering/ShadowMapPass";
-import SpecularProbePass from "./lib/passes/rendering/SpecularProbePass";
-import DiffuseProbePass from "./lib/passes/rendering/DiffuseProbePass";
+import AOPass from "./lib/passes/AOPass";
+import DeferredPass from "./lib/passes/DeferredPass";
+import ForwardPass from "./lib/passes/ForwardPass";
+import DepthPass from "./lib/passes/DepthPass";
+import SSGIPass from "./lib/passes/SSGIPass";
+import SSRPass from "./lib/passes/SSRPass";
+import DirectionalShadows from "./lib/passes/DirectionalShadows";
+import SpecularProbePass from "./lib/passes/SpecularProbePass";
+import DiffuseProbePass from "./lib/passes/DiffuseProbePass";
 import * as shaderCode from "./templates/shaders/CUBE_MAP.glsl";
 
-import ScriptingPass from "./lib/passes/misc/ScriptingPass";
-import ScreenEffectsPass from "./lib/passes/post-processing/ScreenEffectsPass";
-import CompositePass from "./lib/passes/post-processing/CompositePass";
-import SkyboxPass from "./lib/passes/rendering/SkyboxPass";
+import ScriptingPass from "./lib/passes/ScriptingPass";
+import ScreenEffectsPass from "./lib/passes/ScreenEffectsPass";
+import CompositePass from "./lib/passes/CompositePass";
+import SkyboxPass from "./lib/passes/SkyboxPass";
 import Engine from "./Engine";
 import GPUResources from "./GPUResources";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "./static/resources/STATIC_SHADERS";
-import SpritePass from "./lib/passes/rendering/SpritePass";
-import PhysicsPass from "./lib/passes/misc/PhysicsPass";
+import SpritePass from "./lib/passes/SpritePass";
+import PhysicsPass from "./lib/passes/PhysicsPass";
 import MovementWorker from "./workers/movement/MovementWorker";
 import PhysicsAPI from "./lib/apis/PhysicsAPI";
 import GPUController from "./GPUController";
+import OmnidirectionalShadows from "./lib/passes/OmnidirectionalShadows";
 
 let METRICS
 export default class Loop {
@@ -44,7 +45,8 @@ export default class Loop {
         SSGIPass.initialize()
         SSRPass.initialize()
         DiffuseProbePass.initialize()
-        ShadowMapPass.initialize()
+        OmnidirectionalShadows.initialize()
+        DirectionalShadows.initialize()
         SpritePass.initialize()
         DeferredPass.initialize()
         await PhysicsAPI.initialize()
@@ -59,7 +61,8 @@ export default class Loop {
 
         SpecularProbePass.execute()
         DiffuseProbePass.execute()
-        ShadowMapPass.execute(entities)
+        DirectionalShadows.execute()
+        OmnidirectionalShadows.execute()
 
         SSGIPass.execute()
         DeferredPass.execute()
@@ -83,7 +86,6 @@ export default class Loop {
         if (onWrap != null)
             onWrap.execute(true)
         FBO.stopMapping()
-
         SSRPass.execute()
     }
 

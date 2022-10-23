@@ -1,11 +1,11 @@
 import CameraAPI from "./lib/apis/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import DeferredPass from "./lib/passes/rendering/DeferredPass";
-import SSGIPass from "./lib/passes/rendering/SSGIPass";
-import SSRPass from "./lib/passes/rendering/SSRPass";
-import AOPass from "./lib/passes/rendering/AOPass";
-import ShadowMapPass from "./lib/passes/rendering/ShadowMapPass";
+import DeferredPass from "./lib/passes/DeferredPass";
+import SSGIPass from "./lib/passes/SSGIPass";
+import SSRPass from "./lib/passes/SSRPass";
+import AOPass from "./lib/passes/AOPass";
+import DirectionalShadows from "./lib/passes/DirectionalShadows";
 import ConversionAPI from "./lib/apis/math/ConversionAPI";
 
 const METRICS = {
@@ -87,12 +87,10 @@ export default class Engine {
 
         AOPass.enabled = data.SSAO.enabled
         DeferredPass.deferredUniforms.aoSampler = data.SSAO.enabled ? AOPass.filteredSampler : undefined
-
+        DeferredPass.deferredUniforms.hasAO = data.SSAO.enabled ? 1 : 0
         const settingsBuffer = DeferredPass.deferredUniforms.settings
-        settingsBuffer[6] = data.pcfSamples
-        settingsBuffer[5] = data.SSAO.enabled ? 1 : 0
-        settingsBuffer[1] = ShadowMapPass.maxResolution
-        settingsBuffer[3] = ShadowMapPass.atlasRatio
+        settingsBuffer[1] = DirectionalShadows.maxResolution
+        settingsBuffer[2] = DirectionalShadows.atlasRatio
     }
 
     static #callback() {

@@ -37,7 +37,7 @@ out vec4 finalColor;
  
 
 void main(void){
-    vec3 c = vec3(texture(debugSampler, uv).rgb); 
+    vec3 c = vec3(texture(debugSampler, uv).r); 
     finalColor = vec4(c, 1.);
 }
 `

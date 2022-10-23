@@ -6,7 +6,7 @@ import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import SelectionStore from "../../../../src/stores/SelectionStore";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
-import SpritePass from "../../lib/passes/rendering/SpritePass";
+import SpritePass from "../../lib/passes/SpritePass";
 import QueryAPI from "../../lib/apis/utils/QueryAPI";
 import {mat4} from "gl-matrix";
 import GPUController from "../../GPUController";

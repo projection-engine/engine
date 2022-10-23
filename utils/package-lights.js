@@ -1,7 +1,21 @@
 import COMPONENTS from "../static/COMPONENTS.js";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
-import EntityAPI from "../lib/apis/EntityAPI";
+import OmnidirectionalShadows from "../lib/passes/OmnidirectionalShadows";
+import DirectionalShadows from "../lib/passes/DirectionalShadows";
+import DeferredPass from "../lib/passes/DeferredPass";
+
+
+/**
+ * "pointLightData" description (mat4 array):
+ *
+ * Indexes 0 - 2: Light position
+ * Indexes 4 - 6: Light color
+ * Indexes 8 - 10: Attenuation
+ * Index 11: zNear
+ * Index 12: zFar
+ * Index 13: hasShadowMap
+ */
 
 export function packagePointLights(keepOld) {
     const pointLights = Engine.data.pointLights
@@ -40,16 +54,28 @@ export function packagePointLights(keepOld) {
             currentVector[8] = attenuation[0]
             currentVector[9] = attenuation[1]
             currentVector[10] = attenuation[2]
-            currentVector[11] = component.zFar
-            currentVector[12] = component.zNear
+            currentVector[11] = component.zNear
+            currentVector[12] =component.zFar
             currentVector[13] = component.shadowMap ? 1 : 0
-            EntityAPI.lightsChanged.push(component)
+            OmnidirectionalShadows.lightsToUpdate.push(component)
+
         }
 
 
     Engine.data.pointLightsQuantity = pointLightData.length
     Engine.data.pointLightData = pointLightData
+    DeferredPass.deferredUniforms.settings[3] = pointLightData.length
 }
+
+
+/**
+ * "directionalLightsData" description (mat3 array):
+ *
+ * Indexes 0 - 2: Light position
+ * Indexes 3 - 5: Light color
+ * Indexes 6 - 7: Atlas faces
+ * Index 8: hasShadowMap / PCF samples (if positive it has shadow map)
+ */
 
 export function packageDirectionalLights(keepOld) {
     let directionalLightsData = keepOld ? Engine.data.directionalLightsData : [],
@@ -91,15 +117,18 @@ export function packageDirectionalLights(keepOld) {
 
             currentVector[6] = component.atlasFace[0]
             currentVector[7] = component.atlasFace[1]
-            currentVector[8] = component.shadowMap ? 1 : 0
+            currentVector[8] = (component.shadowMap ? 1 : -1) * component.pcfSamples
+
             component.lightIndex = i - activeOffset
             if (!dirLightPOV[component.lightIndex])
                 dirLightPOV[component.lightIndex] = new Float32Array(16)
             mat4.multiply(dirLightPOV[component.lightIndex], component.lightProjection, component.lightView)
-            EntityAPI.lightsChanged.push(component)
+
+            DirectionalShadows.lightsToUpdate.push(component)
         }
 
-    Engine.data.maxTextures = directionalLightsData.length
+    Engine.data.directionalLightsQuantity = directionalLightsData.length
     Engine.data.directionalLightsData = directionalLightsData
+    DeferredPass.deferredUniforms.settings[0] = directionalLightsData.length
     Engine.data.dirLightPOV = dirLightPOV
 }

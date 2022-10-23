@@ -7,6 +7,21 @@ void main() {
     gl_Position = vec4(position, 1);
 }`
 
+/**
+* "settings" uniform decomposition (vec4):
+ * dirLightQuantity,   shadowMapResolution, shadowMapsQuantity, lightQuantity
+ */
+
+
+/**
+ * "directionalLightsData" description (mat3 array):
+ *
+ * Indexes 0 - 2: Light position
+ * Indexes 3 - 5: Light color
+ * Indexes 6 - 7: Atlas faces
+ * Index 8: hasShadowMap / PCF samples (if positive it has shadow map)
+ */
+
 export const fragment = `#version 300 es
 precision highp float;
 
@@ -21,12 +36,8 @@ uniform mat3 directionalLightsData[MAX_LIGHTS];
 uniform mat4 dirLightPOV[MAX_LIGHTS];
 uniform vec3 cameraVec;
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
-uniform mat3 settings;
-
-// dirLightQuantity,   shadowMapResolution, 0,
-// shadowMapsQuantity, lightQuantity,       hasAO
-// pcfSamples,         0,                   0
- 
+uniform vec4 settings;
+uniform bool hasAO;
 uniform sampler2D aoSampler;
 uniform samplerCube shadowCube0;
 uniform samplerCube shadowCube1;
@@ -71,14 +82,12 @@ void main() {
     vec3 fragPosition = texture(positionSampler, texCoord).rgb;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
         discard;
-        
-    float pcfSamples = settings[2][0]; 
-    bool hasAO = settings[1][2] == 1.;
-    float shadowMapsQuantity = settings[1][0];
-    int dirLightQuantity = int(settings[0][0]);
-    float shadowMapResolution = settings[0][1]; 
+         
  
-    int lightQuantity = int(settings[1][1]);
+    float shadowMapsQuantity = settings.z;
+    int dirLightQuantity = int(settings.x);
+    float shadowMapResolution = settings.y; 
+    int lightQuantity = int(settings.w);
  
 
     vec3 albedo = texture(albedoSampler, texCoord).rgb;
@@ -108,7 +117,7 @@ void main() {
             vec4 fragPosLightSpace  = dirLightPOV[i] * vec4(fragPosition, 1.0);
             vec3 lightDir =  normalize(vec3(directionalLightsData[i][0][0], directionalLightsData[i][0][1],directionalLightsData[i][0][2]));
             vec3 lightColor =  vec3(directionalLightsData[i][1][0], directionalLightsData[i][1][1],directionalLightsData[i][1][2]);
-            vec2 atlasFace = vec2(directionalLightsData[i][2][0], directionalLightsData[i][2][1]);    
+         
             
             Lo += computeDirectionalLight(
                 V,
@@ -121,8 +130,10 @@ void main() {
                 N,
                 albedo
             );
-            if(directionalLightsData[i][2][2] == 1.)
-                shadows += calculateShadows(fragPosLightSpace, atlasFace, shadowMapTexture, shadowMapsQuantity, shadowMapResolution, pcfSamples)/quantityToDivide;
+            if(directionalLightsData[i][2][2] > 0.){            
+                vec2 atlasFace = vec2(directionalLightsData[i][2][0], directionalLightsData[i][2][1]);    
+                shadows += calculateShadows(fragPosLightSpace, atlasFace, shadowMapTexture, shadowMapsQuantity, shadowMapResolution, directionalLightsData[i][2][2])/quantityToDivide;
+            }
             else
                 shadows += 1./quantityToDivide;            
         }
