@@ -137,17 +137,17 @@ void main() {
             else
                 shadows += 1./quantityToDivide;            
         }
-       
+        float viewDistance = length(V);       
         for (int i = 0; i < lightQuantity; ++i){
-            vec4 currentLightData = computePointLights(pointLightData[i],  fragPosition, V, N, quantityToDivide, roughness, metallic, albedo, F0, i);
+            mat4 lightMatrix = pointLightData[i];
+            vec4 currentLightData = computePointLights(lightMatrix,  fragPosition, V, N, quantityToDivide, roughness, metallic, albedo, F0, i);
             Lo += currentLightData.rgb;
-            float zNear = pointLightData[i][3][0];
-            float zFar = pointLightData[i][3][1];
-            vec3 positionPLight = vec3(pointLightData[i][0][0], pointLightData[i][0][1], pointLightData[i][0][2]);
-            if(pointLightData[i][3][1] == 1.)
-                shadows += pointLightShadow(fragPosition, positionPLight, i, vec2(zNear, zFar))/quantityToDivide;
-            else
-                shadows += 1./quantityToDivide;            
+            
+
+//            if(pointLightData[i][3][1] == 1.)
+            shadows += pointLightShadow(lightMatrix, viewDistance, fragPosition)/quantityToDivide;
+//            else
+//                shadows += 1./quantityToDivide;            
         }
       
         Lo = (Lo  + texture(screenSpaceReflections, texCoord).rgb)* shadows; 

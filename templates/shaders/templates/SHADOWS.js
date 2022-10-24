@@ -52,22 +52,35 @@ float calculateShadows (vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shado
 
     return response;
 }
-
-float pointLightShadow(vec3 fragPosition, vec3 lightPos, int index, vec2 shadowClipNearFar) {
-    if(index > 1){
-        return 1.;
-    }else{
-        vec3 lightToFrag = normalize(lightPos - fragPosition); 
-        float depth;
-        if(index == 0)
-            depth = texture(shadowCube0, -lightToFrag).r ;
-        else
-            depth = texture(shadowCube1, -lightToFrag).r ;
-        float bias = 0.0001;
-
-        float fromLightToFrag = (length(fragPosition - lightPos) - shadowClipNearFar.x)  / (shadowClipNearFar.y - shadowClipNearFar.x);
+const vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);   
+float pointLightShadow(in mat4 lightMatrix, float viewDistance, vec3 fragPosition) {
+    vec3 lightPos = vec3(lightMatrix[0][0], lightMatrix[0][1], lightMatrix[0][2]);
+    float farPlane = lightMatrix[3][0];
+    float bias   = lightMatrix[0][3];
+    int samples  = int(lightMatrix[1][3]);
+    
+    vec3 fragToLight = fragPosition - lightPos; 
+    float currentDepth = length(fragToLight) / farPlane;
+    if(currentDepth > 1.)
+        currentDepth = 1.;
         
-        return  fromLightToFrag >= depth - bias ? 0. : 1.; 
+    float shadow = 0.0;
+    float diskRadius = 0.05;
+    for(int i = 0; i < samples; ++i){
+        float closestDepth = texture(shadowCube0, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
     }
+    shadow /= float(samples);  
+    
+    
+    return 1. - shadow;    
 }
 `

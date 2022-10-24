@@ -57,6 +57,15 @@ export function packagePointLights(keepOld) {
             currentVector[11] = component.zNear
             currentVector[12] =component.zFar
             currentVector[13] = component.shadowMap ? 1 : 0
+            // [
+            //     0, 1, 2, 3
+            //     4, 5, 6, 7,
+            //     8, 9, 10, 11,
+            //     12, 13, 14, 15
+            // ]
+            currentVector[3] = component.shadowBias
+            currentVector[7] = component.shadowSamples
+            // currentVector[15] =
             OmnidirectionalShadows.lightsToUpdate.push(component)
 
         }

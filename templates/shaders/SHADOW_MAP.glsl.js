@@ -23,13 +23,12 @@ void main(void){
 export const omniFragment = `#version 300 es
 precision mediump  float;
 uniform vec3 lightPosition;
-uniform vec2 shadowClipNearFar;
+uniform float farPlane;
 in vec4 vPosition;
  
 void main(void){
-    vec3 fromLightToFrag = (vPosition.xyz - lightPosition);
-   
-    float lightFragDist = (length(fromLightToFrag) - shadowClipNearFar.x)/(shadowClipNearFar.y - shadowClipNearFar.x);
-    gl_FragDepth = lightFragDist;
+    float fromLightToFrag = length(vPosition.xyz - lightPosition);
+    fromLightToFrag /= farPlane;
+    gl_FragDepth = fromLightToFrag;
 }
 `

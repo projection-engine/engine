@@ -4,17 +4,21 @@ export default  [
 
     Component.group("INTENSITY_COLOR", [
         Component.color("COLOR", "color"),
-        Component.number("INTENSITY", "intensity", 100, 0),
+        Component.number("INTENSITY", "intensity", undefined, 0),
     ]),
 
 
     Component.group("SHADOWS", [
         Component.boolean("ENABLED", "shadowMap"),
 
+        Component.number("PCF_SAMPLES", "shadowSamples", undefined, 1, 1),
+        Component.number("BIAS", "shadowBias"),
+    ]),
+    Component.group("SHADOW_VIEW_PLANES", [
         Component.number("FAR", "zFar"),
         Component.number("NEAR", "zNear"),
     ]),
     Component.group("ATTENUATION", [
-        Component.array(["X", "Y", "Z"], "attenuation", 2, .01)
+        Component.array(["LINEAR", "DISTANCE", "DISTANCE_SQUARED"], "attenuation", 3, .001)
     ]),
 ]
