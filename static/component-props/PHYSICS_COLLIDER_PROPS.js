@@ -1,4 +1,4 @@
-import Component from "../../lib/components/Component";
+import Component from "../../templates/components/Component";
 import COLLISION_TYPES from "../COLLISION_TYPES";
 
 export default [

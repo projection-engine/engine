@@ -1,9 +1,9 @@
 import COMPONENTS from "../static/COMPONENTS.js";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
-import OmnidirectionalShadows from "../lib/passes/OmnidirectionalShadows";
-import DirectionalShadows from "../lib/passes/DirectionalShadows";
-import DeferredPass from "../lib/passes/DeferredPass";
+import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
+import DirectionalShadows from "../runtime/occlusion/DirectionalShadows";
+import DeferredRenderer from "../runtime/renderers/DeferredRenderer";
 
 
 /**
@@ -73,7 +73,7 @@ export function packagePointLights(keepOld) {
 
     Engine.data.pointLightsQuantity = pointLightData.length
     Engine.data.pointLightData = pointLightData
-    DeferredPass.deferredUniforms.settings[3] = pointLightData.length
+    DeferredRenderer.deferredUniforms.settings[3] = pointLightData.length
 }
 
 
@@ -138,6 +138,6 @@ export function packageDirectionalLights(keepOld) {
 
     Engine.data.directionalLightsQuantity = directionalLightsData.length
     Engine.data.directionalLightsData = directionalLightsData
-    DeferredPass.deferredUniforms.settings[0] = directionalLightsData.length
+    DeferredRenderer.deferredUniforms.settings[0] = directionalLightsData.length
     Engine.data.dirLightPOV = dirLightPOV
 }

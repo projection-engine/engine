@@ -1,4 +1,4 @@
-import Component from "../../lib/components/Component";
+import Component from "../../templates/components/Component";
 
 export default  [
     Component.number("MASS", "mass", undefined, 0),

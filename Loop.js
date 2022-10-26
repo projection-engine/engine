@@ -1,28 +1,26 @@
-import AOPass from "./lib/passes/AOPass";
-import DeferredPass from "./lib/passes/DeferredPass";
-import ForwardPass from "./lib/passes/ForwardPass";
-import DepthPass from "./lib/passes/DepthPass";
-import SSGIPass from "./lib/passes/SSGIPass";
-import SSRPass from "./lib/passes/SSRPass";
-import DirectionalShadows from "./lib/passes/DirectionalShadows";
-import SpecularProbePass from "./lib/passes/SpecularProbePass";
-import DiffuseProbePass from "./lib/passes/DiffuseProbePass";
-import * as shaderCode from "./templates/shaders/CUBE_MAP.glsl";
+import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
+import DeferredRenderer from "./runtime/renderers/DeferredRenderer";
+import ForwardRenderer from "./runtime/renderers/ForwardRenderer";
+import DepthPass from "./runtime/renderers/DepthPass";
+import SSGIPass from "./runtime/SSGIPass";
+import SSRPass from "./runtime/SSRPass";
+import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
+import SpecularProbePass from "./runtime/renderers/SpecularProbePass";
+import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
 
-import ScriptingPass from "./lib/passes/ScriptingPass";
-import ScreenEffectsPass from "./lib/passes/ScreenEffectsPass";
-import CompositePass from "./lib/passes/CompositePass";
-import SkyboxPass from "./lib/passes/SkyboxPass";
+import ScriptingPass from "./runtime/ScriptingPass";
+import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
+import FrameComposition from "./runtime/post-processing/FrameComposition";
+import SkyboxPass from "./runtime/renderers/SkyboxPass";
 import Engine from "./Engine";
 import GPUResources from "./GPUResources";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
-import STATIC_SHADERS from "./static/resources/STATIC_SHADERS";
-import SpritePass from "./lib/passes/SpritePass";
-import PhysicsPass from "./lib/passes/PhysicsPass";
-import MovementWorker from "./workers/movement/MovementWorker";
-import PhysicsAPI from "./lib/apis/PhysicsAPI";
+import SpritePass from "./runtime/renderers/SpritePass";
+import PhysicsPass from "./runtime/PhysicsPass";
+import MovementWorker from "./runtime/MovementWorker";
+import PhysicsAPI from "./api/PhysicsAPI";
 import GPUController from "./GPUController";
-import OmnidirectionalShadows from "./lib/passes/OmnidirectionalShadows";
+import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 
 let METRICS
 export default class Loop {
@@ -35,20 +33,18 @@ export default class Loop {
 
         METRICS = Engine.metrics
         Loop.previousFrame = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
-        GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
-        GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
 
         ScreenEffectsPass.initialize()
         DepthPass.initialize()
-        CompositePass.initialize()
-        AOPass.initialize()
+        FrameComposition.initialize()
+        AmbientOcclusion.initialize()
         SSGIPass.initialize()
         SSRPass.initialize()
         DiffuseProbePass.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
         SpritePass.initialize()
-        DeferredPass.initialize()
+        DeferredRenderer.initialize()
         await PhysicsAPI.initialize()
 
         Loop.#initialized = true
@@ -65,9 +61,9 @@ export default class Loop {
         OmnidirectionalShadows.execute()
 
         SSGIPass.execute()
-        DeferredPass.execute()
-        AOPass.execute()
-        DeferredPass.drawBuffer(
+        DeferredRenderer.execute()
+        AmbientOcclusion.execute()
+        DeferredRenderer.drawBuffer(
             entities,
             isDuringBinding => {
                 if (isDuringBinding)
@@ -78,9 +74,9 @@ export default class Loop {
         )
 
         FBO.startMapping()
-        DeferredPass.drawFrame()
-        GPUController.copyTexture(FBO, DeferredPass.gBuffer, gpu.DEPTH_BUFFER_BIT)
-        ForwardPass.execute()
+        DeferredRenderer.drawFrame()
+        GPUController.copyTexture(FBO, DeferredRenderer.gBuffer, gpu.DEPTH_BUFFER_BIT)
+        ForwardRenderer.execute()
 
         SpritePass.execute()
         if (onWrap != null)
@@ -108,7 +104,7 @@ export default class Loop {
         start = performance.now()
         Loop.#rendering(entities)
         ScreenEffectsPass.execute()
-        CompositePass.execute()
+        FrameComposition.execute()
         METRICS.rendering = performance.now() - start
     }
 }

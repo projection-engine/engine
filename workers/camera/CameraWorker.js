@@ -1,5 +1,5 @@
 import {mat4, quat, vec3} from "gl-matrix";
-import TransformationAPI from "../../lib/apis/math/TransformationAPI";
+import TransformationAPI from "../../api/math/TransformationAPI";
 
 
 /**

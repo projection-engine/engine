@@ -1,24 +1,18 @@
-import CubeMap from "./lib/instances/CubeMap";
-import Texture from "./lib/instances/Texture";
-import Material from "./lib/instances/Material";
+import Texture from "./instances/Texture";
+import Material from "./instances/Material";
 import FALLBACK_MATERIAL from "./static/FALLBACK_MATERIAL";
 import TERRAIN_MATERIAL from "./static/TERRAIN_MATERIAL";
-import MaterialInstance from "./lib/instances/MaterialInstance";
+import MaterialInstance from "./instances/MaterialInstance";
 import STATIC_TEXTURES from "./static/resources/STATIC_TEXTURES";
-import Framebuffer from "./lib/instances/Framebuffer";
+import Framebuffer from "./instances/Framebuffer";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
-import Mesh from "./lib/instances/Mesh";
+import Mesh from "./instances/Mesh";
 import STATIC_MESHES from "./static/resources/STATIC_MESHES";
-import Shader from "./lib/instances/Shader";
+import Shader from "./instances/Shader";
 import STATIC_SHADERS from "./static/resources/STATIC_SHADERS";
 import GPUResources from "./GPUResources";
 
 export default class GPUController{
-    static allocateCubeMap(id, resolution, asDepth){
-        const cm = new CubeMap(resolution, asDepth)
-        GPUResources.cubeMaps.set(id, cm)
-        return cm
-    }
     static async allocateTexture(imageData, id) {
         if (GPUResources.textures.get(id) != null)
             return GPUResources.textures.get(id)

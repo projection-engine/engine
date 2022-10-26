@@ -21,7 +21,7 @@ uniform sampler2D ao;
 uniform sampler2D emission;
 uniform mat4 uvScales;
  
-@import(ambientUniforms)
+//import(ambientUniforms)
  
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
@@ -29,8 +29,8 @@ layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour; // AO ROUGHNESS METALLIC
 layout (location = 4) out vec4 gAmbient;
 
-@import(fresnelSchlickRoughness)
-@import(ambient)
+//import(fresnelSchlickRoughness)
+//import(ambient)
 
 float max3 (vec3 v) {
   return max (max (v.x, v.y), v.z);
@@ -106,17 +106,17 @@ in vec3 normalVec;
 
 out vec4 finalColor;
 
-@import(fresnelSchlick)
+//import(fresnelSchlick)
 
-@import(geometrySchlickGGX)
+//import(geometrySchlickGGX)
 
-@import(distributionGGX)
+//import(distributionGGX)
 
-@import(geometrySmith)
+//import(geometrySmith)
 
-@import(computeDirectionalLight) 
+//import(computeDirectionalLight) 
 
-@import(computePointLight)
+//import(computePointLight)
 
 void main(){  
      vec3 albedo = vec3(.5);

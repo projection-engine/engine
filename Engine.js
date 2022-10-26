@@ -1,12 +1,12 @@
-import CameraAPI from "./lib/apis/CameraAPI"
+import CameraAPI from "./api/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import DeferredPass from "./lib/passes/DeferredPass";
-import SSGIPass from "./lib/passes/SSGIPass";
-import SSRPass from "./lib/passes/SSRPass";
-import AOPass from "./lib/passes/AOPass";
-import DirectionalShadows from "./lib/passes/DirectionalShadows";
-import ConversionAPI from "./lib/apis/math/ConversionAPI";
+import DeferredRenderer from "./runtime/renderers/DeferredRenderer";
+import SSGIPass from "./runtime/SSGIPass";
+import SSRPass from "./runtime/SSRPass";
+import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
+import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
+import ConversionAPI from "./api/math/ConversionAPI";
 
 const METRICS = {
     frameRate: 0,
@@ -71,7 +71,7 @@ export default class Engine {
         SSGIPass.rayMarchSettings[2] = data.SSGI.depthThreshold
 
         SSGIPass.enabled = data.SSGI.enabled
-        DeferredPass.deferredUniforms.screenSpaceGI = data.SSGI.enabled ? SSGIPass.sampler : undefined
+        DeferredRenderer.deferredUniforms.screenSpaceGI = data.SSGI.enabled ? SSGIPass.sampler : undefined
 
         SSRPass.uniforms.stepSize = data.SSR.stepSize
         SSRPass.rayMarchSettings[0] = data.SSR.maxSteps
@@ -79,16 +79,16 @@ export default class Engine {
         SSRPass.rayMarchSettings[2] = data.SSR.depthThreshold
 
         SSRPass.enabled = data.SSR.enabled
-        DeferredPass.deferredUniforms.screenSpaceReflections = data.SSR.enabled ? SSRPass.sampler : undefined
+        DeferredRenderer.deferredUniforms.screenSpaceReflections = data.SSR.enabled ? SSRPass.sampler : undefined
 
 
-        AOPass.settings[0] = data.SSAO.radius
-        AOPass.settings[1] = data.SSAO.power
+        AmbientOcclusion.settings[0] = data.SSAO.radius
+        AmbientOcclusion.settings[1] = data.SSAO.power
 
-        AOPass.enabled = data.SSAO.enabled
-        DeferredPass.deferredUniforms.aoSampler = data.SSAO.enabled ? AOPass.filteredSampler : undefined
-        DeferredPass.deferredUniforms.hasAO = data.SSAO.enabled ? 1 : 0
-        const settingsBuffer = DeferredPass.deferredUniforms.settings
+        AmbientOcclusion.enabled = data.SSAO.enabled
+        DeferredRenderer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
+        DeferredRenderer.deferredUniforms.hasAO = data.SSAO.enabled ? 1 : 0
+        const settingsBuffer = DeferredRenderer.deferredUniforms.settings
         settingsBuffer[1] = DirectionalShadows.maxResolution
         settingsBuffer[2] = DirectionalShadows.atlasRatio
     }
