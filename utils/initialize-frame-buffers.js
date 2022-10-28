@@ -40,21 +40,20 @@ export default function initializeFrameBuffers() {
         })
 
     GBuffer.gBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
-        .texture({attachment: 0, precision: window.gpu.RGBA32F, format: window.gpu.RGBA, type: window.gpu.FLOAT})
+        .texture({attachment: 0, precision: gpu.RGBA32F, format: gpu.RGBA})
         .texture({attachment: 1})
-        .texture({attachment: 2})
+        .texture({attachment: 2, precision: gpu.RGBA, format: gpu.RGBA, type: gpu.UNSIGNED_BYTE})
         .texture({attachment: 3})
         .texture({attachment: 4})
         .texture({
             precision: gpu.RGBA32F,
             format: gpu.RGBA,
-
             repeat: false,
             linear: false,
             attachment: 5
         }) // DEPTH
         .texture({attachment: 6}) // ID
-        // .texture({attachment: 7}) // UV
+        .texture({attachment: 7}) // BASE NORMAL
         .depthTest()
     GBuffer.compositeFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
 }

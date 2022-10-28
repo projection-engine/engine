@@ -24,7 +24,7 @@ export default class BackgroundSystem {
             viewMatrix: CameraAPI.viewMatrix,
             gamma: gamma,
             color: backgroundColor,
-            debugSampler: OmnidirectionalShadows.cubeMaps[0].texture
+            // debugSampler: OmnidirectionalShadows.cubeMaps[0].texture
         })
         gpu.drawArrays(gpu.TRIANGLES, 0, 36)
         GPUResources.cubeBuffer.disable()

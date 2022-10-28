@@ -24,6 +24,7 @@ layout (location = 4) out vec4 gAmbient;
 
 layout (location = 5) out vec4 gDepth;
 layout (location = 6) out vec4 gMeshID;
+layout (location = 7) out vec4 gBaseNormal;
  
 
 `,
@@ -35,6 +36,7 @@ ${ambient ? `
 ` : ""}
  
 void main(){ 
+    gBaseNormal = vec4(normalVec, 1.);
     gMeshID = vec4(meshID, 1.);
     gDepth = vec4(gl_FragCoord.z, texCoords, 1.);
     gPosition = vPosition;

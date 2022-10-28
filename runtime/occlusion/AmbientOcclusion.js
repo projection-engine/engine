@@ -49,7 +49,7 @@ export default class AmbientOcclusion {
                     AmbientOcclusion.uniforms,
                     {
                         gPosition: GBuffer.positionSampler,
-                        gNormal: GBuffer.genericNormalSampler,
+                        gNormal: GBuffer.baseNormalSampler,
                         noiseSampler: AmbientOcclusion.noiseSampler,
                         noiseScale: AmbientOcclusion.noiseScale,
                         samples: AmbientOcclusion.kernels,

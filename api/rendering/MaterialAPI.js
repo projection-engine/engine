@@ -18,7 +18,6 @@ export default class MaterialAPI {
             gpu.disable(gpu.DEPTH_TEST)
         if (material.settings.blend === false)
             gpu.disable(gpu.BLEND)
-        gpu.disable(window.gpu.CULL_FACE)
         mesh.draw()
 
         if (material.settings.depthTest === false)

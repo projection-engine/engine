@@ -26,7 +26,7 @@ export default class GBuffer {
 
     static depthUVSampler
     static IDSampler
-    static genericNormalSampler
+    static baseNormalSampler
 
     static forwardDepthShader
     static ready = false
@@ -43,7 +43,7 @@ export default class GBuffer {
         GBuffer.ambientSampler = GBuffer.gBuffer.colors[4]
         GBuffer.depthUVSampler = GBuffer.gBuffer.colors[5]
         GBuffer.IDSampler = GBuffer.gBuffer.colors[6]
-        GBuffer.genericNormalSampler = GBuffer.gBuffer.colors[1]
+        GBuffer.baseNormalSampler = GBuffer.gBuffer.colors[7]
 
         GBuffer.toScreenUniforms.uSampler = GBuffer.compositeFBO.colors[0]
 
@@ -58,7 +58,7 @@ export default class GBuffer {
             settings: new Float32Array(4)
         })
 
-        SSGIPass.normalUniforms.gNormal = GBuffer.genericNormalSampler
+        SSGIPass.normalUniforms.gNormal = GBuffer.baseNormalSampler
         SSGIPass.uniforms.previousFrame = GBuffer.compositeFBO.colors[0]
         SSGIPass.uniforms.gPosition = GBuffer.positionSampler
 

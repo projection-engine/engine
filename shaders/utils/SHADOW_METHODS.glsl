@@ -1,4 +1,4 @@
-export default `
+
 float sampleShadowMap (vec2 coord, float compare, sampler2D shadowMapTexture){
     return step(compare, texture(shadowMapTexture, coord.xy).r);
 }
@@ -83,4 +83,3 @@ float pointLightShadow(in mat4 lightMatrix, float viewDistance, vec3 fragPositio
     
     return 1. - shadow;    
 }
-`

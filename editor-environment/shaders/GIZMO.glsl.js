@@ -269,7 +269,7 @@ layout (location = 4) out vec4 gAmbient;
 
 layout (location = 5) out vec4 gDepth;
 layout (location = 6) out vec4 gMeshID; 
-
+layout (location = 7) out vec4 gNormalBase; 
 
 void main(){
     gPosition = vec4(0.);
@@ -278,6 +278,7 @@ void main(){
     gBehaviour = vec4(0.);
     gAmbient = vec4(0.);
  
+    gNormalBase = vec4(0.);
     gMeshID = vec4(uID, 1.);
     gDepth = vec4(0.);
 }

@@ -1,4 +1,4 @@
-import Shadows from "../shaders/templates/SHADOWS"
+import Shadows from "../shaders/utils/SHADOW_METHODS.glsl"
 import * as PROBES from "../shaders/templates/PROBES"
 import {PBR} from "../shaders/templates/PBR"
 import GPUResources from "../GPUResources";
