@@ -3,7 +3,6 @@ import CameraAPI from "../../api/CameraAPI";
 import Mesh from "../../instances/Mesh";
 import GPUResources from "../../GPUResources";
 import SkyboxPass from "../../runtime/renderers/SkyboxPass";
-import OmnidirectionalShadows from "../../runtime/occlusion/OmnidirectionalShadows";
 
 
 export default class BackgroundSystem {
