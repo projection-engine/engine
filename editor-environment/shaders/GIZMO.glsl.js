@@ -261,15 +261,28 @@ precision highp float;
 
 uniform vec3 uID;
 
-layout (location = 0) out vec4 gDepth;
-layout (location = 1) out vec4 gID;
-layout (location = 2) out vec4 gUV;
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gAlbedo;
+layout (location = 3) out vec4 gBehaviour;
+layout (location = 4) out vec4 gAmbient;
 
-void main() {
-    gDepth = vec4(1.);
-    gUV = vec4(1.);
-    gID = vec4(uID, 1.);
+layout (location = 5) out vec4 gDepth;
+layout (location = 6) out vec4 gMeshID; 
+
+
+void main(){
+    gPosition = vec4(0.);
+    gNormal = vec4(0.);
+    gAlbedo = vec4(0.);
+    gBehaviour = vec4(0.);
+    gAmbient = vec4(0.);
+ 
+    gMeshID = vec4(uID, 1.);
+    gDepth = vec4(0.);
 }
+
+
 `
 
 

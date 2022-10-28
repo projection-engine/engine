@@ -1,7 +1,6 @@
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
-import DeferredRenderer from "./runtime/renderers/DeferredRenderer";
+import GBuffer from "./runtime/renderers/GBuffer";
 import ForwardRenderer from "./runtime/renderers/ForwardRenderer";
-import DepthPass from "./runtime/renderers/DepthPass";
 import SSGIPass from "./runtime/SSGIPass";
 import SSRPass from "./runtime/SSRPass";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
@@ -17,7 +16,7 @@ import GPUResources from "./GPUResources";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import SpritePass from "./runtime/renderers/SpritePass";
 import PhysicsPass from "./runtime/PhysicsPass";
-import MovementWorker from "./runtime/MovementWorker";
+import TransformationPass from "./runtime/TransformationPass";
 import PhysicsAPI from "./api/PhysicsAPI";
 import GPUController from "./GPUController";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
@@ -35,7 +34,6 @@ export default class Loop {
         Loop.previousFrame = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
 
         ScreenEffectsPass.initialize()
-        DepthPass.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
         SSGIPass.initialize()
@@ -44,7 +42,7 @@ export default class Loop {
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
         SpritePass.initialize()
-        DeferredRenderer.initialize()
+        GBuffer.initialize()
         await PhysicsAPI.initialize()
 
         Loop.#initialized = true
@@ -53,7 +51,6 @@ export default class Loop {
     static #rendering(entities) {
         const onWrap = Engine.params.onWrap
         const FBO = Loop.previousFrame
-        DepthPass.execute()
 
         SpecularProbePass.execute()
         DiffuseProbePass.execute()
@@ -61,9 +58,9 @@ export default class Loop {
         OmnidirectionalShadows.execute()
 
         SSGIPass.execute()
-        DeferredRenderer.execute()
+        GBuffer.execute()
         AmbientOcclusion.execute()
-        DeferredRenderer.drawBuffer(
+        GBuffer.drawBuffer(
             entities,
             isDuringBinding => {
                 if (isDuringBinding)
@@ -74,8 +71,8 @@ export default class Loop {
         )
 
         FBO.startMapping()
-        DeferredRenderer.drawFrame()
-        GPUController.copyTexture(FBO, DeferredRenderer.gBuffer, gpu.DEPTH_BUFFER_BIT)
+        GBuffer.drawFrame()
+        GPUController.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardRenderer.execute()
 
         SpritePass.execute()
@@ -98,7 +95,7 @@ export default class Loop {
 
         start = performance.now()
         PhysicsPass.execute(entities)
-        MovementWorker.execute()
+        TransformationPass.execute()
         METRICS.simulation = performance.now() - start
 
         start = performance.now()

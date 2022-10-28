@@ -6,8 +6,10 @@ import TEXTURE_FORMATS from "../static/texture/TEXTURE_FORMATS";
 import TEXTURE_FILTERING from "../static/texture/TEXTURE_FILTERING";
 import TEXTURE_WRAPPING from "../static/texture/TEXTURE_WRAPPING";
 import STATIC_TEXTURES from "../static/resources/STATIC_TEXTURES";
-import TEMPLATE_VERTEX_SHADER from "../static/TEMPLATE_VERTEX_SHADER";
-import FALLBACKGlsl from "../static/SIMPLE_MATERIAL.glsl";
+import TEMPLATE_VERTEX_SHADER from "../shaders/TEMPLATE_VERTEX_SHADER.vert";
+import SIMPLE_MATERIAL from "../shaders/SIMPLE_MATERIAL.frag";
+import SIMPLE_MATERIAL_CUBEMAP from "../shaders/SIMPLE_MATERIAL_CUBEMAP.frag";
+
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import FALLBACK_MATERIAL from "../static/FALLBACK_MATERIAL";
 import getTerrainMaterial from "./get-terrain-material";
@@ -35,8 +37,8 @@ export default async function initializeMaterialsAndTextures(){
     GPUController.allocateMaterial(
         {
             vertex: TEMPLATE_VERTEX_SHADER,
-            fragment: FALLBACKGlsl.fragment,
-            cubeMapShaderCode: FALLBACKGlsl.cubeMap,
+            fragment: SIMPLE_MATERIAL,
+            cubeMapShaderCode: SIMPLE_MATERIAL_CUBEMAP,
             settings: {
                 shadingType: MATERIAL_RENDERING_TYPES.DEFERRED
             }
@@ -48,7 +50,7 @@ export default async function initializeMaterialsAndTextures(){
         GPUController.allocateMaterial({
             vertex: TEMPLATE_VERTEX_SHADER,
             fragment: getTerrainMaterial(i),
-            cubeMapShaderCode: FALLBACKGlsl.cubeMap,
+            cubeMapShaderCode: SIMPLE_MATERIAL_CUBEMAP,
             settings: {
                 shadingType: MATERIAL_RENDERING_TYPES.DEFERRED
             }

@@ -8,7 +8,8 @@ in vec3 normalVec;
 in mat4 normalMatrix;
 in mat3 toTangentSpace;
 in vec3 viewDirection;
-in vec2 texCoord;
+in vec2 texCoords;
+in vec3 meshID;
 in vec4 vPosition;
 uniform float elapsedTime;
 //import(ambientUniforms)
@@ -20,6 +21,11 @@ layout (location = 2) out vec4 gAlbedo;    // R  G         B
 layout (location = 3) out vec4 gBehaviour; // AO ROUGHNESS METALLIC
 layout (location = 4) out vec4 gAmbient;
 
+
+layout (location = 5) out vec4 gDepth;
+layout (location = 6) out vec4 gMeshID;
+ 
+
 `,
     wrapper: (body, ambient) => `
     
@@ -28,7 +34,9 @@ ${ambient ? `
 //import(ambient)
 ` : ""}
  
-void main(){
+void main(){ 
+    gMeshID = vec4(meshID, 1.);
+    gDepth = vec4(gl_FragCoord.z, texCoords, 1.);
     gPosition = vPosition;
     ${body}
     
@@ -56,7 +64,7 @@ uniform vec3 cameraVec;
 
 
 out vec4 vPosition;
-out vec2 texCoord;
+out vec2 texCoords;
 out mat3 toTangentSpace;
 out vec3 normalVec;
 
@@ -76,7 +84,7 @@ void main(){
     toTangentSpace = mat3(T, B, N);
     
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
-    texCoord = uvTexture;
+    texCoords = uvTexture;
     normalVec = normal;
 
    

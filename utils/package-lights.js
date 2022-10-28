@@ -3,7 +3,7 @@ import {mat4} from "gl-matrix";
 import Engine from "../Engine";
 import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
 import DirectionalShadows from "../runtime/occlusion/DirectionalShadows";
-import DeferredRenderer from "../runtime/renderers/DeferredRenderer";
+import GBuffer from "../runtime/renderers/GBuffer";
 
 
 /**
@@ -73,7 +73,7 @@ export function packagePointLights(keepOld) {
 
     Engine.data.pointLightsQuantity = pointLightData.length
     Engine.data.pointLightData = pointLightData
-    DeferredRenderer.deferredUniforms.settings[3] = pointLightData.length
+    GBuffer.deferredUniforms.settings[3] = pointLightData.length
 }
 
 
@@ -138,6 +138,6 @@ export function packageDirectionalLights(keepOld) {
 
     Engine.data.directionalLightsQuantity = directionalLightsData.length
     Engine.data.directionalLightsData = directionalLightsData
-    DeferredRenderer.deferredUniforms.settings[0] = directionalLightsData.length
+    GBuffer.deferredUniforms.settings[0] = directionalLightsData.length
     Engine.data.dirLightPOV = dirLightPOV
 }

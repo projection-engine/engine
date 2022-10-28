@@ -3,7 +3,7 @@ import Engine from "./Engine";
 import ImageWorker from "./workers/image/ImageWorker";
 import TerrainWorker from "./workers/terrain/TerrainWorker";
 import CameraAPI from "./api/CameraAPI";
-import MovementWorker from "./runtime/MovementWorker";
+import TransformationPass from "./runtime/TransformationPass";
 import CubeMapAPI from "./api/CubeMapAPI";
 import initializeShaders from "./utils/initialize-shaders";
 import initializeStaticMeshes from "./utils/initialize-static-meshes";
@@ -25,6 +25,7 @@ export default class GPUResources {
     static BRDF
     static internalResolution = {w: window.outerWidth, h: window.outerHeight}
     static quad
+
 
     static async initializeContext(canvas, [width, height], readAsset) {
         if (GPUResources.context != null)
@@ -51,7 +52,7 @@ export default class GPUResources {
         GPUResources.context = gpu
 
         CameraAPI.initialize()
-        MovementWorker.initialize()
+        TransformationPass.initialize()
         TerrainWorker.initialize()
         ImageWorker.initialize()
 

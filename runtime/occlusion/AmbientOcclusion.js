@@ -1,12 +1,9 @@
-import Framebuffer from "../../instances/Framebuffer"
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPUResources from "../../GPUResources";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import DeferredRenderer from "../renderers/DeferredRenderer";
+import GBuffer from "../renderers/GBuffer";
 import CameraAPI from "../../api/CameraAPI";
 import SSGIPass from "../SSGIPass";
 import ImageWorker from "../../workers/image/ImageWorker";
-import GPUController from "../../GPUController";
 
 const w = 4, h = 4
 export default class AmbientOcclusion {
@@ -28,32 +25,15 @@ export default class AmbientOcclusion {
         AmbientOcclusion.settings[0] = 100 // RADIUS
         AmbientOcclusion.settings[1] = 2 // STRENGTH
 
-        AmbientOcclusion.framebuffer = new Framebuffer()
-        AmbientOcclusion.framebuffer
-            .texture({
-                precision: gpu.R32F,
-                format: gpu.RED,
-                type: gpu.FLOAT,
-                linear: false,
-                repeat: false
-            })
+
         AmbientOcclusion.unfilteredSampler = AmbientOcclusion.framebuffer.colors[0]
 
-        AmbientOcclusion.blurredFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO)
-        AmbientOcclusion.blurredFBO
-            .texture({
-                precision: gpu.R32F,
-                format: gpu.RED,
-                type: gpu.FLOAT,
-                linear: false,
-                repeat: false
-            })
         AmbientOcclusion.filteredSampler = AmbientOcclusion.blurredFBO.colors[0]
 
 
         AmbientOcclusion.noiseScale[0] = window.outerWidth / w
         AmbientOcclusion.noiseScale[1] = window.outerHeight / h
-        DeferredRenderer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
+        GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
         ImageWorker.request(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w, h})
             .then(({kernels, noise}) => {
                 AmbientOcclusion.kernels = kernels
@@ -68,8 +48,8 @@ export default class AmbientOcclusion {
                 Object.assign(
                     AmbientOcclusion.uniforms,
                     {
-                        gPosition: DeferredRenderer.positionSampler,
-                        gNormal: DeferredRenderer.normalSampler,
+                        gPosition: GBuffer.positionSampler,
+                        gNormal: GBuffer.genericNormalSampler,
                         noiseSampler: AmbientOcclusion.noiseSampler,
                         noiseScale: AmbientOcclusion.noiseScale,
                         samples: AmbientOcclusion.kernels,

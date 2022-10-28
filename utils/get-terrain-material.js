@@ -27,9 +27,9 @@ export default function getTerrainMaterial(layers) {
         samplersData += `
             ${i === 0 ? "vec3" : ""}  currentMultiplier = ${currentMultiplier};        
             ${i === 0 ? "float" : ""} layerMultiplier = layerData.${i === 0 ? "x" : i === 1 ? "y" : "z"};
-            gAlbedo.rgb ${i > 0 ? "+" : ""}= texture(albedo${i}, texCoord).rgb * layerMultiplier;
-            gNormal.rgb ${i > 0 ? "+" : ""}= normalize(toTangentSpace * ((texture(normal${i}, texCoord).rgb * 2.0)- 1.0)) * layerMultiplier;
-            gBehaviour.g ${i > 0 ? "+" : ""}= texture(roughness${i}, texCoord).r  * layerMultiplier;
+            gAlbedo.rgb ${i > 0 ? "+" : ""}= texture(albedo${i}, texCoords).rgb * layerMultiplier;
+            gNormal.rgb ${i > 0 ? "+" : ""}= normalize(toTangentSpace * ((texture(normal${i}, texCoords).rgb * 2.0)- 1.0)) * layerMultiplier;
+            gBehaviour.g ${i > 0 ? "+" : ""}= texture(roughness${i}, texCoords).r  * layerMultiplier;
         `
     }
 
@@ -40,7 +40,7 @@ precision highp float;
 
 in vec3 normalVec;
 in mat3 toTangentSpace; 
-in vec2 texCoord;
+in vec2 texCoords;
 in vec4 vPosition; 
 
 uniform sampler2D layerController;
@@ -60,7 +60,7 @@ void main(){
     gNormal = vec4(0., 0., 0., 1.);
     gAmbient = vec4(0., 0., 0., 1.);
     gBehaviour =  vec4(1., 0., 0., 1.); 
-    vec3 layerData = texture(layerController, texCoord).rgb; 
+    vec3 layerData = texture(layerController, texCoords).rgb; 
     ${samplersData}
 
     gAlbedo.rgb /=${layers + 1}.;

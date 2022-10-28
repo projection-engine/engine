@@ -1,33 +1,11 @@
 import {v4} from "uuid"
 import Movable from "./Movable";
 import COMPONENTS from "../static/COMPONENTS.js";
-import DirectionalLightComponent from "../templates/components/rendering/DirectionalLightComponent";
-import MeshComponent from "../templates/components/rendering/MeshComponent";
-import PointLightComponent from "../templates/components/rendering/PointLightComponent";
-import ProbeComponent from "../templates/components/rendering/ProbeComponent";
-import CameraComponent from "../templates/components/misc/CameraComponent";
-import SpriteComponent from "../templates/components/rendering/SpriteComponent";
-import RigidBodyComponent from "../templates/components/physics/RigidBodyComponent";
-import PhysicsColliderComponent from "../templates/components/physics/PhysicsColliderComponent";
-import CullingComponent from "../templates/components/misc/CullingComponent";
 import EntityAPI from "../api/EntityAPI";
-import UIComponent from "../templates/components/misc/UIComponent";
 import QueryAPI from "../api/utils/QueryAPI";
-import TerrainComponent from "../templates/components/rendering/TerrainComponent";
+import ComponentGetter from "../templates/ComponentGetter";
+import serializeStructure from "../utils/serialize-structure";
 
-
-const TYPED_ATTRIBUTES = [
-    "_translation",
-    "__changedBuffer",
-    "_rotationQuat",
-    "matrix",
-    "absoluteTranslation",
-    "_scaling",
-    "baseTransformationMatrix",
-    "pivotPoint",
-    "unscaledMatrix",
-    "normalMatrix"
-]
 
 export default class Entity extends Movable {
     id
@@ -40,6 +18,14 @@ export default class Entity extends Movable {
     parent
     pickID = [-1, -1, -1]
     instancingGroupID
+
+    constructor(id = v4(), name = "Empty entity", active = true) {
+        super()
+        this.id = id
+        this.name = name
+        this._active = active
+        this.queryKey = id.slice(0, id.length / 2);
+    }
 
     set active(data) {
         this._active = data
@@ -55,13 +41,6 @@ export default class Entity extends Movable {
         return this._active
     }
 
-    constructor(id = v4(), name = "Empty entity", active = true) {
-        super()
-        this.id = id
-        this.name = name
-        this._active = active
-        this.queryKey = id.slice(0, id.length / 2);
-    }
 
     get pickIndex() {
         return this.pickID[0] * 255 + this.pickID[1] * 255 + this.pickID[2] * 255
@@ -82,76 +61,22 @@ export default class Entity extends Movable {
     }
 
     clone() {
-        const str = Entity.serializeComplexObject(this.serializable())
-        const newEntity = Entity.parseEntityObject(JSON.parse(str))
+        const str = serializeStructure(this.serializable())
+        const newEntity = EntityAPI.parseEntityObject(JSON.parse(str))
         newEntity.id = v4()
         newEntity.queryKey = newEntity.id.slice(0, newEntity.id.length / 2);
         return newEntity
     }
 
-    static nativeComponents = {
-        [COMPONENTS.DIRECTIONAL_LIGHT]: DirectionalLightComponent,
-        [COMPONENTS.MESH]: MeshComponent,
-        [COMPONENTS.POINT_LIGHT]: PointLightComponent,
-        [COMPONENTS.PROBE]: ProbeComponent,
-        [COMPONENTS.CAMERA]: CameraComponent,
-        [COMPONENTS.SPRITE]: SpriteComponent,
-
-        [COMPONENTS.PHYSICS_COLLIDER]: PhysicsColliderComponent,
-        [COMPONENTS.RIGID_BODY]: RigidBodyComponent,
-        [COMPONENTS.CULLING]: CullingComponent,
-        [COMPONENTS.UI]: UIComponent,
-
-        [COMPONENTS.TERRAIN]: TerrainComponent,
-    }
-
-    static parseEntityObject(entity) {
-
-        const parsedEntity = new Entity(entity.id, entity.name, entity.active)
-        const keys = Object.keys(entity)
-
-        for (let i = 0; i < keys.length; i++) {
-            const k = keys[i]
-            if (k !== "components" && k !== "parent" && k !== "matrix" && !TYPED_ATTRIBUTES.includes(k) && k !== "_props")
-                parsedEntity[k] = entity[k]
-        }
-
-        for (let i = 0; i < TYPED_ATTRIBUTES.length; i++) {
-            const key = TYPED_ATTRIBUTES[i]
-            if (!entity[key])
-                continue
-            for (let j = 0; j < parsedEntity[key].length; j++)
-                parsedEntity[key][j] = entity[key][j]
-        }
-
-        parsedEntity.parent = undefined
-        parsedEntity.parentCache = entity.parent
-        for (const k in entity.components) {
-            const component = parsedEntity.addComponent(k)
-            if (!component)
-                continue
-            const keys = Object.keys(entity.components[k])
-            for (let i = 0; i < keys.length; i++) {
-                const componentValue = keys[i]
-                if (componentValue.includes("__") || componentValue.includes("#") || componentValue === "_props" || componentValue === "_name")
-                    continue
-                component[componentValue] = entity.components[k][componentValue]
-            }
-            if (k === COMPONENTS.DIRECTIONAL_LIGHT)
-                component.changed = true
-        }
-        parsedEntity.changed = true
-        return parsedEntity
-    }
 
     addComponent(KEY) {
-        let instance = Entity.nativeComponents[KEY]
+        let instance = ComponentGetter[KEY]
         if (instance != null) {
             instance = new instance()
             instance.__entity = this
             this.components.set(KEY, instance)
 
-            if (QueryAPI.getEntityByID(this.id) != null) // initialized
+            if (QueryAPI.getEntityByID(this.id) != null)
                 EntityAPI.registerEntityComponents(this)
 
             return instance
@@ -166,30 +91,5 @@ export default class Entity extends Movable {
             EntityAPI.registerEntityComponents(this)
     }
 
-    static serializeComplexObject(obj) {
-        const visited = new WeakSet();
-        return JSON.stringify(
-            obj,
-            (key, value) => {
-                if (key.startsWith("#") || key.startsWith("__"))
-                    return undefined
-                if (typeof value === "object" && value !== null) {
-                    if (visited.has(value))
-                        return
-                    visited.add(value);
-                }
-                if (value instanceof Int8Array ||
-                    value instanceof Uint8Array ||
-                    value instanceof Uint8ClampedArray ||
-                    value instanceof Int16Array ||
-                    value instanceof Uint16Array ||
-                    value instanceof Int32Array ||
-                    value instanceof Uint32Array ||
-                    value instanceof Float32Array ||
-                    value instanceof Float64Array)
-                    return Array.from(value)
-                return value
-            },
-            4)
-    }
+
 }

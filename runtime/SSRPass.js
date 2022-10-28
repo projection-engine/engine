@@ -1,8 +1,6 @@
 import CameraAPI from "../api/CameraAPI";
 import GPUResources from "../GPUResources";
-import DeferredRenderer from "./renderers/DeferredRenderer";
-import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
-import GPUController from "../GPUController";
+import GBuffer from "./renderers/GBuffer";
 
 export default class SSRPass {
     static FBO
@@ -14,11 +12,8 @@ export default class SSRPass {
     static enabled = true
 
     static initialize() {
-        SSRPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSR).texture({linear: true})
-
         SSRPass.sampler = SSRPass.FBO.colors[0]
-        DeferredRenderer.deferredUniforms.screenSpaceReflections = SSRPass.sampler
-
+        GBuffer.deferredUniforms.screenSpaceReflections = SSRPass.sampler
         SSRPass.rayMarchSettings[0] = 100
         SSRPass.rayMarchSettings[1] = 5
         SSRPass.rayMarchSettings[2] = 1.2

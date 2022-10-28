@@ -1,7 +1,7 @@
 import CameraAPI from "./api/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import DeferredRenderer from "./runtime/renderers/DeferredRenderer";
+import GBuffer from "./runtime/renderers/GBuffer";
 import SSGIPass from "./runtime/SSGIPass";
 import SSRPass from "./runtime/SSRPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
@@ -71,7 +71,7 @@ export default class Engine {
         SSGIPass.rayMarchSettings[2] = data.SSGI.depthThreshold
 
         SSGIPass.enabled = data.SSGI.enabled
-        DeferredRenderer.deferredUniforms.screenSpaceGI = data.SSGI.enabled ? SSGIPass.sampler : undefined
+        GBuffer.deferredUniforms.screenSpaceGI = data.SSGI.enabled ? SSGIPass.sampler : undefined
 
         SSRPass.uniforms.stepSize = data.SSR.stepSize
         SSRPass.rayMarchSettings[0] = data.SSR.maxSteps
@@ -79,16 +79,16 @@ export default class Engine {
         SSRPass.rayMarchSettings[2] = data.SSR.depthThreshold
 
         SSRPass.enabled = data.SSR.enabled
-        DeferredRenderer.deferredUniforms.screenSpaceReflections = data.SSR.enabled ? SSRPass.sampler : undefined
+        GBuffer.deferredUniforms.screenSpaceReflections = data.SSR.enabled ? SSRPass.sampler : undefined
 
 
         AmbientOcclusion.settings[0] = data.SSAO.radius
         AmbientOcclusion.settings[1] = data.SSAO.power
 
         AmbientOcclusion.enabled = data.SSAO.enabled
-        DeferredRenderer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
-        DeferredRenderer.deferredUniforms.hasAO = data.SSAO.enabled ? 1 : 0
-        const settingsBuffer = DeferredRenderer.deferredUniforms.settings
+        GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
+        GBuffer.deferredUniforms.hasAO = data.SSAO.enabled ? 1 : 0
+        const settingsBuffer = GBuffer.deferredUniforms.settings
         settingsBuffer[1] = DirectionalShadows.maxResolution
         settingsBuffer[2] = DirectionalShadows.atlasRatio
     }

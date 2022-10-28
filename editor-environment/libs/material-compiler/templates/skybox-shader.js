@@ -6,7 +6,7 @@ precision highp float;
 #define PI  3.14159265359 
 
 in vec4 vPosition;
-in  vec2 texCoord;
+in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform vec3 cameraVec;
 in vec3 normalVec;
@@ -37,10 +37,10 @@ layout (location = 2) in vec2 uvTexture;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-out vec2 texCoord;
+out vec2 texCoords;
 
 void main(){
-    texCoord = uvTexture;
+    texCoords = uvTexture;
     
     mat4 m = viewMatrix;
    m[3][0]  = 0.0;

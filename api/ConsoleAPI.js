@@ -1,5 +1,5 @@
 import {v4} from "uuid";
-import Entity from "../instances/Entity";
+import serializeStructure from "../utils/serialize-structure";
 
 const types = Object.freeze({
     ERROR: "ERROR",
@@ -118,7 +118,7 @@ function parseMessage(messages, type, src) {
             parts.push(...str.split("\n").map((message, i) => ({
                 type,
                 message: message + " " + messages[i].toString(),
-                object: Entity.serializeComplexObject(messages[i]),
+                object: serializeStructure(messages[i]),
                 blockID,
                 src,
                 notFirstOnBlock: i > 0

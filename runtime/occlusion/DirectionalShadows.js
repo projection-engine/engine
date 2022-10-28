@@ -2,7 +2,7 @@ import COMPONENTS from "../../static/COMPONENTS.js"
 import Engine from "../../Engine";
 import GPUResources from "../../GPUResources";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import DeferredRenderer from "../renderers/DeferredRenderer";
+import GBuffer from "../renderers/GBuffer";
 import GPUController from "../../GPUController";
 
 
@@ -25,9 +25,8 @@ export default class DirectionalShadows {
     static allocateData() {
         if (DirectionalShadows.shadowsFrameBuffer)
             GPUController.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
-        DirectionalShadows.shadowsFrameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, DirectionalShadows.maxResolution, DirectionalShadows.maxResolution)
-        DirectionalShadows.shadowsFrameBuffer.depthTexture()
-        DeferredRenderer.deferredUniforms.shadowMapTexture = DirectionalShadows.shadowsFrameBuffer.depthSampler
+        DirectionalShadows.shadowsFrameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, DirectionalShadows.maxResolution, DirectionalShadows.maxResolution).depthTexture()
+        GBuffer.deferredUniforms.shadowMapTexture = DirectionalShadows.shadowsFrameBuffer.depthSampler
     }
 
     static allocateBuffers(shadowAtlasQuantity, shadowMapResolution) {

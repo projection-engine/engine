@@ -7,7 +7,7 @@ precision highp float;
 #define PI  3.14159265359 
 
 in vec4 vPosition;
-in  vec2 texCoord;
+in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform int directionalLightsQuantity;
 uniform mat3 directionalLightsData[MAX_LIGHTS];
@@ -116,7 +116,7 @@ uniform vec3 cameraVec;
 
 
 out vec4 vPosition;
-out vec2 texCoord;
+out vec2 texCoords;
 out mat3 toTangentSpace;
 out vec3 normalVec;  
  
@@ -137,7 +137,7 @@ void main(){
     
     toTangentSpace = mat3(T, B, N);
 
-    texCoord = uvTexture;
+    texCoords = uvTexture;
     gl_Position = vPosition;
 
     ${bodyOperations}

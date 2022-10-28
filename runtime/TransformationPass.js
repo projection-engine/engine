@@ -2,7 +2,7 @@ import EntityAPI from "../api/EntityAPI";
 import GPUResources from "../GPUResources";
 import WORKER_MESSAGES from "../static/WORKER_MESSAGES.json"
 
-export default class MovementWorker {
+export default class TransformationPass {
     static #hasChangeBuffer = new Uint8Array(new SharedArrayBuffer(1))
     static instancingNeedsUpdate = new Map()
     static threads = []
@@ -11,52 +11,52 @@ export default class MovementWorker {
     static #currentWorkerIndex = 0
 
     static get hasUpdatedItem() {
-        return MovementWorker.#hasChangeBuffer[0] === 1
+        return TransformationPass.#hasChangeBuffer[0] === 1
     }
 
     static updateEntityLinks(child, parent) {
         if(parent) {
-            MovementWorker.removeEntity(parent)
-            MovementWorker.registerEntity(parent)
+            TransformationPass.removeEntity(parent)
+            TransformationPass.registerEntity(parent)
         }
 
-        MovementWorker.removeEntity(child)
-        MovementWorker.registerEntity(child)
+        TransformationPass.removeEntity(child)
+        TransformationPass.registerEntity(child)
     }
 
 
     static initialize() {
-        if (MovementWorker.#initialized)
+        if (TransformationPass.#initialized)
             return
 
-        MovementWorker.#initialized = true
+        TransformationPass.#initialized = true
         const max = Math.max(navigator.hardwareConcurrency / 2, 1)
         for (let i = 0; i < max; i++) {
             const w = new Worker("./build/movement-worker.js")
-            MovementWorker.threads.push(w)
+            TransformationPass.threads.push(w)
             w.onmessage = (event) => {
                 if (typeof event.data === "string")
-                    MovementWorker.instancingNeedsUpdate.set(event.data, GPUResources.instancingGroup.get(event.data))
+                    TransformationPass.instancingNeedsUpdate.set(event.data, GPUResources.instancingGroup.get(event.data))
             }
-            w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: MovementWorker.#hasChangeBuffer})
+            w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: TransformationPass.#hasChangeBuffer})
         }
     }
 
 
     static removeEntity(entity) {
-        const thread = MovementWorker.threads[entity.__workerGroup]
+        const thread = TransformationPass.threads[entity.__workerGroup]
         if (!thread)
             return
         thread.postMessage({type: WORKER_MESSAGES.REMOVE_ENTITY, payload: entity.id})
-        MovementWorker.linkedEntities.delete(entity.id)
+        TransformationPass.linkedEntities.delete(entity.id)
         entity.__workerGroup = undefined
     }
 
     static registerEntity(entity) {
-        if (!MovementWorker.#initialized || (entity.__workerGroup != null && MovementWorker.linkedEntities.get(entity.id)))
+        if (!TransformationPass.#initialized || (entity.__workerGroup != null && TransformationPass.linkedEntities.get(entity.id)))
             return
-        MovementWorker.linkedEntities.set(entity.id, entity)
-        const currentThread = MovementWorker.threads[MovementWorker.#currentWorkerIndex]
+        TransformationPass.linkedEntities.set(entity.id, entity)
+        const currentThread = TransformationPass.threads[TransformationPass.#currentWorkerIndex]
         currentThread.postMessage({
             type: WORKER_MESSAGES.REGISTER_ENTITY,
             payload: {
@@ -72,23 +72,23 @@ export default class MovementWorker {
             }
         })
         entity.changed = true
-        entity.__workerGroup = MovementWorker.#currentWorkerIndex
-        if (MovementWorker.#currentWorkerIndex >= MovementWorker.threads.length - 1)
-            MovementWorker.#currentWorkerIndex = 0
+        entity.__workerGroup = TransformationPass.#currentWorkerIndex
+        if (TransformationPass.#currentWorkerIndex >= TransformationPass.threads.length - 1)
+            TransformationPass.#currentWorkerIndex = 0
         else
-            MovementWorker.#currentWorkerIndex++
+            TransformationPass.#currentWorkerIndex++
 
     }
 
     static execute() {
-        if (MovementWorker.#hasChangeBuffer[0] === 1) {
+        if (TransformationPass.#hasChangeBuffer[0] === 1) {
             EntityAPI.packageLights(true, true)
-            MovementWorker.#hasChangeBuffer[0] = 0
+            TransformationPass.#hasChangeBuffer[0] = 0
         }
 
-        if (MovementWorker.instancingNeedsUpdate.size > 0) {
-            MovementWorker.instancingNeedsUpdate.forEach(i => i.updateBuffer())
-            MovementWorker.instancingNeedsUpdate.clear()
+        if (TransformationPass.instancingNeedsUpdate.size > 0) {
+            TransformationPass.instancingNeedsUpdate.forEach(i => i.updateBuffer())
+            TransformationPass.instancingNeedsUpdate.clear()
         }
     }
 

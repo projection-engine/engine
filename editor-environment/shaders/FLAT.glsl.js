@@ -15,7 +15,7 @@ void main() {
 
 export const fragment = `#version 300 es
 precision highp float;
-in vec2 texCoord;
+in vec2 texCoords;
 in vec3 normal;
 
 uniform bool normalView;

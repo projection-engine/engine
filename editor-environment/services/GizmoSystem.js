@@ -11,14 +11,14 @@ import ScreenSpaceGizmo from "../libs/transformation/ScreenSpaceGizmo";
 import DualAxisGizmo from "../libs/transformation/DualAxisGizmo";
 import GPUResources from "../../GPUResources";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import DepthPass from "../../runtime/renderers/DepthPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import MovementWorker from "../../runtime/MovementWorker";
+import TransformationPass from "../../runtime/TransformationPass";
 import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../api/rendering/LineAPI";
 import {mat4, vec3} from "gl-matrix";
 import IconsSystem from "./IconsSystem";
+import GBuffer from "../../runtime/renderers/GBuffer";
 
 const VEC_CACHE = vec3.create()
 const M = mat4.create()
@@ -98,7 +98,7 @@ export default class GizmoSystem {
     }
 
     static drawToDepthSampler(mesh, transforms) {
-        const FBO = DepthPass.framebuffer
+        const FBO = GBuffer.gBuffer
         const data = {
             viewMatrix: CameraAPI.viewMatrix,
             projectionMatrix: CameraAPI.projectionMatrix,
@@ -140,7 +140,7 @@ export default class GizmoSystem {
             GizmoSystem.transformationMatrix = undefined
             GizmoSystem.translation = undefined
         }
-        else if (MovementWorker.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
+        else if (TransformationPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
             main.__pivotChanged = true
             GizmoSystem.mainEntity = main
             GizmoSystem.updatePivot(main)
@@ -154,7 +154,6 @@ export default class GizmoSystem {
             vec3.add(VEC_CACHE, m.pivotPoint, m.parent._translation)
 
             GizmoSystem.translation = VEC_CACHE
-
         } else
             GizmoSystem.translation = m.pivotPoint
     }

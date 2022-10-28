@@ -1,12 +1,12 @@
 import ConversionAPI from "../math/ConversionAPI";
-import DepthPass from "../../runtime/renderers/DepthPass";
+import GBuffer from "../../runtime/renderers/GBuffer";
 
 export default class PickingAPI {
     static readBlock(start, end) {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, DepthPass.framebuffer.FBO)
-        gpu.readBuffer(gpu.COLOR_ATTACHMENT0 + 1)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, GBuffer.gBuffer.FBO)
+        gpu.readBuffer(gpu.COLOR_ATTACHMENT0 + 6)
         let dd = new Float32Array(w * h * 4)
         gpu.readPixels(
             end.x > start.x ? start.x : end.x,
@@ -42,7 +42,7 @@ export default class PickingAPI {
     static readUV(x, y, imageWidth, imageHeight) {
         const w = window.gpu.canvas.width, h = window.gpu.canvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
-        const uv = PickingAPI.readPixels(DepthPass.framebuffer.FBO, 2, coords)
+        const uv = PickingAPI.readPixels(GBuffer.gBuffer.FBO, 5, coords)
         const texCoords = {
             x: (uv[0] * imageWidth) -0.5,
             y: (uv[1] * imageHeight) -0.5,
@@ -56,7 +56,7 @@ export default class PickingAPI {
     static readEntityID(x, y) {
         const w = window.gpu.canvas.width, h = window.gpu.canvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
-        const picked = PickingAPI.readPixels(DepthPass.framebuffer.FBO, 1, coords)
+        const picked = PickingAPI.readPixels(GBuffer.gBuffer.FBO, 6, coords)
 
         return Math.round((picked[0] + picked[1] + picked[2]) * 255)
     }

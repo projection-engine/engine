@@ -2,7 +2,7 @@ import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../static/COMPONENTS.js"
 import Engine from "../../Engine";
 import GPUResources from "../../GPUResources";
-import DeferredRenderer from "../renderers/DeferredRenderer";
+import GBuffer from "../renderers/GBuffer";
 import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
 import ShadowProbe from "../../instances/ShadowProbe";
 
@@ -22,8 +22,8 @@ export default class OmnidirectionalShadows {
         ]
 
 
-        DeferredRenderer.deferredUniforms.shadowCube0 = OmnidirectionalShadows.cubeMaps[0].texture
-        DeferredRenderer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
+        GBuffer.deferredUniforms.shadowCube0 = OmnidirectionalShadows.cubeMaps[0].texture
+        GBuffer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
         lightsToUpdate = OmnidirectionalShadows.lightsToUpdate
     }
 
@@ -52,8 +52,8 @@ export default class OmnidirectionalShadows {
                     current.zNear
                 )
         }
-        DeferredRenderer.deferredUniforms.shadowCube0 = OmnidirectionalShadows.cubeMaps[0].texture
-        DeferredRenderer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
+        GBuffer.deferredUniforms.shadowCube0 = OmnidirectionalShadows.cubeMaps[0].texture
+        GBuffer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
         OmnidirectionalShadows.changed = false
         lightsToUpdate.length = 0
     }

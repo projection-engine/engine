@@ -1,12 +1,8 @@
-import generateBlurBuffers from "../utils/generate-blur-buffers"
 import CameraAPI from "../api/CameraAPI";
 import GPUResources from "../GPUResources";
-import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
-import DepthPass from "./renderers/DepthPass";
 import ScreenEffectsPass from "./post-processing/ScreenEffectsPass";
-import DeferredRenderer from "./renderers/DeferredRenderer";
+import GBuffer from "./renderers/GBuffer";
 import AmbientOcclusion from "./occlusion/AmbientOcclusion";
-import GPUController from "../GPUController";
 
 export default class SSGIPass {
     static sampler
@@ -26,30 +22,17 @@ export default class SSGIPass {
     static uniforms = {}
 
     static initialize() {
-
         SSGIPass.rayMarchSettings[0] = 10
         SSGIPass.rayMarchSettings[1] = 5
         SSGIPass.rayMarchSettings[2] = 1.2
-
-        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPUResources.internalResolution.w, GPUResources.internalResolution.h, 2)
-        SSGIPass.blurBuffers = blurBuffers
-        SSGIPass.upSampledBuffers = upSampledBuffers
-
-
-        SSGIPass.normalsFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS)
-        SSGIPass.normalsFBO.texture({precision: gpu.RGBA32F, linear: true})
         SSGIPass.normalSampler = SSGIPass.normalsFBO.colors[0]
-
-        SSGIPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
-        SSGIPass.FBO.texture({linear: true})
-
-        SSGIPass.sampler = upSampledBuffers[blurBuffers.length - 2].colors[0]
-        DeferredRenderer.deferredUniforms.screenSpaceGI = SSGIPass.sampler
+        SSGIPass.sampler = SSGIPass.upSampledBuffers [SSGIPass.blurBuffers.length - 2].colors[0]
+        GBuffer.deferredUniforms.screenSpaceGI = SSGIPass.sampler
         SSGIPass.settingsBuffer[1] = 1
 
 
         Object.assign(SSGIPass.normalUniforms, {
-            gNormal: DepthPass.normalSampler,
+            gNormal: GBuffer.normalSampler,
             noiseScale: AmbientOcclusion.noiseScale,
         })
         Object.assign(SSGIPass.uniforms, {

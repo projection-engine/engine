@@ -1,4 +1,4 @@
-export default  `#version 300 es
+#version 300 es
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -15,7 +15,7 @@ out vec3 tangent;
 out vec3 bitangent;
 
 out vec4 vPosition;
-out vec2 texCoord;
+out vec2 texCoords;
  
 out mat3 toTangentSpace;
 out vec3 viewDirection;
@@ -36,10 +36,9 @@ void main(){
     toTangentSpace = mat3(T, B, N);
     
     viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
-    texCoord = uvTexture;
+    texCoords = uvTexture;
     
     normalVec = N; 
    
     gl_Position = projectionMatrix * viewMatrix * vPosition;
 }
-`
