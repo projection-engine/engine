@@ -15,7 +15,7 @@ out vec4 fragColor;
 
 void main()
 {
-    float radius = settings.x;
+    float radius = settings.x * 1000.;
     float power = settings.y;
 
     vec3 fragPos = texture(gPosition, texCoords).xyz;

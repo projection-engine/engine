@@ -4,6 +4,7 @@ import Engine from "../Engine";
 import ENVIRONMENT from "../static/ENVIRONMENT";
 import SharedBufferAPI from "./SharedBufferAPI";
 import {vec3, vec4} from "gl-matrix";
+import ConversionAPI from "./math/ConversionAPI";
 
 
 /**
@@ -28,7 +29,7 @@ function getNotificationBuffer() {
 }
 
 export default class CameraAPI {
-
+    static #dynamicAspectRatio = false
     static metadata = new PostProcessingEffects()
     static position = SharedBufferAPI.allocateVector(3)
     static viewMatrix = SharedBufferAPI.allocateMatrix(4, true)
@@ -65,8 +66,19 @@ export default class CameraAPI {
             CameraAPI.skyboxProjectionMatrix,
             CameraAPI.#projectionBuffer
         ])
+
+        new ResizeObserver(CameraAPI.updateAspectRatio)
+            .observe(gpu.canvas)
     }
 
+    static updateAspectRatio() {
+        const bBox = gpu.canvas.getBoundingClientRect()
+        ConversionAPI.canvasBBox = bBox
+        if (Engine.environment === ENVIRONMENT.DEV || CameraAPI.#dynamicAspectRatio) {
+            CameraAPI.aspectRatio = bBox.width / bBox.height
+            CameraAPI.updateProjection()
+        }
+    }
 
     static get didChange() {
         return notificationBuffers[3]
@@ -122,18 +134,22 @@ export default class CameraAPI {
         CameraAPI.#projectionBuffer[4] = data
     }
 
-    static set translationSmoothing(data){
+    static set translationSmoothing(data) {
         notificationBuffers[4] = data
     }
-    static get translationSmoothing(){
+
+    static get translationSmoothing() {
         return notificationBuffers[4]
     }
-    static set rotationSmoothing(data){
+
+    static set rotationSmoothing(data) {
         notificationBuffers[5] = data
     }
-    static get rotationSmoothing(){
+
+    static get rotationSmoothing() {
         return notificationBuffers[5]
     }
+
     static updateProjection() {
         notificationBuffers[1] = 1
     }
@@ -158,11 +174,10 @@ export default class CameraAPI {
         if (!cameraObj)
             return
 
-
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear
         CameraAPI.fov = cameraObj.fov
-        CameraAPI.aspectRatio = cameraObj.aspectRatio
+        CameraAPI.#dynamicAspectRatio = cameraObj.dynamicAspectRatio
         CameraAPI.isOrthographic = cameraObj.ortho
 
         CameraAPI.metadata.distortion = cameraObj.distortion
@@ -177,6 +192,11 @@ export default class CameraAPI {
         CameraAPI.metadata.gamma = cameraObj.gamma
         CameraAPI.metadata.exposure = cameraObj.exposure
         CameraAPI.metadata.size = cameraObj.size
+
+        if (!cameraObj.dynamicAspectRatio)
+            CameraAPI.aspectRatio = cameraObj.aspectRatio
+        else
+            CameraAPI.updateAspectRatio()
 
         CameraAPI.update(entity._translation, entity._rotationQuat)
         CameraAPI.updateProjection()

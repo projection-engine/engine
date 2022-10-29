@@ -1,20 +1,14 @@
 import ENVIRONMENT from "../static/ENVIRONMENT"
 import Engine from "../Engine";
 
-
-const DEV = ENVIRONMENT.DEV
-let entities
 export default class ScriptingPass {
+
+    static entitiesToExecute = []
     static execute() {
-
-        if (Engine.environment === DEV) {
-            entities = undefined
-            return
-        }
-
-        if (!entities)
-            entities = [...Engine.entities]
+        const entities = ScriptingPass.entitiesToExecute
         const size = entities.length
+        if(size === 0)
+            return
         for (let i = 0; i < size; i++) {
             const scripts = entities[i].scripts
             const scriptsSize = scripts.length

@@ -1,5 +1,7 @@
 export default `
 /**
+ * @global GPUResources - Access meshes/materials/framebuffers/shaders
+ * @global GPUController - Create/destroy meshes/textures/framebuffers/cubemaps
  * @global PhysicsAPI - Access to Ammo.JS instance;
  * @global UIAPI - Destry/create/update UI elements; Access to document
  * @global TransformationAPI - Transform/interpolate matrices 

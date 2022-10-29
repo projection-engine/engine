@@ -3,15 +3,21 @@ import ENVIRONMENT from "../static/ENVIRONMENT";
 import COMPONENTS from "../static/COMPONENTS.js";
 import PhysicsAPI from "../api/PhysicsAPI";
 
-const DEV_ENV = ENVIRONMENT.DEV, COMP = COMPONENTS.RIGID_BODY
+const COMP = COMPONENTS.RIGID_BODY
 export default class PhysicsPass {
+    static simulationStep = 0.01666666
+    static subSteps = 10
+    static isDev = false
+
     static execute() {
-        if (Engine.environment === DEV_ENV || !PhysicsAPI.ammo)
+        if (PhysicsPass.isDev || !PhysicsAPI.ammo)
             return
         const rigidBodies = PhysicsAPI.rigidBodies
         const length = rigidBodies.length
         const tempTransformation = PhysicsAPI.tempTransformation
-        PhysicsAPI.world.stepSimulation(Engine.elapsed * .1, 10)
+
+        PhysicsAPI.world.stepSimulation(PhysicsPass.simulationStep, PhysicsPass.subSteps)
+
         for (let i = 0; i < length; i++) {
             const current = rigidBodies[i]
             const component = current.components.get(COMP)

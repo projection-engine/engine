@@ -10,7 +10,6 @@ const MOUSE_RIGHT = 2, MOUSE_LEFT = 0
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
 export default class CameraTracker {
     static #isTracking = false
-    static #id = v4()
     static xRotation = 0
     static yRotation = 0
 

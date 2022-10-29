@@ -209,7 +209,6 @@ export default class EntityAPI {
     }
 
     static parseEntityObject(entity) {
-
         const parsedEntity = new Entity(entity.id, entity.name, entity.active)
         const keys = Object.keys(entity)
 

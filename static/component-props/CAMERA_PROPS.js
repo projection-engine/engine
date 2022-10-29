@@ -4,37 +4,42 @@ export default  [
     Component.number("FOV", "fov", 3.054236111111111, 0.1745277777777778, .1, true),
     Component.group("ORTHO_PROJECTION", [
         Component.boolean("ENABLED", "ortho"),
-        Component.number("SIZE", "size", 175, 1)
+        Component.number("SIZE", "size", 150, 1)
+    ]),
+
+    Component.group("ASPECT_RATIO", [
+        Component.boolean("DYNAMIC", "dynamicAspectRatio"),
+        Component.number("VALUE", "aspectRatio", undefined, undefined, undefined, false, true, "dynamicAspectRatio")
     ]),
 
     Component.group("VIEW_PLANES", [
-        Component.number("FAR", "zFar"),
-        Component.number("NEAR", "zNear"),
+        Component.number("FAR", "zFar", undefined,0, .01),
+        Component.number("NEAR", "zNear", undefined,0, .01),
     ]),
 
     Component.group("DISTORTION", [
         Component.boolean("ENABLED", "distortion"),
-        Component.number("STRENGTH", "distortionStrength"),
+        Component.number("STRENGTH", "distortionStrength", undefined,0, .0001),
     ]),
 
     Component.group("CHROMATIC_ABERRATION", [
         Component.boolean("ENABLED", "chromaticAberration"),
-        Component.number("STRENGTH", "chromaticAberrationStrength"),
+        Component.number("STRENGTH", "chromaticAberrationStrength", undefined,0, .0001),
     ]),
 
     Component.group("FILM_GRAIN", [
         Component.boolean("ENABLED", "filmGrain"),
-        Component.number("STRENGTH", "filmGrainStrength")
+        Component.number("STRENGTH", "filmGrainStrength", undefined,0, .0001),
     ]),
 
     Component.group("BLOOM", [
         Component.boolean("ENABLED", "bloom"),
-        Component.number("STRENGTH", "bloomStrength"),
-        Component.number("THRESHOLD", "bloomThreshold"),
+        Component.number("STRENGTH", "bloomStrength", undefined,0, .0001),
+        Component.number("THRESHOLD", "bloomThreshold", undefined,0, .0001),
     ]),
 
     Component.group("COLOR_CORRECTION", [
-        Component.number("GAMMA", "gamma", 10, .1),
-        Component.number("EXPOSURE", "exposure"),
+        Component.number("GAMMA", "gamma", 10, .1, .001),
+        Component.number("EXPOSURE", "exposure", undefined, 0, .001),
     ])
 ]

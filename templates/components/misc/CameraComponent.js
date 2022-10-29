@@ -6,6 +6,7 @@ export default class CameraComponent extends Component {
     name = "CAMERA"
 
     fov = Math.PI/2
+    dynamicAspectRatio = true
     aspectRatio = 1
     zFar = 10000
     zNear = .1

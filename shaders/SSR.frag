@@ -29,7 +29,7 @@ void main(){
     if(Metallic < 0.01)
     discard;
 
-    vec3 worldNormal = (texture(gNormal, texCoords) * invViewMatrix).rgb;
+    vec3 worldNormal =normalize(texture(gNormal, texCoords) * invViewMatrix).rgb;
     vec3 viewPos = getViewPosition(texCoords);
     vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 

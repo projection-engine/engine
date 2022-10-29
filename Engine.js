@@ -7,6 +7,8 @@ import SSRPass from "./runtime/SSRPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import ConversionAPI from "./api/math/ConversionAPI";
+import ScriptingPass from "./runtime/ScriptingPass";
+import PhysicsPass from "./runtime/PhysicsPass";
 
 const METRICS = {
     frameRate: 0,
@@ -23,7 +25,20 @@ export default class Engine {
     static UILayouts = new Map()
 
     static entities = []
-    static environment = ENVIRONMENT.DEV
+    static #environment = ENVIRONMENT.DEV
+
+    static get environment() {
+        return Engine.#environment
+    }
+
+    static set environment(data) {
+        ScriptingPass.entitiesToExecute = data !== ENVIRONMENT.DEV ? Engine.entities : []
+        PhysicsPass.isDev = data === ENVIRONMENT.DEV
+        Engine.#environment = data
+        if(PhysicsPass.isDev)
+            CameraAPI.updateAspectRatio()
+    }
+
     static data = {
         pointLights: [],
         meshes: [],
@@ -60,8 +75,11 @@ export default class Engine {
         Engine.start()
     }
 
-    static updateParams(data) {
+    static updateParams(data, physicsSteps, physicsSubSteps) {
         Engine.params = data
+        PhysicsPass.subSteps = physicsSubSteps
+        PhysicsPass.simulationStep = physicsSteps
+
 
         SSGIPass.settingsBuffer[0] = data.SSGI.stepSize
         SSGIPass.settingsBuffer[1] = data.SSGI.strength
