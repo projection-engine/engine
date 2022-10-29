@@ -11,11 +11,11 @@ export default function initializeFrameBuffers() {
     GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPUResources.internalResolution.w, GPUResources.internalResolution.h).texture().depthTest()
     GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPUResources.internalResolution.w, GPUResources.internalResolution.h).texture()
 
-    SSGIPass.normalsFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS).texture({
-        precision: gpu.RGBA32F,
-        linear: true
+    SSGIPass.normalsFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS).texture()
+    SSGIPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI).texture({
+        linear: true,
+         // precision: gpu.RGBA, format: gpu.RGBA, type: gpu.UNSIGNED_BYTE
     })
-    SSGIPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI).texture({linear: true})
     const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPUResources.internalResolution.w, GPUResources.internalResolution.h, 2)
     SSGIPass.blurBuffers = blurBuffers
     SSGIPass.upSampledBuffers = upSampledBuffers
@@ -40,7 +40,7 @@ export default function initializeFrameBuffers() {
         })
 
     GBuffer.gBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
-        .texture({attachment: 0, precision: gpu.RGBA32F, format: gpu.RGBA})
+        .texture({attachment: 0, precision: gpu.RGBA32F})
         .texture({attachment: 1})
         .texture({attachment: 2, precision: gpu.RGBA, format: gpu.RGBA, type: gpu.UNSIGNED_BYTE})
         .texture({attachment: 3})

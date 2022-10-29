@@ -34,12 +34,13 @@ export default class SSGIPass {
         Object.assign(SSGIPass.normalUniforms, {
             gNormal: GBuffer.normalSampler,
             noiseScale: AmbientOcclusion.noiseScale,
+            invViewMatrix: CameraAPI.invViewMatrix
         })
         Object.assign(SSGIPass.uniforms, {
+
             gNormal: SSGIPass.normalSampler,
             projection: CameraAPI.projectionMatrix,
             viewMatrix: CameraAPI.viewMatrix,
-            invViewMatrix: CameraAPI.invViewMatrix,
             noiseScale: AmbientOcclusion.noiseScale,
             settings: SSGIPass.settingsBuffer,
             rayMarchSettings: SSGIPass.rayMarchSettings
@@ -60,6 +61,6 @@ export default class SSGIPass {
         SSGIPass.ssgiShader.bindForUse(SSGIPass.uniforms)
         GPUResources.quad.draw()
         SSGIPass.FBO.stopMapping()
-        ScreenEffectsPass.blur(SSGIPass.FBO, 1, 3, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
+        ScreenEffectsPass.blur(SSGIPass.FBO, 1, 2, SSGIPass.blurBuffers, SSGIPass.upSampledBuffers)
     }
 }

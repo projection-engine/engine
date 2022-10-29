@@ -5,7 +5,7 @@ import CameraAPI from "../../api/CameraAPI";
 import SSGIPass from "../SSGIPass";
 import ImageWorker from "../../workers/image/ImageWorker";
 
-const w = 4, h = 4
+const RESOLUTION = 8
 export default class AmbientOcclusion {
     static #ready = false
     static framebuffer
@@ -25,16 +25,13 @@ export default class AmbientOcclusion {
         AmbientOcclusion.settings[0] = 100 // RADIUS
         AmbientOcclusion.settings[1] = 2 // STRENGTH
 
-
         AmbientOcclusion.unfilteredSampler = AmbientOcclusion.framebuffer.colors[0]
-
         AmbientOcclusion.filteredSampler = AmbientOcclusion.blurredFBO.colors[0]
 
-
-        AmbientOcclusion.noiseScale[0] = window.outerWidth / w
-        AmbientOcclusion.noiseScale[1] = window.outerHeight / h
+        AmbientOcclusion.noiseScale[0] = GPUResources.internalResolution.w / RESOLUTION
+        AmbientOcclusion.noiseScale[1] = GPUResources.internalResolution.h / RESOLUTION
         GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
-        ImageWorker.request(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w, h})
+        ImageWorker.request(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w: RESOLUTION, h: RESOLUTION})
             .then(({kernels, noise}) => {
                 AmbientOcclusion.kernels = kernels
                 AmbientOcclusion.noiseSampler = gpu.createTexture()
@@ -43,8 +40,8 @@ export default class AmbientOcclusion {
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
-                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG32F, w, h)
-                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, w, h, gpu.RG, gpu.FLOAT, noise)
+                gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG32F, RESOLUTION, RESOLUTION)
+                gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, RESOLUTION, RESOLUTION, gpu.RG, gpu.FLOAT, noise)
                 Object.assign(
                     AmbientOcclusion.uniforms,
                     {

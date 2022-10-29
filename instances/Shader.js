@@ -2,7 +2,8 @@ import Shadows from "../shaders/utils/SHADOW_METHODS.glsl"
 import * as PROBES from "../shaders/templates/PROBES"
 import {PBR} from "../shaders/templates/PBR"
 import GPUResources from "../GPUResources";
-
+import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
+import ACES from "../shaders/utils/ACES.glsl"
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -30,7 +31,8 @@ export const METHODS = {
 
 
     calculateShadows: "//import(calculateShadows)",
-
+    rayMarcher: "//import(rayMarcher)",
+    aces: "//import(aces)",
     ambient: "//import(ambient)",
     forwardAmbient: "//import(forwardAmbient)",
     ambientUniforms: "//import(ambientUniforms)"
@@ -41,34 +43,48 @@ function applyMethods(shaderCode) {
     let response = shaderCode
 
     Object.keys(METHODS).forEach(key => {
-        if (key === "calculateShadows")
-            response = response.replaceAll(METHODS[key], Shadows)
-        if (key === "ambient")
-            response = response.replaceAll(METHODS[key], PROBES.deferredAmbient)
-        if (key === "forwardAmbient")
-            response = response.replaceAll(METHODS[key], PROBES.forwardAmbient)
-
-        if (key === "ambientUniforms")
-            response = response.replaceAll(METHODS[key], PROBES.UNIFORMS)
-        if (PBR[key])
-            response = response.replaceAll(METHODS[key], PBR[key])
+        switch (true) {
+            case key === "rayMarcher":
+                response = response.replaceAll(METHODS[key], RAY_MARCHER)
+                break
+            case key === "aces":
+                response = response.replaceAll(METHODS[key], ACES)
+                break
+            case key === "calculateShadows":
+                response = response.replaceAll(METHODS[key], Shadows)
+                break
+            case key === "ambient":
+                response = response.replaceAll(METHODS[key], PROBES.deferredAmbient)
+                break
+            case key === "forwardAmbient":
+                response = response.replaceAll(METHODS[key], PROBES.forwardAmbient)
+                break
+            case key === "ambientUniforms":
+                response = response.replaceAll(METHODS[key], PROBES.UNIFORMS)
+                break
+            case PBR[key] != null:
+                response = response.replaceAll(METHODS[key], PBR[key])
+                break
+            default:
+                console.log(key)
+                break
+        }
     })
-
     return response
 }
 
 
 export default class Shader {
     available = false
-    regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
-    structRegex = (type) => {
+    static regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
+    static structRegex = (type) => {
         return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, "gs")
     }
-    defineRegex = (global) => {
+    static defineRegex = (global) => {
         return new RegExp("#define(\\s+)((\\w|_)+)(\\s+)(.+)", global ? "gmi" : "mi")
     }
-    regexMatch = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/m
-    regexArray = (global) => {
+    static regexMatch = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/m
+    static regexArray = (global) => {
         return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
     }
     length = 0
@@ -115,90 +131,85 @@ export default class Shader {
 
     #extractUniforms(code) {
         let uniformObjects = []
-        const uniforms = code.match(this.regex)
-        if (uniforms) {
+        const uniforms = code.match(Shader.regex)
+        if (uniforms)
             uniforms.forEach(u => {
-                const match = u.match(this.regexMatch)
-                if (match) {
-                    const type = match[4]
-                    const name = match[6].replace(" ", "").trim()
+                const match = u.match(Shader.regexMatch)
+                if (!match)
+                    return;
+                const type = match[4]
+                const name = match[6].replace(" ", "").trim()
 
-                    if (TYPES[type] !== undefined) {
-                        uniformObjects.push({
-                            type,
-                            name,
-                            uLocation: gpu.getUniformLocation(this.program, name)
-                        })
-                    } else {
-                        let struct = code.match(this.structRegex(type))
-                        const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
-
-                        if (struct) {
-                            struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
-                            uniformObjects.push(
-                                ...struct.map(s => {
-                                    const current = s.match(reg)
-                                    if (current) {
-                                        return {
-                                            type: current[2],
-                                            name: current[4],
-                                            parent: name,
-                                            uLocation: gpu.getUniformLocation(this.program, name + "." + current[4])
-                                        }
-                                    }
-                                }).filter(e => e !== undefined)
-                            )
-                        }
-                    }
+                if (TYPES[type] != null) {
+                    uniformObjects.push({
+                        type,
+                        name,
+                        uLocation: gpu.getUniformLocation(this.program, name)
+                    })
+                    return
                 }
-            })
-        }
-        const arrayUniforms = code.match(this.regexArray(true))
-        const definitions = code.match(this.defineRegex(true))
-
-        if (arrayUniforms)
-            arrayUniforms.forEach(u => {
-                const match = u.match(this.regexArray(false))
-
-                if (match) {
-                    const type = match[4]
-                    const name = match[6].replace(" ", "")
-                    const define = definitions.find(d => d.includes(match[8]))?.match(this.defineRegex(false))
-
-                    if (define !== undefined) {
-                        const arraySize = parseInt(define[5])
-                        if (TYPES[type] !== undefined) {
-                            uniformObjects.push({
-                                type,
-                                name,
-                                arraySize,
-                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]`))
-                            })
-                        } else {
-                            let struct = code.match(this.structRegex(type))
-                            const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
-
-                            if (struct) {
-                                struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
-                                uniformObjects.push(
-                                    ...struct.map(s => {
-                                        const current = s.match(reg)
-
-                                        if (current) {
-                                            return {
-                                                type: current[2],
-                                                name: current[4],
-                                                parent: name,
-                                                arraySize,
-                                                uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
-                                            }
-                                        }
-                                    }).filter(e => e !== undefined)
-                                )
+                let struct = code.match(Shader.structRegex(type))
+                const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
+                if (!struct)
+                    return
+                struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
+                uniformObjects.push(
+                    ...struct.map(s => {
+                        const current = s.match(reg)
+                        if (current) {
+                            return {
+                                type: current[2],
+                                name: current[4],
+                                parent: name,
+                                uLocation: gpu.getUniformLocation(this.program, name + "." + current[4])
                             }
                         }
-                    }
+                    }).filter(e => e !== undefined)
+                )
+            })
+        const arrayUniforms = code.match(Shader.regexArray(true))
+        const definitions = code.match(Shader.defineRegex(true))
+        if (arrayUniforms)
+            arrayUniforms.forEach(u => {
+                const match = u.match(Shader.regexArray(false))
+
+                if (!match)
+                    return
+                const type = match[4]
+                const name = match[6].replace(" ", "")
+                const define = definitions.find(d => d.includes(match[8]))?.match(Shader.defineRegex(false))
+
+                if (!define) return;
+                const arraySize = parseInt(define[5])
+                if (TYPES[type] !== undefined) {
+                    uniformObjects.push({
+                        type,
+                        name,
+                        arraySize,
+                        uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]`))
+                    })
+                    return
                 }
+                let struct = code.match(Shader.structRegex(type))
+                const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
+
+                if (!struct)
+                    return;
+                struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
+                uniformObjects.push(
+                    ...struct.map(s => {
+                        const current = s.match(reg)
+                        if (!current)
+                            return
+                        return {
+                            type: current[2],
+                            name: current[4],
+                            parent: name,
+                            arraySize,
+                            uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
+                        }
+                    }).filter(e => e !== undefined)
+                )
             })
 
         return uniformObjects
@@ -208,28 +219,28 @@ export default class Shader {
         if (GPUResources.activeShader !== this.program)
             gpu.useProgram(this.program)
 
-            GPUResources.activeShader = this.program
-            let currentSamplerIndex = 0
-            const increase = () => currentSamplerIndex++
-            for (let v = 0; v < this.length; v++) {
-                const current = this.uniforms[v]
-                if (current.uLocations != null) {
-                    const dataAttr = current.parent !== undefined ? data[current.parent] : data[current.name]
-                    if (!dataAttr)
-                        continue
-                    for (let i = 0; i < current.uLocations.length; i++) {
-                        const u = current.uLocations[i]
-                        const d = dataAttr[i]
-                        if (current.parent)
-                            Shader.bind(u, d[current.name], current.type, currentSamplerIndex, increase)
-                        else
-                            Shader.bind(u, d, current.type, currentSamplerIndex, increase)
-                    }
-                } else {
-                    const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
-                    Shader.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, increase)
+        GPUResources.activeShader = this.program
+        let currentSamplerIndex = 0
+        const increase = () => currentSamplerIndex++
+        for (let v = 0; v < this.length; v++) {
+            const current = this.uniforms[v]
+            if (current.uLocations != null) {
+                const dataAttr = current.parent !== undefined ? data[current.parent] : data[current.name]
+                if (!dataAttr)
+                    continue
+                for (let i = 0; i < current.uLocations.length; i++) {
+                    const u = current.uLocations[i]
+                    const d = dataAttr[i]
+                    if (current.parent)
+                        Shader.bind(u, d[current.name], current.type, currentSamplerIndex, increase)
+                    else
+                        Shader.bind(u, d, current.type, currentSamplerIndex, increase)
                 }
+            } else {
+                const dataAttribute = current.parent !== undefined ? data[current.parent][current.name] : data[current.name]
+                Shader.bind(current.uLocation, dataAttribute, current.type, currentSamplerIndex, increase)
             }
+        }
 
     }
 
