@@ -10,7 +10,7 @@ uniform vec3 samples[KERNELS];
 uniform mat4 projection;
 uniform vec2 noiseScale;
 uniform vec2 settings;// RADIUS, POWER
-
+uniform mat4 invViewMatrix;
 out vec4 fragColor;
 
 void main()
@@ -19,7 +19,7 @@ void main()
     float power = settings.y;
 
     vec3 fragPos = texture(gPosition, texCoords).xyz;
-    vec3 normal = normalize(texture(gNormal, texCoords).rgb);
+    vec3 normal = normalize(texture(gNormal, texCoords) * invViewMatrix).rgb;
     vec3 randomVec = normalize(texture(noiseSampler, texCoords * noiseScale).xyz);
 
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));

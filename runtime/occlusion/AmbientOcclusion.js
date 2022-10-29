@@ -30,7 +30,7 @@ export default class AmbientOcclusion {
 
         AmbientOcclusion.noiseScale[0] = GPUResources.internalResolution.w / RESOLUTION
         AmbientOcclusion.noiseScale[1] = GPUResources.internalResolution.h / RESOLUTION
-        GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
+        GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.unfilteredSampler
         ImageWorker.request(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w: RESOLUTION, h: RESOLUTION})
             .then(({kernels, noise}) => {
                 AmbientOcclusion.kernels = kernels
@@ -47,6 +47,7 @@ export default class AmbientOcclusion {
                     {
                         gPosition: GBuffer.positionSampler,
                         gNormal: GBuffer.baseNormalSampler,
+                        invViewMatrix: CameraAPI.invViewMatrix,
                         noiseSampler: AmbientOcclusion.noiseSampler,
                         noiseScale: AmbientOcclusion.noiseScale,
                         samples: AmbientOcclusion.kernels,
