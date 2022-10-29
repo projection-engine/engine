@@ -65,9 +65,9 @@ void main(){
     gAlbedo = vec4(fallbackValues[0][0], fallbackValues[0][1], fallbackValues[0][2], 1.);
     gAlbedo = vec4(gAlbedo.rgb + emissionValue, 1.);
 
-    if (settings[0][1] == 1.)
-    gNormal = vec4(normalize(toTangentSpace * ((texture(normal, texCoords * vec2(uvScales[0][2], uvScales[0][3])).rgb * 2.0)- 1.0) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2])), 1.);
-    else
+//    if (settings[0][1] == 1.)
+//    gNormal = vec4(normalize(toTangentSpace * ((texture(normal, texCoords * vec2(uvScales[0][2], uvScales[0][3])).rgb * 2.0)- 1.0) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2])), 1.);
+//    else
     gNormal = vec4(normalVec, 1.);
 
 

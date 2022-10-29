@@ -26,7 +26,7 @@ export default class SSGIPass {
         SSGIPass.rayMarchSettings[1] = 5
         SSGIPass.rayMarchSettings[2] = 1.2
         SSGIPass.normalSampler = SSGIPass.normalsFBO.colors[0]
-        SSGIPass.sampler = SSGIPass.upSampledBuffers [SSGIPass.blurBuffers.length - 2].colors[0]
+        SSGIPass.sampler = SSGIPass.upSampledBuffers[SSGIPass.blurBuffers.length - 2].colors[0]
         GBuffer.deferredUniforms.screenSpaceGI = SSGIPass.sampler
         SSGIPass.settingsBuffer[1] = 1
 
