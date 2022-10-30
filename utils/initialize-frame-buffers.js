@@ -24,7 +24,7 @@ export default function initializeFrameBuffers() {
 
     AmbientOcclusion.framebuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC)
         .texture({
-            precision: gpu.R32F,
+            precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT,
             linear: false,
@@ -32,7 +32,7 @@ export default function initializeFrameBuffers() {
         })
     AmbientOcclusion.blurredFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO)
         .texture({
-            precision: gpu.R32F,
+            precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT,
             linear: false,

@@ -14,31 +14,34 @@ out vec3 normalVec;
 out vec3 tangent;
 out vec3 bitangent;
 
-out vec4 vPosition;
+out vec4 worldSpacePosition;
 out vec2 texCoords;
- 
+
 out mat3 toTangentSpace;
 out vec3 viewDirection;
- 
+
 
 void main(){
-    vPosition = transformMatrix *   vec4(position, 1.0);
-    
-    vec3 T = normalize( mat3(transformMatrix)  * normalize(tangentVec));
-    vec3 N =  normalize(mat3(transformMatrix) * normal);
-    vec3 biTangent = cross(N, tangentVec); 
-    vec3 B =  normalize(mat3(transformMatrix) * biTangent);
-    B = dot(biTangent, B)  > 0. ? -B : B;
-    
+    worldSpacePosition = transformMatrix *  vec4(position, 1.0);
+
+    mat3 tMatrix = mat3(transformMatrix);
+
+
+    vec3 T = normalize(vec3(transformMatrix * vec4(tangentVec, 0.0)));
+    vec3 N = normalize(vec3(transformMatrix * vec4(normal, 0.0)));
+
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
+
+    toTangentSpace = mat3(T, B, N);
     bitangent = B;
     tangent = T;
-    
-    toTangentSpace = mat3(T, B, N);
-    
-    viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
+
+
+    mat3 t = transpose(toTangentSpace);
+    viewDirection = normalize(t * cameraVec  - t * worldSpacePosition.xyz);
     texCoords = uvTexture;
-    
-    normalVec = N; 
-   
-    gl_Position = projectionMatrix * viewMatrix * vPosition;
+
+    normalVec = N;
+    gl_Position = projectionMatrix * viewMatrix *  worldSpacePosition;
 }

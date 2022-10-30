@@ -9,17 +9,21 @@ uniform sampler2D noiseSampler;
 uniform vec3 samples[KERNELS];
 uniform mat4 projection;
 uniform vec2 noiseScale;
-uniform vec2 settings;// RADIUS, POWER
-uniform mat4 invViewMatrix;
+uniform vec3 settings;// RADIUS, POWER, BIAS
+uniform mat4 viewMatrix;
 out vec4 fragColor;
 
 void main()
 {
-    float radius = settings.x * 1000.;
-    float power = settings.y;
+    vec3 fragPosition = texture(gPosition, texCoords).rgb;
+    if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
+        discard;
 
-    vec3 fragPos = texture(gPosition, texCoords).xyz;
-    vec3 normal = normalize(texture(gNormal, texCoords) * invViewMatrix).rgb;
+    float radius = settings.x;
+    float power = settings.y;
+    float bias = settings.z;
+
+    vec3 normal = normalize(texture(gNormal, texCoords).rgb);
     vec3 randomVec = normalize(texture(noiseSampler, texCoords * noiseScale).xyz);
 
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
@@ -29,16 +33,16 @@ void main()
     float occlusion = 0.0;
     for (int i = 0; i < KERNELS; ++i){
         vec3 samplePos = TBN * samples[i];
-        samplePos = fragPos + samplePos * radius;
+        samplePos = fragPosition + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
-        offset = projection * offset;
+        offset = projection * viewMatrix *offset;
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
         float sampleDepth = texture(gPosition, offset.xy).z;
-        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
-        occlusion += (sampleDepth >= samplePos.z  ? 1.0 : 0.0) * rangeCheck;
+        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPosition.z - sampleDepth));
+        occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
     }
-    occlusion = 1.0 - (occlusion / float(KERNELS));
+    occlusion = occlusion / float(KERNELS);
 
     fragColor = vec4(pow(clamp(occlusion, 0., 1.), power), .0, .0, 1.);
 }

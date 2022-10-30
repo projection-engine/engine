@@ -107,15 +107,14 @@ void main() {
 
 
             Lo += computeDirectionalLight(
-            V,
-            F0,
-            lightDir,
-            lightColor,
-            fragPosition,
-            roughness,
-            metallic,
-            N,
-            albedo
+                V,
+                F0,
+                lightDir,
+                lightColor,
+                roughness,
+                metallic,
+                N,
+                albedo
             );
             if (directionalLightsData[i][2][2] > 0.){
                 vec2 atlasFace = vec2(directionalLightsData[i][2][0], directionalLightsData[i][2][1]);

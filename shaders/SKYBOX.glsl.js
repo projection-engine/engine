@@ -30,7 +30,7 @@ void main(void){
 
 // export const generationFragment = `#version 300 es
 // precision highp float;
-// in vec3 vPosition;
+// in vec3 worldSpacePosition;
 //
 // uniform sampler2D uSampler;
 //
@@ -46,7 +46,7 @@ void main(void){
 // }
 //
 // void main() {
-//     vec2 uv = sampleMapTexture(normalize(vPosition));
+//     vec2 uv = sampleMapTexture(normalize(worldSpacePosition));
 //     vec3 color = texture(uSampler, uv.xy).rgb;
 //     fragColor = vec4(color, 1.0);
 // }

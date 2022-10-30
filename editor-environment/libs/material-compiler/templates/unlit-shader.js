@@ -7,7 +7,7 @@ precision highp float;
 #define MAX_LIGHTS 2
 #define PI  3.14159265359 
 
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform vec3 cameraVec;
@@ -56,7 +56,7 @@ uniform vec3 cameraVec;
 uniform int dirLightQuantity;
 
 
-out vec4 vPosition;
+out vec4 worldSpacePosition;
 out vec2 texCoords;
 out mat3 toTangentSpace;
 out vec3 normalVec;  
@@ -68,7 +68,7 @@ ${functions}
 void main(){
 
 
-    vPosition =  transformMatrix *   vec4(position, 1.0);
+    worldSpacePosition =  transformMatrix *   vec4(position, 1.0);
     
     vec3 T = normalize( normalMatrix  * normalize(tangentVec));
     vec3 N =  normalize(normalMatrix * normal);
@@ -79,7 +79,7 @@ void main(){
     toTangentSpace = mat3(T, B, N);
 
     texCoords = uvTexture;
-    gl_Position = vPosition;
+    gl_Position = worldSpacePosition;
 
     ${bodyOperations}
     

@@ -4,11 +4,11 @@ layout (location = 0) in vec3 position;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 
-out vec3 vPosition;
+out vec3 worldSpacePosition;
 void main() {
-    vPosition = position;
+    worldSpacePosition = position;
 
-    gl_Position = projectionMatrix * viewMatrix * vec4(vPosition, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * vec4(worldSpacePosition, 1.0);
 }
 
 `
@@ -18,7 +18,7 @@ export const irradiance = `#version 300 es
 precision highp float;
 
 out vec4 fragColor;
-in vec3 vPosition;
+in vec3 worldSpacePosition;
 
 uniform vec3 multiplier;
 uniform samplerCube uSampler;
@@ -26,7 +26,7 @@ uniform samplerCube uSampler;
 const float PI = 3.14159265359;
 
 void main(){
-    vec3 N = normalize(vPosition);
+    vec3 N = normalize(worldSpacePosition);
 
     vec3 irradiance = vec3(0.0);
 
@@ -56,7 +56,7 @@ export const prefiltered = `#version 300 es
 precision highp float;
 
 out vec4 FragColor;
-in vec3 vPosition;
+in vec3 worldSpacePosition;
 
 uniform samplerCube environmentMap;
 uniform float roughness;
@@ -119,7 +119,7 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 N = normalize(vPosition);
+    vec3 N = normalize(worldSpacePosition);
 
     // make the simplyfying assumption that V equals R equals the normal
     vec3 R = N;

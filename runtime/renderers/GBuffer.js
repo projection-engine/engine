@@ -55,7 +55,7 @@ export default class GBuffer {
             ambientSampler: GBuffer.ambientSampler,
             cameraVec: CameraAPI.position,
             brdfSampler: GPUResources.BRDF,
-            settings: new Float32Array(4)
+            settings: new Float32Array(4),
         })
 
         SSGIPass.normalUniforms.gNormal = GBuffer.baseNormalSampler

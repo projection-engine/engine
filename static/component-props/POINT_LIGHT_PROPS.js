@@ -1,6 +1,6 @@
 import Component from "../../templates/components/Component";
 
-export default  [
+export default [
 
     Component.group("INTENSITY_COLOR", [
         Component.color("COLOR", "color"),
@@ -12,7 +12,7 @@ export default  [
         Component.boolean("ENABLED", "shadowMap"),
 
         Component.number("PCF_SAMPLES", "shadowSamples", undefined, 1, 1),
-        Component.number("BIAS", "shadowBias"),
+        Component.number("BIAS", "shadowBias", undefined, undefined, .001),
     ]),
     Component.group("SHADOW_VIEW_PLANES", [
         Component.number("FAR", "zFar"),

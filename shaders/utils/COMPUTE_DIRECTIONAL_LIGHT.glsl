@@ -1,4 +1,4 @@
-vec3 computeDirectionalLight(vec3 V, vec3 F0, vec3 lightDir, vec3 ambient, vec3 fragPosition, float roughness, float metallic, vec3 N, vec3 albedo){
+vec3 computeDirectionalLight(vec3 V, vec3 F0, vec3 lightDir, vec3 lightColor, float roughness, float metallic, vec3 N, vec3 albedo){
     vec3 H = normalize(V + lightDir);
 
     float NDF = distributionGGX(N, H, roughness);
@@ -13,5 +13,5 @@ vec3 computeDirectionalLight(vec3 V, vec3 F0, vec3 lightDir, vec3 ambient, vec3 
 
     float NdotL = max(dot(N, lightDir), 0.0);
 
-    return (kD * albedo / PI + specular) * ambient * NdotL;
+    return (kD * albedo / PI + specular) * lightColor * NdotL;
 }

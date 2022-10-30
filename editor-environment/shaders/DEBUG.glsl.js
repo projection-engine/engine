@@ -10,7 +10,7 @@ precision mediump float;
 #define THRESHOLD .0001
 in vec2 texCoords;
 uniform sampler2D uSampler; 
-uniform sampler2D positionSampler;
+uniform mat4 viewMatrix;
 uniform int option;
 out vec4 fragColor;
 
@@ -21,16 +21,14 @@ float linearize(float depth){
 }
 
 void main(){
-     vec3 fragPosition = texture(positionSampler, texCoords).rgb;
-     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
-            discard;
+  
     vec4 samplerData = texture(uSampler, texCoords);
     vec3 color = samplerData.rgb; 
     
     if(option == 2){
         if(samplerData.r <= THRESHOLD)    
             discard;        
-        color = vec3(linearize(color.r)) * 2.;
+        color = vec3(linearize(color.r));
     }
     else if (option == 9)
         color = vec3(color.b);
@@ -40,6 +38,7 @@ void main(){
         color = vec3(color.r);
     else if(option == 16)
         color = vec3(color.gb, 0.);
+  
     fragColor = vec4(color, 1.);
 }
 `

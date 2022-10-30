@@ -4,6 +4,7 @@ import {PBR} from "../shaders/templates/PBR"
 import GPUResources from "../GPUResources";
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
 import ACES from "../shaders/utils/ACES.glsl"
+import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl"
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -35,7 +36,8 @@ export const METHODS = {
     aces: "//import(aces)",
     ambient: "//import(ambient)",
     forwardAmbient: "//import(forwardAmbient)",
-    ambientUniforms: "//import(ambientUniforms)"
+    ambientUniforms: "//import(ambientUniforms)",
+    parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)"
 }
 
 
@@ -44,6 +46,9 @@ function applyMethods(shaderCode) {
 
     Object.keys(METHODS).forEach(key => {
         switch (true) {
+            case key === "parallaxOcclusionMapping":
+                response = response.replaceAll(METHODS[key], PARALLAX_OCCLUSION_MAPPING)
+                break
             case key === "rayMarcher":
                 response = response.replaceAll(METHODS[key], RAY_MARCHER)
                 break

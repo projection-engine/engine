@@ -6,7 +6,7 @@ precision highp float;
 #define MAX_LIGHTS 2
 #define PI  3.14159265359 
 
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform int directionalLightsQuantity;
@@ -47,7 +47,7 @@ ${ambient ? `
 
 void main(){
     ${body}
-    vec3 fragPosition = vPosition.xyz;  
+    vec3 fragPosition = worldSpacePosition.xyz;  
     vec3 albedo = vec3(gAlbedo);
     if(shadingModel != -1 && albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){       
         float roughness = gBehaviour.g;
@@ -69,8 +69,7 @@ void main(){
                     V,
                     F0,
                     lightDir,
-                    lightColor,
-                    fragPosition,
+                    lightColor, 
                     roughness,
                     metallic,
                     N,
@@ -84,7 +83,7 @@ void main(){
         }
     
        ${ambient ? `
-        Lo += computeAmbient(NdotV, metallic, roughness, albedo, F0, V, N, ambientLODSamples, brdfSampler, vPosition.rgb);
+        Lo += computeAmbient(NdotV, metallic, roughness, albedo, F0, V, N, ambientLODSamples, brdfSampler, worldSpacePosition.rgb);
         ` : ""}
     
         finalColor = vec4(Lo, opacity);
@@ -115,7 +114,7 @@ uniform vec3 cameraVec;
 
 
 
-out vec4 vPosition;
+out vec4 worldSpacePosition;
 out vec2 texCoords;
 out mat3 toTangentSpace;
 out vec3 normalVec;  
@@ -127,7 +126,7 @@ ${functions}
 void main(){
 
 
-    vPosition =  transformMatrix *   vec4(position, 1.0);
+    worldSpacePosition =  transformMatrix *   vec4(position, 1.0);
     
     vec3 T = normalize( normalMatrix  * normalize(tangentVec));
     vec3 N =  normalize(normalMatrix * normal);
@@ -138,7 +137,7 @@ void main(){
     toTangentSpace = mat3(T, B, N);
 
     texCoords = uvTexture;
-    gl_Position = vPosition;
+    gl_Position = worldSpacePosition;
 
     ${bodyOperations}
     

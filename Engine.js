@@ -23,7 +23,7 @@ export default class Engine {
     static dataEntity = new Map()
     static queryMap = new Map()
     static UILayouts = new Map()
-
+    static isDev = false
     static entities = []
     static #environment = ENVIRONMENT.DEV
 
@@ -33,9 +33,9 @@ export default class Engine {
 
     static set environment(data) {
         ScriptingPass.entitiesToExecute = data !== ENVIRONMENT.DEV ? Engine.entities : []
-        PhysicsPass.isDev = data === ENVIRONMENT.DEV
+        Engine.isDev = data === ENVIRONMENT.DEV
         Engine.#environment = data
-        if(PhysicsPass.isDev)
+        if (Engine.isDev)
             CameraAPI.updateAspectRatio()
     }
 
@@ -77,8 +77,12 @@ export default class Engine {
 
     static updateParams(data, physicsSteps, physicsSubSteps) {
         Engine.params = data
-        PhysicsPass.subSteps = physicsSubSteps
-        PhysicsPass.simulationStep = physicsSteps
+
+        console.log(physicsSteps, physicsSubSteps)
+        if (typeof physicsSteps === "number")
+            PhysicsPass.subSteps = physicsSubSteps
+        if (typeof physicsSteps === "number")
+            PhysicsPass.simulationStep = physicsSteps
 
 
         SSGIPass.settingsBuffer[0] = data.SSGI.stepSize
@@ -102,6 +106,7 @@ export default class Engine {
 
         AmbientOcclusion.settings[0] = data.SSAO.radius
         AmbientOcclusion.settings[1] = data.SSAO.power
+        AmbientOcclusion.settings[2] = data.SSAO.bias
 
         AmbientOcclusion.enabled = data.SSAO.enabled
         GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined

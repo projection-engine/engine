@@ -10,7 +10,7 @@ in mat3 toTangentSpace;
 in vec3 viewDirection;
 in vec2 texCoords;
 in vec3 meshID;
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 uniform float elapsedTime;
 //import(ambientUniforms)
 
@@ -39,11 +39,11 @@ void main(){
     gBaseNormal = vec4(normalVec, 1.);
     gMeshID = vec4(meshID, 1.);
     gDepth = vec4(gl_FragCoord.z, texCoords, 1.);
-    gPosition = vPosition;
+    gPosition = worldSpacePosition;
     ${body}
     
    ${ambient ? `        
-        gAmbient = vec4( computeAmbient(cameraVec, gAlbedo.rgb,  vPosition.rgb, gNormal.rgb, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, vPosition.rgb), 1.);
+        gAmbient = vec4( computeAmbient(cameraVec, gAlbedo.rgb,  worldSpacePosition.rgb, gNormal.rgb, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, worldSpacePosition.rgb), 1.);
     ` : "gAmbient = vec4(vec3(0.), 1.);"}
 }
         `,
@@ -65,7 +65,7 @@ uniform mat4 projectionMatrix;
 uniform vec3 cameraVec;
 
 
-out vec4 vPosition;
+out vec4 worldSpacePosition;
 out vec2 texCoords;
 out mat3 toTangentSpace;
 out vec3 normalVec;
@@ -75,7 +75,7 @@ ${inputs}
 ${functions}
 
 void main(){
-    vPosition =  transformMatrix *   vec4(position, 1.0);
+    worldSpacePosition =  transformMatrix *   vec4(position, 1.0);
     
     vec3 T = normalize( mat3(transformMatrix)  * normalize(tangentVec));
     vec3 N =  normalize(mat3(transformMatrix) * normal);
@@ -85,12 +85,12 @@ void main(){
     
     toTangentSpace = mat3(T, B, N);
     
-    viewDirection = transpose(toTangentSpace) * (vPosition.xyz - cameraVec);
+    viewDirection = transpose(toTangentSpace) * (worldSpacePosition.xyz - cameraVec);
     texCoords = uvTexture;
     normalVec = normal;
 
    
-     gl_Position = vPosition;
+     gl_Position = worldSpacePosition;
 
     ${bodyOperations}
     

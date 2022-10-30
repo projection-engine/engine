@@ -4,10 +4,9 @@ export const DEFAULT_MATRICES = [
     {
         key: "settings",
         data: [
-            0, 0, 0, // ALBEDO, NORMAL, ROUGHNESS,
-            0, 0, 0, // METALLIC, AO, EMISSION
-
-            0, 0, 0
+            0, 0, 0, // SAMPLE_ALBEDO,   SAMPLE_NORMAL, SAMPLE_ROUGHNESS,
+            0, 0, 0, // SAMPLE_METALLIC, SAMPLE_AO,     SAMPLE_EMISSION
+            0, 0, 0  // POM_HEIGHT_SCALE,POM_LAYERS,    POM_DISCARD_OFF_PIXELS
         ]
     },
     {
@@ -40,7 +39,7 @@ export const DEFAULT_MATRICES = [
             1, 1, 1, 1, // [ALBEDO], [NORMAL]
             1, 1, 1, 1, // [ROUGHNESS], [METALLIC]
             1, 1, 1, 1, // [AO], [EMISSION]
-            0, 0, 0, 0  // EMPTY
+            1, 1, 0, 0  // EMPTY
         ]
     }
 ]
@@ -54,5 +53,6 @@ export default {
         {key: "metallic", "type": "sampler2D"},
         {key: "ao", "type": "sampler2D"},
         {key: "emission", "type": "sampler2D"},
+        {key: "heightMap", "type": "sampler2D"},
     ]
 }

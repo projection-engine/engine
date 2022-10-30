@@ -5,7 +5,7 @@ precision highp float;
 #define MAX_LIGHTS 2
 #define PI  3.14159265359
 
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform int directionalLightsQuantity;
@@ -39,7 +39,7 @@ void main(){
     float metallic = .5;
     vec3 N = normalVec;
 
-    vec3 V = normalize(cameraVec - vPosition.xyz);
+    vec3 V = normalize(cameraVec - worldSpacePosition.xyz);
     float NdotV    = max(dot(N, V), 0.000001);
     vec3 F0 = vec3(0.04);
     vec3 Lo = vec3(0.0);
@@ -53,7 +53,6 @@ void main(){
         F0,
         lightDir,
         lightColor,
-        vPosition.xyz,
         roughness,
         metallic,
         N,
@@ -62,7 +61,7 @@ void main(){
     }
 
     for (int i = 0; i < lightQuantity; ++i){
-        vec4 currentLightData = computePointLights(pointLightData[i],  vPosition.xyz, V, N, 1., roughness, metallic, albedo, F0, i);
+        vec4 currentLightData = computePointLights(pointLightData[i],  worldSpacePosition.xyz, V, N, 1., roughness, metallic, albedo, F0, i);
         Lo += currentLightData.rgb;
     }
 

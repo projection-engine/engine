@@ -3,6 +3,7 @@ import CameraAPI from "../../api/CameraAPI";
 import {v4} from "uuid";
 import {quat, vec3, vec4} from "gl-matrix";
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
+import Engine from "../../Engine";
 
 let holding, toApplyTranslation
 const toDeg = 180 / Math.PI, halfPI = Math.PI / 2
@@ -232,6 +233,7 @@ export default class CameraTracker {
     static startTracking() {
         if (CameraTracker.#isTracking)
             return
+        console.trace("STARTING TRACK")
         CameraTracker.#isTracking = true
         document.addEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.addEventListener("keydown", CameraTracker.#handleInput)
@@ -243,11 +245,13 @@ export default class CameraTracker {
     static stopTracking() {
         if (!CameraTracker.#isTracking)
             return
+        console.trace("STOPPING TRACK")
         CameraTracker.#isTracking = false
         document.removeEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.removeEventListener("keydown", CameraTracker.#handleInput)
         document.removeEventListener("keyup", CameraTracker.#handleInput)
         document.removeEventListener("mouseup", CameraTracker.#handleInput)
+        document.removeEventListener("mousemove", CameraTracker.#handleInput)
         gpu.canvas.removeEventListener("mousedown", CameraTracker.#handleInput)
     }
 

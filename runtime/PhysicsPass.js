@@ -7,10 +7,9 @@ const COMP = COMPONENTS.RIGID_BODY
 export default class PhysicsPass {
     static simulationStep = 0.01666666
     static subSteps = 10
-    static isDev = false
 
     static execute() {
-        if (PhysicsPass.isDev || !PhysicsAPI.ammo)
+        if (Engine.isDev || !PhysicsAPI.ammo)
             return
         const rigidBodies = PhysicsAPI.rigidBodies
         const length = rigidBodies.length

@@ -125,7 +125,7 @@ void main(){
 export const fragment = `#version 300 es
 precision highp float;
 
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 uniform int axis;
 uniform int selectedAxis;
 out vec4 fragColor; 
@@ -218,7 +218,7 @@ export const fragmentRot = `#version 300 es
 precision highp float;
 
 // IN
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 in vec2 uv;
 in vec3 normalVec;
 uniform int axis;

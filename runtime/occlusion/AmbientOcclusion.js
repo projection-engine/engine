@@ -18,7 +18,7 @@ export default class AmbientOcclusion {
     static noiseSampler
     static noiseScale = new Float32Array(2)
     static uniforms = {}
-    static settings = new Float32Array(2)
+    static settings = new Float32Array(3)
     static enabled = true
 
     static initialize() {
@@ -47,7 +47,7 @@ export default class AmbientOcclusion {
                     {
                         gPosition: GBuffer.positionSampler,
                         gNormal: GBuffer.baseNormalSampler,
-                        invViewMatrix: CameraAPI.invViewMatrix,
+                        viewMatrix: CameraAPI.viewMatrix,
                         noiseSampler: AmbientOcclusion.noiseSampler,
                         noiseScale: AmbientOcclusion.noiseScale,
                         samples: AmbientOcclusion.kernels,

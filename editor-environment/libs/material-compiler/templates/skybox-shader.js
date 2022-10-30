@@ -5,7 +5,7 @@ precision highp float;
 // IN
 #define PI  3.14159265359 
 
-in vec4 vPosition;
+in vec4 worldSpacePosition;
 in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform vec3 cameraVec;
