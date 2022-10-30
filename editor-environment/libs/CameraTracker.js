@@ -1,9 +1,6 @@
 import CameraAPI from "../../api/CameraAPI";
-
-import {v4} from "uuid";
 import {quat, vec3, vec4} from "gl-matrix";
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
-import Engine from "../../Engine";
 
 let holding, toApplyTranslation
 const toDeg = 180 / Math.PI, halfPI = Math.PI / 2

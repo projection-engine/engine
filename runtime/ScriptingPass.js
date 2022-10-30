@@ -1,4 +1,3 @@
-import ENVIRONMENT from "../static/ENVIRONMENT"
 import Engine from "../Engine";
 
 export default class ScriptingPass {

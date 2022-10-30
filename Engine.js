@@ -2,8 +2,7 @@ import CameraAPI from "./api/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
 import GBuffer from "./runtime/renderers/GBuffer";
-import SSGIPass from "./runtime/SSGIPass";
-import SSRPass from "./runtime/SSRPass";
+import GlobalIlluminationPass from "./runtime/GlobalIlluminationPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import ConversionAPI from "./api/math/ConversionAPI";
@@ -78,31 +77,23 @@ export default class Engine {
     static updateParams(data, physicsSteps, physicsSubSteps) {
         Engine.params = data
 
-        console.log(physicsSteps, physicsSubSteps)
         if (typeof physicsSteps === "number")
             PhysicsPass.subSteps = physicsSubSteps
         if (typeof physicsSteps === "number")
             PhysicsPass.simulationStep = physicsSteps
 
+        GlobalIlluminationPass.rayMarchSettings[0] = data.SSR.falloff || 3
+        GlobalIlluminationPass.rayMarchSettings[1] = data.SSR.minRayStep || .1
+        GlobalIlluminationPass.rayMarchSettings[2] = data.SSR.stepSize || 1
 
-        SSGIPass.settingsBuffer[0] = data.SSGI.stepSize
-        SSGIPass.settingsBuffer[1] = data.SSGI.strength
+        GlobalIlluminationPass.rayMarchSettings[3] = data.SSGI.stepSize || 1
+        GlobalIlluminationPass.rayMarchSettings[4] = data.SSGI.strength || 1
 
-        SSGIPass.rayMarchSettings[0] = data.SSGI.maxSteps
-        SSGIPass.rayMarchSettings[1] = data.SSGI.binarySearchSteps
-        SSGIPass.rayMarchSettings[2] = data.SSGI.depthThreshold
+        GlobalIlluminationPass.rayMarchSettings[5] = data.SSGI.enabled ? 1 : 0
+        GlobalIlluminationPass.rayMarchSettings[6] = data.SSR.enabled ? 1 : 0
 
-        SSGIPass.enabled = data.SSGI.enabled
-        GBuffer.deferredUniforms.screenSpaceGI = data.SSGI.enabled ? SSGIPass.sampler : undefined
-
-        SSRPass.uniforms.stepSize = data.SSR.stepSize
-        SSRPass.rayMarchSettings[0] = data.SSR.maxSteps
-        SSRPass.rayMarchSettings[1] = data.SSR.binarySearchSteps
-        SSRPass.rayMarchSettings[2] = data.SSR.depthThreshold
-
-        SSRPass.enabled = data.SSR.enabled
-        GBuffer.deferredUniforms.screenSpaceReflections = data.SSR.enabled ? SSRPass.sampler : undefined
-
+        GlobalIlluminationPass.rayMarchSettings[7] = data.SSGI.maxSteps || 4
+        GlobalIlluminationPass.rayMarchSettings[8] = data.SSR.maxSteps || 4
 
         AmbientOcclusion.settings[0] = data.SSAO.radius
         AmbientOcclusion.settings[1] = data.SSAO.power

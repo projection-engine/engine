@@ -5,6 +5,9 @@ import GPUResources from "../GPUResources";
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
 import ACES from "../shaders/utils/ACES.glsl"
 import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl"
+import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
+import SSR from "../shaders/utils/SSR.glsl"
+import SSGI from "../shaders/utils/SSGI.glsl"
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -30,7 +33,9 @@ export const METHODS = {
     computeDirectionalLight: "//import(computeDirectionalLight)",
     computePointLight: "//import(computePointLight)",
 
-
+    SSR: "//import(SSR)",
+    SSGI:"//import(SSGI)",
+    computeTBN: "//import(computeTBN)",
     calculateShadows: "//import(calculateShadows)",
     rayMarcher: "//import(rayMarcher)",
     aces: "//import(aces)",
@@ -46,6 +51,15 @@ function applyMethods(shaderCode) {
 
     Object.keys(METHODS).forEach(key => {
         switch (true) {
+            case key === "SSGI":
+                response = response.replaceAll(METHODS[key], SSGI)
+                break
+            case key === "SSR":
+                response = response.replaceAll(METHODS[key], SSR)
+                break
+            case key === "computeTBN":
+                response = response.replaceAll(METHODS[key], COMPUTE_TBN)
+                break
             case key === "parallaxOcclusionMapping":
                 response = response.replaceAll(METHODS[key], PARALLAX_OCCLUSION_MAPPING)
                 break
@@ -116,12 +130,14 @@ export default class Shader {
 
     #compileShader(shaderCode, shaderType, pushMessage) {
         const bundledCode = applyMethods(shaderCode)
+
         const shader = gpu.createShader(shaderType)
         gpu.shaderSource(shader, bundledCode)
         gpu.compileShader(shader)
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
 
         if (!compiled) {
+            console.log(bundledCode)
             console.error(gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false

@@ -51,7 +51,7 @@ export default class ScreenEffectsPass {
             })
             GPUResources.quad.draw()
             op.stopMapping()
-            ScreenEffectsPass.blur(op, bloomStrength)
+            ScreenEffectsPass.blur(op.colors[0], bloomStrength)
         }
 
         const u = ScreenEffectsPass.uniforms
@@ -63,12 +63,12 @@ export default class ScreenEffectsPass {
         op.stopMapping()
     }
 
-    static blur(fbo, bloomIntensity, sampleScale = 2, blurBuffers = ScreenEffectsPass.blurBuffers, upSampledBuffers = ScreenEffectsPass.upSampledBuffers, kernel = 7) {
+    static blur(SAMPLER, bloomIntensity, sampleScale = 2, blurBuffers = ScreenEffectsPass.blurBuffers, upSampledBuffers = ScreenEffectsPass.upSampledBuffers, kernel = 7) {
         const q = blurBuffers.length
 
         for (let level = 0; level < q; level++) {
             const {width, height} = blurBuffers[level]
-            const previousColor = level > 0 ? blurBuffers[level - 1].height.colors[0] : fbo.colors[0]
+            const previousColor = level > 0 ? blurBuffers[level - 1].height.colors[0] : SAMPLER
             width.startMapping()
             ScreenEffectsPass.blurShader.bindForUse({
                 sceneColor: previousColor,

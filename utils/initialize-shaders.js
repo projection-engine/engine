@@ -4,9 +4,7 @@ import FOLIAGE_SPRITEGlsl from "../shaders/FOLIAGE_SPRITE.glsl";
 import SPRITEGlsl from "../shaders/SPRITE.glsl";
 import QUAD_VERTEX from "../shaders/QUAD.vert";
 import * as shaderCode from "../shaders/CUBE_MAP.glsl";
-import SSGIPass from "../runtime/SSGIPass";
-
-import SSRPass from "../runtime/SSRPass";
+import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import AO_FRAG from "../shaders/AO.frag";
 import AO_BLUR_FRAG from "../shaders/AO-BLUR.frag";
@@ -22,8 +20,7 @@ import DEFERRED_RENDERER_FRAG from "../shaders/DEFERRED_RENDERER.frag";
 import TO_SCREEN_FRAG from "../shaders/TO_SCREEN.frag";
 import ONLY_DEPTH_VERT from "../shaders/ONLY_DEPTH.vert"
 import ONLY_DEPTH_FRAG from "../shaders/ONLY_DEPTH.frag"
-import SSR_FRAG from "../shaders/SSR.frag"
-import SSGI_FRAG from "../shaders/SSGI.frag"
+import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/SCREEN_SPACE_INDIRECT.frag"
 import STOCHASTIC_NORMALS_FRAG from "../shaders/STOCHASTIC_NORMALS.frag"
 
 
@@ -34,9 +31,10 @@ export default function initializeShaders(){
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
-    SSGIPass.ssgiShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, QUAD_VERTEX, SSGI_FRAG)
-    SSGIPass.normalsShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, QUAD_VERTEX, STOCHASTIC_NORMALS_FRAG)
-    SSRPass.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSR, QUAD_VERTEX, SSR_FRAG)
+
+    GlobalIlluminationPass.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, QUAD_VERTEX, SCREEN_SPACE_INDIRECT_FRAG)
+    GlobalIlluminationPass.normalsShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, QUAD_VERTEX, STOCHASTIC_NORMALS_FRAG)
+
     AmbientOcclusion.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.AO, QUAD_VERTEX, AO_FRAG)
     AmbientOcclusion.blurShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, QUAD_VERTEX, AO_BLUR_FRAG)
     DirectionalShadows.shadowMapShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)

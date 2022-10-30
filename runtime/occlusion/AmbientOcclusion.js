@@ -2,7 +2,7 @@ import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPUResources from "../../GPUResources";
 import GBuffer from "../renderers/GBuffer";
 import CameraAPI from "../../api/CameraAPI";
-import SSGIPass from "../SSGIPass";
+import GlobalIlluminationPass from "../GlobalIlluminationPass";
 import ImageWorker from "../../workers/image/ImageWorker";
 
 const RESOLUTION = 8
@@ -56,8 +56,8 @@ export default class AmbientOcclusion {
                         sampler: AmbientOcclusion.unfilteredSampler // blur
                     }
                 )
-                SSGIPass.uniforms.noiseSampler = AmbientOcclusion.noiseSampler
-                SSGIPass.normalUniforms.noise = AmbientOcclusion.noiseSampler
+                GlobalIlluminationPass.uniforms.noiseSampler = AmbientOcclusion.noiseSampler
+                GlobalIlluminationPass.normalUniforms.noise = AmbientOcclusion.noiseSampler
                 AmbientOcclusion.#ready = true
 
             })

@@ -1,8 +1,7 @@
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import GBuffer from "./runtime/renderers/GBuffer";
 import ForwardRenderer from "./runtime/renderers/ForwardRenderer";
-import SSGIPass from "./runtime/SSGIPass";
-import SSRPass from "./runtime/SSRPass";
+import GlobalIlluminationPass from "./runtime/GlobalIlluminationPass";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import SpecularProbePass from "./runtime/renderers/SpecularProbePass";
 import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
@@ -36,8 +35,7 @@ export default class Loop {
         ScreenEffectsPass.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
-        SSGIPass.initialize()
-        SSRPass.initialize()
+        GlobalIlluminationPass.initialize()
         DiffuseProbePass.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
@@ -57,7 +55,7 @@ export default class Loop {
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
 
-        SSGIPass.execute()
+        GlobalIlluminationPass.execute()
         GBuffer.execute()
         AmbientOcclusion.execute()
         GBuffer.drawBuffer(
@@ -79,7 +77,6 @@ export default class Loop {
         if (onWrap != null)
             onWrap.execute(true)
         FBO.stopMapping()
-        SSRPass.execute()
     }
 
 

@@ -1,5 +1,4 @@
 import Engine from "../Engine";
-import ENVIRONMENT from "../static/ENVIRONMENT";
 import COMPONENTS from "../static/COMPONENTS.js";
 import PhysicsAPI from "../api/PhysicsAPI";
 

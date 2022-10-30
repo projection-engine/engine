@@ -2,8 +2,7 @@ import MaterialAPI from "../../api/rendering/MaterialAPI";
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
 import GPUResources from "../../GPUResources";
-import SSGIPass from "../SSGIPass";
-import SSRPass from "../SSRPass";
+import GlobalIlluminationPass from "../GlobalIlluminationPass";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 
 
@@ -58,14 +57,11 @@ export default class GBuffer {
             settings: new Float32Array(4),
         })
 
-        SSGIPass.normalUniforms.gNormal = GBuffer.baseNormalSampler
-        SSGIPass.uniforms.previousFrame = GBuffer.compositeFBO.colors[0]
-        SSGIPass.uniforms.gPosition = GBuffer.positionSampler
-
-        SSRPass.uniforms.previousFrame = GBuffer.compositeFBO.colors[0]
-        SSRPass.uniforms.gPosition = GBuffer.positionSampler
-        SSRPass.uniforms.gNormal = GBuffer.normalSampler
-        SSRPass.uniforms.gBehaviour = GBuffer.behaviourSampler
+        GlobalIlluminationPass.normalUniforms.gNormal = GBuffer.baseNormalSampler
+        GlobalIlluminationPass.uniforms.previousFrame = GBuffer.compositeFBO.colors[0]
+        GlobalIlluminationPass.uniforms.gPosition = GBuffer.positionSampler
+        GlobalIlluminationPass.uniforms.gNormal = GBuffer.normalSampler
+        GlobalIlluminationPass.uniforms.gBehaviour = GBuffer.behaviourSampler
 
         GBuffer.ready = true
 

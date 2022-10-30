@@ -3,24 +3,28 @@ import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
 import GPUResources from "../GPUResources";
 import generateBlurBuffers from "./generate-blur-buffers";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
-import SSGIPass from "../runtime/SSGIPass";
-import SSRPass from "../runtime/SSRPass";
+import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import GBuffer from "../runtime/renderers/GBuffer";
 
 export default function initializeFrameBuffers() {
+    const GI_SETTINGS = {
+        linear: true,
+        precision: gpu.RGBA,
+        format: gpu.RGBA,
+        type: gpu.UNSIGNED_BYTE
+    }
     GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPUResources.internalResolution.w, GPUResources.internalResolution.h).texture().depthTest()
     GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPUResources.internalResolution.w, GPUResources.internalResolution.h).texture()
 
-    SSGIPass.normalsFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS).texture()
-    SSGIPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI).texture({
-        linear: true,
-         // precision: gpu.RGBA, format: gpu.RGBA, type: gpu.UNSIGNED_BYTE
-    })
-    const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPUResources.internalResolution.w, GPUResources.internalResolution.h, 2)
-    SSGIPass.blurBuffers = blurBuffers
-    SSGIPass.upSampledBuffers = upSampledBuffers
+    GlobalIlluminationPass.normalsFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS).texture()
+    GlobalIlluminationPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
+        .texture({...GI_SETTINGS, attachment: 0})
+        .texture({...GI_SETTINGS, attachment: 1})
 
-    SSRPass.FBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSR).texture({linear: true})
+    const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPUResources.internalResolution.w, GPUResources.internalResolution.h, 2)
+    GlobalIlluminationPass.blurBuffers = blurBuffers
+    GlobalIlluminationPass.upSampledBuffers = upSampledBuffers
+
 
     AmbientOcclusion.framebuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC)
         .texture({
