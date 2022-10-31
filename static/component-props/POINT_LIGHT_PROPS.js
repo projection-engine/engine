@@ -15,8 +15,8 @@ export default [
         Component.number("BIAS", "shadowBias", undefined, undefined, .001),
     ]),
     Component.group("SHADOW_VIEW_PLANES", [
-        Component.number("FAR", "zFar"),
-        Component.number("NEAR", "zNear"),
+        Component.number("FAR", "zFar", undefined, undefined, .001),
+        Component.number("NEAR", "zNear", undefined, undefined, .001),
     ]),
     Component.group("ATTENUATION", [
         Component.array(["LINEAR", "DISTANCE", "DISTANCE_SQUARED"], "attenuation", 3, .001)

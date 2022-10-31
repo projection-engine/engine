@@ -20,6 +20,7 @@ export default class DirectionalLightComponent extends Component {
     _intensity = 1
     lightIndex = -1
     pcfSamples = 3
+    shadowBias = .01
 
     get intensity() {
         return this._intensity

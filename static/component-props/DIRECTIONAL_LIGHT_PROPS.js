@@ -12,8 +12,11 @@ export default [
         Component.boolean("ENABLED", "shadowMap"),
         Component.number("SIZE", "size", undefined, 1, undefined, false, v => !v.shadowMap),
 
-        Component.number("FAR", "zFar", undefined, undefined, undefined, false, true, v => !v.shadowMap),
-        Component.number("NEAR", "zNear", undefined, undefined, undefined, false, true, v => !v.shadowMap),
+        Component.number("FAR", "zFar", undefined, undefined, .001, false, true, v => !v.shadowMap),
+        Component.number("NEAR", "zNear", undefined, undefined, .001, false, true, v => !v.shadowMap),
+
+
+        Component.number("BIAS", "shadowBias", undefined, undefined, .001),
 
         Component.number("PCF_SAMPLES", "pcfSamples", 10, 1, 1, false, false, v => !v.shadowMap),
     ]),

@@ -10,8 +10,8 @@ export default class PointLightComponent extends Component {
     attenuation = [1, 0, 0]
     _changed = true
 
-    _zNear = 1
-    _zFar = 1000
+    _zNear = .1
+    _zFar = 25
     shadowMap = true
     intensity = 1
     shadowSamples = 10

@@ -1,21 +1,21 @@
 #version 300 es
 
-precision highp float;
+precision lowp float;
 #define MAX_POINT_LIGHTS 24
 #define MAX_LIGHTS 2
 #define PI  3.14159265359
 
 in vec4 worldSpacePosition;
 in  vec2 texCoords;
-in mat3 toTangentSpace;
-uniform int directionalLightsQuantity;
+in vec3 normalVec;
+
+uniform vec4 settings;
+uniform sampler2D shadowMapTexture;
+uniform samplerCube shadowCube;
+uniform mat4 dirLightPOV[MAX_LIGHTS];
 uniform mat3 directionalLightsData[MAX_LIGHTS];
 uniform vec3 cameraVec;
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
-uniform int lightQuantity;
-in vec3 normalVec;
-
-#define PI  3.14159265359
 
 
 out vec4 finalColor;
@@ -27,6 +27,8 @@ out vec4 finalColor;
 //import(distributionGGX)
 
 //import(geometrySmith)
+
+//import(computeShadows)
 
 //import(computeDirectionalLight)
 
@@ -42,28 +44,30 @@ void main(){
     vec3 V = normalize(cameraVec - worldSpacePosition.xyz);
     float NdotV    = max(dot(N, V), 0.000001);
     vec3 F0 = vec3(0.04);
-    vec3 Lo = vec3(0.0);
+    vec3 directIllumination = vec3(0.0);
     F0 = mix(F0, albedo, metallic);
 
-    for (int i = 0; i < directionalLightsQuantity; i++){
-        vec3 lightDir =  normalize(vec3(directionalLightsData[i][0][0], directionalLightsData[i][0][1],directionalLightsData[i][0][2]));
-        vec3 lightColor =  vec3(directionalLightsData[i][1][0], directionalLightsData[i][1][1],directionalLightsData[i][1][2]);
-        Lo += computeDirectionalLight(
-        V,
-        F0,
-        lightDir,
-        lightColor,
-        roughness,
-        metallic,
-        N,
-        albedo
-        );
+    float shadowMapsQuantity = settings.z;
+    float shadowMapResolution = settings.y;
+    int directionalLights = int(settings.x);
+    int pointLights = int(settings.w);
+
+
+    float shadows = directionalLights > 0 || pointLights > 0?  0. : 1.0;
+    float quantityToDivide = float(directionalLights) + float(pointLights);
+
+    for (int i = 0; i < directionalLights; i++){
+        vec4 lightInformation = computeDirectionalLight(shadowMapTexture, shadowMapsQuantity, shadowMapResolution, dirLightPOV[i], directionalLightsData[i], worldSpacePosition.rgb, V, F0, roughness, metallic, N, albedo);
+        directIllumination += lightInformation.rgb;
+        shadows += lightInformation.a/quantityToDivide;
     }
 
-    for (int i = 0; i < lightQuantity; ++i){
-        vec4 currentLightData = computePointLights(pointLightData[i],  worldSpacePosition.xyz, V, N, 1., roughness, metallic, albedo, F0, i);
-        Lo += currentLightData.rgb;
+    float viewDistance = length(V);
+    for (int i = 0; i < pointLights; ++i){
+        vec4 lightInformation = computePointLights(shadowCube, pointLightData[i], worldSpacePosition.rgb, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
+        directIllumination += lightInformation.rgb;
+        shadows += lightInformation.a/quantityToDivide;
     }
 
-    finalColor = vec4(Lo, 1.);
+    finalColor = vec4(directIllumination * shadows, 1.);
 }

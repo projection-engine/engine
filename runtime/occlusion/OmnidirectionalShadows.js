@@ -22,7 +22,7 @@ export default class OmnidirectionalShadows {
         ]
 
 
-        GBuffer.deferredUniforms.shadowCube0 = OmnidirectionalShadows.cubeMaps[0].texture
+        GBuffer.deferredUniforms.shadowCube = OmnidirectionalShadows.cubeMaps[0].texture
         GBuffer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
         lightsToUpdate = OmnidirectionalShadows.lightsToUpdate
     }
@@ -52,7 +52,7 @@ export default class OmnidirectionalShadows {
                     current.zNear
                 )
         }
-        GBuffer.deferredUniforms.shadowCube0 = OmnidirectionalShadows.cubeMaps[0].texture
+        GBuffer.deferredUniforms.shadowCube = OmnidirectionalShadows.cubeMaps[0].texture
         GBuffer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
         OmnidirectionalShadows.changed = false
         lightsToUpdate.length = 0

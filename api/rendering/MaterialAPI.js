@@ -9,6 +9,9 @@ import DATA_TYPES from "../../static/DATA_TYPES";
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS";
 import ImageWorker from "../../workers/image/ImageWorker";
 import GPUController from "../../GPUController";
+import DirectionalShadows from "../../runtime/occlusion/DirectionalShadows";
+import OmnidirectionalShadows from "../../runtime/occlusion/OmnidirectionalShadows";
+import GBuffer from "../../runtime/renderers/GBuffer";
 
 const SKYBOX = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class MaterialAPI {
@@ -87,6 +90,9 @@ export default class MaterialAPI {
                 mat,
                 meshComponent,
                 {
+                    settings: GBuffer.deferredUniforms.settings,
+                    shadowMapTexture: DirectionalShadows.shadowMapShader,
+                    shadowCube: OmnidirectionalShadows.cubeMaps[0].texture,
                     cameraVec: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,

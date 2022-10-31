@@ -1,4 +1,4 @@
-import Shadows from "../shaders/utils/SHADOW_METHODS.glsl"
+import SHADOW_METHODS from "../shaders/utils/SHADOW_METHODS.glsl"
 import * as PROBES from "../shaders/templates/PROBES"
 import {PBR} from "../shaders/templates/PBR"
 import GPUResources from "../GPUResources";
@@ -8,6 +8,7 @@ import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPP
 import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
 import SSR from "../shaders/utils/SSR.glsl"
 import SSGI from "../shaders/utils/SSGI.glsl"
+import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -25,6 +26,9 @@ const TYPES = {
 }
 
 export const METHODS = {
+
+    computeShadows: "//import(computeShadows)",
+
     distributionGGX: "//import(distributionGGX)",
     geometrySchlickGGX: "//import(geometrySchlickGGX)",
     geometrySmith: "//import(geometrySmith)",
@@ -34,15 +38,15 @@ export const METHODS = {
     computePointLight: "//import(computePointLight)",
 
     SSR: "//import(SSR)",
-    SSGI:"//import(SSGI)",
+    SSGI: "//import(SSGI)",
     computeTBN: "//import(computeTBN)",
-    calculateShadows: "//import(calculateShadows)",
     rayMarcher: "//import(rayMarcher)",
     aces: "//import(aces)",
     ambient: "//import(ambient)",
     forwardAmbient: "//import(forwardAmbient)",
     ambientUniforms: "//import(ambientUniforms)",
-    parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)"
+    parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)",
+    sampleIndirectLight: "//import(sampleIndirectLight)"
 }
 
 
@@ -51,6 +55,9 @@ function applyMethods(shaderCode) {
 
     Object.keys(METHODS).forEach(key => {
         switch (true) {
+            case key === "sampleIndirectLight":
+                response = response.replaceAll(METHODS[key], SAMPLE_INDIRECT_LIGHT)
+                break
             case key === "SSGI":
                 response = response.replaceAll(METHODS[key], SSGI)
                 break
@@ -69,8 +76,8 @@ function applyMethods(shaderCode) {
             case key === "aces":
                 response = response.replaceAll(METHODS[key], ACES)
                 break
-            case key === "calculateShadows":
-                response = response.replaceAll(METHODS[key], Shadows)
+            case key === "computeShadows":
+                response = response.replaceAll(METHODS[key], SHADOW_METHODS)
                 break
             case key === "ambient":
                 response = response.replaceAll(METHODS[key], PROBES.deferredAmbient)
