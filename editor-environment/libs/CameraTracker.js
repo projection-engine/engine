@@ -1,5 +1,5 @@
 import CameraAPI from "../../api/CameraAPI";
-import {quat, vec3, vec4} from "gl-matrix";
+import {getAxisAngle, quat, vec3, vec4} from "gl-matrix";
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
 
 let holding, toApplyTranslation
@@ -48,13 +48,18 @@ export default class CameraTracker {
 
         CameraTracker.#initialized = true
 
-        if (settings.camera.cameraRotation) {
-            CameraTracker.xRotation = settings.camera.cameraRotation[0]
-            CameraTracker.yRotation = settings.camera.cameraRotation[1]
+        if (settings.camera.serialization) {
+            const x = settings.camera.xRotation
+            const y = settings.camera.yRotation
+            const translation = settings.camera.serialization.translation
+            CameraTracker.xRotation = x || 0
+            CameraTracker.yRotation = y || 0
             CameraTracker.rotationChanged = true
-        }
-        if (settings.camera.cameraTranslation) {
-            vec4.copy(toApplyTranslation, settings.camera.cameraTranslation)
+
+            CameraAPI.translationBuffer[0] = translation[0]
+            CameraAPI.translationBuffer[1] = translation[1]
+            CameraAPI.translationBuffer[2] = translation[2]
+
             CameraTracker.forceUpdate = true
         }
     }
@@ -100,15 +105,17 @@ export default class CameraTracker {
             changed = true
         }
 
-        if (changed) {
+        if (changed)
+            CameraTracker.#transform()
 
-            CameraTracker.forceUpdate = false
-            vec3.copy(CameraTracker.currentTranslation, CameraAPI.translationBuffer)
-            vec4.transformQuat(toApplyTranslation, toApplyTranslation, CameraAPI.rotationBuffer)
-            vec3.add(CameraAPI.translationBuffer, CameraAPI.translationBuffer, toApplyTranslation)
-            CameraAPI.updateView()
+    }
 
-        }
+    static #transform() {
+        CameraTracker.forceUpdate = false
+        vec3.copy(CameraTracker.currentTranslation, CameraAPI.translationBuffer)
+        vec4.transformQuat(toApplyTranslation, toApplyTranslation, CameraAPI.rotationBuffer)
+        vec3.add(CameraAPI.translationBuffer, CameraAPI.translationBuffer, toApplyTranslation)
+        CameraAPI.updateView()
     }
 
     static forceRotationTracking() {
@@ -219,6 +226,15 @@ export default class CameraTracker {
                         map.right = false
                         map.fasterJonny = false
                     }
+                    break
+                case "wheel":
+                    event.preventDefault();
+                    console.log(event)
+                    toApplyTranslation[0] = toApplyTranslation[1] = 0
+                    toApplyTranslation[3] = 1
+                    toApplyTranslation[2] += CameraTracker.movement
+                    CameraTracker.#transform()
+                    break
                 default:
                     break
             }
@@ -237,12 +253,14 @@ export default class CameraTracker {
         document.addEventListener("keyup", CameraTracker.#handleInput)
         document.addEventListener("mouseup", CameraTracker.#handleInput)
         gpu.canvas.addEventListener("mousedown", CameraTracker.#handleInput)
+        gpu.canvas.addEventListener("wheel", CameraTracker.#handleInput)
+
     }
 
     static stopTracking() {
         if (!CameraTracker.#isTracking)
             return
-        console.trace("STOPPING TRACK")
+
         CameraTracker.#isTracking = false
         document.removeEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.removeEventListener("keydown", CameraTracker.#handleInput)
@@ -250,6 +268,7 @@ export default class CameraTracker {
         document.removeEventListener("mouseup", CameraTracker.#handleInput)
         document.removeEventListener("mousemove", CameraTracker.#handleInput)
         gpu.canvas.removeEventListener("mousedown", CameraTracker.#handleInput)
+        gpu.canvas.removeEventListener("wheel", CameraTracker.#handleInput)
     }
 
 

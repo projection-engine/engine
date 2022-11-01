@@ -6,7 +6,7 @@ in vec2 texCoords;
 uniform sampler2D uSampler;
 uniform vec3 inverseFilterTextureSize;
 
-uniform ivec2 enabled ;// [fxaa, filmGrain]
+uniform vec2 enabled ;// [fxaa, filmGrain]
 uniform  vec4 settings; //[FXAASpanMax, FXAAReduceMin, FXAAReduceMul, amountFilmGrain]
 uniform vec3 colorGrading; //[gamma, exposure, elapsed]
 
@@ -56,9 +56,6 @@ vec3 FXAA(){
 
 vec3 filmGrain(vec3 fragCurrentColor){
 
-    vec2 texSize  = vec2(textureSize(uSampler, 0).xy);
-    vec2 texCoords = gl_FragCoord.xy / texSize;
-
     vec3 color = fragCurrentColor;
     float randomIntensity = fract(10000. * sin((gl_FragCoord.x + gl_FragCoord.y * colorGrading.b/2.)));
     color += settings.w * randomIntensity;
@@ -68,7 +65,7 @@ vec3 filmGrain(vec3 fragCurrentColor){
 void main() {
     vec3 fragment;
 
-    if(enabled.r == 1)
+    if(enabled.r == 1.)
         fragment = FXAA();
     else
         fragment = texture(uSampler, texCoords).rgb;
@@ -76,7 +73,7 @@ void main() {
     fragment = vec3(1.0) - exp(-fragment * colorGrading.g);
     fragment = pow(fragment, vec3(1.0/colorGrading.r));
 
-    if(enabled.g == 1)
+    if(enabled.g == 1.)
         fragment = filmGrain(fragment);
 
     finalColor = vec4(fragment, 1.0);

@@ -5,6 +5,7 @@ import ENVIRONMENT from "../static/ENVIRONMENT";
 import SharedBufferAPI from "./SharedBufferAPI";
 import {vec3, vec4} from "gl-matrix";
 import ConversionAPI from "./math/ConversionAPI";
+import cloneClass from "../utils/clone-class";
 
 
 /**
@@ -166,7 +167,13 @@ export default class CameraAPI {
         notificationBuffers[0] = 1
     }
 
-
+    static serializeState(translation=CameraAPI.translationBuffer, rotation=CameraAPI.rotationBuffer, rotationSmoothing=CameraAPI.rotationSmoothing, translationSmoothing=CameraAPI.translationSmoothing, metadata=CameraAPI.metadata){
+        const state = {rotationSmoothing, translationSmoothing}
+        state.metadata = cloneClass(metadata)
+        state.rotation = [...rotation]
+        state.translation = [...translation]
+        return state
+    }
     static updateViewTarget(entity) {
         if (!entity?.components || Engine.environment === ENVIRONMENT.DEV)
             return

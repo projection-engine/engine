@@ -1,4 +1,4 @@
-import cloneClass from "../../../../../../src/utils/clone-class";
+import cloneClass from "../../../../utils/clone-class";
 import NODE_TYPES from "../templates/NODE_TYPES";
 import resolveRelationship from "./resolve-relationship";
 import getShaderTemplate from "./get-shader-template";

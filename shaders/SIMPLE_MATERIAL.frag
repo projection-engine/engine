@@ -39,6 +39,7 @@ layout (location = 7) out vec4 gBaseNormal;
 //import(fresnelSchlickRoughness)
 //import(ambient)
 //import(parallaxOcclusionMapping)
+//import(computeTBN)
 
 float max3 (vec3 v) {
     return max (max (v.x, v.y), v.z);
@@ -46,7 +47,7 @@ float max3 (vec3 v) {
 float min3 (vec3 v) {
     return min (min (v.x, v.y), v.z);
 }
-//import(computeTBN)
+
 
 void main(){
     vec2 UVs = texCoords;
@@ -54,10 +55,10 @@ void main(){
     float POM_LAYERS =  settings[2][1];
     bool POM_DISCARD_OFF_PIXELS = settings[2][2] == 1.;
 
-    bool needsTBNMatrix = POM_HEIGHT_SCALE > 0. && settings[0][1] == 1.;
+    bool needsTBNMatrix = POM_HEIGHT_SCALE > 0. || settings[0][1] == 1.;
     mat3 TBN;
     if (needsTBNMatrix == true)
-    TBN = computeTBN(normalize(normalVec), worldSpacePosition.xyz, UVs);
+    TBN = computeTBN(normalVec, worldSpacePosition.xyz, UVs);
     if (POM_HEIGHT_SCALE > 0.){
         mat3 t = transpose(TBN);
         vec3 viewDirection = normalize(t * cameraVec  - t * worldSpacePosition.xyz);
@@ -65,7 +66,7 @@ void main(){
     }
 
     if (settings[0][1] == 1.)
-    gNormal = vec4(normalize(TBN * ((texture(normal, UVs * vec2(uvScales[0][2], uvScales[0][3])).rgb * 2.0)- 1.0) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2])), 1.);
+    gNormal = vec4(TBN * ((texture(normal, UVs * vec2(uvScales[0][2], uvScales[0][3])).rgb * 2.0)- 1.0) * vec3(rgbSamplerScales[1][0], rgbSamplerScales[1][1], rgbSamplerScales[1][2]), 1.);
     else
     gNormal = vec4(normalVec, 1.);
 

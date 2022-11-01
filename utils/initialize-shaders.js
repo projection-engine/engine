@@ -3,7 +3,7 @@ import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 import FOLIAGE_SPRITEGlsl from "../shaders/FOLIAGE_SPRITE.glsl";
 import SPRITEGlsl from "../shaders/SPRITE.glsl";
 import QUAD_VERTEX from "../shaders/QUAD.vert";
-import * as shaderCode from "../shaders/CUBE_MAP.glsl";
+
 import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import AO_FRAG from "../shaders/AO.frag";
@@ -22,6 +22,9 @@ import ONLY_DEPTH_VERT from "../shaders/ONLY_DEPTH.vert"
 import ONLY_DEPTH_FRAG from "../shaders/ONLY_DEPTH.frag"
 import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/SCREEN_SPACE_INDIRECT.frag"
 import STOCHASTIC_NORMALS_FRAG from "../shaders/STOCHASTIC_NORMALS.frag"
+import CUBEMAP from "../shaders/CUBEMAP.vert"
+import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
+import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
 
 
 export default function initializeShaders(){
@@ -29,8 +32,8 @@ export default function initializeShaders(){
 
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, FOLIAGE_SPRITEGlsl.vertex, FOLIAGE_SPRITEGlsl.fragment)
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
-    GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, shaderCode.vertex, shaderCode.irradiance)
-    GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, shaderCode.vertex, shaderCode.prefiltered)
+    GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, CUBEMAP, IRRADIANCE_MAP)
+    GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)
 
     GlobalIlluminationPass.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, QUAD_VERTEX, SCREEN_SPACE_INDIRECT_FRAG)
     GlobalIlluminationPass.normalsShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, QUAD_VERTEX, STOCHASTIC_NORMALS_FRAG)

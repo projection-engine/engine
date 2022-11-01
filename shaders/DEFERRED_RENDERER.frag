@@ -40,7 +40,6 @@ uniform sampler2D ambientSampler;
 uniform sampler2D depthSampler;
 uniform sampler2D screenSpaceReflections;
 uniform sampler2D screenSpaceGI;
-uniform sampler2D brdfSampler;
 out vec4 finalColor;
 
 //import(computeShadows)
