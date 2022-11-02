@@ -52,7 +52,7 @@ export default class GBuffer {
             albedoSampler: GBuffer.albedoSampler,
             behaviourSampler: GBuffer.behaviourSampler,
             ambientSampler: GBuffer.ambientSampler,
-            cameraVec: CameraAPI.position,
+            cameraPosition: CameraAPI.position,
             brdfSampler: GPUResources.BRDF,
             settings: new Float32Array(4),
         })
@@ -66,7 +66,7 @@ export default class GBuffer {
         GBuffer.ready = true
 
         GBuffer.uniforms = {
-            cameraVec: CameraAPI.position,
+            cameraPosition: CameraAPI.position,
             viewMatrix: CameraAPI.viewMatrix,
             projectionMatrix: CameraAPI.projectionMatrix
         }
@@ -81,10 +81,12 @@ export default class GBuffer {
         const {meshes, terrain} = Engine.data
         const u = GBuffer.uniforms
 
+
         GBuffer.gBuffer.startMapping()
         MaterialAPI.loopMeshes(
             meshes,
             (mat, mesh, meshComponent, current) => {
+
                 if (!mat.isDeferredShaded) {
                     if (mat.shadingType === SKYBOX_TYPE)
                         return

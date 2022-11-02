@@ -1,5 +1,5 @@
 import CameraAPI from "../../api/CameraAPI";
-import {getAxisAngle, quat, vec3, vec4} from "gl-matrix";
+import {quat, vec3, vec4} from "gl-matrix";
 import CAMERA_ROTATIONS from "../data/CAMERA_ROTATIONS";
 
 let holding, toApplyTranslation
@@ -45,7 +45,6 @@ export default class CameraTracker {
         if (CameraTracker.#initialized)
             return
         toApplyTranslation = CameraTracker.toApplyTranslation
-
         CameraTracker.#initialized = true
 
         if (settings.camera.serialization) {
@@ -60,8 +59,8 @@ export default class CameraTracker {
             CameraAPI.translationBuffer[1] = translation[1]
             CameraAPI.translationBuffer[2] = translation[2]
 
-            CameraTracker.forceUpdate = true
         }
+        CameraTracker.forceUpdate = true
     }
 
 
@@ -228,11 +227,12 @@ export default class CameraTracker {
                     }
                     break
                 case "wheel":
+
                     event.preventDefault();
-                    console.log(event)
+                    const multiplier = event.ctrlKey ? 10 * 2 : 2
                     toApplyTranslation[0] = toApplyTranslation[1] = 0
                     toApplyTranslation[3] = 1
-                    toApplyTranslation[2] += CameraTracker.movement
+                    toApplyTranslation[2] += multiplier * Math.sign(event.deltaY)
                     CameraTracker.#transform()
                     break
                 default:

@@ -1,6 +1,6 @@
-import EntityAPI from "../api/EntityAPI";
 import GPUResources from "../GPUResources";
 import WORKER_MESSAGES from "../static/WORKER_MESSAGES.json"
+import LightsAPI from "../api/LightsAPI";
 
 export default class TransformationPass {
     static #hasChangeBuffer = new Uint8Array(new SharedArrayBuffer(1))
@@ -82,7 +82,7 @@ export default class TransformationPass {
 
     static execute() {
         if (TransformationPass.#hasChangeBuffer[0] === 1) {
-            EntityAPI.packageLights(true, true)
+            LightsAPI.packageLights(true, true)
             TransformationPass.#hasChangeBuffer[0] = 0
         }
 

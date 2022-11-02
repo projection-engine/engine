@@ -1,16 +1,20 @@
 #version 300 es
 precision highp float;
 #define KERNELS 64
-in vec2 texCoords;
 
+uniform CameraMetadata{
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+};
+uniform Settings{
+    vec4 settings;
+    vec4 samples[KERNELS];
+    vec2 noiseScale;
+};
+in vec2 texCoords;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D noiseSampler;
-uniform vec3 samples[KERNELS];
-uniform mat4 projection;
-uniform vec2 noiseScale;
-uniform vec3 settings;// RADIUS, POWER, BIAS
-uniform mat4 viewMatrix;
 out vec4 fragColor;
 
 void main()
@@ -32,10 +36,10 @@ void main()
 
     float occlusion = 0.0;
     for (int i = 0; i < KERNELS; ++i){
-        vec3 samplePos = TBN * samples[i];
+        vec3 samplePos = TBN * samples[i].rgb;
         samplePos = fragPosition + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
-        offset = projection * viewMatrix *offset;
+        offset = projectionMatrix * viewMatrix *offset;
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
         float sampleDepth = texture(gPosition, offset.xy).z;

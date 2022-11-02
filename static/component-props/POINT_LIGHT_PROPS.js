@@ -19,6 +19,6 @@ export default [
         Component.number("NEAR", "zNear", undefined, undefined, .001),
     ]),
     Component.group("ATTENUATION", [
-        Component.array(["LINEAR", "DISTANCE", "DISTANCE_SQUARED"], "attenuation", 3, .001)
+        Component.array(["LINEAR", "DISTANCE", "DISTANCE_SQUARED"], "attenuation",   .001)
     ]),
 ]

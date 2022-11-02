@@ -93,7 +93,7 @@ export default class MaterialAPI {
                     settings: GBuffer.deferredUniforms.settings,
                     shadowMapTexture: DirectionalShadows.shadowMapShader,
                     shadowCube: OmnidirectionalShadows.cubeMaps[0].texture,
-                    cameraVec: cubeMapPosition,
+                    cameraPosition: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,
                     transformMatrix: current.matrix,

@@ -38,11 +38,11 @@ export default class Component {
     }
 
     static number(label, key, max, min, increment = .1, isAngle, realtime = true, disabledIf) {
-        return {label, max, min, increment,precision:increment != null && increment.toString().split(".")[1] != null ? increment.toString().split(".")[1].length : 2, type: Component.propTypes.NUMBER, key, isAngle, realtime, disabledIf}
+        return {label, max, min, increment, type: Component.propTypes.NUMBER, key, isAngle, realtime, disabledIf}
     }
 
-    static array(labels, key, precision, increment, max, min, isAngle, disabledIf, defaultValue) {
-        return {labels, max, min, precision, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle, defaultValue}
+    static array(labels, key, increment, max, min, isAngle, disabledIf, defaultValue) {
+        return {labels, max, min, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle, defaultValue}
     }
 
     static string(label, key) {

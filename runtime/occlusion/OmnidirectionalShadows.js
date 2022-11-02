@@ -11,19 +11,15 @@ let lightsToUpdate
 export default class OmnidirectionalShadows {
     static changed = false
     static maxCubeMaps = 2
-    static cubeMaps = []
+    static shadowMap
     static shader
     static lightsToUpdate = []
 
     static initialize() {
-        OmnidirectionalShadows.cubeMaps = [
-            new ShadowProbe(512),
-            new ShadowProbe(512)
-        ]
+        OmnidirectionalShadows.shadowMap =  new ShadowProbe(512)
 
 
-        GBuffer.deferredUniforms.shadowCube = OmnidirectionalShadows.cubeMaps[0].texture
-        GBuffer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
+        GBuffer.deferredUniforms.shadowCube = OmnidirectionalShadows.shadowMap.texture
         lightsToUpdate = OmnidirectionalShadows.lightsToUpdate
     }
 
@@ -38,7 +34,7 @@ export default class OmnidirectionalShadows {
             if (!current)
                 continue
             const entity = current.__entity
-            OmnidirectionalShadows.cubeMaps[i]
+            OmnidirectionalShadows.shadowMap
                 .draw((yaw, pitch, perspective, index) => {
                         const target = vec3.add([], entity._translation, CUBE_MAP_VIEWS.target[index])
                         OmnidirectionalShadows.loopMeshes(
@@ -52,8 +48,6 @@ export default class OmnidirectionalShadows {
                     current.zNear
                 )
         }
-        GBuffer.deferredUniforms.shadowCube = OmnidirectionalShadows.cubeMaps[0].texture
-        GBuffer.deferredUniforms.shadowCube1 = OmnidirectionalShadows.cubeMaps[1].texture
         OmnidirectionalShadows.changed = false
         lightsToUpdate.length = 0
     }

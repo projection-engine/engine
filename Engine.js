@@ -61,6 +61,7 @@ export default class Engine {
     static async initialize() {
         if (Engine.#initialized)
             return
+
         Engine.#initialized = true
         await Loop.initialize()
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
@@ -95,9 +96,7 @@ export default class Engine {
         GlobalIlluminationPass.rayMarchSettings[7] = data.SSGI.maxSteps || 4
         GlobalIlluminationPass.rayMarchSettings[8] = data.SSR.maxSteps || 4
 
-        AmbientOcclusion.settings[0] = data.SSAO.radius
-        AmbientOcclusion.settings[1] = data.SSAO.power
-        AmbientOcclusion.settings[2] = data.SSAO.bias
+        AmbientOcclusion.settings = [data.SSAO.radius, data.SSAO.power, data.SSAO.bias]
 
         AmbientOcclusion.enabled = data.SSAO.enabled
         GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
@@ -108,6 +107,7 @@ export default class Engine {
     }
 
     static #callback() {
+
         const now = performance.now()
         const el = now - Engine.then
         Engine.elapsed = el
@@ -117,6 +117,8 @@ export default class Engine {
         METRICS.frameTime = el
 
         Loop.loop(Engine.entities)
+
+        CameraAPI.updateFrame()
 
         Engine.frameID = requestAnimationFrame(() => Engine.#callback())
 

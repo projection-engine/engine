@@ -1,9 +1,9 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS";
 
 self.onmessage = async ({data: {type, data, id}}) => {
-    try{
-        switch (type){
-            case IMAGE_WORKER_ACTIONS.RESIZE_IMAGE:{
+    try {
+        switch (type) {
+            case IMAGE_WORKER_ACTIONS.RESIZE_IMAGE: {
                 const {image, width, height, sizePercent, quality} = data
                 const imageToLoad = await createImageBitmap(await (await fetch(image)).blob())
                 const widthF = width ? width : sizePercent ? imageToLoad.width * sizePercent : imageToLoad.width
@@ -27,14 +27,14 @@ self.onmessage = async ({data: {type, data, id}}) => {
                 }
                 break
             }
-            case IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE:{
+            case IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE: {
                 const {
                     color,
                     resolution
                 } = data
                 const c = new OffscreenCanvas(resolution, resolution)
                 let ctx = c.getContext("2d")
-                ctx.fillStyle = typeof color === "string" ? color : "rgba(" + color[0] + ","+ color[1] + "," + color[2] + "," + color[3] +")"
+                ctx.fillStyle = typeof color === "string" ? color : "rgba(" + color[0] + "," + color[1] + "," + color[2] + "," + color[3] + ")"
                 ctx.fillRect(0, 0, resolution, resolution)
                 const canvasBlob = await c.convertToBlob({
                     type: "image/png",
@@ -46,28 +46,28 @@ self.onmessage = async ({data: {type, data, id}}) => {
 
                 break
             }
-            case IMAGE_WORKER_ACTIONS.IMAGE_BITMAP:{
+            case IMAGE_WORKER_ACTIONS.IMAGE_BITMAP: {
                 const {base64, onlyData} = data
                 const b = onlyData ? base64 : base64.split(";base64,")[1]
                 const buffer = Buffer.from(b, "base64")
-                const blob = new Blob([buffer], { type: "base64" })
-                const bitmap = await  createImageBitmap(blob)
+                const blob = new Blob([buffer], {type: "base64"})
+                const bitmap = await createImageBitmap(blob)
                 self.postMessage({data: bitmap, id})
                 break
             }
             case IMAGE_WORKER_ACTIONS.NOISE_DATA: {
-                const { w, h } = data
-                const kernels = []
-                const RAND_MAX = 1.,
-                    KERNEL_SIZE = 64
+                const {w, h} = data
 
+                const KERNEL_SIZE = 64
+                const kernels = new Float32Array(new ArrayBuffer( KERNEL_SIZE * 4 * 4))
+                let offset = 0
                 for (let i = 0; i < KERNEL_SIZE; i++) {
                     const scale = i / KERNEL_SIZE
                     const m = .1 + .9 * (scale ** 2)
 
                     const v = new Float32Array(12)
                     v[0] = (2.0 * Math.random() - 1.0)
-                    v[1] = (2.0 * Math.random()  - 1.0)
+                    v[1] = (2.0 * Math.random() - 1.0)
                     v[2] = Math.random()
 
                     let x = v[0];
@@ -77,11 +77,11 @@ self.onmessage = async ({data: {type, data, id}}) => {
                     if (len > 0)
                         len = 1 / Math.sqrt(len);
 
-                    v[0] = v[0] * len * m;
-                    v[1] = v[1] * len* m;
-                    v[2] = v[2] * len* m;
-
-                    kernels[i] = v
+                    kernels[offset] = v[0] * len * m;
+                    kernels[offset + 1] = v[1] * len * m;
+                    kernels[offset + 2] = v[2] * len * m;
+                    kernels[offset + 3] = 0
+                    offset += 4
                 }
 
                 let p = w * h
@@ -94,11 +94,13 @@ self.onmessage = async ({data: {type, data, id}}) => {
                     noiseTextureData[index + 2] = 0
                 }
                 self.postMessage(
-                    {data: {
-                        noise: noiseTextureData,
-                        kernels
-                    }, id},
-                    [noiseTextureData.buffer, ...kernels.map(k => k.buffer)]
+                    {
+                        data: {
+                            noise: noiseTextureData,
+                            kernels
+                        }, id
+                    },
+                    [noiseTextureData.buffer, kernels.buffer]
                 )
                 break
             }
@@ -107,7 +109,7 @@ self.onmessage = async ({data: {type, data, id}}) => {
                 break
         }
         return
-    }catch (error){
+    } catch (error) {
         console.error(error)
         self.postMessage({data: null, id})
     }

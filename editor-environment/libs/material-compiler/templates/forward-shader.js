@@ -11,7 +11,7 @@ in  vec2 texCoords;
 in mat3 toTangentSpace;
 uniform int directionalLightsQuantity;
 uniform mat3 directionalLightsData[MAX_LIGHTS];
-uniform vec3 cameraVec;
+uniform vec3 cameraPosition;
 uniform mat4 pointLightData[MAX_POINT_LIGHTS];
 uniform int lightQuantity;
 
@@ -56,7 +56,7 @@ void main(){
         vec3 N = vec3(gNormal); 
         
         
-        vec3 V = normalize(cameraVec - fragPosition);
+        vec3 V = normalize(cameraPosition - fragPosition);
         float NdotV    = max(dot(N, V), 0.000001);
         vec3 F0 = vec3(0.04);
         vec3 Lo = vec3(0.0);
@@ -110,7 +110,7 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraVec; 
+uniform vec3 cameraPosition; 
 
 
 

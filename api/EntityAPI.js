@@ -1,5 +1,4 @@
 import COMPONENTS from "../static/COMPONENTS.js"
-import {packageDirectionalLights, packagePointLights} from "../utils/package-lights";
 import Engine from "../Engine";
 import Component from "../templates/components/Component";
 import ConsoleAPI from "./ConsoleAPI";
@@ -11,7 +10,6 @@ import DiffuseProbePass from "../runtime/renderers/DiffuseProbePass";
 import ENVIRONMENT from "../static/ENVIRONMENT";
 import TransformationPass from "../runtime/TransformationPass";
 import UIAPI from "./UIAPI";
-import GBuffer from "../runtime/renderers/GBuffer";
 import PhysicsAPI from "./PhysicsAPI";
 import Entity from "../instances/Entity";
 import TransformationAPI from "./math/TransformationAPI";
@@ -19,9 +17,9 @@ import CubeMapAPI from "./CubeMapAPI";
 import GPUController from "../GPUController";
 import GPUResources from "../GPUResources";
 import ENTITY_TYPED_ATTRIBUTES from "../static/ENTITY_TYPED_ATTRIBUTES";
+import LightsAPI from "./LightsAPI";
 
 
-let lightTimeout
 export default class EntityAPI {
 
     static addEntity(entity) {
@@ -102,7 +100,7 @@ export default class EntityAPI {
 
         Engine.dataEntity.set(entity.id, placementMap)
         if (entity.components.get(COMPONENTS.POINT_LIGHT) || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) || entity.components.get(COMPONENTS.MESH))
-            EntityAPI.packageLights(false, true)
+            LightsAPI.packageLights(false, true)
     }
 
     static removeEntity(id) {
@@ -123,7 +121,7 @@ export default class EntityAPI {
         Engine.queryMap.delete(entity.queryKey)
 
         if (entity.components.get(COMPONENTS.POINT_LIGHT) || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) || entity.components.get(COMPONENTS.MESH))
-            EntityAPI.packageLights(false, true)
+            LightsAPI.packageLights(false, true)
     }
 
 
@@ -146,34 +144,6 @@ export default class EntityAPI {
         }
     }
 
-    static packageLights(keepOld, force) {
-        const updateDeferred = () => {
-            const {
-                directionalLightsData,
-                dirLightPOV,
-                pointLightData
-            } = Engine.data
-
-            const U = GBuffer.deferredUniforms
-            U.directionalLightsData = directionalLightsData
-            U.dirLightPOV = dirLightPOV
-            U.pointLightData = pointLightData
-        }
-        if (force) {
-            packagePointLights(keepOld)
-            packageDirectionalLights(keepOld)
-            updateDeferred()
-            return
-        }
-        clearTimeout(lightTimeout)
-        lightTimeout = setTimeout(() => {
-            packagePointLights(keepOld)
-            packageDirectionalLights(keepOld)
-            updateDeferred()
-
-        }, 50)
-
-    }
 
 
     static linkScript(data, entity, scriptID) {

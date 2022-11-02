@@ -8,7 +8,7 @@ precision highp float;
 in vec4 worldSpacePosition;
 in  vec2 texCoords;
 in mat3 toTangentSpace;
-uniform vec3 cameraVec;
+uniform vec3 cameraPosition;
 in vec3 normalVec;
 in mat4 normalMatrix; 
 in vec3 viewDirection;  

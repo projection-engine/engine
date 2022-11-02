@@ -108,18 +108,20 @@ export default class CameraWorker {
         elapsed = now - then
         then = now
 
-        nBuffer[3] = 0
         if (needsUpdate) {
             const incrementTranslation = 1 - Math.pow(.001, elapsed  * nBuffer[4])
             const incrementRotation = 1 - Math.pow(.001, elapsed  * nBuffer[5])
             vec3.lerp(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, incrementTranslation)
             quat.slerp(CameraWorker.currentRotation, CameraWorker.currentRotation, CameraWorker.#rotationBuffer, incrementRotation)
+
             if (!vec3.equals(CameraWorker.currentTranslation, CameraWorker.#translationBuffer) || !quat.equals(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)) {
                 CameraWorker.#updateView()
                 nBuffer[3] = 1
             }
-            else
+            else {
                 needsUpdate = false
+                nBuffer[0] = 0
+            }
         }
         if (nBuffer[0] === 1) {
             needsUpdate = true

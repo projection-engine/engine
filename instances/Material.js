@@ -3,6 +3,8 @@ import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MaterialAPI from "../api/rendering/MaterialAPI";
 import {DEFAULT_MATRICES} from "../static/SIMPLE_MATERIAL_UNIFORMS";
 import GPUController from "../GPUController";
+import CameraAPI from "../api/CameraAPI";
+import LightsAPI from "../api/LightsAPI";
 
 export default class Material {
     ready = false
@@ -57,6 +59,10 @@ export default class Material {
         }
     }
 
+    get shader() {
+        return this._shader
+    }
+
     set shader([shader, vertexShader, u, onCompiled, settings]) {
 
         const uniformData = [...DEFAULT_MATRICES]
@@ -72,7 +78,11 @@ export default class Material {
         GPUController.destroyShader(this.id + "-CUBE-MAP")
 
         this._shader = GPUController.allocateShader(this.id, vertexShader, shader)
-
+        CameraAPI.UBO.bindWithShader(this._shader.program)
+        if (this.shadingType === MATERIAL_RENDERING_TYPES.FORWARD) {
+            LightsAPI.pointLightsUBO.bindWithShader(this._shader.program)
+            LightsAPI.directionalLightsUBO.bindWithShader(this._shader.program)
+        }
         MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
             if (onCompiled)
                 onCompiled(message)

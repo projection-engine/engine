@@ -16,7 +16,7 @@ export default class MaterialInstance {
         this.uniforms = materialReference.uniforms
         this.id = id
         this.settings = materialReference.settings
-
+        this.shader = this.materialReference._shader
         MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
             resolve(this)
             this.ready = true

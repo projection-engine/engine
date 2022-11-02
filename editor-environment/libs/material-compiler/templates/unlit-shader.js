@@ -10,7 +10,7 @@ precision highp float;
 in vec4 worldSpacePosition;
 in  vec2 texCoords;
 in mat3 toTangentSpace;
-uniform vec3 cameraVec;
+uniform vec3 cameraPosition;
 in vec3 normalVec;
 in mat4 normalMatrix; 
 in vec3 viewDirection;  
@@ -52,7 +52,7 @@ uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraVec; 
+uniform vec3 cameraPosition; 
 uniform int dirLightQuantity;
 
 

@@ -1,6 +1,6 @@
 import TRANSFORMATION_PROPS from "../static/component-props/TRANSFORMATION_PROPS";
 import Component from "../templates/components/Component";
-import SharedBufferAPI from "../api/SharedBufferAPI";
+import ArrayBufferAPI from "../api/ArrayBufferAPI";
 
 
 /**
@@ -11,13 +11,13 @@ import SharedBufferAPI from "../api/SharedBufferAPI";
 export default class Movable extends Component {
 
     _props = TRANSFORMATION_PROPS
-    _rotationQuat = SharedBufferAPI.allocateVector(4, 0, true)
-    _translation = SharedBufferAPI.allocateVector(3)
-    _scaling = SharedBufferAPI.allocateVector(3, 1)
-    pivotPoint = SharedBufferAPI.allocateVector(3)
-    unscaledMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    matrix = SharedBufferAPI.allocateMatrix(4, true)
-    baseTransformationMatrix = SharedBufferAPI.allocateMatrix(4, true)
+    _rotationQuat = ArrayBufferAPI.allocateVector(4, 0, true)
+    _translation = ArrayBufferAPI.allocateVector(3)
+    _scaling = ArrayBufferAPI.allocateVector(3, 1)
+    pivotPoint = ArrayBufferAPI.allocateVector(3)
+    unscaledMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    matrix = ArrayBufferAPI.allocateMatrix(4, true)
+    baseTransformationMatrix = ArrayBufferAPI.allocateMatrix(4, true)
 
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
@@ -25,8 +25,8 @@ export default class Movable extends Component {
     lockedTranslation = false
     lockedScaling = false
 
-    normalMatrix = SharedBufferAPI.allocateMatrix(3)
-    absoluteTranslation = SharedBufferAPI.allocateVector(3)
+    normalMatrix = ArrayBufferAPI.allocateMatrix(3)
+    absoluteTranslation = ArrayBufferAPI.allocateVector(3)
     __workerGroup
 
     get position() {

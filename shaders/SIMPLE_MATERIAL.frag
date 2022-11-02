@@ -5,8 +5,7 @@ precision highp float;
 in vec3 normalVec;
 in vec2 texCoords;
 in vec4 worldSpacePosition;
-
-uniform vec3 cameraVec;
+in vec3 camera;
 
 
 uniform vec3 meshID;
@@ -61,7 +60,7 @@ void main(){
     TBN = computeTBN(normalVec, worldSpacePosition.xyz, UVs);
     if (POM_HEIGHT_SCALE > 0.){
         mat3 t = transpose(TBN);
-        vec3 viewDirection = normalize(t * cameraVec  - t * worldSpacePosition.xyz);
+        vec3 viewDirection = normalize(t * camera  - t * worldSpacePosition.xyz);
         UVs = parallaxOcclusionMapping(texCoords, viewDirection, POM_DISCARD_OFF_PIXELS, heightMap, POM_HEIGHT_SCALE, POM_LAYERS);
     }
 
@@ -115,6 +114,6 @@ void main(){
     vec3 specular = vec3(0.);
 
 
-    gAmbient = vec4(computeAmbient(cameraVec, gAlbedo.rgb, worldSpacePosition.rgb, normalVec, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, worldSpacePosition.rgb), 1.);
+    gAmbient = vec4(computeAmbient(camera, gAlbedo.rgb, worldSpacePosition.rgb, normalVec, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, worldSpacePosition.rgb), 1.);
 }
 

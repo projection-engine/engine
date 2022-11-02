@@ -14,7 +14,7 @@ in vec4 worldSpacePosition;
 uniform float elapsedTime;
 //import(ambientUniforms)
 
-uniform vec3 cameraVec;
+uniform vec3 cameraPosition;
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;    // R  G         B
@@ -43,7 +43,7 @@ void main(){
     ${body}
     
    ${ambient ? `        
-        gAmbient = vec4( computeAmbient(cameraVec, gAlbedo.rgb,  worldSpacePosition.rgb, gNormal.rgb, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, worldSpacePosition.rgb), 1.);
+        gAmbient = vec4( computeAmbient(cameraPosition, gAlbedo.rgb,  worldSpacePosition.rgb, gNormal.rgb, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, worldSpacePosition.rgb), 1.);
     ` : "gAmbient = vec4(vec3(0.), 1.);"}
 }
         `,
@@ -62,7 +62,7 @@ layout (location = 3) in vec3 tangentVec;
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraVec;
+uniform vec3 cameraPosition;
 
 
 out vec4 worldSpacePosition;
@@ -85,7 +85,7 @@ void main(){
     
     toTangentSpace = mat3(T, B, N);
     
-    viewDirection = transpose(toTangentSpace) * (worldSpacePosition.xyz - cameraVec);
+    viewDirection = transpose(toTangentSpace) * (worldSpacePosition.xyz - cameraPosition);
     texCoords = uvTexture;
     normalVec = normal;
 

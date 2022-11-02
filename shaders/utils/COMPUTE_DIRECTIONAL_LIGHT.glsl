@@ -1,11 +1,11 @@
-vec4 computeDirectionalLight(sampler2D shadowMap, float lightsPerShadowAtlas, float shadowAtlasResolution, mat4 lightMatrix, mat3 lightData, vec3 fragPosition, vec3 viewDirection, vec3 F0, float roughness, float metallic, vec3 surfaceNormal, vec3 albedo){
+vec4 computeDirectionalLight(sampler2D shadowMap, float lightsPerShadowAtlas, float shadowAtlasResolution, mat4 lightMatrix, mat4 lightData, vec3 fragPosition, vec3 viewDirection, vec3 F0, float roughness, float metallic, vec3 surfaceNormal, vec3 albedo){
     vec3 lightDirection =  normalize(vec3(lightData[0][0], lightData[0][1], lightData[0][2]));
     vec3 lightColor =  vec3(lightData[1][0], lightData[1][1], lightData[1][2]);
     float shadows = 1.;
     if (lightData[2][2] > 0.){
         vec4 fragPosLightSpace  = lightMatrix * vec4(fragPosition, 1.0);
         vec2 atlasFace = vec2(lightData[2][0], lightData[2][1]);
-        shadows = directionalLightShadows(fragPosLightSpace, atlasFace, shadowMap, lightsPerShadowAtlas, shadowAtlasResolution, lightData[2][2]);
+        shadows = directionalLightShadows(lightData[3][0], fragPosLightSpace, atlasFace, shadowMap, lightsPerShadowAtlas, shadowAtlasResolution, lightData[2][2]);
     }
 
     vec3 H = normalize(viewDirection + lightDirection);

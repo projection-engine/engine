@@ -22,10 +22,10 @@ export default [
     ),
 
     Component.group("CENTER", [
-        Component.array(["X", "Y", "Z"], "center", 3, .001, undefined, undefined)
+        Component.array(["X", "Y", "Z"], "center",   .001, undefined, undefined)
     ]),
     Component.group("SIZE", [
-        Component.array(["X", "Y", "Z"], "size", 3, .001, undefined, 0, false, (comp) => comp.collisionType !== COLLISION_TYPES.BOX)
+        Component.array(["X", "Y", "Z"], "size",  .001, undefined, 0, false, (comp) => comp.collisionType !== COLLISION_TYPES.BOX)
     ]),
 
 

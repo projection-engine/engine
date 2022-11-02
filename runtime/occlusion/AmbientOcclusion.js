@@ -4,9 +4,11 @@ import GBuffer from "../renderers/GBuffer";
 import CameraAPI from "../../api/CameraAPI";
 import GlobalIlluminationPass from "../GlobalIlluminationPass";
 import ImageWorker from "../../workers/image/ImageWorker";
+import UBO from "../../instances/UBO";
 
 const RESOLUTION = 8
 export default class AmbientOcclusion {
+    static UBO
     static #ready = false
     static framebuffer
     static blurredFBO
@@ -14,26 +16,53 @@ export default class AmbientOcclusion {
     static unfilteredSampler
     static shader
     static blurShader
-    static kernels
     static noiseSampler
     static noiseScale = new Float32Array(2)
     static uniforms = {}
-    static settings = new Float32Array(3)
+
+    static set settings(data) {
+        AmbientOcclusion.UBO.bind()
+        AmbientOcclusion.UBO.updateData("settings", new Float32Array(data))
+        AmbientOcclusion.UBO.unbind()
+    }
+
     static enabled = true
 
     static initialize() {
-        AmbientOcclusion.settings[0] = 100 // RADIUS
-        AmbientOcclusion.settings[1] = 2 // STRENGTH
-
         AmbientOcclusion.unfilteredSampler = AmbientOcclusion.framebuffer.colors[0]
         AmbientOcclusion.filteredSampler = AmbientOcclusion.blurredFBO.colors[0]
 
         AmbientOcclusion.noiseScale[0] = GPUResources.internalResolution.w / RESOLUTION
         AmbientOcclusion.noiseScale[1] = GPUResources.internalResolution.h / RESOLUTION
         GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
-        ImageWorker.request(IMAGE_WORKER_ACTIONS.NOISE_DATA, {w: RESOLUTION, h: RESOLUTION})
+
+        AmbientOcclusion.UBO = new UBO(
+            "Settings",
+            3,
+            [
+                {name: "settings", type: "vec3"},
+                {name: "samples", type: "vec4", dataLength: 64},
+
+                {name: "noiseScale", type: "vec2"}
+            ]
+        )
+
+        CameraAPI.UBO.bindWithShader(AmbientOcclusion.shader.program)
+        AmbientOcclusion.UBO.bindWithShader(AmbientOcclusion.shader.program)
+        AmbientOcclusion.settings = [.5, .7, -.1]
+        AmbientOcclusion.UBO.bind()
+        AmbientOcclusion.UBO.updateData("noiseScale", AmbientOcclusion.noiseScale)
+        AmbientOcclusion.UBO.unbind()
+
+        ImageWorker.request(
+            IMAGE_WORKER_ACTIONS.NOISE_DATA,
+            {w: RESOLUTION, h: RESOLUTION}
+        )
             .then(({kernels, noise}) => {
-                AmbientOcclusion.kernels = kernels
+                AmbientOcclusion.UBO.bind()
+                AmbientOcclusion.UBO.updateData("samples", kernels)
+                AmbientOcclusion.UBO.unbind()
+
                 AmbientOcclusion.noiseSampler = gpu.createTexture()
                 gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.noiseSampler)
                 gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
@@ -47,13 +76,8 @@ export default class AmbientOcclusion {
                     {
                         gPosition: GBuffer.positionSampler,
                         gNormal: GBuffer.baseNormalSampler,
-                        viewMatrix: CameraAPI.viewMatrix,
                         noiseSampler: AmbientOcclusion.noiseSampler,
-                        noiseScale: AmbientOcclusion.noiseScale,
-                        samples: AmbientOcclusion.kernels,
-                        projection: CameraAPI.projectionMatrix,
-                        settings: AmbientOcclusion.settings,
-                        sampler: AmbientOcclusion.unfilteredSampler // blur
+                        sampler: AmbientOcclusion.unfilteredSampler
                     }
                 )
                 GlobalIlluminationPass.uniforms.noiseSampler = AmbientOcclusion.noiseSampler

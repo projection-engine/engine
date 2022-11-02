@@ -74,7 +74,7 @@ export default class PreviewSystem {
                 GPUResources.materials.get(FALLBACK_MATERIAL),
                 undefined,
                 {
-                    cameraVec: cam[1],
+                    cameraPosition: cam[1],
                     viewMatrix: cam[0],
                     projectionMatrix: PreviewSystem.projection,
                     transformMatrix,
@@ -88,14 +88,14 @@ export default class PreviewSystem {
                     useCubeMapShader: true
                 })
         } else if (materialMesh instanceof Material) {
-            const [viewMatrix, cameraVec] = PreviewSystem.cameraData
+            const [viewMatrix, cameraPosition] = PreviewSystem.cameraData
             MaterialAPI.drawMesh(
                 undefined,
                 GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE),
                 materialMesh,
                 undefined,
                 {
-                    cameraVec,
+                    cameraPosition,
                     viewMatrix,
                     projectionMatrix: PreviewSystem.projection,
                     transformMatrix: PreviewSystem.identity,

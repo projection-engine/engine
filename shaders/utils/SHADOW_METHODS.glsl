@@ -36,14 +36,13 @@ float sampleSoftShadows(vec2 coord, float compare, sampler2D shadowMapTexture, f
     return response/SAMPLES_SQUARED;
 }
 
-float directionalLightShadows(vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shadowMapTexture, float shadowMapsQuantity, float shadowMapResolution, float pcfSamples){
+float directionalLightShadows(float bias, vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shadowMapTexture, float shadowMapsQuantity, float shadowMapResolution, float pcfSamples){
     float response = 1.0;
     vec3 pos = (fragPosLightSpace.xyz / fragPosLightSpace.w)* 0.5 + 0.5;
 
     if (pos.z > 1.0)
         pos.z = 1.0;
-    
-    float bias = 0.0001;
+
     float compare = pos.z - bias;
 
     response = sampleSoftShadows(vec2(pos.x/shadowMapsQuantity + faceOffset.x/shadowMapsQuantity, pos.y/shadowMapsQuantity + faceOffset.y/shadowMapsQuantity), compare, shadowMapTexture, shadowMapResolution, pcfSamples);

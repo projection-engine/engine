@@ -1,6 +1,6 @@
-export default class SharedBufferAPI {
-    static allocateVector(size, defaultValue = 0, asQuaternion) {
-        const b = new Float32Array(new SharedArrayBuffer(size * 4))
+export default class ArrayBufferAPI {
+    static allocateVector(size, defaultValue = 0, asQuaternion, shared=true) {
+        const b = new Float32Array(shared ? new SharedArrayBuffer(size  * 4) : new ArrayBuffer( size * 4))
         for (let i = 0; i < size; i++)
             b[i] = defaultValue
 
@@ -9,8 +9,8 @@ export default class SharedBufferAPI {
         return b
     }
 
-    static allocateMatrix(size, identity) {
-        const m = new Float32Array(new SharedArrayBuffer(size * size * 4))
+    static allocateMatrix(size, identity, shared=true) {
+        const m = new Float32Array(shared ? new SharedArrayBuffer(size * size * 4) : new ArrayBuffer(size * size * 4))
         if (identity) {
             let row = 0, column = 0
             for (let i = 0; i < m.length; i++) {

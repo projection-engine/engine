@@ -9,6 +9,7 @@ import initializeShaders from "./utils/initialize-shaders";
 import initializeStaticMeshes from "./utils/initialize-static-meshes";
 import initializeFrameBuffers from "./utils/initialize-frame-buffers";
 import initializeMaterialsAndTextures from "./utils/initialize-materials-and-textures";
+import LightsAPI from "./api/LightsAPI";
 
 export default class GPUResources {
     static context
@@ -52,6 +53,7 @@ export default class GPUResources {
         GPUResources.context = gpu
 
         CameraAPI.initialize()
+        LightsAPI.initialize()
         TransformationPass.initialize()
         TerrainWorker.initialize()
         ImageWorker.initialize()

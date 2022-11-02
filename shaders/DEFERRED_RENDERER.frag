@@ -2,31 +2,24 @@
 precision highp float;
 
 #define MAX_LIGHTS 4
-#define MAX_POINT_LIGHTS 24
-#define CELLSIZE 2.25
 #define PI 3.14159265359
-#define SH_C0 0.282094791
-#define SH_C1 0.488602512
+
 in vec2 texCoords;
 
-/**
- * "directionalLightsData" description (mat3 array):
- *
- * Indexes 0 - 2: Light position
- * Indexes 3 - 5: Light color
- * Indexes 6 - 7: Atlas faces
- * Index 8: hasShadowMap / PCF samples (if positive it has shadow map)
- */
-uniform mat3 directionalLightsData[MAX_LIGHTS];
-/**
-* "settings" decomposition (vec4):
- * directionalLights, shadowMapResolution, shadowMapsQuantity, pointLights
- */
-uniform vec4 settings;
-uniform mat4 dirLightPOV[MAX_LIGHTS];
-uniform mat4 pointLightData[MAX_POINT_LIGHTS];
+uniform PointLights{
+    mat4 pointLights[24];
+    int pointLightsQuantity;
+};
 
-uniform vec3 cameraVec;
+uniform DirectionalLights{
+    mat4 directionalLights[16];
+    mat4 directionalLightsPOV[16];
+    int directionalLightsQuantity;
+};
+
+uniform vec4 settings;
+
+uniform vec3 cameraPosition;
 uniform bool hasAO;
 
 uniform sampler2D shadowMapTexture;
@@ -68,15 +61,12 @@ void main() {
 
     float shadowMapsQuantity = settings.z;
     float shadowMapResolution = settings.y;
-    int directionalLights = int(settings.x);
-    int pointLights = int(settings.w);
-
     vec3 albedo = texture(albedoSampler, texCoords).rgb;
 
     if (albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){
         vec3 directIllumination = vec3(0.0);
         vec3 indirectIllumination = vec3(0.0);
-        vec3 V = normalize(cameraVec - fragPosition);
+        vec3 V = normalize(cameraPosition - fragPosition);
         vec3 N = texture(normalSampler, texCoords).rgb;
 
         float ao = texture(behaviourSampler, texCoords).r;
@@ -91,17 +81,17 @@ void main() {
 
         F0 = mix(F0, albedo, metallic);
 
-        float shadows = directionalLights > 0 || pointLights > 0?  0. : 1.0;
-        float quantityToDivide = float(directionalLights) + float(pointLights);
-        for (int i = 0; i < directionalLights; i++){
-            vec4 lightInformation = computeDirectionalLight(shadowMapTexture, shadowMapsQuantity, shadowMapResolution, dirLightPOV[i], directionalLightsData[i], fragPosition, V, F0, roughness, metallic, N, albedo);
+        float shadows = directionalLightsQuantity > 0 || pointLightsQuantity > 0?  0. : 1.0;
+        float quantityToDivide = float(directionalLightsQuantity) + float(pointLightsQuantity);
+        for (int i = 0; i < directionalLightsQuantity; i++){
+            vec4 lightInformation = computeDirectionalLight(shadowMapTexture, shadowMapsQuantity, shadowMapResolution, directionalLightsPOV[i], directionalLights[i], fragPosition, V, F0, roughness, metallic, N, albedo);
             directIllumination += lightInformation.rgb;
             shadows += lightInformation.a/quantityToDivide;
         }
 
         float viewDistance = length(V);
-        for (int i = 0; i < pointLights; ++i){
-            vec4 lightInformation = computePointLights(shadowCube, pointLightData[i], fragPosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
+        for (int i = 0; i < int(pointLightsQuantity); ++i){
+            vec4 lightInformation = computePointLights(shadowCube, pointLights[i], fragPosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
             directIllumination += lightInformation.rgb;
             shadows += lightInformation.a/quantityToDivide;
         }

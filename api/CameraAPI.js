@@ -2,10 +2,11 @@ import PostProcessingEffects from "../templates/PostProcessingEffects";
 import COMPONENTS from "../static/COMPONENTS.js";
 import Engine from "../Engine";
 import ENVIRONMENT from "../static/ENVIRONMENT";
-import SharedBufferAPI from "./SharedBufferAPI";
+import ArrayBufferAPI from "./ArrayBufferAPI";
 import {vec3, vec4} from "gl-matrix";
 import ConversionAPI from "./math/ConversionAPI";
 import cloneClass from "../utils/clone-class";
+import UBO from "../instances/UBO";
 
 
 /**
@@ -19,7 +20,7 @@ const ORTHOGRAPHIC = 1, PERSPECTIVE = 0
 let notificationBuffers
 
 function getNotificationBuffer() {
-    const b = SharedBufferAPI.allocateVector(6, 0)
+    const b = ArrayBufferAPI.allocateVector(6, 0)
     b[0] = 1
     b[1] = 1
     b[2] = PERSPECTIVE
@@ -30,26 +31,36 @@ function getNotificationBuffer() {
 }
 
 export default class CameraAPI {
+    static UBO
     static #dynamicAspectRatio = false
     static metadata = new PostProcessingEffects()
-    static position = SharedBufferAPI.allocateVector(3)
-    static viewMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    static projectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    static invViewMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    static invProjectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    static staticViewMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    static skyboxProjectionMatrix = SharedBufferAPI.allocateMatrix(4, true)
-    static #projectionBuffer = SharedBufferAPI.allocateVector(5)
-    static translationBuffer = SharedBufferAPI.allocateVector(3)
-    static rotationBuffer = SharedBufferAPI.allocateVector(4, 0, true)
+    static position = ArrayBufferAPI.allocateVector(3)
+    static viewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static projectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static invViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static invProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static staticViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static #projectionBuffer = ArrayBufferAPI.allocateVector(5)
+    static translationBuffer = ArrayBufferAPI.allocateVector(3)
+    static rotationBuffer = ArrayBufferAPI.allocateVector(4, 0, true)
     static #notificationBuffers = getNotificationBuffer()
     static #worker
-    static #initialized = false
+    static initialized = false
 
     static initialize() {
-        if (CameraAPI.#initialized)
+        if (CameraAPI.initialized)
             return
-        CameraAPI.#initialized = true
+
+        CameraAPI.UBO = new UBO(
+            "CameraMetadata",
+            0,
+            [
+                {name: "viewMatrix", type: "mat4"},
+                {name: "projectionMatrix", type: "mat4"},
+                {name: "placement", type: "vec3"},
+                {name: "invViewMatrix", type: "mat4"},
+            ])
 
         const w = new Worker("./build/camera-worker.js")
         CameraAPI.#worker = w
@@ -70,6 +81,21 @@ export default class CameraAPI {
 
         new ResizeObserver(CameraAPI.updateAspectRatio)
             .observe(gpu.canvas)
+
+        CameraAPI.updateFrame(true)
+        CameraAPI.initialized = true
+    }
+
+    static updateFrame(force) {
+        if (notificationBuffers[3] || force) {
+            const UBO = CameraAPI.UBO
+            notificationBuffers[3] = 0
+            UBO.bind()
+            UBO.updateData("viewMatrix", CameraAPI.viewMatrix)
+            UBO.updateData("projectionMatrix", CameraAPI.projectionMatrix)
+            UBO.updateData("placement", CameraAPI.position)
+            UBO.unbind()
+        }
     }
 
     static updateAspectRatio() {
@@ -167,13 +193,14 @@ export default class CameraAPI {
         notificationBuffers[0] = 1
     }
 
-    static serializeState(translation=CameraAPI.translationBuffer, rotation=CameraAPI.rotationBuffer, rotationSmoothing=CameraAPI.rotationSmoothing, translationSmoothing=CameraAPI.translationSmoothing, metadata=CameraAPI.metadata){
+    static serializeState(translation = CameraAPI.translationBuffer, rotation = CameraAPI.rotationBuffer, rotationSmoothing = CameraAPI.rotationSmoothing, translationSmoothing = CameraAPI.translationSmoothing, metadata = CameraAPI.metadata) {
         const state = {rotationSmoothing, translationSmoothing}
         state.metadata = cloneClass(metadata)
         state.rotation = [...rotation]
         state.translation = [...translation]
         return state
     }
+
     static updateViewTarget(entity) {
         if (!entity?.components || Engine.environment === ENVIRONMENT.DEV)
             return

@@ -25,10 +25,12 @@ import STOCHASTIC_NORMALS_FRAG from "../shaders/STOCHASTIC_NORMALS.frag"
 import CUBEMAP from "../shaders/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
+import CameraAPI from "../api/CameraAPI";
+import LightsAPI from "../api/LightsAPI";
 
 
 export default function initializeShaders(){
-    GBuffer.forwardDepthShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
+
 
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, FOLIAGE_SPRITEGlsl.vertex, FOLIAGE_SPRITEGlsl.fragment)
     GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
@@ -47,7 +49,14 @@ export default function initializeShaders(){
     ScreenEffectsPass.upSamplingShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.BILINEAR_UP_SAMPLING, QUAD_VERTEX, SCREEN_EFFECTS.bilinearUpSampling)
     ScreenEffectsPass.brightShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, QUAD_VERTEX, SCREEN_EFFECTS.brightFragment,)
     ScreenEffectsPass.blurShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, QUAD_VERTEX, SCREEN_EFFECTS.blurBox)
+
+    GBuffer.forwardDepthShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
+    CameraAPI.UBO.bindWithShader(GBuffer.forwardDepthShader.program)
+
     GBuffer.deferredShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, QUAD_VERTEX, DEFERRED_RENDERER_FRAG)
+    LightsAPI.pointLightsUBO.bindWithShader(GBuffer.deferredShader.program)
+    LightsAPI.directionalLightsUBO.bindWithShader(GBuffer.deferredShader.program)
+
     GBuffer.toScreenShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, QUAD_VERTEX, TO_SCREEN_FRAG)
 
 }

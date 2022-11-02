@@ -10,9 +10,9 @@ vec3 computeDiffuseIrradiance(vec3 N, vec3 albedo, vec3 kD){
 export const deferredAmbient = `
 ${diffuse}
 
-vec3 computeAmbient(vec3 cameraVec, vec3 albedo,  vec3 worldSpacePosition,  vec3 N, float roughness, float metallic, float samples, sampler2D brdfSampler, vec3 elementPosition){
+vec3 computeAmbient(vec3 cameraPosition, vec3 albedo,  vec3 worldSpacePosition,  vec3 N, float roughness, float metallic, float samples, sampler2D brdfSampler, vec3 elementPosition){
     vec3 specular = vec3(0.);
-    vec3 V = normalize(cameraVec - worldSpacePosition);
+    vec3 V = normalize(cameraPosition - worldSpacePosition);
     float NdotV    = max(dot(N, V), 0.000001);
     vec3 F0 = mix(vec3(0.04), albedo, metallic);
     
