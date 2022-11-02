@@ -11,6 +11,7 @@ export default {
     SSGI_NORMALS: "SSGI_NORMALS",
     G_BUFFER:"G_BUFFER",
     SHADOWS: "SHADOWS",
+    MOTION_BLUR: "MOTION_BLUR",
     EDITOR: {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"

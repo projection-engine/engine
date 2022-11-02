@@ -51,14 +51,14 @@ layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;   
 layout (location = 3) out vec4 gBehaviour; 
-layout (location = 4) out vec4 gAmbient;
+// layout (location = 4) out vec4 gAmbient;
 
 
 void main(){  
     gPosition = worldSpacePosition;
     gAlbedo = vec4(0., 0., 0., 1.);
     gNormal = vec4(0., 0., 0., 1.);
-    gAmbient = vec4(0., 0., 0., 1.);
+    // gAmbient = vec4(0., 0., 0., 1.);
     gBehaviour =  vec4(1., 0., 0., 1.); 
     vec3 layerData = texture(layerController, texCoords).rgb; 
     ${samplersData}

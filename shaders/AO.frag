@@ -3,8 +3,7 @@ precision highp float;
 #define KERNELS 64
 
 uniform CameraMetadata{
-    mat4 viewMatrix;
-    mat4 projectionMatrix;
+    mat4 viewProjection;
 };
 uniform Settings{
     vec4 settings;
@@ -39,7 +38,7 @@ void main()
         vec3 samplePos = TBN * samples[i].rgb;
         samplePos = fragPosition + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
-        offset = projectionMatrix * viewMatrix *offset;
+        offset = viewProjection *offset;
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
         float sampleDepth = texture(gPosition, offset.xy).z;

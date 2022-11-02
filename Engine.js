@@ -8,6 +8,8 @@ import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import ConversionAPI from "./api/math/ConversionAPI";
 import ScriptingPass from "./runtime/ScriptingPass";
 import PhysicsPass from "./runtime/PhysicsPass";
+import MotionBlur from "./runtime/post-processing/MotionBlur";
+import FrameComposition from "./runtime/post-processing/FrameComposition";
 
 const METRICS = {
     frameRate: 0,
@@ -100,10 +102,13 @@ export default class Engine {
 
         AmbientOcclusion.enabled = data.SSAO.enabled
         GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
-        GBuffer.deferredUniforms.hasAO = data.SSAO.enabled ? 1 : 0
-        const settingsBuffer = GBuffer.deferredUniforms.settings
-        settingsBuffer[1] = DirectionalShadows.maxResolution
-        settingsBuffer[2] = DirectionalShadows.atlasRatio
+
+        GBuffer.UBO.bind()
+        GBuffer.UBO.updateData("shadowMapsQuantity", new Float32Array([DirectionalShadows.maxResolution]))
+        GBuffer.UBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.atlasRatio]))
+        GBuffer.UBO.updateData("hasAO", new Uint8Array([data.SSAO.enabled ? 1 : 0]))
+        GBuffer.UBO.unbind()
+        MotionBlur.uniforms.velocityScale = data.mbVelocityScale
     }
 
     static #callback() {

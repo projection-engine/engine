@@ -17,11 +17,19 @@ uniform DirectionalLights{
     int directionalLightsQuantity;
 };
 
-uniform vec4 settings;
+uniform DeferredSettings{
+    float shadowMapsQuantity;
+    float shadowMapResolution;
+    float ambientLODSamples;
+    bool hasAO;
+    bool hasAmbient;
 
+};
 uniform vec3 cameraPosition;
-uniform bool hasAO;
 
+uniform sampler2D brdfSampler;
+uniform samplerCube prefilteredMap;
+uniform samplerCube irradiance;
 uniform sampler2D shadowMapTexture;
 uniform samplerCube shadowCube;
 uniform sampler2D aoSampler;
@@ -34,6 +42,8 @@ uniform sampler2D depthSampler;
 uniform sampler2D screenSpaceReflections;
 uniform sampler2D screenSpaceGI;
 out vec4 finalColor;
+
+
 
 //import(computeShadows)
 
@@ -59,10 +69,7 @@ void main() {
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
     discard;
 
-    float shadowMapsQuantity = settings.z;
-    float shadowMapResolution = settings.y;
     vec3 albedo = texture(albedoSampler, texCoords).rgb;
-
     if (albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){
         vec3 directIllumination = vec3(0.0);
         vec3 indirectIllumination = vec3(0.0);
@@ -97,6 +104,8 @@ void main() {
         }
 
         indirectIllumination = texture(ambientSampler, texCoords).rgb + sampleIndirectLight(shadows, screenSpaceGI, screenSpaceReflections, NdotV, metallic, roughness, albedo, F0);
+        if(hasAmbient)
+            indirectIllumination += sampleProbeIndirectLight(brdfSampler, prefilteredMap, irradiance, ambientLODSamples, NdotV, metallic, roughness, albedo, F0, V, N);
         finalColor = vec4(directIllumination * ao * shadows + indirectIllumination, 1.);
     }
     else

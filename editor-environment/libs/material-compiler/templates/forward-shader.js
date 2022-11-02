@@ -19,8 +19,7 @@ in vec3 normalVec;
 in mat4 normalMatrix; 
 in vec3 viewDirection;  
 uniform float elapsedTime;
-uniform int shadingModel;
-//import(ambientUniforms)
+uniform int shadingModel; 
 
 uniform sampler2D sceneColor;
 
@@ -32,7 +31,7 @@ out vec4 finalColor;
 
 ${ambient ? `
 //import(fresnelSchlickRoughness)
-//import(forwardAmbient)
+//import(sampleIndirectLight)
 ` : ""}
  
   

@@ -54,13 +54,11 @@ export default class MaterialAPI {
 
     static drawMesh(id, mesh, material, meshComponent, uniforms, directDrawing = false) {
         const isNotSkybox = material.shadingType !== SKYBOX
-        if (isNotSkybox) {
+        if (material.shadingType === MATERIAL_RENDERING_TYPES.FORWARD ) {
             const ambient = MaterialAPI.#getEnvironment(id, meshComponent)
             uniforms.prefilteredMap = ambient[0]
             uniforms.ambientLODSamples = ambient[1]
             uniforms.irradiance0 = ambient[2]
-            uniforms.irradiance1 = ambient[3]
-            uniforms.irradiance2 = ambient[4]
         }
 
         uniforms.brdfSampler = GPUResources.BRDF

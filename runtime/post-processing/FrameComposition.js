@@ -9,10 +9,8 @@ export default class FrameComposition {
     static shader
 
     static initialize() {
-
         for (let i = 1e6; i > 0; i--)
             FrameComposition.lookUpRandom.push(Math.random())
-        FrameComposition.workerTexture = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER).colors[0]
     }
 
     static lookup() {

@@ -38,7 +38,8 @@ void main(){
         color = vec3(color.r);
     else if(option == 16)
         color = vec3(color.gb, 0.);
-  
+    else if (option == 19)
+        color = vec3(color.rg, 0.);
     fragColor = vec4(color, 1.);
 }
 `

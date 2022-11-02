@@ -39,6 +39,10 @@ class MovementPass {
             const current = entities[i]
             if (!current.__changedBuffer[0] && (!current.parentChangedBuffer || !current.parentChangedBuffer[1])) {
                 current.__changedBuffer[1] = 0
+                if(current.needsCacheUpdate){
+                    current.needsCacheUpdate = false
+                    mat4.copy(current.previousModelMatrix, current.matrix)
+                }
                 continue
             }
 
@@ -58,7 +62,8 @@ class MovementPass {
         if (scaling[2] === 0)
             scaling[2] = MIN_SCALE
 
-
+        mat4.copy(entity.previousModelMatrix, entity.matrix)
+        entity.needsCacheUpdate = true
         quat.normalize(cache, entity._rotationQuat)
         mat4.fromRotationTranslationScale(entity.matrix, cache, entity._translation, scaling)
         mat4.fromRotationTranslationScale(entity.unscaledMatrix, cache, entity._translation, SCALING_UNIT)

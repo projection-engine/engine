@@ -5,6 +5,8 @@ import generateBlurBuffers from "./generate-blur-buffers";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import GBuffer from "../runtime/renderers/GBuffer";
+import MotionBlur from "../runtime/post-processing/MotionBlur";
+import FrameComposition from "../runtime/post-processing/FrameComposition";
 
 export default function initializeFrameBuffers() {
     const GI_SETTINGS = {
@@ -42,22 +44,26 @@ export default function initializeFrameBuffers() {
             linear: false,
             repeat: false
         })
+    MotionBlur.frameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})
+    MotionBlur.workerTexture = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER).colors[0]
+    FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
 
     GBuffer.gBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
-        .texture({attachment: 0, precision: gpu.RGBA32F})
-        .texture({attachment: 1})
-        .texture({attachment: 2, precision: gpu.RGBA, format: gpu.RGBA, type: gpu.UNSIGNED_BYTE})
+        .texture({attachment: 0, precision: gpu.RGBA32F}) // POSITION
+        .texture({attachment: 1}) // NORMAL
+        .texture({attachment: 2, precision: gpu.RGBA, format: gpu.RGBA, type: gpu.UNSIGNED_BYTE}) // ALBEDO
         .texture({attachment: 3})
-        .texture({attachment: 4})
         .texture({
             precision: gpu.RGBA32F,
             format: gpu.RGBA,
             repeat: false,
             linear: false,
-            attachment: 5
+            attachment: 4
         }) // DEPTH
-        .texture({attachment: 6}) // ID
-        .texture({attachment: 7}) // BASE NORMAL
+        .texture({attachment: 5}) // ID
+        .texture({attachment: 6}) // BASE NORMAL
+        .texture({attachment: 7, precision: gpu.RG16F, format: gpu.RG}) // gVelocity
+
         .depthTest()
     GBuffer.compositeFBO = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
 }

@@ -149,12 +149,13 @@ export default class EntityAPI {
     static linkScript(data, entity, scriptID) {
         const found = entity.scripts.findIndex(s => s.id === scriptID)
         try {
-            const generator = new Function("GPUResources, GPUController, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI", data.toString())
+            const generator = new Function("GPUResources, GPUController, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity", data.toString())
 
             try {
-                const Instance = generator(GPUResources, GPUController, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI)
+                const Instance = generator(GPUResources, GPUController, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity)
                 const newClass = new Instance(entity)
                 newClass.entity = entity
+                console.log(entity)
 
                 if (found > -1) {
                     const ref = entity.scripts[found]

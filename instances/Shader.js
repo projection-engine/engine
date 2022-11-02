@@ -1,5 +1,4 @@
 import SHADOW_METHODS from "../shaders/utils/SHADOW_METHODS.glsl"
-import * as PROBES from "../shaders/templates/PROBES"
 import {PBR} from "../shaders/templates/PBR"
 import GPUResources from "../GPUResources";
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
@@ -42,9 +41,6 @@ export const METHODS = {
     computeTBN: "//import(computeTBN)",
     rayMarcher: "//import(rayMarcher)",
     aces: "//import(aces)",
-    ambient: "//import(ambient)",
-    forwardAmbient: "//import(forwardAmbient)",
-    ambientUniforms: "//import(ambientUniforms)",
     parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)",
     sampleIndirectLight: "//import(sampleIndirectLight)"
 }
@@ -79,15 +75,7 @@ function applyMethods(shaderCode) {
             case key === "computeShadows":
                 response = response.replaceAll(METHODS[key], SHADOW_METHODS)
                 break
-            case key === "ambient":
-                response = response.replaceAll(METHODS[key], PROBES.deferredAmbient)
-                break
-            case key === "forwardAmbient":
-                response = response.replaceAll(METHODS[key], PROBES.forwardAmbient)
-                break
-            case key === "ambientUniforms":
-                response = response.replaceAll(METHODS[key], PROBES.UNIFORMS)
-                break
+
             case PBR[key] != null:
                 response = response.replaceAll(METHODS[key], PBR[key])
                 break

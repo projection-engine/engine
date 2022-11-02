@@ -18,7 +18,7 @@ export default class Movable extends Component {
     unscaledMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     matrix = ArrayBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = ArrayBufferAPI.allocateMatrix(4, true)
-
+    previousModelMatrix =  ArrayBufferAPI.allocateMatrix(4, true)
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
     lockedRotation = false

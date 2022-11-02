@@ -22,6 +22,8 @@ export default class CameraWorker {
     static #projectionMatrix
     static #invViewMatrix
     static #invProjectionMatrix
+    static viewProjectionMatrix
+    static previousViewProjectionMatrix
     static #staticViewMatrix
     static #initialized = false
     static #projectionBuffer
@@ -41,10 +43,14 @@ export default class CameraWorker {
         translationBuffer,
         rotationBuffer,
         skyboxProjectionMatrix,
-        projectionBuffer
+        projectionBuffer,
+        viewProjectionMatrix,
+        previousViewProjectionMatrix
     ) {
         if (CameraWorker.#initialized)
             return
+        CameraWorker.previousViewProjectionMatrix = previousViewProjectionMatrix
+        CameraWorker.viewProjectionMatrix = viewProjectionMatrix
         CameraWorker.#projectionBuffer = projectionBuffer
         CameraWorker.#initialized = true
         nBuffer = CameraWorker.#notificationBuffers = notificationBuffers
@@ -64,7 +70,9 @@ export default class CameraWorker {
             CameraWorker.execute()
             CameraWorker.frameID = requestAnimationFrame(callback)
         }
+        CameraWorker.updateVP()
         CameraWorker.frameID = requestAnimationFrame(callback)
+
     }
 
     static #updateProjection() {
@@ -84,6 +92,7 @@ export default class CameraWorker {
 
         mat4.invert(CameraWorker.#invProjectionMatrix, CameraWorker.#projectionMatrix)
         mat4.perspective(CameraWorker.#skyboxProjectionMatrix, fov, aR, .1, 1000)
+        CameraWorker.updateVP()
     }
 
     static #updateStaticViewMatrix() {
@@ -92,9 +101,15 @@ export default class CameraWorker {
         return matrix
     }
 
+    static updateVP() {
+        mat4.copy(CameraWorker.previousViewProjectionMatrix, CameraWorker.viewProjectionMatrix)
+        mat4.multiply(CameraWorker.viewProjectionMatrix, CameraWorker.#projectionMatrix, CameraWorker.#viewMatrix)
+    }
+
     static #updateView() {
         mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, CameraWorker.currentRotation, CameraWorker.currentTranslation)
         mat4.invert(CameraWorker.#viewMatrix, CameraWorker.#invViewMatrix)
+        CameraWorker.updateVP()
 
         const m = CameraWorker.#invViewMatrix
         CameraWorker.#position[0] = m[12]
@@ -109,16 +124,15 @@ export default class CameraWorker {
         then = now
 
         if (needsUpdate) {
-            const incrementTranslation = 1 - Math.pow(.001, elapsed  * nBuffer[4])
-            const incrementRotation = 1 - Math.pow(.001, elapsed  * nBuffer[5])
+            const incrementTranslation = 1 - Math.pow(.001, elapsed * nBuffer[4])
+            const incrementRotation = 1 - Math.pow(.001, elapsed * nBuffer[5])
             vec3.lerp(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, incrementTranslation)
             quat.slerp(CameraWorker.currentRotation, CameraWorker.currentRotation, CameraWorker.#rotationBuffer, incrementRotation)
 
             if (!vec3.equals(CameraWorker.currentTranslation, CameraWorker.#translationBuffer) || !quat.equals(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)) {
                 CameraWorker.#updateView()
                 nBuffer[3] = 1
-            }
-            else {
+            } else {
                 needsUpdate = false
                 nBuffer[0] = 0
             }

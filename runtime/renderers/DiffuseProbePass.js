@@ -56,6 +56,7 @@ export default class DiffuseProbePass {
                     )
                     if (!DiffuseProbePass.diffuseProbes[current.id])
                         DiffuseProbePass.diffuseProbes[current.id] = new LightProbe()
+
                     DiffuseProbePass.diffuseProbes[current.id].drawDiffuseMap(DiffuseProbePass.baseCubeMap.texture, current.components.get(COMPONENTS.PROBE).multiplier)
                 }
 

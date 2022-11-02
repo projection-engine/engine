@@ -11,10 +11,6 @@ import ArrayBufferAPI from "./ArrayBufferAPI";
  * Index 8: hasShadowMap / PCF samples (if positive it has shadow map)
  */
 
-/**
- * "settings" decomposition (vec4):
- * directionalLights, shadowMapResolution, shadowMapsQuantity, pointLights
- */
 
 const MAX_POINT_LIGHT = 24, MAX_DIRECTIONAL_LIGHT = 16
 let lightTimeout

@@ -69,7 +69,6 @@ export function packagePointLights(keepOld) {
     LightsAPI.pointLightsQuantity = size
     Engine.data.pointLightsQuantity = size
     Engine.data.pointLightData = pointLightData
-    // GBuffer.deferredUniforms.settings[3] = size
 }
 
 

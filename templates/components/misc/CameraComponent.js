@@ -23,6 +23,7 @@ export default class CameraComponent extends Component {
     bloomThreshold = .75
     gamma = 2.2
     exposure = 1
+    motionBlurEnabled = true
 
     ortho = false
     size = 100

@@ -27,6 +27,8 @@ import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
 import CameraAPI from "../api/CameraAPI";
 import LightsAPI from "../api/LightsAPI";
+import MotionBlur from "../runtime/post-processing/MotionBlur";
+import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
 
 
 export default function initializeShaders(){
@@ -39,6 +41,8 @@ export default function initializeShaders(){
 
     GlobalIlluminationPass.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, QUAD_VERTEX, SCREEN_SPACE_INDIRECT_FRAG)
     GlobalIlluminationPass.normalsShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, QUAD_VERTEX, STOCHASTIC_NORMALS_FRAG)
+
+    MotionBlur.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.MOTION_BLUR, QUAD_VERTEX, MOTION_BLUR_FRAG)
 
     AmbientOcclusion.shader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.AO, QUAD_VERTEX, AO_FRAG)
     AmbientOcclusion.blurShader = GPUController.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, QUAD_VERTEX, AO_BLUR_FRAG)

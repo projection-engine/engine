@@ -8,5 +8,6 @@ export default [
     "baseTransformationMatrix",
     "pivotPoint",
     "unscaledMatrix",
-    "normalMatrix"
+    "normalMatrix",
+    "previousModelMatrix"
 ]

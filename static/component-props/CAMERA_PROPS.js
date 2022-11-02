@@ -2,6 +2,9 @@ import Component from "../../templates/components/Component";
 
 export default  [
     Component.number("FOV", "fov", 3.054236111111111, 0.1745277777777778, .1, true),
+    Component.group("MOTION_BLUR", [
+        Component.boolean("ENABLED", "motionBlurEnabled"),
+    ]),
     Component.group("ORTHO_PROJECTION", [
         Component.boolean("ENABLED", "ortho"),
         Component.number("SIZE", "size", 150, 1)

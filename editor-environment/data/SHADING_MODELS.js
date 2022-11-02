@@ -18,5 +18,6 @@ export default {
 
     UV: 16,
     ID: 17,
-    SSR: 18
+    SSR: 18,
+    VELOCITY: 19
 }

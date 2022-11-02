@@ -19,6 +19,7 @@ import TransformationPass from "./runtime/TransformationPass";
 import PhysicsAPI from "./api/PhysicsAPI";
 import GPUController from "./GPUController";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
+import MotionBlur from "./runtime/post-processing/MotionBlur";
 
 let METRICS
 export default class Loop {
@@ -32,6 +33,7 @@ export default class Loop {
         METRICS = Engine.metrics
         Loop.previousFrame = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
 
+
         ScreenEffectsPass.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
@@ -41,6 +43,7 @@ export default class Loop {
         DirectionalShadows.initialize()
         SpritePass.initialize()
         GBuffer.initialize()
+        MotionBlur.initialize()
         await PhysicsAPI.initialize()
 
         Loop.#initialized = true
@@ -98,6 +101,7 @@ export default class Loop {
         start = performance.now()
         Loop.#rendering(entities)
         ScreenEffectsPass.execute()
+        MotionBlur.execute()
         FrameComposition.execute()
         METRICS.rendering = performance.now() - start
     }

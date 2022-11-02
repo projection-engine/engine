@@ -11,15 +11,16 @@ export default `
  * @global Component - Access static methods to generate inputs or create your custom component
  * @global COMPONENTS - Native components structure 
  * @global CameraAPI - Apply custom transformations to view, change projection attributes, bind to entity
- * @global QueryAPI - Query engine entities 
+ * @global QueryAPI - Query engine entities
+ * @global entity - Entity reference 
  */
 
  
 // You can also declare functions outside class
 class MyComponent extends Component {
     myNumber = 10
-    entity // will be initialized with entity reference after constructor    
-    constructor(entity){
+       
+    constructor(){
         super()
         // Executed on first frame update
     }

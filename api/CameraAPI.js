@@ -7,6 +7,8 @@ import {vec3, vec4} from "gl-matrix";
 import ConversionAPI from "./math/ConversionAPI";
 import cloneClass from "../utils/clone-class";
 import UBO from "../instances/UBO";
+import MotionBlur from "../runtime/post-processing/MotionBlur";
+import FrameComposition from "../runtime/post-processing/FrameComposition";
 
 
 /**
@@ -39,11 +41,16 @@ export default class CameraAPI {
     static projectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static invViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static invProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static viewProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static previousViewProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+
     static staticViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+
     static #projectionBuffer = ArrayBufferAPI.allocateVector(5)
     static translationBuffer = ArrayBufferAPI.allocateVector(3)
     static rotationBuffer = ArrayBufferAPI.allocateVector(4, 0, true)
+
     static #notificationBuffers = getNotificationBuffer()
     static #worker
     static initialized = false
@@ -56,10 +63,9 @@ export default class CameraAPI {
             "CameraMetadata",
             0,
             [
-                {name: "viewMatrix", type: "mat4"},
-                {name: "projectionMatrix", type: "mat4"},
+                {name: "viewProjection", type: "mat4"},
                 {name: "placement", type: "vec3"},
-                {name: "invViewMatrix", type: "mat4"},
+                {name: "previousViewProjection", type: "mat4"},
             ])
 
         const w = new Worker("./build/camera-worker.js")
@@ -76,7 +82,9 @@ export default class CameraAPI {
             CameraAPI.translationBuffer,
             CameraAPI.rotationBuffer,
             CameraAPI.skyboxProjectionMatrix,
-            CameraAPI.#projectionBuffer
+            CameraAPI.#projectionBuffer,
+            CameraAPI.viewProjectionMatrix,
+            CameraAPI.previousViewProjectionMatrix
         ])
 
         new ResizeObserver(CameraAPI.updateAspectRatio)
@@ -91,9 +99,10 @@ export default class CameraAPI {
             const UBO = CameraAPI.UBO
             notificationBuffers[3] = 0
             UBO.bind()
-            UBO.updateData("viewMatrix", CameraAPI.viewMatrix)
-            UBO.updateData("projectionMatrix", CameraAPI.projectionMatrix)
+            UBO.updateData("viewProjection", CameraAPI.viewProjectionMatrix)
             UBO.updateData("placement", CameraAPI.position)
+            UBO.updateData("previousViewProjection", CameraAPI.previousViewProjectionMatrix)
+
             UBO.unbind()
         }
     }
@@ -195,18 +204,44 @@ export default class CameraAPI {
 
     static serializeState(translation = CameraAPI.translationBuffer, rotation = CameraAPI.rotationBuffer, rotationSmoothing = CameraAPI.rotationSmoothing, translationSmoothing = CameraAPI.translationSmoothing, metadata = CameraAPI.metadata) {
         const state = {rotationSmoothing, translationSmoothing}
-        state.metadata = cloneClass(metadata)
+
         state.rotation = [...rotation]
         state.translation = [...translation]
         return state
     }
 
+    static restoreState({rotation, translation, rotationSmoothing, translationSmoothing}) {
+        CameraAPI.translationBuffer[0] = translation[0]
+        CameraAPI.translationBuffer[1] = translation[1]
+        CameraAPI.translationBuffer[2] = translation[2]
+
+        CameraAPI.rotationBuffer[0] = rotation[0]
+        CameraAPI.rotationBuffer[1] = rotation[1]
+        CameraAPI.rotationBuffer[2] = rotation[2]
+        CameraAPI.rotationBuffer[3] = rotation[3]
+
+        CameraAPI.rotationSmoothing = rotationSmoothing
+        CameraAPI.translationSmoothing = translationSmoothing
+
+        CameraAPI.updateView()
+    }
+
+    static updateMotionBlurState(enabled){
+        MotionBlur.enabled = enabled
+
+        if(!MotionBlur.enabled)
+            FrameComposition.workerTexture = MotionBlur.workerTexture
+        else
+            FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
+    }
     static updateViewTarget(entity) {
         if (!entity?.components || Engine.environment === ENVIRONMENT.DEV)
             return
         const cameraObj = entity.components.get(COMPONENTS.CAMERA)
         if (!cameraObj)
             return
+
+        CameraAPI.updateMotionBlurState(cameraObj.motionBlurEnabled)
 
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear

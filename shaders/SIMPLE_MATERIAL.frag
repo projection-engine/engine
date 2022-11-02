@@ -7,6 +7,8 @@ in vec2 texCoords;
 in vec4 worldSpacePosition;
 in vec3 camera;
 
+in vec4 previousScreenPosition;
+in vec4 currentScreenPosition;
 
 uniform vec3 meshID;
 uniform mat3 settings;
@@ -23,20 +25,16 @@ uniform sampler2D emission;
 uniform sampler2D heightMap;
 uniform mat4 uvScales;
 
-//import(ambientUniforms)
-
 layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gBehaviour;// AO ROUGHNESS METALLIC
-layout (location = 4) out vec4 gAmbient;
-
-layout (location = 5) out vec4 gDepth;
-layout (location = 6) out vec4 gMeshID;
-layout (location = 7) out vec4 gBaseNormal;
+layout (location = 4) out vec4 gDepth;
+layout (location = 5) out vec4 gMeshID;
+layout (location = 6) out vec4 gBaseNormal;
+layout (location = 7) out vec4 gVelocity;
 
 //import(fresnelSchlickRoughness)
-//import(ambient)
 //import(parallaxOcclusionMapping)
 //import(computeTBN)
 
@@ -46,9 +44,12 @@ float max3 (vec3 v) {
 float min3 (vec3 v) {
     return min (min (v.x, v.y), v.z);
 }
-
-
 void main(){
+    vec2 a = (currentScreenPosition.xy / currentScreenPosition.w) * 0.5 + 0.5;
+    vec2 b = (previousScreenPosition.xy / previousScreenPosition.w) * 0.5 + 0.5;
+    vec2 c = a - b;
+    gVelocity = vec4(c, 0., 1.);
+
     vec2 UVs = texCoords;
     float POM_HEIGHT_SCALE =  settings[2][0];
     float POM_LAYERS =  settings[2][1];
@@ -110,10 +111,5 @@ void main(){
     gBehaviour.r = max3(texture(ao, UVs * vec2(uvScales[2][0], uvScales[2][1])).rgb * vec3(linearSamplerScales[1][0], linearSamplerScales[1][1], linearSamplerScales[1][2]));
 
 
-    vec3 diffuse = vec3(0.);
-    vec3 specular = vec3(0.);
-
-
-    gAmbient = vec4(computeAmbient(camera, gAlbedo.rgb, worldSpacePosition.rgb, normalVec, gBehaviour.g, gBehaviour.b, ambientLODSamples, brdfSampler, worldSpacePosition.rgb), 1.);
 }
 
