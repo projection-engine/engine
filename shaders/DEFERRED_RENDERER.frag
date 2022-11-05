@@ -24,7 +24,6 @@ uniform DeferredSettings{
     bool hasAO;
     bool hasDiffuseProbe;
     bool hasSpecularProbe;
-
 };
 
 uniform vec3 cameraPosition;
@@ -59,10 +58,10 @@ uniform samplerCube shadowCube;
 
 out vec4 finalColor;
 void main() {
-    vec3 fragPosition = texture(positionSampler, texCoords).rgb;
-    if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
+    vec4 pixelPosition = texture(positionSampler, texCoords);
+    if (pixelPosition.a < 1.)
     discard;
-
+    vec3 fragPosition = pixelPosition.rgb;
 
     vec3 albedo = texture(albedoSampler, texCoords).rgb;
     if (albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){

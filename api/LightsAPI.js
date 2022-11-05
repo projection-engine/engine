@@ -30,7 +30,6 @@ export default class LightsAPI {
         LightsAPI.#initialized = true
         LightsAPI.pointLightsUBO = new UBO(
             "PointLights",
-            1,
             [
 
                 {name: "pointLights", type: "mat4", dataLength: MAX_POINT_LIGHT},
@@ -39,7 +38,6 @@ export default class LightsAPI {
         )
         LightsAPI.directionalLightsUBO = new UBO(
             "DirectionalLights",
-            2,
             [
 
                 {name: "directionalLights", type: "mat4", dataLength: MAX_DIRECTIONAL_LIGHT},

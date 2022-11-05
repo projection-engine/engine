@@ -61,7 +61,6 @@ export default class CameraAPI {
 
         CameraAPI.UBO = new UBO(
             "CameraMetadata",
-            0,
             [
                 {name: "viewProjection", type: "mat4"},
                 {name: "placement", type: "vec3"},

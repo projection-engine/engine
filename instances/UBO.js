@@ -1,5 +1,6 @@
 import getGlslSizes from "../utils/get-glsl-sizes";
 
+
 export default class UBO {
     items = []
     keys = []
@@ -7,7 +8,9 @@ export default class UBO {
     blockName
     blockPoint
 
-    constructor(blockName, blockPoint, dataArray) {
+    static #blockPointIncrement = 0
+
+    constructor(blockName, dataArray) {
         const bufferSize = UBO.#calculate(dataArray);
         for (let i = 0; i < dataArray.length; i++) {
             this.items[dataArray[i].name] = {
@@ -20,13 +23,15 @@ export default class UBO {
 
 
         this.blockName = blockName;
-        this.blockPoint = blockPoint;
+        this.blockPoint = UBO.#blockPointIncrement;
+        UBO.#blockPointIncrement += 1
+
 
         this.buffer = gpu.createBuffer();
         gpu.bindBuffer(gpu.UNIFORM_BUFFER, this.buffer);
         gpu.bufferData(gpu.UNIFORM_BUFFER, bufferSize, gpu.DYNAMIC_DRAW);
         gpu.bindBuffer(gpu.UNIFORM_BUFFER, null);
-        gpu.bindBufferBase(gpu.UNIFORM_BUFFER, blockPoint, this.buffer);
+        gpu.bindBufferBase(gpu.UNIFORM_BUFFER, this.blockPoint, this.buffer);
     }
 
     bindWithShader(shaderProgram) {

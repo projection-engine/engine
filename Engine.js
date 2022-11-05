@@ -147,6 +147,22 @@ export default class Engine {
         GBuffer.UBO.unbind()
         MotionBlur.uniforms.velocityScale = data.mbVelocityScale
         MotionBlur.uniforms.maxSamples = data.mbSamples
+
+        FrameComposition.UBO.bind()
+        FrameComposition.UBO.updateData("fxaaEnabled", new Uint8Array([data.fxaa ? 1 : 0]))
+        FrameComposition.UBO.updateData("FXAASpanMax", new Float32Array([data.FXAASpanMax || 8]))
+        FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
+        FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))
+
+        if (data.gamma !== undefined)
+            FrameComposition.UBO.updateData("gamma", new Float32Array([data.gamma]))
+        if (data.exposure !== undefined)
+            FrameComposition.UBO.updateData("exposure", new Float32Array([data.exposure]))
+        if (data.filmGrain !== undefined)
+            FrameComposition.UBO.updateData("filmGrainEnabled", new Uint8Array([data.filmGrain ? 1 : 0]))
+        if (data.filmGrainStrength !== undefined)
+            FrameComposition.UBO.updateData("filmGrainStrength", new Float32Array([data.filmGrainStrength]))
+        FrameComposition.UBO.unbind()
     }
 
 

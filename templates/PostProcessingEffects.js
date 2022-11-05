@@ -1,3 +1,5 @@
+import FrameComposition from "../runtime/post-processing/FrameComposition";
+
 export default class PostProcessingEffects {
     zNear = .1
     zFar = 1000
@@ -5,21 +7,47 @@ export default class PostProcessingEffects {
     aspectRatio = 1
     size = 50
     _bloom = false
-    filmGrain = false
-    filmGrainStrength = 1.
+    _filmGrain = false
+    _filmGrainStrength = 1.
+
+    get filmGrain(){
+        return this._filmGrain
+    }
+    get filmGrainStrength(){
+        return this._filmGrainStrength
+    }
+
+    set filmGrain(data){
+        this._filmGrain = data
+        FrameComposition.UBO.updateData("filmGrainEnabled", new Float32Array([data ? 1 : 0]))
+    }
+    set filmGrainStrength(data){
+        this._filmGrainStrength = data
+        FrameComposition.UBO.updateData("filmGrainStrength", new Float32Array([data]))
+    }
 
     bloomStrength = 1.
     bloomThreshold = .85
-    gamma = 2.2
-    exposure = 1.
+
+    _gamma = 2.2
+    _exposure = 1.
+    get gamma(){
+        return this._gamma
+    }
+    get exposure(){
+        return this._exposure
+    }
+    set gamma(data){
+        this._gamma = data
+        FrameComposition.UBO.updateData("gamma", new Float32Array([data]))
+    }
+    set exposure(data){
+        this._exposure = data
+        FrameComposition.UBO.updateData("exposure", new Float32Array([data]))
+    }
 
     postProcessingEffects = new Uint8Array([1, 1, 1])
     postProcessingStrength = new Uint8Array([1, 1])
-
-    fxaa = true
-    FXAASpanMax = 8
-    FXAAReduceMin = 1 / 128
-    FXAAReduceMul = 1 / 8
 
     set distortion(v) {
         this.postProcessingEffects[0] = v ? 1 : 0

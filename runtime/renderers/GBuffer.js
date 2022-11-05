@@ -39,7 +39,6 @@ export default class GBuffer {
         uniforms = shader.uniformMap
         GBuffer.UBO = new UBO(
             "DeferredSettings",
-            4,
             [
                 {name: "shadowMapsQuantity", type: "float"},
                 {name: "shadowMapResolution", type: "float"},

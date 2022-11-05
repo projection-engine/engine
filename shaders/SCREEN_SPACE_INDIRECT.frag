@@ -31,6 +31,9 @@ layout (location = 1) out vec4 SSRSampler;
 //import(SSR)
 
 void main(){
+    vec4 pixelPosition = texture(gPosition, texCoords);
+    if (pixelPosition.a < 1.)
+    discard;
     float SSR_falloff = rayMarchSettings[0][0];
     float SSR_minRayStep = rayMarchSettings[0][1];
     float SSR_stepSize = rayMarchSettings[0][2];

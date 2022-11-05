@@ -27,7 +27,10 @@ vec3 cosHemisphereSample(vec2 randVal, vec3 hitNorm)
 }
 
 void main(){
-    vec4 worldNormal = texture(gNormal, texCoords) * invViewMatrix;
+    vec4 normal = texture(gNormal, texCoords);
+    if(normal.a < 1.)
+        discard;
+    vec4 worldNormal = normal * invViewMatrix;
 
     vec2 noise = vec2(interleavedGradientNoise(texCoords));
     vec3 stochasticNormal = cosHemisphereSample(noise, worldNormal.rgb);

@@ -1,6 +1,7 @@
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
+import Engine from "../../Engine";
 
 let shader, uniforms
 export default class FrameComposition {
@@ -13,31 +14,39 @@ export default class FrameComposition {
     static UBO
 
     static initialize() {
-        // FrameComposition.UBO = new UBO(
-        //     "compositionSettings",
-        //     0,
-        //     [
-        //         {type: "bool", name: "fxaaEnabled"},
-        //         {type: "bool", name: "filmGrainEnabled"},
-        //         {type: "float", name: "FXAASpanMax"},
-        //         {type: "float", name: "FXAAReduceMin"},
-        //         {type: "float", name: "FXAAReduceMul"},
-        //         {type: "float", name: "filmGrainStrength"},
-        //         {type: "float", name: "gamma"},
-        //         {type: "float", name: "exposure"},
-        //         {type: "vec2", name: "inverseFilterTextureSize"}
-        //     ]
-        // )
-        // FrameComposition.UBO.bindWithShader(FrameComposition.shader.program)
-        // FrameComposition.UBO.updateData("inverseFilterTextureSize", new Float32Array([1 / GPU.internalResolution.w, 1 / GPU.internalResolution.h]))
+        FrameComposition.UBO = new UBO(
+            "CompositionSettings",
+            [
+                {type: "vec2", name: "inverseFilterTextureSize"},
+                {type: "bool", name: "fxaaEnabled"},
+                {type: "bool", name: "filmGrainEnabled"},
+                {type: "float", name: "FXAASpanMax"},
+                {type: "float", name: "FXAAReduceMin"},
+                {type: "float", name: "FXAAReduceMul"},
+                {type: "float", name: "filmGrainStrength"},
+                {type: "float", name: "gamma"},
+                {type: "float", name: "exposure"}
+            ]
+        )
 
+        FrameComposition.UBO.bindWithShader(FrameComposition.shader.program)
+        FrameComposition.UBO.bind()
+        FrameComposition.UBO.updateData("gamma", new Float32Array([2.2]))
+        FrameComposition.UBO.updateData("exposure", new Float32Array([1]))
+        FrameComposition.UBO.updateData("FXAASpanMax", new Float32Array([8.0]))
+        FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([1.0/128.0]))
+        FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([1.0/8.0]))
+        FrameComposition.UBO.updateData("inverseFilterTextureSize", new Float32Array([1 / GPU.internalResolution.w, 1 / GPU.internalResolution.h]))
+        FrameComposition.UBO.unbind()
         for (let i = 1e6; i > 0; i--)
             FrameComposition.lookUpRandom.push(Math.random())
+        FrameComposition.updateShader()
     }
 
     static updateShader() {
         shader = FrameComposition.shader
-        uniforms = shader.uniforms
+        uniforms = shader.uniformMap
+        console.log(uniforms)
     }
 
     static lookup() {
@@ -45,28 +54,14 @@ export default class FrameComposition {
     }
 
     static execute() {
-        const {
-            filmGrain,
-            filmGrainStrength,
-            gamma,
-            exposure,
-            fxaa,
-            FXAASpanMax,
-            FXAAReduceMin,
-            FXAAReduceMul
-        } = CameraAPI.metadata
-
-        shader.bindForUse({
-            uSampler: FrameComposition.workerTexture,
-            debugFlag: FrameComposition.debugFlag,
-
-
-            enabled: [fxaa ? 1 : 0, filmGrain ? 1 : 0],
-            settings: [FXAASpanMax, FXAAReduceMin, FXAAReduceMul, filmGrainStrength],
-            colorGrading: [gamma, exposure, filmGrain ? FrameComposition.lookup() : 0],
-            inverseFilterTextureSize: [1 / gpu.drawingBufferWidth, 1 / gpu.drawingBufferHeight, 0],
-
-        })
+        shader.bind()
+        gpu.activeTexture(gpu.TEXTURE0)
+        gpu.bindTexture(gpu.TEXTURE_2D, FrameComposition.workerTexture)
+        gpu.uniform1i(uniforms.uSampler, 0)
+        if(uniforms.debugFlag)
+            gpu.uniform1i(uniforms.debugFlag, FrameComposition.debugFlag)
+        else
+            gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.lookup())
         GPU.quad.draw()
 
     }

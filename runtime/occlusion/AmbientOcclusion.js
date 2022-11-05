@@ -37,7 +37,6 @@ export default class AmbientOcclusion {
 
         AmbientOcclusion.UBO = new UBO(
             "Settings",
-            3,
             [
                 {name: "settings", type: "vec3"},
                 {name: "samples", type: "vec4", dataLength: 64},
