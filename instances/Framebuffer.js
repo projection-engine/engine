@@ -1,4 +1,4 @@
-import GPUResources from "../GPUResources";
+import GPU from "../GPU";
 import Texture from "./Texture";
 
 export default class Framebuffer {
@@ -9,7 +9,7 @@ export default class Framebuffer {
     colors = []
     attachments = []
 
-    constructor(width = GPUResources.internalResolution.w, height = GPUResources.internalResolution.h) {
+    constructor(width = GPU.internalResolution.w, height = GPU.internalResolution.h) {
 
         this.width = width
         this.height = height
@@ -39,7 +39,7 @@ export default class Framebuffer {
 
     stopMapping(clear = true) {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
-        GPUResources.activeFramebuffer = undefined
+        GPU.activeFramebuffer = undefined
         if (clear)
             gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
 
@@ -126,9 +126,9 @@ export default class Framebuffer {
 
 
     use() {
-        if (GPUResources.activeFramebuffer !== this.FBO) {
+        if (GPU.activeFramebuffer !== this.FBO) {
             gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
-            GPUResources.activeFramebuffer = this.FBO
+            GPU.activeFramebuffer = this.FBO
         }
         return this
     }

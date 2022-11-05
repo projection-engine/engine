@@ -1,7 +1,7 @@
 export default `
 /**
  * @global GPUResources - Access meshes/materials/framebuffers/shaders
- * @global GPUController - Create/destroy meshes/textures/framebuffers/cubemaps
+ * @global GPUAPI - Create/destroy meshes/textures/framebuffers/cubemaps
  * @global PhysicsAPI - Access to Ammo.JS instance;
  * @global UIAPI - Destry/create/update UI elements; Access to document
  * @global TransformationAPI - Transform/interpolate matrices 
@@ -12,29 +12,31 @@ export default `
  * @global COMPONENTS - Native components structure 
  * @global CameraAPI - Apply custom transformations to view, change projection attributes, bind to entity
  * @global QueryAPI - Query engine entities
- * @global entity - Entity reference 
+ * @global entity - Entity reference
+ * @global FileSystemAPI - Read methods and orther data
  */
 
- 
-// You can also declare functions outside class
-class MyComponent extends Component {
-    myNumber = 10
-       
-    constructor(){
-        super()
-        // Executed on first frame update
-    }
+let myModule 
+FileSystemAPI.importAsset("my-asset-id").then(data => {
+    myModule = data
+})
+
+return {
     
+    myNumber: 10,
+    onCreation(){  
+        // Executed when entity is created
+    },
+    onDestruction(){  
+        // Executed when entity is destroyed
+    },
     onUpdate(){
         // executed every frame  
-    }
-    
+    },
     // Component metadata
-    _name = "My component" // Ideally unique
-    _props = [
-        Component.number("My example input", "myNumber")
+    _name: "My component", // Component name that will be showed on editor
+    _props: [
+        Component.number("My example input", "myNumber") // Inputs for inspector
     ]
 }
-
-return MyComponent // Required return statement for class reference
- `
+`

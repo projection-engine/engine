@@ -1,4 +1,4 @@
-import GPUResources from "../GPUResources";
+import GPU from "../GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 
 
@@ -7,11 +7,11 @@ export default class CubeMapAPI {
     static #initialized
 
     static get irradianceShader() {
-        return GPUResources.shaders.get(STATIC_SHADERS.PRODUCTION.IRRADIANCE)
+        return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.IRRADIANCE)
     }
 
     static get prefilteredShader() {
-        return GPUResources.shaders.get(STATIC_SHADERS.PRODUCTION.PREFILTERED)
+        return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.PREFILTERED)
     }
 
     static initialize() {

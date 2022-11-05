@@ -1,6 +1,6 @@
 import Engine from "../../Engine";
 import COMPONENTS from "../../static/COMPONENTS.js";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import AmbientOcclusion from "../../runtime/occlusion/AmbientOcclusion";
 import SpecularProbePass from "../../runtime/renderers/SpecularProbePass";
 import DiffuseProbePass from "../../runtime/renderers/DiffuseProbePass";
@@ -8,10 +8,11 @@ import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import DATA_TYPES from "../../static/DATA_TYPES";
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS";
 import ImageWorker from "../../workers/image/ImageWorker";
-import GPUController from "../../GPUController";
+import GPUAPI from "../GPUAPI";
 import DirectionalShadows from "../../runtime/occlusion/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/occlusion/OmnidirectionalShadows";
 import GBuffer from "../../runtime/renderers/GBuffer";
+import FileSystemAPI from "../FileSystemAPI";
 
 const SKYBOX = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class MaterialAPI {
@@ -61,7 +62,7 @@ export default class MaterialAPI {
             uniforms.irradiance0 = ambient[2]
         }
 
-        uniforms.brdfSampler = GPUResources.BRDF
+        uniforms.brdfSampler = GPU.BRDF
         uniforms.aoSampler = AmbientOcclusion.filteredSampler
         uniforms.elapsedTime = Engine.elapsed
 
@@ -109,8 +110,8 @@ export default class MaterialAPI {
 
     static loopMeshes(entities, callback) {
         const l = entities.length
-        const materials = GPUResources.materials
-        const meshes = GPUResources.meshes
+        const materials = GPU.materials
+        const meshes = GPU.meshes
 
         for (let m = 0; m < l; m++) {
             const current = entities[m]
@@ -129,8 +130,8 @@ export default class MaterialAPI {
 
     static loopTerrain(entities, callback) {
         const l = entities.length
-        const materials = GPUResources.materials
-        const meshes = GPUResources.meshes
+        const materials = GPU.materials
+        const meshes = GPU.meshes
 
         for (let m = 0; m < l; m++) {
             const current = entities[m]
@@ -158,7 +159,7 @@ export default class MaterialAPI {
                             resolution: 4
                         })
                         const textureID = k.data.toString()
-                        let texture = await GPUController.allocateTexture(img, textureID)
+                        let texture = await GPUAPI.allocateTexture(img, textureID)
 
                         material.texturesInUse[textureID] = texture
                         material.updateTexture[textureID] = (newTexture) => {
@@ -169,16 +170,16 @@ export default class MaterialAPI {
                     }
                     case DATA_TYPES.TEXTURE: {
                         try {
-                            if (Engine.readAsset) {
+                            if (FileSystemAPI.isReady) {
                                 const textureID = k.data
                                 if (!material.texturesInUse[textureID]) {
-                                    const asset = await Engine.readAsset(textureID)
+                                    const asset = await FileSystemAPI.readAsset(textureID)
                                     if (asset) {
-                                        if (GPUResources.textures.get(textureID))
-                                            GPUController.destroyTexture(textureID)
+                                        if (GPU.textures.get(textureID))
+                                            GPUAPI.destroyTexture(textureID)
                                         const textureData = typeof asset === "string" ? JSON.parse(asset) : asset
 
-                                        let texture = await GPUController.allocateTexture({
+                                        let texture = await GPUAPI.allocateTexture({
                                             ...textureData,
                                             img: textureData.base64,
                                             yFlip: textureData.flipY,

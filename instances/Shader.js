@@ -1,6 +1,6 @@
 import SHADOW_METHODS from "../shaders/utils/SHADOW_METHODS.glsl"
 import {PBR} from "../shaders/templates/PBR"
-import GPUResources from "../GPUResources";
+import GPU from "../GPU";
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
 import ACES from "../shaders/utils/ACES.glsl"
 import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl"
@@ -232,10 +232,10 @@ export default class Shader {
     }
 
     bindForUse(data) {
-        if (GPUResources.activeShader !== this.program)
+        if (GPU.activeShader !== this.program)
             gpu.useProgram(this.program)
 
-        GPUResources.activeShader = this.program
+        GPU.activeShader = this.program
         let currentSamplerIndex = 0
         const increase = () => currentSamplerIndex++
         for (let v = 0; v < this.length; v++) {

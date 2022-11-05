@@ -1,6 +1,6 @@
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -9,7 +9,7 @@ import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import SpritePass from "../../runtime/renderers/SpritePass";
 import QueryAPI from "../../api/utils/QueryAPI";
 import {mat4} from "gl-matrix";
-import GPUController from "../../GPUController";
+import GPUAPI from "../../api/GPUAPI";
 
 const SCALE = (new Array(3)).fill(.25)
 const EMPTY_MATRIX = mat4.create()
@@ -22,10 +22,10 @@ export default class IconsSystem {
     static textureYellow
 
     static initialize() {
-        IconsSystem.cameraMesh = GPUResources.meshes.get(STATIC_MESHES.EDITOR.CAMERA)
+        IconsSystem.cameraMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.CAMERA)
         IconsSystem.selectedMap = SelectionStore.map
 
-        IconsSystem.shader = GPUResources.shaders.get(STATIC_SHADERS.DEVELOPMENT.UNSHADED)
+        IconsSystem.shader = GPU.shaders.get(STATIC_SHADERS.DEVELOPMENT.UNSHADED)
 
         const canvas = document.createElement("canvas")
         const ctx = canvas.getContext("2d")
@@ -36,7 +36,7 @@ export default class IconsSystem {
         ctx.fillStyle = "rgb(255, 69, 0)"
         ctx.arc(64, 64, 10, 0, Math.PI * 2)
         ctx.fill()
-        GPUController.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL).then(texture => {
+        GPUAPI.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL).then(texture => {
             IconsSystem.textureYellow = texture.texture
         })
 
@@ -45,7 +45,7 @@ export default class IconsSystem {
         ctx.fillStyle = "yellow"
         ctx.arc(64, 64, 10, 0, Math.PI * 2)
         ctx.fill()
-        GPUController.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL_ORANGE).then(texture => {
+        GPUAPI.allocateTexture(canvas.toDataURL(), STATIC_TEXTURES.PIXEL_ORANGE).then(texture => {
             IconsSystem.textureOrange = texture.texture
         })
 
@@ -100,7 +100,7 @@ export default class IconsSystem {
                     attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
 
                     SpritePass.shader.bindForUse(attr)
-                    GPUResources.quad.draw()
+                    GPU.quad.draw()
                 }
             }
 

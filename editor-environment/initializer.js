@@ -23,7 +23,7 @@ import CollisionVisualizationSystem from "./services/CollisionVisualizationSyste
 import UIAPI from "../api/UIAPI";
 import DEBUGGlsl from "./shaders/DEBUG.glsl";
 import ActionHistoryAPI from "../../../src/libs/ActionHistoryAPI";
-import GPUController from "../GPUController";
+import GPUAPI from "../api/GPUAPI";
 import WIREFRAMEGlsl from "./shaders/WIREFRAME.glsl";
 import RotationGizmo from "./libs/transformation/RotationGizmo";
 import * as SKYBOX from "./shaders/SKYBOX.glsl";
@@ -33,28 +33,28 @@ import * as GRID from "./shaders/GRID.glsl";
 export default async function initializer() {
 
     UIAPI.useIframe = true
-    GPUController.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
-    GPUController.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
-    GPUController.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()
-    GPUController.allocateTexture(circle, STATIC_TEXTURES.ROTATION_GIZMO).catch()
+    GPUAPI.allocateTexture(pointLightIcon, STATIC_TEXTURES.POINT_LIGHT).catch()
+    GPUAPI.allocateTexture(directionalLightIcon, STATIC_TEXTURES.DIRECTIONAL_LIGHT).catch()
+    GPUAPI.allocateTexture(probeIcon, STATIC_TEXTURES.PROBE).catch()
+    GPUAPI.allocateTexture(circle, STATIC_TEXTURES.ROTATION_GIZMO).catch()
 
-    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.LINE, gizmoShaderCode.lineVertex, gizmoShaderCode.lineFragment)
-    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
-    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
-    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
-    GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.DEBUG_DEFERRED, DEBUGGlsl.vertex, DEBUGGlsl.fragment)
-    CollisionVisualizationSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
-    RotationGizmo.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.ROTATION_GIZMO, gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
-    BackgroundSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, SKYBOX.vertex, SKYBOX.fragment)
-    GridSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.GRID, GRID.vertex, GRID.fragment)
-    SelectedSystem.shaderSilhouette = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE, SELECTED.vertexSilhouette, SELECTED.fragmentSilhouette)
-    SelectedSystem.shader = GPUController.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE_OUTLINE, SELECTED.vertex, SELECTED.fragment)
+    GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.LINE, gizmoShaderCode.lineVertex, gizmoShaderCode.lineFragment)
+    GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.TO_BUFFER, gizmoShaderCode.sameSizeVertex, gizmoShaderCode.pickFragment)
+    GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.UNSHADED, gizmoShaderCode.cameraVertex, gizmoShaderCode.cameraFragment)
+    GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.GIZMO, gizmoShaderCode.vertex, gizmoShaderCode.fragment)
+    GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.DEBUG_DEFERRED, DEBUGGlsl.vertex, DEBUGGlsl.fragment)
+    CollisionVisualizationSystem.shader = GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.WIREFRAME, WIREFRAMEGlsl.vertex, WIREFRAMEGlsl.fragment)
+    RotationGizmo.shader = GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.ROTATION_GIZMO, gizmoShaderCode.vertexRot, gizmoShaderCode.fragmentRot)
+    BackgroundSystem.shader = GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.BACKGROUND, SKYBOX.vertex, SKYBOX.fragment)
+    GridSystem.shader = GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.GRID, GRID.vertex, GRID.fragment)
+    SelectedSystem.shaderSilhouette = GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE, SELECTED.vertexSilhouette, SELECTED.fragmentSilhouette)
+    SelectedSystem.shader = GPUAPI.allocateShader(STATIC_SHADERS.DEVELOPMENT.SILHOUETTE_OUTLINE, SELECTED.vertex, SELECTED.fragment)
 
-    GPUController.allocateMesh(STATIC_MESHES.EDITOR.CAMERA, CAMERA)
-    GPUController.allocateMesh(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO, PLANE)
-    GPUController.allocateMesh(STATIC_MESHES.EDITOR.ROTATION_GIZMO, ROTATION_GIZMO)
-    GPUController.allocateMesh(STATIC_MESHES.EDITOR.SCALE_GIZMO, SCALE_GIZMO)
-    GPUController.allocateMesh(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
+    GPUAPI.allocateMesh(STATIC_MESHES.EDITOR.CAMERA, CAMERA)
+    GPUAPI.allocateMesh(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO, PLANE)
+    GPUAPI.allocateMesh(STATIC_MESHES.EDITOR.ROTATION_GIZMO, ROTATION_GIZMO)
+    GPUAPI.allocateMesh(STATIC_MESHES.EDITOR.SCALE_GIZMO, SCALE_GIZMO)
+    GPUAPI.allocateMesh(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO, TRANSLATION_GIZMO)
 
     Engine.environment = ENVIRONMENT.DEV
 
@@ -65,5 +65,4 @@ export default async function initializer() {
     PreviewSystem.initialize()
     GizmoSystem.initialize(ActionHistoryAPI.pushGroupChange)
 
-    await Engine.initialize()
 }

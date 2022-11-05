@@ -1,6 +1,6 @@
-import Component from "../Component"
+import Component from "./Component"
 import {mat4} from "gl-matrix"
-import DIRECTIONAL_LIGHT_PROPS from "../../../static/component-props/DIRECTIONAL_LIGHT_PROPS";
+import DIRECTIONAL_LIGHT_PROPS from "../../static/component-props/DIRECTIONAL_LIGHT_PROPS";
 
 export default class DirectionalLightComponent extends Component {
 

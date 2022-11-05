@@ -11,7 +11,7 @@ import initializeFrameBuffers from "./utils/initialize-frame-buffers";
 import initializeMaterialsAndTextures from "./utils/initialize-materials-and-textures";
 import LightsAPI from "./api/LightsAPI";
 
-export default class GPUResources {
+export default class GPU {
     static context
     static activeShader
     static activeFramebuffer
@@ -28,12 +28,10 @@ export default class GPUResources {
     static quad
 
 
-    static async initializeContext(canvas, [width, height], readAsset) {
-        if (GPUResources.context != null)
+    static async initializeContext(canvas, width, height) {
+        if (GPU.context != null)
             return
-
-        Engine.readAsset = readAsset
-        GPUResources.internalResolution = {w: width, h: height}
+        GPU.internalResolution = {w: width, h: height}
         const gpu = canvas.getContext("webgl2", {
             antialias: false,
             preserveDrawingBuffer: true,
@@ -50,7 +48,7 @@ export default class GPUResources {
         gpu.depthFunc(gpu.LESS)
         gpu.frontFace(gpu.CCW)
         window.gpu = gpu
-        GPUResources.context = gpu
+        GPU.context = gpu
 
         CameraAPI.initialize()
         LightsAPI.initialize()

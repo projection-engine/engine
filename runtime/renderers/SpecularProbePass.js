@@ -3,7 +3,7 @@ import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../static/COMPONENTS.js"
 import MaterialAPI from "../../api/rendering/MaterialAPI";
 import Engine from "../../Engine";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
 import LightProbe from "../../instances/LightProbe";
 
@@ -67,7 +67,7 @@ export default class SpecularProbePass {
                     if (!specularProbes[i].active)
                         continue
                     const current = specularProbes[i].components.get(COMPONENTS.PROBE)
-                    SpecularProbePass.specularProbes[specularProbes[i].id].drawSpecularMap(current.mipmaps, current.resolution, GPUResources.cubeBuffer, current.multiplier)
+                    SpecularProbePass.specularProbes[specularProbes[i].id].drawSpecularMap(current.mipmaps, current.resolution, GPU.cubeBuffer, current.multiplier)
                 }
                 SpecularProbePass.step = STEPS_CUBE_MAP.CALCULATE
                 break

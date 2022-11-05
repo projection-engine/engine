@@ -1,7 +1,7 @@
 import VertexBuffer from "./VertexBuffer"
 import {v4 as uuidv4} from "uuid"
-import GPUResources from "../GPUResources";
-import GPUController from "../GPUController";
+import GPU from "../GPU";
+import GPUAPI from "../api/GPUAPI";
 
 export default class Mesh {
     verticesQuantity = 0
@@ -40,7 +40,7 @@ export default class Mesh {
         this.VAO = gpu.createVertexArray()
         gpu.bindVertexArray(this.VAO)
 
-        this.indexVBO = GPUController.createBuffer(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
+        this.indexVBO = GPUAPI.createBuffer(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
         this.vertexVBO = new VertexBuffer(0, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
 
         if (normals && normals.length > 0)
@@ -56,13 +56,13 @@ export default class Mesh {
     }
 
     static finishIfUsed() {
-        const lastUsed = GPUResources.activeMesh
+        const lastUsed = GPU.activeMesh
         if (lastUsed != null)
             lastUsed.finish()
     }
 
     use() {
-        const last = GPUResources.activeMesh
+        const last = GPU.activeMesh
         if (last === this)
             return
         else if (last != null)
@@ -94,7 +94,7 @@ export default class Mesh {
 
         gpu.bindVertexArray(null)
 
-        GPUResources.activeMesh = undefined
+        GPU.activeMesh = undefined
     }
 
 

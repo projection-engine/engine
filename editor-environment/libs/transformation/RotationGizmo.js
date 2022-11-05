@@ -6,7 +6,7 @@ import CameraAPI from "../../../api/CameraAPI";
 import GizmoSystem from "../../services/GizmoSystem";
 import AXIS from "../../data/AXIS";
 import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
-import GPUResources from "../../../GPUResources";
+import GPU from "../../../GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 
 const toDeg = 57.29, toRad = Math.PI / 180
@@ -24,7 +24,7 @@ static shader
         this.xGizmo = mapGizmoMesh("x", "ROTATION")
         this.yGizmo = mapGizmoMesh("y", "ROTATION")
         this.zGizmo = mapGizmoMesh("z", "ROTATION")
-        this.texture = GPUResources.textures.get(STATIC_TEXTURES.ROTATION_GIZMO)
+        this.texture = GPU.textures.get(STATIC_TEXTURES.ROTATION_GIZMO)
     }
 
     onMouseDown(event) {

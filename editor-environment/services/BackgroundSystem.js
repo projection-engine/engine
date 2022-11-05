@@ -1,7 +1,7 @@
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
 import Mesh from "../../instances/Mesh";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import SkyboxPass from "../../runtime/renderers/SkyboxPass";
 
 
@@ -17,7 +17,7 @@ export default class BackgroundSystem {
 
         Mesh.finishIfUsed()
         gpu.depthMask(false)
-        GPUResources.cubeBuffer.enable()
+        GPU.cubeBuffer.enable()
         BackgroundSystem.shader.bindForUse({
             projectionMatrix: CameraAPI.skyboxProjectionMatrix,
             viewMatrix: CameraAPI.viewMatrix,
@@ -26,7 +26,7 @@ export default class BackgroundSystem {
             // debugSampler: OmnidirectionalShadows.cubeMaps[0].texture
         })
         gpu.drawArrays(gpu.TRIANGLES, 0, 36)
-        GPUResources.cubeBuffer.disable()
+        GPU.cubeBuffer.disable()
 
         gpu.depthMask(true)
 

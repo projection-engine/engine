@@ -2,6 +2,7 @@ import COMPONENTS from "../static/COMPONENTS.js";
 import Engine from "../Engine";
 import InputEventsAPI from "./utils/InputEventsAPI";
 import QueryAPI from "./utils/QueryAPI";
+import FileSystemAPI from "./FileSystemAPI";
 
 const STYLES = {
     position: "absolute",
@@ -34,10 +35,28 @@ export default class UIAPI {
     static document
     static uiMountingPoint
     static #useIframe = false
-    static #iframeParent
+    static iframeParent
 
     static set useIframe(data) {
         UIAPI.#useIframe = data
+    }
+
+    static async updateAllElements() {
+        const uiElements = Array.from(Engine.UILayouts.keys())
+        for (let i = 0; i < uiElements.length; i++) {
+            const found = uiElements[i]
+
+            const entities = Engine.entities.filter(e => e.components.get(COMPONENTS.UI)?.uiLayoutID === found)
+            if (!entities.length) {
+                Engine.UILayouts.delete(found)
+                continue
+            }
+            Engine.UILayouts.set(found, await FileSystemAPI.readAsset(found))
+            entities.forEach(e => {
+                UIAPI.updateUIEntity(e)
+            })
+        }
+
     }
 
     static deleteUIEntity(entity) {
@@ -82,7 +101,7 @@ export default class UIAPI {
     static buildUI(t) {
         const target = t || InputEventsAPI.targetElement
         UIAPI.destroyUI()
-        UIAPI.#iframeParent = target
+        UIAPI.iframeParent = target
         if (UIAPI.#useIframe) {
             const iframe = document.createElement("iframe")
             Object.assign(iframe.style, STYLES)
@@ -140,9 +159,9 @@ export default class UIAPI {
         }
 
 
-        if (UIAPI.#iframeParent) {
-            UIAPI.#iframeParent.removeChild(UIAPI.#iframeParent.querySelector("iframe"))
-            UIAPI.#iframeParent = undefined
+        if (UIAPI.iframeParent) {
+            UIAPI.iframeParent.removeChild(UIAPI.iframeParent.querySelector("iframe"))
+            UIAPI.iframeParent = undefined
         }
 
     }

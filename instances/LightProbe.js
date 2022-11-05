@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix"
 import Mesh from "./Mesh";
-import GPUResources from "../GPUResources";
+import GPU from "../GPU";
 import CubeMapAPI from "../api/CubeMapAPI";
 import getProbeRotation from "../utils/get-probe-rotation";
 import getProbeLookat from "../utils/get-probe-lookat";
@@ -53,7 +53,7 @@ export default class LightProbe {
 
 
         const rbo = CubeMapAPI.createRenderBuffer(resolution)
-        GPUResources.cubeBuffer.enable()
+        GPU.cubeBuffer.enable()
 
         for (let i = 0; i < mipLevels; i++) {
             const currentRes = resolution * Math.pow(0.5, i)
@@ -81,7 +81,7 @@ export default class LightProbe {
                 gpu.drawArrays(gpu.TRIANGLES, 0, 36)
             }
         }
-        GPUResources.cubeBuffer.disable()
+        GPU.cubeBuffer.disable()
 
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         gpu.deleteRenderbuffer(rbo)
@@ -108,7 +108,7 @@ export default class LightProbe {
         }
 
         if (asIrradiance)
-            GPUResources.cubeBuffer.enable()
+            GPU.cubeBuffer.enable()
 
         for (let i = 0; i < 6; i++) {
             const rotations = getProbeRotation(i)
@@ -123,7 +123,7 @@ export default class LightProbe {
             callback(rotations.yaw, rotations.pitch, perspective, i)
         }
         if (asIrradiance)
-            GPUResources.cubeBuffer.disable()
+            GPU.cubeBuffer.disable()
 
         gpu.deleteRenderbuffer(rbo)
         return this

@@ -1,7 +1,7 @@
 import ScreenEffectsPass from "./ScreenEffectsPass";
 import FrameComposition from "./FrameComposition";
 import GBuffer from "../renderers/GBuffer";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 
 export default class MotionBlur {
     static shader
@@ -21,7 +21,7 @@ export default class MotionBlur {
             return
         MotionBlur.frameBuffer.startMapping()
         MotionBlur.shader.bindForUse(MotionBlur.uniforms)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
         MotionBlur.frameBuffer.stopMapping()
     }
 }

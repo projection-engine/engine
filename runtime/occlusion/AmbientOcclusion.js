@@ -1,5 +1,5 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import GBuffer from "../renderers/GBuffer";
 import CameraAPI from "../../api/CameraAPI";
 import GlobalIlluminationPass from "../GlobalIlluminationPass";
@@ -32,8 +32,8 @@ export default class AmbientOcclusion {
         AmbientOcclusion.unfilteredSampler = AmbientOcclusion.framebuffer.colors[0]
         AmbientOcclusion.filteredSampler = AmbientOcclusion.blurredFBO.colors[0]
 
-        AmbientOcclusion.noiseScale[0] = GPUResources.internalResolution.w / RESOLUTION
-        AmbientOcclusion.noiseScale[1] = GPUResources.internalResolution.h / RESOLUTION
+        AmbientOcclusion.noiseScale[0] = GPU.internalResolution.w / RESOLUTION
+        AmbientOcclusion.noiseScale[1] = GPU.internalResolution.h / RESOLUTION
         GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
 
         AmbientOcclusion.UBO = new UBO(
@@ -93,12 +93,12 @@ export default class AmbientOcclusion {
             return
         AmbientOcclusion.framebuffer.startMapping()
         AmbientOcclusion.shader.bindForUse(AmbientOcclusion.uniforms)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
         AmbientOcclusion.framebuffer.stopMapping()
 
         AmbientOcclusion.blurredFBO.startMapping()
         AmbientOcclusion.blurShader.bindForUse(AmbientOcclusion.uniforms)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
         AmbientOcclusion.blurredFBO.stopMapping()
     }
 

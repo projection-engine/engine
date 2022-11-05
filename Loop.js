@@ -6,52 +6,28 @@ import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import SpecularProbePass from "./runtime/renderers/SpecularProbePass";
 import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
 
-import ScriptingPass from "./runtime/ScriptingPass";
+import ExecuteScripts from "./runtime/execute-scripts";
 import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
 import SkyboxPass from "./runtime/renderers/SkyboxPass";
 import Engine from "./Engine";
-import GPUResources from "./GPUResources";
+import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import SpritePass from "./runtime/renderers/SpritePass";
 import PhysicsPass from "./runtime/PhysicsPass";
 import TransformationPass from "./runtime/TransformationPass";
 import PhysicsAPI from "./api/PhysicsAPI";
-import GPUController from "./GPUController";
+import GPUAPI from "./api/GPUAPI";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
+import CameraAPI from "./api/CameraAPI";
+import executeScripts from "./runtime/execute-scripts";
 
-let METRICS
+let then = 0
 export default class Loop {
-    static #initialized = false
-    static previousFrame
-
-    static async initialize() {
-        if (Loop.#initialized)
-            return
-
-        METRICS = Engine.metrics
-        Loop.previousFrame = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
-
-
-        ScreenEffectsPass.initialize()
-        FrameComposition.initialize()
-        AmbientOcclusion.initialize()
-        GlobalIlluminationPass.initialize()
-        DiffuseProbePass.initialize()
-        OmnidirectionalShadows.initialize()
-        DirectionalShadows.initialize()
-        SpritePass.initialize()
-        GBuffer.initialize()
-        MotionBlur.initialize()
-        await PhysicsAPI.initialize()
-
-        Loop.#initialized = true
-    }
-
-    static #rendering(entities) {
+    static #rendering() {
         const onWrap = Engine.params.onWrap
-        const FBO = Loop.previousFrame
+        const FBO = Engine.previousFrame
 
         SpecularProbePass.execute()
         DiffuseProbePass.execute()
@@ -62,7 +38,7 @@ export default class Loop {
         GBuffer.execute()
         AmbientOcclusion.execute()
         GBuffer.drawBuffer(
-            entities,
+            Engine.entities,
             isDuringBinding => {
                 if (isDuringBinding)
                     SkyboxPass.execute()
@@ -73,7 +49,7 @@ export default class Loop {
 
         FBO.startMapping()
         GBuffer.drawFrame()
-        GPUController.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
+        GPUAPI.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardRenderer.execute()
 
         SpritePass.execute()
@@ -83,26 +59,39 @@ export default class Loop {
     }
 
 
-    static loop(entities) {
-        if (!Loop.#initialized)
-            return
+    static #callback(METRICS) {
 
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-
         let start = performance.now()
-        ScriptingPass.execute()
+        if (!Engine.isDev)
+            executeScripts()
         METRICS.scripting = performance.now() - start
 
         start = performance.now()
-        PhysicsPass.execute(entities)
+        PhysicsPass.execute()
         TransformationPass.execute()
         METRICS.simulation = performance.now() - start
 
         start = performance.now()
-        Loop.#rendering(entities)
+        Loop.#rendering()
         ScreenEffectsPass.execute()
         MotionBlur.execute()
         FrameComposition.execute()
         METRICS.rendering = performance.now() - start
+    }
+
+    static loop() {
+        const METRICS = Engine.metrics
+        const now = performance.now()
+        const el = now - then
+        Engine.elapsed = el
+        then = now
+
+        METRICS.frameRate = 1000 / el
+        METRICS.frameTime = el
+
+        Loop.#callback(METRICS)
+        CameraAPI.updateFrame()
+        Engine.frameID = requestAnimationFrame(() => Loop.loop())
     }
 }

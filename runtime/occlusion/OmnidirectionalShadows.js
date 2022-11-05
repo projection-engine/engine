@@ -1,7 +1,7 @@
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../static/COMPONENTS.js"
 import Engine from "../../Engine";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import GBuffer from "../renderers/GBuffer";
 import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
 import ShadowProbe from "../../instances/ShadowProbe";
@@ -57,7 +57,7 @@ export default class OmnidirectionalShadows {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m], meshComponent = current.components.get(COMPONENTS.MESH)
-            const mesh = GPUResources.meshes.get(meshComponent.meshID)
+            const mesh = GPU.meshes.get(meshComponent.meshID)
             if (!mesh || !meshComponent.castsShadows || !current.active)
                 continue
             OmnidirectionalShadows.shader.bindForUse({

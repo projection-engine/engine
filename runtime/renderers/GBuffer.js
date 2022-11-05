@@ -1,7 +1,7 @@
 import MaterialAPI from "../../api/rendering/MaterialAPI";
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import GlobalIlluminationPass from "../GlobalIlluminationPass";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import UBO from "../../instances/UBO";
@@ -67,7 +67,7 @@ export default class GBuffer {
             albedoSampler: GBuffer.albedoSampler,
             behaviourSampler: GBuffer.behaviourSampler,
             cameraPosition: CameraAPI.position,
-            brdfSampler: GPUResources.BRDF,
+            brdfSampler: GPU.BRDF,
         })
 
         GlobalIlluminationPass.normalUniforms.gNormal = GBuffer.baseNormalSampler
@@ -103,7 +103,7 @@ export default class GBuffer {
 
     static drawFrame() {
         GBuffer.toScreenShader.bindForUse(GBuffer.toScreenUniforms)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
     }
 
     static execute() {
@@ -151,7 +151,7 @@ export default class GBuffer {
         onWrap(true)
 
         GBuffer.deferredShader.bindForUse(GBuffer.deferredUniforms)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
         GBuffer.compositeFBO.stopMapping()
     }
 }

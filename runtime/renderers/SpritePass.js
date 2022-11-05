@@ -1,13 +1,13 @@
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import COMPONENTS from "../../static/COMPONENTS.js";
 
 export default class SpritePass {
     static shader
     static initialize() {
-        SpritePass.shader = GPUResources.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
+        SpritePass.shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
     }
 
     static execute() {
@@ -15,7 +15,7 @@ export default class SpritePass {
         const s = sprites.length
         if (s === 0)
             return
-        const textures = GPUResources.textures
+        const textures = GPU.textures
 
         const shaderAttr = {
             cameraPosition: CameraAPI.position,
@@ -38,7 +38,7 @@ export default class SpritePass {
             shaderAttr.attributes = component.attributes
 
             SpritePass.shader.bindForUse(shaderAttr)
-            GPUResources.quad.draw()
+            GPU.quad.draw()
         }
 
         gpu.enable(gpu.CULL_FACE)

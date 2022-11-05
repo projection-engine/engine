@@ -1,5 +1,5 @@
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import COMPONENTS from "../../static/COMPONENTS.js";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import CameraAPI from "../../api/CameraAPI";
@@ -16,8 +16,8 @@ export default class CollisionVisualizationSystem {
 
     static initialize() {
 
-        CollisionVisualizationSystem.cube = GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
-        CollisionVisualizationSystem.sphere = GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
+        CollisionVisualizationSystem.cube = GPU.meshes.get(STATIC_MESHES.PRODUCTION.CUBE)
+        CollisionVisualizationSystem.sphere = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
 
     }
 

@@ -6,10 +6,20 @@ import GlobalIlluminationPass from "./runtime/GlobalIlluminationPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import ConversionAPI from "./api/math/ConversionAPI";
-import ScriptingPass from "./runtime/ScriptingPass";
+import ExecuteScripts from "./runtime/execute-scripts";
 import PhysicsPass from "./runtime/PhysicsPass";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
+import GPU from "./GPU";
+import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
+import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
+import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
+import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
+import SpritePass from "./runtime/renderers/SpritePass";
+import PhysicsAPI from "./api/PhysicsAPI";
+import FileSystemAPI from "./api/FileSystemAPI";
+import ScriptsAPI from "./api/ScriptsAPI";
+import UIAPI from "./api/UIAPI";
 
 const METRICS = {
     frameRate: 0,
@@ -20,6 +30,9 @@ const METRICS = {
     singleLoop: 0
 }
 export default class Engine {
+    static previousFrame
+
+
     static entitiesMap = new Map()
     static dataEntity = new Map()
     static queryMap = new Map()
@@ -33,7 +46,6 @@ export default class Engine {
     }
 
     static set environment(data) {
-        ScriptingPass.entitiesToExecute = data !== ENVIRONMENT.DEV ? Engine.entities : []
         Engine.isDev = data === ENVIRONMENT.DEV
         Engine.#environment = data
         if (Engine.isDev)
@@ -50,22 +62,35 @@ export default class Engine {
         sprites: [],
         terrain: []
     }
+
     static params = {}
-    static then = 0
     static elapsed = 0
     static frameID
     static isReady = false
-    static readAsset
     static metrics = METRICS
 
     static #initialized = false
 
-    static async initialize() {
+    static async initialize(canvas, width, height, readAsset, readMetadata) {
         if (Engine.#initialized)
             return
 
+        await GPU.initializeContext(canvas, width, height)
+        FileSystemAPI.initialize(readAsset, readMetadata)
         Engine.#initialized = true
-        await Loop.initialize()
+        Engine.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
+        ScreenEffectsPass.initialize()
+        FrameComposition.initialize()
+        AmbientOcclusion.initialize()
+        GlobalIlluminationPass.initialize()
+        DiffuseProbePass.initialize()
+        OmnidirectionalShadows.initialize()
+        DirectionalShadows.initialize()
+        SpritePass.initialize()
+        GBuffer.initialize()
+        MotionBlur.initialize()
+        await PhysicsAPI.initialize()
+
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
@@ -75,6 +100,17 @@ export default class Engine {
         }).observe(gpu.canvas)
         Engine.isReady = true
         Engine.start()
+    }
+
+    static async startSimulation() {
+        Engine.environment = ENVIRONMENT.EXECUTION
+        UIAPI.buildUI()
+        const entities = Engine.entities
+        for (let i = 0; i < entities.length; i++) {
+            const current = entities[i]
+            PhysicsAPI.registerRigidBody(current)
+        }
+        await ScriptsAPI.updateAllScripts()
     }
 
     static updateParams(data, physicsSteps, physicsSubSteps) {
@@ -111,27 +147,10 @@ export default class Engine {
         MotionBlur.uniforms.velocityScale = data.mbVelocityScale
     }
 
-    static #callback() {
-
-        const now = performance.now()
-        const el = now - Engine.then
-        Engine.elapsed = el
-        Engine.then = now
-
-        METRICS.frameRate = 1000 / el
-        METRICS.frameTime = el
-
-        Loop.loop(Engine.entities)
-
-        CameraAPI.updateFrame()
-
-        Engine.frameID = requestAnimationFrame(() => Engine.#callback())
-
-    }
 
     static start() {
         if (!Engine.frameID && Engine.isReady)
-            Engine.frameID = requestAnimationFrame(() => Engine.#callback())
+            Engine.frameID = requestAnimationFrame(() => Loop.loop())
     }
 
     static stop() {

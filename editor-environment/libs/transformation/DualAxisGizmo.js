@@ -4,7 +4,7 @@ import CameraAPI from "../../../api/CameraAPI";
 import mapGizmoMesh from "../../utils/map-gizmo-mesh";
 import getPickerId from "../../../utils/get-picker-id";
 import STATIC_MESHES from "../../../static/resources/STATIC_MESHES";
-import GPUResources from "../../../GPUResources";
+import GPU from "../../../GPU";
 import GizmoAPI from "../GizmoAPI";
 
 export const XZ_ID = getPickerId(AXIS.XZ), XY_ID = getPickerId(AXIS.XY), ZY_ID = getPickerId(AXIS.ZY)
@@ -97,6 +97,6 @@ export default class DualAxisGizmo {
         if (!isSurface)
             GizmoSystem.dualAxisGizmoMesh.draw()
         else
-            GPUResources.meshes.get(STATIC_MESHES.PRODUCTION.PLANE).draw()
+            GPU.meshes.get(STATIC_MESHES.PRODUCTION.PLANE).draw()
     }
 }

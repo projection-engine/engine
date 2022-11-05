@@ -1,9 +1,9 @@
 import COMPONENTS from "../../static/COMPONENTS.js"
 import Engine from "../../Engine";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import GBuffer from "../renderers/GBuffer";
-import GPUController from "../../GPUController";
+import GPUAPI from "../../api/GPUAPI";
 
 
 let lightsToUpdate
@@ -24,8 +24,8 @@ export default class DirectionalShadows {
 
     static allocateData() {
         if (DirectionalShadows.shadowsFrameBuffer)
-            GPUController.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
-        DirectionalShadows.shadowsFrameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, DirectionalShadows.maxResolution, DirectionalShadows.maxResolution).depthTexture()
+            GPUAPI.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
+        DirectionalShadows.shadowsFrameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, DirectionalShadows.maxResolution, DirectionalShadows.maxResolution).depthTexture()
         GBuffer.deferredUniforms.shadowMapTexture = DirectionalShadows.shadowsFrameBuffer.depthSampler
     }
 
@@ -92,7 +92,7 @@ export default class DirectionalShadows {
         const l = meshes.length
         for (let m = 0; m < l; m++) {
             const current = meshes[m], meshComponent = current.components.get(COMPONENTS.MESH)
-            const mesh = GPUResources.meshes.get(meshComponent.meshID)
+            const mesh = GPU.meshes.get(meshComponent.meshID)
             if (!mesh || !meshComponent.castsShadows || !current.active)
                 continue
             shader.bindForUse({

@@ -1,8 +1,8 @@
-import GPUController from "../GPUController";
+import GPUAPI from "../api/GPUAPI";
 
 export default class VertexBuffer {
     constructor(index, data, type, size, dataType, normalized = false, renderingType, stride = 0) {
-        this.id = GPUController.createBuffer(type, data, renderingType)
+        this.id = GPUAPI.createBuffer(type, data, renderingType)
         gpu.vertexAttribPointer(
             index,
             size,

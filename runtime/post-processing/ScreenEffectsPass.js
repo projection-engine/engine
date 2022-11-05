@@ -1,6 +1,6 @@
 import generateBlurBuffers from "../../utils/generate-blur-buffers"
 import CameraAPI from "../../api/CameraAPI";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
 export default class ScreenEffectsPass {
@@ -16,7 +16,7 @@ export default class ScreenEffectsPass {
     static uniforms = {}
 
     static initialize() {
-        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPUResources.internalResolution.w, GPUResources.internalResolution.h)
+        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
 
         ScreenEffectsPass.blurred = upSampledBuffers[blurBuffers.length - 2].colors[0]
 
@@ -24,8 +24,8 @@ export default class ScreenEffectsPass {
         ScreenEffectsPass.upSampledBuffers = upSampledBuffers
 
 
-        ScreenEffectsPass.outputFBO = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
-        ScreenEffectsPass.workerTexture = GPUResources.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
+        ScreenEffectsPass.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
+        ScreenEffectsPass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
 
         ScreenEffectsPass.uniforms = {
             blurred: ScreenEffectsPass.blurred,
@@ -49,7 +49,7 @@ export default class ScreenEffectsPass {
                 sceneColor: ScreenEffectsPass.workerTexture,
                 threshold: bloomThreshold
             })
-            GPUResources.quad.draw()
+            GPU.quad.draw()
             op.stopMapping()
             ScreenEffectsPass.blur(op.colors[0], bloomStrength)
         }
@@ -59,7 +59,7 @@ export default class ScreenEffectsPass {
         u.intensity = postProcessingStrength
         op.startMapping()
         ScreenEffectsPass.compositeShader.bindForUse(u)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
         op.stopMapping()
     }
 
@@ -76,7 +76,7 @@ export default class ScreenEffectsPass {
                 isWidth: true,
                 kernel
             })
-            GPUResources.quad.draw()
+            GPU.quad.draw()
             width.stopMapping()
 
             height.startMapping()
@@ -85,7 +85,7 @@ export default class ScreenEffectsPass {
                 resolution: [height.width, height.height],
                 isWidth: false
             })
-            GPUResources.quad.draw()
+            GPU.quad.draw()
             height.stopMapping()
         }
 
@@ -99,7 +99,7 @@ export default class ScreenEffectsPass {
                 bloomIntensity,
                 sampleScale
             })
-            GPUResources.quad.draw()
+            GPU.quad.draw()
             current.stopMapping()
         }
         return upSampledBuffers[q - 2].colors[0]

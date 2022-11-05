@@ -1,15 +1,15 @@
 import COMPONENTS from "../static/COMPONENTS";
-import DirectionalLightComponent from "./components/rendering/DirectionalLightComponent";
-import MeshComponent from "./components/rendering/MeshComponent";
-import PointLightComponent from "./components/rendering/PointLightComponent";
-import ProbeComponent from "./components/rendering/ProbeComponent";
-import CameraComponent from "./components/misc/CameraComponent";
-import SpriteComponent from "./components/rendering/SpriteComponent";
-import PhysicsColliderComponent from "./components/physics/PhysicsColliderComponent";
-import RigidBodyComponent from "./components/physics/RigidBodyComponent";
-import CullingComponent from "./components/misc/CullingComponent";
-import UIComponent from "./components/misc/UIComponent";
-import TerrainComponent from "./components/rendering/TerrainComponent";
+import DirectionalLightComponent from "./components/DirectionalLightComponent";
+import MeshComponent from "./components/MeshComponent";
+import PointLightComponent from "./components/PointLightComponent";
+import ProbeComponent from "./components/ProbeComponent";
+import CameraComponent from "./components/CameraComponent";
+import SpriteComponent from "./components/SpriteComponent";
+import PhysicsColliderComponent from "./components/PhysicsColliderComponent";
+import RigidBodyComponent from "./components/RigidBodyComponent";
+import CullingComponent from "./components/CullingComponent";
+import UIComponent from "./components/UIComponent";
+import TerrainComponent from "./components/TerrainComponent";
 
 export default {
     [COMPONENTS.DIRECTIONAL_LIGHT]: DirectionalLightComponent,

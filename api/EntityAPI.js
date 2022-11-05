@@ -14,8 +14,8 @@ import PhysicsAPI from "./PhysicsAPI";
 import Entity from "../instances/Entity";
 import TransformationAPI from "./math/TransformationAPI";
 import CubeMapAPI from "./CubeMapAPI";
-import GPUController from "../GPUController";
-import GPUResources from "../GPUResources";
+import GPUAPI from "./GPUAPI";
+import GPU from "../GPU";
 import ENTITY_TYPED_ATTRIBUTES from "../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
 
@@ -107,6 +107,14 @@ export default class EntityAPI {
         const entity = QueryAPI.getEntityByID(id)
         if (!entity)
             return
+
+        if (!Engine.isDev)
+            for (let i = 0; i < entity.scripts.length; i++) {
+                const scr = entity.scripts[i]
+                if (scr && scr.onDestruction)
+                    scr.onDestruction()
+            }
+
         const placementMap = Engine.dataEntity.get(id)
         Object.keys(placementMap).forEach(k => Engine.data[k] = Engine.data[k].filter(e => e !== entity))
 
@@ -141,41 +149,6 @@ export default class EntityAPI {
             delete d[entity.id]
             CubeMapAPI.delete(diffuseProbes[entity.id])
             delete diffuseProbes[entity.id]
-        }
-    }
-
-
-
-    static linkScript(data, entity, scriptID) {
-        const found = entity.scripts.findIndex(s => s.id === scriptID)
-        try {
-            const generator = new Function("GPUResources, GPUController, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity", data.toString())
-
-            try {
-                const Instance = generator(GPUResources, GPUController, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity)
-                const newClass = new Instance(entity)
-                newClass.entity = entity
-                console.log(entity)
-
-                if (found > -1) {
-                    const ref = entity.scripts[found]
-                    Object.entries(ref).forEach(([key, value]) => {
-                        if (typeof value !== "function")
-                            newClass[key] = value
-                    })
-                    entity.scripts[found] = newClass
-                } else
-                    entity.scripts.push(newClass)
-
-                newClass.id = scriptID
-                return true
-            } catch (runtimeError) {
-                console.error(runtimeError)
-                return false
-            }
-        } catch (syntaxError) {
-            console.error(syntaxError)
-            return false
         }
     }
 

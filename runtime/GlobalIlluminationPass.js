@@ -1,5 +1,5 @@
 import CameraAPI from "../api/CameraAPI";
-import GPUResources from "../GPUResources";
+import GPU from "../GPU";
 import ScreenEffectsPass from "./post-processing/ScreenEffectsPass";
 import GBuffer from "./renderers/GBuffer";
 import AmbientOcclusion from "./occlusion/AmbientOcclusion";
@@ -71,13 +71,13 @@ export default class GlobalIlluminationPass {
         if (GlobalIlluminationPass.rayMarchSettings[5] === 1) {
             GlobalIlluminationPass.normalsFBO.startMapping()
             GlobalIlluminationPass.normalsShader.bindForUse(GlobalIlluminationPass.normalUniforms)
-            GPUResources.quad.draw()
+            GPU.quad.draw()
             GlobalIlluminationPass.normalsFBO.stopMapping()
         }
 
         GlobalIlluminationPass.FBO.startMapping()
         GlobalIlluminationPass.shader.bindForUse(GlobalIlluminationPass.uniforms)
-        GPUResources.quad.draw()
+        GPU.quad.draw()
         GlobalIlluminationPass.FBO.stopMapping()
         ScreenEffectsPass.blur(GlobalIlluminationPass.unfilteredSSGISampler, 1, 2, GlobalIlluminationPass.blurBuffers, GlobalIlluminationPass.upSampledBuffers)
     }

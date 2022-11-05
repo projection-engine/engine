@@ -1,6 +1,6 @@
-import Component from "../Component";
-import COLLISION_TYPES from "../../../static/COLLISION_TYPES";
-import PHYSICS_COLLIDER_PROPS from "../../../static/component-props/PHYSICS_COLLIDER_PROPS";
+import Component from "./Component";
+import COLLISION_TYPES from "../../static/COLLISION_TYPES";
+import PHYSICS_COLLIDER_PROPS from "../../static/component-props/PHYSICS_COLLIDER_PROPS";
 
 export default class PhysicsColliderComponent extends Component {
     _props = PHYSICS_COLLIDER_PROPS

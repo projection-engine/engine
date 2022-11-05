@@ -1,5 +1,5 @@
 import CameraAPI from "../../api/CameraAPI";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
 export default class FrameComposition {
@@ -40,7 +40,7 @@ export default class FrameComposition {
             inverseFilterTextureSize: [1 / gpu.drawingBufferWidth, 1 / gpu.drawingBufferHeight, 0],
             FXAAReduceMul: 1 / 8
         })
-        GPUResources.quad.draw()
+        GPU.quad.draw()
 
     }
 }

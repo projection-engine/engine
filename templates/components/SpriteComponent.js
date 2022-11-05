@@ -1,5 +1,5 @@
-import SPRITE_PROPS from "../../../static/component-props/SPRITE_PROPS";
-import Component from "../Component";
+import SPRITE_PROPS from "../../static/component-props/SPRITE_PROPS";
+import Component from "./Component";
 
 export default class SpriteComponent extends Component{
     _props = SPRITE_PROPS

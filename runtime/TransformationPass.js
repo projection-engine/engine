@@ -1,4 +1,4 @@
-import GPUResources from "../GPUResources";
+import GPU from "../GPU";
 import WORKER_MESSAGES from "../static/WORKER_MESSAGES.json"
 import LightsAPI from "../api/LightsAPI";
 
@@ -36,7 +36,7 @@ export default class TransformationPass {
             TransformationPass.threads.push(w)
             w.onmessage = (event) => {
                 if (typeof event.data === "string")
-                    TransformationPass.instancingNeedsUpdate.set(event.data, GPUResources.instancingGroup.get(event.data))
+                    TransformationPass.instancingNeedsUpdate.set(event.data, GPU.instancingGroup.get(event.data))
             }
             w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: TransformationPass.#hasChangeBuffer})
         }
@@ -61,11 +61,10 @@ export default class TransformationPass {
             type: WORKER_MESSAGES.REGISTER_ENTITY,
             payload: {
                 ...entity,
+                scripts: undefined,
                 children: undefined,
                 parent: undefined,
                 parentUnscaled: entity.parent?.unscaledMatrix,
-
-
                 parentChangedBuffer: entity.parent?.__changedBuffer,
                 components: undefined,
                 pivotPoint: entity.pivotPoint

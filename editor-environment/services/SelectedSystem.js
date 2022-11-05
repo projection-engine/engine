@@ -1,9 +1,9 @@
 import COMPONENTS from "../../static/COMPONENTS.js"
 import CameraAPI from "../../api/CameraAPI";
-import GPUResources from "../../GPUResources";
+import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import QueryAPI from "../../api/utils/QueryAPI";
-import GPUController from "../../GPUController";
+import GPUAPI from "../../api/GPUAPI";
 
 
 export default class SelectedSystem {
@@ -14,7 +14,7 @@ export default class SelectedSystem {
 
     static initialize() {
 
-        SelectedSystem.frameBuffer = GPUController.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.OUTLINE).texture({
+        SelectedSystem.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.EDITOR.OUTLINE).texture({
             precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT
@@ -37,7 +37,7 @@ export default class SelectedSystem {
             const mMeshID = components.get(COMPONENTS.MESH)?.meshID
             const tTerrainID = components.get(COMPONENTS.TERRAIN)?.terrainID
 
-            const mesh = GPUResources.meshes.get(mMeshID || tTerrainID)
+            const mesh = GPU.meshes.get(mMeshID || tTerrainID)
             if (!mesh)
                 continue
             SelectedSystem.shader.bindForUse({
@@ -59,7 +59,7 @@ export default class SelectedSystem {
             SelectedSystem.shaderSilhouette.bindForUse({
                 silhouette: SelectedSystem.silhouetteSampler
             })
-            GPUResources.quad.draw()
+            GPU.quad.draw()
         }
     }
 }

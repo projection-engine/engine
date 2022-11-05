@@ -1,5 +1,5 @@
-import Component from "../Component"
-import PROBE_PROPS from "../../../static/component-props/PROBE_PROPS";
+import Component from "./Component"
+import PROBE_PROPS from "../../static/component-props/PROBE_PROPS";
 
 export default class ProbeComponent extends Component {
 
