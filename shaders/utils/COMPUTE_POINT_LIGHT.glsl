@@ -15,7 +15,7 @@ vec4 computePointLights (samplerCube shadowMap, mat4 pointLight, vec3 fragPositi
 
     float NDF = distributionGGX(N, H, roughness);
     float G   = geometrySmith(N, V, L, roughness);
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0, roughness);
 
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
@@ -23,7 +23,7 @@ vec4 computePointLights (samplerCube shadowMap, mat4 pointLight, vec3 fragPositi
 
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-    vec3 specular     = numerator / denominator;
+    vec3 specular  = numerator / denominator;
     float NdotL = max(dot(N, L), 0.0);
 
     return vec4((kD * albedo / PI + specular) * lightColor * NdotL * attFactor, shadows);

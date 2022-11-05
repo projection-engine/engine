@@ -21,17 +21,17 @@ export default async function initializeMaterialsAndTextures(){
         base64: BRDF_SAMPLER,
         onlyData: true
     })
+    bitmap.naturalHeight = bitmap.height
+    bitmap.naturalWidth = bitmap.width
     GPU.BRDF = (await GPUAPI.allocateTexture({
         img: bitmap,
-        internalFormat: TEXTURE_FORMATS.FLOAT_RGBA.internalFormat,
-
-        format: TEXTURE_FORMATS.FLOAT_RGBA.format,
-        type: TEXTURE_FORMATS.FLOAT_RGBA.type,
-
-        minFilter: TEXTURE_FILTERING.MIN.LINEAR,
-        magFilter: TEXTURE_FILTERING.MAG.LINEAR,
-        wrapS: TEXTURE_WRAPPING.CLAMP_TO_EDGE,
-        wrapT: TEXTURE_WRAPPING.CLAMP_TO_EDGE
+        internalFormat: "RG32F",
+        format: "RG",
+        type: "FLOAT",
+        minFilter: "LINEAR",
+        magFilter: "LINEAR",
+        wrapS: "CLAMP_TO_EDGE",
+        wrapT: "CLAMP_TO_EDGE"
     }, STATIC_TEXTURES.BRDF)).texture
 
     GPUAPI.allocateMaterial(

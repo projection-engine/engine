@@ -11,7 +11,7 @@ vec4 computeDirectionalLight(sampler2D shadowMap, float lightsPerShadowAtlas, fl
     vec3 H = normalize(viewDirection + lightDirection);
     float NDF = distributionGGX(surfaceNormal, H, roughness);
     float G   = geometrySmith(surfaceNormal, viewDirection, lightDirection, roughness);
-    vec3 F    = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0);
+    vec3 F    = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0, roughness);
     vec3 kD = vec3(1.0) - F;
     kD *= 1.0 - metallic;
 

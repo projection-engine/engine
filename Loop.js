@@ -89,6 +89,7 @@ export default class Loop {
         METRICS.frameTime = el
 
         Loop.#callback(METRICS)
+        CameraAPI.updateFrame()
         Engine.frameID = requestAnimationFrame(() => Loop.loop())
     }
 }

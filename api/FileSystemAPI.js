@@ -22,7 +22,7 @@ export default class FileSystemAPI {
 
     static async loadMaterial(ID) {
         if (ID === FALLBACK_MATERIAL || !ID || ID.includes(TERRAIN_MATERIAL) || GPU.materials.get(ID) != null)
-            return
+            return GPU.materials.get(ID) != null
         try {
             if (!GPU.materials.get(ID)) {
                 const file = JSON.parse(await FileSystemAPI.readAsset(ID))

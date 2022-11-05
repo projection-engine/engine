@@ -99,7 +99,7 @@ void main(){
     if (settings[0][2] == 1.)
     gBehaviour.g = max3(texture(roughness, UVs * vec2(uvScales[1][0], uvScales[1][1])).rgb  * vec3(linearSamplerScales[2][0], linearSamplerScales[2][1], linearSamplerScales[2][2]));
     else
-    gBehaviour.g = fallbackValues[2][1];
+    gBehaviour.g = fallbackValues[2][0];
 
     if (settings[1][0] == 1.)
     gBehaviour.b = max3(texture(metallic, UVs* vec2(uvScales[1][2], uvScales[1][3])).rgb * vec3(linearSamplerScales[1][0], linearSamplerScales[1][1], linearSamplerScales[1][2]));

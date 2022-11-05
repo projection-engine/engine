@@ -37,6 +37,7 @@ uniform sampler2D shadowMapTexture;
 uniform samplerCube shadowCube;
 
 
+//import(fresnelSchlick)
 
 //import(sampleIndirectLight)
 
@@ -48,7 +49,7 @@ uniform samplerCube shadowCube;
 
 //import(geometrySmith)
 
-//import(fresnelSchlick)
+
 
 //import(computeDirectionalLight)
 
@@ -64,7 +65,9 @@ void main() {
     vec3 fragPosition = pixelPosition.rgb;
 
     vec3 albedo = texture(albedoSampler, texCoords).rgb;
-    if (albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){
+    if (albedo.r > 1. && albedo.g > 1. && albedo.b > 1.)
+        finalColor = vec4(albedo, 1.);
+    else{
         vec3 directIllumination = vec3(0.0);
         vec3 indirectIllumination = vec3(0.0);
         vec3 V = normalize(cameraPosition - fragPosition);
@@ -113,7 +116,6 @@ void main() {
             );
         finalColor = vec4(directIllumination * ao * shadows + indirectIllumination, 1.);
     }
-    else
-    finalColor = vec4(albedo, 1.);
+
 }
 

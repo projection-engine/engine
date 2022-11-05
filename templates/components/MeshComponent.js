@@ -86,13 +86,15 @@ export default class MeshComponent extends Component {
                 current.mesh = referenceMesh
             }
         }
-        else if (!referenceMat)
+        else if (!referenceMat) {
+            console.trace(component._materialID)
             FileSystemAPI.loadMaterial(component._materialID).then(res => {
                 if (res)
                     MeshComponent.updateMap(component)
                 else
                     ConsoleAPI.error("Material not found")
             })
+        }
 
         console.log(component, MaterialAPI.deferredShadedEntities)
     }
