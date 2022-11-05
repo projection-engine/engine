@@ -1,17 +1,12 @@
-import MaterialAPI from "../../api/rendering/MaterialAPI";
-import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
 import GlobalIlluminationPass from "../GlobalIlluminationPass";
-import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import UBO from "../../instances/UBO";
-import DirectionalShadows from "../occlusion/DirectionalShadows";
 import DiffuseProbePass from "./DiffuseProbePass";
 import COMPONENTS from "../../static/COMPONENTS";
 import SpecularProbePass from "./SpecularProbePass";
 
 
-const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class GBuffer {
     static gBuffer
     static deferredShader
@@ -104,45 +99,6 @@ export default class GBuffer {
     static drawFrame() {
         GBuffer.toScreenShader.bindForUse(GBuffer.toScreenUniforms)
         GPU.quad.draw()
-    }
-
-    static execute() {
-        const {meshes, terrain} = Engine.data
-        const u = GBuffer.uniforms
-
-        GBuffer.gBuffer.startMapping()
-        MaterialAPI.loopMeshes(
-            meshes,
-            (mat, mesh, meshComponent, current) => {
-                if (!mat.isDeferredShaded) {
-                    if (mat.shadingType === SKYBOX_TYPE)
-                        return
-                    GBuffer.forwardDepthShader.bindForUse(u)
-                    mesh.draw()
-                    return;
-                }
-                u.previousModelMatrix = current.previousModelMatrix
-                u.transformMatrix = current.matrix
-                u.normalMatrix = current.normalMatrix
-                u.meshID = current.pickID
-                MaterialAPI.drawMesh(
-                    current.id,
-                    mesh,
-                    mat,
-                    meshComponent,
-                    u)
-            }
-        )
-
-        MaterialAPI.loopTerrain(
-            terrain,
-            (mat, mesh, meshComponent, current) => {
-                u.transformMatrix = current.matrix
-                MaterialAPI.drawMesh(current.id, mesh, mat, meshComponent, u)
-            }
-        )
-
-        GBuffer.gBuffer.stopMapping()
     }
 
     static drawBuffer(entities, onWrap) {

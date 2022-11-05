@@ -81,7 +81,6 @@ export default class ScriptsAPI {
                 } else
                     entity.scripts.push(script)
                 script.id = scriptID
-                console.trace(script)
 
                 if (!Engine.isDev && script.onCreation)
                     script.onCreation()

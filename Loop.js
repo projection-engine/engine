@@ -6,22 +6,19 @@ import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import SpecularProbePass from "./runtime/renderers/SpecularProbePass";
 import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
 
-import ExecuteScripts from "./runtime/execute-scripts";
+import executeScripts from "./runtime/execute-scripts";
 import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
 import SkyboxPass from "./runtime/renderers/SkyboxPass";
 import Engine from "./Engine";
-import GPU from "./GPU";
-import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import SpritePass from "./runtime/renderers/SpritePass";
 import PhysicsPass from "./runtime/PhysicsPass";
 import TransformationPass from "./runtime/TransformationPass";
-import PhysicsAPI from "./api/PhysicsAPI";
 import GPUAPI from "./api/GPUAPI";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./api/CameraAPI";
-import executeScripts from "./runtime/execute-scripts";
+import renderScene from "./runtime/render-scene";
 
 let then = 0
 export default class Loop {
@@ -35,7 +32,7 @@ export default class Loop {
         OmnidirectionalShadows.execute()
 
         GlobalIlluminationPass.execute()
-        GBuffer.execute()
+        renderScene()
         AmbientOcclusion.execute()
         GBuffer.drawBuffer(
             Engine.entities,

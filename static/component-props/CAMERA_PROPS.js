@@ -1,7 +1,7 @@
 import Component from "../../templates/components/Component";
 
 export default  [
-    Component.number("FOV", "fov", 3.054236111111111, 0.1745277777777778, .1, true),
+    Component.number("FOV", "fov", 150, 10),
     Component.group("MOTION_BLUR", [
         Component.boolean("ENABLED", "motionBlurEnabled"),
     ]),

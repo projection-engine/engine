@@ -5,7 +5,6 @@ import ENVIRONMENT from "../static/ENVIRONMENT";
 import ArrayBufferAPI from "./ArrayBufferAPI";
 import {vec3, vec4} from "gl-matrix";
 import ConversionAPI from "./math/ConversionAPI";
-import cloneClass from "../utils/clone-class";
 import UBO from "../instances/UBO";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
@@ -31,6 +30,7 @@ function getNotificationBuffer() {
     b[5] = .1
     return b
 }
+const toRad = Math.PI/180
 
 export default class CameraAPI {
     static UBO
@@ -235,7 +235,7 @@ export default class CameraAPI {
             FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
     }
     static updateViewTarget(entity) {
-        if (!entity?.components || Engine.environment === ENVIRONMENT.DEV)
+        if (!entity?.components)
             return
         const cameraObj = entity.components.get(COMPONENTS.CAMERA)
         if (!cameraObj)
@@ -245,7 +245,7 @@ export default class CameraAPI {
 
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear
-        CameraAPI.fov = cameraObj.fov
+        CameraAPI.fov = cameraObj.fov < 10 ? cameraObj.fov :cameraObj.fov * toRad
         CameraAPI.#dynamicAspectRatio = cameraObj.dynamicAspectRatio
         CameraAPI.isOrthographic = cameraObj.ortho
 

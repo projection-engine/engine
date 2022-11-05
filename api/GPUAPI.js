@@ -142,6 +142,7 @@ export default class GPUAPI {
         const instance = new Mesh(bufferData)
         instance.id = id
         GPU.meshes.set(id, instance)
+
         return instance
     }
 

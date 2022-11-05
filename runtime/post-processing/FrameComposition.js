@@ -1,6 +1,5 @@
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
 export default class FrameComposition {
     static lookUpRandom = []

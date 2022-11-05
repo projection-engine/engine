@@ -1,10 +1,6 @@
 import COMPONENTS from "../static/COMPONENTS.js"
 import Engine from "../Engine";
-import Component from "../templates/components/Component";
-import ConsoleAPI from "./ConsoleAPI";
 import QueryAPI from "./utils/QueryAPI";
-import InputEventsAPI from "./utils/InputEventsAPI";
-import CameraAPI from "./CameraAPI";
 import SpecularProbePass from "../runtime/renderers/SpecularProbePass";
 import DiffuseProbePass from "../runtime/renderers/DiffuseProbePass";
 import ENVIRONMENT from "../static/ENVIRONMENT";
@@ -12,12 +8,10 @@ import TransformationPass from "../runtime/TransformationPass";
 import UIAPI from "./UIAPI";
 import PhysicsAPI from "./PhysicsAPI";
 import Entity from "../instances/Entity";
-import TransformationAPI from "./math/TransformationAPI";
 import CubeMapAPI from "./CubeMapAPI";
-import GPUAPI from "./GPUAPI";
-import GPU from "../GPU";
 import ENTITY_TYPED_ATTRIBUTES from "../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
+import MaterialAPI from "./rendering/MaterialAPI";
 
 
 export default class EntityAPI {
@@ -128,6 +122,9 @@ export default class EntityAPI {
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
 
+        const meshComponent = entity.components.get(COMPONENTS.MESH)
+        if(meshComponent && meshComponent.__mapSource.index !== undefined)
+            MaterialAPI[meshComponent.__mapSource.type] = MaterialAPI[meshComponent.__mapSource.type].filter(e => e.entity !== entity)
         if (entity.components.get(COMPONENTS.POINT_LIGHT) || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) || entity.components.get(COMPONENTS.MESH))
             LightsAPI.packageLights(false, true)
     }
@@ -178,10 +175,14 @@ export default class EntityAPI {
                 continue
             const keys = Object.keys(entity.components[k])
             for (let i = 0; i < keys.length; i++) {
-                const componentValue = keys[i]
+                let componentValue = keys[i]
                 if (componentValue.includes("__") || componentValue.includes("#") || componentValue === "_props" || componentValue === "_name")
                     continue
-                component[componentValue] = entity.components[k][componentValue]
+                if(k === COMPONENTS.MESH && (componentValue === "_meshID" || componentValue === "_materialID")){
+                    component[componentValue.replace("_", "")] = entity.components[k][componentValue]
+                }
+                else
+                    component[componentValue] = entity.components[k][componentValue]
             }
             if (k === COMPONENTS.DIRECTIONAL_LIGHT)
                 component.changed = true

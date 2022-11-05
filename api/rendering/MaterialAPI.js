@@ -16,6 +16,12 @@ import FileSystemAPI from "../FileSystemAPI";
 
 const SKYBOX = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class MaterialAPI {
+    static deferredShadedEntities = []
+    static forwardShadedEntities = []
+    static staticShadedEntities = []
+
+    static materialEntityMap = new Map()
+    static meshEntityMap = new Map()
 
     static draw(mesh, material) {
         if (material.settings.depthTest === false)
@@ -55,7 +61,7 @@ export default class MaterialAPI {
 
     static drawMesh(id, mesh, material, meshComponent, uniforms, directDrawing = false) {
         const isNotSkybox = material.shadingType !== SKYBOX
-        if (material.shadingType === MATERIAL_RENDERING_TYPES.FORWARD ) {
+        if (material.shadingType === MATERIAL_RENDERING_TYPES.FORWARD) {
             const ambient = MaterialAPI.#getEnvironment(id, meshComponent)
             uniforms.prefilteredMap = ambient[0]
             uniforms.ambientLODSamples = ambient[1]
@@ -91,7 +97,7 @@ export default class MaterialAPI {
                 {
                     settings: GBuffer.deferredUniforms.settings,
                     shadowMapTexture: DirectionalShadows.shadowMapShader,
-                    shadowCube: OmnidirectionalShadows.cubeMaps[0].texture,
+                    shadowCube: OmnidirectionalShadows.shadowMap.texture,
                     cameraPosition: cubeMapPosition,
                     viewMatrix: view,
                     projectionMatrix: projection,

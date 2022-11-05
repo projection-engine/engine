@@ -25,7 +25,6 @@ export default class SpritePass {
 
         gpu.disable(gpu.CULL_FACE)
         for (let i = 0; i < s; i++) {
-
             const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
             if (!current.active)
                 continue

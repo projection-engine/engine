@@ -1,11 +1,9 @@
-import ScreenEffectsPass from "./ScreenEffectsPass";
-import FrameComposition from "./FrameComposition";
 import GBuffer from "../renderers/GBuffer";
 import GPU from "../../GPU";
 
 export default class MotionBlur {
     static shader
-    static uniforms = {velocityScale: 1}
+    static uniforms = {velocityScale: 1, maxSamples: 50}
     static frameBuffer
     static workerTexture
     static enabled = true

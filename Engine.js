@@ -6,7 +6,6 @@ import GlobalIlluminationPass from "./runtime/GlobalIlluminationPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import ConversionAPI from "./api/math/ConversionAPI";
-import ExecuteScripts from "./runtime/execute-scripts";
 import PhysicsPass from "./runtime/PhysicsPass";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
@@ -37,7 +36,7 @@ export default class Engine {
     static dataEntity = new Map()
     static queryMap = new Map()
     static UILayouts = new Map()
-    static isDev = false
+    static isDev = true
     static entities = []
     static #environment = ENVIRONMENT.DEV
 
@@ -104,7 +103,7 @@ export default class Engine {
 
     static async startSimulation() {
         Engine.environment = ENVIRONMENT.EXECUTION
-        UIAPI.buildUI()
+        UIAPI.buildUI(gpu.canvas.parentElement)
         const entities = Engine.entities
         for (let i = 0; i < entities.length; i++) {
             const current = entities[i]
@@ -145,6 +144,7 @@ export default class Engine {
         GBuffer.UBO.updateData("hasAO", new Uint8Array([data.SSAO.enabled ? 1 : 0]))
         GBuffer.UBO.unbind()
         MotionBlur.uniforms.velocityScale = data.mbVelocityScale
+        MotionBlur.uniforms.maxSamples = data.mbSamples
     }
 
 

@@ -1,12 +1,12 @@
 #version 300 es
 precision highp float;
-#define MAX_SAMPLES 10
 
 in vec2 texCoords;
 
 uniform sampler2D currentFrame;
 uniform sampler2D gVelocity;
 uniform float velocityScale;
+uniform int maxSamples;
 
 out vec4 fragColor;
 
@@ -19,7 +19,7 @@ void main(){
 velocity *= velocityScale;
 
     float speed = length(velocity / texelSize);
-    int nSamples = clamp(int(speed), 1, MAX_SAMPLES);
+    int nSamples = max(clamp(int(speed), 1, maxSamples), 1);
 
     fragColor = texture(currentFrame, screenTexCoords);
     for (int i = 1; i < nSamples; ++i) {

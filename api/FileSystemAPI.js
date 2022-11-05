@@ -1,4 +1,9 @@
 import ScriptsAPI from "./ScriptsAPI";
+import FALLBACK_MATERIAL from "../static/FALLBACK_MATERIAL";
+import TERRAIN_MATERIAL from "../static/TERRAIN_MATERIAL";
+import GPU from "../GPU";
+import GPUAPI from "./GPUAPI";
+import ConsoleAPI from "./ConsoleAPI";
 import FILE_TYPES from "shared-resources/FILE_TYPES";
 
 export default class FileSystemAPI {
@@ -13,6 +18,38 @@ export default class FileSystemAPI {
         if (FileSystemAPI.#callback)
             return FileSystemAPI.#callback(assetID)
         return null
+    }
+
+    static async loadMaterial(ID) {
+        if (ID === FALLBACK_MATERIAL || !ID || ID.includes(TERRAIN_MATERIAL) || GPU.materials.get(ID) != null)
+            return
+        try {
+            if (!GPU.materials.get(ID)) {
+                const file = JSON.parse(await FileSystemAPI.readAsset(ID))
+                console.trace(file)
+                const isInstance = file.original != null
+                if (!file || !isInstance && !file.response)
+                    return
+                if (isInstance) {
+                    if (!GPU.materials.get(file.original))
+                        await FileSystemAPI.loadMaterial(file.original)
+                    await GPUAPI.allocateMaterialInstance(file, ID)
+                } else
+                    await new Promise(resolve => {
+                        GPUAPI.allocateMaterial({
+                            onCompiled: () => resolve(),
+                            settings: file.response.settings,
+                            vertex: file.response.vertexShader,
+                            fragment: file.response.shader,
+                            uniformData: file.response.uniformData
+                        }, ID)
+                    })
+            }
+            return true
+        } catch (err) {
+            console.error(err)
+            ConsoleAPI.error(err)
+        }
     }
 
     static async importAsset(ID) {

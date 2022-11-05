@@ -1,5 +1,4 @@
 import LineAPI from "./api/rendering/LineAPI";
-import Engine from "./Engine";
 import ImageWorker from "./workers/image/ImageWorker";
 import TerrainWorker from "./workers/terrain/TerrainWorker";
 import CameraAPI from "./api/CameraAPI";
