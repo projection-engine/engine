@@ -34,7 +34,6 @@ export default class AmbientOcclusion {
 
         AmbientOcclusion.noiseScale[0] = GPU.internalResolution.w / RESOLUTION
         AmbientOcclusion.noiseScale[1] = GPU.internalResolution.h / RESOLUTION
-        GBuffer.deferredUniforms.aoSampler = AmbientOcclusion.filteredSampler
 
         AmbientOcclusion.UBO = new UBO(
             "Settings",
@@ -80,10 +79,7 @@ export default class AmbientOcclusion {
                         sampler: AmbientOcclusion.unfilteredSampler
                     }
                 )
-                GlobalIlluminationPass.uniforms.noiseSampler = AmbientOcclusion.noiseSampler
-                GlobalIlluminationPass.normalUniforms.noise = AmbientOcclusion.noiseSampler
                 AmbientOcclusion.#ready = true
-
             })
     }
 

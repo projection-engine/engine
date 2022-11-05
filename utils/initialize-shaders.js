@@ -29,13 +29,14 @@ import CameraAPI from "../api/CameraAPI";
 import LightsAPI from "../api/LightsAPI";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
+import SpritePass from "../runtime/renderers/SpritePass";
 
 
 export default function initializeShaders(){
 
 
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, FOLIAGE_SPRITEGlsl.vertex, FOLIAGE_SPRITEGlsl.fragment)
-    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
+    SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITEGlsl.vertex, SPRITEGlsl.fragment)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, CUBEMAP, IRRADIANCE_MAP)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)
 

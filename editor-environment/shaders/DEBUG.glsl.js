@@ -9,9 +9,8 @@ const fragment = `#version 300 es
 precision mediump float;
 #define THRESHOLD .0001
 in vec2 texCoords;
-uniform sampler2D uSampler; 
-uniform mat4 viewMatrix;
-uniform int option;
+uniform sampler2D uSampler;
+uniform int debugFlag;
 out vec4 fragColor;
 
 float linearize(float depth){ 
@@ -25,20 +24,20 @@ void main(){
     vec4 samplerData = texture(uSampler, texCoords);
     vec3 color = samplerData.rgb; 
     
-    if(option == 2){
+    if(debugFlag == 2){
         if(samplerData.r <= THRESHOLD)    
             discard;        
         color = vec3(linearize(color.r));
     }
-    else if (option == 9)
+    else if (debugFlag == 9)
         color = vec3(color.b);
-    else if (option == 10)
+    else if (debugFlag == 10)
         color = vec3(color.g);
-    else if (option == 11 || option == 3)
+    else if (debugFlag == 11 || debugFlag == 3)
         color = vec3(color.r);
-    else if(option == 16)
+    else if(debugFlag == 16)
         color = vec3(color.gb, 0.);
-    else if (option == 19)
+    else if (debugFlag == 19)
         color = vec3(color.rg, 0.);
     fragColor = vec4(color, 1.);
 }

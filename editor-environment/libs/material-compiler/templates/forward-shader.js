@@ -30,7 +30,6 @@ out vec4 finalColor;
 
 
 ${ambient ? `
-//import(fresnelSchlickRoughness)
 //import(sampleIndirectLight)
 ` : ""}
  

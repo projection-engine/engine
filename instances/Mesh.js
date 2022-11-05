@@ -106,7 +106,7 @@ export default class Mesh {
 
     drawLines() {
         this.use()
-        gpu.drawElements(gpu.LINES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        gpu.drawElements(gpu.LINE_LOOP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
 
     drawInstanced(quantity) {

@@ -29,8 +29,8 @@ const METRICS = {
     singleLoop: 0
 }
 export default class Engine {
-    static previousFrame
-
+    static currentFrameFBO
+    static previousFrameSampler
 
     static entitiesMap = new Map()
     static dataEntity = new Map()
@@ -77,7 +77,8 @@ export default class Engine {
         await GPU.initializeContext(canvas, width, height)
         FileSystemAPI.initialize(readAsset, readMetadata)
         Engine.#initialized = true
-        Engine.previousFrame = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
+        Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
+
         ScreenEffectsPass.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
@@ -87,6 +88,7 @@ export default class Engine {
         DirectionalShadows.initialize()
         SpritePass.initialize()
         GBuffer.initialize()
+        Engine.previousFrameSampler = GBuffer.compositeFBO.colors[0]
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
 

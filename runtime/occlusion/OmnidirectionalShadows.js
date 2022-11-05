@@ -12,6 +12,7 @@ export default class OmnidirectionalShadows {
     static changed = false
     static maxCubeMaps = 2
     static shadowMap
+    static sampler
     static shader
     static lightsToUpdate = []
 
@@ -19,7 +20,7 @@ export default class OmnidirectionalShadows {
         OmnidirectionalShadows.shadowMap =  new ShadowProbe(512)
 
 
-        GBuffer.deferredUniforms.shadowCube = OmnidirectionalShadows.shadowMap.texture
+        OmnidirectionalShadows.sampler = OmnidirectionalShadows.shadowMap.texture
         lightsToUpdate = OmnidirectionalShadows.lightsToUpdate
     }
 

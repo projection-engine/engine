@@ -34,7 +34,6 @@ layout (location = 5) out vec4 gMeshID;
 layout (location = 6) out vec4 gBaseNormal;
 layout (location = 7) out vec4 gVelocity;
 
-//import(fresnelSchlickRoughness)
 //import(parallaxOcclusionMapping)
 //import(computeTBN)
 
@@ -88,7 +87,7 @@ void main(){
 
     gMeshID = vec4(meshID, 1.);
     gDepth = vec4(gl_FragCoord.z, UVs, 1.);
-    gBaseNormal = vec4(normalVec, 1.);
+    gBaseNormal = gNormal;
     gPosition = vec4(worldSpacePosition.rgb, 1.);
     gBehaviour =  vec4(1., 0., 0., 1.);
 

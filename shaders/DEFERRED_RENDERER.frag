@@ -22,28 +22,24 @@ uniform DeferredSettings{
     float shadowMapResolution;
     float ambientLODSamples;
     bool hasAO;
-    bool hasAmbient;
+    bool hasDiffuseProbe;
+    bool hasSpecularProbe;
 
 };
+
 uniform vec3 cameraPosition;
 
-uniform sampler2D brdfSampler;
-uniform samplerCube prefilteredMap;
-uniform samplerCube irradiance;
+uniform sampler2D albedoSampler;
+uniform sampler2D aoSampler;
+uniform sampler2D behaviourSampler;
+uniform sampler2D normalSampler;
+uniform sampler2D positionSampler;
 uniform sampler2D shadowMapTexture;
 uniform samplerCube shadowCube;
-uniform sampler2D aoSampler;
-uniform sampler2D positionSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D albedoSampler;
-uniform sampler2D behaviourSampler;
-uniform sampler2D ambientSampler;
-uniform sampler2D depthSampler;
-uniform sampler2D screenSpaceReflections;
-uniform sampler2D screenSpaceGI;
-out vec4 finalColor;
 
 
+
+//import(sampleIndirectLight)
 
 //import(computeShadows)
 
@@ -55,19 +51,18 @@ out vec4 finalColor;
 
 //import(fresnelSchlick)
 
-//import(fresnelSchlickRoughness)
-
 //import(computeDirectionalLight)
 
 //import(computePointLight)
 
-//import(sampleIndirectLight)
 
 
+out vec4 finalColor;
 void main() {
     vec3 fragPosition = texture(positionSampler, texCoords).rgb;
     if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
     discard;
+
 
     vec3 albedo = texture(albedoSampler, texCoords).rgb;
     if (albedo.r <= 1. && albedo.g <= 1. && albedo.b <= 1.){
@@ -103,9 +98,20 @@ void main() {
             shadows += lightInformation.a/quantityToDivide;
         }
 
-        indirectIllumination = texture(ambientSampler, texCoords).rgb + sampleIndirectLight(shadows, screenSpaceGI, screenSpaceReflections, NdotV, metallic, roughness, albedo, F0);
-        if(hasAmbient)
-            indirectIllumination += sampleProbeIndirectLight(brdfSampler, prefilteredMap, irradiance, ambientLODSamples, NdotV, metallic, roughness, albedo, F0, V, N);
+        indirectIllumination = sampleIndirectLight(shadows, NdotV, metallic, roughness, albedo, F0);
+        if (hasDiffuseProbe || hasSpecularProbe)
+            indirectIllumination += sampleProbeIndirectLight(
+                hasDiffuseProbe,
+                hasSpecularProbe,
+                ambientLODSamples,
+                NdotV,
+                metallic,
+                roughness,
+                albedo,
+                F0,
+                V,
+                N
+            );
         finalColor = vec4(directIllumination * ao * shadows + indirectIllumination, 1.);
     }
     else

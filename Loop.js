@@ -24,7 +24,7 @@ let then = 0
 export default class Loop {
     static #rendering() {
         const onWrap = Engine.params.onWrap
-        const FBO = Engine.previousFrame
+        const FBO = Engine.currentFrameFBO
 
         SpecularProbePass.execute()
         DiffuseProbePass.execute()

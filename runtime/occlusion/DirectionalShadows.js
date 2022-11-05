@@ -15,6 +15,7 @@ export default class DirectionalShadows {
     static shadowsFrameBuffer
     static lightsToUpdate = []
     static atlasRatio = 0
+    static sampler
 
     static initialize() {
         DirectionalShadows.allocateData()
@@ -26,7 +27,7 @@ export default class DirectionalShadows {
         if (DirectionalShadows.shadowsFrameBuffer)
             GPUAPI.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
         DirectionalShadows.shadowsFrameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, DirectionalShadows.maxResolution, DirectionalShadows.maxResolution).depthTexture()
-        GBuffer.deferredUniforms.shadowMapTexture = DirectionalShadows.shadowsFrameBuffer.depthSampler
+        DirectionalShadows.sampler = DirectionalShadows.shadowsFrameBuffer.depthSampler
     }
 
     static allocateBuffers(shadowAtlasQuantity, shadowMapResolution) {

@@ -32,7 +32,7 @@ export const METHODS = {
     geometrySchlickGGX: "//import(geometrySchlickGGX)",
     geometrySmith: "//import(geometrySmith)",
     fresnelSchlick: "//import(fresnelSchlick)",
-    fresnelSchlickRoughness: "//import(fresnelSchlickRoughness)",
+
     computeDirectionalLight: "//import(computeDirectionalLight)",
     computePointLight: "//import(computePointLight)",
 
@@ -101,6 +101,8 @@ export default class Shader {
     static regexArray = (global) => {
         return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
     }
+
+    uniformMap = {}
     length = 0
 
     constructor(vertex, fragment, setMessage) {
@@ -109,16 +111,22 @@ export default class Shader {
         const vCode = this.#compileShader(trimString(vertex), gpu.VERTEX_SHADER, m => alert.push(m))
         const fCode = this.#compileShader(trimString(fragment), gpu.FRAGMENT_SHADER, m => alert.push(m))
 
-        this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat()
+        this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat().filter(u => {
+            return typeof u.uLocation === "object" || typeof u.uLocations === "object"
+        })
+
+        for (let i = 0; i < this.uniforms.length; i++)
+            this.uniformMap[this.uniforms[i].name] = this.uniforms[i].uLocation || this.uniforms[i].uLocations
+
+
         if (typeof setMessage === "function")
             setMessage({
                 error: gpu.getError(),
                 messages: alert,
                 hasError: alert.length > 0
             })
-        this.uniforms = this.uniforms.filter(u => {
-            return typeof u.uLocation === "object" || typeof u.uLocations === "object"
-        })
+
+
 
         this.length = this.uniforms.length
     }
@@ -132,7 +140,7 @@ export default class Shader {
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
 
         if (!compiled) {
-            console.log(bundledCode)
+            console.log(shaderCode)
             console.error(gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false
@@ -229,6 +237,11 @@ export default class Shader {
             })
 
         return uniformObjects
+    }
+    bind(){
+        if (GPU.activeShader !== this.program)
+            gpu.useProgram(this.program)
+        GPU.activeShader = this.program
     }
 
     bindForUse(data) {

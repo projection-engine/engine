@@ -4,10 +4,12 @@ import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import COMPONENTS from "../../static/COMPONENTS.js";
 
+let shader, uniforms
 export default class SpritePass {
     static shader
     static initialize() {
-        SpritePass.shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
+        shader = SpritePass.shader
+        uniforms = shader.uniformMap
     }
 
     static execute() {
@@ -17,13 +19,14 @@ export default class SpritePass {
             return
         const textures = GPU.textures
 
-        const shaderAttr = {
-            cameraPosition: CameraAPI.position,
-            viewMatrix: CameraAPI.viewMatrix,
-            projectionMatrix: CameraAPI.projectionMatrix
-        }
 
         gpu.disable(gpu.CULL_FACE)
+        shader.bind()
+        gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
+        gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
+        gpu.uniform4fv(uniforms.cameraPosition, CameraAPI.position)
+        gpu.activeTexture(gpu.TEXTURE0)
+
         for (let i = 0; i < s; i++) {
             const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
             if (!current.active)
@@ -31,12 +34,13 @@ export default class SpritePass {
             const texture = textures.get(component.imageID)
             if (!texture)
                 continue
-            shaderAttr.scale = current.scaling
-            shaderAttr.transformationMatrix = current.matrix
-            shaderAttr.iconSampler = texture.texture
-            shaderAttr.attributes = component.attributes
 
-            SpritePass.shader.bindForUse(shaderAttr)
+            gpu.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
+            gpu.uniform3fv(uniforms.scale, current._scaling)
+            gpu.uniform2fv(uniforms.attributes, component.attributes)
+            gpu.bindTexture(gpu.TEXTURE_2D, texture.texture)
+            gpu.uniform1i(uniforms.iconSampler, 0)
+
             GPU.quad.draw()
         }
 

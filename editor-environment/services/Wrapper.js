@@ -26,10 +26,10 @@ export default class Wrapper {
             gpu.blendFunc(gpu.SRC_ALPHA, gpu.ONE_MINUS_SRC_ALPHA)
 
             SelectedSystem.drawSilhouette(selected)
-
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
-            CollisionVisualizationSystem.execute(selected)
+
             if (iconsVisibility) {
+                CollisionVisualizationSystem.execute(selected)
                 const attr = {
                     viewMatrix: CameraAPI.viewMatrix,
                     cameraPosition: CameraAPI.position,

@@ -38,8 +38,10 @@ export default class CollisionVisualizationSystem {
             if (!entity?.active)
                 continue
             const collision = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
+
             if (!collision)
                 continue
+            console.log(collision)
             if (entity.changesApplied || !entity.__collisionTransformationMatrix) {
                 entity.collisionUpdated = true
                 const m = entity.__collisionTransformationMatrix || mat4.clone(EMPTY_MATRIX)
@@ -55,14 +57,14 @@ export default class CollisionVisualizationSystem {
                 mat4.fromRotationTranslationScale(m, rotation, translation, scale)
                 entity.__collisionTransformationMatrix = m
             }
-            obj.transformMatrix = entity.collisionTransformationMatrix
+            obj.transformMatrix = entity.__collisionTransformationMatrix
             CollisionVisualizationSystem.shader.bindForUse(obj)
             switch (collision.collisionType) {
                 case COLLISION_TYPES.SPHERE:
                     CollisionVisualizationSystem.sphere.draw()
                     break
                 case COLLISION_TYPES.BOX:
-                    CollisionVisualizationSystem.cube.draw()
+                    CollisionVisualizationSystem.cube.drawLines()
                     break
             }
         }
