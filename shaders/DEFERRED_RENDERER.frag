@@ -15,11 +15,12 @@ uniform DirectionalLights{
     mat4 directionalLights[16];
     mat4 directionalLightsPOV[16];
     int directionalLightsQuantity;
+    float shadowMapsQuantity;
+    float shadowMapResolution;
 };
 
 uniform DeferredSettings{
-    float shadowMapsQuantity;
-    float shadowMapResolution;
+
     float ambientLODSamples;
     bool hasAO;
     bool hasDiffuseProbe;
@@ -41,8 +42,6 @@ uniform samplerCube shadowCube;
 
 //import(sampleIndirectLight)
 
-//import(computeShadows)
-
 //import(distributionGGX)
 
 //import(geometrySchlickGGX)
@@ -51,9 +50,8 @@ uniform samplerCube shadowCube;
 
 
 
-//import(computeDirectionalLight)
+//import(computeLights)
 
-//import(computePointLight)
 
 
 
@@ -116,6 +114,5 @@ void main() {
             );
         finalColor = vec4(directIllumination * ao * shadows + indirectIllumination, 1.);
     }
-
 }
 

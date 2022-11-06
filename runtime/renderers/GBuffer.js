@@ -40,8 +40,6 @@ export default class GBuffer {
         GBuffer.UBO = new UBO(
             "DeferredSettings",
             [
-                {name: "shadowMapsQuantity", type: "float"},
-                {name: "shadowMapResolution", type: "float"},
                 {name: "ambientLODSamples", type: "float"},
                 {name: "hasAO", type: "bool"},
                 {name: "hasDiffuseProbe", type: "bool"},
@@ -49,9 +47,14 @@ export default class GBuffer {
 
             ]
         )
+        GBuffer.UBO.bind()
         GBuffer.UBO.updateData("hasSpecularProbe", new Uint8Array([0]))
         GBuffer.UBO.updateData("hasDiffuseProbe", new Uint8Array([0]))
+        GBuffer.UBO.unbind()
         GBuffer.UBO.bindWithShader(shader.program)
+
+
+
 
         GBuffer.positionSampler = GBuffer.gBuffer.colors[0]
         GBuffer.normalSampler = GBuffer.gBuffer.colors[1]

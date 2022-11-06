@@ -3,11 +3,12 @@ import COMPONENTS from "../static/COMPONENTS.js";
 import Engine from "../Engine";
 import ENVIRONMENT from "../static/ENVIRONMENT";
 import ArrayBufferAPI from "./ArrayBufferAPI";
-import {vec3, vec4} from "gl-matrix";
+import {mat4, vec3, vec4} from "gl-matrix";
 import ConversionAPI from "./math/ConversionAPI";
 import UBO from "../instances/UBO";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
+import Float from "../../../src/views/shader-editor/templates/nodes/math/Float";
 
 
 /**
@@ -30,8 +31,8 @@ function getNotificationBuffer() {
     b[5] = .1
     return b
 }
-const toRad = Math.PI/180
 
+const toRad = Math.PI / 180
 export default class CameraAPI {
     static UBO
     static #dynamicAspectRatio = false
@@ -46,7 +47,7 @@ export default class CameraAPI {
 
     static staticViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
-
+    static #UBOBuffer = ArrayBufferAPI.allocateVector(36)
     static #projectionBuffer = ArrayBufferAPI.allocateVector(5)
     static translationBuffer = ArrayBufferAPI.allocateVector(3)
     static rotationBuffer = ArrayBufferAPI.allocateVector(4, 0, true)
@@ -83,25 +84,22 @@ export default class CameraAPI {
             CameraAPI.skyboxProjectionMatrix,
             CameraAPI.#projectionBuffer,
             CameraAPI.viewProjectionMatrix,
-            CameraAPI.previousViewProjectionMatrix
+            CameraAPI.previousViewProjectionMatrix,
+            CameraAPI.#UBOBuffer
         ])
 
         new ResizeObserver(CameraAPI.updateAspectRatio)
             .observe(gpu.canvas)
-
-        CameraAPI.updateFrame(true)
+        notificationBuffers[3] = 1
         CameraAPI.initialized = true
     }
 
-    static updateFrame(force) {
-        if (notificationBuffers[3] || force) {
+    static updateFrame() {
+        if (notificationBuffers[3]) {
             const UBO = CameraAPI.UBO
-            notificationBuffers[3] = 0
+            notificationBuffers[3] =  0
             UBO.bind()
-            UBO.updateData("viewProjection", CameraAPI.viewProjectionMatrix)
-            UBO.updateData("placement", CameraAPI.position)
-            UBO.updateData("previousViewProjection", CameraAPI.previousViewProjectionMatrix)
-
+            UBO.updateBuffer(CameraAPI.#UBOBuffer)
             UBO.unbind()
         }
     }
@@ -225,14 +223,15 @@ export default class CameraAPI {
         CameraAPI.updateView()
     }
 
-    static updateMotionBlurState(enabled){
+    static updateMotionBlurState(enabled) {
         MotionBlur.enabled = enabled
 
-        if(!MotionBlur.enabled)
+        if (!MotionBlur.enabled)
             FrameComposition.workerTexture = MotionBlur.workerTexture
         else
             FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
     }
+
     static updateViewTarget(entity) {
         if (!entity?.components)
             return
@@ -244,7 +243,7 @@ export default class CameraAPI {
 
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear
-        CameraAPI.fov = cameraObj.fov < 10 ? cameraObj.fov :cameraObj.fov * toRad
+        CameraAPI.fov = cameraObj.fov < 10 ? cameraObj.fov : cameraObj.fov * toRad
         CameraAPI.#dynamicAspectRatio = cameraObj.dynamicAspectRatio
         CameraAPI.isOrthographic = cameraObj.ortho
 

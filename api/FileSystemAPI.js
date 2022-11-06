@@ -20,13 +20,22 @@ export default class FileSystemAPI {
         return null
     }
 
+    static async loadMesh(ID){
+        try{
+            const file = JSON.parse(await FileSystemAPI.readAsset(ID))
+            GPUAPI.allocateMesh(ID, file)
+        }catch (err){
+            console.error(err)
+            ConsoleAPI.error(err)
+        }
+    }
+
     static async loadMaterial(ID) {
         if (ID === FALLBACK_MATERIAL || !ID || ID.includes(TERRAIN_MATERIAL) || GPU.materials.get(ID) != null)
             return GPU.materials.get(ID) != null
         try {
             if (!GPU.materials.get(ID)) {
                 const file = JSON.parse(await FileSystemAPI.readAsset(ID))
-                console.trace(file)
                 const isInstance = file.original != null
                 if (!file || !isInstance && !file.response)
                     return

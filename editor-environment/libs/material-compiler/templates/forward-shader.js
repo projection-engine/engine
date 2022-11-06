@@ -37,9 +37,8 @@ ${ambient ? `
 //import(fresnelSchlick)
 //import(geometrySchlickGGX)
 //import(distributionGGX)
-//import(geometrySmith)
-//import(computeDirectionalLight) 
-//import(computePointLight)
+//import(geometrySmith) 
+//import(computeLights)
 
 
 

@@ -1,5 +1,4 @@
-import COMPUTE_DIRECTIONAL_LIGHT from "../utils/COMPUTE_DIRECTIONAL_LIGHT.glsl"
-import COMPUTE_POINT_LIGHT from "../utils/COMPUTE_POINT_LIGHT.glsl"
+import COMPUTE_LIGHTS from "../utils/COMPUTE_LIGHTS.glsl"
 
 export const PBR = {
     distributionGGX: `
@@ -28,6 +27,5 @@ export const PBR = {
         }
     `,
 
-    computeDirectionalLight: COMPUTE_DIRECTIONAL_LIGHT,
-    computePointLight: COMPUTE_POINT_LIGHT
+    computeLights: COMPUTE_LIGHTS,
 }

@@ -23,11 +23,8 @@ out vec4 finalColor;
 
 //import(geometrySmith)
 
-//import(computeShadows)
+//import(computeLights)
 
-//import(computeDirectionalLight)
-
-//import(computePointLight)
 
 void main(){
 //    vec3 albedo = vec3(.5);

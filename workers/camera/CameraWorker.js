@@ -31,7 +31,7 @@ export default class CameraWorker {
     static frameID
     static currentTranslation = TransformationAPI.vec3.create()
     static currentRotation = TransformationAPI.quat.create()
-
+static UBOBuffer
     static initialize(
         notificationBuffers,
         position,
@@ -45,7 +45,8 @@ export default class CameraWorker {
         skyboxProjectionMatrix,
         projectionBuffer,
         viewProjectionMatrix,
-        previousViewProjectionMatrix
+        previousViewProjectionMatrix,
+        UBOBuffer
     ) {
         if (CameraWorker.#initialized)
             return
@@ -65,7 +66,7 @@ export default class CameraWorker {
         CameraWorker.#skyboxProjectionMatrix = skyboxProjectionMatrix
         TransformationAPI.vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
         TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
-
+CameraWorker.UBOBuffer = UBOBuffer
         const callback = () => {
             CameraWorker.execute()
             CameraWorker.frameID = requestAnimationFrame(callback)
@@ -109,14 +110,45 @@ export default class CameraWorker {
     static #updateView() {
         mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, CameraWorker.currentRotation, CameraWorker.currentTranslation)
         mat4.invert(CameraWorker.#viewMatrix, CameraWorker.#invViewMatrix)
-        CameraWorker.updateVP()
-
         const m = CameraWorker.#invViewMatrix
         CameraWorker.#position[0] = m[12]
         CameraWorker.#position[1] = m[13]
         CameraWorker.#position[2] = m[14]
+
+        CameraWorker.updateVP()
+
+        const a = CameraWorker.previousViewProjectionMatrix
+        const p = CameraWorker.#position
+        const cacheUBOBuffer = CameraWorker.UBOBuffer
+
+        mat4.copy(cacheUBOBuffer, CameraWorker.viewProjectionMatrix)
+        cacheUBOBuffer[16] = p[0]
+        cacheUBOBuffer[17] = p[1]
+        cacheUBOBuffer[18] = p[2]
+        cacheUBOBuffer[19] = 0
+        cacheUBOBuffer[20] = a[0];
+        cacheUBOBuffer[21] = a[1];
+        cacheUBOBuffer[22] = a[2];
+        cacheUBOBuffer[23] = a[3];
+        cacheUBOBuffer[24] = a[4];
+        cacheUBOBuffer[25] = a[5];
+        cacheUBOBuffer[26] = a[6];
+        cacheUBOBuffer[27] = a[7];
+        cacheUBOBuffer[28] = a[8];
+        cacheUBOBuffer[29] = a[9];
+        cacheUBOBuffer[30] = a[10];
+        cacheUBOBuffer[31] = a[11];
+        cacheUBOBuffer[32] = a[12];
+        cacheUBOBuffer[33] = a[13];
+        cacheUBOBuffer[34] = a[14];
+        cacheUBOBuffer[35] = a[15];
+
         CameraWorker.#updateStaticViewMatrix()
     }
+
+
+    static previousRotationLength = 0
+    static currentRotationLength = 0
 
     static execute() {
         const now = performance.now()
@@ -127,9 +159,12 @@ export default class CameraWorker {
             const incrementTranslation = 1 - Math.pow(.001, elapsed * nBuffer[4])
             const incrementRotation = 1 - Math.pow(.001, elapsed * nBuffer[5])
             vec3.lerp(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, incrementTranslation)
-            quat.slerp(CameraWorker.currentRotation, CameraWorker.currentRotation, CameraWorker.#rotationBuffer, incrementRotation)
 
-            if (!vec3.equals(CameraWorker.currentTranslation, CameraWorker.#translationBuffer) || !quat.equals(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)) {
+            CameraWorker.previousRotationLength = quat.length(CameraWorker.currentRotation)
+            quat.slerp(CameraWorker.currentRotation, CameraWorker.currentRotation, CameraWorker.#rotationBuffer, incrementRotation)
+            CameraWorker.currentRotationLength = quat.length(CameraWorker.currentRotation)
+
+            if (!vec3.equals(CameraWorker.currentTranslation, CameraWorker.#translationBuffer) || CameraWorker.currentRotationLength !== CameraWorker.previousRotationLength) {
                 CameraWorker.#updateView()
                 nBuffer[3] = 1
             } else {

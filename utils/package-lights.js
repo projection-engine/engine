@@ -94,7 +94,6 @@ export function packageDirectionalLights(keepOld) {
             LightsAPI.directionalLightsPOVBuffer[i] = 0
         }
 
-
     if (directionalLights)
         for (let i = 0; i < directionalLights.length; i++) {
             const current = directionalLights[i]
@@ -103,9 +102,6 @@ export function packageDirectionalLights(keepOld) {
                 continue
             current.needsLightUpdate = false
             const component = current.components.get(COMPONENTS.DIRECTIONAL_LIGHT)
-            mat4.lookAt(component.lightView, component.__entity.translation, component.center, [0, 1, 0])
-            mat4.ortho(component.lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
-
 
             const position = current.translation
             directionalLightsData[offset] = position[0]
@@ -121,9 +117,11 @@ export function packageDirectionalLights(keepOld) {
             directionalLightsData[offset + 9] = component.atlasFace[1]
             directionalLightsData[offset + 10] = (component.shadowMap ? 1 : -1) * component.pcfSamples
             directionalLightsData[offset + 12] = component.shadowBias
-            console.log(component.shadowBias, directionalLightsData[offset + 12])
 
             if (component.shadowMap) {
+                mat4.lookAt(component.lightView, component.__entity._translation, component.center, [0, 1, 0])
+                mat4.ortho(component.lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
+
                 const temp = mat4.multiply([], component.lightProjection, component.lightView)
                 for (let i = 0; i < temp.length; i++)
                     dirLightPOV[offset + i] = temp[i]
@@ -137,5 +135,4 @@ export function packageDirectionalLights(keepOld) {
 
     LightsAPI.directionalLightsQuantity = size
     Engine.data.directionalLightsQuantity = size
-    Engine.data.dirLightPOV = dirLightPOV
 }

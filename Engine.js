@@ -141,8 +141,6 @@ export default class Engine {
         GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
 
         GBuffer.UBO.bind()
-        GBuffer.UBO.updateData("shadowMapsQuantity", new Float32Array([DirectionalShadows.maxResolution]))
-        GBuffer.UBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.atlasRatio]))
         GBuffer.UBO.updateData("hasAO", new Uint8Array([data.SSAO.enabled ? 1 : 0]))
         GBuffer.UBO.unbind()
         MotionBlur.uniforms.velocityScale = data.mbVelocityScale

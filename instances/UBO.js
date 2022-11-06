@@ -53,7 +53,9 @@ export default class UBO {
     updateData(name, data) {
         gpu.bufferSubData(gpu.UNIFORM_BUFFER, this.items[name].offset, data, 0, null)
     }
-
+    updateBuffer(data) {
+        gpu.bufferSubData(gpu.UNIFORM_BUFFER, 0, data, 0, null)
+    }
     static #calculate(dataArray) {
         let chunk = 16,
             tsize = 0,

@@ -12,16 +12,19 @@ export default class PointLightComponent extends Component {
 
     _zNear = .1
     _zFar = 25
-    shadowMap = true
+    _shadowMap = true
+    get shadowMap(){
+        return this._shadowMap
+    }
+    set shadowMap(data){
+        if(this._shadowMap !== data)
+            this.__entity.needsLightUpdate = true
+        this._shadowMap = data
+    }
     intensity = 1
     shadowSamples = 10
     shadowBias = .05
 
-
-
-    constructor() {
-        super()
-    }
 
     get zNear() {
         return this._zNear

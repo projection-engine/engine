@@ -78,7 +78,6 @@ export default class Loop {
     }
 
     static loop() {
-        CameraAPI.updateFrame()
         const METRICS = Engine.metrics
         const now = performance.now()
         const el = now - then

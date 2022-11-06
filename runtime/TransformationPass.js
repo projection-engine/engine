@@ -81,7 +81,7 @@ export default class TransformationPass {
 
     static execute() {
         if (TransformationPass.#hasChangeBuffer[0] === 1) {
-            LightsAPI.packageLights(true, true)
+            LightsAPI.packageLights(false, true)
             TransformationPass.#hasChangeBuffer[0] = 0
         }
 

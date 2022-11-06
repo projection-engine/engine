@@ -4,6 +4,7 @@ import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import GBuffer from "../renderers/GBuffer";
 import GPUAPI from "../../api/GPUAPI";
+import LightsAPI from "../../api/LightsAPI";
 
 
 let lightsToUpdate
@@ -42,6 +43,10 @@ export default class DirectionalShadows {
             DirectionalShadows.changed = true
         }
         DirectionalShadows.atlasRatio = DirectionalShadows.maxResolution / DirectionalShadows.resolutionPerTexture
+        LightsAPI.directionalLightsUBO.bind()
+        LightsAPI.directionalLightsUBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
+        LightsAPI.directionalLightsUBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
+        LightsAPI.directionalLightsUBO.unbind()
     }
 
 

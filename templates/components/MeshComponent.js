@@ -56,7 +56,7 @@ export default class MeshComponent extends Component {
         const referenceMesh = GPU.meshes.get(component._meshID)
         console.trace(referenceMat, referenceMesh)
         if (referenceMat && referenceMesh) {
-            if( component.__mapSource.material === referenceMat && component.__mapSource.mesh === referenceMesh)
+            if (component.__mapSource.material === referenceMat && component.__mapSource.mesh === referenceMesh)
                 return
             if (typeof component.__mapSource.index !== "number") {
                 let key
@@ -86,7 +86,7 @@ export default class MeshComponent extends Component {
                 current.mesh = referenceMesh
             }
         }
-        else if (!referenceMat) {
+        if (!referenceMat && component._materialID != null) {
             console.trace(component._materialID)
             FileSystemAPI.loadMaterial(component._materialID).then(res => {
                 if (res)
@@ -95,7 +95,14 @@ export default class MeshComponent extends Component {
                     ConsoleAPI.error("Material not found")
             })
         }
-
+        if (!referenceMesh && component._meshID != null) {
+            FileSystemAPI.loadMesh(component._meshID).then(res => {
+                if (res)
+                    MeshComponent.updateMap(component)
+                else
+                    ConsoleAPI.error("Mesh not found")
+            })
+        }
         console.log(component, MaterialAPI.deferredShadedEntities)
     }
 

@@ -1,4 +1,4 @@
-import SHADOW_METHODS from "../shaders/utils/SHADOW_METHODS.glsl"
+
 import {PBR} from "../shaders/templates/PBR"
 import GPU from "../GPU";
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
@@ -33,8 +33,7 @@ export const METHODS = {
     geometrySmith: "//import(geometrySmith)",
     fresnelSchlick: "//import(fresnelSchlick)",
 
-    computeDirectionalLight: "//import(computeDirectionalLight)",
-    computePointLight: "//import(computePointLight)",
+    computeLights: "//import(computeLights)",
 
     SSR: "//import(SSR)",
     SSGI: "//import(SSGI)",
@@ -72,9 +71,7 @@ function applyMethods(shaderCode) {
             case key === "aces":
                 response = response.replaceAll(METHODS[key], ACES)
                 break
-            case key === "computeShadows":
-                response = response.replaceAll(METHODS[key], SHADOW_METHODS)
-                break
+
 
             case PBR[key] != null:
                 response = response.replaceAll(METHODS[key], PBR[key])

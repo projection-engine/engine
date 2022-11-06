@@ -39,13 +39,14 @@ export default class LightsAPI {
         LightsAPI.directionalLightsUBO = new UBO(
             "DirectionalLights",
             [
-
                 {name: "directionalLights", type: "mat4", dataLength: MAX_DIRECTIONAL_LIGHT},
                 {name: "directionalLightsPOV", type: "mat4", dataLength: MAX_DIRECTIONAL_LIGHT},
-
                 {name: "directionalLightsQuantity", type: "int"},
+                {name: "shadowMapsQuantity", type: "float"},
+                {name: "shadowMapResolution", type: "float"},
             ]
         )
+
     }
 
     static packageLights(keepOld, force) {
@@ -69,7 +70,6 @@ export default class LightsAPI {
         LightsAPI.directionalLightsUBO.bind()
         LightsAPI.directionalLightsUBO.updateData("directionalLightsQuantity", new Uint8Array([Math.min(LightsAPI.directionalLightsQuantity, MAX_DIRECTIONAL_LIGHT)]))
         LightsAPI.directionalLightsUBO.updateData("directionalLightsPOV", LightsAPI.directionalLightsPOVBuffer)
-
         LightsAPI.directionalLightsUBO.updateData("directionalLights", LightsAPI.directionalLightsBuffer)
         LightsAPI.directionalLightsUBO.unbind()
 
