@@ -57,7 +57,6 @@ export default class ScalingGizmo extends Inheritance {
                     target._scaling[j] = Math.round(target._scaling[j] / g) * g
                 target.__changedBuffer[0] = 1
             }
-            GizmoSystem.notify(GizmoSystem.mainEntity._scaling)
             ScalingGizmo.cache = [0, 0, 0]
         }
     }

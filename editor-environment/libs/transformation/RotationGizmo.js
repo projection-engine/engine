@@ -28,7 +28,6 @@ static shader
     }
 
     onMouseDown(event) {
-        GizmoSystem.onMouseDown()
         this.x = event.clientX
         this.y = event.clientY
 
@@ -37,7 +36,6 @@ static shader
     }
 
     onMouseUp() {
-        GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved > 0) {
             GizmoSystem.totalMoved = 0
             GizmoSystem.save("_rotationQuat")
@@ -84,7 +82,6 @@ static shader
             default:
                 break
         }
-        GizmoSystem.notify([this.currentRotation[0] * toDeg, this.currentRotation[1] * toDeg, this.currentRotation[2] * toDeg])
     }
 
     rotateElement(vec, screenSpace) {

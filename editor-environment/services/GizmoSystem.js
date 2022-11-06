@@ -13,7 +13,6 @@ import GPU from "../../GPU";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import TransformationPass from "../../runtime/TransformationPass";
-import INFORMATION_CONTAINER from "../../../../src/data/INFORMATION_CONTAINER";
 import AXIS from "../data/AXIS";
 import LineAPI from "../../api/rendering/LineAPI";
 import {mat4, vec3} from "gl-matrix";
@@ -83,18 +82,6 @@ export default class GizmoSystem {
                 value: [...e.pivotPoint]
             })))
         GizmoSystem.#onSave(changes)
-    }
-
-    static onMouseDown() {
-        if (!GizmoSystem.tooltip)
-            GizmoSystem.tooltip = document.getElementById(INFORMATION_CONTAINER.TRANSFORMATION)
-    }
-
-    static onMouseUp() {
-        if (GizmoSystem.tooltip)
-            setTimeout(() => {
-                GizmoSystem.tooltip.finished()
-            }, 250)
     }
 
     static drawToDepthSampler(mesh, transforms) {
@@ -208,15 +195,6 @@ export default class GizmoSystem {
             GizmoSystem.transformationMatrix = undefined
             GizmoSystem.translation = undefined
         }
-    }
-
-    static notify(targetBuffer) {
-        if (!GizmoSystem.tooltip)
-            return
-
-        GizmoSystem.tooltip.isChanging()
-        GizmoSystem.totalMoved = 1
-        GizmoSystem.tooltip.innerText = `X ${targetBuffer[0].toFixed(2)}  |  Y ${targetBuffer[1].toFixed(2)}  |  Z ${targetBuffer[2].toFixed(2)}`
     }
 
 }

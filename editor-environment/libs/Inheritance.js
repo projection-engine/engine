@@ -24,7 +24,6 @@ export default class Inheritance {
     }
 
     onMouseDown(event) {
-        GizmoSystem.onMouseDown()
         this.x = event.clientX
         this.y = event.clientY
 
@@ -33,7 +32,6 @@ export default class Inheritance {
 
 
     onMouseUp() {
-        GizmoSystem.onMouseUp()
         if (GizmoSystem.totalMoved !== 0) {
             GizmoSystem.totalMoved = 0
             GizmoSystem.save(this.key)

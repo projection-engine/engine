@@ -65,7 +65,6 @@ export default class TranslationGizmo extends Inheritance {
                 target.__pivotChanged = true
                 target.__changedBuffer[0] = 1
             }
-            GizmoSystem.notify(GizmoSystem.mainEntity._translation)
             TranslationGizmo.cache = [0, 0, 0]
         }
     }
