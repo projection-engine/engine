@@ -34,8 +34,8 @@ return {
         // executed every frame  
     },
     // Component metadata
-    _name: "My component", // Component name that will be showed on editor
-    _props: [
+    name: "My component", // Component name that will be showed on editor
+    props: [
         Component.number("My example input", "myNumber") // Inputs for inspector
     ]
 }

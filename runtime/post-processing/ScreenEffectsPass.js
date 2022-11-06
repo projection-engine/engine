@@ -2,7 +2,10 @@ import generateBlurBuffers from "../../utils/generate-blur-buffers"
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import UBO from "../../instances/UBO";
 
+
+let shader, uniforms
 export default class ScreenEffectsPass {
     static workerTexture
     static outputFBO
@@ -13,25 +16,22 @@ export default class ScreenEffectsPass {
     static upSamplingShader
     static brightShader
     static blurShader
-    static uniforms = {}
+
+    static UBO
 
     static initialize() {
-        const [blurBuffers, upSampledBuffers] = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
-
-        ScreenEffectsPass.blurred = upSampledBuffers[blurBuffers.length - 2].colors[0]
-
-        ScreenEffectsPass.blurBuffers = blurBuffers
-        ScreenEffectsPass.upSampledBuffers = upSampledBuffers
-
-
-        ScreenEffectsPass.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
-        ScreenEffectsPass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
-
-        ScreenEffectsPass.uniforms = {
-            blurred: ScreenEffectsPass.blurred,
-            resolution: ScreenEffectsPass.resolution,
-            sceneColor: ScreenEffectsPass.workerTexture
-        }
+        ScreenEffectsPass.UBO = new UBO(
+            "LensEffects",
+            [
+                {type: "float", name: "distortionIntensity"},
+                {type: "float", name: "chromaticAberrationIntensity"},
+                {type: "bool", name: "distortionEnabled"},
+                {type: "bool", name: "chromaticAberrationEnabled"},
+                {type: "bool", name: "bloomEnabled"},]
+        )
+        ScreenEffectsPass.UBO.bindWithShader(ScreenEffectsPass.compositeShader.program)
+        shader = ScreenEffectsPass.compositeShader
+        uniforms = shader.uniformMap
     }
 
     static execute() {
@@ -39,8 +39,6 @@ export default class ScreenEffectsPass {
             bloomStrength,
             bloomThreshold,
             bloom,
-            postProcessingStrength,
-            postProcessingEffects
         } = CameraAPI.metadata
         const op = ScreenEffectsPass.outputFBO
         if (bloom) {
@@ -54,11 +52,17 @@ export default class ScreenEffectsPass {
             ScreenEffectsPass.blur(op.colors[0], bloomStrength)
         }
 
-        const u = ScreenEffectsPass.uniforms
-        u.settings = postProcessingEffects
-        u.intensity = postProcessingStrength
         op.startMapping()
-        ScreenEffectsPass.compositeShader.bindForUse(u)
+        shader.bind()
+
+        gpu.activeTexture(gpu.TEXTURE0)
+        gpu.bindTexture(gpu.TEXTURE_2D, ScreenEffectsPass.blurred)
+        gpu.uniform1i(uniforms.blurred, 0)
+
+        gpu.activeTexture(gpu.TEXTURE1)
+        gpu.bindTexture(gpu.TEXTURE_2D, ScreenEffectsPass.workerTexture)
+        gpu.uniform1i(uniforms.sceneColor, 1)
+
         GPU.quad.draw()
         op.stopMapping()
     }

@@ -201,13 +201,21 @@ export default class CameraAPI {
 
     static serializeState(translation = CameraAPI.translationBuffer, rotation = CameraAPI.rotationBuffer, rotationSmoothing = CameraAPI.rotationSmoothing, translationSmoothing = CameraAPI.translationSmoothing, metadata = CameraAPI.metadata) {
         const state = {rotationSmoothing, translationSmoothing}
-
+        state.metadata = {...CameraAPI.metadata}
         state.rotation = [...rotation]
         state.translation = [...translation]
         return state
     }
 
-    static restoreState({rotation, translation, rotationSmoothing, translationSmoothing}) {
+    static restoreState({rotation, translation, rotationSmoothing, translationSmoothing, metadata}) {
+        if(metadata){
+            const keys = Object.keys(metadata)
+            for(let i =0; i< keys.length; i++){
+                const key = keys[i].replaceAll("_", "")
+                const value = metadata[keys[i]]
+                CameraAPI.metadata[key] = value
+            }
+        }
         CameraAPI.translationBuffer[0] = translation[0]
         CameraAPI.translationBuffer[1] = translation[1]
         CameraAPI.translationBuffer[2] = translation[2]

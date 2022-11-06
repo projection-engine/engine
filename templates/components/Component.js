@@ -37,7 +37,7 @@ export default class Component {
         }
     }
 
-    static number(label, key, max, min, increment = .1, isAngle, realtime = true, disabledIf) {
+    static number(label, key, max, min, increment = .001, isAngle, realtime = true, disabledIf) {
         return {label, max, min, increment, type: Component.propTypes.NUMBER, key, isAngle, realtime, disabledIf}
     }
 

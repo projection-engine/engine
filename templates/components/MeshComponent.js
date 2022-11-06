@@ -62,7 +62,7 @@ export default class MeshComponent extends Component {
         if (referenceMat && referenceMesh) {
             if (component.__mapSource.material === referenceMat && component.__mapSource.mesh === referenceMesh)
                 return
-            if (typeof component.__mapSource.index !== "number") {
+            if (typeof component.__mapSource.index !== "number" || !MaterialAPI[component.__mapSource.type]?.[component.__mapSource.index]) {
                 let key
                 switch (referenceMat.shadingType) {
                     case MATERIAL_RENDERING_TYPES.DEFERRED:
@@ -88,6 +88,7 @@ export default class MeshComponent extends Component {
                 const current = MaterialAPI[component.__mapSource.type][component.__mapSource.index]
                 current.material = referenceMat
                 current.mesh = referenceMesh
+
             }
         }
         if (!referenceMat && component._materialID != null) {

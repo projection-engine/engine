@@ -7,6 +7,7 @@ import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import GBuffer from "../runtime/renderers/GBuffer";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
+import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";
 
 export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
@@ -60,4 +61,13 @@ export default function initializeFrameBuffers() {
 
         .depthTest()
     GBuffer.compositeFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
+
+    const ssEffects = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
+    ScreenEffectsPass.blurred = ssEffects[1][ssEffects[0].length - 2].colors[0]
+    ScreenEffectsPass.blurBuffers = ssEffects[0]
+    ScreenEffectsPass.upSampledBuffers = ssEffects[1]
+
+    ScreenEffectsPass.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
+    ScreenEffectsPass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
+
 }
