@@ -2,7 +2,6 @@ import COMPONENTS from "../../static/COMPONENTS.js"
 import Engine from "../../Engine";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import GBuffer from "../renderers/GBuffer";
 import GPUAPI from "../../api/GPUAPI";
 import LightsAPI from "../../api/LightsAPI";
 

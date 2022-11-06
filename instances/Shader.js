@@ -1,4 +1,3 @@
-
 import {PBR} from "../shaders/templates/PBR"
 import GPU from "../GPU";
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"

@@ -6,7 +6,6 @@ import GPU from "../../GPU";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import FileSystemAPI from "../../api/FileSystemAPI";
 import ConsoleAPI from "../../api/ConsoleAPI";
-import QueryAPI from "../../api/utils/QueryAPI";
 import Engine from "../../Engine";
 
 export default class MeshComponent extends Component {

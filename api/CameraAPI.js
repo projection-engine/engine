@@ -8,7 +8,6 @@ import ConversionAPI from "./math/ConversionAPI";
 import UBO from "../instances/UBO";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
-import Float from "../../../src/views/shader-editor/templates/nodes/math/Float";
 
 
 /**

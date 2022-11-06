@@ -1,7 +1,5 @@
-import generateBlurBuffers from "../../utils/generate-blur-buffers"
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import UBO from "../../instances/UBO";
 
 

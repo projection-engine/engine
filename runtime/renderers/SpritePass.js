@@ -1,7 +1,6 @@
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import COMPONENTS from "../../static/COMPONENTS.js";
 
 let shader, uniforms

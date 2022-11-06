@@ -1,7 +1,5 @@
-import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
-import Engine from "../../Engine";
 
 let shader, uniforms
 export default class FrameComposition {

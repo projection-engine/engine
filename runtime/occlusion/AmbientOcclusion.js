@@ -2,7 +2,6 @@ import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPU from "../../GPU";
 import GBuffer from "../renderers/GBuffer";
 import CameraAPI from "../../api/CameraAPI";
-import GlobalIlluminationPass from "../GlobalIlluminationPass";
 import ImageWorker from "../../workers/image/ImageWorker";
 import UBO from "../../instances/UBO";
 
