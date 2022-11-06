@@ -247,6 +247,8 @@ export default class CameraAPI {
         CameraAPI.#dynamicAspectRatio = cameraObj.dynamicAspectRatio
         CameraAPI.isOrthographic = cameraObj.ortho
 
+        CameraAPI.metadata.vignetteEnabled = cameraObj.vignette
+        CameraAPI.metadata.vignetteStrength = cameraObj.vignetteStrength
         CameraAPI.metadata.distortion = cameraObj.distortion
         CameraAPI.metadata.distortionStrength = cameraObj.distortionStrength
         CameraAPI.metadata.chromaticAberration = cameraObj.chromaticAberration

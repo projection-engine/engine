@@ -10,18 +10,41 @@ export default class PostProcessingEffects {
     _filmGrain = false
     _filmGrainStrength = 1.
 
-    get filmGrain(){
+    _vignetteStrength = .25
+    _vignetteEnabled = false
+
+    get vignetteStrength() {
+        return this._vignetteStrength
+    }
+
+    set vignetteStrength(data) {
+        this._vignetteStrength = data
+        FrameComposition.UBO.updateData("vignetteStrength", new Float32Array([data]))
+    }
+
+    get vignetteEnabled() {
+        return this._vignetteEnabled
+    }
+
+    set vignetteEnabled(data) {
+        this._vignetteEnabled = data
+        FrameComposition.UBO.updateData("vignetteEnabled", new Uint8Array([data ? 1 : 0]))
+    }
+
+    get filmGrain() {
         return this._filmGrain
     }
-    get filmGrainStrength(){
+
+    get filmGrainStrength() {
         return this._filmGrainStrength
     }
 
-    set filmGrain(data){
+    set filmGrain(data) {
         this._filmGrain = data
         FrameComposition.UBO.updateData("filmGrainEnabled", new Float32Array([data ? 1 : 0]))
     }
-    set filmGrainStrength(data){
+
+    set filmGrainStrength(data) {
         this._filmGrainStrength = data
         FrameComposition.UBO.updateData("filmGrainStrength", new Float32Array([data]))
     }
@@ -31,17 +54,21 @@ export default class PostProcessingEffects {
 
     _gamma = 2.2
     _exposure = 1.
-    get gamma(){
+
+    get gamma() {
         return this._gamma
     }
-    get exposure(){
+
+    get exposure() {
         return this._exposure
     }
-    set gamma(data){
+
+    set gamma(data) {
         this._gamma = data
         FrameComposition.UBO.updateData("gamma", new Float32Array([data]))
     }
-    set exposure(data){
+
+    set exposure(data) {
         this._exposure = data
         FrameComposition.UBO.updateData("exposure", new Float32Array([data]))
     }

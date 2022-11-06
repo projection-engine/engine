@@ -14,7 +14,14 @@ export default class DirectionalLightComponent extends Component {
     lightProjection = mat4.create()
     size = 35
     atlasFace = [0, 0]
-    center = [0, 0, 0]
+    _center = [0, 0, 0]
+    get center(){
+        return this._center
+    }
+    set center(data){
+        this._center = data
+        this.__entity.needsLightUpdate = true
+    }
     changed = true
     _shadowMap = true
     get shadowMap() {

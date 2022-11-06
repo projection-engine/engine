@@ -2,8 +2,10 @@
 precision highp float;
 uniform CompositionSettings{
     vec2 inverseFilterTextureSize;
+    bool vignetteEnabled;
     bool fxaaEnabled;
     bool filmGrainEnabled;
+    float vignetteStrength;
     float FXAASpanMax;
     float FXAAReduceMin;
     float FXAAReduceMul;
@@ -77,6 +79,13 @@ void main() {
     if (filmGrainEnabled)
     fragment = filmGrain(fragment);
 
+    if (vignetteEnabled){
+        vec2 uv = texCoords;
+        uv *=  1.0 - uv.yx;
+        float vig = uv.x*uv.y * 15.;
+        vig = pow(vig, vignetteStrength);
+        fragment *= vig;
+    }
     finalColor = vec4(fragment, 1.0);
 }
 

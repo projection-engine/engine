@@ -12,6 +12,7 @@ import CubeMapAPI from "./CubeMapAPI";
 import ENTITY_TYPED_ATTRIBUTES from "../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
 import MaterialAPI from "./rendering/MaterialAPI";
+import MeshComponent from "../templates/components/MeshComponent";
 
 
 export default class EntityAPI {
@@ -62,6 +63,7 @@ export default class EntityAPI {
 
         if (entity.components.get(COMPONENTS.MESH)) {
             data.meshes.push(entity)
+            MeshComponent.updateMap(entity.components.get(COMPONENTS.MESH))
             placementMap.meshes = true
         }
 
@@ -123,7 +125,7 @@ export default class EntityAPI {
         Engine.queryMap.delete(entity.queryKey)
 
         const meshComponent = entity.components.get(COMPONENTS.MESH)
-        if(meshComponent && meshComponent.__mapSource.index !== undefined)
+        if (meshComponent && meshComponent.__mapSource.index !== undefined)
             MaterialAPI[meshComponent.__mapSource.type] = MaterialAPI[meshComponent.__mapSource.type].filter(e => e.entity !== entity)
         if (entity.components.get(COMPONENTS.POINT_LIGHT) || entity.components.get(COMPONENTS.DIRECTIONAL_LIGHT) || entity.components.get(COMPONENTS.MESH))
             LightsAPI.packageLights(false, true)
@@ -178,10 +180,9 @@ export default class EntityAPI {
                 let componentValue = keys[i]
                 if (componentValue.includes("__") || componentValue.includes("#") || componentValue === "_props" || componentValue === "_name")
                     continue
-                if(k === COMPONENTS.MESH && (componentValue === "_meshID" || componentValue === "_materialID")){
+                if (k === COMPONENTS.MESH && (componentValue === "_meshID" || componentValue === "_materialID")) {
                     component[componentValue.replace("_", "")] = entity.components[k][componentValue]
-                }
-                else
+                } else
                     component[componentValue] = entity.components[k][componentValue]
             }
             if (k === COMPONENTS.DIRECTIONAL_LIGHT)

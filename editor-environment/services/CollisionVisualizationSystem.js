@@ -41,7 +41,6 @@ export default class CollisionVisualizationSystem {
 
             if (!collision)
                 continue
-            console.log(collision)
             if (entity.changesApplied || !entity.__collisionTransformationMatrix) {
                 entity.collisionUpdated = true
                 const m = entity.__collisionTransformationMatrix || mat4.clone(EMPTY_MATRIX)

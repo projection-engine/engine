@@ -19,6 +19,11 @@ export default  [
         Component.number("FAR", "zFar", undefined,0, .01),
         Component.number("NEAR", "zNear", undefined,0, .01),
     ]),
+    Component.group("VIGNETTE", [
+        Component.boolean("ENABLED", "vignette"),
+        Component.number("STRENGTH", "vignetteStrength", undefined,0, .0001),
+    ]),
+
 
     Component.group("DISTORTION", [
         Component.boolean("ENABLED", "distortion"),

@@ -18,8 +18,10 @@ export default class FrameComposition {
             "CompositionSettings",
             [
                 {type: "vec2", name: "inverseFilterTextureSize"},
+                {type: "bool", name: "vignetteEnabled"},
                 {type: "bool", name: "fxaaEnabled"},
                 {type: "bool", name: "filmGrainEnabled"},
+                {type: "float", name: "vignetteStrength"},
                 {type: "float", name: "FXAASpanMax"},
                 {type: "float", name: "FXAAReduceMin"},
                 {type: "float", name: "FXAAReduceMul"},

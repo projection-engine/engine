@@ -16,7 +16,8 @@ export default class CameraComponent extends Component {
     distortionStrength = 1
     chromaticAberration = false
     chromaticAberrationStrength = 1
-
+    vignette = false
+    vignetteStrength = .25
     filmGrain = false
     filmGrainStrength = 1
     bloom = false
