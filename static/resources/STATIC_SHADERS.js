@@ -21,7 +21,8 @@ export default {
         BILINEAR_UP_SAMPLING: "BILINEAR_UP_SAMPLING",
         BLOOM_MASK: "BLOOM_MASK",
         BOX_BLUR: "BOX_BLUR",
-        MOTION_BLUR: "MOTION_BLUR"
+        MOTION_BLUR: "MOTION_BLUR",
+        DOWNSAMPLE: "DOWNSAMPLE"
     },
 
     DEVELOPMENT: {

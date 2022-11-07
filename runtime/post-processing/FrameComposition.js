@@ -46,7 +46,6 @@ export default class FrameComposition {
     static updateShader() {
         shader = FrameComposition.shader
         uniforms = shader.uniformMap
-        console.log(uniforms)
     }
 
     static lookup() {

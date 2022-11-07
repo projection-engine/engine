@@ -6,48 +6,40 @@ import GPUAPI from "./GPUAPI";
 
 
 let blurShader, blurShaderUniforms, resolution = new Float32Array(2), source
+let biLinearShader, biLinearShaderUniforms
 export default class BufferBlur {
     static downSampleBuffers
     static upSampleBuffers
 
     static blurShader
-    static upSamplingShader
+    static downsamplingShader
 
     static initialize() {
-        const [downSampleBuffers, upSampleBuffers] = BufferBlur.generateBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
+        const [downSampleBuffers, upSampleBuffers] = BufferBlur.generateBuffers(1, GPU.internalResolution.w, GPU.internalResolution.h)
         BufferBlur.downSampleBuffers = downSampleBuffers
         BufferBlur.upSampleBuffers = upSampleBuffers
 
         resolution[0] = GPU.internalResolution.w
         resolution[1] = GPU.internalResolution.h
 
-        source = upSampleBuffers[upSampleBuffers.length - 1]
+
 
         blurShader = BufferBlur.blurShader
         blurShaderUniforms = blurShader.uniformMap
-
+        biLinearShader = BufferBlur.downsamplingShader
+        biLinearShaderUniforms= biLinearShader.uniformMap
+        console.log(biLinearShaderUniforms)
     }
 
     static generateBuffers(quantity, w, h) {
-        const downscaleStrength = 2
         const downSampleBuffers = [], upSampleBuffers = []
-
-        let pW = w, pH = h
         for (let i = 0; i < quantity; i++) {
-            const [wW, hH] = [pW / downscaleStrength, pH / downscaleStrength]
             downSampleBuffers.push(
-                new Framebuffer(wW, hH).texture({linear: true})
+                new Framebuffer(w, h).texture({linear: true})
             )
-            pW = wW
-            pH = hH
         }
-        pW *= downscaleStrength
-        pH *=downscaleStrength
-        for (let i = 0; i < quantity - 1; i++) {
-            const [wW, hH] = [pW * downscaleStrength, pH * downscaleStrength]
-            upSampleBuffers.push(new Framebuffer(wW, hH).texture({linear: true}))
-            pW = wW
-            pH = hH
+        for (let i = 0; i < quantity; i++) {
+            upSampleBuffers.push(new Framebuffer(w, h).texture({linear: true}))
         }
         return [downSampleBuffers, upSampleBuffers]
     }
@@ -56,31 +48,39 @@ export default class BufferBlur {
         const blurBuffers = BufferBlur.downSampleBuffers
         const upSampleBuffers = BufferBlur.upSampleBuffers
         const q = blurBuffers.length
+        source = upSampleBuffers[window.inD || 0]
 
-        blurShader.bind()
+        biLinearShader.bind()
         for (let level = 0; level < q; level++) {
             const fbo = blurBuffers[level]
             const previousColor = level > 0 ? blurBuffers[level - 1].colors[0] : sampler
 
             fbo.startMapping()
+
             gpu.activeTexture(gpu.TEXTURE0)
             gpu.bindTexture(gpu.TEXTURE_2D, previousColor)
-            gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
+            gpu.uniform1i(biLinearShaderUniforms.sampler, 0)
 
-            gpu.uniform1f(blurShaderUniforms.blurRadius, radius)
-            gpu.uniform2fv(blurShaderUniforms.resolution, resolution)
+            gpu.uniform1f(biLinearShaderUniforms.downscaleStrength, 2)
+
             GPU.quad.draw()
             fbo.stopMapping()
         }
 
-        for (let index = 0; index < q -1; index++) {
+        blurShader.bind()
+        for (let index = 0; index < upSampleBuffers.length ; index++) {
             const current = upSampleBuffers[index]
             current.startMapping()
-            BufferBlur.upSamplingShader.bindForUse({
-                blurred: blurBuffers[index].colors[0],
-                previousSampler: index > 0 ?  upSampleBuffers[index-1].colors[0] : blurBuffers[0].colors[0],
-                bloomIntensity
-            })
+
+            const currentColor = index === 0 ? blurBuffers[q-1].colors[0] : upSampleBuffers[index-1].colors[0]
+
+            gpu.activeTexture(gpu.TEXTURE0)
+            gpu.bindTexture(gpu.TEXTURE_2D, currentColor)
+            gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
+
+
+            gpu.uniform1f(blurShaderUniforms.blurRadius, 4)
+            gpu.uniform2fv(blurShaderUniforms.resolution, resolution)
             GPU.quad.draw()
             current.stopMapping()
         }

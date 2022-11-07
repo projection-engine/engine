@@ -3,11 +3,11 @@ precision highp float;
 // BIG THANKS TO https://stackoverflow.com/questions/64837705/opengl-blurring
 in vec2 texCoords;
 uniform sampler2D sceneColor;
+uniform vec2 resolution;
 uniform float blurRadius;
 
 out vec4 fragColor;
 void main(void){
-    vec2 resolution =   vec2(textureSize(sceneColor, 0));
     float xs = resolution.x;
     float ys = resolution.y;
 
@@ -29,6 +29,7 @@ void main(void){
             yy=y*y;
             if (xx+yy<=rr){
                 w=w0*exp((-xx-yy)/(2.0*rr));
+                if(p != texCoords)
                 col+=texture(sceneColor, p)*w;
             }
         }
