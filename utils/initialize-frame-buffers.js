@@ -1,7 +1,7 @@
 import GPUAPI from "../api/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
 import GPU from "../GPU";
-import generateBlurBuffers from "./generate-blur-buffers";
+
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import GBuffer from "../runtime/renderers/GBuffer";
@@ -18,9 +18,7 @@ export default function initializeFrameBuffers() {
         .texture({attachment: 0})
         .texture({attachment: 1})
 
-    const [blurBuffers, upSampledBuffers] = generateBlurBuffers(3, GPU.internalResolution.w, GPU.internalResolution.h, 2)
-    GlobalIlluminationPass.blurBuffers = blurBuffers
-    GlobalIlluminationPass.upSampledBuffers = upSampledBuffers
+    GlobalIlluminationPass.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.GI).texture()
 
 
     AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC)
@@ -62,10 +60,7 @@ export default function initializeFrameBuffers() {
         .depthTest()
     GBuffer.compositeFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
 
-    const ssEffects = generateBlurBuffers(4, GPU.internalResolution.w, GPU.internalResolution.h)
-    ScreenEffectsPass.blurred = ssEffects[1][ssEffects[0].length - 2].colors[0]
-    ScreenEffectsPass.blurBuffers = ssEffects[0]
-    ScreenEffectsPass.upSampledBuffers = ssEffects[1]
+    ScreenEffectsPass.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.BLUR_BLOOM).texture()
 
     ScreenEffectsPass.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
     ScreenEffectsPass.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]

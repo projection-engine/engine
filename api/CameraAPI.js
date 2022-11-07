@@ -55,6 +55,8 @@ export default class CameraAPI {
     static #worker
     static initialized = false
 
+    static trackingEntity
+
     static initialize() {
         if (CameraAPI.initialized)
             return
@@ -94,9 +96,13 @@ export default class CameraAPI {
     }
 
     static updateFrame() {
+        const entity = CameraAPI.trackingEntity
+        if (entity && entity.__changedBuffer[1])
+            CameraAPI.update(entity._translation, entity._rotationQuat)
+
         if (notificationBuffers[3]) {
             const UBO = CameraAPI.UBO
-            notificationBuffers[3] =  0
+            notificationBuffers[3] = 0
             UBO.bind()
             UBO.updateBuffer(CameraAPI.#UBOBuffer)
             UBO.unbind()
@@ -207,9 +213,9 @@ export default class CameraAPI {
     }
 
     static restoreState({rotation, translation, rotationSmoothing, translationSmoothing, metadata}) {
-        if(metadata){
+        if (metadata) {
             const keys = Object.keys(metadata)
-            for(let i =0; i< keys.length; i++){
+            for (let i = 0; i < keys.length; i++) {
                 const key = keys[i].replaceAll("_", "")
                 const value = metadata[keys[i]]
                 CameraAPI.metadata[key] = value
@@ -240,12 +246,16 @@ export default class CameraAPI {
     }
 
     static updateViewTarget(entity) {
+        if (!entity)
+            CameraAPI.trackingEntity = undefined
+
         if (!entity?.components)
             return
         const cameraObj = entity.components.get(COMPONENTS.CAMERA)
         if (!cameraObj)
             return
 
+        CameraAPI.trackingEntity = entity
         CameraAPI.updateMotionBlurState(cameraObj.motionBlurEnabled)
 
         CameraAPI.zFar = cameraObj.zFar

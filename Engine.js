@@ -19,6 +19,7 @@ import PhysicsAPI from "./api/PhysicsAPI";
 import FileSystemAPI from "./api/FileSystemAPI";
 import ScriptsAPI from "./api/ScriptsAPI";
 import UIAPI from "./api/UIAPI";
+import BufferBlur from "./api/BufferBlur";
 
 const METRICS = {
     frameRate: 0,
@@ -91,6 +92,7 @@ export default class Engine {
         Engine.previousFrameSampler = GBuffer.compositeFBO.colors[0]
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
+        BufferBlur.initialize()
 
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         new ResizeObserver(() => {

@@ -36,8 +36,8 @@ static shader
     }
 
     onMouseUp() {
-        if (GizmoSystem.totalMoved > 0) {
-            GizmoSystem.totalMoved = 0
+        if (GizmoSystem.hasStarted) {
+            GizmoSystem.hasStarted = false
             GizmoSystem.save("_rotationQuat")
         }
         document.exitPointerLock()
@@ -82,6 +82,7 @@ static shader
             default:
                 break
         }
+        GizmoSystem.hasStarted = true
     }
 
     rotateElement(vec, screenSpace) {
@@ -89,7 +90,6 @@ static shader
         if (SIZE === 1 && GizmoSystem.mainEntity.lockedRotation)
             return
 
-        GizmoSystem.totalMoved += vec[0] + vec[1] + vec[2]
         const quatA = quat.create()
         if (screenSpace)
             this.currentRotation = vec

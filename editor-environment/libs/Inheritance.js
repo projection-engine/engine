@@ -32,8 +32,8 @@ export default class Inheritance {
 
 
     onMouseUp() {
-        if (GizmoSystem.totalMoved !== 0) {
-            GizmoSystem.totalMoved = 0
+        if (GizmoSystem.hasStarted) {
+            GizmoSystem.hasStarted = false
             GizmoSystem.save(this.key)
         }
         this.tracking = false

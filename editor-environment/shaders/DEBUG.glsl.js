@@ -39,7 +39,14 @@ void main(){
         color = vec3(color.gb, 0.);
     else if (debugFlag == 19)
         color = vec3(color.rg, 0.);
-    fragColor = vec4(color, 1.);
+    else if (debugFlag == 14 || debugFlag == 20){
+        vec3 fragment = color;
+        fragment = vec3(1.0) - exp(-fragment);
+        fragment = pow(fragment, vec3(1.0/2.2));
+        fragColor = vec4(fragment, 1.);
+    }
+    else
+        fragColor = vec4(color, 1.);
 }
 `
 

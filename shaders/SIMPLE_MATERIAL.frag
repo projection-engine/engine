@@ -87,7 +87,7 @@ void main(){
 
     gMeshID = vec4(meshID, 1.);
     gDepth = vec4(gl_FragCoord.z, UVs, 1.);
-    gBaseNormal = gNormal;
+    gBaseNormal = vec4(normalVec, 1.);
     gPosition = vec4(worldSpacePosition.rgb, 1.);
     gBehaviour =  vec4(1., 0., 0., 1.);
 

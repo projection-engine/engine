@@ -4,8 +4,7 @@ import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
 import ACES from "../shaders/utils/ACES.glsl"
 import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl"
 import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
-import SSR from "../shaders/utils/SSR.glsl"
-import SSGI from "../shaders/utils/SSGI.glsl"
+
 import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
 
 const TYPES = {
@@ -34,8 +33,6 @@ export const METHODS = {
 
     computeLights: "//import(computeLights)",
 
-    SSR: "//import(SSR)",
-    SSGI: "//import(SSGI)",
     computeTBN: "//import(computeTBN)",
     rayMarcher: "//import(rayMarcher)",
     aces: "//import(aces)",
@@ -52,12 +49,7 @@ function applyMethods(shaderCode) {
             case key === "sampleIndirectLight":
                 response = response.replaceAll(METHODS[key], SAMPLE_INDIRECT_LIGHT)
                 break
-            case key === "SSGI":
-                response = response.replaceAll(METHODS[key], SSGI)
-                break
-            case key === "SSR":
-                response = response.replaceAll(METHODS[key], SSR)
-                break
+
             case key === "computeTBN":
                 response = response.replaceAll(METHODS[key], COMPUTE_TBN)
                 break

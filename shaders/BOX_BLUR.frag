@@ -5,7 +5,7 @@ precision mediump float;
 in vec2 texCoords;
 uniform sampler2D sceneColor;
 uniform vec2 resolution;
-const float kernel = 5.;
+const float kernel = 1.;
 
 out vec4 fragColor;
 
@@ -18,10 +18,8 @@ void main( )
     vec3 sum = vec3(0);
     float pixelSize = 1.0 / resolution.x;
 
-    // Horizontal Blur
     vec3 accumulation = vec3(0);
     vec3 weightsum = vec3(0);
-
     vec2 vector;
     for (float i = -kernel; i <= kernel; i++){
         if(isWidth == true)

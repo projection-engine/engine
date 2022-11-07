@@ -34,7 +34,8 @@ import LightsAPI from "../api/LightsAPI";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
 import SpritePass from "../runtime/renderers/SpritePass";
-
+import GAUSSIAN_FRAG from "../shaders/GAUSSIAN.frag"
+import BufferBlur from "../api/BufferBlur";
 
 export default function initializeShaders() {
 
@@ -54,10 +55,12 @@ export default function initializeShaders() {
     DirectionalShadows.shadowMapShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
     OmnidirectionalShadows.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
     FrameComposition.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FRAME_COMPOSITION, QUAD_VERTEX, FXAA_FRAG)
-    ScreenEffectsPass.compositeShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, QUAD_VERTEX, LENS_POST_PROCESSING_FRAG)
-    ScreenEffectsPass.upSamplingShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BILINEAR_UP_SAMPLING, QUAD_VERTEX, BI_LINEAR_UPSAMPLING_FRAG)
+
     ScreenEffectsPass.brightShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, QUAD_VERTEX, BRIGHTNESS_FILTER_FRAG)
-    ScreenEffectsPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, QUAD_VERTEX, BOX_BLUR_FRAG)
+    ScreenEffectsPass.compositeShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, QUAD_VERTEX, LENS_POST_PROCESSING_FRAG)
+
+    BufferBlur.upSamplingShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BILINEAR_UP_SAMPLING, QUAD_VERTEX, BI_LINEAR_UPSAMPLING_FRAG)
+    BufferBlur.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, QUAD_VERTEX, GAUSSIAN_FRAG)
 
     GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
     CameraAPI.UBO.bindWithShader(GBuffer.forwardDepthShader.program)

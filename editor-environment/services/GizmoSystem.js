@@ -34,7 +34,7 @@ export default class GizmoSystem {
     static selectedEntities = []
     static clickedAxis
     static sensitivity = .001
-    static totalMoved = 0
+    static hasStarted = false
     static wasOnGizmo
     static rotationGizmoMesh
     static scaleGizmoMesh
@@ -83,6 +83,8 @@ export default class GizmoSystem {
             })))
         GizmoSystem.#onSave(changes)
     }
+
+
 
     static drawToDepthSampler(mesh, transforms) {
         const FBO = GBuffer.gBuffer
@@ -196,5 +198,6 @@ export default class GizmoSystem {
             GizmoSystem.translation = undefined
         }
     }
+
 
 }

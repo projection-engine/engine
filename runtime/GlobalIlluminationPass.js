@@ -4,6 +4,7 @@ import ScreenEffectsPass from "./post-processing/ScreenEffectsPass";
 import GBuffer from "./renderers/GBuffer";
 import AmbientOcclusion from "./occlusion/AmbientOcclusion";
 import Engine from "../Engine";
+import BufferBlur from "../api/BufferBlur";
 
 /**
  * rayMarchSettings definition:
@@ -25,6 +26,7 @@ export default class GlobalIlluminationPass {
     static SSRSampler
     static unfilteredSSGISampler
 
+    static baseFBO
     static blurBuffers
     static upSampledBuffers
     static normalsFBO
@@ -35,20 +37,21 @@ export default class GlobalIlluminationPass {
     static normalSampler
     static rayMarchSettings = new Float32Array(9)
 
-    static normalUniforms = {}
-    static uniforms = {}
+
 
     static initialize() {
         GlobalIlluminationPass.unfilteredSSGISampler = GlobalIlluminationPass.FBO.colors[0]
         GlobalIlluminationPass.SSRSampler = GlobalIlluminationPass.FBO.colors[1]
 
         GlobalIlluminationPass.normalSampler = GlobalIlluminationPass.normalsFBO.colors[0]
-        GlobalIlluminationPass.SSGISampler = GlobalIlluminationPass.upSampledBuffers[GlobalIlluminationPass.blurBuffers.length - 2].colors[0]
+        GlobalIlluminationPass.SSGISampler = GlobalIlluminationPass.baseFBO.colors[0]
 
         normalsShader = GlobalIlluminationPass.normalsShader
         normalUniforms = normalsShader.uniformMap
         shader = GlobalIlluminationPass.shader
         uniforms = shader.uniformMap
+
+
     }
 
     static execute() {
@@ -107,6 +110,7 @@ export default class GlobalIlluminationPass {
 
         GPU.quad.draw()
         GlobalIlluminationPass.FBO.stopMapping()
-        ScreenEffectsPass.blur(GlobalIlluminationPass.unfilteredSSGISampler, 1, 2, GlobalIlluminationPass.blurBuffers, GlobalIlluminationPass.upSampledBuffers)
+
+        BufferBlur.applyBlur(GlobalIlluminationPass.baseFBO, GlobalIlluminationPass.unfilteredSSGISampler, 5, 1, 2)
     }
 }
