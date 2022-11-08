@@ -15,6 +15,7 @@ uniform sampler2D gBehaviour;
 uniform sampler2D stochasticNormals;
 uniform sampler2D noiseSampler;
 
+uniform vec2 ssgiColorGrading;
 uniform vec2 noiseScale;
 uniform mat3 rayMarchSettings;
 
@@ -30,7 +31,11 @@ vec3 viewPos;
 //import(aces)
 //import(rayMarcher)
 
+
 vec3 SSGI(int maxSteps, float stepSize, float intensity, vec2 noiseScale){
+
+    float gamma = ssgiColorGrading.x;
+    float exposure = ssgiColorGrading.y;
     vec3 worldNormal = normalize(texture(stochasticNormals, texCoords).rgb);
     vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 
@@ -42,8 +47,9 @@ vec3 SSGI(int maxSteps, float stepSize, float intensity, vec2 noiseScale){
 
     float step = stepSize * (jitter.x + jitter.y) + stepSize;
     vec4 coords = RayMarch(maxSteps, worldNormal, hitPos, dDepth, step);
-    vec3 tracedAlbedo = aces(texture(previousFrame, coords.xy).rgb);
-
+    vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
+    tracedAlbedo = vec3(1.0) - exp(-tracedAlbedo * exposure);
+    tracedAlbedo = pow(tracedAlbedo, vec3(1.0/gamma));
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float reflectionMultiplier = screenEdgefactor * -reflected.z;

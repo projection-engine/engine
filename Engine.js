@@ -19,7 +19,6 @@ import PhysicsAPI from "./api/PhysicsAPI";
 import FileSystemAPI from "./api/FileSystemAPI";
 import ScriptsAPI from "./api/ScriptsAPI";
 import UIAPI from "./api/UIAPI";
-import BufferBlur from "./api/BufferBlur";
 
 const METRICS = {
     frameRate: 0,
@@ -92,15 +91,17 @@ export default class Engine {
         Engine.previousFrameSampler = GBuffer.compositeFBO.colors[0]
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
-        BufferBlur.initialize()
 
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
-        new ResizeObserver(() => {
+        const OBS = new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
             ConversionAPI.canvasBBox = bBox
+
             CameraAPI.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
-        }).observe(gpu.canvas)
+        })
+        OBS.observe(gpu.canvas.parentElement)
+        OBS.observe(gpu.canvas)
         Engine.isReady = true
         Engine.start()
     }
@@ -124,6 +125,9 @@ export default class Engine {
         if (typeof physicsSteps === "number")
             PhysicsPass.simulationStep = physicsSteps
 
+        GlobalIlluminationPass.ssgiColorGrading[0] = data.SSGI.gamma || 2.2
+        GlobalIlluminationPass.ssgiColorGrading[1] = data.SSGI.exposure || 1
+
         GlobalIlluminationPass.rayMarchSettings[0] = data.SSR.falloff || 3
         GlobalIlluminationPass.rayMarchSettings[1] = data.SSR.minRayStep || .1
         GlobalIlluminationPass.rayMarchSettings[2] = data.SSR.stepSize || 1
@@ -133,6 +137,9 @@ export default class Engine {
 
         GlobalIlluminationPass.rayMarchSettings[5] = data.SSGI.enabled ? 1 : 0
         GlobalIlluminationPass.rayMarchSettings[6] = data.SSR.enabled ? 1 : 0
+
+        GlobalIlluminationPass.SSREnabled = data.SSR.enabled
+        GlobalIlluminationPass.SSGIEnabled = data.SSGI.enabled
 
         GlobalIlluminationPass.rayMarchSettings[7] = data.SSGI.maxSteps || 4
         GlobalIlluminationPass.rayMarchSettings[8] = data.SSR.maxSteps || 4

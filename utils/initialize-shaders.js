@@ -6,8 +6,7 @@ import SPRITE_VERTEX from "../shaders/SPRITE.vert";
 
 import QUAD_VERTEX from "../shaders/QUAD.vert";
 import LENS_POST_PROCESSING_FRAG from "../shaders/LENS_POST_PROCESSING.frag"
-import DOWNSAMPLE_FRAG from "../shaders/DOWNSCALE_FILTER.frag"
-import BOX_BLUR_FRAG from "../shaders/BOX_BLUR.frag"
+
 import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import AO_FRAG from "../shaders/AO.frag";
@@ -35,9 +34,7 @@ import MotionBlur from "../runtime/post-processing/MotionBlur";
 import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
 import SpritePass from "../runtime/renderers/SpritePass";
 import GAUSSIAN_FRAG from "../shaders/GAUSSIAN.frag"
-import BILINEAR_FILTER from "../shaders/BILINEAR_FILTER.frag"
 
-import BufferBlur from "../api/BufferBlur";
 
 export default function initializeShaders() {
 
@@ -61,9 +58,7 @@ export default function initializeShaders() {
     ScreenEffectsPass.brightShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, QUAD_VERTEX, BRIGHTNESS_FILTER_FRAG)
     ScreenEffectsPass.compositeShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, QUAD_VERTEX, LENS_POST_PROCESSING_FRAG)
 
-    BufferBlur.downsamplingShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DOWNSAMPLE, QUAD_VERTEX, DOWNSAMPLE_FRAG)
-    BufferBlur.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, QUAD_VERTEX, GAUSSIAN_FRAG)
-    BufferBlur.upsample = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BILINEAR_UP_SAMPLING, QUAD_VERTEX, BILINEAR_FILTER)
+    GlobalIlluminationPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GAUSSIAN, QUAD_VERTEX, GAUSSIAN_FRAG)
 
     GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
     CameraAPI.UBO.bindWithShader(GBuffer.forwardDepthShader.program)

@@ -37,6 +37,11 @@ export default class Framebuffer {
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
     }
 
+    clear() {
+        this.use()
+        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+    }
+
     stopMapping(clear = true) {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         GPU.activeFramebuffer = undefined

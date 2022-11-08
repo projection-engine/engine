@@ -1,7 +1,7 @@
 import CameraAPI from "../../api/CameraAPI";
 import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
-import BufferBlur from "../../api/BufferBlur";
+
 
 
 let shader, uniforms, metadata
@@ -46,7 +46,7 @@ export default class ScreenEffectsPass {
             })
             GPU.quad.draw()
             op.stopMapping()
-            BufferBlur.applyBlur(ScreenEffectsPass.baseFBO, op.colors[0], 5, 1, 2)
+            // BufferBlur.applyBlur(ScreenEffectsPass.baseFBO, op.colors[0], 5, 1, 2)
         }
 
         op.startMapping()
