@@ -15,7 +15,8 @@ export default class PostProcessingEffects {
     _vignetteEnabled = false
 
     bloomThreshold = .75
-
+    bloomQuality = 8
+    bloomOffset = 0
     _gamma = 2.2
     _exposure = 1.
 

@@ -141,7 +141,7 @@ export default class GlobalIlluminationPass {
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.unfilteredSSGISampler)
         gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
-        gpu.uniform1f(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
+        gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
         GPU.quad.draw()
         blurSSGIFBO.stopMapping()
 
@@ -149,7 +149,7 @@ export default class GlobalIlluminationPass {
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, blurSSGIFBO.colors[0])
         gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
-        gpu.uniform1f(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
+        gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
         GPU.quad.draw()
         finalSSGIFBO.stopMapping()
     }

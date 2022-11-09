@@ -10,7 +10,7 @@ uniform sampler2D nextSampler;
 uniform float sampleScale;
 
 void main(void){
-    vec2 texelSize = 1.0 / vec2(textureSize(nextSampler, 0));
+    vec2 texelSize = 1.0 / vec2(textureSize(blurred, 0));
     vec4 d = texelSize.xyxy  * vec4(-1, -1, +1, +1) * (sampleScale * 0.5);
 
     vec4 s;

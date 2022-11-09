@@ -43,6 +43,8 @@ export default  [
     Component.group("BLOOM", [
         Component.boolean("ENABLED", "bloom"),
         Component.number("THRESHOLD", "bloomThreshold", undefined,0, .0001),
+        Component.number("SAMPLES", "bloomQuality", undefined,0,1),
+        Component.number("OFFSET", "bloomOffset", undefined,0),
     ]),
 
     Component.group("COLOR_CORRECTION", [

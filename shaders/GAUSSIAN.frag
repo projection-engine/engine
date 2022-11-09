@@ -1,38 +1,42 @@
 #version 300 es
 precision highp float;
-// BIG THANKS TO https://stackoverflow.com/questions/64837705/opengl-blurring
+#define PI 3.14159265359
+
+// BIG THANKS TO https://www.shadertoy.com/view/4tSyzy
 in vec2 texCoords;
 uniform sampler2D sceneColor;
-uniform float blurRadius;
-
+uniform int blurRadius;
 out vec4 fragColor;
-void main(void){
-    vec2 resolution =   vec2(textureSize(sceneColor, 0));
-    float xs = resolution.x;
-    float ys = resolution.y;
 
-    float x;
-    float y;
-    float xx;
-    float yy;
-    float rr=pow(blurRadius, 2.);
-    float dx;
-    float dy;
-    float w;
-    float w0;
-    w0=0.3780/pow(blurRadius, 1.975);
-    vec2 p;
-    vec4 col=vec4(0.0, 0.0, 0.0, 0.0);
-    for (dx=1.0/xs, x=-blurRadius, p.x=texCoords.x+(x*dx);x<=blurRadius;x++, p.x+=dx){
-        xx=x*x;
-        for (dy=1.0/ys, y=-blurRadius, p.y=texCoords.y+(y*dy);y<=blurRadius;y++, p.y+=dy){
-            yy=y*y;
-            if (xx+yy<=rr){
-                w=w0*exp((-xx-yy)/(2.0*rr));
-                col+=texture(sceneColor, p)*w;
-            }
+int samples;
+float sigma;
+
+float gaussian(vec2 i) {
+    return 1.0 / (2.0 * PI * pow(sigma, 2.)) * exp(-((pow(i.x, 2.) + pow(i.y, 2.)) / (2.0 * pow(sigma, 2.))));
+}
+
+vec3 blur(sampler2D sp, vec2 uv, vec2 scale) {
+    vec3 col = vec3(0.0);
+    float accum = 0.0;
+    float weight;
+    vec2 offset;
+
+    for (int x = -samples / 2; x < samples / 2; ++x) {
+        for (int y = -samples / 2; y < samples / 2; ++y) {
+            offset = vec2(x, y);
+            weight = gaussian(offset);
+            col += texture(sp, uv + scale * offset).rgb * weight;
+            accum += weight;
         }
     }
 
-    fragColor = col;
+    return col / accum;
+}
+
+void main(void){
+    vec2 resolution = 1./  vec2(textureSize(sceneColor, 0));
+    samples = blurRadius;
+    sigma = float(samples) * 0.25;
+
+    fragColor = vec4(blur(sceneColor, texCoords, resolution), 1.);
 }
