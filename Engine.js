@@ -78,7 +78,7 @@ export default class Engine {
         FileSystemAPI.initialize(readAsset, readMetadata)
         Engine.#initialized = true
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
-
+        Engine.previousFrameSampler = Engine.currentFrameFBO.colors[0]
         ScreenEffectsPass.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
@@ -88,7 +88,7 @@ export default class Engine {
         DirectionalShadows.initialize()
         SpritePass.initialize()
         GBuffer.initialize()
-        Engine.previousFrameSampler = GBuffer.compositeFBO.colors[0]
+
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
 
@@ -96,7 +96,6 @@ export default class Engine {
         const OBS = new ResizeObserver(() => {
             const bBox = gpu.canvas.getBoundingClientRect()
             ConversionAPI.canvasBBox = bBox
-
             CameraAPI.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
         })
@@ -125,6 +124,7 @@ export default class Engine {
         if (typeof physicsSteps === "number")
             PhysicsPass.simulationStep = physicsSteps
 
+        GlobalIlluminationPass.blurSamples = data.SSGI.blurSamples || 3
         GlobalIlluminationPass.ssgiColorGrading[0] = data.SSGI.gamma || 2.2
         GlobalIlluminationPass.ssgiColorGrading[1] = data.SSGI.exposure || 1
 

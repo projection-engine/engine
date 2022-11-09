@@ -21,7 +21,7 @@ export default class CameraComponent extends Component {
     filmGrain = false
     filmGrainStrength = 1
     bloom = false
-    bloomStrength = 1
+
     bloomThreshold = .75
     gamma = 2.2
     exposure = 1

@@ -40,7 +40,6 @@ export default class MeshComponent extends Component {
     }
 
     set materialID(data) {
-        console.trace(data, this)
         if (this._materialID === data)
             return
         this._materialID = data
@@ -91,7 +90,6 @@ export default class MeshComponent extends Component {
             }
         }
         if (!referenceMat && component._materialID != null) {
-            console.trace(component._materialID)
             FileSystemAPI.loadMaterial(component._materialID).then(res => {
                 if (res)
                     MeshComponent.updateMap(component)
@@ -107,7 +105,6 @@ export default class MeshComponent extends Component {
                     ConsoleAPI.error("Mesh not found")
             })
         }
-        console.log(component, MaterialAPI.deferredShadedEntities)
     }
 
     get materialID() {

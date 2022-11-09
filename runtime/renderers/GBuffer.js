@@ -14,7 +14,6 @@ let shader, uniforms
 export default class GBuffer {
     static gBuffer
     static deferredShader
-    static compositeFBO
     static toScreenShader
     static positionSampler
     static normalSampler
@@ -54,8 +53,6 @@ export default class GBuffer {
         GBuffer.UBO.bindWithShader(shader.program)
 
 
-
-
         GBuffer.positionSampler = GBuffer.gBuffer.colors[0]
         GBuffer.normalSampler = GBuffer.gBuffer.colors[1]
         GBuffer.albedoSampler = GBuffer.gBuffer.colors[2]
@@ -65,7 +62,6 @@ export default class GBuffer {
         GBuffer.baseNormalSampler = GBuffer.gBuffer.colors[6]
         GBuffer.velocityMapSampler = GBuffer.gBuffer.colors[7]
 
-        GBuffer.toScreenUniforms.uSampler = GBuffer.compositeFBO.colors[0]
         GBuffer.ready = true
 
         GBuffer.uniforms = {
@@ -93,18 +89,8 @@ export default class GBuffer {
         GBuffer.UBO.unbind()
     }
 
-    static drawFrame() {
-        GBuffer.toScreenShader.bindForUse(GBuffer.toScreenUniforms)
-        GPU.quad.draw()
-    }
-
-    static drawBuffer(entities, onWrap) {
-        onWrap(false)
-        GBuffer.compositeFBO.startMapping()
-        onWrap(true)
-
+    static drawBuffer() {
         shader.bind()
-
         gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
 
         gpu.activeTexture(gpu.TEXTURE0)
@@ -159,8 +145,6 @@ export default class GBuffer {
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, DiffuseProbePass.sampler)
             gpu.uniform1i(uniforms.irradianceMap, index)
         }
-
         GPU.quad.draw()
-        GBuffer.compositeFBO.stopMapping()
     }
 }

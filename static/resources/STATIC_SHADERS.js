@@ -21,6 +21,7 @@ export default {
         BLOOM_MASK: "BLOOM_MASK",
         GAUSSIAN: "GAUSSIAN",
         MOTION_BLUR: "MOTION_BLUR",
+        UPSAMPLING_BLOOM: "UPSAMPLING_BLOOM"
     },
 
     DEVELOPMENT: {

@@ -20,7 +20,6 @@ import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/BRIGHTNESS_FILTER.frag";
 import GBuffer from "../runtime/renderers/GBuffer";
 import DEFERRED_RENDERER_FRAG from "../shaders/DEFERRED_RENDERER.frag";
-import TO_SCREEN_FRAG from "../shaders/TO_SCREEN.frag";
 import ONLY_DEPTH_VERT from "../shaders/ONLY_DEPTH.vert"
 import ONLY_DEPTH_FRAG from "../shaders/ONLY_DEPTH.frag"
 import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/SCREEN_SPACE_INDIRECT.frag"
@@ -34,7 +33,7 @@ import MotionBlur from "../runtime/post-processing/MotionBlur";
 import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
 import SpritePass from "../runtime/renderers/SpritePass";
 import GAUSSIAN_FRAG from "../shaders/GAUSSIAN.frag"
-
+import UPSAMPLING_TEND_FRAG from "../shaders/UPSAMPLE_TENT.glsl"
 
 export default function initializeShaders() {
 
@@ -59,14 +58,12 @@ export default function initializeShaders() {
     ScreenEffectsPass.compositeShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, QUAD_VERTEX, LENS_POST_PROCESSING_FRAG)
 
     GlobalIlluminationPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GAUSSIAN, QUAD_VERTEX, GAUSSIAN_FRAG)
-
+    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.UPSAMPLING_BLOOM, QUAD_VERTEX, UPSAMPLING_TEND_FRAG)
     GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
     CameraAPI.UBO.bindWithShader(GBuffer.forwardDepthShader.program)
 
     GBuffer.deferredShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, QUAD_VERTEX, DEFERRED_RENDERER_FRAG)
     LightsAPI.pointLightsUBO.bindWithShader(GBuffer.deferredShader.program)
     LightsAPI.directionalLightsUBO.bindWithShader(GBuffer.deferredShader.program)
-
-    GBuffer.toScreenShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, QUAD_VERTEX, TO_SCREEN_FRAG)
 
 }

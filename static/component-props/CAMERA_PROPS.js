@@ -42,7 +42,6 @@ export default  [
 
     Component.group("BLOOM", [
         Component.boolean("ENABLED", "bloom"),
-        Component.number("STRENGTH", "bloomStrength", undefined,0, .0001),
         Component.number("THRESHOLD", "bloomThreshold", undefined,0, .0001),
     ]),
 

@@ -30,29 +30,25 @@ export default class Loop {
         DiffuseProbePass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
-
-        GlobalIlluminationPass.execute()
         renderScene()
         AmbientOcclusion.execute()
-        GBuffer.drawBuffer(
-            Engine.entities,
-            isDuringBinding => {
-                if (isDuringBinding)
-                    SkyboxPass.execute()
-                if (onWrap != null)
-                    onWrap.execute(false, isDuringBinding)
-            }
-        )
+        if (onWrap != null)
+            onWrap.execute(false, false)
 
         FBO.startMapping()
-        GBuffer.drawFrame()
+
+        if (onWrap != null)
+            onWrap.execute(false, true)
+        SkyboxPass.execute()
+        GBuffer.drawBuffer()
         GPUAPI.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardRenderer.execute()
-
         SpritePass.execute()
         if (onWrap != null)
-            onWrap.execute(true)
+            onWrap.execute(true, false)
         FBO.stopMapping()
+
+        GlobalIlluminationPass.execute()
     }
 
 

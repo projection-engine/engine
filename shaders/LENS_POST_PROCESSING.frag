@@ -14,6 +14,9 @@ uniform sampler2D blurred;
 uniform sampler2D sceneColor;
 
 out vec4 fragColor;
+
+
+//import(aces)
 vec3 chromaticAberration(vec2 uv){
     float amount = chromaticAberrationIntensity * .001;
     vec3 col;
@@ -33,7 +36,7 @@ vec2 lensDistortion( vec2 uv, float k){
 
 void main(void){
     vec2 texCoords = distortionEnabled ? lensDistortion( texCoords, distortionIntensity * .5)  : texCoords;
-    vec3 bloomColor = bloomEnabled ? texture(blurred, texCoords).rgb : vec3(0.);
+    vec3 bloomColor = bloomEnabled ? aces(texture(blurred, texCoords).rgb) : vec3(0.);
     vec3 color = chromaticAberrationEnabled ? chromaticAberration(texCoords): texture(sceneColor, texCoords).rgb;
 
 

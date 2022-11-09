@@ -18,4 +18,5 @@ export default {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"
     },
+    SCREEN_EFFECTS: "SCREEN_EFFECTS"
 }

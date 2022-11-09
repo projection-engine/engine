@@ -8,6 +8,7 @@ import GBuffer from "../runtime/renderers/GBuffer";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
 import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";
+import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 
 export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
@@ -17,10 +18,6 @@ export default function initializeFrameBuffers() {
     GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
         .texture({attachment: 0})
         .texture({attachment: 1})
-
-    GlobalIlluminationPass.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.GI).texture()
-
-
     AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC)
         .texture({
             precision: gpu.R16F,
@@ -46,19 +43,12 @@ export default function initializeFrameBuffers() {
         .texture({attachment: 1}) // NORMAL
         .texture({attachment: 2}) // ALBEDO
         .texture({attachment: 3})
-        .texture({
-            precision: gpu.RGBA32F,
-            format: gpu.RGBA,
-            repeat: false,
-            linear: false,
-            attachment: 4
-        }) // DEPTH
+        .texture({precision: gpu.RGBA32F, attachment: 4}) // DEPTH
         .texture({attachment: 5}) // ID
         .texture({attachment: 6}) // BASE NORMAL
-        .texture({attachment: 7, precision: gpu.RG16F, format: gpu.RG}) // gVelocity
-
+        .texture({attachment: 7, precision: gpu.RG32F, format: gpu.RG}) // gVelocity
         .depthTest()
-    GBuffer.compositeFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.DEFERRED_COMPOSITION).texture()
+
 
     ScreenEffectsPass.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.BLUR_BLOOM).texture()
 

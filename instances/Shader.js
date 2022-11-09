@@ -68,7 +68,6 @@ function applyMethods(shaderCode) {
                 response = response.replaceAll(METHODS[key], PBR[key])
                 break
             default:
-                console.log(key)
                 break
         }
     })
@@ -233,10 +232,7 @@ export default class Shader {
     }
 
     bindForUse(data) {
-        if (GPU.activeShader !== this.program)
-            gpu.useProgram(this.program)
-
-        GPU.activeShader = this.program
+        this.bind()
         let currentSamplerIndex = 0
         const increase = () => currentSamplerIndex++
         for (let v = 0; v < this.length; v++) {

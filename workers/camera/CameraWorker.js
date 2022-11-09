@@ -31,7 +31,8 @@ export default class CameraWorker {
     static frameID
     static currentTranslation = TransformationAPI.vec3.create()
     static currentRotation = TransformationAPI.quat.create()
-static UBOBuffer
+    static UBOBuffer
+
     static initialize(
         notificationBuffers,
         position,
@@ -66,7 +67,7 @@ static UBOBuffer
         CameraWorker.#skyboxProjectionMatrix = skyboxProjectionMatrix
         TransformationAPI.vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
         TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
-CameraWorker.UBOBuffer = UBOBuffer
+        CameraWorker.UBOBuffer = UBOBuffer
         const callback = () => {
             CameraWorker.execute()
             CameraWorker.frameID = requestAnimationFrame(callback)
@@ -94,6 +95,7 @@ CameraWorker.UBOBuffer = UBOBuffer
         mat4.invert(CameraWorker.#invProjectionMatrix, CameraWorker.#projectionMatrix)
         mat4.perspective(CameraWorker.#skyboxProjectionMatrix, fov, aR, .1, 1000)
         CameraWorker.updateVP()
+        CameraWorker.updateUBO()
     }
 
     static #updateStaticViewMatrix() {
@@ -116,7 +118,11 @@ CameraWorker.UBOBuffer = UBOBuffer
         CameraWorker.#position[2] = m[14]
 
         CameraWorker.updateVP()
+        CameraWorker.updateUBO()
+        CameraWorker.#updateStaticViewMatrix()
+    }
 
+    static updateUBO() {
         const a = CameraWorker.previousViewProjectionMatrix
         const p = CameraWorker.#position
         const cacheUBOBuffer = CameraWorker.UBOBuffer
@@ -142,10 +148,7 @@ CameraWorker.UBOBuffer = UBOBuffer
         cacheUBOBuffer[33] = a[13];
         cacheUBOBuffer[34] = a[14];
         cacheUBOBuffer[35] = a[15];
-
-        CameraWorker.#updateStaticViewMatrix()
     }
-
 
     static previousRotationLength = 0
     static currentRotationLength = 0

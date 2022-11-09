@@ -112,7 +112,7 @@ void main() {
                 V,
                 N
             );
-        finalColor = vec4(directIllumination * ao * shadows + indirectIllumination, 1.);
+        finalColor = vec4((directIllumination * shadows + indirectIllumination) * ao, 1.);
     }
 }
 

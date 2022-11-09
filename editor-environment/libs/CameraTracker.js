@@ -246,7 +246,6 @@ export default class CameraTracker {
     static startTracking() {
         if (CameraTracker.#isTracking)
             return
-        console.trace("STARTING TRACK")
         CameraTracker.#isTracking = true
         document.addEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.addEventListener("keydown", CameraTracker.#handleInput)
@@ -260,7 +259,6 @@ export default class CameraTracker {
     static stopTracking() {
         if (!CameraTracker.#isTracking)
             return
-        console.trace("STOP TRACK")
         CameraTracker.#isTracking = false
         document.removeEventListener("pointerlockchange", CameraTracker.#handleInput)
         document.removeEventListener("keydown", CameraTracker.#handleInput)

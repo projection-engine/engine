@@ -273,7 +273,6 @@ export default class CameraAPI {
         CameraAPI.metadata.filmGrain = cameraObj.filmGrain
         CameraAPI.metadata.filmGrainStrength = cameraObj.filmGrainStrength
         CameraAPI.metadata.bloom = cameraObj.bloom
-        CameraAPI.metadata.bloomStrength = cameraObj.bloomStrength
         CameraAPI.metadata.bloomThreshold = cameraObj.bloomThreshold
         CameraAPI.metadata.gamma = cameraObj.gamma
         CameraAPI.metadata.exposure = cameraObj.exposure

@@ -23,7 +23,6 @@ export default class PhysicsAPI {
 
     static async initialize() {
         const ammo = await Ammo()
-        console.log(ammo)
         const wS = PhysicsAPI.worldSettings
         PhysicsAPI.ammo = ammo
         wS.set(COLLISION, new ammo.btDefaultCollisionConfiguration())
