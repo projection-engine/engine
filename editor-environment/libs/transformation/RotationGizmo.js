@@ -9,16 +9,15 @@ import ScreenSpaceGizmo from "./ScreenSpaceGizmo";
 import GPU from "../../../GPU";
 import STATIC_TEXTURES from "../../../static/resources/STATIC_TEXTURES";
 
-const toDeg = 57.29, toRad = Math.PI / 180
+const toRad = Math.PI / 180
 
 export default class RotationGizmo {
     tracking = false
     currentRotation = [0, 0, 0]
     gridSize = toRad
-
-    started = false
     currentIncrement = 0
-static shader
+    static shader
+
     constructor() {
 
         this.xGizmo = mapGizmoMesh("x", "ROTATION")
@@ -38,11 +37,10 @@ static shader
     onMouseUp() {
         if (GizmoSystem.hasStarted) {
             GizmoSystem.hasStarted = false
-            GizmoSystem.save("_rotationQuat")
+            GizmoSystem.save()
         }
-        document.exitPointerLock()
 
-        this.started = false
+        document.exitPointerLock()
         GizmoSystem.clickedAxis = -1
         this.tracking = false
         this.currentRotation = [0, 0, 0]
@@ -52,9 +50,9 @@ static shader
     onMouseMove(event) {
         if (!GizmoSystem.mainEntity)
             return
-        if (!this.started) {
-            this.started = true
-            GizmoSystem.save("_rotationQuat")
+        if (!GizmoSystem.hasStarted) {
+            GizmoSystem.hasStarted = true
+            GizmoSystem.save()
         }
 
         const g = event.ctrlKey ? toRad : this.gridSize * toRad

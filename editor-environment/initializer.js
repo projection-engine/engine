@@ -63,6 +63,6 @@ export default async function initializer() {
     IconsSystem.initialize()
     SelectedSystem.initialize()
     PreviewSystem.initialize()
-    GizmoSystem.initialize(ActionHistoryAPI.pushGroupChange)
+    GizmoSystem.initialize(ActionHistoryAPI.save)
 
 }

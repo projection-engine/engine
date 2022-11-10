@@ -49,10 +49,11 @@ export default class GizmoSystem {
     static EMPTY_COMPONENT = EMPTY_COMPONENT
     static transformationType = TRANSFORMATION_TYPE.GLOBAL
     static activeGizmoMatrix = M
-    static #onSave
+
+    static save
 
     static initialize(onSave) {
-        GizmoSystem.#onSave = onSave
+        GizmoSystem.save = () => onSave(GizmoSystem.selectedEntities)
         GizmoSystem.screenSpaceMesh = GPU.meshes.get(STATIC_MESHES.PRODUCTION.SPHERE)
         GizmoSystem.dualAxisGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.DUAL_AXIS_GIZMO)
         GizmoSystem.translationGizmoMesh = GPU.meshes.get(STATIC_MESHES.EDITOR.TRANSLATION_GIZMO)
@@ -72,19 +73,6 @@ export default class GizmoSystem {
         GizmoSystem.scaleGizmo = new ScalingGizmo()
         GizmoSystem.rotationGizmo = new RotationGizmo()
     }
-
-    static save(key) {
-        const changes = GizmoSystem.selectedEntities.map(e => ({id: e.id, value: [...e[key]], key}))
-        if (key === "_translation")
-            changes.push(...GizmoSystem.selectedEntities.map(e => ({
-                id: e.id,
-                key: "pivotPoint",
-                value: [...e.pivotPoint]
-            })))
-        GizmoSystem.#onSave(changes)
-    }
-
-
 
     static drawToDepthSampler(mesh, transforms) {
         const FBO = GBuffer.gBuffer
@@ -128,8 +116,7 @@ export default class GizmoSystem {
             GizmoSystem.mainEntity = undefined
             GizmoSystem.transformationMatrix = undefined
             GizmoSystem.translation = undefined
-        }
-        else if (TransformationPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
+        } else if (TransformationPass.hasUpdatedItem || GizmoSystem.mainEntity !== main) {
             main.__pivotChanged = true
             GizmoSystem.mainEntity = main
             GizmoSystem.updatePivot(main)
@@ -196,6 +183,7 @@ export default class GizmoSystem {
             GizmoSystem.mainEntity = undefined
             GizmoSystem.transformationMatrix = undefined
             GizmoSystem.translation = undefined
+            GizmoSystem.hasStarted = false
         }
     }
 

@@ -12,14 +12,15 @@ export default class Inheritance {
     zGizmo
     xyz
     gridSize
-    started = false
     updateTransformationRealtime = false
     key
 
     onMouseMove() {
-        if (!this.started && GizmoSystem.mainEntity) {
-            this.started = true
-            GizmoSystem.save(this.key)
+        if (!GizmoSystem.hasStarted) {
+            GizmoSystem.hasStarted = true
+            console.trace("STARTED")
+
+            GizmoSystem.save()
         }
     }
 
@@ -33,11 +34,12 @@ export default class Inheritance {
 
     onMouseUp() {
         if (GizmoSystem.hasStarted) {
+            console.trace("STOPPED")
             GizmoSystem.hasStarted = false
-            GizmoSystem.save(this.key)
+            GizmoSystem.save()
         }
         this.tracking = false
-        this.started = false
+        GizmoSystem.hasStarted = false
         document.exitPointerLock()
         GizmoSystem.clickedAxis = -1
     }
