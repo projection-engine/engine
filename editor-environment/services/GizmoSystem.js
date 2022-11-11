@@ -26,7 +26,8 @@ export default class GizmoSystem {
     static mainEntity
     static transformationMatrix
     static translation
-
+    static onStart
+    static onStop
     static targetRotation
     static targetGizmo
     static toBufferShader
@@ -35,7 +36,17 @@ export default class GizmoSystem {
     static clickedAxis
     static sensitivity = .001
     static hasStarted = false
-    static wasOnGizmo
+    static _wasOnGizmo = false
+    static get wasOnGizmo(){
+        return GizmoSystem._wasOnGizmo
+    }
+    static set wasOnGizmo(data){
+        GizmoSystem._wasOnGizmo = data
+        if(data)
+            GizmoSystem.onStart?.()
+        else
+            GizmoSystem.onStop?.()
+    }
     static rotationGizmoMesh
     static scaleGizmoMesh
     static translationGizmoMesh

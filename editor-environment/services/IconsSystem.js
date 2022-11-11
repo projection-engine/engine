@@ -100,7 +100,7 @@ export default class IconsSystem {
                     attr.iconSampler = i === 0 ? IconsSystem.textureYellow : IconsSystem.textureOrange
 
                     SpritePass.shader.bindForUse(attr)
-                    GPU.quad.draw()
+                    drawQuad()
                 }
             }
 

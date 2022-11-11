@@ -19,7 +19,6 @@ export default class Inheritance {
         if (!GizmoSystem.hasStarted) {
             GizmoSystem.hasStarted = true
             console.trace("STARTED")
-
             GizmoSystem.save()
         }
     }

@@ -61,7 +61,7 @@ export default class FrameComposition {
             gpu.uniform1i(uniforms.debugFlag, FrameComposition.debugFlag)
         else
             gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.lookup())
-        GPU.quad.draw()
+        drawQuad()
 
     }
 }

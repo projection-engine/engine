@@ -3,7 +3,6 @@ import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
 import GPUAPI from "../../api/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import GlobalIlluminationPass from "../GlobalIlluminationPass";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 
@@ -76,7 +75,7 @@ export default class ScreenEffectsPass {
                 sceneColor: ScreenEffectsPass.workerTexture,
                 threshold: metadata.bloomThreshold
             })
-            GPU.quad.draw()
+            drawQuad()
             outputFBO.stopMapping()
 
             blurShader.bind()
@@ -87,7 +86,7 @@ export default class ScreenEffectsPass {
                 gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? downscale[i -1].colors[0] : outputFBO.colors[0])
                 gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
                 gpu.uniform1i(blurShaderUniforms.blurRadius, metadata.bloomQuality)
-                GPU.quad.draw()
+                drawQuad()
                 fbo.stopMapping()
             }
 
@@ -103,7 +102,7 @@ export default class ScreenEffectsPass {
                 gpu.bindTexture(gpu.TEXTURE_2D, downscale[downscale.length - 1 - i].colors[0])
                 gpu.uniform1i(upSamplingShaderUniforms.blurred, 1)
                 gpu.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
-                GPU.quad.draw()
+                drawQuad()
                 fbo.stopMapping()
             }
 
@@ -116,7 +115,7 @@ export default class ScreenEffectsPass {
             gpu.bindTexture(gpu.TEXTURE_2D, upscale[upscale.length -1].colors[0])
             gpu.uniform1i(upSamplingShaderUniforms.blurred, 1)
             gpu.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
-            GPU.quad.draw()
+            drawQuad()
             ScreenEffectsPass.baseFBO.stopMapping()
         // }
         //     else
@@ -133,7 +132,7 @@ export default class ScreenEffectsPass {
         gpu.bindTexture(gpu.TEXTURE_2D, ScreenEffectsPass.workerTexture)
         gpu.uniform1i(uniforms.sceneColor, 1)
 
-        GPU.quad.draw()
+        drawQuad()
         outputFBO.stopMapping()
     }
 

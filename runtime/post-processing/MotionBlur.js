@@ -1,5 +1,4 @@
 import GBuffer from "../renderers/GBuffer";
-import GPU from "../../GPU";
 
 export default class MotionBlur {
     static shader
@@ -19,7 +18,7 @@ export default class MotionBlur {
             return
         MotionBlur.frameBuffer.startMapping()
         MotionBlur.shader.bindForUse(MotionBlur.uniforms)
-        GPU.quad.draw()
+        drawQuad()
         MotionBlur.frameBuffer.stopMapping()
     }
 }

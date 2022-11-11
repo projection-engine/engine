@@ -3,7 +3,6 @@ import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MaterialAPI from "../api/rendering/MaterialAPI";
 import {DEFAULT_MATRICES} from "../static/SIMPLE_MATERIAL_UNIFORMS";
 import GPUAPI from "../api/GPUAPI";
-import CameraAPI from "../api/CameraAPI";
 import LightsAPI from "../api/LightsAPI";
 
 export default class Material {
@@ -78,7 +77,7 @@ export default class Material {
         GPUAPI.destroyShader(this.id + "-CUBE-MAP")
 
         this._shader = GPUAPI.allocateShader(this.id, vertexShader, shader)
-        CameraAPI.UBO.bindWithShader(this._shader.program)
+
         if (this.shadingType === MATERIAL_RENDERING_TYPES.FORWARD) {
             LightsAPI.pointLightsUBO.bindWithShader(this._shader.program)
             LightsAPI.directionalLightsUBO.bindWithShader(this._shader.program)

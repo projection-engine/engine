@@ -86,7 +86,7 @@ export default class GlobalIlluminationPass {
             gpu.uniformMatrix4fv(normalUniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
             gpu.uniform2fv(normalUniforms.noiseScale, AmbientOcclusion.noiseScale)
 
-            GPU.quad.draw()
+            drawQuad()
             GlobalIlluminationPass.normalsFBO.stopMapping()
         }
 
@@ -126,7 +126,7 @@ export default class GlobalIlluminationPass {
 
         gpu.uniformMatrix3fv(uniforms.rayMarchSettings, false, GlobalIlluminationPass.rayMarchSettings)
 
-        GPU.quad.draw()
+        drawQuad()
         GlobalIlluminationPass.FBO.stopMapping()
         finalSSGIFBO.clear()
         if (GlobalIlluminationPass.SSGIEnabled)
@@ -142,7 +142,7 @@ export default class GlobalIlluminationPass {
         gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.unfilteredSSGISampler)
         gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
         gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
-        GPU.quad.draw()
+        drawQuad()
         blurSSGIFBO.stopMapping()
 
         finalSSGIFBO.startMapping()
@@ -150,7 +150,7 @@ export default class GlobalIlluminationPass {
         gpu.bindTexture(gpu.TEXTURE_2D, blurSSGIFBO.colors[0])
         gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
         gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
-        GPU.quad.draw()
+        drawQuad()
         finalSSGIFBO.stopMapping()
     }
 }

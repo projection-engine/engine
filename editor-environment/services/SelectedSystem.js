@@ -59,7 +59,7 @@ export default class SelectedSystem {
             SelectedSystem.shaderSilhouette.bindForUse({
                 silhouette: SelectedSystem.silhouetteSampler
             })
-            GPU.quad.draw()
+            drawQuad()
         }
     }
 }

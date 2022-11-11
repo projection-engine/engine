@@ -1,6 +1,5 @@
 import Engine from "../../Engine";
 import CameraAPI from "../../api/CameraAPI";
-import GPU from "../../GPU";
 import {vec3, vec4} from "gl-matrix";
 
 const uniforms = {}
@@ -23,6 +22,6 @@ export default class GridSystem {
         if (!Engine.params.gridVisibility)
             return
         GridSystem.shader.bindForUse(uniforms)
-        GPU.quad.draw()
+        drawQuad()
     }
 }

@@ -217,8 +217,7 @@ export default class CameraAPI {
             const keys = Object.keys(metadata)
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i].replaceAll("_", "")
-                const value = metadata[keys[i]]
-                CameraAPI.metadata[key] = value
+                CameraAPI.metadata[key] = metadata[keys[i]]
             }
         }
         CameraAPI.translationBuffer[0] = translation[0]

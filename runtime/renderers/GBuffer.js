@@ -145,6 +145,6 @@ export default class GBuffer {
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, DiffuseProbePass.sampler)
             gpu.uniform1i(uniforms.irradianceMap, index)
         }
-        GPU.quad.draw()
+        drawQuad()
     }
 }

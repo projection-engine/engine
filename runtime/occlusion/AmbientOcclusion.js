@@ -1,7 +1,6 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPU from "../../GPU";
 import GBuffer from "../renderers/GBuffer";
-import CameraAPI from "../../api/CameraAPI";
 import ImageWorker from "../../workers/image/ImageWorker";
 import UBO from "../../instances/UBO";
 
@@ -44,7 +43,6 @@ export default class AmbientOcclusion {
             ]
         )
 
-        CameraAPI.UBO.bindWithShader(AmbientOcclusion.shader.program)
         AmbientOcclusion.UBO.bindWithShader(AmbientOcclusion.shader.program)
         AmbientOcclusion.settings = [.5, .7, -.1]
         AmbientOcclusion.UBO.bind()
@@ -87,12 +85,12 @@ export default class AmbientOcclusion {
             return
         AmbientOcclusion.framebuffer.startMapping()
         AmbientOcclusion.shader.bindForUse(AmbientOcclusion.uniforms)
-        GPU.quad.draw()
+        drawQuad()
         AmbientOcclusion.framebuffer.stopMapping()
 
         AmbientOcclusion.blurredFBO.startMapping()
         AmbientOcclusion.blurShader.bindForUse(AmbientOcclusion.uniforms)
-        GPU.quad.draw()
+        drawQuad()
         AmbientOcclusion.blurredFBO.stopMapping()
     }
 

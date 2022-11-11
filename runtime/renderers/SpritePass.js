@@ -39,8 +39,7 @@ export default class SpritePass {
             gpu.uniform2fv(uniforms.attributes, component.attributes)
             gpu.bindTexture(gpu.TEXTURE_2D, texture.texture)
             gpu.uniform1i(uniforms.iconSampler, 0)
-
-            GPU.quad.draw()
+            drawQuad()
         }
 
         gpu.enable(gpu.CULL_FACE)

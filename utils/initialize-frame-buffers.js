@@ -8,7 +8,6 @@ import GBuffer from "../runtime/renderers/GBuffer";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
 import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";
-import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 
 export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()

@@ -6,6 +6,7 @@ import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPP
 import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
 
 import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
+import CameraAPI from "../api/CameraAPI";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -104,18 +105,15 @@ export default class Shader {
 
         for (let i = 0; i < this.uniforms.length; i++)
             this.uniformMap[this.uniforms[i].name] = this.uniforms[i].uLocation || this.uniforms[i].uLocations
-
-
-        if (typeof setMessage === "function")
-            setMessage({
-                error: gpu.getError(),
-                messages: alert,
-                hasError: alert.length > 0
-            })
-
-
+        setMessage?.({
+            error: gpu.getError(),
+            messages: alert,
+            hasError: alert.length > 0
+        })
 
         this.length = this.uniforms.length
+        if(vCode.includes("CameraMetadata"))
+            CameraAPI.UBO.bindWithShader( this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
@@ -225,7 +223,8 @@ export default class Shader {
 
         return uniformObjects
     }
-    bind(){
+
+    bind() {
         if (GPU.activeShader !== this.program)
             gpu.useProgram(this.program)
         GPU.activeShader = this.program

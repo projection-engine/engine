@@ -27,7 +27,6 @@ import STOCHASTIC_NORMALS_FRAG from "../shaders/STOCHASTIC_NORMALS.frag"
 import CUBEMAP from "../shaders/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
-import CameraAPI from "../api/CameraAPI";
 import LightsAPI from "../api/LightsAPI";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
@@ -60,7 +59,7 @@ export default function initializeShaders() {
     GlobalIlluminationPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GAUSSIAN, QUAD_VERTEX, GAUSSIAN_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.UPSAMPLING_BLOOM, QUAD_VERTEX, UPSAMPLING_TEND_FRAG)
     GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
-    CameraAPI.UBO.bindWithShader(GBuffer.forwardDepthShader.program)
+
 
     GBuffer.deferredShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, QUAD_VERTEX, DEFERRED_RENDERER_FRAG)
     LightsAPI.pointLightsUBO.bindWithShader(GBuffer.deferredShader.program)

@@ -9,6 +9,10 @@ import initializeStaticMeshes from "./utils/initialize-static-meshes";
 import initializeFrameBuffers from "./utils/initialize-frame-buffers";
 import initializeMaterialsAndTextures from "./utils/initialize-materials-and-textures";
 import LightsAPI from "./api/LightsAPI";
+import QUAD_VERT from "./shaders/QUAD.vert"
+import BRDF_FRAG from "./shaders/BRDF_GEN.frag"
+import Shader from "./instances/Shader";
+import Framebuffer from "./instances/Framebuffer";
 
 export default class GPU {
     static context
@@ -31,11 +35,13 @@ export default class GPU {
         if (GPU.context != null)
             return
         GPU.internalResolution = {w: width, h: height}
-        const gpu = canvas.getContext("webgl2", {
+        window.gpu = canvas.getContext("webgl2", {
             antialias: false,
             preserveDrawingBuffer: true,
             premultipliedAlpha: false
         })
+        GPU.context = gpu
+
         gpu.getExtension("EXT_color_buffer_float")
         gpu.getExtension("OES_texture_float")
         gpu.getExtension("OES_texture_float_linear")
@@ -46,8 +52,6 @@ export default class GPU {
         gpu.enable(gpu.DEPTH_TEST)
         gpu.depthFunc(gpu.LESS)
         gpu.frontFace(gpu.CCW)
-        window.gpu = gpu
-        GPU.context = gpu
 
         CameraAPI.initialize()
         LightsAPI.initialize()
@@ -63,6 +67,16 @@ export default class GPU {
 
         CubeMapAPI.initialize()
         LineAPI.initialize()
+
+        const FBO = new Framebuffer(512, 512).texture({precision: gpu.RG32F, format: gpu.RG})
+        const brdfShader = new Shader(QUAD_VERT, BRDF_FRAG)
+
+        FBO.startMapping()
+        brdfShader.bindForUse({})
+        drawQuad()
+        FBO.stopMapping()
+        GPU.BRDF = FBO.colors[0]
+        gpu.deleteProgram(brdfShader.program)
     }
 
 }
