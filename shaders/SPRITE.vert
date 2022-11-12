@@ -1,16 +1,17 @@
 #version 300 es
 layout (location = 0) in vec3 position;
 
-#define SIZE .2
 
 uniform CameraDiscreteMetadata{
     mat4 viewMatrix;
     mat4 projectionMatrix;
+    mat4 invViewMatrix;
     vec4 placement;
 };
 
 
 uniform mat4 transformationMatrix;
+
 uniform vec2 attributes; // [ alwaysFaceCamera, keepSameSize ]
 uniform vec3 scale;
 
@@ -41,12 +42,12 @@ void main(){
 
     if(keepSameSize){
         vec3 translation = vec3(transformationMatrix[3]);
-        float len = length(placement.xyz - translation) * SIZE;
+        float len = length(placement.xyz - translation);
         mat4 sc;
         for ( int x = 0; x < 4; x++ )
         for ( int y = 0; y < 4; y++ )
         if ( x == y && x <= 2 )
-        sc[x][y] = len;
+        sc[x][y] = len * scale[x];
         else if ( x == y )
         sc[x][y] = 1.;
         else

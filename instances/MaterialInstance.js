@@ -1,5 +1,5 @@
 import {v4} from "uuid"
-import MaterialAPI from "../api/rendering/MaterialAPI";
+import MaterialAPI from "../lib/rendering/MaterialAPI";
 
 export default class MaterialInstance {
     id = v4()

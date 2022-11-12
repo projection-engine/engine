@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix"
 import Mesh from "./Mesh";
 import getProbeRotation from "../utils/get-probe-rotation";
-import CubeMapAPI from "../api/CubeMapAPI";
+import CubeMapAPI from "../lib/rendering/CubeMapAPI";
 
 export default class ShadowProbe {
     texture

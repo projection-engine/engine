@@ -1,10 +1,10 @@
-import GPUAPI from "../api/GPUAPI";
+import GPUAPI from "../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
 import GPU from "../GPU";
 
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
-import GlobalIlluminationPass from "../runtime/GlobalIlluminationPass";
-import GBuffer from "../runtime/renderers/GBuffer";
+import GlobalIlluminationPass from "../runtime/rendering/GlobalIlluminationPass";
+import GBuffer from "../runtime/rendering/GBuffer";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
 import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";

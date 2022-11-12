@@ -1,4 +1,4 @@
-import GBuffer from "../renderers/GBuffer";
+import GBuffer from "../rendering/GBuffer";
 
 export default class MotionBlur {
     static shader

@@ -1,12 +1,10 @@
 // THANKS TO https://imanolfotia.com/blog/1
 
-float dDepth;
-
 vec3 getViewPosition(vec2 coords){
     return  vec3(viewMatrix * textureLod(gPosition, coords, 2.));
 }
 
-vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord)
+vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
 {
     float depth;
     vec4 projectedCoord;
@@ -32,7 +30,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord)
     return vec3(projectedCoord.xy, depth);
 }
 
-vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord,  float stepSize){
+vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord, out float dDepth, float stepSize){
     dir *= stepSize;
     float depth;
     int steps;
@@ -55,7 +53,7 @@ vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord,  float stepSize){
             if(dDepth <= 0.0)
             {
                 vec4 Result;
-                Result = vec4(BinarySearch(dir, hitCoord), 1.0);
+                Result = vec4(BinarySearch(dir, hitCoord, dDepth), 1.0);
 
                 return Result;
             }
@@ -68,7 +66,8 @@ vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord,  float stepSize){
     return vec4(projectedCoord.xy, depth, 0.0);
 }
 
-vec3 hash(vec3 a){
+vec3 hash(vec3 a)
+{
     a = fract(a * vec3(.8) );
     a += dot(a, a.yxz + 19.19);
     return fract((a.xxy + a.yxx)*a.zyx);

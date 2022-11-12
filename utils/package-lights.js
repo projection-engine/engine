@@ -3,7 +3,7 @@ import {mat4} from "gl-matrix";
 import Engine from "../Engine";
 import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
 import DirectionalShadows from "../runtime/occlusion/DirectionalShadows";
-import LightsAPI from "../api/LightsAPI";
+import LightsAPI from "../lib/rendering/LightsAPI";
 
 
 /**

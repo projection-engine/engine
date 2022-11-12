@@ -1,6 +1,6 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPU from "../../GPU";
-import GBuffer from "../renderers/GBuffer";
+import GBuffer from "../rendering/GBuffer";
 import ImageWorker from "../../workers/image/ImageWorker";
 import UBO from "../../instances/UBO";
 

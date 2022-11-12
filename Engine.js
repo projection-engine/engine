@@ -1,24 +1,24 @@
-import CameraAPI from "./api/CameraAPI"
+import CameraAPI from "./lib/utils/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import GBuffer from "./runtime/renderers/GBuffer";
-import GlobalIlluminationPass from "./runtime/GlobalIlluminationPass";
+import GBuffer from "./runtime/rendering/GBuffer";
+import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
-import ConversionAPI from "./api/math/ConversionAPI";
-import PhysicsPass from "./runtime/PhysicsPass";
+import ConversionAPI from "./lib/math/ConversionAPI";
+import PhysicsPass from "./runtime/misc/PhysicsPass";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
 import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
-import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
+import DiffuseProbePass from "./runtime/rendering/DiffuseProbePass";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
-import SpritePass from "./runtime/renderers/SpritePass";
-import PhysicsAPI from "./api/PhysicsAPI";
-import FileSystemAPI from "./api/FileSystemAPI";
-import ScriptsAPI from "./api/ScriptsAPI";
-import UIAPI from "./api/UIAPI";
+import SpritePass from "./runtime/rendering/SpritePass";
+import PhysicsAPI from "./lib/rendering/PhysicsAPI";
+import FileSystemAPI from "./lib/utils/FileSystemAPI";
+import ScriptsAPI from "./lib/rendering/ScriptsAPI";
+import UIAPI from "./lib/rendering/UIAPI";
 
 export default class Engine {
     static currentFrameFBO

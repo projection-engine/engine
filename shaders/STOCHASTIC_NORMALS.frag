@@ -1,13 +1,15 @@
 #version 300 es
-
 precision highp float;
+uniform CameraDiscreteMetadata{
+    mat4 invViewMatrix;
+};
+
 #define PI 3.14159265
 uniform sampler2D noise;
 uniform sampler2D gNormal;
 in vec2 texCoords;
 uniform vec2 noiseScale;
 out vec4 outColor;
-uniform mat4 invViewMatrix;
 
 float interleavedGradientNoise(vec2 n) {
     float f = 0.05 * n.x + 0.05 * n.y;

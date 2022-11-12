@@ -1,31 +1,51 @@
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
-import GBuffer from "./runtime/renderers/GBuffer";
-import ForwardRenderer from "./runtime/renderers/ForwardRenderer";
-import GlobalIlluminationPass from "./runtime/GlobalIlluminationPass";
+import GBuffer from "./runtime/rendering/GBuffer";
+import ForwardRenderer from "./runtime/rendering/ForwardRenderer";
+import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
-import SpecularProbePass from "./runtime/renderers/SpecularProbePass";
-import DiffuseProbePass from "./runtime/renderers/DiffuseProbePass";
+import SpecularProbePass from "./runtime/rendering/SpecularProbePass";
+import DiffuseProbePass from "./runtime/rendering/DiffuseProbePass";
 
-import executeScripts from "./runtime/execute-scripts";
+import executeScripts from "./runtime/misc/execute-scripts";
 import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
-import SkyboxPass from "./runtime/renderers/SkyboxPass";
+import SkyboxPass from "./runtime/rendering/SkyboxPass";
 import Engine from "./Engine";
-import SpritePass from "./runtime/renderers/SpritePass";
-import PhysicsPass from "./runtime/PhysicsPass";
-import TransformationPass from "./runtime/TransformationPass";
-import GPUAPI from "./api/GPUAPI";
+import SpritePass from "./runtime/rendering/SpritePass";
+import PhysicsPass from "./runtime/misc/PhysicsPass";
+import TransformationPass from "./runtime/misc/TransformationPass";
+import GPUAPI from "./lib/rendering/GPUAPI";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
-import CameraAPI from "./api/CameraAPI";
-import renderScene from "./runtime/render-scene";
-import BenchmarkAPI from "./api/BenchmarkAPI";
+import CameraAPI from "./lib/utils/CameraAPI";
+import renderScene from "./runtime/rendering/render-scene";
+import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 
-let onWrap, FBO, previous = 0
+let FBO, previous = 0
 export default class Loop {
+    static #beforeDrawing = () => null
+    static #duringDrawing = () => null
+    static #afterDrawing = () => null
+
+    static linkToExecutionPipeline(before, during, after) {
+        if(typeof before === "function"){
+            Loop.#beforeDrawing = before
+        }else
+            Loop.#beforeDrawing = () => null
+
+        if(typeof during === "function"){
+            Loop.#duringDrawing = during
+        }else
+            Loop.#duringDrawing = () => null
+
+        if(typeof after === "function"){
+            Loop.#afterDrawing = after
+        }else
+            Loop.#afterDrawing = () => null
+    }
+
     static linkParams() {
-        onWrap = Engine.params.onWrap
         FBO = Engine.currentFrameFBO
     }
 
@@ -68,16 +88,14 @@ export default class Loop {
         AmbientOcclusion.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
 
-        if (onWrap != null)
-            onWrap.execute(false, false)
+        Loop.#beforeDrawing()
 
         FBO.startMapping()
         BenchmarkAPI.track(BENCHMARK_KEYS.SKYBOX)
         SkyboxPass.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SKYBOX)
 
-        if (onWrap != null)
-            onWrap.execute(false, true)
+        Loop.#duringDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.DEFERRED_DRAWING)
         GBuffer.drawBuffer()
@@ -93,8 +111,8 @@ export default class Loop {
         SpritePass.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
 
-        if (onWrap != null)
-            onWrap.execute(true, false)
+        Loop.#afterDrawing()
+
         FBO.stopMapping()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
@@ -126,21 +144,16 @@ export default class Loop {
         OmnidirectionalShadows.execute()
         renderScene()
         AmbientOcclusion.execute()
-        if (onWrap != null)
-            onWrap.execute(false, false)
-
+        Loop.#beforeDrawing()
         FBO.startMapping()
         SkyboxPass.execute()
-        if (onWrap != null)
-            onWrap.execute(false, true)
+        Loop.#duringDrawing()
         GBuffer.drawBuffer()
         GPUAPI.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardRenderer.execute()
         SpritePass.execute()
-        if (onWrap != null)
-            onWrap.execute(true, false)
+        Loop.#afterDrawing()
         FBO.stopMapping()
-
         GlobalIlluminationPass.execute()
 
         ScreenEffectsPass.execute()

@@ -1,5 +1,5 @@
 import {mat4, quat, vec3} from "gl-matrix";
-import TransformationAPI from "../../api/math/TransformationAPI";
+import TransformationAPI from "../../lib/math/TransformationAPI";
 import copyWithOffset from "./copy-with-offset";
 
 

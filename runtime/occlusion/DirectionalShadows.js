@@ -2,8 +2,8 @@ import COMPONENTS from "../../static/COMPONENTS.js"
 import Engine from "../../Engine";
 import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import GPUAPI from "../../api/GPUAPI";
-import LightsAPI from "../../api/LightsAPI";
+import GPUAPI from "../../lib/rendering/GPUAPI";
+import LightsAPI from "../../lib/rendering/LightsAPI";
 
 
 let lightsToUpdate

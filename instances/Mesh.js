@@ -1,7 +1,7 @@
 import VertexBuffer from "./VertexBuffer"
 import {v4 as uuidv4} from "uuid"
 import GPU from "../GPU";
-import GPUAPI from "../api/GPUAPI";
+import GPUAPI from "../lib/rendering/GPUAPI";
 
 export default class Mesh {
     verticesQuantity = 0

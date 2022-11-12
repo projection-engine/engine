@@ -6,7 +6,7 @@ import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPP
 import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
 
 import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
-import CameraAPI from "../api/CameraAPI";
+import CameraAPI from "../lib/utils/CameraAPI";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -112,9 +112,9 @@ export default class Shader {
         })
 
         this.length = this.uniforms.length
-        if (vCode.includes("CameraMetadata"))
+        if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
-        if (vCode.includes("CameraDiscreteMetadata"))
+        if (vCode.includes("CameraDiscreteMetadata") || fCode.includes("CameraDiscreteMetadata"))
             CameraAPI.discreteUBO.bindWithShader(this.program)
     }
 

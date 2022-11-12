@@ -1,4 +1,4 @@
-import AXIS from "../data/AXIS";
+import AXIS from "../static/AXIS";
 
 
 export const lineFragment = `

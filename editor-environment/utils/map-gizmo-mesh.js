@@ -1,5 +1,5 @@
 import Entity from "../../instances/Entity"
-import TransformationAPI from "../../api/math/TransformationAPI"
+import TransformationAPI from "../../lib/math/TransformationAPI"
 import getPickerId from "../../utils/get-picker-id";
 
 const toDeg = 57.29

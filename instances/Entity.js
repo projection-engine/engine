@@ -1,11 +1,11 @@
 import {v4} from "uuid"
 import Movable from "./Movable";
 import COMPONENTS from "../static/COMPONENTS.js";
-import EntityAPI from "../api/EntityAPI";
-import QueryAPI from "../api/utils/QueryAPI";
+import EntityAPI from "../lib/utils/EntityAPI";
+import QueryAPI from "../lib/utils/QueryAPI";
 import ComponentGetter from "../templates/ComponentGetter";
 import serializeStructure from "../utils/serialize-structure";
-import LightsAPI from "../api/LightsAPI";
+import LightsAPI from "../lib/rendering/LightsAPI";
 
 
 export default class Entity extends Movable {

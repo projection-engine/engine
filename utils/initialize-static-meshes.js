@@ -1,4 +1,4 @@
-import GPUAPI from "../api/GPUAPI";
+import GPUAPI from "../lib/rendering/GPUAPI";
 import STATIC_MESHES from "../static/resources/STATIC_MESHES";
 import SPHERE from "../static/meshes/SPHERE.json";
 import CUBE from "../static/meshes/CUBE_SM.json";

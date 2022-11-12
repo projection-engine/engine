@@ -1,11 +1,11 @@
 import Component from "./Component"
 import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
 import MESH_PROPS from "../../static/component-props/MESH_PROPS";
-import MaterialAPI from "../../api/rendering/MaterialAPI";
+import MaterialAPI from "../../lib/rendering/MaterialAPI";
 import GPU from "../../GPU";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
-import FileSystemAPI from "../../api/FileSystemAPI";
-import ConsoleAPI from "../../api/ConsoleAPI";
+import FileSystemAPI from "../../lib/utils/FileSystemAPI";
+import ConsoleAPI from "../../lib/utils/ConsoleAPI";
 import Engine from "../../Engine";
 
 export default class MeshComponent extends Component {

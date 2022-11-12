@@ -1,4 +1,5 @@
 import TEMPLATE_VERTEX from "../../shaders/TEMPLATE_VERTEX_SHADER.vert"
+
 export const vertex = TEMPLATE_VERTEX
 
 export const fragment = `#version 300 es

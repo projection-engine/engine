@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix"
 import Mesh from "./Mesh";
 import GPU from "../GPU";
-import CubeMapAPI from "../api/CubeMapAPI";
+import CubeMapAPI from "../lib/rendering/CubeMapAPI";
 import getProbeRotation from "../utils/get-probe-rotation";
 import getProbeLookat from "../utils/get-probe-lookat";
 

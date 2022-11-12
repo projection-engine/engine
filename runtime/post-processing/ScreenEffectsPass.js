@@ -1,7 +1,7 @@
-import CameraAPI from "../../api/CameraAPI";
+import CameraAPI from "../../lib/utils/CameraAPI";
 import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
-import GPUAPI from "../../api/GPUAPI";
+import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 

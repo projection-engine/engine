@@ -1,9 +1,9 @@
 import {v4} from "uuid"
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
-import MaterialAPI from "../api/rendering/MaterialAPI";
+import MaterialAPI from "../lib/rendering/MaterialAPI";
 import {DEFAULT_MATRICES} from "../static/SIMPLE_MATERIAL_UNIFORMS";
-import GPUAPI from "../api/GPUAPI";
-import LightsAPI from "../api/LightsAPI";
+import GPUAPI from "../lib/rendering/GPUAPI";
+import LightsAPI from "../lib/rendering/LightsAPI";
 
 export default class Material {
     ready = false
