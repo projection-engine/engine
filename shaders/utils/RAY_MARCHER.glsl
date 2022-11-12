@@ -12,7 +12,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord)
     vec4 projectedCoord;
     int Q = SEARCH_STEPS;
     for(int i = 0; i < Q; i++){
-        projectedCoord = projection * vec4(hitCoord, 1.0);
+        projectedCoord = projectionMatrix * vec4(hitCoord, 1.0);
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 
@@ -25,7 +25,7 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord)
         hitCoord -= dir;
     }
 
-    projectedCoord = projection * vec4(hitCoord, 1.0);
+    projectedCoord = projectionMatrix * vec4(hitCoord, 1.0);
     projectedCoord.xy /= projectedCoord.w;
     projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 
@@ -41,7 +41,7 @@ vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord,  float stepSize){
 
     for(int i = 0; i < maxSteps; i++)   {
         hitCoord += dir;
-        projectedCoord = projection * vec4(hitCoord, 1.0);
+        projectedCoord = projectionMatrix * vec4(hitCoord, 1.0);
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 

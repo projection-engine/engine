@@ -2,12 +2,14 @@ export const vertex = `#version 300 es
 
 layout (location = 0) in vec3 position; 
 
-uniform mat4 viewMatrix;
+uniform CameraMetadata{
+    mat4 viewProjection; 
+};
+
 uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
 
 void main(){              
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position, 1.0);
+    gl_Position = viewProjection * transformMatrix * vec4(position, 1.0);
 }
 `
 

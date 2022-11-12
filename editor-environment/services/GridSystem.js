@@ -11,8 +11,6 @@ export default class GridSystem {
     static initialize() {
 
         Object.assign(uniforms, {
-            viewMatrix: CameraAPI.viewMatrix,
-            projectionMatrix: CameraAPI.projectionMatrix,
             settings: GridSystem.buffer,
             visualSettings: GridSystem.metadataBuffer
         })

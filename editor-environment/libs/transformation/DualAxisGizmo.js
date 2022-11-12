@@ -82,11 +82,8 @@ export default class DualAxisGizmo {
 
     static #draw(uID, axis, transformMatrix, isSurface = false) {
         GizmoSystem.gizmoShader.bindForUse({
-            viewMatrix: CameraAPI.viewMatrix,
             transformMatrix,
             isDualAxis: true,
-            projectionMatrix: CameraAPI.projectionMatrix,
-            camPos: CameraAPI.position,
             translation: GizmoSystem.translation,
             axis: isSurface ? undefined : axis,
             selectedAxis: GizmoSystem.clickedAxis,

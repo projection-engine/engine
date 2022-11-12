@@ -6,8 +6,8 @@ layout (location = 2) in vec2 uvTexture;
 
 uniform CameraMetadata{
     mat4 viewProjection;
-    vec3 placement;
     mat4 previousViewProjection;
+    vec4 placement;
 };
 
 uniform mat4 previousModelMatrix;
@@ -26,7 +26,7 @@ void main(){
     previousScreenPosition = viewProjection * previousModelMatrix * worldPlacement;
     currentScreenPosition =  viewProjection * worldSpacePosition;
 
-    camera = placement;
+    camera = placement.xyz;
 
     texCoords = uvTexture;
     normalVec = normalize(mat3(transformMatrix) * normal);

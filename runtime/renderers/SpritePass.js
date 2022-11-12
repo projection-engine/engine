@@ -21,9 +21,6 @@ export default class SpritePass {
 
         gpu.disable(gpu.CULL_FACE)
         shader.bind()
-        gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
-        gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
-        gpu.uniform4fv(uniforms.cameraPosition, CameraAPI.position)
         gpu.activeTexture(gpu.TEXTURE0)
 
         for (let i = 0; i < s; i++) {

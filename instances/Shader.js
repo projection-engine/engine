@@ -112,8 +112,10 @@ export default class Shader {
         })
 
         this.length = this.uniforms.length
-        if(vCode.includes("CameraMetadata"))
-            CameraAPI.UBO.bindWithShader( this.program)
+        if (vCode.includes("CameraMetadata"))
+            CameraAPI.UBO.bindWithShader(this.program)
+        if (vCode.includes("CameraDiscreteMetadata"))
+            CameraAPI.discreteUBO.bindWithShader(this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

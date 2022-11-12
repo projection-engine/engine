@@ -34,6 +34,8 @@ function getNotificationBuffer() {
 const toRad = Math.PI / 180
 export default class CameraAPI {
     static UBO
+    static discreteUBO
+
     static #dynamicAspectRatio = false
     static metadata = new PostProcessingEffects()
     static position = ArrayBufferAPI.allocateVector(3)
@@ -47,6 +49,7 @@ export default class CameraAPI {
     static staticViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static #UBOBuffer = ArrayBufferAPI.allocateVector(36)
+    static #discreteUBOBuffer = ArrayBufferAPI.allocateVector(51)
     static #projectionBuffer = ArrayBufferAPI.allocateVector(5)
     static translationBuffer = ArrayBufferAPI.allocateVector(3)
     static rotationBuffer = ArrayBufferAPI.allocateVector(4, 0, true)
@@ -65,10 +68,18 @@ export default class CameraAPI {
             "CameraMetadata",
             [
                 {name: "viewProjection", type: "mat4"},
-                {name: "placement", type: "vec3"},
                 {name: "previousViewProjection", type: "mat4"},
+                {name: "placement", type: "vec4"},
             ])
 
+        CameraAPI.discreteUBO = new UBO(
+            "CameraDiscreteMetadata",
+            [
+                {name: "viewMatrix", type: "mat4"},
+                {name: "projectionMatrix", type: "mat4"},
+                {name: "invViewMatrix", type: "mat4"},
+                {name: "placement", type: "vec4"},
+            ])
         const w = new Worker("./build/camera-worker.js")
         CameraAPI.#worker = w
         notificationBuffers = CameraAPI.#notificationBuffers
@@ -86,7 +97,8 @@ export default class CameraAPI {
             CameraAPI.#projectionBuffer,
             CameraAPI.viewProjectionMatrix,
             CameraAPI.previousViewProjectionMatrix,
-            CameraAPI.#UBOBuffer
+            CameraAPI.#UBOBuffer,
+            CameraAPI.#discreteUBOBuffer
         ])
 
         new ResizeObserver(CameraAPI.updateAspectRatio)
@@ -101,11 +113,16 @@ export default class CameraAPI {
             CameraAPI.update(entity._translation, entity._rotationQuat)
 
         if (notificationBuffers[3]) {
-            const UBO = CameraAPI.UBO
+            const UBO = CameraAPI.UBO, discreteUBO = CameraAPI.discreteUBO
             notificationBuffers[3] = 0
+
             UBO.bind()
             UBO.updateBuffer(CameraAPI.#UBOBuffer)
             UBO.unbind()
+
+            discreteUBO.bind()
+            discreteUBO.updateBuffer(CameraAPI.#discreteUBOBuffer)
+            discreteUBO.unbind()
         }
     }
 

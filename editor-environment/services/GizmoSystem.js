@@ -88,9 +88,6 @@ export default class GizmoSystem {
     static drawToDepthSampler(mesh, transforms) {
         const FBO = GBuffer.gBuffer
         const data = {
-            viewMatrix: CameraAPI.viewMatrix,
-            projectionMatrix: CameraAPI.projectionMatrix,
-            camPos: CameraAPI.position,
             translation: GizmoSystem.translation,
             cameraIsOrthographic: CameraAPI.isOrthographic
         }
@@ -164,11 +161,7 @@ export default class GizmoSystem {
             }
             if (t instanceof TranslationGizmo) {
                 const c = GizmoSystem.clickedAxis
-                const o = {
-                    viewMatrix: CameraAPI.viewMatrix,
-                    transformMatrix: GizmoSystem.activeGizmoMatrix,
-                    projectionMatrix: CameraAPI.projectionMatrix
-                }
+                const o = {transformMatrix: GizmoSystem.activeGizmoMatrix}
                 if (c === AXIS.X) {
                     o.axis = [1, 0, 0]
                     GizmoSystem.lineShader.bindForUse(o)

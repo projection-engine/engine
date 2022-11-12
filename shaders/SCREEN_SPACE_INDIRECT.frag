@@ -19,7 +19,7 @@ uniform vec2 ssgiColorGrading;
 uniform vec2 noiseScale;
 uniform mat3 rayMarchSettings;
 
-uniform mat4 projection;
+uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 invViewMatrix;
 

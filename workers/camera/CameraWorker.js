@@ -1,5 +1,6 @@
 import {mat4, quat, vec3} from "gl-matrix";
 import TransformationAPI from "../../api/math/TransformationAPI";
+import copyWithOffset from "./copy-with-offset";
 
 
 /**
@@ -12,6 +13,7 @@ import TransformationAPI from "../../api/math/TransformationAPI";
 const ORTHOGRAPHIC = 1
 let needsUpdate = false, then = 0, elapsed = 0
 let nBuffer
+
 export default class CameraWorker {
     static #translationBuffer
     static #rotationBuffer
@@ -32,6 +34,7 @@ export default class CameraWorker {
     static currentTranslation = TransformationAPI.vec3.create()
     static currentRotation = TransformationAPI.quat.create()
     static UBOBuffer
+    static discreteUBOBuffer
 
     static initialize(
         notificationBuffers,
@@ -47,7 +50,8 @@ export default class CameraWorker {
         projectionBuffer,
         viewProjectionMatrix,
         previousViewProjectionMatrix,
-        UBOBuffer
+        UBOBuffer,
+        discreteUBOBuffer
     ) {
         if (CameraWorker.#initialized)
             return
@@ -68,6 +72,8 @@ export default class CameraWorker {
         TransformationAPI.vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
         TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
         CameraWorker.UBOBuffer = UBOBuffer
+        CameraWorker.discreteUBOBuffer = discreteUBOBuffer
+
         const callback = () => {
             CameraWorker.execute()
             CameraWorker.frameID = requestAnimationFrame(callback)
@@ -123,31 +129,18 @@ export default class CameraWorker {
     }
 
     static updateUBO() {
-        const a = CameraWorker.previousViewProjectionMatrix
-        const p = CameraWorker.#position
-        const cacheUBOBuffer = CameraWorker.UBOBuffer
+        const previousViewProjectionMatrix = CameraWorker.previousViewProjectionMatrix
+        const position = CameraWorker.#position
+        const cacheUBOBuffer = CameraWorker.UBOBuffer, cacheDiscreteUBOBuffer = CameraWorker.discreteUBOBuffer
 
-        mat4.copy(cacheUBOBuffer, CameraWorker.viewProjectionMatrix)
-        cacheUBOBuffer[16] = p[0]
-        cacheUBOBuffer[17] = p[1]
-        cacheUBOBuffer[18] = p[2]
-        cacheUBOBuffer[19] = 0
-        cacheUBOBuffer[20] = a[0];
-        cacheUBOBuffer[21] = a[1];
-        cacheUBOBuffer[22] = a[2];
-        cacheUBOBuffer[23] = a[3];
-        cacheUBOBuffer[24] = a[4];
-        cacheUBOBuffer[25] = a[5];
-        cacheUBOBuffer[26] = a[6];
-        cacheUBOBuffer[27] = a[7];
-        cacheUBOBuffer[28] = a[8];
-        cacheUBOBuffer[29] = a[9];
-        cacheUBOBuffer[30] = a[10];
-        cacheUBOBuffer[31] = a[11];
-        cacheUBOBuffer[32] = a[12];
-        cacheUBOBuffer[33] = a[13];
-        cacheUBOBuffer[34] = a[14];
-        cacheUBOBuffer[35] = a[15];
+        copyWithOffset(cacheUBOBuffer, CameraWorker.viewProjectionMatrix, 0)
+        copyWithOffset(cacheUBOBuffer, previousViewProjectionMatrix, 16)
+        copyWithOffset(cacheUBOBuffer, position, 32)
+
+        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#viewMatrix, 0)
+        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#projectionMatrix, 16)
+        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#invViewMatrix, 32)
+        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#position, 48)
     }
 
     static previousRotationLength = 0

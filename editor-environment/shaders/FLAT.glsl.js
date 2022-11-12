@@ -1,17 +1,5 @@
-export const vertex = `#version 300 es
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normalVec;
- 
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix; 
-uniform mat4 projectionMatrix;
-
-out vec3 normal;
-
-void main() {
-	normal = normalize(transformMatrix * normalVec); 
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix * vec4(position, 1.0);
-}`
+import TEMPLATE_VERTEX from "../../shaders/TEMPLATE_VERTEX_SHADER.vert"
+export const vertex = TEMPLATE_VERTEX
 
 export const fragment = `#version 300 es
 precision highp float;

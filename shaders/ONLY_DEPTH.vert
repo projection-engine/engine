@@ -6,7 +6,6 @@ layout (location = 2) in vec2 uvTexture;
 
 uniform CameraMetadata{
     mat4 viewProjection;
-    vec3 placement;
     mat4 previousViewProjection;
 };
 
@@ -28,3 +27,4 @@ void main(){
     normalVec = normalize(mat3(transformMatrix) * normal);
     gl_Position = currentScreenPosition;
 }
+

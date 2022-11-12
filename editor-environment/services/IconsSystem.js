@@ -77,9 +77,7 @@ export default class IconsSystem {
 
         if (iconsVisibility) {
             const attr = {
-                viewMatrix: CameraAPI.viewMatrix,
-                cameraPosition: CameraAPI.position,
-                projectionMatrix: CameraAPI.projectionMatrix,
+
                 translation: [0, 0, 0],
                 sameSize: false,
                 highlight: false

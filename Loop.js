@@ -153,14 +153,14 @@ export default class Loop {
         previous = current
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
-        if (!Engine.benchmarkMode) {
+        if (!Engine.benchmarkMode)
             Loop.#callback()
-
-        } else {
+        else {
             BenchmarkAPI.track(BENCHMARK_KEYS.ALL)
             Loop.#benchmarkMode()
             BenchmarkAPI.endTrack(BENCHMARK_KEYS.ALL)
         }
+
         CameraAPI.updateFrame()
         Engine.frameID = requestAnimationFrame(Loop.loop)
     }

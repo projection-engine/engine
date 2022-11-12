@@ -187,12 +187,9 @@ export default class RotationGizmo {
 
     #draw(transformMatrix, axis, id) {
         RotationGizmo.shader.bindForUse({
-            viewMatrix: CameraAPI.viewMatrix,
             transformMatrix,
-            projectionMatrix: CameraAPI.projectionMatrix,
             axis,
             translation: GizmoSystem.translation,
-            camPos: CameraAPI.position,
             uID: [...id, 1],
             selectedAxis: GizmoSystem.clickedAxis,
             circleSampler: this.texture.texture,

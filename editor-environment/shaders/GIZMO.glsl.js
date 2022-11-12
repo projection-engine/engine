@@ -15,9 +15,12 @@ layout (location = 0) in vec3 position;
  
 #define HALF 5000.
 #define FULL 1000000.
-uniform mat4 viewMatrix;
+ 
+uniform CameraMetadata{
+    mat4 viewProjection; 
+};
+
 uniform mat4 transformMatrix; 
-uniform mat4 projectionMatrix;
 uniform vec3 axis; 
 
 void main() {
@@ -42,14 +45,14 @@ void main() {
            sc[2][2] = FULL;
            sc[3][2] = -HALF;
     } 
-    gl_Position = projectionMatrix * viewMatrix * transformMatrix* sc * vec4(position, 1.0);
+    gl_Position = viewProjection * transformMatrix* sc * vec4(position, 1.0);
 }
 
 `
 const SIZE_DEFINITION = `#define SIZE .15`
 const TRANSLATION_METHOD = `
-vec3 t = translation - camPos;
-float len = length(camPos - translation) * SIZE;
+vec3 t = translation - placement.xyz;
+float len = length(placement.xyz - translation) * SIZE;
 mat4 tt = transformMatrix;
 if(!cameraIsOrthographic){
     tt[3][0]  += t.x;
@@ -73,27 +76,32 @@ export const sameSizeVertex = `#version 300 es
 ${SIZE_DEFINITION}
 layout (location = 0) in vec3 position;
 
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 camPos;
+uniform CameraMetadata{
+    mat4 viewProjection; 
+    mat4 previousViewProjection;
+    vec4 placement;
+};
+
+uniform mat4 transformMatrix;  
 uniform vec3 translation;
 uniform bool cameraIsOrthographic;
  
 void main(){
     ${TRANSLATION_METHOD}
     ${SCALE_METHOD}        
-    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);
+    gl_Position =  viewProjection * tt * sc * vec4(position,1.0);
 }
 `
 export const vertex = `#version 300 es
 ${SIZE_DEFINITION}
 layout (location = 0) in vec3 position; 
 
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 camPos;
+uniform CameraMetadata{
+    mat4 viewProjection; 
+    mat4 previousViewProjection;
+    vec4 placement;
+};
+uniform mat4 transformMatrix; 
 uniform vec3 translation;
 uniform bool cameraIsOrthographic;
 uniform bool isSurface;
@@ -103,7 +111,7 @@ void main(){
     if(!isSurface){
         ${SCALE_METHOD}
         tt = tt * sc;
-        gl_Position =  projectionMatrix * viewMatrix * tt *  vec4(position,1.0);
+        gl_Position =  viewProjection * tt *  vec4(position,1.0);
     }  
     else{
         mat4 sc;
@@ -117,7 +125,7 @@ void main(){
                     sc[x][y] = 0.;
  
       
-        gl_Position =  projectionMatrix * viewMatrix * tt * sc *  vec4(position,1.0);
+        gl_Position =  viewProjection * tt * sc *  vec4(position,1.0);
     }
 }
 `
@@ -172,11 +180,14 @@ export const vertexRot = `#version 300 es
 ${SIZE_DEFINITION}
 layout (location = 0) in vec3 position;
 layout (location = 2) in vec2 uvs;
+ 
+uniform CameraMetadata{
+    mat4 viewProjection;
+    mat4 previousViewProjection;
+    vec4 placement;
+};
 
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 camPos;
+uniform mat4 transformMatrix; 
 uniform vec3 translation;
 uniform bool cameraIsOrthographic;
 
@@ -186,9 +197,9 @@ out vec2 uv;
 void main(){
  
     uv = uvs; 
-    vec3 t = translation - camPos;
+    vec3 t = translation - placement.xyz;
      
-    float len = length(camPos - translation) * SIZE;
+    float len = length(placement.xyz - translation) * SIZE;
      if(cameraIsOrthographic)
     	len *= .5; 
     mat4 tt = transformMatrix;
@@ -210,7 +221,7 @@ void main(){
 			tt[3][2]  += t.z;
 		}
     
-    gl_Position =  projectionMatrix * viewMatrix * tt * sc * vec4(position,1.0);   
+    gl_Position =  viewProjection * tt * sc * vec4(position,1.0);   
 }
 `
 
@@ -290,19 +301,22 @@ export const cameraVertex = `#version 300 es
 
 layout (location = 0) in vec3 position;
 #define SIZE .15
+uniform CameraMetadata{
+    mat4 viewProjection; 
+    mat4 previousViewProjection;
+    vec4 placement;
+};
 
-uniform vec3 translation;
-uniform vec3 cameraPosition;
+uniform vec3 translation; 
 uniform bool sameSize;
-uniform mat4 viewMatrix;
-uniform mat4 transformMatrix;
-uniform mat4 projectionMatrix;
+ 
+uniform mat4 transformMatrix; 
  
 
 void main(){ 
     mat4 sc  ;
     if(sameSize){
-        float len = length(cameraPosition - translation) * SIZE;
+        float len = length(placement.xyz - translation) * SIZE;
             
         for ( int x = 0; x < 4; x++ )
             for ( int y = 0; y < 4; y++ )
@@ -316,7 +330,7 @@ void main(){
     }
     else
         sc = transformMatrix;
-    gl_Position = projectionMatrix * viewMatrix * sc * vec4(position,1.0);
+    gl_Position = viewProjection * sc * vec4(position,1.0);
 }
 `
 

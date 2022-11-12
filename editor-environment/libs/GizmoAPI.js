@@ -35,10 +35,7 @@ export default class GizmoAPI {
     }
     static drawGizmo(mesh, transformMatrix, axis, uID) {
         GizmoSystem.gizmoShader.bindForUse({
-            viewMatrix: CameraAPI.viewMatrix,
             transformMatrix,
-            projectionMatrix: CameraAPI.projectionMatrix,
-            camPos: CameraAPI.position,
             translation: GizmoSystem.translation,
             axis,
             selectedAxis: GizmoSystem.clickedAxis,

@@ -1,6 +1,5 @@
 import GPUAPI from "../api/GPUAPI";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
-import FOLIAGE_SPRITEGlsl from "../shaders/FOLIAGE_SPRITE.glsl";
 import SPRITE_FRAG from "../shaders/SPRITE.frag";
 import SPRITE_VERTEX from "../shaders/SPRITE.vert";
 
@@ -35,10 +34,8 @@ import GAUSSIAN_FRAG from "../shaders/GAUSSIAN.frag"
 import UPSAMPLING_TEND_FRAG from "../shaders/UPSAMPLE_TENT.glsl"
 
 export default function initializeShaders() {
-
-
-    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FOLIAGE_SPRITE, FOLIAGE_SPRITEGlsl.vertex, FOLIAGE_SPRITEGlsl.fragment)
     SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
+
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, CUBEMAP, IRRADIANCE_MAP)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)
 

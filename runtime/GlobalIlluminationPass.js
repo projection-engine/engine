@@ -116,8 +116,9 @@ export default class GlobalIlluminationPass {
         gpu.uniform1f(uniforms.elapsed, Engine.elapsed)
 
         gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
-        gpu.uniformMatrix4fv(uniforms.projection, false, CameraAPI.projectionMatrix)
+        gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
         gpu.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
+
         gpu.uniform2fv(uniforms.noiseScale, AmbientOcclusion.noiseScale)
         gpu.uniform2fv(uniforms.ssgiColorGrading, GlobalIlluminationPass.ssgiColorGrading)
 

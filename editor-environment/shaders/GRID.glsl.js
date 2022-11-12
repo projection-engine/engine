@@ -1,9 +1,10 @@
 export const vertex = `#version 300 es
 
 layout (location = 0) in vec3 position;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
+uniform CameraDiscreteMetadata{
+    mat4 viewMatrix;
+    mat4 projectionMatrix; 
+};
 out vec3 nearPoint;
 out vec3 farPoint;
 

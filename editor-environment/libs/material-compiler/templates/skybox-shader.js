@@ -33,8 +33,12 @@ export const vertexSkybox = `
 layout (location = 0) in vec3 position;
 layout (location = 2) in vec2 uvTexture;
 
-uniform mat4 viewMatrix;
+uniform CameraDiscreteMetadata{
+    mat4 viewMatrix; 
+};
+
 uniform mat4 projectionMatrix;
+        
 out vec2 texCoords;
 
 void main(){
