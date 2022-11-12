@@ -13,8 +13,8 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gBehaviour;
 uniform sampler2D stochasticNormals;
-uniform sampler2D noiseSampler;
 
+uniform float elapsed;
 uniform vec2 ssgiColorGrading;
 uniform vec2 noiseScale;
 uniform mat3 rayMarchSettings;
@@ -25,7 +25,7 @@ uniform mat4 invViewMatrix;
 
 layout (location = 0) out vec4 SSGISampler;
 layout (location = 1) out vec4 SSRSampler;
-//vec3 worldNormal;
+
 vec3 viewPos;
 
 //import(aces)
@@ -40,13 +40,9 @@ vec3 SSGI(int maxSteps, float stepSize, float intensity, vec2 noiseScale){
     vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 
     vec3 hitPos = viewPos;
-    float dDepth;
-    vec2 jitter = texture(noiseSampler, texCoords * noiseScale).rg;
-    jitter.x = clamp(jitter.x, 0., 1.);
-    jitter.y = clamp(jitter.y, 0., 1.);
+    float step = stepSize;
 
-    float step = stepSize * (jitter.x + jitter.y) + stepSize;
-    vec4 coords = RayMarch(maxSteps, worldNormal, hitPos, dDepth, step);
+    vec4 coords = RayMarch(maxSteps, worldNormal, hitPos, step);
     vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
     tracedAlbedo = vec3(1.0) - exp(-tracedAlbedo * exposure);
     tracedAlbedo = pow(tracedAlbedo, vec3(1.0/gamma));
@@ -70,9 +66,9 @@ vec3 SSR(int maxSteps, float falloff, float minRayStep, float stepSize){
     vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 
     vec3 hitPos = viewPos;
-    float dDepth;
     vec3 jitt = mix(vec3(0.0), vec3(hash(viewPos)), roughness);
-    vec4 coords = RayMarch(maxSteps, (vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth, stepSize);
+    vec3 rayDirection = vec3(jitt) + reflected * max(minRayStep, -viewPos.z);
+    vec4 coords = RayMarch(maxSteps, rayDirection, hitPos,  stepSize);
 
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);

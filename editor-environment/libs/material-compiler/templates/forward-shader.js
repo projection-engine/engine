@@ -7,7 +7,7 @@ precision highp float;
 #define PI  3.14159265359 
 
 in vec4 worldSpacePosition;
-in  vec2 texCoords;
+in vec2 texCoords;
 in mat3 toTangentSpace;
 uniform int directionalLightsQuantity;
 uniform mat3 directionalLightsData[MAX_LIGHTS];

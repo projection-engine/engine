@@ -41,6 +41,8 @@ export default class Wrapper {
 
                 for (let i = 0; i < cameras.length; i++) {
                     const current = cameras[i]
+                    if(CameraAPI.trackingEntity === current)
+                        continue
                     if (!current.active)
                         continue
                     attr.highlight = IconsSystem.selectedMap.get(current.id) != null

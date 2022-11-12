@@ -84,12 +84,12 @@ export default class ScriptsAPI {
 
                 if (!Engine.isDev && script.onCreation)
                     script.onCreation()
-                const oldIndex = ScriptsAPI.mountedScriptsMap.get(scriptID)
+                const oldIndex = ScriptsAPI.mountedScriptsMap.get(scriptID + entity.id)
                 if (oldIndex !== undefined)
                     ScriptsAPI.mountedScripts[oldIndex] = script
                 else {
                     ScriptsAPI.mountedScripts.push(script)
-                    ScriptsAPI.mountedScriptsMap.set(scriptID, ScriptsAPI.mountedScripts.length - 1)
+                    ScriptsAPI.mountedScriptsMap.set(scriptID + entity.id, ScriptsAPI.mountedScripts.length - 1)
                 }
                 return true
             } catch (runtimeError) {

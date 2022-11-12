@@ -19,12 +19,106 @@ import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./api/CameraAPI";
 import renderScene from "./runtime/render-scene";
+import BenchmarkAPI from "./api/BenchmarkAPI";
+import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 
-let then = 0
+let onWrap, FBO, previous = 0
 export default class Loop {
-    static #rendering() {
-        const onWrap = Engine.params.onWrap
-        const FBO = Engine.currentFrameFBO
+    static linkParams() {
+        onWrap = Engine.params.onWrap
+        FBO = Engine.currentFrameFBO
+    }
+
+    static #benchmarkMode() {
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.SCRIPT_PASS)
+        if (!Engine.isDev)
+            executeScripts()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SCRIPT_PASS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.PHYSICS_PASS)
+        PhysicsPass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.PHYSICS_PASS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.TRANSFORMATION_PASS)
+        TransformationPass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.TRANSFORMATION_PASS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.SPECULAR_PROBE)
+        SpecularProbePass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPECULAR_PROBE)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.DIFFUSE_PROBE)
+        DiffuseProbePass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.DIFFUSE_PROBE)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS)
+        DirectionalShadows.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
+        OmnidirectionalShadows.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.DEFERRED_PASS)
+        renderScene()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.DEFERRED_PASS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
+        AmbientOcclusion.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
+
+        if (onWrap != null)
+            onWrap.execute(false, false)
+
+        FBO.startMapping()
+        BenchmarkAPI.track(BENCHMARK_KEYS.SKYBOX)
+        SkyboxPass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SKYBOX)
+
+        if (onWrap != null)
+            onWrap.execute(false, true)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.DEFERRED_DRAWING)
+        GBuffer.drawBuffer()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.DEFERRED_DRAWING)
+
+        GPUAPI.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
+        ForwardRenderer.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.SPRITE_PASS)
+        SpritePass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
+
+        if (onWrap != null)
+            onWrap.execute(true, false)
+        FBO.stopMapping()
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
+        GlobalIlluminationPass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.POST_PROCESSING)
+        ScreenEffectsPass.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.POST_PROCESSING)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.MOTION_BLUR)
+        MotionBlur.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.MOTION_BLUR)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.FRAME_COMPOSITION)
+        FrameComposition.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.FRAME_COMPOSITION)
+    }
+
+    static #callback() {
+        if (!Engine.isDev)
+            executeScripts()
+        PhysicsPass.execute()
+        TransformationPass.execute()
 
         SpecularProbePass.execute()
         DiffuseProbePass.execute()
@@ -36,10 +130,9 @@ export default class Loop {
             onWrap.execute(false, false)
 
         FBO.startMapping()
-
+        SkyboxPass.execute()
         if (onWrap != null)
             onWrap.execute(false, true)
-        SkyboxPass.execute()
         GBuffer.drawBuffer()
         GPUAPI.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
         ForwardRenderer.execute()
@@ -49,42 +142,26 @@ export default class Loop {
         FBO.stopMapping()
 
         GlobalIlluminationPass.execute()
-    }
 
-
-    static #callback(METRICS) {
-
-        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-        let start = performance.now()
-        if (!Engine.isDev)
-            executeScripts()
-        METRICS.scripting = performance.now() - start
-
-        start = performance.now()
-        PhysicsPass.execute()
-        TransformationPass.execute()
-        METRICS.simulation = performance.now() - start
-
-        start = performance.now()
-        Loop.#rendering()
         ScreenEffectsPass.execute()
         MotionBlur.execute()
         FrameComposition.execute()
-        METRICS.rendering = performance.now() - start
     }
 
-    static loop() {
-        const METRICS = Engine.metrics
-        const now = performance.now()
-        const el = now - then
-        Engine.elapsed = el
-        then = now
+    static loop(current) {
+        Engine.elapsed = current - previous
+        previous = current
+        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
-        METRICS.frameRate = 1000 / el
-        METRICS.frameTime = el
+        if (!Engine.benchmarkMode) {
+            Loop.#callback()
 
-        Loop.#callback(METRICS)
+        } else {
+            BenchmarkAPI.track(BENCHMARK_KEYS.ALL)
+            Loop.#benchmarkMode()
+            BenchmarkAPI.endTrack(BENCHMARK_KEYS.ALL)
+        }
         CameraAPI.updateFrame()
-        Engine.frameID = requestAnimationFrame(() => Loop.loop())
+        Engine.frameID = requestAnimationFrame(Loop.loop)
     }
 }

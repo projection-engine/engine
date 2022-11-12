@@ -19,11 +19,9 @@ uniform float elapsedTime;
 out vec4 finalColor;
         `,
     wrapper: (body) => `
-
 void main(){
     ${body}
-     vec3 albedo = vec3(gAlbedo);
-    finalColor = vec4(albedo, 1.);
+     finalColor = vec4(gAlbedo.rgb, 1.);
 }
         `,
     inputs: "",

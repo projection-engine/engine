@@ -106,17 +106,14 @@ export default class GlobalIlluminationPass {
         gpu.uniform1i(uniforms.gPosition, 2)
 
         gpu.activeTexture(gpu.TEXTURE3)
-        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.noiseSampler)
-        gpu.uniform1i(uniforms.noiseSampler, 3)
+        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
+        gpu.uniform1i(uniforms.previousFrame, 3)
 
         gpu.activeTexture(gpu.TEXTURE4)
-        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
-        gpu.uniform1i(uniforms.previousFrame, 4)
-
-        gpu.activeTexture(gpu.TEXTURE5)
         gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.normalSampler)
-        gpu.uniform1i(uniforms.stochasticNormals, 5)
+        gpu.uniform1i(uniforms.stochasticNormals, 4)
 
+        gpu.uniform1f(uniforms.elapsed, Engine.elapsed)
 
         gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
         gpu.uniformMatrix4fv(uniforms.projection, false, CameraAPI.projectionMatrix)

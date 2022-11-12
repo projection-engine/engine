@@ -20,14 +20,6 @@ import FileSystemAPI from "./api/FileSystemAPI";
 import ScriptsAPI from "./api/ScriptsAPI";
 import UIAPI from "./api/UIAPI";
 
-const METRICS = {
-    frameRate: 0,
-    frameTime: 0,
-    rendering: 0,
-    scripting: 0,
-    simulation: 0,
-    singleLoop: 0
-}
 export default class Engine {
     static currentFrameFBO
     static previousFrameSampler
@@ -66,8 +58,7 @@ export default class Engine {
     static elapsed = 0
     static frameID
     static isReady = false
-    static metrics = METRICS
-
+    static benchmarkMode = false
     static #initialized = false
 
     static async initialize(canvas, width, height, readAsset, readMetadata) {
@@ -102,6 +93,7 @@ export default class Engine {
         OBS.observe(gpu.canvas.parentElement)
         OBS.observe(gpu.canvas)
         Engine.isReady = true
+        Loop.linkParams()
         Engine.start()
     }
 
@@ -161,21 +153,14 @@ export default class Engine {
         FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
         FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))
 
-        if (data.gamma !== undefined)
-            FrameComposition.UBO.updateData("gamma", new Float32Array([data.gamma]))
-        if (data.exposure !== undefined)
-            FrameComposition.UBO.updateData("exposure", new Float32Array([data.exposure]))
-        if (data.filmGrain !== undefined)
-            FrameComposition.UBO.updateData("filmGrainEnabled", new Uint8Array([data.filmGrain ? 1 : 0]))
-        if (data.filmGrainStrength !== undefined)
-            FrameComposition.UBO.updateData("filmGrainStrength", new Float32Array([data.filmGrainStrength]))
         FrameComposition.UBO.unbind()
+        Loop.linkParams()
     }
 
 
     static start() {
         if (!Engine.frameID && Engine.isReady)
-            Engine.frameID = requestAnimationFrame(() => Loop.loop())
+            Engine.frameID = requestAnimationFrame(Loop.loop)
     }
 
     static stop() {

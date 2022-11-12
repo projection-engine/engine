@@ -38,7 +38,6 @@ export default class AmbientOcclusion {
             [
                 {name: "settings", type: "vec3"},
                 {name: "samples", type: "vec4", dataLength: 64},
-
                 {name: "noiseScale", type: "vec2"}
             ]
         )
