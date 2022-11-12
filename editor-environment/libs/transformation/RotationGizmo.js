@@ -1,5 +1,5 @@
 import {mat4, quat, vec3} from "gl-matrix"
-import TRANSFORMATION_TYPE from "../../../../../src/data/TRANSFORMATION_TYPE"
+import TRANSFORMATION_TYPE from "../../../../../src/static/TRANSFORMATION_TYPE"
 import mapGizmoMesh from "../../utils/map-gizmo-mesh"
 import PickingAPI from "../../../api/utils/PickingAPI";
 import CameraAPI from "../../../api/CameraAPI";
