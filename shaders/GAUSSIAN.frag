@@ -37,7 +37,7 @@ vec3 blur() {
 }
 
 void main(){
-    scale = 1./  vec2(textureSize(sceneColor, 0));
+    scale = 1./ vec2(textureSize(sceneColor, 0));
     samples = blurRadius;
     sigma = float(samples) * 0.25;
 
