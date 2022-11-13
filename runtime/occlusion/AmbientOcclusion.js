@@ -4,7 +4,7 @@ import GBuffer from "../rendering/GBuffer";
 import ImageWorker from "../../workers/image/ImageWorker";
 import UBO from "../../instances/UBO";
 
-const RESOLUTION = 8
+const RESOLUTION = 4
 export default class AmbientOcclusion {
     static UBO
     static #ready = false
@@ -17,6 +17,8 @@ export default class AmbientOcclusion {
     static noiseSampler
     static noiseScale = new Float32Array(2)
     static uniforms = {}
+    static blurSamples = 2
+    static maxSamples = 64
 
     static set settings(data) {
         AmbientOcclusion.UBO.bind()
@@ -28,7 +30,7 @@ export default class AmbientOcclusion {
 
     static initialize() {
         AmbientOcclusion.unfilteredSampler = AmbientOcclusion.framebuffer.colors[0]
-        AmbientOcclusion.filteredSampler = AmbientOcclusion.blurredFBO.colors[0]
+        AmbientOcclusion.filteredSampler =AmbientOcclusion.blurredFBO.colors[0]// AmbientOcclusion.blurredFBO.colors[0]
 
         AmbientOcclusion.noiseScale[0] = GPU.internalResolution.w / RESOLUTION
         AmbientOcclusion.noiseScale[1] = GPU.internalResolution.h / RESOLUTION
@@ -70,8 +72,7 @@ export default class AmbientOcclusion {
                     {
                         gPosition: GBuffer.positionSampler,
                         gNormal: GBuffer.baseNormalSampler,
-                        noiseSampler: AmbientOcclusion.noiseSampler,
-                        sampler: AmbientOcclusion.unfilteredSampler
+                        noiseSampler: AmbientOcclusion.noiseSampler
                     }
                 )
                 AmbientOcclusion.#ready = true
@@ -84,11 +85,16 @@ export default class AmbientOcclusion {
             return
         AmbientOcclusion.framebuffer.startMapping()
         AmbientOcclusion.shader.bindForUse(AmbientOcclusion.uniforms)
+        gpu.uniform1i(AmbientOcclusion.shader.uniformMap.maxSamples, AmbientOcclusion.maxSamples)
         drawQuad()
         AmbientOcclusion.framebuffer.stopMapping()
 
+        AmbientOcclusion.blurShader.bind()
         AmbientOcclusion.blurredFBO.startMapping()
-        AmbientOcclusion.blurShader.bindForUse(AmbientOcclusion.uniforms)
+        gpu.activeTexture(gpu.TEXTURE0)
+        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.unfilteredSampler)
+        gpu.uniform1i(AmbientOcclusion.blurShader.uniformMap.sampler, 0)
+        gpu.uniform1i(AmbientOcclusion.blurShader.uniformMap.samples, AmbientOcclusion.blurSamples)
         drawQuad()
         AmbientOcclusion.blurredFBO.stopMapping()
     }

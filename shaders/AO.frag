@@ -11,6 +11,7 @@ uniform Settings{
     vec2 noiseScale;
 };
 in vec2 texCoords;
+uniform int maxSamples;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D noiseSampler;
@@ -18,8 +19,8 @@ out vec4 fragColor;
 
 void main()
 {
-    vec3 fragPosition = texture(gPosition, texCoords).rgb;
-    if (fragPosition.x == 0.0 && fragPosition.y == 0.0 && fragPosition.z == 0.0)
+    vec4 fragPosition = texture(gPosition, texCoords);
+    if (fragPosition.a < 0.)
         discard;
 
     float radius = settings.x;
@@ -34,9 +35,9 @@ void main()
     mat3 TBN = mat3(tangent, bitangent, normal);
 
     float occlusion = 0.0;
-    for (int i = 0; i < KERNELS; ++i){
+    for (int i = 0; i < maxSamples; ++i){
         vec3 samplePos = TBN * samples[i].rgb;
-        samplePos = fragPosition + samplePos * radius;
+        samplePos = fragPosition.rgb + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
         offset = viewProjection *offset;
         offset.xyz /= offset.w;
@@ -45,7 +46,7 @@ void main()
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPosition.z - sampleDepth));
         occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
     }
-    occlusion = occlusion / float(KERNELS);
+    occlusion = occlusion / float(maxSamples);
 
     fragColor = vec4(pow(clamp(occlusion, 0., 1.), power), .0, .0, 1.);
 }

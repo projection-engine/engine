@@ -10,7 +10,8 @@ export default class Component {
         IMAGE: "image",
         MESH: "mesh",
         MATERIAL: "material",
-        TERRAIN: "terrain"
+        TERRAIN: "terrain",
+        QUAT_EULER: "quatEuler"
     })
     __entity
 
@@ -40,7 +41,9 @@ export default class Component {
     static number(label, key, max, min, increment = .001, isAngle, realtime = true, disabledIf) {
         return {label, max, min, increment, type: Component.propTypes.NUMBER, key, isAngle, realtime, disabledIf}
     }
-
+    static quaternionToEuler(label, key, disabledIf) {
+        return {label, type: Component.propTypes.QUAT_EULER, key, disabledIf}
+    }
     static array(labels, key, increment, max, min, isAngle, disabledIf, defaultValue) {
         return {labels, max, min, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle, defaultValue}
     }

@@ -61,11 +61,11 @@ export default class Engine {
     static benchmarkMode = false
     static #initialized = false
 
-    static async initialize(canvas, width, height, readAsset, readMetadata) {
+    static async initialize(canvas, mainResolution, AOResolution, GIResolution, readAsset, readMetadata) {
         if (Engine.#initialized)
             return
 
-        await GPU.initializeContext(canvas, width, height)
+        await GPU.initializeContext(canvas, mainResolution, AOResolution, GIResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
         Engine.#initialized = true
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
@@ -137,7 +137,8 @@ export default class Engine {
         GlobalIlluminationPass.rayMarchSettings[8] = data.SSR.maxSteps || 4
 
         AmbientOcclusion.settings = [data.SSAO.radius, data.SSAO.power, data.SSAO.bias]
-
+        AmbientOcclusion.blurSamples = data.SSAO.blurSamples || 2
+        AmbientOcclusion.maxSamples = data.SSAO.maxSamples || 64
         AmbientOcclusion.enabled = data.SSAO.enabled
         GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
 

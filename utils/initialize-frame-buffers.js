@@ -13,24 +13,22 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture()
 
-    GlobalIlluminationPass.normalsFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS).texture()
-    GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
+    GlobalIlluminationPass.normalsFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS, GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h).texture()
+    GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI , GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h)
         .texture({attachment: 0})
         .texture({attachment: 1})
-    AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC)
+    console.log(GPU.samplerResolutions)
+    AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
         .texture({
             precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT,
-            linear: false,
-            repeat: false
         })
-    AmbientOcclusion.blurredFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO)
+    AmbientOcclusion.blurredFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
         .texture({
             precision: gpu.R16F,
             format: gpu.RED,
             type: gpu.FLOAT,
-            linear: false,
             repeat: false
         })
     MotionBlur.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})

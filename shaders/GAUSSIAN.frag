@@ -10,12 +10,13 @@ out vec4 fragColor;
 
 int samples;
 float sigma;
+vec2 scale;
 
 float gaussian(vec2 i) {
     return 1.0 / (2.0 * PI * pow(sigma, 2.)) * exp(-((pow(i.x, 2.) + pow(i.y, 2.)) / (2.0 * pow(sigma, 2.))));
 }
 
-vec3 blur(sampler2D sp, vec2 uv, vec2 scale) {
+vec3 blur() {
     vec3 col = vec3(0.0);
     float accum = 0.0;
     float weight;
@@ -25,18 +26,20 @@ vec3 blur(sampler2D sp, vec2 uv, vec2 scale) {
         for (int y = -samples / 2; y < samples / 2; ++y) {
             offset = vec2(x, y);
             weight = gaussian(offset);
-            col += texture(sp, uv + scale * offset).rgb * weight;
+            col += texture(sceneColor, texCoords + scale * offset).rgb * weight;
             accum += weight;
         }
     }
 
-    return col / accum;
+    if(accum > 0.)
+        return col / accum;
+    return texture(sceneColor, texCoords).rgb;
 }
 
-void main(void){
-    vec2 resolution = 1./  vec2(textureSize(sceneColor, 0));
+void main(){
+    scale = 1./  vec2(textureSize(sceneColor, 0));
     samples = blurRadius;
     sigma = float(samples) * 0.25;
 
-    fragColor = vec4(blur(sceneColor, texCoords, resolution), 1.);
+    fragColor = vec4(blur(), 1.);
 }

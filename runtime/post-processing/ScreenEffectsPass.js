@@ -13,9 +13,6 @@ let upSamplingShader, upSamplingShaderUniforms
 const downscale = []
 const upscale = []
 
-
-
-
 export default class ScreenEffectsPass {
     static workerTexture
     static outputFBO
@@ -86,6 +83,7 @@ export default class ScreenEffectsPass {
                 gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? downscale[i -1].colors[0] : outputFBO.colors[0])
                 gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
                 gpu.uniform1i(blurShaderUniforms.blurRadius, metadata.bloomQuality)
+
                 drawQuad()
                 fbo.stopMapping()
             }

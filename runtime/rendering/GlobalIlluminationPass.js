@@ -22,7 +22,7 @@ import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
 let shader, uniforms, normalsShader, normalUniforms
 let blurShader, blurShaderUniforms
-let blurSSGIFBO, finalSSGIFBO
+let  finalSSGIFBO, tempSSGIFBO
 export default class GlobalIlluminationPass {
     static SSGISampler
     static SSRSampler
@@ -31,7 +31,7 @@ export default class GlobalIlluminationPass {
     static SSREnabled = true
     static unfilteredSSGISampler
     static ssgiColorGrading = new Float32Array(2)
-    static blurSSGIFBO
+static tempSSGIFBO
     static finalSSGIFBO
     static normalsFBO
     static FBO
@@ -43,11 +43,12 @@ export default class GlobalIlluminationPass {
 
 
     static initialize() {
+        tempSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE1", GPU.internalResolution.w/6, GPU.internalResolution.h/6).texture({linear: true})
+        finalSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE2", GPU.internalResolution.w/4, GPU.internalResolution.h/4).texture({linear: true})
 
-        blurSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE1", GPU.internalResolution.w / 5, GPU.internalResolution.h / 5).texture({linear: true})
-        finalSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE2", GPU.internalResolution.w / 5, GPU.internalResolution.h / 5).texture({linear: true})
+
+        GlobalIlluminationPass.tempSSGIFBO = tempSSGIFBO
         GlobalIlluminationPass.finalSSGIFBO = finalSSGIFBO
-        GlobalIlluminationPass.blurSSGIFBO = blurSSGIFBO
         GlobalIlluminationPass.unfilteredSSGISampler = GlobalIlluminationPass.FBO.colors[0]
         GlobalIlluminationPass.SSRSampler = GlobalIlluminationPass.FBO.colors[1]
 
@@ -134,20 +135,20 @@ export default class GlobalIlluminationPass {
 
     static #applyBlur() {
         blurShader.bind()
-
-        blurSSGIFBO.startMapping()
+        tempSSGIFBO.startMapping()
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.unfilteredSSGISampler)
         gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
         gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
-        drawQuad()
-        blurSSGIFBO.stopMapping()
 
+        drawQuad()
+        tempSSGIFBO.stopMapping()
         finalSSGIFBO.startMapping()
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, blurSSGIFBO.colors[0])
+        gpu.bindTexture(gpu.TEXTURE_2D, tempSSGIFBO.colors[0])
         gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
         gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
+
         drawQuad()
         finalSSGIFBO.stopMapping()
     }

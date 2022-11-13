@@ -13,7 +13,7 @@ vec3 sampleIndirectLight(float shadowValue, float NdotV, float metallic, float r
     vec3 diffuseColor = texture(screenSpaceGI, texCoords).rgb;
     vec3 specularColor = texture(screenSpaceReflections, texCoords).rgb * shadowValue;
 
-    if (length(diffuseColor) != 0. || length(specularColor) != 0.){
+    if (length(diffuseColor) > 0. || length(specularColor) > 0.){
         vec3 F  = fresnelSchlick(NdotV, F0, roughness);
         vec3 kD = (1.0 - F) * (1.0 - metallic);
         diffuseColor *= albedo * kD;

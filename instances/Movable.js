@@ -8,9 +8,7 @@ import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
  * @field __workerGroup {int} - Transformation group which entity is linked to
  */
 
-export default class Movable extends Component {
-
-    _props = TRANSFORMATION_PROPS
+export default class Movable {
     _rotationQuat = ArrayBufferAPI.allocateVector(4, 0, true)
     _translation = ArrayBufferAPI.allocateVector(3)
     _scaling = ArrayBufferAPI.allocateVector(3, 1)
@@ -18,7 +16,7 @@ export default class Movable extends Component {
     unscaledMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     matrix = ArrayBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = ArrayBufferAPI.allocateMatrix(4, true)
-    previousModelMatrix =  ArrayBufferAPI.allocateMatrix(4, true)
+    previousModelMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
 
     lockedRotation = false

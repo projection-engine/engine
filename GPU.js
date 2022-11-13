@@ -27,14 +27,28 @@ export default class GPU {
     static textures = new Map()
     static cubeBuffer
     static BRDF
-    static internalResolution = {w: window.outerWidth, h: window.outerHeight}
+    static internalResolution
+    static samplerResolutions
     static quad
 
 
-    static async initializeContext(canvas, width, height) {
+    static async initializeContext(canvas, mainResolution, AOResolution, GIResolution) {
         if (GPU.context != null)
             return
-        GPU.internalResolution = {w: width, h: height}
+        const screen = window.screen
+        GPU.internalResolution = {w: screen.width, h: screen.height}
+        GPU.samplerResolutions = {
+            AO: {w: screen.width, h: screen.height},
+            GI: {w: screen.width, h: screen.height}
+        }
+        if (mainResolution?.w > 0 && mainResolution?.h > 0)
+            GPU.internalResolution = mainResolution
+        if (AOResolution?.w > 0 && AOResolution?.h > 0)
+            GPU.samplerResolutions.AO = AOResolution
+        if (GIResolution?.w > 0 && GIResolution?.h > 0)
+            GPU.samplerResolutions.GI = GIResolution
+
+
         window.gpu = canvas.getContext("webgl2", {
             antialias: false,
             preserveDrawingBuffer: true,

@@ -110,7 +110,7 @@ void main(){
     SSRSampler = vec4(vec3(0.), 1.);
 
     if (ENABLED_SSGI)
-    SSGISampler = vec4(SSGI(SSGI_maxSteps, SSGI_stepSize, SSGI_intensity, noiseScale), 1.);
+        SSGISampler = vec4(SSGI(SSGI_maxSteps, SSGI_stepSize, SSGI_intensity, noiseScale), 1.);
     else
     SSGISampler = vec4(vec3(0.), 1.);
 }

@@ -13,7 +13,7 @@ export default [
 
     Component.group("ROTATION", [
         Component.boolean("LOCKED", "lockedRotation"),
-        Component.array(["X", "Y", "Z", "W"], "_rotationQuat",   .001, undefined, undefined, false, "lockedRotation", [0, 0, 0, 1])
+        Component.quaternionToEuler("ROTATION", "_rotationQuat", "lockedRotation")
     ]),
 
     Component.group("SCALING_LOCAL", [

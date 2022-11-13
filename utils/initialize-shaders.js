@@ -9,7 +9,7 @@ import LENS_POST_PROCESSING_FRAG from "../shaders/LENS_POST_PROCESSING.frag"
 import GlobalIlluminationPass from "../runtime/rendering/GlobalIlluminationPass";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import AO_FRAG from "../shaders/AO.frag";
-import AO_BLUR_FRAG from "../shaders/AO-BLUR.frag";
+import BOX_BLUR_FRAG from "../shaders/BOX-BLUR.frag";
 import DirectionalShadows from "../runtime/occlusion/DirectionalShadows";
 import * as smShaders from "../shaders/SHADOW_MAP.glsl";
 import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
@@ -45,7 +45,7 @@ export default function initializeShaders() {
     MotionBlur.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.MOTION_BLUR, QUAD_VERTEX, MOTION_BLUR_FRAG)
 
     AmbientOcclusion.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.AO, QUAD_VERTEX, AO_FRAG)
-    AmbientOcclusion.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, QUAD_VERTEX, AO_BLUR_FRAG)
+    AmbientOcclusion.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.AO_BLUR, QUAD_VERTEX, BOX_BLUR_FRAG)
     DirectionalShadows.shadowMapShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
     OmnidirectionalShadows.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
     FrameComposition.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FRAME_COMPOSITION, QUAD_VERTEX, FXAA_FRAG)

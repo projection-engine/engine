@@ -11,7 +11,7 @@ export default {
         SSGI_NORMALS: "SSGI_NORMALS",
         SSR: "SSR",
         AO: "AO",
-        AO_BLUR: "AO_BLUR",
+        BOX_BLUR: "BOX_BLUR",
         FRAME_COMPOSITION: "FRAME_COMPOSITION",
         DEFERRED: "DEFERRED",
         TO_SCREEN: "TO_SCREEN",
