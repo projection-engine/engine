@@ -16,8 +16,11 @@ export default class Wrapper {
         selected = []
         Wrapper.selected = selected
         data.forEach(d => {
-            selected.push(Engine.entitiesMap.get(d))
-            Wrapper.selectionMap.set(d, true)
+            const c= Engine.entitiesMap.get(d)
+            if(c) {
+                selected.push(c)
+                Wrapper.selectionMap.set(d, true)
+            }
         })
     }
 

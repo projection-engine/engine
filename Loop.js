@@ -114,7 +114,6 @@ export default class Loop {
         Loop.#afterDrawing()
 
         FBO.stopMapping()
-
         BenchmarkAPI.track(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
         GlobalIlluminationPass.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
@@ -130,6 +129,8 @@ export default class Loop {
         BenchmarkAPI.track(BENCHMARK_KEYS.FRAME_COMPOSITION)
         FrameComposition.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FRAME_COMPOSITION)
+
+
     }
 
     static #callback() {
@@ -145,6 +146,7 @@ export default class Loop {
         renderScene()
         AmbientOcclusion.execute()
         Loop.#beforeDrawing()
+
         FBO.startMapping()
         SkyboxPass.execute()
         Loop.#duringDrawing()
@@ -154,11 +156,12 @@ export default class Loop {
         SpritePass.execute()
         Loop.#afterDrawing()
         FBO.stopMapping()
-        GlobalIlluminationPass.execute()
 
+        GlobalIlluminationPass.execute()
         ScreenEffectsPass.execute()
         MotionBlur.execute()
         FrameComposition.execute()
+
     }
 
     static loop(current) {

@@ -115,6 +115,7 @@ export default class GlobalIlluminationPass {
         gpu.activeTexture(gpu.TEXTURE5)
         gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.noiseSampler)
         gpu.uniform1i(uniforms.noiseSampler, 5)
+
         gpu.uniform2fv(uniforms.noiseScale, AmbientOcclusion.noiseScale)
 
         gpu.uniform2fv(uniforms.ssgiColorGrading, GlobalIlluminationPass.ssgiColorGrading)
@@ -122,9 +123,12 @@ export default class GlobalIlluminationPass {
 
         drawQuad()
         GlobalIlluminationPass.FBO.stopMapping()
-        finalSSGIFBO.clear()
+
+
         if (GlobalIlluminationPass.SSGIEnabled)
             GlobalIlluminationPass.#applyBlur()
+        else
+            finalSSGIFBO.clear()
 
     }
 

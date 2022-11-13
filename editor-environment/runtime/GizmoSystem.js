@@ -120,7 +120,6 @@ export default class GizmoSystem {
     }
 
     static #findMainEntity(main) {
-        console.trace(main)
         if (main && main === GizmoSystem.mainEntity )
             return
 

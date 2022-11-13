@@ -1,8 +1,8 @@
 #version 300 es
 precision highp float;
 
-#define CLAMP_MIN .2
-#define CLAMP_MAX .8
+#define CLAMP_MIN .1
+#define CLAMP_MAX .9
 #define SEARCH_STEPS 5;
 #define DEPTH_THRESHOLD 1.2;
 
@@ -11,6 +11,7 @@ uniform CameraDiscreteMetadata{
     mat4 projectionMatrix;
     mat4 invViewMatrix;
 };
+
 in vec2 texCoords;
 
 uniform sampler2D previousFrame;
@@ -20,19 +21,24 @@ uniform sampler2D gBehaviour;
 uniform sampler2D stochasticNormals;
 uniform sampler2D noiseSampler;
 
+uniform vec2 ssgiColorGrading;
 uniform vec2 noiseScale;
 uniform mat3 rayMarchSettings;
 
 
 layout (location = 0) out vec4 SSGISampler;
 layout (location = 1) out vec4 SSRSampler;
-
+//vec3 worldNormal;
 vec3 viewPos;
 
 //import(aces)
 //import(rayMarcher)
 
-vec3 SSGI(int maxSteps, float stepSize, float intensity){
+
+vec3 SSGI(int maxSteps, float stepSize, float intensity, vec2 noiseScale){
+
+    float gamma = ssgiColorGrading.x;
+    float exposure = ssgiColorGrading.y;
     vec3 worldNormal = normalize(texture(stochasticNormals, texCoords).rgb);
     vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 
@@ -44,13 +50,14 @@ vec3 SSGI(int maxSteps, float stepSize, float intensity){
 
     float step = stepSize * (jitter.x + jitter.y) + stepSize;
     vec4 coords = RayMarch(maxSteps, worldNormal, hitPos, dDepth, step);
-    vec3 tracedAlbedo = aces(texture(previousFrame, coords.xy).rgb);
-
+    vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
+    tracedAlbedo = vec3(1.0) - exp(-tracedAlbedo * exposure);
+    tracedAlbedo = pow(tracedAlbedo, vec3(1.0/gamma));
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float reflectionMultiplier = screenEdgefactor * -reflected.z;
 
-    return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 0.9) * intensity;
+    return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.) * intensity;
 }
 
 vec3 SSR(int maxSteps, float falloff, float minRayStep, float stepSize){
@@ -75,7 +82,7 @@ vec3 SSR(int maxSteps, float falloff, float minRayStep, float stepSize){
     float reflectionMultiplier = pow(metallic, falloff) * screenEdgefactor * -reflected.z;
     vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
 
-    return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 0.9);
+    return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.);
 }
 
 
@@ -103,10 +110,9 @@ void main(){
     SSRSampler = vec4(vec3(0.), 1.);
 
     if (ENABLED_SSGI)
-    SSGISampler = vec4(SSGI(SSGI_maxSteps, SSGI_stepSize, SSGI_intensity), 1.);
+    SSGISampler = vec4(SSGI(SSGI_maxSteps, SSGI_stepSize, SSGI_intensity, noiseScale), 1.);
     else
     SSGISampler = vec4(vec3(0.), 1.);
 }
-
 
 
