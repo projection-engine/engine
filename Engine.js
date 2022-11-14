@@ -65,6 +65,7 @@ export default class Engine {
         if (Engine.#initialized)
             return
 
+        window.entities = Engine.entities
         await GPU.initializeContext(canvas, mainResolution, AOResolution, GIResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
         Engine.#initialized = true

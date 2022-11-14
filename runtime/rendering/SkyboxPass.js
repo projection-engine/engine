@@ -34,7 +34,6 @@ export default class SkyboxPass {
                     {
                         projectionMatrix: CameraAPI.skyboxProjectionMatrix,
                         transformMatrix: current.matrix,
-                        normalMatrix: current.normalMatrix,
                         materialComponent: meshComponent
                     }, true)
 

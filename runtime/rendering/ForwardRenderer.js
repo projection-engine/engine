@@ -25,12 +25,9 @@ export default class ForwardRenderer {
                     mat,
                     meshComponent,
                     {
-                    cameraPosition: CameraAPI.position,
-                    viewMatrix: CameraAPI.viewMatrix,
-                    projectionMatrix: CameraAPI.projectionMatrix,
+
                     transformMatrix: current.matrix,
 
-                    normalMatrix: current.normalMatrix,
                     materialComponent: meshComponent,
                     directionalLightsQuantity,
                     directionalLightsData,

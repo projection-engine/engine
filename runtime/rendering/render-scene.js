@@ -17,7 +17,6 @@ export default function renderScene(){
 
         uniforms.previousModelMatrix = entity.previousModelMatrix
         uniforms.transformMatrix = entity.matrix
-        uniforms.normalMatrix = entity.normalMatrix
         uniforms.meshID = entity.pickID
 
         MaterialAPI.drawMesh(

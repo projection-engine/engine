@@ -64,7 +64,7 @@ export default class TransformationPass {
                 scripts: undefined,
                 children: undefined,
                 parent: undefined,
-                parentUnscaled: entity.parent?.unscaledMatrix,
+                parentMatrix: entity.parent?.matrix,
                 parentChangedBuffer: entity.parent?.__changedBuffer,
                 components: undefined,
                 pivotPoint: entity.pivotPoint

@@ -4,7 +4,7 @@ import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
 
 
 /**
- * @field __changedBuffer {Uint8Array [needsUpdate, wasUpdated]} - Transferable array buffer that worker thread reads and writes in;
+ * @field __changedBuffer {Uint8Array [changed, changesApplied]} - Transferable array buffer that worker thread reads and writes in;
  * @field __workerGroup {int} - Transformation group which entity is linked to
  */
 
@@ -13,7 +13,6 @@ export default class Movable {
     _translation = ArrayBufferAPI.allocateVector(3)
     _scaling = ArrayBufferAPI.allocateVector(3, 1)
     pivotPoint = ArrayBufferAPI.allocateVector(3)
-    unscaledMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     matrix = ArrayBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     previousModelMatrix = ArrayBufferAPI.allocateMatrix(4, true)
@@ -23,7 +22,6 @@ export default class Movable {
     lockedTranslation = false
     lockedScaling = false
 
-    normalMatrix = ArrayBufferAPI.allocateMatrix(3)
     absoluteTranslation = ArrayBufferAPI.allocateVector(3)
     __workerGroup
 
