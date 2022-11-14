@@ -62,7 +62,6 @@ export default class ScreenEffectsPass {
             h *= 4
             upscale.push(GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SCREEN_EFFECTS + "UPSCALE" + i, w, h).texture({linear: true}))
         }
-        console.log(upscale, downscale)
     }
 
     static execute() {

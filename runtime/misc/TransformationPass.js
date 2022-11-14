@@ -66,8 +66,7 @@ export default class TransformationPass {
                 parent: undefined,
                 parentMatrix: entity.parent?.matrix,
                 parentChangedBuffer: entity.parent?.__changedBuffer,
-                components: undefined,
-                pivotPoint: entity.pivotPoint
+                components: undefined
             }
         })
         entity.changed = true

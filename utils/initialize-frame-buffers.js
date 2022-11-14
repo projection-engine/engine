@@ -17,7 +17,6 @@ export default function initializeFrameBuffers() {
     GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI , GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h)
         .texture({attachment: 0})
         .texture({attachment: 1})
-    console.log(GPU.samplerResolutions)
     AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
         .texture({
             precision: gpu.R16F,

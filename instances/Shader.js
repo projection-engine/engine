@@ -7,6 +7,7 @@ import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
 
 import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
 import CameraAPI from "../lib/utils/CameraAPI";
+import ConsoleAPI from "../lib/utils/ConsoleAPI";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -127,7 +128,7 @@ export default class Shader {
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
 
         if (!compiled) {
-            console.log(shaderCode)
+            ConsoleAPI.error(shaderCode)
             console.error(gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false
