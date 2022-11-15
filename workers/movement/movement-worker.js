@@ -7,7 +7,6 @@ import {mat4, quat} from "gl-matrix";
 
 const MIN_SCALE = 5e-10
 const cache = quat.create()
-const SCALING_UNIT = [1,1,1]
 class MovementPass {
     static targets = []
     static controlBuffers
@@ -65,7 +64,7 @@ class MovementPass {
         mat4.copy(entity.previousModelMatrix, entity.matrix)
         entity.needsCacheUpdate = true
         quat.normalize(cache, entity._rotationQuat)
-        mat4.fromRotationTranslationScale(entity.matrix, cache, entity._translation, scaling)
+        mat4.fromRotationTranslationScaleOrigin(entity.matrix, cache, entity._translation, scaling, entity.pivotPoint)
 
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
 

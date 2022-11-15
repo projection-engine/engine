@@ -32,10 +32,12 @@ import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
 import SpritePass from "../runtime/rendering/SpritePass";
 import GAUSSIAN_FRAG from "../shaders/GAUSSIAN.frag"
 import UPSAMPLING_TEND_FRAG from "../shaders/UPSAMPLE_TENT.glsl"
+import BOKEH_FRAG from "../shaders/BOKEH.frag"
 
 export default function initializeShaders() {
     SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
 
+    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOKEH, QUAD_VERTEX, BOKEH_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, CUBEMAP, IRRADIANCE_MAP)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)
 

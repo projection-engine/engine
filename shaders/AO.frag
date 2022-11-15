@@ -2,8 +2,10 @@
 precision highp float;
 #define KERNELS 64
 
-uniform CameraMetadata{
-    mat4 viewProjection;
+uniform CameraDiscreteMetadata{
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+    mat4 invViewMatrix;
 };
 uniform Settings{
     vec4 settings;
@@ -20,15 +22,15 @@ out vec4 fragColor;
 void main()
 {
     vec4 fragPosition = texture(gPosition, texCoords);
-    if (fragPosition.a < 0.)
+    if (fragPosition.a <1.)
         discard;
-
+    fragPosition = viewMatrix * fragPosition;
     float radius = settings.x;
     float power = settings.y;
     float bias = settings.z;
 
-    vec3 normal = normalize(texture(gNormal, texCoords).rgb);
-    vec3 randomVec = normalize(texture(noiseSampler, texCoords * noiseScale).xyz);
+    vec3 normal = (transpose(invViewMatrix) * texture(gNormal, texCoords)).rgb;
+    vec3 randomVec = texture(noiseSampler, texCoords * noiseScale).xyx;
 
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
@@ -37,16 +39,17 @@ void main()
     float occlusion = 0.0;
     for (int i = 0; i < maxSamples; ++i){
         vec3 samplePos = TBN * samples[i].rgb;
-        samplePos = fragPosition.rgb + samplePos * radius;
+        samplePos = fragPosition.xyz + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
-        offset = viewProjection *offset;
+        offset = projectionMatrix *offset;
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
-        float sampleDepth = texture(gPosition, offset.xy).z;
+
+        float sampleDepth = (viewMatrix * texture(gPosition, offset.xy)).z;
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPosition.z - sampleDepth));
         occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
     }
-    occlusion = occlusion / float(maxSamples);
+    occlusion = 1.- occlusion / float(maxSamples);
 
     fragColor = vec4(pow(clamp(occlusion, 0., 1.), power), .0, .0, 1.);
 }

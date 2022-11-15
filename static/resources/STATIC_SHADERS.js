@@ -9,6 +9,7 @@ export default {
         SPRITE: "SPRITE",
         SSGI: "SSGI",
         SSGI_NORMALS: "SSGI_NORMALS",
+        BOKEH: "BOKEH",
         SSR: "SSR",
         AO: "AO",
         BOX_BLUR: "BOX_BLUR",

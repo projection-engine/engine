@@ -19,7 +19,7 @@ export default class Framebuffer {
             w: this.width,
             h: this.height,
             attachment: 0,
-            precision: gpu.RGBA16F,
+            precision: gpu.RGBA32F,
             format: gpu.RGBA,
             type: gpu.FLOAT,
             linear: false,
@@ -37,10 +37,7 @@ export default class Framebuffer {
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
     }
 
-    clear() {
-        this.use()
-        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-    }
+
 
     stopMapping(clear = true) {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
@@ -78,7 +75,7 @@ export default class Framebuffer {
         return this
     }
 
-    depthTest(typeStorage = gpu.DEPTH_COMPONENT24) {
+    depthTest(typeStorage = gpu.DEPTH_COMPONENT16) {
         this.use()
         this.RBO = gpu.createRenderbuffer()
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, this.RBO)
@@ -140,7 +137,7 @@ export default class Framebuffer {
 
     clear() {
         this.use()
-        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT | gpu.STENCIL_BUFFER_BIT)
+        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
     }
 
     static toImage(fbo, w = 300, h = 300) {

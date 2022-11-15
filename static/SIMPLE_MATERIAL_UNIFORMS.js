@@ -54,5 +54,8 @@ export default {
         {key: "ao", "type": "sampler2D"},
         {key: "emission", "type": "sampler2D"},
         {key: "heightMap", "type": "sampler2D"},
-    ]
+
+    ],
+    cullFace: "BACK",
+    noDepthTest: false
 }

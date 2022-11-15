@@ -21,6 +21,7 @@ import CameraAPI from "./lib/utils/CameraAPI";
 import renderScene from "./runtime/rendering/render-scene";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
+import Bokeh from "./runtime/post-processing/Bokeh";
 
 let FBO, previous = 0
 export default class Loop {
@@ -159,6 +160,7 @@ export default class Loop {
 
         GlobalIlluminationPass.execute()
         ScreenEffectsPass.execute()
+        // Bokeh.execute()
         MotionBlur.execute()
         FrameComposition.execute()
 

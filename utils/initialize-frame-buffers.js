@@ -38,11 +38,11 @@ export default function initializeFrameBuffers() {
         .texture({attachment: 0, precision: gpu.RGBA32F}) // POSITION
         .texture({attachment: 1}) // NORMAL
         .texture({attachment: 2}) // ALBEDO
-        .texture({attachment: 3})
-        .texture({precision: gpu.RGBA32F, attachment: 4}) // DEPTH
+        .texture({attachment: 3}) // BEHAVIOUR
+        .texture({attachment: 4}) // DEPTH
         .texture({attachment: 5}) // ID
         .texture({attachment: 6}) // BASE NORMAL
-        .texture({attachment: 7, precision: gpu.RG32F, format: gpu.RG}) // gVelocity
+        .texture({attachment: 7, precision: gpu.RG16F, format: gpu.RG}) // gVelocity
         .depthTest()
 
 

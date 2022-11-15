@@ -17,7 +17,8 @@ export default class Material {
     texturesInUse = {}
     updateTexture = {}
     instances = new Map()
-
+    cullFace = "BACK"
+    noDepthTest
 
     constructor({
                     vertex,
@@ -41,6 +42,8 @@ export default class Material {
     set settings(settings) {
         if (settings) {
             this.#settings = settings
+            this.cullFace = settings.cullFace
+            this.noDepthTest = settings.noDepthTest
             this.shadingType = settings.shadingType
             this.isForwardShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.FORWARD || settings.shadingType === MATERIAL_RENDERING_TYPES.UNLIT
             this.isDeferredShaded = settings.shadingType === MATERIAL_RENDERING_TYPES.DEFERRED

@@ -19,6 +19,7 @@ import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
+import Bokeh from "./runtime/post-processing/Bokeh";
 
 export default class Engine {
     static currentFrameFBO
@@ -71,6 +72,7 @@ export default class Engine {
         Engine.#initialized = true
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         Engine.previousFrameSampler = Engine.currentFrameFBO.colors[0]
+        // Bokeh.initialize()
         ScreenEffectsPass.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
