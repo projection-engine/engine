@@ -2,7 +2,14 @@ import MaterialAPI from "../../lib/rendering/MaterialAPI";
 import GBuffer from "./GBuffer";
 import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
 
-
+function draw(cf, mesh){
+    if(!cf){
+        gpu.disable(gpu.CULL_FACE)
+        mesh.draw()
+        gpu.enable(gpu.CULL_FACE)
+    }
+    else mesh.draw()
+}
 export default class SceneRenderer{
     static drawDeferred(){
         const uniforms = GBuffer.uniforms
@@ -61,20 +68,19 @@ export default class SceneRenderer{
                 gpu.uniformMatrix4fv(uniformMap.transformMatrix, false, entity.matrix)
 
                 gpu.uniform3fv(uniformMap.meshID, entity.pickID)
-                if(!material.cullFace)
-                    gpu.cullFace(gpu.NONE)
-                else{
-                    if(material.cullFace === "BACK")
+                const cf = material.cullFace
+                if(cf){
+                    if(cf === "BACK")
                         gpu.cullFace(gpu.BACK)
                     else
                         gpu.cullFace(gpu.FRONT)
                 }
                 if(material.noDepthTest) {
                     gpu.disable(gpu.DEPTH_TEST)
-                    current.mesh.draw()
+                    draw(cf, current.mesh)
                     gpu.enable(gpu.DEPTH_TEST)
                 }else
-                    current.mesh.draw()
+                    draw(cf, current.mesh)
             }else {
                 uniforms.previousModelMatrix = entity.previousModelMatrix
                 uniforms.transformMatrix = entity.matrix

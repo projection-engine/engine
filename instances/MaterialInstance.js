@@ -12,13 +12,20 @@ export default class MaterialInstance {
     updateTexture = {}
     refID
     shader
+    noDepthTest
+    cullFace
+
     constructor(id, uniformData, materialReference, resolve) {
         this.materialReference = materialReference
         this.uniforms = materialReference.uniforms
         this.id = id
         this.refID = materialReference.id
         this.settings = materialReference.settings
+        this.cullFace = this.settings?.cullFace
+        this.noDepthTest = this.settings?.noDepthTest
         this.shader = this.materialReference._shader
+
+
         MaterialAPI.updateMaterialUniforms(uniformData, this).then(() => {
             resolve(this)
             this.ready = true
