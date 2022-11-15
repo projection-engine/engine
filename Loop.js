@@ -21,7 +21,6 @@ import CameraAPI from "./lib/utils/CameraAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
-import Bokeh from "./runtime/post-processing/Bokeh";
 
 let FBO, previous = 0
 export default class Loop {

@@ -1,4 +1,3 @@
-import CameraAPI from "../../lib/utils/CameraAPI";
 import GPU from "../../GPU";
 import GBuffer from "./GBuffer";
 import AmbientOcclusion from "../occlusion/AmbientOcclusion";

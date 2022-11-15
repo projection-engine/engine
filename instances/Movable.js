@@ -1,5 +1,3 @@
-import TRANSFORMATION_PROPS from "../static/component-props/TRANSFORMATION_PROPS";
-import Component from "../templates/components/Component";
 import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
 
 

@@ -19,8 +19,6 @@ import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
-import Bokeh from "./runtime/post-processing/Bokeh";
-import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class Engine {
     static currentFrameFBO

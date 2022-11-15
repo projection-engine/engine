@@ -118,9 +118,7 @@ export default class Shader {
             CameraAPI.UBO.bindWithShader(this.program)
         if (vCode.includes("CameraDiscreteMetadata") || fCode.includes("CameraDiscreteMetadata"))
             CameraAPI.discreteUBO.bindWithShader(this.program)
-        if(fCode.includes("SimpleMaterialSettings")){
-            SceneRenderer.simpleMaterialUBO.bindWithShader(this.program)
-        }
+
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

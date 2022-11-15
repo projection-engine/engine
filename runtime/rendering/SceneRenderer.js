@@ -1,8 +1,7 @@
-import Engine from "../../Engine";
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
 import GBuffer from "./GBuffer";
 import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
-import UBO from "../../instances/UBO";
+
 
 export default class SceneRenderer{
     static drawDeferred(){
@@ -18,9 +17,6 @@ export default class SceneRenderer{
             if (!entity.active)
                 continue
             const material = current.material
-
-
-
             if(material.refID === FALLBACK_MATERIAL){
                 const shader = material.shader
                 shader.bind()
@@ -65,7 +61,20 @@ export default class SceneRenderer{
                 gpu.uniformMatrix4fv(uniformMap.transformMatrix, false, entity.matrix)
 
                 gpu.uniform3fv(uniformMap.meshID, entity.pickID)
-                current.mesh.draw()
+                if(!material.cullFace)
+                    gpu.cullFace(gpu.NONE)
+                else{
+                    if(material.cullFace === "BACK")
+                        gpu.cullFace(gpu.BACK)
+                    else
+                        gpu.cullFace(gpu.FRONT)
+                }
+                if(material.noDepthTest) {
+                    gpu.disable(gpu.DEPTH_TEST)
+                    current.mesh.draw()
+                    gpu.enable(gpu.DEPTH_TEST)
+                }else
+                    current.mesh.draw()
             }else {
                 uniforms.previousModelMatrix = entity.previousModelMatrix
                 uniforms.transformMatrix = entity.matrix

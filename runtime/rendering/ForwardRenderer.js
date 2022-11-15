@@ -1,6 +1,5 @@
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
 import Engine from "../../Engine";
-import CameraAPI from "../../lib/utils/CameraAPI";
 
 export default class ForwardRenderer {
     static execute() {
