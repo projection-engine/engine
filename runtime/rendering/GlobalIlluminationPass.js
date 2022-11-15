@@ -31,7 +31,7 @@ export default class GlobalIlluminationPass {
     static SSREnabled = true
     static unfilteredSSGISampler
     static ssgiColorGrading = new Float32Array(2)
-static tempSSGIFBO
+    static tempSSGIFBO
     static finalSSGIFBO
     static normalsFBO
     static FBO
@@ -43,8 +43,8 @@ static tempSSGIFBO
 
 
     static initialize() {
-        tempSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE1", GPU.internalResolution.w/6, GPU.internalResolution.h/6).texture({linear: true})
-        finalSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE2", GPU.internalResolution.w/4, GPU.internalResolution.h/4).texture({linear: true})
+        tempSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE1", GPU.internalResolution.w/6, GPU.internalResolution.h/6).texture({linear: true, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE})
+        finalSSGIFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI + "DOWNSCALE2", GPU.internalResolution.w/4, GPU.internalResolution.h/4).texture({linear: true, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE})
 
 
         GlobalIlluminationPass.tempSSGIFBO = tempSSGIFBO

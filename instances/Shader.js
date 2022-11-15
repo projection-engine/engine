@@ -8,6 +8,7 @@ import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
 import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
 import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
+import SceneRenderer from "../runtime/rendering/SceneRenderer";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -117,6 +118,9 @@ export default class Shader {
             CameraAPI.UBO.bindWithShader(this.program)
         if (vCode.includes("CameraDiscreteMetadata") || fCode.includes("CameraDiscreteMetadata"))
             CameraAPI.discreteUBO.bindWithShader(this.program)
+        if(fCode.includes("SimpleMaterialSettings")){
+            SceneRenderer.simpleMaterialUBO.bindWithShader(this.program)
+        }
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

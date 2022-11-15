@@ -19,7 +19,7 @@ export default class Framebuffer {
             w: this.width,
             h: this.height,
             attachment: 0,
-            precision: gpu.RGBA32F,
+            precision: gpu.RGBA16F,
             format: gpu.RGBA,
             type: gpu.FLOAT,
             linear: false,
@@ -75,7 +75,7 @@ export default class Framebuffer {
         return this
     }
 
-    depthTest(typeStorage = gpu.DEPTH_COMPONENT16) {
+    depthTest(typeStorage = gpu.DEPTH_COMPONENT24) {
         this.use()
         this.RBO = gpu.createRenderbuffer()
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, this.RBO)

@@ -1,5 +1,5 @@
 import FrameComposition from "../runtime/post-processing/FrameComposition";
-import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";
+import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 
 export default class PostProcessingEffects {
     zNear = .1
@@ -100,9 +100,9 @@ export default class PostProcessingEffects {
 
     set distortion(v) {
         this._distortion = v
-        ScreenEffectsPass.UBO.bind()
-        ScreenEffectsPass.UBO.updateData("distortionEnabled", new Uint8Array([v ? 1 : 0]))
-        ScreenEffectsPass.UBO.unbind()
+        LensPostProcessing.UBO.bind()
+        LensPostProcessing.UBO.updateData("distortionEnabled", new Uint8Array([v ? 1 : 0]))
+        LensPostProcessing.UBO.unbind()
     }
 
     get chromaticAberration() {
@@ -111,9 +111,9 @@ export default class PostProcessingEffects {
 
     set chromaticAberration(v) {
         this._chromaticAberration = v
-        ScreenEffectsPass.UBO.bind()
-        ScreenEffectsPass.UBO.updateData("chromaticAberrationEnabled", new Float32Array([v ? 1 : 0]))
-        ScreenEffectsPass.UBO.unbind()
+        LensPostProcessing.UBO.bind()
+        LensPostProcessing.UBO.updateData("chromaticAberrationEnabled", new Float32Array([v ? 1 : 0]))
+        LensPostProcessing.UBO.unbind()
     }
 
     get bloom() {
@@ -122,9 +122,9 @@ export default class PostProcessingEffects {
 
     set bloom(v) {
         this._bloom = v
-        ScreenEffectsPass.UBO.bind()
-        ScreenEffectsPass.UBO.updateData("bloomEnabled", new Float32Array([v ? 1 : 0]))
-        ScreenEffectsPass.UBO.unbind()
+        LensPostProcessing.UBO.bind()
+        LensPostProcessing.UBO.updateData("bloomEnabled", new Float32Array([v ? 1 : 0]))
+        LensPostProcessing.UBO.unbind()
     }
 
     get chromaticAberrationStrength() {
@@ -133,9 +133,9 @@ export default class PostProcessingEffects {
 
     set chromaticAberrationStrength(v) {
         this._chromaticAberrationStrength = v
-        ScreenEffectsPass.UBO.bind()
-        ScreenEffectsPass.UBO.updateData("chromaticAberrationIntensity", new Float32Array([v]))
-        ScreenEffectsPass.UBO.unbind()
+        LensPostProcessing.UBO.bind()
+        LensPostProcessing.UBO.updateData("chromaticAberrationIntensity", new Float32Array([v]))
+        LensPostProcessing.UBO.unbind()
     }
 
     get distortionStrength() {
@@ -144,9 +144,9 @@ export default class PostProcessingEffects {
 
     set distortionStrength(v) {
         this._distortionStrength = v
-        ScreenEffectsPass.UBO.bind()
-        ScreenEffectsPass.UBO.updateData("distortionIntensity", new Float32Array([v]))
-        ScreenEffectsPass.UBO.unbind()
+        LensPostProcessing.UBO.bind()
+        LensPostProcessing.UBO.updateData("distortionIntensity", new Float32Array([v]))
+        LensPostProcessing.UBO.unbind()
     }
 
 }

@@ -13,7 +13,7 @@ let upSamplingShader, upSamplingShaderUniforms
 const downscale = []
 const upscale = []
 
-export default class ScreenEffectsPass {
+export default class LensPostProcessing {
     static workerTexture
     static outputFBO
     static blurBuffers
@@ -26,7 +26,7 @@ export default class ScreenEffectsPass {
     static blurredSampler
 
     static initialize() {
-        ScreenEffectsPass.UBO = new UBO(
+        LensPostProcessing.UBO = new UBO(
             "LensEffects",
             [
                 {type: "float", name: "distortionIntensity"},
@@ -35,14 +35,14 @@ export default class ScreenEffectsPass {
                 {type: "bool", name: "chromaticAberrationEnabled"},
                 {type: "bool", name: "bloomEnabled"},]
         )
-        ScreenEffectsPass.UBO.bindWithShader(ScreenEffectsPass.compositeShader.program)
-        shader = ScreenEffectsPass.compositeShader
+        LensPostProcessing.UBO.bindWithShader(LensPostProcessing.compositeShader.program)
+        shader = LensPostProcessing.compositeShader
         uniforms = shader.uniformMap
 
         metadata = CameraAPI.metadata
-        ScreenEffectsPass.blurredSampler = ScreenEffectsPass.baseFBO.colors[0]
-        outputFBO = ScreenEffectsPass.outputFBO
-        ScreenEffectsPass.generateBuffers(7)
+        LensPostProcessing.blurredSampler = LensPostProcessing.baseFBO.colors[0]
+        outputFBO = LensPostProcessing.outputFBO
+        LensPostProcessing.generateBuffers(7)
 
         upSamplingShader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.UPSAMPLING_BLOOM)
         upSamplingShaderUniforms = upSamplingShader.uniformMap
@@ -57,7 +57,7 @@ export default class ScreenEffectsPass {
             h /= 2
             downscale.push(GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SCREEN_EFFECTS + "DOWNSCALE" + i, w, h).texture({linear: true}))
         }
-        for (let i = 0; i < (q / 2 -1); i++) {
+        for (let i = 0; i < (q / 2 - 1); i++) {
             w *= 4
             h *= 4
             upscale.push(GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SCREEN_EFFECTS + "UPSCALE" + i, w, h).texture({linear: true}))
@@ -65,21 +65,21 @@ export default class ScreenEffectsPass {
     }
 
     static execute() {
-        // if (metadata.bloom) {
+        if (metadata.bloom) {
             outputFBO.startMapping()
-            ScreenEffectsPass.brightShader.bindForUse({
-                sceneColor: ScreenEffectsPass.workerTexture,
+            LensPostProcessing.brightShader.bindForUse({
+                sceneColor: LensPostProcessing.workerTexture,
                 threshold: metadata.bloomThreshold
             })
             drawQuad()
             outputFBO.stopMapping()
 
             blurShader.bind()
-            for(let i = 0; i < downscale.length; i++){
+            for (let i = 0; i < downscale.length; i++) {
                 const fbo = downscale[i]
                 fbo.startMapping()
                 gpu.activeTexture(gpu.TEXTURE0)
-                gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? downscale[i -1].colors[0] : outputFBO.colors[0])
+                gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? downscale[i - 1].colors[0] : outputFBO.colors[0])
                 gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
                 gpu.uniform1i(blurShaderUniforms.blurRadius, metadata.bloomQuality)
 
@@ -88,11 +88,11 @@ export default class ScreenEffectsPass {
             }
 
             upSamplingShader.bind()
-            for(let i = 0; i < upscale.length; i++){
+            for (let i = 0; i < upscale.length; i++) {
                 const fbo = upscale[i]
                 fbo.startMapping()
                 gpu.activeTexture(gpu.TEXTURE0)
-                gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? upscale[i -1].colors[0] : undefined)
+                gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? upscale[i - 1].colors[0] : undefined)
                 gpu.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
 
                 gpu.activeTexture(gpu.TEXTURE1)
@@ -103,30 +103,29 @@ export default class ScreenEffectsPass {
                 fbo.stopMapping()
             }
 
-            ScreenEffectsPass.baseFBO.startMapping()
+            LensPostProcessing.baseFBO.startMapping()
             gpu.activeTexture(gpu.TEXTURE0)
             gpu.bindTexture(gpu.TEXTURE_2D, outputFBO.colors[0])
             gpu.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
 
             gpu.activeTexture(gpu.TEXTURE1)
-            gpu.bindTexture(gpu.TEXTURE_2D, upscale[upscale.length -1].colors[0])
+            gpu.bindTexture(gpu.TEXTURE_2D, upscale[upscale.length - 1].colors[0])
             gpu.uniform1i(upSamplingShaderUniforms.blurred, 1)
             gpu.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
             drawQuad()
-            ScreenEffectsPass.baseFBO.stopMapping()
-        // }
-        //     else
-        // ScreenEffectsPass.baseFBO.clear()
+            LensPostProcessing.baseFBO.stopMapping()
+        } else
+            LensPostProcessing.baseFBO.clear()
 
         outputFBO.startMapping()
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, ScreenEffectsPass.baseFBO.colors[0])
+        gpu.bindTexture(gpu.TEXTURE_2D, LensPostProcessing.baseFBO.colors[0])
         gpu.uniform1i(uniforms.blurred, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, ScreenEffectsPass.workerTexture)
+        gpu.bindTexture(gpu.TEXTURE_2D, LensPostProcessing.workerTexture)
         gpu.uniform1i(uniforms.sceneColor, 1)
 
         drawQuad()

@@ -15,7 +15,7 @@ import * as smShaders from "../shaders/SHADOW_MAP.glsl";
 import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
 import FXAA_FRAG from "../shaders/FXAA.frag";
-import ScreenEffectsPass from "../runtime/post-processing/ScreenEffectsPass";
+import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/BRIGHTNESS_FILTER.frag";
 import GBuffer from "../runtime/rendering/GBuffer";
 import DEFERRED_RENDERER_FRAG from "../shaders/DEFERRED_RENDERER.frag";
@@ -52,8 +52,8 @@ export default function initializeShaders() {
     OmnidirectionalShadows.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
     FrameComposition.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FRAME_COMPOSITION, QUAD_VERTEX, FXAA_FRAG)
 
-    ScreenEffectsPass.brightShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, QUAD_VERTEX, BRIGHTNESS_FILTER_FRAG)
-    ScreenEffectsPass.compositeShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, QUAD_VERTEX, LENS_POST_PROCESSING_FRAG)
+    LensPostProcessing.brightShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, QUAD_VERTEX, BRIGHTNESS_FILTER_FRAG)
+    LensPostProcessing.compositeShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SCREEN_COMPOSITION, QUAD_VERTEX, LENS_POST_PROCESSING_FRAG)
 
     GlobalIlluminationPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GAUSSIAN, QUAD_VERTEX, GAUSSIAN_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.UPSAMPLING_BLOOM, QUAD_VERTEX, UPSAMPLING_TEND_FRAG)

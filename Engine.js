@@ -11,7 +11,7 @@ import MotionBlur from "./runtime/post-processing/MotionBlur";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
 import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
-import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
+import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import DiffuseProbePass from "./runtime/rendering/DiffuseProbePass";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import SpritePass from "./runtime/rendering/SpritePass";
@@ -20,6 +20,7 @@ import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import Bokeh from "./runtime/post-processing/Bokeh";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class Engine {
     static currentFrameFBO
@@ -65,15 +66,14 @@ export default class Engine {
     static async initialize(canvas, mainResolution, AOResolution, GIResolution, readAsset, readMetadata) {
         if (Engine.#initialized)
             return
-
-        window.entities = Engine.entities
+        Engine.#initialized = true
         await GPU.initializeContext(canvas, mainResolution, AOResolution, GIResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
-        Engine.#initialized = true
+
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         Engine.previousFrameSampler = Engine.currentFrameFBO.colors[0]
         // Bokeh.initialize()
-        ScreenEffectsPass.initialize()
+        LensPostProcessing.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
         GlobalIlluminationPass.initialize()
@@ -82,7 +82,6 @@ export default class Engine {
         DirectionalShadows.initialize()
         SpritePass.initialize()
         GBuffer.initialize()
-
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
 
@@ -97,6 +96,7 @@ export default class Engine {
         OBS.observe(gpu.canvas)
         Engine.isReady = true
         Loop.linkParams()
+
         Engine.start()
     }
 

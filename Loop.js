@@ -7,7 +7,7 @@ import SpecularProbePass from "./runtime/rendering/SpecularProbePass";
 import DiffuseProbePass from "./runtime/rendering/DiffuseProbePass";
 
 import executeScripts from "./runtime/misc/execute-scripts";
-import ScreenEffectsPass from "./runtime/post-processing/ScreenEffectsPass";
+import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
 import SkyboxPass from "./runtime/rendering/SkyboxPass";
 import Engine from "./Engine";
@@ -18,7 +18,7 @@ import GPUAPI from "./lib/rendering/GPUAPI";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
-import renderScene from "./runtime/rendering/render-scene";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import Bokeh from "./runtime/post-processing/Bokeh";
@@ -82,7 +82,7 @@ export default class Loop {
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.DEFERRED_PASS)
-        renderScene()
+        SceneRenderer.drawDeferred()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.DEFERRED_PASS)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
@@ -120,7 +120,7 @@ export default class Loop {
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.POST_PROCESSING)
-        ScreenEffectsPass.execute()
+        LensPostProcessing.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.POST_PROCESSING)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.MOTION_BLUR)
@@ -144,7 +144,7 @@ export default class Loop {
         DiffuseProbePass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
-        renderScene()
+        SceneRenderer.drawDeferred()
         AmbientOcclusion.execute()
         Loop.#beforeDrawing()
 
@@ -159,7 +159,7 @@ export default class Loop {
         FBO.stopMapping()
 
         GlobalIlluminationPass.execute()
-        ScreenEffectsPass.execute()
+        LensPostProcessing.execute()
         // Bokeh.execute()
         MotionBlur.execute()
         FrameComposition.execute()
