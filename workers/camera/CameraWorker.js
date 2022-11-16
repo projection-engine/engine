@@ -34,7 +34,6 @@ export default class CameraWorker {
     static currentTranslation = TransformationAPI.vec3.create()
     static currentRotation = TransformationAPI.quat.create()
     static UBOBuffer
-    static discreteUBOBuffer
 
     static initialize(
         notificationBuffers,
@@ -50,8 +49,7 @@ export default class CameraWorker {
         projectionBuffer,
         viewProjectionMatrix,
         previousViewProjectionMatrix,
-        UBOBuffer,
-        discreteUBOBuffer
+        UBOBuffer
     ) {
         if (CameraWorker.#initialized)
             return
@@ -72,7 +70,6 @@ export default class CameraWorker {
         TransformationAPI.vec3.copy(CameraWorker.currentTranslation, CameraWorker.#translationBuffer)
         TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
         CameraWorker.UBOBuffer = UBOBuffer
-        CameraWorker.discreteUBOBuffer = discreteUBOBuffer
 
         const callback = () => {
             CameraWorker.execute()
@@ -129,18 +126,16 @@ export default class CameraWorker {
     }
 
     static updateUBO() {
-        const previousViewProjectionMatrix = CameraWorker.previousViewProjectionMatrix
-        const position = CameraWorker.#position
-        const cacheUBOBuffer = CameraWorker.UBOBuffer, cacheDiscreteUBOBuffer = CameraWorker.discreteUBOBuffer
+        // const previousViewProjectionMatrix = CameraWorker.previousViewProjectionMatrix
+
+        const cacheUBOBuffer = CameraWorker.UBOBuffer
 
         copyWithOffset(cacheUBOBuffer, CameraWorker.viewProjectionMatrix, 0)
-        copyWithOffset(cacheUBOBuffer, previousViewProjectionMatrix, 16)
-        copyWithOffset(cacheUBOBuffer, position, 32)
+        copyWithOffset(cacheUBOBuffer, CameraWorker.#viewMatrix, 16)
+        copyWithOffset(cacheUBOBuffer, CameraWorker.#projectionMatrix, 32)
+        copyWithOffset(cacheUBOBuffer, CameraWorker.#invViewMatrix, 48)
+        copyWithOffset(cacheUBOBuffer, CameraWorker.#position, 64)
 
-        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#viewMatrix, 0)
-        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#projectionMatrix, 16)
-        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#invViewMatrix, 32)
-        copyWithOffset(cacheDiscreteUBOBuffer, CameraWorker.#position, 48)
     }
 
     static previousRotationLength = 0

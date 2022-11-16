@@ -1,6 +1,6 @@
 import GPUAPI from "../lib/rendering/GPUAPI";
-import TEMPLATE_VERTEX_SHADER from "../shaders/TEMPLATE_VERTEX_SHADER.vert";
-import SIMPLE_MATERIAL from "../shaders/SIMPLE_MATERIAL.frag";
+import TEMPLATE_VERTEX_SHADER from "../shaders/DEFAULT_MATERIAL.vert";
+import SIMPLE_MATERIAL from "../shaders/DEFAULT_MATERIAL.frag";
 import SIMPLE_MATERIAL_CUBEMAP from "../shaders/SIMPLE_MATERIAL_CUBEMAP.frag";
 
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";

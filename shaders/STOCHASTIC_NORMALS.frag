@@ -1,11 +1,7 @@
 #version 300 es
 precision highp float;
 
-uniform CameraDiscreteMetadata{
-    mat4 viewMatrix;
-    mat4 projectionMatrix;
-    mat4 invViewMatrix;
-};
+//import(cameraUBO)
 #define PI 6.2831853
 uniform sampler2D noise;
 uniform sampler2D gNormal;

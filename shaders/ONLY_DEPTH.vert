@@ -4,10 +4,7 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uvTexture;
 
-uniform CameraMetadata{
-    mat4 viewProjection;
-    mat4 previousViewProjection;
-};
+//import(cameraUBO)
 
 uniform mat4 previousModelMatrix;
 uniform mat4 transformMatrix;

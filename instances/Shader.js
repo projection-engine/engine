@@ -8,7 +8,7 @@ import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
 import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
 import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
-import SceneRenderer from "../runtime/rendering/SceneRenderer";
+import CAMERA_UBO from "../shaders/utils/CAMERA_METADATA_UNIFORM.glsl";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -28,7 +28,7 @@ const TYPES = {
 export const METHODS = {
 
     computeShadows: "//import(computeShadows)",
-
+    cameraUBO: "//import(cameraUBO)",
     distributionGGX: "//import(distributionGGX)",
     geometrySchlickGGX: "//import(geometrySchlickGGX)",
     geometrySmith: "//import(geometrySmith)",
@@ -49,6 +49,9 @@ function applyMethods(shaderCode) {
 
     Object.keys(METHODS).forEach(key => {
         switch (true) {
+            case key === "cameraUBO":
+                response = response.replaceAll(METHODS[key], CAMERA_UBO)
+                break
             case key === "sampleIndirectLight":
                 response = response.replaceAll(METHODS[key], SAMPLE_INDIRECT_LIGHT)
                 break
@@ -116,9 +119,6 @@ export default class Shader {
         this.length = this.uniforms.length
         if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
-        if (vCode.includes("CameraDiscreteMetadata") || fCode.includes("CameraDiscreteMetadata"))
-            CameraAPI.discreteUBO.bindWithShader(this.program)
-
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
@@ -131,7 +131,7 @@ export default class Shader {
 
         if (!compiled) {
             ConsoleAPI.error(shaderCode)
-            console.error(gpu.getShaderInfoLog(shader))
+            console.error(shaderCode,gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false
         } else {

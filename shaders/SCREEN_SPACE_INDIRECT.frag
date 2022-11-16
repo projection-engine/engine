@@ -6,11 +6,7 @@ precision highp float;
 #define SEARCH_STEPS 5;
 #define DEPTH_THRESHOLD 1.2;
 
-uniform CameraDiscreteMetadata{
-    mat4 viewMatrix;
-    mat4 projectionMatrix;
-    mat4 invViewMatrix;
-};
+//import(cameraUBO)
 
 in vec2 texCoords;
 
@@ -89,8 +85,7 @@ vec3 SSR(int maxSteps, float falloff, float minRayStep, float stepSize){
 
 void main(){
     vec4 pixelPosition = texture(gPosition, texCoords);
-    if (pixelPosition.a < 1.)
-    discard;
+    if (pixelPosition.a < 1.) discard;
     float SSR_falloff = rayMarchSettings[0][0];
     float SSR_minRayStep = rayMarchSettings[0][1];
     float SSR_stepSize = rayMarchSettings[0][2];

@@ -4,8 +4,9 @@ precision highp float;
 #define MAX_LIGHTS 4
 #define PI 3.14159265359
 
-in vec2 texCoords;
+//import(cameraUBO)
 
+in vec2 texCoords;
 uniform PointLights{
     mat4 pointLights[24];
     int pointLightsQuantity;
@@ -58,9 +59,8 @@ uniform samplerCube shadowCube;
 out vec4 finalColor;
 void main() {
     vec4 pixelPosition = texture(positionSampler, texCoords);
-    if (pixelPosition.a < 1.)
-    discard;
-    vec3 fragPosition = pixelPosition.rgb;
+    if (pixelPosition.a < 1.) discard;
+    vec3 fragPosition = (invViewMatrix * vec4(pixelPosition.rgb, 1.)).xyz;
 
     vec3 albedo = texture(albedoSampler, texCoords).rgb;
     if (albedo.r > 1. && albedo.g > 1. && albedo.b > 1.)

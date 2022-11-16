@@ -2,11 +2,8 @@
 precision highp float;
 #define KERNELS 64
 
-uniform CameraDiscreteMetadata{
-    mat4 viewMatrix;
-    mat4 projectionMatrix;
-    mat4 invViewMatrix;
-};
+//import(cameraUBO)
+
 uniform Settings{
     vec4 settings;
     vec4 samples[KERNELS];
@@ -22,9 +19,7 @@ out vec4 fragColor;
 void main()
 {
     vec4 fragPosition = texture(gPosition, texCoords);
-    if (fragPosition.a <1.)
-        discard;
-    fragPosition = viewMatrix * fragPosition;
+    if (fragPosition.a < 1.) discard;
     float radius = settings.x;
     float power = settings.y;
     float bias = settings.z;
@@ -45,7 +40,7 @@ void main()
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
 
-        float sampleDepth = (viewMatrix * texture(gPosition, offset.xy)).z;
+        float sampleDepth = texture(gPosition, offset.xy).z;
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPosition.z - sampleDepth));
         occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
     }

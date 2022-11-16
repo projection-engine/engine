@@ -1,11 +1,9 @@
 export const vertex = `#version 300 es
 layout (location = 0) in vec3 position;
 
-uniform CameraDiscreteMetadata{
-    mat4 viewMatrix; 
-};
+//import(cameraUBO)
 
-uniform mat4 projectionMatrix;
+uniform mat4 skyboxProjectionMatrix;
 
 out highp vec3 texCoords;
 
@@ -18,7 +16,7 @@ void main(){
    m[3][1]  = 0.0;
    m[3][2]  = 0.0;
 
-    gl_Position = projectionMatrix * m * vec4(position, 1.0);
+    gl_Position = skyboxProjectionMatrix * m * vec4(position, 1.0);
 }
 `
 export const fragment = `#version 300 es

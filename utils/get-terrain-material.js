@@ -41,7 +41,8 @@ precision highp float;
 in vec3 normalVec;
 in mat3 toTangentSpace; 
 in vec2 texCoords;
-in vec4 worldSpacePosition; 
+in vec3 worldSpacePosition;
+in vec3 viewSpacePosition; 
 
 uniform sampler2D layerController;
 uniform ${multiplierType} multipliers;
@@ -51,11 +52,9 @@ layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;   
 layout (location = 3) out vec4 gBehaviour; 
-// layout (location = 4) out vec4 gAmbient;
-
 
 void main(){  
-    gPosition = worldSpacePosition;
+    gPosition = vec4(viewSpacePosition, 1.);
     gAlbedo = vec4(0., 0., 0., 1.);
     gNormal = vec4(0., 0., 0., 1.);
     // gAmbient = vec4(0., 0., 0., 1.);

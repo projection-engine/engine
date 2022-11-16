@@ -10,9 +10,9 @@ function draw(cf, mesh){
     }
     else mesh.draw()
 }
+const uniforms = {}
 export default class SceneRenderer{
     static drawDeferred(){
-        const uniforms = GBuffer.uniforms
         const deferred = MaterialAPI.deferredShadedEntities
 
         GBuffer.gBuffer.startMapping()

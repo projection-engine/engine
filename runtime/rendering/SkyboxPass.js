@@ -10,9 +10,7 @@ export default class SkyboxPass {
     static hasRendered = false
 
     static execute() {
-        const {
-            meshes
-        } = Engine.data
+        const {meshes} = Engine.data
 
         MaterialAPI.loopMeshes(
             meshes,
@@ -26,13 +24,14 @@ export default class SkyboxPass {
                     gpu.disable(gpu.CULL_FACE)
                     gpu.disable(gpu.DEPTH_TEST)
                 }
+
                 MaterialAPI.drawMesh(
                     current.id,
                     mesh,
                     mat,
                     meshComponent,
                     {
-                        projectionMatrix: CameraAPI.skyboxProjectionMatrix,
+                        skyboxProjectionMatrix: CameraAPI.skyboxProjectionMatrix,
                         transformMatrix: current.matrix,
                         materialComponent: meshComponent
                     }, true)

@@ -4,7 +4,8 @@ precision highp float;
 #define PI  3.14159265359
 in vec3 normalVec;
 in vec2 texCoords;
-in vec4 worldSpacePosition;
+in vec3 worldSpacePosition;
+in vec3 viewSpacePosition;
 in vec3 camera;
 
 in vec4 previousScreenPosition;
@@ -61,21 +62,22 @@ void main(){
     bool needsTBNMatrix = POM_HEIGHT_SCALE > 0. || settings[0][1] == 1.;
     mat3 TBN;
     if (needsTBNMatrix == true)
-    TBN = computeTBN(normalVec, worldSpacePosition.xyz, UVs);
+    TBN = computeTBN(normalVec, worldSpacePosition, UVs);
     if (POM_HEIGHT_SCALE > 0.){
         mat3 t = transpose(TBN);
-        vec3 viewDirection = normalize(t * camera  - t * worldSpacePosition.xyz);
+        vec3 viewDirection = normalize(t * camera  - t * worldSpacePosition);
         UVs = parallaxOcclusionMapping(texCoords, viewDirection, POM_DISCARD_OFF_PIXELS, heightMap, POM_HEIGHT_SCALE, POM_LAYERS);
     }
+    vec4 albedoColor = texture(albedo, UVs * vec2(uvScales[0][0], uvScales[0][1])) * albedoScale;
+    if (albedoColor.a < 1.) discard;
 
     gMeshID = vec4(meshID, 1.);
     gDepth = vec4(gl_FragCoord.z, UVs, 1.);
     gBaseNormal = vec4(normalVec, 1.);
-    gPosition = vec4(worldSpacePosition.rgb, 1.);
+    gPosition = vec4(viewSpacePosition, 1.);
     gBehaviour =  vec4(1., 0., 0., 1.);
 
-    vec4 albedoColor = texture(albedo, UVs * vec2(uvScales[0][0], uvScales[0][1])) * albedoScale;
-    if (albedoColor.a < 1.) discard;
+
     vec4 emissionValue = settings[1][2] == 0. ? vec4(fallbackValues[1][0], fallbackValues[1][1], fallbackValues[1][2], 1.) : texture(emission, UVs * vec2(uvScales[2][2], uvScales[2][3]));
 
     gAlbedo = vec4(settings[0][0] == 1. ? albedoColor.rgb :  vec3(fallbackValues[0][0], fallbackValues[0][1], fallbackValues[0][2]), 1.);

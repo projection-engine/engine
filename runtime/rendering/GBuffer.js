@@ -63,11 +63,6 @@ export default class GBuffer {
 
         GBuffer.ready = true
 
-        GBuffer.uniforms = {
-            cameraPosition: CameraAPI.position,
-            viewMatrix: CameraAPI.viewMatrix,
-            projectionMatrix: CameraAPI.projectionMatrix
-        }
 
 
     }

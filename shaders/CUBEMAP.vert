@@ -1,10 +1,7 @@
 #version 300 es
 layout (location = 0) in vec3 position;
 
-uniform CameraMetadata{
-    mat4 viewProjection;
-    mat4 previousViewProjection;
-};
+//import(cameraUBO)
 
 out vec3 worldSpacePosition;
 
