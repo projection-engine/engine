@@ -1,15 +1,13 @@
 export const vertex = `#version 300 es
 layout (location = 0) in vec3 position;
-
+layout (location = 2) in vec2 uvTexture;
 //import(cameraUBO)
 
 uniform mat4 skyboxProjectionMatrix;
 
-out highp vec3 texCoords;
-
-
+out highp vec2 texCoords;
 void main(){
-    texCoords = position;
+    texCoords = uvTexture;
     
     mat4 m = viewMatrix ;
    m[3][0]  = 0.0;
