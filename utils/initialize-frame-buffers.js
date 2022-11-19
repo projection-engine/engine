@@ -13,10 +13,11 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture()
 
+
     GlobalIlluminationPass.normalsFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS, GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h).texture()
     GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI , GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h)
-        .texture({attachment: 0, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE})
-        .texture({attachment: 1, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE})
+        .texture({attachment: 0})
+        .texture({attachment: 1})
     AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
         .texture({
             precision: gpu.R8,

@@ -8,9 +8,8 @@ export default class FrameComposition {
     static workerTexture
     static shader
     static debugFlag
-
     static UBO
-
+    static currentNoise = 0
     static initialize() {
         FrameComposition.UBO = new UBO(
             "CompositionSettings",
@@ -53,6 +52,7 @@ export default class FrameComposition {
     }
 
     static execute() {
+        FrameComposition.currentNoise = FrameComposition.lookup()
         shader.bind()
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, FrameComposition.workerTexture)
@@ -60,7 +60,7 @@ export default class FrameComposition {
         if(uniforms.debugFlag)
             gpu.uniform1i(uniforms.debugFlag, FrameComposition.debugFlag)
         else
-            gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.lookup())
+            gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
         drawQuad()
 
     }
