@@ -50,10 +50,9 @@ export default function initializeFrameBuffers() {
         .texture({attachment: 1}) // NORMAL
         .texture({attachment: 2, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE}) // ALBEDO
         .texture({attachment: 3, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE}) // BEHAVIOUR
-        .texture({attachment: 4}) // DEPTH
-        .texture({attachment: 5}) // ID
-        .texture({attachment: 6}) // BASE NORMAL
-        .texture({attachment: 7, precision: gpu.RG16F, format: gpu.RG}) // gVelocity
+        .texture({attachment: 4}) // ID
+        .texture({attachment: 5}) // BASE NORMAL
+        .texture({attachment: 6, precision: gpu.RG16F, format: gpu.RG}) // gVelocity
         .depthTest()
 
 

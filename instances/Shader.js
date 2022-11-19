@@ -1,14 +1,7 @@
-import {PBR} from "../shaders/templates/PBR"
 import GPU from "../GPU";
-import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl"
-import ACES from "../shaders/utils/ACES.glsl"
-import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl"
-import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl"
-
-import SAMPLE_INDIRECT_LIGHT from "../shaders/utils/SAMPLE_INDIRECT_LIGHT.glsl"
 import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
-import CAMERA_UBO from "../shaders/utils/CAMERA_METADATA_UNIFORM.glsl";
+import applyShaderMethods from "../utils/apply-shader-methods";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -23,61 +16,6 @@ const TYPES = {
     "ivec2": "uniform2iv",
     "ivec3": "uniform3iv",
     "bool": "uniform1i"
-}
-
-export const METHODS = {
-
-    computeShadows: "//import(computeShadows)",
-    cameraUBO: "//import(cameraUBO)",
-    distributionGGX: "//import(distributionGGX)",
-    geometrySchlickGGX: "//import(geometrySchlickGGX)",
-    geometrySmith: "//import(geometrySmith)",
-    fresnelSchlick: "//import(fresnelSchlick)",
-
-    computeLights: "//import(computeLights)",
-
-    computeTBN: "//import(computeTBN)",
-    rayMarcher: "//import(rayMarcher)",
-    aces: "//import(aces)",
-    parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)",
-    sampleIndirectLight: "//import(sampleIndirectLight)"
-}
-
-
-function applyMethods(shaderCode) {
-    let response = shaderCode
-
-    Object.keys(METHODS).forEach(key => {
-        switch (true) {
-            case key === "cameraUBO":
-                response = response.replaceAll(METHODS[key], CAMERA_UBO)
-                break
-            case key === "sampleIndirectLight":
-                response = response.replaceAll(METHODS[key], SAMPLE_INDIRECT_LIGHT)
-                break
-
-            case key === "computeTBN":
-                response = response.replaceAll(METHODS[key], COMPUTE_TBN)
-                break
-            case key === "parallaxOcclusionMapping":
-                response = response.replaceAll(METHODS[key], PARALLAX_OCCLUSION_MAPPING)
-                break
-            case key === "rayMarcher":
-                response = response.replaceAll(METHODS[key], RAY_MARCHER)
-                break
-            case key === "aces":
-                response = response.replaceAll(METHODS[key], ACES)
-                break
-
-
-            case PBR[key] != null:
-                response = response.replaceAll(METHODS[key], PBR[key])
-                break
-            default:
-                break
-        }
-    })
-    return response
 }
 
 
@@ -101,8 +39,8 @@ export default class Shader {
     constructor(vertex, fragment, setMessage) {
         let alert = []
         this.program = gpu.createProgram()
-        const vCode = this.#compileShader(trimString(vertex), gpu.VERTEX_SHADER, m => alert.push(m))
-        const fCode = this.#compileShader(trimString(fragment), gpu.FRAGMENT_SHADER, m => alert.push(m))
+        const vCode = trimString(this.#compileShader(vertex, gpu.VERTEX_SHADER, m => alert.push(m)))
+        const fCode = trimString(this.#compileShader(fragment, gpu.FRAGMENT_SHADER, m => alert.push(m)))
 
         this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat().filter(u => {
             return typeof u.uLocation === "object" || typeof u.uLocations === "object"
@@ -122,7 +60,7 @@ export default class Shader {
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
-        const bundledCode = applyMethods(shaderCode)
+        const bundledCode = "#version 300 es\n" + applyShaderMethods(shaderCode)
 
         const shader = gpu.createShader(shaderType)
         gpu.shaderSource(shader, bundledCode)
@@ -131,7 +69,8 @@ export default class Shader {
 
         if (!compiled) {
             ConsoleAPI.error(shaderCode)
-            console.error(shaderCode,gpu.getShaderInfoLog(shader))
+            console.log(bundledCode)
+            console.error(gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false
         } else {

@@ -1,4 +1,4 @@
-#version 300 es
+
 precision highp float;
 uniform CompositionSettings{
     vec2 inverseFilterTextureSize;

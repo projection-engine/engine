@@ -1,4 +1,4 @@
-#version 300 es
+
 
 precision lowp float;
 #define MAX_POINT_LIGHTS 24

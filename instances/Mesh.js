@@ -46,8 +46,8 @@ export default class Mesh {
             this.normalVBO = new VertexBuffer(1, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
         if (uvs && uvs.length > 0)
             this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
-        if (tangents && tangents.length > 0)
-            this.tangentVBO = new VertexBuffer(3, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        // if (tangents && tangents.length > 0)
+        //     this.tangentVBO = new VertexBuffer(3, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
 
         gpu.bindVertexArray(null)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
@@ -75,8 +75,8 @@ export default class Mesh {
             this.normalVBO.enable()
         if (this.uvVBO)
             this.uvVBO.enable()
-        if (this.tangentVBO)
-            this.tangentVBO.enable()
+        // if (this.tangentVBO)
+        //     this.tangentVBO.enable()
     }
 
     finish() {
@@ -88,8 +88,8 @@ export default class Mesh {
             this.uvVBO.disable()
         if (this.normalVBO)
             this.normalVBO.disable()
-        if (this.tangentVBO)
-            this.tangentVBO.disable()
+        // if (this.tangentVBO)
+        //     this.tangentVBO.disable()
 
         gpu.bindVertexArray(null)
 

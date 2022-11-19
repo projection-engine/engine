@@ -34,7 +34,7 @@ export default function getTerrainMaterial(layers) {
     }
 
     return `
-#version 300 es
+
 
 precision highp float;
 

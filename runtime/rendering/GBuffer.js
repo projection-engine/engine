@@ -20,7 +20,6 @@ export default class GBuffer {
     static albedoSampler
     static behaviourSampler
     static velocityMapSampler
-    static depthUVSampler
     static IDSampler
     static baseNormalSampler
 
@@ -56,10 +55,9 @@ export default class GBuffer {
         GBuffer.normalSampler = GBuffer.gBuffer.colors[1]
         GBuffer.albedoSampler = GBuffer.gBuffer.colors[2]
         GBuffer.behaviourSampler = GBuffer.gBuffer.colors[3]
-        GBuffer.depthUVSampler = GBuffer.gBuffer.colors[4]
-        GBuffer.IDSampler = GBuffer.gBuffer.colors[5]
-        GBuffer.baseNormalSampler = GBuffer.gBuffer.colors[6]
-        GBuffer.velocityMapSampler = GBuffer.gBuffer.colors[7]
+        GBuffer.IDSampler = GBuffer.gBuffer.colors[4]
+        GBuffer.baseNormalSampler = GBuffer.gBuffer.colors[5]
+        GBuffer.velocityMapSampler = GBuffer.gBuffer.colors[6]
 
         GBuffer.ready = true
 

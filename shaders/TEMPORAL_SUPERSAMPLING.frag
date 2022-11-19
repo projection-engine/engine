@@ -1,4 +1,4 @@
-#version 300 es
+
 precision highp float;
 
 // Temporal AA based on Epic Games' implementation:

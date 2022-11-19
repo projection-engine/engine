@@ -1,4 +1,4 @@
-#version 300 es
+
 precision highp float;
 
 // THANKS TO https://www.shadertoy.com/view/XlSBRW

@@ -1,9 +1,9 @@
-#version 300 es
+
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uvTexture;
-layout (location = 3) in vec3 tangent;
+//layout (location = 3) in vec3 tangent;
 
 //import(cameraUBO)
 
@@ -17,7 +17,7 @@ out vec3 viewSpacePosition;
 out vec2 texCoords;
 out vec4 previousScreenPosition;
 out vec4 currentScreenPosition;
-out mat3 toTangentSpace;
+//out mat3 toTangentSpace;
 
 void main(){
     vec4 wPosition = transformMatrix * vec4(position, 1.0);
@@ -29,8 +29,8 @@ void main(){
 
     normalVec = normalize(mat3(transformMatrix) * normal);
 
-    vec3 bitangent = cross(normal, tangent);
-    toTangentSpace = mat3(tangent, bitangent, normal);
+//    vec3 bitangent = cross(normal, tangent);
+//    toTangentSpace = mat3(tangent, bitangent, normal);
 
     camera = placement.xyz;
     texCoords = uvTexture;

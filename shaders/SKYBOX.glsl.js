@@ -1,4 +1,4 @@
-export const vertex = `#version 300 es
+export const vertex = `
 layout (location = 0) in vec3 position;
 layout (location = 2) in vec2 uvTexture;
 //import(cameraUBO)
@@ -17,7 +17,7 @@ void main(){
     gl_Position = skyboxProjectionMatrix * m * vec4(position, 1.0);
 }
 `
-export const fragment = `#version 300 es
+export const fragment = `
 precision mediump float;
 in highp vec3 texCoords;
 uniform samplerCube uTexture;
@@ -27,7 +27,7 @@ void main(void){
 }
 `
 
-// export const generationFragment = `#version 300 es
+// export const generationFragment = `
 // precision highp float;
 // in vec3 worldSpacePosition;
 //

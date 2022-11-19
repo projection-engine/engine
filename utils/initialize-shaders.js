@@ -36,6 +36,7 @@ import BOKEH_FRAG from "../shaders/BOKEH.frag"
 import TEMPORAL_SUPERSAMPLING from "../shaders/TEMPORAL_SUPERSAMPLING.frag"
 import BILATERAL_BLUR from "../shaders/BILATERAL_BLUR.glsl"
 import BILINEAR_DOWNSCALE from "../shaders/BILINEAR_DOWNSCALE.glsl"
+
 export default function initializeShaders() {
     SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
 
