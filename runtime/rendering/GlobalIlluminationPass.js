@@ -101,7 +101,7 @@ export default class GlobalIlluminationPass {
 
     static execute() {
         if (!GlobalIlluminationPass.SSREnabled && !GlobalIlluminationPass.SSGIEnabled) {
-            finalSSGIFBO.clear()
+            ssgiFinal.clear()
             GlobalIlluminationPass.FBO.clear()
             return
         }

@@ -1,9 +1,47 @@
 # Projection engine
 
-Projection engine is a free and open-source 3D graphics engine and 3D editor, intended to be used to create small to medium size
+Projection engine is a free and open-source 3D graphics engine and 3D editor, intended to be used to create small to
+medium size
 interactive desktop and web applications.
 
-![img](https://github.com/projection-engine/.github/blob/main/PROJECTION-ENGINE-SHOWCASE.png?raw=true)
+---
+<table>
+    <tr>
+        <th>
+          SSGI OFF 
+        </th>
+        <th>
+          SSGI ON 
+        </th>
+    </tr>
+    <tr>
+        <th>
+           <img src="https://github.com/projection-engine/.github/blob/main/SSGI_BEFORE.png?raw=true"/> 
+        </th>
+        <th>
+          <img src="https://github.com/projection-engine/.github/blob/main/SSGI%20+%20SSAO.png?raw=true"/>  
+        </th>
+    </tr>
+</table>
+<small><a href="https://github.com/Vinc3r/cornellBox">Cornell Box by Vinc3r</a></small>
+
+---
+
+<table>
+    <tr>
+        <th>
+           New SSAO pipeline
+        </th>
+    </tr>
+    <tr>
+        <th>
+          <img src="https://github.com/projection-engine/.github/blob/main/SSAO-FIXED.png?raw=true"/>  
+        </th>
+    </tr>
+</table>
+
+---
+
 ## Development
 
 You can follow the project development via the following boards:
@@ -19,10 +57,12 @@ You can follow the project development via the following boards:
 - [HUB](https://github.com/projection-engine/hub)
 
 ## Download
-[**Projection Engine HUB**](https://github.com/projection-engine/hub/releases/tag/APP-WINDOWS) - Manage projects and editor versions.
 
+[**Projection Engine HUB**](https://github.com/projection-engine/hub/releases/tag/APP-WINDOWS) - Manage projects and
+editor versions.
 
 ## License
+
 Projection Engine is licensed under the GNU General Public License, Version 3.
 Some files may have other compatible licenses.
 
