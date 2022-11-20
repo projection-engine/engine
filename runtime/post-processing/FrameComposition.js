@@ -3,7 +3,7 @@ import UBO from "../../instances/UBO";
 
 let shader, uniforms
 export default class FrameComposition {
-    static lookUpRandom = []
+    static lookUpRandom
     static lookUpIndex = 0
     static workerTexture
     static shader
@@ -37,8 +37,9 @@ export default class FrameComposition {
         FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([1.0/8.0]))
         FrameComposition.UBO.updateData("inverseFilterTextureSize", new Float32Array([1 / GPU.internalResolution.w, 1 / GPU.internalResolution.h]))
         FrameComposition.UBO.unbind()
-        for (let i = 1e6; i > 0; i--)
-            FrameComposition.lookUpRandom.push(Math.random())
+        FrameComposition.lookUpRandom = new Float32Array(2e+3)
+        for (let i = 0; i < FrameComposition.lookUpRandom.length; i++)
+            FrameComposition.lookUpRandom[i] = Math.random()
         FrameComposition.updateShader()
     }
 

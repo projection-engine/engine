@@ -50,7 +50,6 @@ export default class GBuffer {
         GBuffer.UBO.unbind()
         GBuffer.UBO.bindWithShader(shader.program)
 
-
         GBuffer.positionSampler = GBuffer.gBuffer.colors[0]
         GBuffer.normalSampler = GBuffer.gBuffer.colors[1]
         GBuffer.albedoSampler = GBuffer.gBuffer.colors[2]
@@ -64,7 +63,6 @@ export default class GBuffer {
 
 
     }
-
     // TODO - SORT BY DISTANCE FROM CAMERA
     static updateUBOProbe(dE, sE) {
         const diffuse = dE.components.get(COMPONENTS.PROBE), specular = sE.components.get(COMPONENTS.PROBE)
