@@ -37,7 +37,6 @@ export default class GBuffer {
                 materialID: material.bindID,
                 v_position: VisibilityBuffer.positionSampler,
                 v_uv: VisibilityBuffer.uvSampler,
-                v_materialID: VisibilityBuffer.materialIDSampler,
                 v_entityID: VisibilityBuffer.entityIDSampler,
                 v_normal: VisibilityBuffer.normalSampler
             })

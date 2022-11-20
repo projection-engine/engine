@@ -22,7 +22,7 @@ uniform int materialID;
 uniform sampler2D v_position;
 uniform sampler2D v_normal;
 uniform sampler2D v_uv;
-uniform sampler2D v_materialID;
+
 
 layout (location = 0) out vec4 g_albedo;
 layout (location = 1) out vec4 g_behaviour;
@@ -37,10 +37,10 @@ vec3 albedoData;
 vec3 behaviourData;
 
 void main(){
-    int materialIDData = int(texture(v_materialID, texCoords).r);
+    vec3 uv_material = texture(v_uv, texCoords).rgb;
     vec4 positionData = texture(v_position, texCoords);
-    if (materialID != materialIDData || positionData.a < 1.) discard;
-    vec2 UVs = texture(v_uv, texCoords).rg;
+    if (round(uv_material.b) != round(float(materialID)/255.)|| positionData.a < 1.) discard;
+    vec2 UVs = uv_material.rg;
 
     //        vec2 UVs = texCoords;
     //        float POM_HEIGHT_SCALE =  settings[2][0];

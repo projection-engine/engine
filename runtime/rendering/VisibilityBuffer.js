@@ -8,7 +8,6 @@ let shader, uniforms, fbo
 export default class VisibilityBuffer {
     static positionSampler
     static uvSampler
-    static materialIDSampler
     static entityIDSampler
     static normalSampler
     static buffer
@@ -23,7 +22,6 @@ export default class VisibilityBuffer {
         VisibilityBuffer.normalSampler = fbo.colors[1]
         VisibilityBuffer.entityIDSampler = fbo.colors[2]
         VisibilityBuffer.uvSampler = fbo.colors[3]
-        VisibilityBuffer.materialIDSampler = fbo.colors[4]
         VisibilityBuffer.buffer = fbo
     }
 

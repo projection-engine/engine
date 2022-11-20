@@ -13,9 +13,8 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
         .texture({attachment: 0, label: "POSITION"})
         .texture({attachment: 1, label: "NORMAL"})
-        .texture({attachment: 2, label: "ENTITY_ID"})
-        .texture({attachment: 3, label: "UV", precision: gpu.RG16F, format: gpu.RG})
-        .texture({attachment: 4, label: "MATERIAL_ID", precision: gpu.R8, format: gpu.RED, type: gpu.UNSIGNED_BYTE})
+        .texture({attachment: 2, label: "INSTANCE"})
+        .texture({attachment: 3, label: "UV_MATERIAL"})
         .depthTest()
 
     GBuffer.gBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
