@@ -3,6 +3,7 @@ import GPU from "../../GPU";
 import GBuffer from "../rendering/GBuffer";
 import ImageWorker from "../../workers/image/ImageWorker";
 import UBO from "../../instances/UBO";
+import VisibilityBuffer from "../rendering/VisibilityBuffer";
 
 const RESOLUTION = 4
 export default class AmbientOcclusion {
@@ -70,8 +71,8 @@ export default class AmbientOcclusion {
                 Object.assign(
                     AmbientOcclusion.uniforms,
                     {
-                        gPosition: GBuffer.positionSampler,
-                        gNormal: GBuffer.baseNormalSampler,
+                        gPosition: VisibilityBuffer.positionSampler,
+                        gNormal: VisibilityBuffer.normalSampler,
                         noiseSampler: AmbientOcclusion.noiseSampler
                     }
                 )
@@ -81,8 +82,10 @@ export default class AmbientOcclusion {
 
 
     static execute() {
-        if (!AmbientOcclusion.enabled || !AmbientOcclusion.#ready)
+        if (!AmbientOcclusion.enabled || !AmbientOcclusion.#ready) {
+            AmbientOcclusion.blurredFBO.clear()
             return
+        }
         AmbientOcclusion.framebuffer.startMapping()
         AmbientOcclusion.shader.bindForUse(AmbientOcclusion.uniforms)
         gpu.uniform1i(AmbientOcclusion.shader.uniformMap.maxSamples, AmbientOcclusion.maxSamples)

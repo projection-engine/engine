@@ -21,6 +21,7 @@ import CameraAPI from "./lib/utils/CameraAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
+import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 
 let FBO, previous = 0
 export default class Loop {
@@ -136,6 +137,7 @@ export default class Loop {
     static #callback() {
         if (!Engine.isDev)
             executeScripts()
+
         PhysicsPass.execute()
         TransformationPass.execute()
 
@@ -143,15 +145,20 @@ export default class Loop {
         DiffuseProbePass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
-        SceneRenderer.drawDeferred()
+
         AmbientOcclusion.execute()
+        VisibilityBuffer.execute()
+
         Loop.#beforeDrawing()
+
+        GBuffer.drawMaterials()
 
         FBO.startMapping()
         SkyboxPass.execute()
         Loop.#duringDrawing()
-        GBuffer.drawBuffer()
-        GPUAPI.copyTexture(FBO, GBuffer.gBuffer, gpu.DEPTH_BUFFER_BIT)
+        GBuffer.drawToBuffer()
+        // GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
+
         ForwardRenderer.execute()
         SpritePass.execute()
         Loop.#afterDrawing()
@@ -166,6 +173,7 @@ export default class Loop {
     }
 
     static loop(current) {
+        try{
         Engine.elapsed = current - previous
         previous = current
         gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
@@ -180,5 +188,8 @@ export default class Loop {
 
         CameraAPI.updateFrame()
         Engine.frameID = requestAnimationFrame(Loop.loop)
+        }catch (err){
+            console.log(err)
+        }
     }
 }

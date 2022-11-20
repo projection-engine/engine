@@ -19,6 +19,7 @@ import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
+import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 
 export default class Engine {
     static currentFrameFBO
@@ -71,6 +72,7 @@ export default class Engine {
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         Engine.previousFrameSampler = Engine.currentFrameFBO.colors[0]
         // Bokeh.initialize()
+        VisibilityBuffer.initialize()
         LensPostProcessing.initialize()
         FrameComposition.initialize()
         AmbientOcclusion.initialize()
@@ -82,6 +84,7 @@ export default class Engine {
         GBuffer.initialize()
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
+
 
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         const OBS = new ResizeObserver(() => {
@@ -141,11 +144,7 @@ export default class Engine {
         AmbientOcclusion.blurSamples = data.SSAO.blurSamples || 2
         AmbientOcclusion.maxSamples = data.SSAO.maxSamples || 64
         AmbientOcclusion.enabled = data.SSAO.enabled
-        GBuffer.deferredUniforms.aoSampler = data.SSAO.enabled ? AmbientOcclusion.filteredSampler : undefined
 
-        GBuffer.UBO.bind()
-        GBuffer.UBO.updateData("hasAO", new Uint8Array([data.SSAO.enabled ? 1 : 0]))
-        GBuffer.UBO.unbind()
         MotionBlur.uniforms.velocityScale = data.mbVelocityScale
         MotionBlur.uniforms.maxSamples = data.mbSamples
 

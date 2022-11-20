@@ -10,8 +10,20 @@ import FrameComposition from "../runtime/post-processing/FrameComposition";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 
 export default function initializeFrameBuffers() {
+    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
+        .texture({attachment: 0, label: "POSITION"})
+        .texture({attachment: 1, label: "NORMAL"})
+        .texture({attachment: 2, label: "ENTITY_ID"})
+        .texture({attachment: 3, label: "UV", precision: gpu.RG16F, format: gpu.RG})
+        .texture({attachment: 4, label: "MATERIAL_ID", precision: gpu.R8, format: gpu.RED, type: gpu.UNSIGNED_BYTE})
+        .depthTest()
+
+    GBuffer.gBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
+        .texture({attachment: 0, label: "ALBEDO"}) // ALBEDO
+        .texture({attachment: 1, precision: gpu.RGB, type: gpu.UNSIGNED_BYTE, format: gpu.RGB, label: "BEHAVIOUR"})
+
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
-    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture()
+    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
 
 
     GlobalIlluminationPass.normalsFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS, GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h).texture()
@@ -19,12 +31,14 @@ export default function initializeFrameBuffers() {
         .texture({
             attachment: 0,
             precision: gpu.RGBA8,
-            type: gpu.UNSIGNED_BYTE
+            type: gpu.UNSIGNED_BYTE,
+            label: "SSGI"
         })
         .texture({
             attachment: 1,
             precision: gpu.RGBA8,
-            type: gpu.UNSIGNED_BYTE
+            type: gpu.UNSIGNED_BYTE,
+            label: "SSR"
         })
     AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
         .texture({
@@ -45,19 +59,8 @@ export default function initializeFrameBuffers() {
     MotionBlur.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER).colors[0]
     FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
 
-    GBuffer.gBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
-        .texture({attachment: 0, precision: gpu.RGBA32F}) // POSITION
-        .texture({attachment: 1}) // NORMAL
-        .texture({attachment: 2, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE}) // ALBEDO
-        .texture({attachment: 3, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE}) // BEHAVIOUR
-        .texture({attachment: 4}) // ID
-        .texture({attachment: 5}) // BASE NORMAL
-        .texture({attachment: 6, precision: gpu.RG16F, format: gpu.RG}) // gVelocity
-        .depthTest()
-
 
     LensPostProcessing.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.BLUR_BLOOM).texture()
-
     LensPostProcessing.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
     LensPostProcessing.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
 

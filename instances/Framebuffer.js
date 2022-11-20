@@ -94,7 +94,6 @@ export default class Framebuffer {
             precision,
             format,
             type,
-
             linear,
             repeat
         } = {...this.fallback, ...obj}

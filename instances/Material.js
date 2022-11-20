@@ -19,6 +19,18 @@ export default class Material {
     instances = new Map()
     cullFace = "BACK"
     noDepthTest
+    bindID
+
+    static incrementalMap = new Map()
+    static #generator
+
+    static* getIncrementalID() {
+        let counter = 1
+        while (true) {
+            yield counter
+            counter++
+        }
+    }
 
     constructor({
                     vertex,
@@ -29,14 +41,20 @@ export default class Material {
                     onCompiled,
                     cubeMapShaderCode
                 }) {
-
+        if (!Material.#generator)
+            Material.#generator = Material.getIncrementalID()
         this.id = id ? id : v4().toString()
+        this.bindID = Material.#generator.next().value
+
+        Material.incrementalMap.set(this.bindID, this)
+
         this.settings = settings
         this.shader = [fragment, vertex, uniformData, onCompiled]
-        if (cubeMapShaderCode !== undefined && cubeMapShaderCode !== null)
-            this.cubeMapShader = [cubeMapShaderCode, vertex]
-        else
+        if (!cubeMapShaderCode)
             this.hasCubeMap = false
+        else
+            this.cubeMapShader = [cubeMapShaderCode, vertex]
+
     }
 
     set settings(settings) {
@@ -54,13 +72,7 @@ export default class Material {
         return this.#settings
     }
 
-    set cubeMapShader([shader, vertexShader]) {
-        const v = shader !== undefined && shader !== null
-        if (v) {
-            this._cubeMapShader = GPUAPI.allocateShader(this.id + "-CUBE-MAP", vertexShader, shader)
-            this.hasCubeMap = v
-        }
-    }
+
 
     get shader() {
         return this._shader
@@ -96,7 +108,7 @@ export default class Material {
     }
 
     use(additionalUniforms = {}, isCubeMap = false, uniforms = this.uniformData) {
-        const shader = isCubeMap ? this._cubeMapShader : this._shader
+        const shader = this._shader
 
         if (shader) {
             Object.assign(uniforms, additionalUniforms)
@@ -116,6 +128,7 @@ export default class Material {
                     gpu.deleteTexture(t.texture)
             })
             this.texturesInUse = {}
+            Material.incrementalMap.delete(this.bindID)
         } catch (err) {
             console.error(err)
         }

@@ -1,5 +1,6 @@
 export default {
     PRODUCTION: {
+        VISIBILITY_BUFFER: "VISIBILITY_BUFFER",
 
         FOLIAGE_SPRITE: "FOLIAGE_SPRITE",
         IRRADIANCE: "IRRADIANCE",
@@ -14,7 +15,7 @@ export default {
         AO: "AO",
         BOX_BLUR: "BOX_BLUR",
         FRAME_COMPOSITION: "FRAME_COMPOSITION",
-        DEFERRED: "DEFERRED",
+
         TO_SCREEN: "TO_SCREEN",
         DEPTH: "DEPTH",
         NORMAL_RECONSTRUCTION: "NORMAL_RECONSTRUCTION",
@@ -23,6 +24,7 @@ export default {
         GAUSSIAN: "GAUSSIAN",
         MOTION_BLUR: "MOTION_BLUR",
         UPSAMPLING_BLOOM: "UPSAMPLING_BLOOM",
+        DEFERRED_SHADING: "DEFERRED_SHADING",
         TAA: "TAA",
         BILATERAL_BLUR: "BILATERAL_BLUR",
         DOWNSCALE: "DOWNSCALE",
@@ -30,6 +32,7 @@ export default {
     },
 
     DEVELOPMENT: {
+        TO_SCREEN:  "TO_SCREEN",
         DEBUG_DEFERRED: "DEBUG_DEFERRED",
         LINE: "LINE",
         WIREFRAME: "WIREFRAME",

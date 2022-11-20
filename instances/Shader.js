@@ -2,6 +2,7 @@ import GPU from "../GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
+import LightsAPI from "../lib/rendering/LightsAPI";
 
 const TYPES = {
     "vec2": "uniform2fv",
@@ -57,6 +58,12 @@ export default class Shader {
         this.length = this.uniforms.length
         if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
+
+        if (fCode.includes("PointLights"))
+            LightsAPI.pointLightsUBO.bindWithShader(this.program)
+
+        if (fCode.includes("DirectionalLights"))
+            LightsAPI.directionalLightsUBO.bindWithShader(this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
@@ -69,7 +76,7 @@ export default class Shader {
 
         if (!compiled) {
             ConsoleAPI.error(shaderCode)
-            console.log(bundledCode)
+            console.trace(bundledCode)
             console.error(gpu.getShaderInfoLog(shader))
             pushMessage(gpu.getShaderInfoLog(shader))
             this.available = false

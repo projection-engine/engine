@@ -15,6 +15,7 @@ export default {
     MOTION_BLUR:            "MOTION_BLUR",
     GI:                     "GI",
     SCREEN_EFFECTS:         "SCREEN_EFFECTS",
+    VISIBILITY_BUFFER:      "VISIBILITY_BUFFER",
     EDITOR: {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"

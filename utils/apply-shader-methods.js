@@ -28,37 +28,49 @@ const METHODS = {
 
 export default function applyShaderMethods(shaderCode) {
     let response = shaderCode
+    let appliedQuantity = -1
 
-    Object.keys(METHODS).forEach(key => {
-        switch (true) {
-            case key === "populateGBuffer":
-                response = response.replaceAll(METHODS[key], POPULATE_G_BUFFER)
-                break
-            case key === "cameraUBO":
-                response = response.replaceAll(METHODS[key], CAMERA_UBO)
-                break
-            case key === "sampleIndirectLight":
-                response = response.replaceAll(METHODS[key], SAMPLE_INDIRECT_LIGHT)
-                break
+    // while (appliedQuantity !== 0) {
+        appliedQuantity = 0
+        Object.keys(METHODS).forEach(key => {
+            switch (true) {
+                case key === "populateGBuffer":
+                    response = response.replaceAll(METHODS[key], POPULATE_G_BUFFER)
+                    appliedQuantity++
+                    break
 
-            case key === "computeTBN":
-                response = response.replaceAll(METHODS[key], COMPUTE_TBN)
-                break
-            case key === "parallaxOcclusionMapping":
-                response = response.replaceAll(METHODS[key], PARALLAX_OCCLUSION_MAPPING)
-                break
-            case key === "rayMarcher":
-                response = response.replaceAll(METHODS[key], RAY_MARCHER)
-                break
-            case key === "aces":
-                response = response.replaceAll(METHODS[key], ACES)
-                break
-            case PBR[key] != null:
-                response = response.replaceAll(METHODS[key], PBR[key])
-                break
-            default:
-                break
-        }
-    })
+                case key === "cameraUBO":
+                    response = response.replaceAll(METHODS[key], CAMERA_UBO)
+                    appliedQuantity++
+                    break
+                case key === "sampleIndirectLight":
+                    response = response.replaceAll(METHODS[key], SAMPLE_INDIRECT_LIGHT)
+                    appliedQuantity++
+                    break
+                case key === "computeTBN":
+                    response = response.replaceAll(METHODS[key], COMPUTE_TBN)
+                    appliedQuantity++
+                    break
+                case key === "parallaxOcclusionMapping":
+                    response = response.replaceAll(METHODS[key], PARALLAX_OCCLUSION_MAPPING)
+                    appliedQuantity++
+                    break
+                case key === "rayMarcher":
+                    response = response.replaceAll(METHODS[key], RAY_MARCHER)
+                    appliedQuantity++
+                    break
+                case key === "aces":
+                    response = response.replaceAll(METHODS[key], ACES)
+                    appliedQuantity++
+                    break
+                case PBR[key] != null:
+                    response = response.replaceAll(METHODS[key], PBR[key])
+                    appliedQuantity++
+                    break
+                default:
+                    break
+            }
+        })
+    // }
     return response
 }

@@ -5,6 +5,7 @@ import Engine from "../../Engine";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import VisibilityBuffer from "./VisibilityBuffer";
 
 /**
  * rayMarchSettings definition:
@@ -110,7 +111,7 @@ export default class GlobalIlluminationPass {
             normalsShader.bind()
 
             gpu.activeTexture(gpu.TEXTURE0)
-            gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.baseNormalSampler)
+            gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.normalSampler)
             gpu.uniform1i(normalUniforms.gNormal, 0)
 
             gpu.activeTexture(gpu.TEXTURE1)
@@ -131,11 +132,11 @@ export default class GlobalIlluminationPass {
         gpu.uniform1i(uniforms.gBehaviour, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.baseNormalSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.normalSampler)
         gpu.uniform1i(uniforms.gNormal, 1)
 
         gpu.activeTexture(gpu.TEXTURE2)
-        gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.positionSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.positionSampler)
         gpu.uniform1i(uniforms.gPosition, 2)
 
         gpu.activeTexture(gpu.TEXTURE3)

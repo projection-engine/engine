@@ -17,16 +17,11 @@ import FrameComposition from "../runtime/post-processing/FrameComposition";
 import FXAA_FRAG from "../shaders/FXAA.frag";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/BRIGHTNESS_FILTER.frag";
-import GBuffer from "../runtime/rendering/GBuffer";
-import DEFERRED_RENDERER_FRAG from "../shaders/DEFERRED_RENDERER.frag";
-import ONLY_DEPTH_VERT from "../shaders/ONLY_DEPTH.vert"
-import ONLY_DEPTH_FRAG from "../shaders/ONLY_DEPTH.frag"
 import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/SCREEN_SPACE_INDIRECT.frag"
 import STOCHASTIC_NORMALS_FRAG from "../shaders/STOCHASTIC_NORMALS.frag"
 import CUBEMAP from "../shaders/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
-import LightsAPI from "../lib/rendering/LightsAPI";
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
 import SpritePass from "../runtime/rendering/SpritePass";
@@ -37,10 +32,16 @@ import TEMPORAL_SUPERSAMPLING from "../shaders/TEMPORAL_SUPERSAMPLING.frag"
 import BILATERAL_BLUR from "../shaders/BILATERAL_BLUR.glsl"
 import BILINEAR_DOWNSCALE from "../shaders/BILINEAR_DOWNSCALE.glsl"
 import TO_SCREEN from "../shaders/TO_SCREEN.vert"
+
+import V_BUFFER_VERT from "../shaders/V_BUFFER.vert"
+import V_BUFFER_FRAG from "../shaders/V_BUFFER.frag"
+import DEFERRED_SHADING from "../shaders/DEFERRED_SHADING.glsl"
+
 export default function initializeShaders() {
     SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
 
-
+    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED_SHADING, QUAD_VERTEX, DEFERRED_SHADING)
+    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.VISIBILITY_BUFFER, V_BUFFER_VERT, V_BUFFER_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, QUAD_VERTEX, TO_SCREEN)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DOWNSCALE, QUAD_VERTEX, BILINEAR_DOWNSCALE)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BILATERAL_BLUR, QUAD_VERTEX, BILATERAL_BLUR)
@@ -65,11 +66,7 @@ export default function initializeShaders() {
 
     GlobalIlluminationPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GAUSSIAN, QUAD_VERTEX, GAUSSIAN_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.UPSAMPLING_BLOOM, QUAD_VERTEX, UPSAMPLING_TEND_FRAG)
-    GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GENERIC_GBUFFER_DATA, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
-
-
-    GBuffer.deferredShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DEFERRED, QUAD_VERTEX, DEFERRED_RENDERER_FRAG)
-    LightsAPI.pointLightsUBO.bindWithShader(GBuffer.deferredShader.program)
-    LightsAPI.directionalLightsUBO.bindWithShader(GBuffer.deferredShader.program)
+// TODO
+//    GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GENERIC_GBUFFER_DATA, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
 
 }
