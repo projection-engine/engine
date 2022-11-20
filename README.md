@@ -5,6 +5,7 @@ medium size
 interactive desktop and web applications.
 
 ---
+### Further improvements to lighting
 <table>
     <tr>
         <th>
@@ -26,16 +27,28 @@ interactive desktop and web applications.
 <small><a href="https://github.com/Vinc3r/cornellBox">Cornell Box by Vinc3r</a></small>
 
 ---
-
+### New visualizations
 <table>
     <tr>
         <th>
            New SSAO pipeline
         </th>
+        <th>
+           Random colors
+        </th>
+        <th>
+           Buffer visualization
+        </th>
     </tr>
     <tr>
         <th>
           <img src="https://github.com/projection-engine/.github/blob/main/SSAO-FIXED.png?raw=true"/>  
+        </th>
+        <th>
+          <img src="https://github.com/projection-engine/.github/blob/main/RANDOM%20COLOR.png?raw=true"/>  
+        </th>
+        <th>
+          <img src="https://github.com/projection-engine/.github/blob/main/BUFFER-VISUALIZATION.png?raw=true"/>  
         </th>
     </tr>
 </table>

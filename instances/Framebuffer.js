@@ -8,6 +8,7 @@ export default class Framebuffer {
     depthSampler
     colors = []
     attachments = []
+    colorsMetadata = []
 
     constructor(width = GPU.internalResolution.w, height = GPU.internalResolution.h) {
 
@@ -98,7 +99,7 @@ export default class Framebuffer {
             repeat
         } = {...this.fallback, ...obj}
 
-
+        this.colorsMetadata.push({...this.fallback, ...obj})
         this.use()
         const texture = gpu.createTexture()
         gpu.bindTexture(gpu.TEXTURE_2D, texture)
