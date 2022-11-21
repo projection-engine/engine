@@ -24,61 +24,61 @@ export default class SpecularProbePass {
     static specularProbes = {}
 
     static execute() {
-        const {
-            specularProbes,
-            meshes
-        } = Engine.data
-
-        if (SpecularProbePass.lastCallLength !== specularProbes.length) {
-            SpecularProbePass.step = STEPS_CUBE_MAP.BASE
-            SpecularProbePass.lastCallLength = specularProbes.length
-        }
-        switch (SpecularProbePass.step) {
-            case STEPS_CUBE_MAP.BASE:
-                for (let i = 0; i < specularProbes.length; i++) {
-                    const current = specularProbes[i]
-                    if (!current.active)
-                        continue
-                    const component = current.components.get(COMPONENTS.PROBE)
-                    if (!SpecularProbePass.specularProbes[current.id])
-                        SpecularProbePass.specularProbes[current.id] = new LightProbe(component.resolution)
-                    else
-                        SpecularProbePass.specularProbes[current.id].resolution = component.resolution
-                    const cubeMap = SpecularProbePass.specularProbes[current.id]
-                    cubeMap.draw((yaw, pitch, projection, index) => {
-                            const target = vec3.add([], current._translation, CUBE_MAP_VIEWS.target[index])
-                            const view = mat4.lookAt([], current._translation, target, CUBE_MAP_VIEWS.up[index])
-                            MaterialAPI.drawProbe(
-                                view,
-                                projection,
-                                current._translation
-                            )
-                        },
-                        10000,
-                        1
-                    )
-
-                    cubeMap.drawSpecularMap(component.mipmaps, component.resolution)
-                }
-                SpecularProbePass.step = STEPS_CUBE_MAP.PRE_FILTERED
-                break
-            case STEPS_CUBE_MAP.PRE_FILTERED:
-                for (let i = 0; i < SpecularProbePass.lastCallLength; i++) {
-                    if (!specularProbes[i].active)
-                        continue
-                    const current = specularProbes[i].components.get(COMPONENTS.PROBE)
-                    SpecularProbePass.specularProbes[specularProbes[i].id].drawSpecularMap(current.mipmaps, current.resolution, GPU.cubeBuffer, current.multiplier)
-                }
-                SpecularProbePass.step = STEPS_CUBE_MAP.CALCULATE
-                break
-            case STEPS_CUBE_MAP.CALCULATE:
-                SpecularProbePass.sort(meshes, specularProbes)
-                SpecularProbePass.step = STEPS_CUBE_MAP.DONE
-                break
-            default:
-                SpecularProbePass.step = STEPS_CUBE_MAP.DONE
-                break
-        }
+        // const {
+        //     specularProbes,
+        //     meshes
+        // } = Engine.data
+        //
+        // if (SpecularProbePass.lastCallLength !== specularProbes.length) {
+        //     SpecularProbePass.step = STEPS_CUBE_MAP.BASE
+        //     SpecularProbePass.lastCallLength = specularProbes.length
+        // }
+        // switch (SpecularProbePass.step) {
+        //     case STEPS_CUBE_MAP.BASE:
+        //         for (let i = 0; i < specularProbes.length; i++) {
+        //             const current = specularProbes[i]
+        //             if (!current.active)
+        //                 continue
+        //             const component = current.components.get(COMPONENTS.PROBE)
+        //             if (!SpecularProbePass.specularProbes[current.id])
+        //                 SpecularProbePass.specularProbes[current.id] = new LightProbe(component.resolution)
+        //             else
+        //                 SpecularProbePass.specularProbes[current.id].resolution = component.resolution
+        //             const cubeMap = SpecularProbePass.specularProbes[current.id]
+        //             cubeMap.draw((yaw, pitch, projection, index) => {
+        //                     const target = vec3.add([], current._translation, CUBE_MAP_VIEWS.target[index])
+        //                     const view = mat4.lookAt([], current._translation, target, CUBE_MAP_VIEWS.up[index])
+        //                     MaterialAPI.drawProbe(
+        //                         view,
+        //                         projection,
+        //                         current._translation
+        //                     )
+        //                 },
+        //                 10000,
+        //                 1
+        //             )
+        //
+        //             cubeMap.drawSpecularMap(component.mipmaps, component.resolution)
+        //         }
+        //         SpecularProbePass.step = STEPS_CUBE_MAP.PRE_FILTERED
+        //         break
+        //     case STEPS_CUBE_MAP.PRE_FILTERED:
+        //         for (let i = 0; i < SpecularProbePass.lastCallLength; i++) {
+        //             if (!specularProbes[i].active)
+        //                 continue
+        //             const current = specularProbes[i].components.get(COMPONENTS.PROBE)
+        //             SpecularProbePass.specularProbes[specularProbes[i].id].drawSpecularMap(current.mipmaps, current.resolution, GPU.cubeBuffer, current.multiplier)
+        //         }
+        //         SpecularProbePass.step = STEPS_CUBE_MAP.CALCULATE
+        //         break
+        //     case STEPS_CUBE_MAP.CALCULATE:
+        //         SpecularProbePass.sort(meshes, specularProbes)
+        //         SpecularProbePass.step = STEPS_CUBE_MAP.DONE
+        //         break
+        //     default:
+        //         SpecularProbePass.step = STEPS_CUBE_MAP.DONE
+        //         break
+        // }
     }
 
     static sort(entities, specularProbes) {

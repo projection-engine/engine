@@ -11,6 +11,8 @@ export default class VisibilityBuffer {
     static entityIDSampler
     static normalSampler
     static buffer
+    static materialsToRender = new Array(1000)
+    static materialMaxOffset = 0
 
     static initialize() {
         shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.VISIBILITY_BUFFER)
@@ -30,6 +32,7 @@ export default class VisibilityBuffer {
         const size = toRender.length
         shader.bind()
         fbo.startMapping()
+        let internalOffset = 0, previousMaterial = -1
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
             const meshComponent = entity.components.get(COMPONENTS.MESH)
@@ -39,12 +42,20 @@ export default class VisibilityBuffer {
             if (!meshComponent || !mesh || !entity.active || !material?.bindID)
                 continue
 
+            const currentMaterial = material.bindID
+            if (previousMaterial < 0 || previousMaterial !== currentMaterial) {
+                VisibilityBuffer.materialsToRender[internalOffset] = material
+                internalOffset++
+            }
+            previousMaterial = currentMaterial
+
             gpu.uniform3fv(uniforms.entityID, entity.pickID)
-            gpu.uniform1i(uniforms.materialID, material.bindID)
+            gpu.uniform1i(uniforms.materialID, currentMaterial)
             gpu.uniformMatrix4fv(uniforms.transformationMatrix, false, entity.matrix)
 
             mesh.draw()
         }
+        VisibilityBuffer.materialMaxOffset = internalOffset
         fbo.stopMapping()
     }
 }

@@ -14,6 +14,7 @@ export default class GBuffer {
     static albedoSampler
     static behaviourSampler
 
+
     static initialize() {
         if (GBuffer.#initialized)
             return
@@ -28,7 +29,9 @@ export default class GBuffer {
 
     static drawMaterials() {
         buffer.startMapping()
-        GPU.materials.forEach(material => {
+        const materials = VisibilityBuffer.materialsToRender
+        for (let i = 0; i < VisibilityBuffer.materialMaxOffset; i++) {
+            const material = materials[i]
             if (!material.bindID)
                 return
             const shader = material.shader
@@ -41,56 +44,57 @@ export default class GBuffer {
                 v_normal: VisibilityBuffer.normalSampler
             })
             drawQuad()
-        })
+        }
         buffer.stopMapping()
 
 
     }
-static drawToBuffer(){
-    shader.bind()
 
-    gpu.uniform1i(uniforms.hasAO, AmbientOcclusion.enabled ? 1 : 0)
+    static drawToBuffer() {
+        shader.bind()
 
-    gpu.activeTexture(gpu.TEXTURE0)
-    gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.albedoSampler)
-    gpu.uniform1i(uniforms.g_albedo, 0)
+        gpu.uniform1i(uniforms.hasAO, AmbientOcclusion.enabled ? 1 : 0)
 
-    gpu.activeTexture(gpu.TEXTURE1)
-    gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.filteredSampler)
-    gpu.uniform1i(uniforms.aoSampler, 1)
+        gpu.activeTexture(gpu.TEXTURE0)
+        gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.albedoSampler)
+        gpu.uniform1i(uniforms.g_albedo, 0)
 
-    gpu.activeTexture(gpu.TEXTURE2)
-    gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.behaviourSampler)
-    gpu.uniform1i(uniforms.g_behaviour, 2)
+        gpu.activeTexture(gpu.TEXTURE1)
+        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.filteredSampler)
+        gpu.uniform1i(uniforms.aoSampler, 1)
 
-    gpu.activeTexture(gpu.TEXTURE3)
-    gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.normalSampler)
-    gpu.uniform1i(uniforms.g_normal, 3)
+        gpu.activeTexture(gpu.TEXTURE2)
+        gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.behaviourSampler)
+        gpu.uniform1i(uniforms.g_behaviour, 2)
 
-    gpu.activeTexture(gpu.TEXTURE4)
-    gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.positionSampler)
-    gpu.uniform1i(uniforms.v_position, 4)
+        gpu.activeTexture(gpu.TEXTURE3)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.normalSampler)
+        gpu.uniform1i(uniforms.g_normal, 3)
 
-    gpu.activeTexture(gpu.TEXTURE5)
-    gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.SSGISampler)
-    gpu.uniform1i(uniforms.screenSpaceGI, 5)
+        gpu.activeTexture(gpu.TEXTURE4)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.positionSampler)
+        gpu.uniform1i(uniforms.v_position, 4)
 
-    gpu.activeTexture(gpu.TEXTURE6)
-    gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.SSRSampler)
-    gpu.uniform1i(uniforms.screenSpaceReflections, 6)
+        gpu.activeTexture(gpu.TEXTURE5)
+        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.SSGISampler)
+        gpu.uniform1i(uniforms.screenSpaceGI, 5)
 
-    gpu.activeTexture(gpu.TEXTURE7)
-    gpu.bindTexture(gpu.TEXTURE_2D, DirectionalShadows.sampler)
-    gpu.uniform1i(uniforms.shadowMapTexture, 7)
+        gpu.activeTexture(gpu.TEXTURE6)
+        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.SSRSampler)
+        gpu.uniform1i(uniforms.screenSpaceReflections, 6)
 
-    gpu.activeTexture(gpu.TEXTURE8)
-    gpu.bindTexture(gpu.TEXTURE_2D, GPU.BRDF)
-    gpu.uniform1i(uniforms.brdfSampler, 8)
+        gpu.activeTexture(gpu.TEXTURE7)
+        gpu.bindTexture(gpu.TEXTURE_2D, DirectionalShadows.sampler)
+        gpu.uniform1i(uniforms.shadowMapTexture, 7)
 
-    gpu.activeTexture(gpu.TEXTURE9)
-    gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
-    gpu.uniform1i(uniforms.shadowCube, 9)
+        gpu.activeTexture(gpu.TEXTURE8)
+        gpu.bindTexture(gpu.TEXTURE_2D, GPU.BRDF)
+        gpu.uniform1i(uniforms.brdfSampler, 8)
 
-    drawQuad()
-}
+        gpu.activeTexture(gpu.TEXTURE9)
+        gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
+        gpu.uniform1i(uniforms.shadowCube, 9)
+
+        drawQuad()
+    }
 }

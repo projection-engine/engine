@@ -10,6 +10,7 @@ export default class FrameComposition {
     static debugFlag
     static UBO
     static currentNoise = 0
+
     static initialize() {
         FrameComposition.UBO = new UBO(
             "CompositionSettings",
@@ -33,8 +34,8 @@ export default class FrameComposition {
         FrameComposition.UBO.updateData("gamma", new Float32Array([2.2]))
         FrameComposition.UBO.updateData("exposure", new Float32Array([1]))
         FrameComposition.UBO.updateData("FXAASpanMax", new Float32Array([8.0]))
-        FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([1.0/128.0]))
-        FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([1.0/8.0]))
+        FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([1.0 / 128.0]))
+        FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([1.0 / 8.0]))
         FrameComposition.UBO.updateData("inverseFilterTextureSize", new Float32Array([1 / GPU.internalResolution.w, 1 / GPU.internalResolution.h]))
         FrameComposition.UBO.unbind()
         FrameComposition.lookUpRandom = new Float32Array(2e+3)
@@ -58,10 +59,7 @@ export default class FrameComposition {
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, FrameComposition.workerTexture)
         gpu.uniform1i(uniforms.uSampler, 0)
-        if(uniforms.debugFlag)
-            gpu.uniform1i(uniforms.debugFlag, FrameComposition.debugFlag)
-        else
-            gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
+        gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
         drawQuad()
 
     }

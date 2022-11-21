@@ -25,51 +25,51 @@ export default class DiffuseProbePass {
     }
 
     static execute() {
-        const {
-            diffuseProbes,
-            meshes
-        } = Engine.data
-        if (!DiffuseProbePass.baseCubeMap)
-            return
-
-        if (DiffuseProbePass.lastCallLength !== diffuseProbes.length) {
-            DiffuseProbePass.step = STEPS_LIGHT_PROBE.GENERATION
-            DiffuseProbePass.lastCallLength = diffuseProbes.length
-        }
-        switch (DiffuseProbePass.step) {
-            case STEPS_LIGHT_PROBE.GENERATION:
-                for (let i = 0; i < diffuseProbes.length; i++) {
-                    const current = diffuseProbes[i]
-                    if (!current.active)
-                        continue
-                    DiffuseProbePass.baseCubeMap.draw((yaw, pitch, projection, index) => {
-                            const target = vec3.add([], current.translation, CUBE_MAP_VIEWS.target[index])
-                            const view = mat4.lookAt([], current.translation, target, CUBE_MAP_VIEWS.up[index])
-                            MaterialAPI.drawProbe(
-                                view,
-                                projection,
-                                current.translation
-                            )
-                        },
-                        10000,
-                        1
-                    )
-                    if (!DiffuseProbePass.diffuseProbes[current.id])
-                        DiffuseProbePass.diffuseProbes[current.id] = new LightProbe()
-
-                    DiffuseProbePass.diffuseProbes[current.id].drawDiffuseMap(DiffuseProbePass.baseCubeMap.texture, current.components.get(COMPONENTS.PROBE).multiplier)
-                }
-
-                DiffuseProbePass.step = STEPS_LIGHT_PROBE.CALCULATE
-                break
-            case STEPS_LIGHT_PROBE.CALCULATE:
-                DiffuseProbePass.sort(diffuseProbes, meshes)
-                DiffuseProbePass.step = STEPS_LIGHT_PROBE.DONE
-                break
-            default:
-                DiffuseProbePass.step = STEPS_LIGHT_PROBE.DONE
-                break
-        }
+        // const {
+        //     diffuseProbes,
+        //     meshes
+        // } = Engine.data
+        // if (!DiffuseProbePass.baseCubeMap)
+        //     return
+        //
+        // if (DiffuseProbePass.lastCallLength !== diffuseProbes.length) {
+        //     DiffuseProbePass.step = STEPS_LIGHT_PROBE.GENERATION
+        //     DiffuseProbePass.lastCallLength = diffuseProbes.length
+        // }
+        // switch (DiffuseProbePass.step) {
+        //     case STEPS_LIGHT_PROBE.GENERATION:
+        //         for (let i = 0; i < diffuseProbes.length; i++) {
+        //             const current = diffuseProbes[i]
+        //             if (!current.active)
+        //                 continue
+        //             DiffuseProbePass.baseCubeMap.draw((yaw, pitch, projection, index) => {
+        //                     const target = vec3.add([], current.translation, CUBE_MAP_VIEWS.target[index])
+        //                     const view = mat4.lookAt([], current.translation, target, CUBE_MAP_VIEWS.up[index])
+        //                     MaterialAPI.drawProbe(
+        //                         view,
+        //                         projection,
+        //                         current.translation
+        //                     )
+        //                 },
+        //                 10000,
+        //                 1
+        //             )
+        //             if (!DiffuseProbePass.diffuseProbes[current.id])
+        //                 DiffuseProbePass.diffuseProbes[current.id] = new LightProbe()
+        //
+        //             DiffuseProbePass.diffuseProbes[current.id].drawDiffuseMap(DiffuseProbePass.baseCubeMap.texture, current.components.get(COMPONENTS.PROBE).multiplier)
+        //         }
+        //
+        //         DiffuseProbePass.step = STEPS_LIGHT_PROBE.CALCULATE
+        //         break
+        //     case STEPS_LIGHT_PROBE.CALCULATE:
+        //         DiffuseProbePass.sort(diffuseProbes, meshes)
+        //         DiffuseProbePass.step = STEPS_LIGHT_PROBE.DONE
+        //         break
+        //     default:
+        //         DiffuseProbePass.step = STEPS_LIGHT_PROBE.DONE
+        //         break
+        // }
     }
 
     static sort(probes, meshes) {

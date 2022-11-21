@@ -4,40 +4,32 @@ import Engine from "../../Engine";
 import CameraAPI from "../../lib/utils/CameraAPI";
 
 
-const SKYBOX_TYPE = MATERIAL_RENDERING_TYPES.SKYBOX
 export default class SkyboxPass {
     static isReady = false
     static hasRendered = false
 
     static execute() {
-        const {meshes} = Engine.data
-
-        MaterialAPI.loopMeshes(
-            meshes,
-            (mat, mesh, meshComponent, current) => {
-
-                if (mat.shadingType !== SKYBOX_TYPE)
-                    return
-                if (!SkyboxPass.isReady) {
-                    SkyboxPass.isReady = true
-                    gpu.depthMask(false)
-                    gpu.disable(gpu.CULL_FACE)
-                    gpu.disable(gpu.DEPTH_TEST)
-                }
-
-                MaterialAPI.drawMesh(
-                    current.id,
-                    mesh,
-                    mat,
-                    meshComponent,
-                    {
-                        skyboxProjectionMatrix: CameraAPI.skyboxProjectionMatrix,
-                        transformMatrix: current.matrix,
-                        materialComponent: meshComponent
-                    }, true)
-
+        const mats = MaterialAPI.staticShadedEntities
+        for (let i = 0; i < mats.length; i++) {
+            if (!SkyboxPass.isReady) {
+                SkyboxPass.isReady = true
+                gpu.depthMask(false)
+                gpu.disable(gpu.CULL_FACE)
+                gpu.disable(gpu.DEPTH_TEST)
             }
-        )
+            const current = mats[i]
+            const entity = current.entity
+            if (!entity.active)
+                continue
+            const material = current.material
+            const mesh = current.mesh
+            material.use({
+                skyboxProjectionMatrix: CameraAPI.skyboxProjectionMatrix,
+                transformMatrix: current.matrix
+            })
+            mesh.draw()
+        }
+
         if (SkyboxPass.isReady) {
             SkyboxPass.hasRendered = true
             gpu.enable(gpu.DEPTH_TEST)

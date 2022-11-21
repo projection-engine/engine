@@ -157,7 +157,7 @@ export default class Loop {
         SkyboxPass.execute()
         Loop.#duringDrawing()
         GBuffer.drawToBuffer()
-        // GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
+        GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
 
         ForwardRenderer.execute()
         SpritePass.execute()
