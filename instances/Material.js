@@ -19,18 +19,6 @@ export default class Material {
     instances = new Map()
     cullFace = "BACK"
     noDepthTest
-    bindID
-
-    static incrementalMap = new Map()
-    static #generator
-
-    static* getIncrementalID() {
-        let counter = 1
-        while (true) {
-            yield counter
-            counter++
-        }
-    }
 
     constructor({
                     vertex,
@@ -41,12 +29,9 @@ export default class Material {
                     onCompiled,
                     cubeMapShaderCode
                 }) {
-        if (!Material.#generator)
-            Material.#generator = Material.getIncrementalID()
-        this.id = id ? id : v4().toString()
-        this.bindID = Material.#generator.next().value
 
-        Material.incrementalMap.set(this.bindID, this)
+        this.id = id ? id : v4().toString()
+
 
         this.settings = settings
         this.shader = [fragment, vertex, uniformData, onCompiled]
@@ -128,7 +113,6 @@ export default class Material {
                     gpu.deleteTexture(t.texture)
             })
             this.texturesInUse = {}
-            Material.incrementalMap.delete(this.bindID)
         } catch (err) {
             console.error(err)
         }

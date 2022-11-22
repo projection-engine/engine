@@ -39,7 +39,7 @@ vec3 behaviourData;
 void main(){
     vec3 uv_material = texture(v_uv, texCoords).rgb;
     vec4 positionData = texture(v_position, texCoords);
-    if (round(uv_material.b) != round(float(materialID)/255.)|| positionData.a < 1.) discard;
+    if (round(uv_material.b * 255.) != round(float(materialID))|| positionData.a < 1.) discard;
     vec2 UVs = uv_material.rg;
 
     //        vec2 UVs = texCoords;

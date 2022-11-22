@@ -2,7 +2,7 @@ import IMAGE_WORKER_ACTIONS from "../static/IMAGE_WORKER_ACTIONS"
 import TEXTURE_WRAPPING from "../static/texture/TEXTURE_WRAPPING";
 import TEXTURE_FILTERING from "../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../static/texture/TEXTURE_FORMATS";
-import ImageWorker from "../workers/image/ImageWorker";
+import ImageProcessor from "../lib/math/ImageProcessor";
 
 export default class Texture {
     loaded = false
@@ -14,7 +14,7 @@ export default class Texture {
         this.attributes = attributes
         if (typeof img === "string") {
             if (img.includes("data:image/")) {
-                const res = await ImageWorker.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
+                const res = await ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
                 res.naturalHeight = res.height
                 res.naturalWidth = res.width
                 this.attributes.img = res
@@ -76,7 +76,7 @@ export default class Texture {
     update(newImage) {
         if (this.loaded) {
             gpu.deleteTexture(this.texture)
-            ImageWorker.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
+            ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
                 this.attributes.img = res
                 Texture.#initializeTexture(this.attributes)
             })

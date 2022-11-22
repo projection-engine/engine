@@ -1,6 +1,6 @@
 import {mat4, quat, vec3} from "gl-matrix";
-import TransformationAPI from "../../lib/math/TransformationAPI";
-import copyWithOffset from "./copy-with-offset";
+import TransformationAPI from "../lib/math/TransformationAPI";
+import copyWithOffset from "../utils/copy-with-offset";
 
 
 /**
@@ -14,7 +14,7 @@ const ORTHOGRAPHIC = 1
 let needsUpdate = false, then = 0, elapsed = 0
 let nBuffer
 
-export default class CameraWorker {
+class CameraWorker {
     static #translationBuffer
     static #rotationBuffer
 
@@ -177,3 +177,5 @@ export default class CameraWorker {
 
     }
 }
+
+self.onmessage = (event) => CameraWorker.initialize(...event.data)

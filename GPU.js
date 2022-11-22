@@ -1,6 +1,6 @@
 import LineAPI from "./lib/rendering/LineAPI";
-import ImageWorker from "./workers/image/ImageWorker";
-import TerrainWorker from "./workers/terrain/TerrainWorker";
+import ImageProcessor from "./lib/math/ImageProcessor";
+import TerrainGenerator from "./lib/math/TerrainGenerator";
 import CameraAPI from "./lib/utils/CameraAPI";
 import TransformationPass from "./runtime/misc/TransformationPass";
 import CubeMapAPI from "./lib/rendering/CubeMapAPI";
@@ -74,8 +74,8 @@ export default class GPU {
         CameraAPI.initialize()
         LightsAPI.initialize()
         TransformationPass.initialize()
-        TerrainWorker.initialize()
-        ImageWorker.initialize()
+        TerrainGenerator.initialize()
+        ImageProcessor.initialize()
 
 
         initializeFrameBuffers()

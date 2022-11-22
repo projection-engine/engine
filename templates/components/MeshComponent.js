@@ -32,7 +32,7 @@ export default class MeshComponent extends Component {
             MaterialAPI[this.__mapSource.type].splice(this.__mapSource.index, 1)
             this.__mapSource = {}
         } else if (data)
-            MeshComponent.updateMap(this)
+            MaterialAPI.updateMap(this)
     }
 
     get meshID() {
@@ -48,63 +48,7 @@ export default class MeshComponent extends Component {
             MaterialAPI[this.__mapSource.type].splice(this.__mapSource.index, 1)
             this.__mapSource = {}
         } else if (data)
-            MeshComponent.updateMap(this)
-    }
-
-    static updateMap(component) {
-        if (!Engine.queryMap.get(component.__entity.queryKey))
-            return;
-        const referenceMat = GPU.materials.get(component._materialID)
-        const referenceMesh = GPU.meshes.get(component._meshID)
-
-        if (referenceMat && referenceMesh) {
-            if (component.__mapSource.material === referenceMat && component.__mapSource.mesh === referenceMesh)
-                return
-            if (typeof component.__mapSource.index !== "number" || !MaterialAPI[component.__mapSource.type]?.[component.__mapSource.index]) {
-                let key
-                switch (referenceMat.shadingType) {
-                    case MATERIAL_RENDERING_TYPES.DEFERRED:
-                        key = "deferredShadedEntities"
-                        break
-                    case MATERIAL_RENDERING_TYPES.FORWARD:
-                    case MATERIAL_RENDERING_TYPES.UNLIT:
-                        key = "forwardShadedEntities"
-                        break
-                    case MATERIAL_RENDERING_TYPES.SKYBOX:
-                        key = "staticShadedEntities"
-                        break
-                }
-                component.__mapSource.type = key
-                MaterialAPI[key].push({
-                    entity: component.__entity,
-                    component: component,
-                    mesh: referenceMesh,
-                    material: referenceMat
-                })
-                component.__mapSource.index = MaterialAPI[key].length - 1
-            } else {
-                const current = MaterialAPI[component.__mapSource.type][component.__mapSource.index]
-                current.material = referenceMat
-                current.mesh = referenceMesh
-
-            }
-        }
-        if (!referenceMat && component._materialID != null) {
-            FileSystemAPI.loadMaterial(component._materialID).then(res => {
-                if (res)
-                    MeshComponent.updateMap(component)
-                else
-                    ConsoleAPI.error("Material not found")
-            })
-        }
-        if (!referenceMesh && component._meshID != null) {
-            FileSystemAPI.loadMesh(component._meshID).then(res => {
-                if (res)
-                    MeshComponent.updateMap(component)
-                else
-                    ConsoleAPI.error("Mesh not found")
-            })
-        }
+            MaterialAPI.updateMap(this)
     }
 
     get materialID() {

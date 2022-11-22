@@ -1,7 +1,7 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPU from "../../GPU";
 import GBuffer from "../rendering/GBuffer";
-import ImageWorker from "../../workers/image/ImageWorker";
+import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
 import VisibilityBuffer from "../rendering/VisibilityBuffer";
 
@@ -51,7 +51,7 @@ export default class AmbientOcclusion {
         AmbientOcclusion.UBO.updateData("noiseScale", AmbientOcclusion.noiseScale)
         AmbientOcclusion.UBO.unbind()
 
-        ImageWorker.request(
+        ImageProcessor.request(
             IMAGE_WORKER_ACTIONS.NOISE_DATA,
             {w: RESOLUTION, h: RESOLUTION}
         )

@@ -1,4 +1,4 @@
-import PrimitiveProcessor from "../../lib/math/PrimitiveProcessor";
+import PrimitiveProcessor from "../lib/math/PrimitiveProcessor";
 import getImageData from "../utils/get-image-data";
 
 

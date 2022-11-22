@@ -9,10 +9,10 @@ export default class IntanceBuffer {
     }
 
 
-    updateBuffer(){
+    updateBuffer() {
 
         this.bufferSize = this.entities.size
-        if(this.bufferSize > 0) {
+        if (this.bufferSize > 0) {
             const data = []
             this.entities.forEach(entity => data.push(Array.from(entity.matrix)))
             const temp = new Float32Array(data.flat())
@@ -20,7 +20,8 @@ export default class IntanceBuffer {
             gpu.bufferData(gpu.ARRAY_BUFFER, temp, gpu.STREAM_DRAW)
         }
     }
-    bind(){
+
+    bind() {
         gpu.bindBuffer(gpu.ARRAY_BUFFER, this.transformVBO)
         gpu.enableVertexAttribArray(1)
         gpu.enableVertexAttribArray(2)

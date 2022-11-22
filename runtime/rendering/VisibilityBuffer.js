@@ -3,6 +3,7 @@ import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import Engine from "../../Engine";
 import COMPONENTS from "../../static/COMPONENTS";
+import MaterialAPI from "../../lib/rendering/MaterialAPI";
 
 let shader, uniforms, fbo
 export default class VisibilityBuffer {
@@ -28,18 +29,18 @@ export default class VisibilityBuffer {
     }
 
     static execute() {
-        const toRender = Engine.data.meshes
+        const toRender = MaterialAPI.deferredShadedEntities
         const size = toRender.length
         shader.bind()
         fbo.startMapping()
         let internalOffset = 0, previousMaterial = -1
         for (let i = 0; i < size; i++) {
-            const entity = toRender[i]
-            const meshComponent = entity.components.get(COMPONENTS.MESH)
-            const mesh = GPU.meshes.get(meshComponent?.meshID)
-            const material = GPU.materials.get(meshComponent?.materialID)
+            const currentTarget = toRender[i]
+            const mesh = currentTarget.mesh
+            const entity = currentTarget.entity
+            const material = currentTarget.material
 
-            if (!meshComponent || !mesh || !entity.active || !material?.bindID)
+            if (!entity.active)
                 continue
 
             const currentMaterial = material.bindID
