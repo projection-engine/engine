@@ -74,7 +74,7 @@ export default class DirectionalShadows {
                     DirectionalShadows.resolutionPerTexture,
                     DirectionalShadows.resolutionPerTexture
                 )
-                gpu.clear(gpu.DEPTH_BUFFER_BIT)
+
 
                 currentLight.atlasFace = [currentColumn, 0]
                 DirectionalShadows.loopMeshes(DirectionalShadows.shadowMapShader, currentLight.lightView, currentLight.lightProjection)

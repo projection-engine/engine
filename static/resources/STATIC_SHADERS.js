@@ -32,7 +32,6 @@ export default {
     },
 
     DEVELOPMENT: {
-        TO_SCREEN:  "TO_SCREEN",
         DEBUG_DEFERRED: "DEBUG_DEFERRED",
         LINE: "LINE",
         WIREFRAME: "WIREFRAME",

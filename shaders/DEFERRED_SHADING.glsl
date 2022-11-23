@@ -46,10 +46,10 @@ uniform samplerCube shadowCube;
 
 out vec4 finalColor;
 void main() {
-    vec4 pixelPosition = texture(v_position, texCoords);
-    if (pixelPosition.a < 1.) discard;
-    vec3 fragPosition = (invViewMatrix * vec4(pixelPosition.rgb, 1.)).xyz;
-    vec3 albedo = texture(g_albedo, texCoords).rgb;
+    vec4 pixelColor = texture(g_albedo, texCoords);
+    if (pixelColor.a < 1.) discard;
+    vec3 fragPosition = (invViewMatrix * vec4(texture(v_position, texCoords).rgb, 1.)).xyz;
+    vec3 albedo = pixelColor.rgb;
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
     vec3 V = normalize(placement.xyz - fragPosition);

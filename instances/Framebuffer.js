@@ -30,23 +30,20 @@ export default class Framebuffer {
     }
 
 
-    startMapping(buffer = this.FBO, autoSetViewport = true, clear = true) {
-        if (autoSetViewport)
-            gpu.viewport(0, 0, this.width, this.height)
+    startMapping(noClearing) {
         this.use()
-        if (clear)
+        gpu.viewport(0, 0, this.width, this.height)
+        if (!noClearing)
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+        else
+            console.trace("IM HERE")
     }
 
 
-
-    stopMapping(clear = true) {
-        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+    stopMapping() {
         GPU.activeFramebuffer = undefined
-        if (clear)
-            gpu?.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
-
-        gpu.bindVertexArray(null)
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+        gpu.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
     }
 
     depthTexture(precision = gpu.DEPTH_COMPONENT32F) {

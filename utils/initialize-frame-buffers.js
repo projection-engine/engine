@@ -19,7 +19,7 @@ export default function initializeFrameBuffers() {
 
     GBuffer.gBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
         .texture({attachment: 0, label: "ALBEDO"}) // ALBEDO
-        .texture({attachment: 1, precision: gpu.RGB, type: gpu.UNSIGNED_BYTE, format: gpu.RGB, label: "BEHAVIOUR"})
+        .texture({attachment: 1, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE, format: gpu.RGBA, label: "BEHAVIOUR"})
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()

@@ -42,10 +42,10 @@ export default class GlobalIlluminationPass {
     static shader
     static normalSampler
     static rayMarchSettings = new Float32Array(9)
-
+    static sourceColorSampler
 
     static initialize() {
-
+        GlobalIlluminationPass.sourceColorSampler = Engine.previousFrameSampler
 
         ssgiQuarter = GPUAPI.allocateFramebuffer(
             STATIC_FRAMEBUFFERS.SSGI + "QUARTER",
@@ -140,7 +140,7 @@ export default class GlobalIlluminationPass {
         gpu.uniform1i(uniforms.gPosition, 2)
 
         gpu.activeTexture(gpu.TEXTURE3)
-        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.sourceColorSampler)
         gpu.uniform1i(uniforms.previousFrame, 3)
 
         gpu.activeTexture(gpu.TEXTURE4)

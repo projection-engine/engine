@@ -3,16 +3,13 @@ import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
 import LightsAPI from "../../lib/rendering/LightsAPI";
 
 export default class TransformationPass {
-    static #hasChangeBuffer = new Uint8Array(new SharedArrayBuffer(1))
+    static hasChangeBuffer = new Uint8Array(new SharedArrayBuffer(1))
     static instancingNeedsUpdate = new Map()
     static threads = []
     static linkedEntities = new Map()
     static #initialized = false
     static #currentWorkerIndex = 0
 
-    static get hasUpdatedItem() {
-        return TransformationPass.#hasChangeBuffer[0] === 1
-    }
 
     static updateEntityLinks(child, parent) {
         if(parent) {
@@ -38,7 +35,7 @@ export default class TransformationPass {
                 if (typeof event.data === "string")
                     TransformationPass.instancingNeedsUpdate.set(event.data, GPU.instancingGroup.get(event.data))
             }
-            w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: TransformationPass.#hasChangeBuffer})
+            w.postMessage({type: WORKER_MESSAGES.INITIALIZE, payload: TransformationPass.hasChangeBuffer})
         }
     }
 
@@ -78,17 +75,6 @@ export default class TransformationPass {
 
     }
 
-    static execute() {
-        if (TransformationPass.#hasChangeBuffer[0] === 1) {
-            LightsAPI.packageLights(false, true)
-            TransformationPass.#hasChangeBuffer[0] = 0
-        }
-
-        if (TransformationPass.instancingNeedsUpdate.size > 0) {
-            TransformationPass.instancingNeedsUpdate.forEach(i => i.updateBuffer())
-            TransformationPass.instancingNeedsUpdate.clear()
-        }
-    }
 
 }
 
