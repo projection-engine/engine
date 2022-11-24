@@ -17,6 +17,7 @@ export default function initializeFrameBuffers() {
         .texture({attachment: 3, label: "UV_MATERIAL"})
         .depthTest()
 
+
     GBuffer.gBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
         .texture({attachment: 0, label: "ALBEDO"}) // ALBEDO
         .texture({attachment: 1, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE, format: gpu.RGBA, label: "BEHAVIOUR"})
@@ -24,9 +25,7 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
 
-
-    GlobalIlluminationPass.normalsFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI_NORMALS, GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h).texture()
-    GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI, GPU.samplerResolutions.GI.w, GPU.samplerResolutions.GI.h)
+    GlobalIlluminationPass.FBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI)
         .texture({
             attachment: 0,
             precision: gpu.RGBA8,
@@ -39,19 +38,17 @@ export default function initializeFrameBuffers() {
             type: gpu.UNSIGNED_BYTE,
             label: "SSR"
         })
-    AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
+    AmbientOcclusion.framebuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, GPU.internalResolution.w / 2, GPU.internalResolution.h / 2)
         .texture({
             precision: gpu.R8,
             format: gpu.RED,
-            type: gpu.UNSIGNED_BYTE,
-            linear: true
+            type: gpu.UNSIGNED_BYTE
         })
-    AmbientOcclusion.blurredFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO, GPU.samplerResolutions.AO.w, GPU.samplerResolutions.AO.h)
+    AmbientOcclusion.blurredFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO, GPU.internalResolution.w / 2, GPU.internalResolution.h / 2)
         .texture({
             precision: gpu.R8,
             format: gpu.RED,
-            type: gpu.UNSIGNED_BYTE,
-            linear: true
+            type: gpu.UNSIGNED_BYTE
         })
 
     MotionBlur.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})

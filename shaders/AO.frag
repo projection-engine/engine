@@ -16,6 +16,8 @@ uniform sampler2D gNormal;
 uniform sampler2D noiseSampler;
 out vec4 fragColor;
 
+
+
 void main()
 {
     vec4 fragPosition = texture(gPosition, texCoords);

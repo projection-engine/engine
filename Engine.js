@@ -62,11 +62,11 @@ export default class Engine {
     static benchmarkMode = false
     static #initialized = false
 
-    static async initialize(canvas, mainResolution, AOResolution, GIResolution, readAsset, readMetadata) {
+    static async initialize(canvas, mainResolution, readAsset, readMetadata) {
         if (Engine.#initialized)
             return
         Engine.#initialized = true
-        await GPU.initializeContext(canvas, mainResolution, AOResolution, GIResolution)
+        await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
 
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)

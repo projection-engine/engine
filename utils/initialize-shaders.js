@@ -18,7 +18,6 @@ import FXAA_FRAG from "../shaders/FXAA.frag";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/BRIGHTNESS_FILTER.frag";
 import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/SCREEN_SPACE_INDIRECT.frag"
-import STOCHASTIC_NORMALS_FRAG from "../shaders/STOCHASTIC_NORMALS.frag"
 import CUBEMAP from "../shaders/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
@@ -51,8 +50,6 @@ export default function initializeShaders() {
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)
 
     GlobalIlluminationPass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, QUAD_VERTEX, SCREEN_SPACE_INDIRECT_FRAG)
-    GlobalIlluminationPass.normalsShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI_NORMALS, QUAD_VERTEX, STOCHASTIC_NORMALS_FRAG)
-
     MotionBlur.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.MOTION_BLUR, QUAD_VERTEX, MOTION_BLUR_FRAG)
 
     AmbientOcclusion.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.AO, QUAD_VERTEX, AO_FRAG)
@@ -66,7 +63,4 @@ export default function initializeShaders() {
 
     GlobalIlluminationPass.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GAUSSIAN, QUAD_VERTEX, GAUSSIAN_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.UPSAMPLING_BLOOM, QUAD_VERTEX, UPSAMPLING_TEND_FRAG)
-// TODO
-//    GBuffer.forwardDepthShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.GENERIC_GBUFFER_DATA, ONLY_DEPTH_VERT, ONLY_DEPTH_FRAG)
-
 }

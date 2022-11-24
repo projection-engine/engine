@@ -126,16 +126,13 @@ class CameraWorker {
     }
 
     static updateUBO() {
-        // const previousViewProjectionMatrix = CameraWorker.previousViewProjectionMatrix
-
         const cacheUBOBuffer = CameraWorker.UBOBuffer
-
         copyWithOffset(cacheUBOBuffer, CameraWorker.viewProjectionMatrix, 0)
         copyWithOffset(cacheUBOBuffer, CameraWorker.#viewMatrix, 16)
         copyWithOffset(cacheUBOBuffer, CameraWorker.#projectionMatrix, 32)
         copyWithOffset(cacheUBOBuffer, CameraWorker.#invViewMatrix, 48)
-        copyWithOffset(cacheUBOBuffer, CameraWorker.#position, 64)
-
+        copyWithOffset(cacheUBOBuffer, CameraWorker.#invProjectionMatrix, 64)
+        copyWithOffset(cacheUBOBuffer, CameraWorker.#position, 80)
     }
 
     static previousRotationLength = 0
