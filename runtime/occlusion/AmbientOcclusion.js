@@ -71,8 +71,7 @@ export default class AmbientOcclusion {
                 Object.assign(
                     AmbientOcclusion.uniforms,
                     {
-                        gPosition: VisibilityBuffer.positionSampler,
-                        gNormal: VisibilityBuffer.normalSampler,
+                        gDepth: VisibilityBuffer.depthEntityIDSampler,
                         noiseSampler: AmbientOcclusion.noiseSampler
                     }
                 )

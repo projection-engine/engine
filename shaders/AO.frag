@@ -11,22 +11,24 @@ uniform Settings{
 };
 in vec2 texCoords;
 uniform int maxSamples;
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
+uniform sampler2D gDepth;
 uniform sampler2D noiseSampler;
 out vec4 fragColor;
 
-
+//import(depthReconstructionUtils)
 
 void main()
 {
-    vec4 fragPosition = texture(gPosition, texCoords);
-    if (fragPosition.a < 1.) discard;
+    vec4 depthData = texture(gDepth, texCoords);
+    if (depthData.a < 1.) discard;
+    vec3 fragPosition = viewSpacePositionFromDepth(depthData.r, texCoords);
+    vec3 normal = normalFromDepth(depthData.r, texCoords, gDepth);
+
     float radius = settings.x;
     float power = settings.y;
     float bias = settings.z;
 
-    vec3 normal = (transpose(invViewMatrix) * texture(gNormal, texCoords)).rgb;
+
     vec3 randomVec = texture(noiseSampler, texCoords * noiseScale).xyx;
 
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
@@ -38,11 +40,10 @@ void main()
         vec3 samplePos = TBN * samples[i].rgb;
         samplePos = fragPosition.xyz + samplePos * radius;
         vec4 offset = vec4(samplePos, 1.0);
-        offset = projectionMatrix *offset;
+        offset = projectionMatrix * offset;
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
-
-        float sampleDepth = texture(gPosition, offset.xy).z;
+        float sampleDepth = viewSpacePositionFromDepth(texture(gDepth, offset.xy).r, texCoords).z;
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPosition.z - sampleDepth));
         occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
     }
