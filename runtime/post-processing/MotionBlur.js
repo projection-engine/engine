@@ -1,3 +1,4 @@
+import VisibilityBuffer from "../rendering/VisibilityBuffer";
 
 
 export default class MotionBlur {

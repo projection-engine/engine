@@ -15,6 +15,6 @@ void main(){
     vec2 c = a - b;
 
     v_depth_entityid = vec4(gl_FragCoord.z, entityID.rg, 1.);
-    v_velocity = vec4(vec2(pow(c.x, 3.), pow(c.y, 3.)), 0., 1.);
+    v_velocity = vec4(vec2(pow(c.x, 1.), pow(c.y, 1.)), 0., 1.);
 
 }
