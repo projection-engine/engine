@@ -23,18 +23,10 @@ void main(){
     vec4 wPosition = transformMatrix * vec4(position, 1.0);
     previousScreenPosition = viewProjection * previousModelMatrix * vec4(position, 1.0);
     currentScreenPosition =  viewProjection * wPosition;
-
     worldSpacePosition = wPosition.xyz;
     viewSpacePosition = (viewMatrix * wPosition).xyz;
-
     normalVec = normalize(mat3(transformMatrix) * normal);
-
-//    vec3 bitangent = cross(normal, tangent);
-//    toTangentSpace = mat3(tangent, bitangent, normal);
-
     camera = placement.xyz;
     texCoords = uvTexture;
-
-
     gl_Position = projectionMatrix * viewMatrix * wPosition;
 }

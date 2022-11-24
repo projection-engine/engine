@@ -96,7 +96,18 @@ export default class Mesh {
         GPU.activeMesh = undefined
     }
 
+    simplifiedDraw(){
+        const last = GPU.activeMesh
+        if (last === this)
+            return
+        else if (last != null)
+            last.finish()
 
+        gpu.bindVertexArray(this.VAO)
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
+        this.vertexVBO.enable()
+        gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+    }
 
     draw() {
         this.use()

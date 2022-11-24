@@ -1,20 +1,20 @@
 precision highp float;
 
-in vec3 normalVec;
-in vec4 viewSpacePosition;
-in vec2 texCoords;
+in vec4 previousScreenPosition;
+in vec4 currentScreenPosition;
 
-layout (location = 0) out vec4 v_position;
-layout (location = 1) out vec4 v_normal;
-layout (location = 2) out vec4 v_entityID;
-layout (location = 3) out vec4 v_uv;
+layout (location = 0) out vec4 v_depth_entityid;
+layout (location = 1) out vec4 v_velocity;
+
 
 uniform vec3 entityID;
-uniform int materialID;
 
 void main(){
-    v_position = vec4(viewSpacePosition.rgb, 1.);
-    v_normal = vec4(normalVec, 1.);
-    v_uv = vec4(texCoords, float(materialID)/255., 1.);
-    v_entityID = vec4(entityID, 1.);
+    vec2 a = (currentScreenPosition.xy / currentScreenPosition.w) * 0.5 + 0.5;
+    vec2 b = (previousScreenPosition.xy / previousScreenPosition.w) * 0.5 + 0.5;
+    vec2 c = a - b;
+
+    v_depth_entityid = vec4(gl_FragCoord.z, entityID.rg, 1.);
+    v_velocity = vec4(vec2(pow(c.x, 3.), pow(c.y, 3.)), 0., 1.);
+
 }

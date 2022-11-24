@@ -1,7 +1,6 @@
 import CameraAPI from "./lib/utils/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import GBuffer from "./runtime/rendering/GBuffer";
 import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
@@ -81,7 +80,7 @@ export default class Engine {
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
         SpritePass.initialize()
-        GBuffer.initialize()
+
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
 

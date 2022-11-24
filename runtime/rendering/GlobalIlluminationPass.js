@@ -1,6 +1,4 @@
 import GPU from "../../GPU";
-import GBuffer from "./GBuffer";
-import AmbientOcclusion from "../occlusion/AmbientOcclusion";
 import Engine from "../../Engine";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
@@ -92,17 +90,14 @@ export default class GlobalIlluminationPass {
         GlobalIlluminationPass.FBO.startMapping()
         shader.bind()
 
+        // TODO - POSITION AND NORMAL RECONSTRUCTION
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.normalSampler)
-        gpu.uniform1i(uniforms.gNormal, 0)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+        gpu.uniform1i(uniforms.depthEntityIDSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.positionSampler)
-        gpu.uniform1i(uniforms.gPosition, 1)
-
-        gpu.activeTexture(gpu.TEXTURE2)
         gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.sourceColorSampler)
-        gpu.uniform1i(uniforms.previousFrame, 2)
+        gpu.uniform1i(uniforms.previousFrame, 1)
 
         gpu.uniform1f(uniforms.noise, FrameComposition.currentNoise)
 
@@ -139,8 +134,8 @@ export default class GlobalIlluminationPass {
 
         blurShader.bind()
         ssgiFinal.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, GBuffer.IDSampler)
-        gpu.uniform1i(blurShaderUniforms.gMeshID, 0)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+        gpu.uniform1i(blurShaderUniforms.depthEntityIDSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
         gpu.bindTexture(gpu.TEXTURE_2D, ssgiEighth.colors[0])

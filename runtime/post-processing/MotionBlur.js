@@ -1,4 +1,4 @@
-import GBuffer from "../rendering/GBuffer";
+
 
 export default class MotionBlur {
     static shader
@@ -10,7 +10,7 @@ export default class MotionBlur {
     static initialize(){
         Object.assign(MotionBlur.uniforms, {
             currentFrame: MotionBlur.workerTexture,
-            gVelocity: GBuffer.velocityMapSampler
+            gVelocity: VisibilityBuffer.velocitySampler
         })
     }
     static execute() {

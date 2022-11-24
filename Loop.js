@@ -1,5 +1,5 @@
 import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
-import GBuffer from "./runtime/rendering/GBuffer";
+
 import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import SpecularProbePass from "./runtime/rendering/SpecularProbePass";
@@ -72,16 +72,13 @@ export default class Loop {
 
         Loop.#beforeDrawing()
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.MATERIALS)
-        GBuffer.drawMaterials()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.MATERIALS)
 
         FBO.startMapping()
         SkyboxPass.execute()
         Loop.#duringDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.GBUFFER)
-        GBuffer.drawToBuffer()
+        // TODO - FORWARD SHADING
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.GBUFFER)
 
         GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
@@ -121,12 +118,12 @@ export default class Loop {
         AmbientOcclusion.execute()
         VisibilityBuffer.execute()
         Loop.#beforeDrawing()
-        GBuffer.drawMaterials()
+
 
         FBO.startMapping()
         SkyboxPass.execute()
         Loop.#duringDrawing()
-        GBuffer.drawToBuffer()
+
         GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
 
         SpritePass.execute()

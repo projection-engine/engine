@@ -129,7 +129,6 @@ export default class Framebuffer {
             gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
             GPU.activeFramebuffer = this.FBO
         }
-        return this
     }
 
     clear() {

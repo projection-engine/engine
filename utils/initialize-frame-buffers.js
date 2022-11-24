@@ -4,23 +4,28 @@ import GPU from "../GPU";
 
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
 import GlobalIlluminationPass from "../runtime/rendering/GlobalIlluminationPass";
-import GBuffer from "../runtime/rendering/GBuffer";
+
 import MotionBlur from "../runtime/post-processing/MotionBlur";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 
 export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
-        .texture({attachment: 0, label: "POSITION"})
-        .texture({attachment: 1, label: "NORMAL"})
-        .texture({attachment: 2, label: "INSTANCE"})
-        .texture({attachment: 3, label: "UV_MATERIAL"})
+        .texture({
+                attachment: 0,
+                precision: gpu.RGBA32F,
+                label: "DEPTH_ENTITY"
+            })
+        .texture({
+            attachment: 1,
+            label: "VELOCITY",
+            precision: gpu.RG16F,
+            type: gpu.FLOAT,
+            format: gpu.RG,
+        })
         .depthTest()
 
 
-    GBuffer.gBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.G_BUFFER)
-        .texture({attachment: 0, label: "ALBEDO"}) // ALBEDO
-        .texture({attachment: 1, precision: gpu.RGBA8, type: gpu.UNSIGNED_BYTE, format: gpu.RGBA, label: "BEHAVIOUR"})
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()

@@ -4,7 +4,7 @@ precision highp float;
 in vec2 texCoords;
 
 uniform sampler2D sceneColor;//color buffer
-uniform sampler2D gMeshID;//ID buffer
+uniform sampler2D depthEntityIDSampler;//ID buffer
 uniform int blurRadius;
 out vec4 fragColor;
 
@@ -22,14 +22,14 @@ vec3 blur() {
     float weight;
     vec2 offset;
     vec2 scaledOffset;
-    vec4 root = texture(gMeshID, texCoords);
+    vec4 root = texture(depthEntityIDSampler, texCoords);
     if (root.a < 1.) discard;
 
     for (int x = -samples / 2; x < samples / 2; ++x) {
         for (int y = -samples / 2; y < samples / 2; ++y) {
             offset = vec2(x, y);
             scaledOffset = scale * offset;
-            if (root.rgb == texture(gMeshID, texCoords + scaledOffset).rgb){
+            if (root.gb == texture(depthEntityIDSampler, texCoords + scaledOffset).gb){
                 weight = gaussian(offset);
                 col += texture(sceneColor, texCoords + scaledOffset).rgb * weight;
                 accum += weight;

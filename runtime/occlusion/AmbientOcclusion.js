@@ -1,6 +1,6 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
 import GPU from "../../GPU";
-import GBuffer from "../rendering/GBuffer";
+
 import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
 import VisibilityBuffer from "../rendering/VisibilityBuffer";
