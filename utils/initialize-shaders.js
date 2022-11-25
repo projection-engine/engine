@@ -34,7 +34,7 @@ import TO_SCREEN from "../shaders/TO_SCREEN.vert"
 
 import V_BUFFER_VERT from "../shaders/V_BUFFER.vert"
 import V_BUFFER_FRAG from "../shaders/V_BUFFER.frag"
-import DEFERRED_SHADING from "../shaders/DEFERRED_SHADING.glsl"
+import DEFERRED_SHADING from "../shaders/utils/PB_LIGHT_COMPUTATION.glsl"
 
 export default function initializeShaders() {
     SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
