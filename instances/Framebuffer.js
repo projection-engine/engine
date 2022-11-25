@@ -133,7 +133,10 @@ export default class Framebuffer {
 
     clear() {
         this.use()
-        gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+        if (this.RBO)
+            gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+        else
+            gpu.clear(gpu.COLOR_BUFFER_BIT)
     }
 
     static toImage(fbo, w = 300, h = 300) {

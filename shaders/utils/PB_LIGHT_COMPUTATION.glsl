@@ -1,7 +1,12 @@
-precision highp float;
-
-#define MAX_LIGHTS 4
-#define PI 3.14159265359
+float naturalAO = 1.;
+float roughness = .5;
+float metallic = .5;
+float refractionIndex=0.;
+float alpha = 1.;
+vec3 albedo= vec3(.5);
+vec3 N = vec3(0.);
+vec3 emission = vec3(0.);
+bool flatShading = false;
 
 //import(cameraUBO)
 
@@ -74,31 +79,35 @@ float geometrySmith (vec3 N, vec3 V, vec3 L, float roughness){
 
 //import(computeLights)
 
-void pbLightComputation(out vec4 finalColor, vec3 fragPosition, vec3 albedo, vec3 N, float naturalAO, float roughness, float metallic, bool enabledAO) {
-    vec3 directIllumination = vec3(0.0);
-    vec3 indirectIllumination = vec3(0.0);
-    vec3 V = normalize(placement.xyz - fragPosition);
-    float ao = enabledAO ? naturalAO * texture(ao_sampler, texCoords).r : 1.;
-    float NdotV = max(dot(N, V), 0.000001);
-    brdf = texture(brdfSampler, vec2(NdotV, roughness)).rg;
-    F0 = mix(F0, albedo, metallic);
+void pbLightComputation(out vec4 finalColor) {
+    if(flatShading){
+        finalColor = vec4(albedo + emission, alpha);
+    }else{
+        vec3 directIllumination = vec3(0.0);
+        vec3 indirectIllumination = vec3(0.0);
+        vec3 V = normalize(placement.xyz - worldSpacePosition);
+        float ao = naturalAO * texture(ao_sampler, texCoords).r;
+        float NdotV = max(dot(N, V), 0.000001);
+        brdf = texture(brdfSampler, vec2(NdotV, roughness)).rg;
+        F0 = mix(F0, albedo, metallic);
 
-    float shadows = directionalLightsQuantity > 0 || pointLightsQuantity > 0?  0. : 1.0;
-    float quantityToDivide = float(directionalLightsQuantity) + float(pointLightsQuantity);
-    for (int i = 0; i < directionalLightsQuantity; i++){
-        vec4 lightInformation = computeDirectionalLight(shadowMapTexture, shadowMapsQuantity, shadowMapResolution, directionalLightsPOV[i], directionalLights[i], fragPosition, V, F0, roughness, metallic, N, albedo);
-        directIllumination += lightInformation.rgb;
-        shadows += lightInformation.a/quantityToDivide;
+        float shadows = directionalLightsQuantity > 0 || pointLightsQuantity > 0?  0. : 1.0;
+        float quantityToDivide = float(directionalLightsQuantity) + float(pointLightsQuantity);
+        for (int i = 0; i < directionalLightsQuantity; i++){
+            vec4 lightInformation = computeDirectionalLight(shadowMapTexture, shadowMapsQuantity, shadowMapResolution, directionalLightsPOV[i], directionalLights[i], worldSpacePosition, V, F0, roughness, metallic, N, albedo);
+            directIllumination += lightInformation.rgb;
+            shadows += lightInformation.a/quantityToDivide;
+        }
+
+        float viewDistance = length(V);
+        for (int i = 0; i < int(pointLightsQuantity); ++i){
+            vec4 lightInformation = computePointLights(shadowCube, pointLights[i], worldSpacePosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
+            directIllumination += lightInformation.rgb;
+            shadows += lightInformation.a/quantityToDivide;
+        }
+
+        indirectIllumination = sampleIndirectLight(shadows, metallic, roughness, albedo);
+        finalColor = vec4((directIllumination * shadows + indirectIllumination) * ao + emission, alpha);
     }
-
-    float viewDistance = length(V);
-    for (int i = 0; i < int(pointLightsQuantity); ++i){
-        vec4 lightInformation = computePointLights(shadowCube, pointLights[i], fragPosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
-        directIllumination += lightInformation.rgb;
-        shadows += lightInformation.a/quantityToDivide;
-    }
-
-    indirectIllumination = sampleIndirectLight(shadows, metallic, roughness, albedo);
-    finalColor = vec4((directIllumination * shadows + indirectIllumination) * ao, 1.);
 }
 

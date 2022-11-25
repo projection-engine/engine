@@ -82,7 +82,9 @@ export default class AmbientOcclusion {
 
     static execute() {
         if (!AmbientOcclusion.enabled || !AmbientOcclusion.#ready) {
-            AmbientOcclusion.blurredFBO.clear()
+            AmbientOcclusion.blurredFBO.use()
+            gpu.clearColor(1, 1, 1, 0)
+            gpu.clear(gpu.COLOR_BUFFER_BIT)
             return
         }
         AmbientOcclusion.framebuffer.startMapping()

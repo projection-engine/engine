@@ -1,39 +1,39 @@
 import GPUAPI from "../lib/rendering/GPUAPI";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
-import SPRITE_FRAG from "../shaders/SPRITE.frag";
-import SPRITE_VERTEX from "../shaders/SPRITE.vert";
+import SPRITE_FRAG from "../shaders/forward-rendering/SPRITE.frag";
+import SPRITE_VERTEX from "../shaders/forward-rendering/SPRITE.vert";
 
-import QUAD_VERTEX from "../shaders/QUAD.vert";
-import LENS_POST_PROCESSING_FRAG from "../shaders/LENS_POST_PROCESSING.frag"
+import QUAD_VERTEX from "../shaders/post-processing/QUAD.vert";
+import LENS_POST_PROCESSING_FRAG from "../shaders/post-processing/LENS_POST_PROCESSING.frag"
 
 import GlobalIlluminationPass from "../runtime/rendering/GlobalIlluminationPass";
 import AmbientOcclusion from "../runtime/occlusion/AmbientOcclusion";
-import AO_FRAG from "../shaders/AO.frag";
-import BOX_BLUR_FRAG from "../shaders/BOX-BLUR.frag";
+import AO_FRAG from "../shaders/post-processing/AO.frag";
+import BOX_BLUR_FRAG from "../shaders/post-processing/BOX-BLUR.frag";
 import DirectionalShadows from "../runtime/occlusion/DirectionalShadows";
-import * as smShaders from "../shaders/SHADOW_MAP.glsl";
+import * as smShaders from "../shaders/forward-rendering/SHADOW_MAP.glsl";
 import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
-import FXAA_FRAG from "../shaders/FXAA.frag";
+import FXAA_FRAG from "../shaders/post-processing/FXAA.frag";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
-import BRIGHTNESS_FILTER_FRAG from "../shaders/BRIGHTNESS_FILTER.frag";
-import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/SCREEN_SPACE_INDIRECT.frag"
+import BRIGHTNESS_FILTER_FRAG from "../shaders/post-processing/BRIGHTNESS_FILTER.frag";
+import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/post-processing/SCREEN_SPACE_INDIRECT.frag"
 import CUBEMAP from "../shaders/CUBEMAP.vert"
-import PREFILTERED_MAP from "../shaders/PREFILTERED_MAP.frag"
-import IRRADIANCE_MAP from "../shaders/IRRADIANCE_MAP.frag"
+import PREFILTERED_MAP from "../shaders/post-processing/PREFILTERED_MAP.frag"
+import IRRADIANCE_MAP from "../shaders/post-processing/IRRADIANCE_MAP.frag"
 import MotionBlur from "../runtime/post-processing/MotionBlur";
-import MOTION_BLUR_FRAG from "../shaders/MOTION_BLUR.frag";
+import MOTION_BLUR_FRAG from "../shaders/post-processing/MOTION_BLUR.frag";
 import SpritePass from "../runtime/rendering/SpritePass";
-import GAUSSIAN_FRAG from "../shaders/GAUSSIAN.frag"
-import UPSAMPLING_TEND_FRAG from "../shaders/UPSAMPLE_TENT.glsl"
-import BOKEH_FRAG from "../shaders/BOKEH.frag"
-import TEMPORAL_SUPERSAMPLING from "../shaders/TEMPORAL_SUPERSAMPLING.frag"
-import BILATERAL_BLUR from "../shaders/BILATERAL_BLUR.glsl"
-import BILINEAR_DOWNSCALE from "../shaders/BILINEAR_DOWNSCALE.glsl"
-import TO_SCREEN from "../shaders/TO_SCREEN.vert"
+import GAUSSIAN_FRAG from "../shaders/post-processing/GAUSSIAN.frag"
+import UPSAMPLING_TEND_FRAG from "../shaders/post-processing/UPSAMPLE_TENT.glsl"
+import BOKEH_FRAG from "../shaders/post-processing/BOKEH.frag"
+import TEMPORAL_SUPERSAMPLING from "../shaders/post-processing/TEMPORAL_SUPERSAMPLING.frag"
+import BILATERAL_BLUR from "../shaders/post-processing/BILATERAL_BLUR.glsl"
+import BILINEAR_DOWNSCALE from "../shaders/post-processing/BILINEAR_DOWNSCALE.glsl"
+import TO_SCREEN from "../shaders/post-processing/TO_SCREEN.vert"
 
-import V_BUFFER_VERT from "../shaders/V_BUFFER.vert"
-import V_BUFFER_FRAG from "../shaders/V_BUFFER.frag"
+import V_BUFFER_VERT from "../shaders/forward-rendering/V_BUFFER.vert"
+import V_BUFFER_FRAG from "../shaders/forward-rendering/V_BUFFER.frag"
 import DEFERRED_SHADING from "../shaders/utils/PB_LIGHT_COMPUTATION.glsl"
 
 export default function initializeShaders() {

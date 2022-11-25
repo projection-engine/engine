@@ -1,9 +1,6 @@
-
-
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uvTexture;
-//layout (location = 3) in vec3 tangent;
 
 //import(cameraUBO)
 
@@ -17,7 +14,6 @@ out vec3 viewSpacePosition;
 out vec2 texCoords;
 out vec4 previousScreenPosition;
 out vec4 currentScreenPosition;
-//out mat3 toTangentSpace;
 
 void main(){
     vec4 wPosition = transformMatrix * vec4(position, 1.0);

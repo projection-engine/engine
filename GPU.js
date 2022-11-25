@@ -8,12 +8,12 @@ import initializeShaders from "./utils/initialize-shaders";
 import initializeStaticMeshes from "./utils/initialize-static-meshes";
 import initializeFrameBuffers from "./utils/initialize-frame-buffers";
 import LightsAPI from "./lib/rendering/LightsAPI";
-import QUAD_VERT from "./shaders/QUAD.vert"
-import BRDF_FRAG from "./shaders/BRDF_GEN.frag"
+import QUAD_VERT from "./shaders/post-processing/QUAD.vert"
+import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
 import Shader from "./instances/Shader";
 import Framebuffer from "./instances/Framebuffer";
 import GPUAPI from "./lib/rendering/GPUAPI";
-import DEFAULT_MATERIAL_FRAG from "./shaders/DEFAULT_MATERIAL.frag";
+import DEFAULT_MATERIAL_FRAG from "./shaders/uber-shader/DEFAULT_MATERIAL.frag";
 
 import MATERIAL_RENDERING_TYPES from "./static/MATERIAL_RENDERING_TYPES";
 import FALLBACK_MATERIAL from "./static/FALLBACK_MATERIAL";

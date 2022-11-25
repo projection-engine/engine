@@ -21,7 +21,7 @@ const TYPES = {
 
 
 export default class Shader {
-    available = false
+
     static regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
     static structRegex = (type) => {
         return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, "gs")
@@ -34,10 +34,20 @@ export default class Shader {
         return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
     }
 
+    #available = false
+    get available() {
+        return this.#available
+    }
+
     uniformMap = {}
     length = 0
+    messages = {
+        error: undefined,
+        messages: undefined,
+        hasError: false
+    }
 
-    constructor(vertex, fragment, setMessage) {
+    constructor(vertex, fragment) {
         let alert = []
         this.program = gpu.createProgram()
         const vCode = trimString(this.#compileShader(vertex, gpu.VERTEX_SHADER, m => alert.push(m)))
@@ -49,11 +59,11 @@ export default class Shader {
 
         for (let i = 0; i < this.uniforms.length; i++)
             this.uniformMap[this.uniforms[i].name] = this.uniforms[i].uLocation || this.uniforms[i].uLocations
-        setMessage?.({
+        this.messages = {
             error: gpu.getError(),
             messages: alert,
             hasError: alert.length > 0
-        })
+        }
 
         this.length = this.uniforms.length
         if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
@@ -77,17 +87,19 @@ export default class Shader {
         if (!compiled) {
             ConsoleAPI.error(shaderCode)
             console.trace(bundledCode)
-            console.error(gpu.getShaderInfoLog(shader))
-            pushMessage(gpu.getShaderInfoLog(shader))
-            this.available = false
+            const error = gpu.getShaderInfoLog(shader)
+            console.error(error)
+            pushMessage(error)
+            this.#available = false
         } else {
             gpu.attachShader(this.program, shader)
             gpu.linkProgram(this.program)
 
-            this.available = true
+            this.#available = true
         }
         return bundledCode
     }
+
 
     #extractUniforms(code) {
         let uniformObjects = []

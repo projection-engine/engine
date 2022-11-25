@@ -15,14 +15,14 @@ uniform sampler2D previous_frame;
 uniform float elapsedTime;
 uniform int materialID;
 
-mat3 TBN;
+//--UNIFORMS--
 
-//import(pbLightComputation)
+//--FUNCTIONS--
 
-//import(parallaxOcclusionMapping)
+//--MATERIALS--
 
 void main(){
-
+    //--MATERIAL_SELECTION--
 }
 
 

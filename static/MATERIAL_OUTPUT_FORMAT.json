@@ -1,0 +1,11 @@
+{
+  "functionDeclaration": "",
+  "uniformsDeclaration": "",
+  "settings": {
+    "cullFace": 0,
+    "noDepthTest": false,
+    "isAlphaTested": false
+  },
+  "uniforms": [],
+  "uniformsMetadata": []
+}

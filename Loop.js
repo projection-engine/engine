@@ -140,6 +140,7 @@ export default class Loop {
         try {
             Engine.elapsed = current - previous
             previous = current
+            gpu.clearColor(0, 0, 0, 0)
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
             if (TransformationPass.hasChangeBuffer[0] === 1) {
