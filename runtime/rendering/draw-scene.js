@@ -5,12 +5,14 @@ import AmbientOcclusion from "../occlusion/AmbientOcclusion";
 import GlobalIlluminationPass from "./GlobalIlluminationPass";
 import DirectionalShadows from "../occlusion/DirectionalShadows";
 import OmnidirectionalShadows from "../occlusion/OmnidirectionalShadows";
+import VisibilityBuffer from "./VisibilityBuffer";
 
 export default function drawScene() {
     const entities = Engine.data.meshes
     const size = entities.length
     const shader = Material.uberShader
     const uniforms = shader.uniformMap
+
     shader.bind()
 
 
@@ -42,12 +44,20 @@ export default function drawScene() {
     gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
     gpu.uniform1i(uniforms.previous_frame, 6)
 
+    gpu.activeTexture(gpu.TEXTURE7)
+    gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+    gpu.uniform1i(uniforms.scene_depth, 7)
+
+    gpu.uniform1i(uniforms.hasAmbientOcclusion, AmbientOcclusion.enabled ? 1 : 0)
     for (let i = 0; i < size; i++) {
         const entity = entities[i]
         const mesh = entity.__meshReference
         // const material = entity.__materialReference
+
         if (!entity.active || !mesh)
             continue
+        gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
         mesh.draw()
     }
+
 }

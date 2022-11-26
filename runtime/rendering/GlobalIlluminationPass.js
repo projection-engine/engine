@@ -93,7 +93,7 @@ export default class GlobalIlluminationPass {
         // TODO - POSITION AND NORMAL RECONSTRUCTION
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
-        gpu.uniform1i(uniforms.depthEntityIDSampler, 0)
+        gpu.uniform1i(uniforms.depthSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
         gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.sourceColorSampler)

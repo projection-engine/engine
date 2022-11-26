@@ -11,8 +11,7 @@ precision highp float;
 in vec2 texCoords;
 
 uniform sampler2D previousFrame;
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
+uniform sampler2D depthSampler;
 
 
 uniform vec2 ssgiColorGrading;
@@ -21,9 +20,12 @@ uniform mat3 rayMarchSettings;
 
 layout (location = 0) out vec4 SSGISampler;
 layout (location = 1) out vec4 SSRSampler;
-//vec3 worldNormal;
+
+vec3 worldNormal;
 vec3 viewPos;
 vec3 jitt;
+
+//import(depthReconstructionUtils)
 
 //import(rayMarcher)
 
@@ -47,19 +49,19 @@ vec3 cosHemisphereSample(vec3 hitNorm)
 
 
 vec3 SSGI(int maxSteps, float stepSize, float intensity){
-    vec3 worldNormal = normalize(cosHemisphereSample(vec3(texture(gNormal, texCoords) * invViewMatrix)));
+    vec3 normal = cosHemisphereSample(worldNormal);
 
     float gamma = ssgiColorGrading.x;
     float exposure = ssgiColorGrading.y;
 
-    vec3 reflected = normalize(reflect(normalize(viewPos), worldNormal));
+    vec3 reflected = normalize(reflect(normalize(viewPos), normal));
 
     vec3 hitPos = viewPos;
     float dDepth;
 
 
     float step =  stepSize * (clamp(jitt.x, 0., 1.) + clamp(jitt.y, 0., 1.)) + stepSize;
-    vec4 coords = RayMarch(maxSteps,  worldNormal, hitPos, dDepth, step);
+    vec4 coords = RayMarch(maxSteps,  normal, hitPos, dDepth, step);
     vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
     tracedAlbedo = vec3(1.0) - exp(-tracedAlbedo * exposure);
     tracedAlbedo = pow(tracedAlbedo, vec3(1.0/gamma));
@@ -71,8 +73,8 @@ vec3 SSGI(int maxSteps, float stepSize, float intensity){
 }
 
 vec3 SSR(int maxSteps, float falloff, float minRayStep, float stepSize){
-    vec3 worldNormal = normalize(texture(gNormal, texCoords) * invViewMatrix).rgb;
-    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
+    vec3 normal = normalize(worldNormal).rgb;
+    vec3 reflected = normalize(reflect(normalize(viewPos), normal));
 
     vec3 hitPos = viewPos;
     float dDepth;
@@ -90,8 +92,11 @@ vec3 SSR(int maxSteps, float falloff, float minRayStep, float stepSize){
 
 
 void main(){
-    vec4 pixelPosition = texture(gPosition, texCoords);
-    if (pixelPosition.a < 1.) discard;
+    vec4 pixelDepth = texture(depthSampler, texCoords);
+    if (pixelDepth.a < 1.) discard;
+
+    worldNormal = normalFromDepth(pixelDepth.r, texCoords, depthSampler);
+
     float SSR_falloff = rayMarchSettings[0][0];
     float SSR_minRayStep = rayMarchSettings[0][1];
     float SSR_stepSize = rayMarchSettings[0][2];

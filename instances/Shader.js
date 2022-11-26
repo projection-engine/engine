@@ -3,22 +3,8 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import LightsAPI from "../lib/rendering/LightsAPI";
-
-const TYPES = {
-    "vec2": "uniform2fv",
-    "vec3": "uniform3fv",
-    "vec4": "uniform4fv",
-    "mat3": "uniformMatrix3fv",
-    "mat4": "uniformMatrix4fv",
-    "float": "uniform1f",
-    "int": "uniform1i",
-    "sampler2D": "sampler2D",
-    "samplerCube": "cubemap",
-    "ivec2": "uniform2iv",
-    "ivec3": "uniform3iv",
-    "bool": "uniform1i"
-}
-
+import GLSL_TYPES from "../static/GLSL_TYPES.json"
+import trimString from "../utils/trim-string";
 
 export default class Shader {
 
@@ -112,7 +98,7 @@ export default class Shader {
                 const type = match[4]
                 const name = match[6].replace(" ", "").trim()
 
-                if (TYPES[type] != null) {
+                if (GLSL_TYPES[type] != null) {
                     uniformObjects.push({
                         type,
                         name,
@@ -124,7 +110,7 @@ export default class Shader {
                 const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
                 if (!struct)
                     return
-                struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
+                struct = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
                 uniformObjects.push(
                     ...struct.map(s => {
                         const current = s.match(reg)
@@ -153,7 +139,7 @@ export default class Shader {
 
                 if (!define) return;
                 const arraySize = parseInt(define[5])
-                if (TYPES[type] !== undefined) {
+                if (GLSL_TYPES[type] !== undefined) {
                     uniformObjects.push({
                         type,
                         name,
@@ -167,7 +153,7 @@ export default class Shader {
 
                 if (!struct)
                     return;
-                struct = struct[0].split("\n").filter(e => Object.keys(TYPES).some(v => e.includes(v)))
+                struct = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
                 uniformObjects.push(
                     ...struct.map(s => {
                         const current = s.match(reg)
@@ -230,10 +216,9 @@ export default class Shader {
             case "ivec2":
             case "ivec3":
             case "bool":
-
                 if (data == null)
                     return
-                gpu[TYPES[type]](uLocation, data)
+                gpu[GLSL_TYPES[type]](uLocation, data)
                 break
             case "mat3":
                 if (data == null)
@@ -264,8 +249,4 @@ export default class Shader {
     }
 
 
-}
-
-export function trimString(str) {
-    return str.replaceAll(/^(\s*)/gm, "").replaceAll(/^\s*\n/gm, "")
 }

@@ -1,6 +1,8 @@
 precision highp float;
 #define PI 3.14159265359
 
+
+in vec3 cameraPosition;
 in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;

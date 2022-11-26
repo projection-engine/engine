@@ -1,7 +1,7 @@
 // THANKS TO https://imanolfotia.com/blog/1
 
 vec3 getViewPosition(vec2 coords){
-    return  textureLod(gPosition, coords, 2.).rgb;
+    return viewSpacePositionFromDepth(textureLod(depthSampler, coords, 2.).r, texCoords); ;
 }
 
 vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)

@@ -120,13 +120,11 @@ export default class Loop {
 
 
         FBO.startMapping()
-        SkyboxPass.execute()
+
+        // SkyboxPass.execute()
         Loop.#duringDrawing()
-
+        gpu.clear(gpu.DEPTH_BUFFER_BIT)
         drawScene()
-
-        GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
-
         SpritePass.execute()
         Loop.#afterDrawing()
         FBO.stopMapping()
@@ -141,7 +139,6 @@ export default class Loop {
         try {
             Engine.elapsed = current - previous
             previous = current
-            gpu.clearColor(0, 0, 0, 0)
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
 
             if (TransformationPass.hasChangeBuffer[0] === 1) {
