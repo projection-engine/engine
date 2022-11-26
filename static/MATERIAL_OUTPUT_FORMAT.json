@@ -2,9 +2,10 @@
   "functionDeclaration": "",
   "uniformsDeclaration": "",
   "settings": {
-    "cullFace": 0,
+    "cullFace": true,
     "noDepthTest": false,
-    "isAlphaTested": false
+    "isAlphaTested": false,
+    "depthMask": true
   },
   "uniforms": [],
   "uniformValues": []

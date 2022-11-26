@@ -6,7 +6,7 @@ import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
 import executeScripts from "./runtime/misc/execute-scripts";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
-import SkyboxPass from "./runtime/rendering/SkyboxPass";
+
 import Engine from "./Engine";
 import SpritePass from "./runtime/rendering/SpritePass";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
@@ -73,9 +73,7 @@ export default class Loop {
 
 
         FBO.startMapping()
-        SkyboxPass.execute()
         Loop.#duringDrawing()
-
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
         SceneRenderer.draw()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
@@ -120,8 +118,6 @@ export default class Loop {
 
 
         FBO.startMapping()
-
-        // SkyboxPass.execute()
         Loop.#duringDrawing()
         gpu.clear(gpu.DEPTH_BUFFER_BIT)
         SceneRenderer.draw()

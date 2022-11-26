@@ -22,15 +22,14 @@ export default class SceneRenderer {
 
         shader.bind()
 
-        if(!useCustomView){
+        gpu.uniformMatrix4fv(uniforms.skyboxProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
+        if (!useCustomView) {
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
-        }
-        else{
+        } else {
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
             gpu.uniform3fv(uniforms.cameraPosition, cameraPosition)
         }
-
 
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, GPU.BRDF)
@@ -67,8 +66,14 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.hasAmbientOcclusion, AmbientOcclusion.enabled ? 1 : 0)
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
 
+        let depthMaskState = true, cullFaceState = true
+
+        gpu.enable(gpu.CULL_FACE)
+        gpu.cullFace(gpu.BACK)
+        gpu.depthMask(true)
+
         for (let i = 0; i < size; i++) {
-            texOffset = 7
+            texOffset = 8
             const entity = entities[i]
             const mesh = entity.__meshRef
 
@@ -77,9 +82,18 @@ export default class SceneRenderer {
 
             const material = entity.__materialRef
             if (material) {
-
-                gpu.uniform1i(uniforms.isAlphaTested, material.isAlphaTested ? 0 : 1)
+                gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
                 gpu.uniform1i(uniforms.materialID, material.bindID)
+                if (material.depthMask !== depthMaskState)
+                    gpu.depthMask(material.depthMask)
+                if (material.cullFace !== cullFaceState) {
+                    if (!material.cullFace)
+                        gpu.disable(GPU.CULL_FACE)
+                    else
+                        gpu.enable(GPU.CULL_FACE)
+                }
+                cullFaceState = material.cullFace
+                depthMaskState = material.depthMask
                 const data = material.uniformValues, toBind = material.uniforms
                 for (let j = 0; j < toBind.length; j++) {
                     const current = toBind[j]
@@ -87,8 +101,16 @@ export default class SceneRenderer {
                     Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                 }
             } else {
-                gpu.uniform1i(uniforms.isAlphaTested, 0)
+                gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
+                if (!depthMaskState) {
+                    gpu.depthMask(true)
+                    depthMaskState = true
+                }
+                if (!cullFaceState) {
+                    gpu.enable(GPU.CULL_FACE)
+                    cullFaceState = true
+                }
             }
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()

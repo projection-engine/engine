@@ -30,7 +30,7 @@ uniform sampler2D shadow_atlas;
 uniform sampler2D shadow_cube;
 //uniform sampler2D previous_frame;
 
-uniform bool isAlphaTested;
+uniform bool noDepthChecking;
 uniform bool hasAmbientOcclusion;
 uniform float elapsedTime;
 uniform int materialID;

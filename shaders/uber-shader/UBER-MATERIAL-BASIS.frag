@@ -17,7 +17,7 @@ precision highp float;
 void main(){
 
     quadUV = gl_FragCoord.xy/vec2(textureSize(scene_depth, 0));
-    if(!isAlphaTested){
+    if(!noDepthChecking){
         vec4 depthData = texture(scene_depth, quadUV);
         if (depthData.a < 1.) discard;
     }

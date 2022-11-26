@@ -10,9 +10,6 @@ import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import SceneRenderer from "../runtime/rendering/SceneRenderer";
 
-/**
- * cullFace: 0 = BACK, 1 = FRONT, OTHER = NONE
- */
 export default class Material {
     static #uberShader
     static #fallbackUberShader
@@ -85,7 +82,8 @@ export default class Material {
     #uniformsDeclaration
     texturesInUse = {}
     isAlphaTested = false
-    cullFace = 0
+    depthMask = true
+    cullFace = true
     noDepthTest
     bindID = -1
 
