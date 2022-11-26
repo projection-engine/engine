@@ -4,6 +4,7 @@ import GPU from "../GPU";
 import CubeMapAPI from "../lib/rendering/CubeMapAPI";
 import getProbeRotation from "../utils/get-probe-rotation";
 import getProbeLookat from "../utils/get-probe-lookat";
+import Engine from "../Engine";
 
 
 export default class LightProbe {
@@ -13,7 +14,7 @@ export default class LightProbe {
     _resolution
 
     constructor(resolution) {
-        if(resolution != null)
+        if (resolution != null)
             this.resolution = resolution
     }
 
@@ -27,7 +28,6 @@ export default class LightProbe {
     }
 
     drawDiffuseMap(sampler = this.texture, multiplier = [1, 1, 1]) {
-
         this.draw(
             (yaw, pitch, perspective) => {
                 CubeMapAPI.irradianceShader.bindForUse({
@@ -69,14 +69,16 @@ export default class LightProbe {
                     this.prefiltered,
                     i
                 )
+                const shader = CubeMapAPI.prefilteredShader
+                const uniforms = shader.uniformMap
+                shader.bind()
+                gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, perspective)
+                gpu.uniformMatrix4fv(uniforms.viewMatrix, false, getProbeLookat(rotations.yaw, rotations.pitch, [0, 0, 0]))
+                gpu.uniform1f(uniforms.roughness, roughness)
 
-                CubeMapAPI.prefilteredShader.bindForUse({
-                    projectionMatrix: perspective,
-                    viewMatrix: getProbeLookat(rotations.yaw, rotations.pitch, [0, 0, 0]),
-                    roughness: roughness,
-                    environmentMap: this.texture,
-                    multiplier: [1, 1, 1]
-                })
+                gpu.activeTexture(gpu.TEXTURE0)
+                gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, this.texture)
+                gpu.uniform1i(uniforms.environmentMap, 0)
 
                 gpu.drawArrays(gpu.TRIANGLES, 0, 36)
             }

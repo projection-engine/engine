@@ -22,13 +22,14 @@ export default class VisibilityBuffer {
     static execute() {
         const toRender = Engine.data.meshes
         const size = toRender.length
+        const meshes= GPU.meshes
         shader.bind()
 
         fbo.startMapping()
 
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
-            const mesh = entity.__meshReference
+            const mesh = meshes.get(entity.__meshID)
 
             if (!entity.active || !mesh)
                 continue

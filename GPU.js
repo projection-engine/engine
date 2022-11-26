@@ -78,7 +78,7 @@ export default class GPU {
         const brdfShader = new Shader(QUAD_VERT, BRDF_FRAG)
 
         FBO.startMapping()
-        brdfShader.bindForUse({})
+        brdfShader.bind()
         drawQuad()
         FBO.stopMapping()
         GPU.BRDF = FBO.colors[0]

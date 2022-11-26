@@ -1,5 +1,5 @@
 import Component from "./Component"
-import FALLBACK_MATERIAL from "../../static/FALLBACK_MATERIAL";
+
 import MESH_PROPS from "../../static/component-props/MESH_PROPS";
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
 
@@ -9,12 +9,12 @@ export default class MeshComponent extends Component {
 
     castsShadows = true
     _meshID
-    _materialID = FALLBACK_MATERIAL
+    _materialID
     __mapSource = {
         type: undefined,
         index: undefined
     }
-
+    materialUniforms = []
     diffuseProbeInfluence = true
     specularProbeInfluence = true
     contributeToProbes = true

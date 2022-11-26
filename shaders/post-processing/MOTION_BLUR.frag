@@ -16,7 +16,7 @@ void main(){
     vec2 screenTexCoords = gl_FragCoord.xy * texelSize;
 
     vec2 velocity = texture(gVelocity, screenTexCoords).rg;
-velocity *= velocityScale;
+    velocity *= velocityScale;
 
     float speed = length(velocity / texelSize);
     int nSamples = max(clamp(int(speed), 1, maxSamples), 1);

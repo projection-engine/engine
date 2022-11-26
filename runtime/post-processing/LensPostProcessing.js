@@ -4,6 +4,7 @@ import UBO from "../../instances/UBO";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import VisibilityBuffer from "../rendering/VisibilityBuffer";
 
 
 let shader, uniforms, metadata
@@ -16,8 +17,6 @@ const upscale = []
 export default class LensPostProcessing {
     static workerTexture
     static outputFBO
-    static blurBuffers
-    static upSampledBuffers
     static compositeShader
 
     static brightShader
@@ -67,10 +66,17 @@ export default class LensPostProcessing {
     static execute() {
         if (metadata.bloom) {
             outputFBO.startMapping()
-            LensPostProcessing.brightShader.bindForUse({
-                sceneColor: LensPostProcessing.workerTexture,
-                threshold: metadata.bloomThreshold
-            })
+            const shader = LensPostProcessing.brightShader
+            const uniforms = shader.uniformMap
+
+            shader.bind()
+
+            gpu.activeTexture(gpu.TEXTURE0)
+            gpu.bindTexture(gpu.TEXTURE_2D, LensPostProcessing.workerTexture)
+            gpu.uniform1i(uniforms.sceneColor, 0)
+
+            gpu.uniform1f(uniforms.threshold, metadata.bloomThreshold)
+
             drawQuad()
             outputFBO.stopMapping()
 

@@ -6,7 +6,9 @@ import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import GPU from "../GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 import GENERIC_FRAG_SHADER from "../shaders/uber-shader/UBER-MATERIAL-GENERIC.frag"
+import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
+import SceneRenderer from "../runtime/rendering/SceneRenderer";
 
 /**
  * cullFace: 0 = BACK, 1 = FRONT, OTHER = NONE
@@ -18,21 +20,41 @@ export default class Material {
     static #initialized = false
 
     static compileUberShader() {
-        const methodsToLoad = [], uniformsToLoad = []
+        if(Material.#uberShader)
+            GPUAPI.destroyShader(STATIC_SHADERS.UBER_SHADER)
+        const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
 
         GPU.materials.forEach(mat => {
-            methodsToLoad.push(mat.functionDeclaration)
+            console.log(mat)
+            const declaration = [`case ${mat.bindID}: {`, mat.functionDeclaration, "break;", "}", ""]
+            methodsToLoad.push(declaration.join("\n"))
             uniformsToLoad.push(mat.uniformsDeclaration)
         })
+        methodsToLoad.push(`
+            default:
+                N = normalVec;
+                break;
+            }
+            `)
+        let fragment = BASIS_FRAG
+        fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
+        fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
-        const shader = GPUAPI.allocateShader(STATIC_SHADERS.UBER_SHADER, VERTEX_SHADER,)
-        if (!shader.messages.hasError) {
+        console.trace(fragment)
+        console.trace(methodsToLoad, uniformsToLoad)
+
+        const shader = GPUAPI.allocateShader(STATIC_SHADERS.UBER_SHADER, VERTEX_SHADER, fragment)
+        if (shader.messages.hasError) {
+            SceneRenderer.shader = Material.uberShader
             ConsoleAPI.error("Invalid shader", shader.messages)
             console.error("Invalid shader", shader.messages)
             return
         }
+
         Material.#uberShader = shader
         Material.#useFallback = false
+
+        SceneRenderer.shader = Material.uberShader
     }
 
     static initialize() {
@@ -40,10 +62,13 @@ export default class Material {
             return
         Material.#initialized = true
         Material.#fallbackUberShader = GPUAPI.allocateShader(STATIC_SHADERS.FALLBACK_UBER_SHADER, DEFAULT_VERTEX, GENERIC_FRAG_SHADER)
+        window.c = () => Material.compileUberShader()
+        SceneRenderer.shader = Material.uberShader
     }
 
     static forceFallbackShader() {
         Material.#useFallback = true
+        SceneRenderer.shader = Material.uberShader
     }
 
     static get uberShader() {
@@ -54,13 +79,15 @@ export default class Material {
 
     #ready = false
     #id = ""
-    #uniformMetadata = []
+    #uniformValues = {}
+    #uniforms = []
     #functionDeclaration
     #uniformsDeclaration
-
+    texturesInUse = {}
     isAlphaTested = false
     cullFace = 0
     noDepthTest
+    bindID = -1
 
     constructor(id) {
         this.#id = id ? id : v4()
@@ -74,10 +101,12 @@ export default class Material {
         return this.#ready
     }
 
-    get uniformMetadata() {
-        return this.#uniformMetadata
+    get uniforms() {
+        return this.#uniforms
     }
-
+    get uniformValues() {
+        return this.#uniformValues
+    }
     get functionDeclaration() {
         return this.#functionDeclaration
     }
@@ -91,19 +120,20 @@ export default class Material {
         this.#uniformsDeclaration = uniforms
     }
 
-    async updateUniformGroup(uniformMetadata) {
-        this.#uniformMetadata = uniformMetadata
+    async updateUniformGroup(uniforms) {
+        this.#uniforms = uniforms
+
         this.#ready = false
         await MaterialAPI.updateMaterialUniforms(this)
         this.#ready = true
     }
 
     async updateUniformAttribute(key, data) {
-        const ind = this.#uniformMetadata.findIndex(d => d.key === key)
+        const ind = this.#uniforms.findIndex(d => d.key === key)
         if (ind === -1)
             return false
         try {
-            this.#uniformMetadata[ind] = data
+            this.#uniforms[ind] = data
             await MaterialAPI.updateMaterialUniforms(this)
             return true
         } catch (err) {

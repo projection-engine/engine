@@ -1,30 +1,30 @@
 precision highp float;
-#define PI 3.14159265359
-
-
-in vec3 cameraPosition;
-in vec2 texCoords;
-in vec3 normalVec;
-in vec3 worldSpacePosition;
-
-uniform sampler2D SSAO;
-uniform sampler2D SSGI;
-uniform sampler2D SSR;
-uniform sampler2D shadow_atlas;
-uniform sampler2D shadow_cube;
-uniform sampler2D previous_frame;
-
-uniform float elapsedTime;
-uniform int materialID;
 
 //--UNIFORMS--
 
-//--FUNCTIONS--
+//import(uberAttributes)
 
-//--MATERIALS--
+//uniform sampler2D sampler0;
+//uniform sampler2D sampler1;
+//uniform sampler2D sampler2;
+//uniform sampler2D sampler3;
+//uniform sampler2D sampler4;
+//uniform sampler2D sampler5;
+//uniform sampler2D sampler6;
+
+//import(pbLightComputation)
 
 void main(){
+
+    quadUV = gl_FragCoord.xy/vec2(textureSize(scene_depth, 0));
+    vec4 depthData = texture(scene_depth, quadUV);
+    if(depthData.a < 1.) discard;
+
+    computeTBN();
+
     //--MATERIAL_SELECTION--
+
+    fragColor = pbLightComputation();
 }
 
 

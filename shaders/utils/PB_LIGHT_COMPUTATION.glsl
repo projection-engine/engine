@@ -8,34 +8,14 @@ vec3 albedo= vec3(.5);
 vec3 N = vec3(0.);
 vec3 emission = vec3(0.);
 bool flatShading = false;
-
-vec2 brdf = vec2(0.);
-vec3 F0 = vec3(0.04);
-float NdotV;
 // ------------------ ATTRIBUTES TO FILL
 
 
+// ------------------ INTERNAL ATTRIBUTES
+vec2 brdf = vec2(0.);
+vec3 F0 = vec3(0.04);
+float NdotV;
 
-uniform PointLights{
-    mat4 pointLights[24];
-    int pointLightsQuantity;
-};
-
-uniform DirectionalLights{
-    mat4 directionalLights[16];
-    mat4 directionalLightsPOV[16];
-    int directionalLightsQuantity;
-    float shadowMapsQuantity;
-    float shadowMapResolution;
-};
-
-uniform sampler2D brdf_sampler;
-uniform sampler2D SSAO;
-uniform sampler2D SSGI;
-uniform sampler2D SSR;
-uniform sampler2D shadow_atlas;
-uniform sampler2D shadow_cube;
-//uniform sampler2D previous_frame;
 
 
 vec3 fresnelSchlick (float cosTheta, vec3 F0, float roughness){

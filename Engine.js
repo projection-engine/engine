@@ -74,7 +74,7 @@ export default class Engine {
         VisibilityBuffer.initialize()
         LensPostProcessing.initialize()
         FrameComposition.initialize()
-        AmbientOcclusion.initialize()
+        await AmbientOcclusion.initialize()
         GlobalIlluminationPass.initialize()
         DiffuseProbePass.initialize()
         OmnidirectionalShadows.initialize()
@@ -144,8 +144,8 @@ export default class Engine {
         AmbientOcclusion.maxSamples = data.SSAO.maxSamples || 64
         AmbientOcclusion.enabled = data.SSAO.enabled
 
-        MotionBlur.uniforms.velocityScale = data.mbVelocityScale
-        MotionBlur.uniforms.maxSamples = data.mbSamples
+        MotionBlur.velocityScale = data.mbVelocityScale
+        MotionBlur.maxSamples = data.mbSamples
 
         FrameComposition.UBO.bind()
         FrameComposition.UBO.updateData("fxaaEnabled", new Uint8Array([data.fxaa ? 1 : 0]))

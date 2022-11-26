@@ -12,16 +12,17 @@ void main(){
     mat4 m = viewMatrix ;
    m[3][0]  = 0.0;
    m[3][1]  = 0.0;
-   m[3][2]  = 0.0;
+    m[3][2]  = 0.0;
 
     gl_Position = skyboxProjectionMatrix * m * vec4(position, 1.0);
 }
 `
 export const fragment = `
 precision mediump float;
-in highp vec3 texCoords;
-uniform samplerCube uTexture;
+in vec2 texCoords;
+uniform sampler2D uTexture;
 out vec4 finalColor;
+
 void main(void){
     finalColor = vec4(texture(uTexture, texCoords).rgb, 1.);
 }

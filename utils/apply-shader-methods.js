@@ -6,6 +6,7 @@ import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl";
 import ACES from "../shaders/utils/ACES.glsl";
 import DEPTH_UTILS from "../shaders/utils/DEPTH_RECONSTRUCTION_UTILS.glsl"
 import COMPUTE_LIGHTS from "../shaders/utils/COMPUTE_LIGHTS.glsl"
+import UBER_ATTRIBUTES from "../shaders/uber-shader/ATTRIBUTES.glsl"
 
 const METHODS = {
     cameraUBO: "//import(cameraUBO)",
@@ -13,9 +14,11 @@ const METHODS = {
     computeTBN: "//import(computeTBN)",
     rayMarcher: "//import(rayMarcher)",
     aces: "//import(aces)",
+    uberAttributes: "//import(uberAttributes)",
     parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)",
     depthReconstructionUtils: "//import(depthReconstructionUtils)",
-    pbLightComputation: "//import(pbLightComputation)"
+    pbLightComputation: "//import(pbLightComputation)",
+
 }
 
 
@@ -25,6 +28,9 @@ export default function applyShaderMethods(shaderCode) {
     for (let i = 0; i < 3; i++) {
         Object.keys(METHODS).forEach(key => {
             switch (true) {
+                case key === "uberAttributes":
+                    response = response.replaceAll(METHODS[key], UBER_ATTRIBUTES)
+                    break
                 case key === "computeLights":
                     response = response.replaceAll(METHODS[key], COMPUTE_LIGHTS)
                     break

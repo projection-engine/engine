@@ -19,7 +19,7 @@ import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightsAPI from "./lib/rendering/LightsAPI";
-import drawScene from "./runtime/rendering/draw-scene";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 let FBO, previous = 0
 export default class Loop {
@@ -76,9 +76,9 @@ export default class Loop {
         SkyboxPass.execute()
         Loop.#duringDrawing()
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.GBUFFER)
-        // TODO - FORWARD SHADING
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.GBUFFER)
+        BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
+        SceneRenderer.draw()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
 
         GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
 
@@ -124,7 +124,7 @@ export default class Loop {
         // SkyboxPass.execute()
         Loop.#duringDrawing()
         gpu.clear(gpu.DEPTH_BUFFER_BIT)
-        drawScene()
+        SceneRenderer.draw()
         SpritePass.execute()
         Loop.#afterDrawing()
         FBO.stopMapping()
@@ -157,7 +157,7 @@ export default class Loop {
             CameraAPI.updateFrame()
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {
-            console.log(err)
+            console.error(err)
         }
     }
 }
