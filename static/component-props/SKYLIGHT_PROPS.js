@@ -1,8 +1,6 @@
 import Component from "../../templates/components/Component";
 
 export default [
-
-    Component.boolean("SPECULAR_PROBE", "specularProbe"),
     Component.number("LOD", "mipmaps", 10, 1, 1, false, true, "isDiffuse"),
 
     Component.options("RESOLUTION", "resolution", [

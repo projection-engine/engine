@@ -7,27 +7,13 @@ import OmnidirectionalShadows from "../occlusion/OmnidirectionalShadows";
 import VisibilityBuffer from "./VisibilityBuffer";
 import COMPONENTS from "../../static/COMPONENTS";
 import Shader from "../../instances/Shader";
+import CameraAPI from "../../lib/utils/CameraAPI";
 
 let texOffset
-const TO_IGNORE = {
-    brdf_sampler: true,
-    SSAO: true,
-    SSGI: true,
-    SSR: true,
-    shadow_atlas: true,
-    shadow_cube: true,
-    previous_frame: true,
-    scene_depth: true,
-    hasAmbientOcclusion: true,
-    materialID: true,
-    modelMatrix: true
-}
 export default class SceneRenderer {
     static shader
 
-    static draw() {
-        const materials = GPU.materials
-        const meshes = GPU.meshes
+    static draw(useCustomView, viewProjection, cameraPosition) {
         const entities = Engine.data.meshes
         const size = entities.length
         const shader = SceneRenderer.shader
@@ -35,6 +21,16 @@ export default class SceneRenderer {
         const uniforms = shader.uniformMap
 
         shader.bind()
+
+        if(!useCustomView){
+            gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
+            gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
+        }
+        else{
+            gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
+            gpu.uniform3fv(uniforms.cameraPosition, cameraPosition)
+        }
+
 
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, GPU.BRDF)
@@ -69,28 +65,31 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.scene_depth, 7)
 
         gpu.uniform1i(uniforms.hasAmbientOcclusion, AmbientOcclusion.enabled ? 1 : 0)
+        gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
+
         for (let i = 0; i < size; i++) {
             texOffset = 7
             const entity = entities[i]
-            const mesh = meshes.get(entity.__meshID)
+            const mesh = entity.__meshRef
 
             if (!entity.active || !mesh)
                 continue
 
-            if (entity.__materialID) {
-                const material = materials.get(entity.__materialID)
-                if (material) {
-                    gpu.uniform1i(uniforms.materialID, material.bindID)
-                    const data = material.uniformValues, toBind = material.uniforms
-                    for(let j = 0; j < toBind.length; j++){
-                        const current = toBind[j]
-                        const dataAttribute = data[current.key]
-                        Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
-                    }
-                }
+            const material = entity.__materialRef
+            if (material) {
 
-            } else
+                gpu.uniform1i(uniforms.isAlphaTested, material.isAlphaTested ? 0 : 1)
+                gpu.uniform1i(uniforms.materialID, material.bindID)
+                const data = material.uniformValues, toBind = material.uniforms
+                for (let j = 0; j < toBind.length; j++) {
+                    const current = toBind[j]
+                    const dataAttribute = data[current.key]
+                    Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+                }
+            } else {
+                gpu.uniform1i(uniforms.isAlphaTested, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
+            }
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()
         }

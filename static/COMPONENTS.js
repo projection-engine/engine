@@ -3,7 +3,7 @@ export default {
   "POINT_LIGHT": "PointLightComponent",
   "MESH": "MeshComponent",
   "CAMERA": "CameraComponent",
-  "PROBE": "ProbeComponent",
+  "SKYLIGHT": "SKYLIGHT",
   "SPRITE": "SpriteComponent",
   "PHYSICS_COLLIDER": "PHYSICS_COLLIDER",
   "RIGID_BODY": "RigidBody",

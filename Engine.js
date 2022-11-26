@@ -11,7 +11,6 @@ import FrameComposition from "./runtime/post-processing/FrameComposition";
 import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
-import DiffuseProbePass from "./runtime/rendering/DiffuseProbePass";
 import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
 import SpritePass from "./runtime/rendering/SpritePass";
 import PhysicsAPI from "./lib/rendering/PhysicsAPI";
@@ -19,6 +18,11 @@ import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
+import LightProbe from "./instances/LightProbe";
+import COMPONENTS from "./static/COMPONENTS";
+import {mat4, vec3} from "gl-matrix";
+import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class Engine {
     static currentFrameFBO
@@ -43,15 +47,28 @@ export default class Engine {
             CameraAPI.updateAspectRatio()
     }
 
+    static #activeSkylightEntity
+    static set activeSkylightEntity(entity) {
+        Engine.#activeSkylightEntity = entity
+        Engine.updateSkylight()
+    }
+
+    static get activeSkylightEntity() {
+        return Engine.#activeSkylightEntity
+    }
+
+    static skylightProbe
+
     static data = {
         pointLights: [],
         meshes: [],
         directionalLights: [],
-        specularProbes: [],
+
         cameras: [],
-        diffuseProbes: [],
+
         sprites: [],
-        terrain: []
+        terrain: [],
+        skylights: []
     }
 
     static params = {}
@@ -76,7 +93,6 @@ export default class Engine {
         FrameComposition.initialize()
         await AmbientOcclusion.initialize()
         GlobalIlluminationPass.initialize()
-        DiffuseProbePass.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
         SpritePass.initialize()
@@ -96,7 +112,7 @@ export default class Engine {
         OBS.observe(gpu.canvas)
         Engine.isReady = true
         Loop.linkParams()
-
+        Engine.skylightProbe = new LightProbe()
         Engine.start()
     }
 
@@ -109,6 +125,20 @@ export default class Engine {
             PhysicsAPI.registerRigidBody(current)
         }
         await ScriptsAPI.updateAllScripts()
+    }
+
+    static updateSkylight() {
+        const entity = Engine.#activeSkylightEntity
+        if (entity) {
+            const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
+            Engine.skylightProbe.resolution = skylight.resolution
+            Engine.skylightProbe.draw((yaw, pitch, projection, index) => {
+                const position = vec3.add([], Engine.skylightProbe.translation, CUBE_MAP_VIEWS.target[index])
+                const view = mat4.lookAt([], Engine.skylightProbe.translation, position, CUBE_MAP_VIEWS.up[index])
+                const viewProjection = mat4.multiply([], projection, view)
+                SceneRenderer.draw(true, viewProjection, position)
+            })
+        }
     }
 
     static updateParams(data, physicsSteps, physicsSubSteps) {

@@ -3,11 +3,11 @@
 mat3 TBN;
 vec2 quadUV;
 
-in vec3 cameraPosition;
 in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
 
+uniform vec3 cameraPosition;
 uniform PointLights{
     mat4 pointLights[24];
     int pointLightsQuantity;
@@ -30,6 +30,7 @@ uniform sampler2D shadow_atlas;
 uniform sampler2D shadow_cube;
 //uniform sampler2D previous_frame;
 
+uniform bool isAlphaTested;
 uniform bool hasAmbientOcclusion;
 uniform float elapsedTime;
 uniform int materialID;

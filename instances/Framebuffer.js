@@ -139,6 +139,11 @@ export default class Framebuffer {
             gpu.clear(gpu.COLOR_BUFFER_BIT)
     }
 
+    stop() {
+        GPU.activeFramebuffer = undefined
+        gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
+    }
+
     static toImage(fbo, w = 300, h = 300) {
         const canvas = document.createElement("canvas")
         canvas.width = w

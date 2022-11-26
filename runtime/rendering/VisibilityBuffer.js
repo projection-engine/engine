@@ -22,7 +22,8 @@ export default class VisibilityBuffer {
     static execute() {
         const toRender = Engine.data.meshes
         const size = toRender.length
-        const meshes= GPU.meshes
+        const meshes = GPU.meshes
+        const materials = GPU.materials
         shader.bind()
 
         fbo.startMapping()
@@ -30,9 +31,16 @@ export default class VisibilityBuffer {
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
             const mesh = meshes.get(entity.__meshID)
+            entity.__meshRef = mesh
 
             if (!entity.active || !mesh)
                 continue
+            if (entity.__materialID) {
+                const material = materials.get(entity.__materialID)
+                entity.__materialRef = material
+                if (material && material.isAlphaTested)
+                    continue
+            }
 
             gpu.uniform3fv(uniforms.entityID, entity.pickID)
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)

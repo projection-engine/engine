@@ -19,7 +19,11 @@ export default class LightProbe {
     }
 
     set resolution(data) {
+        if (data === this._resolution || typeof data !== "number")
+            return
         this._resolution = data
+        if (this.texture instanceof WebGLTexture)
+            gpu.deleteTexture(this.texture)
         this.texture = CubeMapAPI.initializeTexture(data)
     }
 

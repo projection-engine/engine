@@ -15,8 +15,6 @@ export default class MeshComponent extends Component {
         index: undefined
     }
     materialUniforms = []
-    diffuseProbeInfluence = true
-    specularProbeInfluence = true
     contributeToProbes = true
     overrideMaterialUniforms = false
 
