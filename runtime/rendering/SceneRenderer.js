@@ -5,7 +5,23 @@ import GlobalIlluminationPass from "./GlobalIlluminationPass";
 import DirectionalShadows from "../occlusion/DirectionalShadows";
 import OmnidirectionalShadows from "../occlusion/OmnidirectionalShadows";
 import VisibilityBuffer from "./VisibilityBuffer";
+import COMPONENTS from "../../static/COMPONENTS";
+import Shader from "../../instances/Shader";
 
+let texOffset
+const TO_IGNORE = {
+    brdf_sampler: true,
+    SSAO: true,
+    SSGI: true,
+    SSR: true,
+    shadow_atlas: true,
+    shadow_cube: true,
+    previous_frame: true,
+    scene_depth: true,
+    hasAmbientOcclusion: true,
+    materialID: true,
+    modelMatrix: true
+}
 export default class SceneRenderer {
     static shader
 
@@ -54,6 +70,7 @@ export default class SceneRenderer {
 
         gpu.uniform1i(uniforms.hasAmbientOcclusion, AmbientOcclusion.enabled ? 1 : 0)
         for (let i = 0; i < size; i++) {
+            texOffset = 7
             const entity = entities[i]
             const mesh = meshes.get(entity.__meshID)
 
@@ -62,9 +79,16 @@ export default class SceneRenderer {
 
             if (entity.__materialID) {
                 const material = materials.get(entity.__materialID)
-                if (material)
+                if (material) {
                     gpu.uniform1i(uniforms.materialID, material.bindID)
-                    // shader.bindForUse(material.uniformValues)
+                    const data = material.uniformValues, toBind = material.uniforms
+                    for(let j = 0; j < toBind.length; j++){
+                        const current = toBind[j]
+                        const dataAttribute = data[current.key]
+                        Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+                    }
+                }
+
             } else
                 gpu.uniform1i(uniforms.materialID, -1)
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)

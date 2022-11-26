@@ -18,6 +18,7 @@ export default class MeshComponent extends Component {
     diffuseProbeInfluence = true
     specularProbeInfluence = true
     contributeToProbes = true
+    overrideMaterialUniforms = false
 
     set meshID(data) {
         if (this._meshID === data)

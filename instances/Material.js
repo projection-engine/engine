@@ -122,10 +122,7 @@ export default class Material {
 
     async updateUniformGroup(uniforms) {
         this.#uniforms = uniforms
-
-        this.#ready = false
         await MaterialAPI.updateMaterialUniforms(this)
-        this.#ready = true
     }
 
     async updateUniformAttribute(key, data) {
@@ -133,12 +130,14 @@ export default class Material {
         if (ind === -1)
             return false
         try {
-            this.#uniforms[ind] = data
-            await MaterialAPI.updateMaterialUniforms(this)
-            return true
+            if(this.#uniforms[ind]) {
+                this.#uniforms[ind] = data
+                await MaterialAPI.updateMaterialUniforms(this)
+                return true
+            }
         } catch (err) {
             ConsoleAPI.error(err)
-            return false
         }
+        return false
     }
 }
