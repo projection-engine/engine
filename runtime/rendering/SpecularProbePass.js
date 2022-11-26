@@ -1,11 +1,6 @@
-import {mat4, vec3} from "gl-matrix"
+import {vec3} from "gl-matrix"
 
 import COMPONENTS from "../../static/COMPONENTS.js"
-import MaterialAPI from "../../lib/rendering/MaterialAPI";
-import Engine from "../../Engine";
-import GPU from "../../GPU";
-import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
-import LightProbe from "../../instances/LightProbe";
 
 export const STEPS_CUBE_MAP = {
     BASE: 0,

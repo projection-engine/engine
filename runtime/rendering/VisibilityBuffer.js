@@ -2,8 +2,6 @@ import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import Engine from "../../Engine";
-import COMPONENTS from "../../static/COMPONENTS";
-import MaterialAPI from "../../lib/rendering/MaterialAPI";
 
 let shader, uniforms, fbo
 export default class VisibilityBuffer {
@@ -30,7 +28,7 @@ export default class VisibilityBuffer {
 
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
-            const mesh = GPU.meshes.get(entity.components.get(COMPONENTS.MESH).meshID)
+            const mesh = entity.__meshReference
 
             if (!entity.active || !mesh)
                 continue

@@ -18,7 +18,7 @@ import FXAA_FRAG from "../shaders/post-processing/FXAA.frag";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/post-processing/BRIGHTNESS_FILTER.frag";
 import SCREEN_SPACE_INDIRECT_FRAG from "../shaders/post-processing/SCREEN_SPACE_INDIRECT.frag"
-import CUBEMAP from "../shaders/CUBEMAP.vert"
+import CUBEMAP from "../shaders/forward-rendering/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/post-processing/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/post-processing/IRRADIANCE_MAP.frag"
 import MotionBlur from "../runtime/post-processing/MotionBlur";

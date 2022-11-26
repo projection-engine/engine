@@ -1,6 +1,5 @@
 import GPU from "../../GPU";
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.json"
-import LightsAPI from "../../lib/rendering/LightsAPI";
 
 export default class TransformationPass {
     static hasChangeBuffer = new Uint8Array(new SharedArrayBuffer(1))

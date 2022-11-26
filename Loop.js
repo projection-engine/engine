@@ -2,8 +2,6 @@ import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
 
 import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
 import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
-import SpecularProbePass from "./runtime/rendering/SpecularProbePass";
-import DiffuseProbePass from "./runtime/rendering/DiffuseProbePass";
 
 import executeScripts from "./runtime/misc/execute-scripts";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
@@ -21,6 +19,7 @@ import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightsAPI from "./lib/rendering/LightsAPI";
+import drawScene from "./runtime/rendering/draw-scene";
 
 let FBO, previous = 0
 export default class Loop {
@@ -123,6 +122,8 @@ export default class Loop {
         FBO.startMapping()
         SkyboxPass.execute()
         Loop.#duringDrawing()
+
+        drawScene()
 
         GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
 

@@ -5,6 +5,7 @@ import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPP
 import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl";
 import ACES from "../shaders/utils/ACES.glsl";
 import DEPTH_UTILS from "../shaders/utils/DEPTH_RECONSTRUCTION_UTILS.glsl"
+import COMPUTE_LIGHTS from "../shaders/utils/COMPUTE_LIGHTS.glsl"
 
 const METHODS = {
     cameraUBO: "//import(cameraUBO)",
@@ -24,6 +25,9 @@ export default function applyShaderMethods(shaderCode) {
     for (let i = 0; i < 3; i++) {
         Object.keys(METHODS).forEach(key => {
             switch (true) {
+                case key === "computeLights":
+                    response = response.replaceAll(METHODS[key], COMPUTE_LIGHTS)
+                    break
                 case key === "pbLightComputation":
                     response = response.replaceAll(METHODS[key], PB_LIGHT_COMPUTATION)
                     break

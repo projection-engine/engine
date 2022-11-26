@@ -1,15 +1,11 @@
 import {v4} from "uuid"
-import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MaterialAPI from "../lib/rendering/MaterialAPI";
-import {DEFAULT_MATRICES} from "../static/SIMPLE_MATERIAL_UNIFORMS";
 import GPUAPI from "../lib/rendering/GPUAPI";
-import LightsAPI from "../lib/rendering/LightsAPI";
 import DEFAULT_VERTEX from "../shaders/uber-shader/UBER-MATERIAL.vert"
+import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import GPU from "../GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 import GENERIC_FRAG_SHADER from "../shaders/uber-shader/UBER-MATERIAL-GENERIC.frag"
-import BASIS_FRAG_SHADER from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
-import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 
 /**
