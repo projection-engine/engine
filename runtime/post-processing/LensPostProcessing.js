@@ -4,7 +4,6 @@ import UBO from "../../instances/UBO";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import VisibilityBuffer from "../rendering/VisibilityBuffer";
 
 
 let shader, uniforms, metadata

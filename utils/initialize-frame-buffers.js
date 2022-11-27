@@ -1,8 +1,6 @@
 import GPUAPI from "../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
 import GPU from "../GPU";
-
-import SSAO from "../runtime/rendering/SSAO";
 import SSGI from "../runtime/rendering/SSGI";
 
 import MotionBlur from "../runtime/post-processing/MotionBlur";

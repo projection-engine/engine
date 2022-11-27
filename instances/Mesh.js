@@ -59,18 +59,21 @@ export default class Mesh {
         if (lastUsed != null)
             lastUsed.finish()
     }
-
-    use() {
+    prepareForUse(){
         const last = GPU.activeMesh
         if (last === this)
             return
         else if (last != null)
             last.finish()
 
+        GPU.activeMesh = this
+        this.prepareForUse()
         gpu.bindVertexArray(this.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
-
         this.vertexVBO.enable()
+    }
+    use() {
+        this.prepareForUse()
         if (this.normalVBO)
             this.normalVBO.enable()
         if (this.uvVBO)
@@ -80,7 +83,6 @@ export default class Mesh {
     }
 
     finish() {
-
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
         this.vertexVBO.disable()
 
@@ -88,29 +90,13 @@ export default class Mesh {
             this.uvVBO.disable()
         if (this.normalVBO)
             this.normalVBO.disable()
-        // if (this.tangentVBO)
-        //     this.tangentVBO.disable()
 
-        gpu.bindVertexArray(null)
-
-        GPU.activeMesh = undefined
-    }
-    simplifiedFinish(){
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
-        this.vertexVBO.disable()
         gpu.bindVertexArray(null)
         GPU.activeMesh = undefined
     }
+
     simplifiedDraw(){
-        const last = GPU.activeMesh
-        if (last === this)
-            return
-        else if (last != null)
-            last.simplifiedFinish()
-
-        gpu.bindVertexArray(this.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
-        this.vertexVBO.enable()
+        this.prepareForUse()
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
 

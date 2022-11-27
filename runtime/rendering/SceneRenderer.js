@@ -5,7 +5,6 @@ import SSGI from "./SSGI";
 import DirectionalShadows from "./DirectionalShadows";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import VisibilityBuffer from "./VisibilityBuffer";
-import COMPONENTS from "../../static/COMPONENTS";
 import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import SSR from "./SSR";
@@ -66,6 +65,19 @@ export default class SceneRenderer {
 
         gpu.uniform1i(uniforms.hasAmbientOcclusion, SSAO.enabled ? 1 : 0)
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
+        texOffset = 8
+
+        // uniform samplerCube skylight_diffuse;
+        // uniform samplerCube skylight_specular;
+        // uniform float skylight_samples;
+
+        if(GPU.__activeSkylightEntity !== null) {
+            gpu.uniform1i(uniforms.hasSkylight, 1)
+            texOffset++
+            gpu.activeTexture(gpu.TEXTURE8)
+            gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
+            gpu.uniform1i(uniforms.skylight_specular, 8)
+        }
 
         let depthMaskState = true, cullFaceState = true
 
@@ -74,7 +86,7 @@ export default class SceneRenderer {
         gpu.depthMask(true)
 
         for (let i = 0; i < size; i++) {
-            texOffset = 8
+
             const entity = entities[i]
             const mesh = entity.__meshRef
 

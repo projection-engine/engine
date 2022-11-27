@@ -27,7 +27,7 @@ class CameraWorker {
     static viewProjectionMatrix
     static previousViewProjectionMatrix
     static #staticViewMatrix
-    static #initialized = false
+    static initialized = false
     static #projectionBuffer
     static #skyboxProjectionMatrix
     static frameID
@@ -51,12 +51,12 @@ class CameraWorker {
         previousViewProjectionMatrix,
         UBOBuffer
     ) {
-        if (CameraWorker.#initialized)
+        if (CameraWorker.initialized)
             return
         CameraWorker.previousViewProjectionMatrix = previousViewProjectionMatrix
         CameraWorker.viewProjectionMatrix = viewProjectionMatrix
         CameraWorker.#projectionBuffer = projectionBuffer
-        CameraWorker.#initialized = true
+        CameraWorker.initialized = true
         nBuffer = CameraWorker.#notificationBuffers = notificationBuffers
         CameraWorker.#position = position
         CameraWorker.#viewMatrix = viewMatrix
@@ -71,12 +71,8 @@ class CameraWorker {
         TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
         CameraWorker.UBOBuffer = UBOBuffer
 
-        const callback = () => {
-            CameraWorker.execute()
-            CameraWorker.frameID = requestAnimationFrame(callback)
-        }
+
         CameraWorker.updateVP()
-        CameraWorker.frameID = requestAnimationFrame(callback)
 
     }
 
@@ -175,4 +171,8 @@ class CameraWorker {
     }
 }
 
-self.onmessage = (event) => CameraWorker.initialize(...event.data)
+self.onmessage = (event) => {
+    if(!CameraWorker.initialized)
+        CameraWorker.initialize(...event.data)
+    CameraWorker.execute()
+}

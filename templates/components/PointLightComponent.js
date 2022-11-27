@@ -26,7 +26,6 @@ export default class PointLightComponent extends Component {
     shadowSamples = 10
     shadowBias = .05
 
-
     get zNear() {
         return this._zNear
     }

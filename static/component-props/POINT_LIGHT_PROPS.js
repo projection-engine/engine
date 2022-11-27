@@ -15,12 +15,10 @@ export default [
         Component.number("BIAS", "shadowBias", undefined, undefined, .001),
         Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, undefined, false, false, v => !v.shadowMap),
 
-    ]),
-    Component.group("SHADOW_VIEW_PLANES", [
         Component.number("FAR", "zFar", undefined, undefined, .001),
         Component.number("NEAR", "zNear", undefined, undefined, .001),
     ]),
     Component.group("ATTENUATION", [
-        Component.array(["LINEAR", "DISTANCE", "DISTANCE_SQUARED"], "attenuation",   .001)
+        Component.array(["LINEAR", "DISTANCE", "DISTANCE_SQUARED"], "attenuation",   .001, 1, 0)
     ]),
 ]

@@ -1,4 +1,4 @@
-import PB_LIGHT_COMPUTATION from "../shaders/utils/PB_LIGHT_COMPUTATION.glsl";
+import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
 import CAMERA_UBO from "../shaders/utils/CAMERA_METADATA_UNIFORM.glsl";
 import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl";
 import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl";

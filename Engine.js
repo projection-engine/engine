@@ -19,10 +19,6 @@ import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightProbe from "./instances/LightProbe";
-import COMPONENTS from "./static/COMPONENTS";
-import {mat4, vec3} from "gl-matrix";
-import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
-import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import SSR from "./runtime/rendering/SSR";
 
 export default class Engine {
@@ -103,7 +99,7 @@ export default class Engine {
         OBS.observe(gpu.canvas)
         Engine.isReady = true
         Loop.linkParams()
-        Engine.skylightProbe = new LightProbe()
+        GPU.skylightProbe = new LightProbe()
         Engine.start()
     }
 

@@ -28,6 +28,12 @@ uniform sampler2D SSGI;
 uniform sampler2D SSR;
 uniform sampler2D shadow_atlas;
 uniform samplerCube shadow_cube;
+
+//uniform samplerCube skylight_diffuse;
+uniform samplerCube skylight_specular;
+uniform float skylight_samples;
+uniform bool hasSkylight;
+
 //uniform sampler2D previous_frame;
 
 uniform bool noDepthChecking;

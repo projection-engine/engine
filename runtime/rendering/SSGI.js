@@ -4,7 +4,6 @@ import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import VisibilityBuffer from "./VisibilityBuffer";
-import FrameComposition from "../post-processing/FrameComposition";
 
 /**
  * rayMarchSettings definition:

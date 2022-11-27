@@ -37,12 +37,9 @@ export default class Material {
         fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
         fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
-        console.trace(fragment)
-        console.trace(methodsToLoad, uniformsToLoad)
-
         const shader = GPUAPI.allocateShader(STATIC_SHADERS.UBER_SHADER, VERTEX_SHADER, fragment)
         if (shader.messages.hasError) {
-            SceneRenderer.shader = Material.uberShader
+            SceneRenderer.shader = Material.#fallbackUberShader
             ConsoleAPI.error("Invalid shader", shader.messages)
             console.error("Invalid shader", shader.messages)
             return
@@ -65,7 +62,7 @@ export default class Material {
 
     static forceFallbackShader() {
         Material.#useFallback = true
-        SceneRenderer.shader = Material.uberShader
+        SceneRenderer.shader = Material.#fallbackUberShader
     }
 
     static get uberShader() {

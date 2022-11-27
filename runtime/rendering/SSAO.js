@@ -5,7 +5,6 @@ import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
 import VisibilityBuffer from "./VisibilityBuffer";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import Engine from "../../Engine";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
 const RESOLUTION = 4

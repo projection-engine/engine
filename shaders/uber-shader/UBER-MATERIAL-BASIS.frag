@@ -19,7 +19,7 @@ void main(){
     quadUV = gl_FragCoord.xy/vec2(textureSize(scene_depth, 0));
     if(!noDepthChecking){
         vec4 depthData = texture(scene_depth, quadUV);
-        if (depthData.r != gl_FragCoord.z) discard;
+        if (abs(depthData.r - gl_FragCoord.z) > .00001) discard;
     }
 
     // computeTBN();

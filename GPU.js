@@ -33,26 +33,29 @@ export default class GPU {
     static BRDF
     static internalResolution
     static quad
-    static #activeSkylightEntity
+    static __activeSkylightEntity
+
     static set activeSkylightEntity(entity) {
-        GPU.#activeSkylightEntity = entity
+        GPU.__activeSkylightEntity = entity
         GPU.updateSkylight()
     }
 
     static get activeSkylightEntity() {
-        return GPU.#activeSkylightEntity
+        return GPU.__activeSkylightEntity
     }
 
     static skylightProbe
 
     static updateSkylight() {
-        const entity = GPU.#activeSkylightEntity
+        const entity = GPU.__activeSkylightEntity
+        if(!GPU.skylightProbe)
+            return
         if (entity) {
             const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
             GPU.skylightProbe.resolution = skylight.resolution
             GPU.skylightProbe.draw((yaw, pitch, projection, index) => {
-                const position = vec3.add([], GPU.skylightProbe.translation, CUBE_MAP_VIEWS.target[index])
-                const view = mat4.lookAt([], GPU.skylightProbe.translation, position, CUBE_MAP_VIEWS.up[index])
+                const position = vec3.add([], entity._translation, CUBE_MAP_VIEWS.target[index])
+                const view = mat4.lookAt([], entity._translation, position, CUBE_MAP_VIEWS.up[index])
                 const viewProjection = mat4.multiply([], projection, view)
                 SceneRenderer.draw(true, viewProjection, position)
             })
@@ -71,8 +74,10 @@ export default class GPU {
 
         window.gpu = canvas.getContext("webgl2", {
             antialias: false,
-            preserveDrawingBuffer: true,
-            premultipliedAlpha: false
+            // preserveDrawingBuffer: true,
+            premultipliedAlpha: false,
+            powerPreference: "high-performance",
+            depth: false
         })
         GPU.context = gpu
 

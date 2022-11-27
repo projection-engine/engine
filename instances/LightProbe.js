@@ -4,7 +4,6 @@ import GPU from "../GPU";
 import CubeMapAPI from "../lib/rendering/CubeMapAPI";
 import getProbeRotation from "../utils/get-probe-rotation";
 import getProbeLookat from "../utils/get-probe-lookat";
-import Engine from "../Engine";
 
 
 export default class LightProbe {

@@ -11,7 +11,6 @@ import Engine from "./Engine";
 import SpritePass from "./runtime/rendering/SpritePass";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
 import TransformationPass from "./runtime/misc/TransformationPass";
-import GPUAPI from "./lib/rendering/GPUAPI";
 import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
@@ -134,6 +133,8 @@ export default class Loop {
 
     static loop(current) {
         try {
+            // CameraAPI.updateFrame()
+
             Engine.elapsed = current - previous
             previous = current
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
@@ -149,6 +150,8 @@ export default class Loop {
             }
             if (transformationChanged === 1)
                 TransformationPass.hasChangeBuffer[0] = 0
+
+
             CameraAPI.updateFrame()
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {
