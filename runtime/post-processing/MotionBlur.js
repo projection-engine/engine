@@ -1,11 +1,12 @@
 import VisibilityBuffer from "../rendering/VisibilityBuffer";
 import GPU from "../../GPU";
 import Engine from "../../Engine";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 
 let shader, uniforms
 export default class MotionBlur {
-    static shader
+
 
     static velocityScale = 1
     static maxSamples = 50
@@ -14,15 +15,14 @@ export default class MotionBlur {
     static enabled = true
 
     static initialize(){
-
-        shader = MotionBlur.shader
+        shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.MOTION_BLUR)
         uniforms = shader.uniformMap
     }
     static execute() {
         if(!MotionBlur.enabled)
             return
         MotionBlur.frameBuffer.startMapping()
-        MotionBlur.shader.bind()
+        shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)

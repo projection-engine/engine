@@ -59,9 +59,12 @@ float geometrySmith (vec3 N, vec3 V, vec3 L, float roughness){
 vec4 pbLightComputation() {
     if (flatShading) return vec4(albedo + emission, alpha);
 
+
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
-    vec3 V = normalize(cameraPosition - worldSpacePosition);
+    vec3 V = cameraPosition - worldSpacePosition;
+    float distanceFromCamera = length(V);
+    V = normalize(V);
     float ao = hasAmbientOcclusion ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
     float NdotV = max(dot(N, V), 0.000001);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
@@ -70,17 +73,17 @@ vec4 pbLightComputation() {
     float shadows = directionalLightsQuantity > 0 || pointLightsQuantity > 0?  0. : 1.0;
     float quantityToDivide = float(directionalLightsQuantity) + float(pointLightsQuantity);
     for (int i = 0; i < directionalLightsQuantity; i++){
-        vec4 lightInformation = computeDirectionalLight(shadow_atlas, shadowMapsQuantity, shadowMapResolution, directionalLightsPOV[i], directionalLights[i], worldSpacePosition, V, F0, roughness, metallic, N, albedo);
+        vec4 lightInformation = computeDirectionalLight(distanceFromCamera, shadow_atlas, shadowMapsQuantity, shadowMapResolution, directionalLightsPOV[i], directionalLights[i], worldSpacePosition, V, F0, roughness, metallic, N, albedo);
         directIllumination += lightInformation.rgb;
         shadows += lightInformation.a/quantityToDivide;
     }
 
-    //        float viewDistance = length(V);
-    //        for (int i = 0; i < int(pointLightsQuantity); ++i){
-    //            vec4 lightInformation = computePointLights(shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
-    //            directIllumination += lightInformation.rgb;
-    //            shadows += lightInformation.a/quantityToDivide;
-    //        }
+    float viewDistance = length(V);
+    for (int i = 0; i < int(pointLightsQuantity); ++i){
+        vec4 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
+        directIllumination += lightInformation.rgb;
+        shadows += lightInformation.a/quantityToDivide;
+    }
 
     indirectIllumination = sampleIndirectLight(shadows, metallic, roughness, albedo);
     return vec4((directIllumination * shadows + indirectIllumination) * ao + emission, alpha);

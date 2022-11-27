@@ -17,5 +17,7 @@ export default {
     ALL: "ALL",
     GBUFFER: "G-Buffer",
     MATERIALS: "Materials",
-    VISIBILITY_BUFFER: "Visibility buffer"
+    VISIBILITY_BUFFER: "Visibility buffer",
+    SSR: "Screen-space reflections",
+    SSGI: "Screen-space GI",
 }

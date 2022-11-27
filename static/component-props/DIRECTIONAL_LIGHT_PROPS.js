@@ -18,6 +18,8 @@ export default [
         Component.number("NEAR", "zNear", undefined, undefined, .001, false, true, v => !v.shadowMap),
         Component.number("BIAS", "shadowBias", undefined, undefined, .00001),
         Component.number("PCF_SAMPLES", "pcfSamples", 10, 1, 1, false, false, v => !v.shadowMap),
+        Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, undefined, false, false, v => !v.shadowMap),
+
     ]),
 
 

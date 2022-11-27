@@ -36,7 +36,10 @@ float sampleSoftShadows(vec2 coord, float compare, sampler2D shadowMapTexture, f
     return response/SAMPLES_SQUARED;
 }
 
-float directionalLightShadows(float bias, vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shadowMapTexture, float shadowMapsQuantity, float shadowMapResolution, float pcfSamples){
+float directionalLightShadows(float distanceFromCamera, float shadowFalloffDistance, float bias, vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shadowMapTexture, float shadowMapsQuantity, float shadowMapResolution, float pcfSamples){
+    float attenuation = clamp(mix(1., 0., shadowFalloffDistance - distanceFromCamera), 0., 1.);
+    if(attenuation == 1.) return 1.;
+
     float response = 1.0;
     vec3 pos = (fragPosLightSpace.xyz / fragPosLightSpace.w)* 0.5 + 0.5;
 
@@ -46,7 +49,8 @@ float directionalLightShadows(float bias, vec4 fragPosLightSpace, vec2 faceOffse
     float compare = pos.z - bias;
 
     response = sampleSoftShadows(vec2(pos.x/shadowMapsQuantity + faceOffset.x/shadowMapsQuantity, pos.y/shadowMapsQuantity + faceOffset.y/shadowMapsQuantity), compare, shadowMapTexture, shadowMapResolution, pcfSamples);
-
+    if(response < 1.)
+        return min(1., response + attenuation);
     return response;
 }
 
@@ -59,7 +63,10 @@ vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
 vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
 vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
 );
-float pointLightShadow(samplerCube shadowMap, vec3 lightPos, mat4 lightMatrix, float viewDistance, vec3 fragPosition) {
+float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, samplerCube shadowMap, vec3 lightPos, mat4 lightMatrix, float viewDistance, vec3 fragPosition) {
+    float attenuation = clamp(mix(1., 0., shadowFalloffDistance - distanceFromCamera), 0., 1.);
+    if(attenuation == 1.) return 1.;
+
     float farPlane = lightMatrix[3][0];
     float bias   = lightMatrix[0][3];
     int samples  = int(lightMatrix[1][3]);
@@ -78,19 +85,22 @@ float pointLightShadow(samplerCube shadowMap, vec3 lightPos, mat4 lightMatrix, f
     }
     shadow /= float(samples);
 
-
-    return 1. - shadow;
+    float response = 1. - shadow;
+    if(response < 1.)
+        return min(1., response + attenuation);
+    return response;
 }
 
 
-vec4 computeDirectionalLight(sampler2D shadowMap, float lightsPerShadowAtlas, float shadowAtlasResolution, mat4 lightMatrix, mat4 lightData, vec3 fragPosition, vec3 viewDirection, vec3 F0, float roughness, float metallic, vec3 surfaceNormal, vec3 albedo){
+vec4 computeDirectionalLight(float distanceFromCamera, sampler2D shadowMap, float lightsPerShadowAtlas, float shadowAtlasResolution, mat4 lightMatrix, mat4 lightData, vec3 fragPosition, vec3 viewDirection, vec3 F0, float roughness, float metallic, vec3 surfaceNormal, vec3 albedo){
     vec3 lightDirection =  normalize(vec3(lightData[0][0], lightData[0][1], lightData[0][2]));
     vec3 lightColor =  vec3(lightData[1][0], lightData[1][1], lightData[1][2]);
     float shadows = 1.;
     if (lightData[2][2] > 0.){
         vec4 fragPosLightSpace  = lightMatrix * vec4(fragPosition, 1.0);
         vec2 atlasFace = vec2(lightData[2][0], lightData[2][1]);
-        shadows = directionalLightShadows(lightData[3][0], fragPosLightSpace, atlasFace, shadowMap, lightsPerShadowAtlas, shadowAtlasResolution, lightData[2][2]);
+
+        shadows = directionalLightShadows(distanceFromCamera, lightData[3][1], lightData[3][0], fragPosLightSpace, atlasFace, shadowMap, lightsPerShadowAtlas, shadowAtlasResolution, lightData[2][2]);
     }
 
     vec3 H = normalize(viewDirection + lightDirection);
@@ -110,12 +120,12 @@ vec4 computeDirectionalLight(sampler2D shadowMap, float lightsPerShadowAtlas, fl
 }
 
 
-vec4 computePointLights (samplerCube shadowMap, mat4 pointLight, vec3 fragPosition, float viewDistance, vec3 V, vec3 N, float quantityToDivide, float roughness, float metallic, vec3 albedo, vec3 F0) {
+vec4 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 pointLight, vec3 fragPosition, float viewDistance, vec3 V, vec3 N, float quantityToDivide, float roughness, float metallic, vec3 albedo, vec3 F0) {
     vec3 lightPosition = vec3(pointLight[0][0], pointLight[0][1], pointLight[0][2]);
 
     float shadows = 1.;
     if (pointLight[3][1] == 1.)
-    shadows = pointLightShadow(shadowMap, lightPosition, pointLight, viewDistance, fragPosition)/quantityToDivide;
+    shadows = pointLightShadow(distanceFromCamera, pointLight[3][2], shadowMap, lightPosition, pointLight, viewDistance, fragPosition)/quantityToDivide;
 
     vec3 lightColor = vec3(pointLight[1][0], pointLight[1][1], pointLight[1][2]);
     vec3 attenuationPLight = vec3(pointLight[2][0], pointLight[2][1], pointLight[2][2]);

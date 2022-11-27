@@ -12,8 +12,8 @@ vec3 normalFromDepth(float depth, vec2 texCoords, sampler2D depthSampler) {
     vec2 texCoords1 =texCoords +  vec2(0., 1.)*texelSize;
     vec2 texCoords2 = texCoords +  vec2(1., 0.)*texelSize;
 
-    float depth1 = texture(depthSampler, texCoords1).r;
-    float depth2 = texture(depthSampler, texCoords2).r;
+    float depth1 = textureLod(depthSampler, texCoords1, 2.).r;
+    float depth2 = textureLod(depthSampler, texCoords2, 2.).r;
 
     vec3 P0 = viewSpacePositionFromDepth(depth, texCoords);
     vec3 P1 = viewSpacePositionFromDepth(depth1, texCoords1);

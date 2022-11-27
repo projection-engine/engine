@@ -1,7 +1,7 @@
-import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
+import SSAO from "./runtime/rendering/SSAO";
 
-import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
-import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
+import SSGI from "./runtime/rendering/SSGI";
+import DirectionalShadows from "./runtime/rendering/DirectionalShadows";
 
 import executeScripts from "./runtime/misc/execute-scripts";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
@@ -12,7 +12,7 @@ import SpritePass from "./runtime/rendering/SpritePass";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
 import TransformationPass from "./runtime/misc/TransformationPass";
 import GPUAPI from "./lib/rendering/GPUAPI";
-import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
+import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
@@ -20,6 +20,7 @@ import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightsAPI from "./lib/rendering/LightsAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
+import SSR from "./runtime/rendering/SSR";
 
 let FBO, previous = 0
 export default class Loop {
@@ -49,6 +50,7 @@ export default class Loop {
     }
 
     static #benchmarkMode() {
+
         BenchmarkAPI.track(BENCHMARK_KEYS.PHYSICS_PASS)
         PhysicsPass.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.PHYSICS_PASS)
@@ -62,7 +64,7 @@ export default class Loop {
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
-        AmbientOcclusion.execute()
+        SSAO.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.VISIBILITY_BUFFER)
@@ -70,15 +72,13 @@ export default class Loop {
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
         Loop.#beforeDrawing()
-
-
         FBO.startMapping()
         Loop.#duringDrawing()
+
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
+        gpu.clear(gpu.DEPTH_BUFFER_BIT)
         SceneRenderer.draw()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
-
-        GPUAPI.copyTexture(FBO, VisibilityBuffer.buffer, gpu.DEPTH_BUFFER_BIT)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.SPRITE_PASS)
         SpritePass.execute()
@@ -87,9 +87,13 @@ export default class Loop {
         Loop.#afterDrawing()
         FBO.stopMapping()
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
-        GlobalIlluminationPass.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.GLOBAL_ILLUMINATION_PASS)
+        BenchmarkAPI.track(BENCHMARK_KEYS.SSGI)
+        SSGI.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SSGI)
+
+        BenchmarkAPI.track(BENCHMARK_KEYS.SSR)
+        SSR.execute()
+        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SSR)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.POST_PROCESSING)
         LensPostProcessing.execute()
@@ -109,14 +113,11 @@ export default class Loop {
             executeScripts()
 
         PhysicsPass.execute()
-
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
-        AmbientOcclusion.execute()
+        SSAO.execute()
         VisibilityBuffer.execute()
         Loop.#beforeDrawing()
-
-
         FBO.startMapping()
         Loop.#duringDrawing()
         gpu.clear(gpu.DEPTH_BUFFER_BIT)
@@ -124,8 +125,8 @@ export default class Loop {
         SpritePass.execute()
         Loop.#afterDrawing()
         FBO.stopMapping()
-
-        GlobalIlluminationPass.execute()
+        SSGI.execute()
+        SSR.execute()
         LensPostProcessing.execute()
         MotionBlur.execute()
         FrameComposition.execute()
@@ -136,12 +137,9 @@ export default class Loop {
             Engine.elapsed = current - previous
             previous = current
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-
-            if (TransformationPass.hasChangeBuffer[0] === 1) {
+            const transformationChanged = TransformationPass.hasChangeBuffer[0]
+            if (transformationChanged === 1)
                 LightsAPI.packageLights(false, true)
-                TransformationPass.hasChangeBuffer[0] = 0
-            }
-
             if (!Engine.benchmarkMode)
                 Loop.#callback()
             else {
@@ -149,7 +147,8 @@ export default class Loop {
                 Loop.#benchmarkMode()
                 BenchmarkAPI.endTrack(BENCHMARK_KEYS.ALL)
             }
-
+            if (transformationChanged === 1)
+                TransformationPass.hasChangeBuffer[0] = 0
             CameraAPI.updateFrame()
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {

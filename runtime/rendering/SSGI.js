@@ -22,29 +22,22 @@ import FrameComposition from "../post-processing/FrameComposition";
 
 let shader, uniforms
 let blurShader, blurShaderUniforms
-
 let gaussianBlurShader, gaussianBlurShaderUniforms
 let ssgiQuarter, ssgiEighth, ssgiFinal
-export default class GlobalIlluminationPass {
+let framebuffer
+
+export default class SSGI {
+    static FBO
     static SSGISampler
     static SSRSampler
     static blurSamples = 4
-    static SSGIEnabled = true
-    static SSREnabled = true
+    static enabled = true
     static unfilteredSSGISampler
     static ssgiColorGrading = new Float32Array(2)
-
-    static FBO
-
-    static blurShader
-    static shader
-    static normalSampler
-    static rayMarchSettings = new Float32Array(9)
-    static sourceColorSampler
+    static rayMarchSettings = new Float32Array(3)
 
     static initialize() {
-        GlobalIlluminationPass.sourceColorSampler = Engine.previousFrameSampler
-
+        framebuffer = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.SSGI)
         ssgiQuarter = GPUAPI.allocateFramebuffer(
             STATIC_FRAMEBUFFERS.SSGI + "QUARTER",
             GPU.internalResolution.w / 4,
@@ -62,18 +55,17 @@ export default class GlobalIlluminationPass {
         ).texture({linear: true})
 
 
-        GlobalIlluminationPass.unfilteredSSGISampler = GlobalIlluminationPass.FBO.colors[0]
-        GlobalIlluminationPass.SSGISampler = ssgiFinal.colors[0]
-        GlobalIlluminationPass.SSRSampler = GlobalIlluminationPass.FBO.colors[1]
+        SSGI.unfilteredSSGISampler = framebuffer.colors[0]
+        SSGI.SSGISampler = ssgiFinal.colors[0]
 
-        shader = GlobalIlluminationPass.shader
+
+        shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SSGI)
         uniforms = shader.uniformMap
-        GlobalIlluminationPass.ssgiColorGrading[0] = 2.2
-        GlobalIlluminationPass.ssgiColorGrading[1] = 1
+        SSGI.ssgiColorGrading[0] = 2.2
+        SSGI.ssgiColorGrading[1] = 1
 
         blurShader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.BILATERAL_BLUR)
         blurShaderUniforms = blurShader.uniformMap
-
 
         gaussianBlurShader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.GAUSSIAN)
         gaussianBlurShaderUniforms = gaussianBlurShader.uniformMap
@@ -81,34 +73,30 @@ export default class GlobalIlluminationPass {
     }
 
     static execute() {
-        if (!GlobalIlluminationPass.SSREnabled && !GlobalIlluminationPass.SSGIEnabled) {
+        if (!SSGI.enabled) {
             ssgiFinal.clear()
-            GlobalIlluminationPass.FBO.clear()
             return
         }
 
-        GlobalIlluminationPass.FBO.startMapping()
+        framebuffer.startMapping()
         shader.bind()
 
-        // TODO - POSITION AND NORMAL RECONSTRUCTION
         gpu.activeTexture(gpu.TEXTURE0)
         gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
         gpu.uniform1i(uniforms.depthSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.sourceColorSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
         gpu.uniform1i(uniforms.previousFrame, 1)
 
-        gpu.uniform1f(uniforms.noise, FrameComposition.currentNoise)
-
-        gpu.uniform2fv(uniforms.ssgiColorGrading, GlobalIlluminationPass.ssgiColorGrading)
-        gpu.uniformMatrix3fv(uniforms.rayMarchSettings, false, GlobalIlluminationPass.rayMarchSettings)
+        gpu.uniform2fv(uniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
+        gpu.uniform3fv(uniforms.rayMarchSettings,  SSGI.rayMarchSettings)
 
         drawQuad()
-        GlobalIlluminationPass.FBO.stopMapping()
+        framebuffer.stopMapping()
 
-        if (GlobalIlluminationPass.SSGIEnabled)
-            GlobalIlluminationPass.#applyBlur()
+        if (SSGI.enabled)
+            SSGI.#applyBlur()
         else
             ssgiFinal.clear()
 
@@ -119,16 +107,16 @@ export default class GlobalIlluminationPass {
 
         gaussianBlurShader.bind()
         ssgiQuarter.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.unfilteredSSGISampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSGI.unfilteredSSGISampler)
         gpu.uniform1i(gaussianBlurShaderUniforms.sceneColor, 0)
-        gpu.uniform1i(gaussianBlurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
+        gpu.uniform1i(gaussianBlurShaderUniforms.blurRadius, SSGI.blurSamples)
         drawQuad()
         ssgiQuarter.stopMapping()
 
         ssgiEighth.startMapping()
         gpu.bindTexture(gpu.TEXTURE_2D, ssgiQuarter.colors[0])
         gpu.uniform1i(gaussianBlurShaderUniforms.sceneColor, 0)
-        gpu.uniform1i(gaussianBlurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples * 2)
+        gpu.uniform1i(gaussianBlurShaderUniforms.blurRadius, SSGI.blurSamples * 2)
         drawQuad()
         ssgiEighth.stopMapping()
 
@@ -140,7 +128,7 @@ export default class GlobalIlluminationPass {
         gpu.activeTexture(gpu.TEXTURE1)
         gpu.bindTexture(gpu.TEXTURE_2D, ssgiEighth.colors[0])
         gpu.uniform1i(blurShaderUniforms.sceneColor, 1)
-        gpu.uniform1i(blurShaderUniforms.blurRadius, GlobalIlluminationPass.blurSamples)
+        gpu.uniform1i(blurShaderUniforms.blurRadius, SSGI.blurSamples)
 
         drawQuad()
         ssgiFinal.stopMapping()

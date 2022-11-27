@@ -4,8 +4,8 @@ precision highp float;
 
 //import(uberAttributes)
 
-//uniform sampler2D sampler0;
-//uniform sampler2D sampler1;
+uniform sampler2D sampler0;
+uniform sampler2D sampler1;
 //uniform sampler2D sampler2;
 //uniform sampler2D sampler3;
 //uniform sampler2D sampler4;
@@ -19,10 +19,10 @@ void main(){
     quadUV = gl_FragCoord.xy/vec2(textureSize(scene_depth, 0));
     if(!noDepthChecking){
         vec4 depthData = texture(scene_depth, quadUV);
-        if (depthData.a < 1.) discard;
+        if (depthData.r != gl_FragCoord.z) discard;
     }
 
-    computeTBN();
+    // computeTBN();
 
     //--MATERIAL_SELECTION--
 

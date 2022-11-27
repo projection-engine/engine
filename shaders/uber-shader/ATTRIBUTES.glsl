@@ -27,7 +27,7 @@ uniform sampler2D SSAO;
 uniform sampler2D SSGI;
 uniform sampler2D SSR;
 uniform sampler2D shadow_atlas;
-uniform sampler2D shadow_cube;
+uniform samplerCube shadow_cube;
 //uniform sampler2D previous_frame;
 
 uniform bool noDepthChecking;

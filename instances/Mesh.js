@@ -95,13 +95,18 @@ export default class Mesh {
 
         GPU.activeMesh = undefined
     }
-
+    simplifiedFinish(){
+        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
+        this.vertexVBO.disable()
+        gpu.bindVertexArray(null)
+        GPU.activeMesh = undefined
+    }
     simplifiedDraw(){
         const last = GPU.activeMesh
         if (last === this)
             return
         else if (last != null)
-            last.finish()
+            last.simplifiedFinish()
 
         gpu.bindVertexArray(this.VAO)
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)

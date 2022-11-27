@@ -1,13 +1,14 @@
 import Engine from "../../Engine";
 import GPU from "../../GPU";
-import AmbientOcclusion from "../occlusion/AmbientOcclusion";
-import GlobalIlluminationPass from "./GlobalIlluminationPass";
-import DirectionalShadows from "../occlusion/DirectionalShadows";
-import OmnidirectionalShadows from "../occlusion/OmnidirectionalShadows";
+import SSAO from "./SSAO";
+import SSGI from "./SSGI";
+import DirectionalShadows from "./DirectionalShadows";
+import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import VisibilityBuffer from "./VisibilityBuffer";
 import COMPONENTS from "../../static/COMPONENTS";
 import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
+import SSR from "./SSR";
 
 let texOffset
 export default class SceneRenderer {
@@ -36,15 +37,15 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.brdf_sampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.filteredSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.filteredSampler)
         gpu.uniform1i(uniforms.SSAO, 1)
 
         gpu.activeTexture(gpu.TEXTURE2)
-        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.SSGISampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSGI.SSGISampler)
         gpu.uniform1i(uniforms.SSGI, 2)
 
         gpu.activeTexture(gpu.TEXTURE3)
-        gpu.bindTexture(gpu.TEXTURE_2D, GlobalIlluminationPass.SSRSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSR.SSRSampler)
         gpu.uniform1i(uniforms.SSR, 3)
 
         gpu.activeTexture(gpu.TEXTURE4)
@@ -52,7 +53,7 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.shadow_atlas, 4)
 
         gpu.activeTexture(gpu.TEXTURE5)
-        gpu.bindTexture(gpu.TEXTURE_2D, OmnidirectionalShadows.sampler)
+        gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
         gpu.uniform1i(uniforms.shadow_cube, 5)
 
         gpu.activeTexture(gpu.TEXTURE6)
@@ -63,7 +64,7 @@ export default class SceneRenderer {
         gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
         gpu.uniform1i(uniforms.scene_depth, 7)
 
-        gpu.uniform1i(uniforms.hasAmbientOcclusion, AmbientOcclusion.enabled ? 1 : 0)
+        gpu.uniform1i(uniforms.hasAmbientOcclusion, SSAO.enabled ? 1 : 0)
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
 
         let depthMaskState = true, cullFaceState = true
@@ -88,9 +89,9 @@ export default class SceneRenderer {
                     gpu.depthMask(material.depthMask)
                 if (material.cullFace !== cullFaceState) {
                     if (!material.cullFace)
-                        gpu.disable(GPU.CULL_FACE)
+                        gpu.disable(gpu.CULL_FACE)
                     else
-                        gpu.enable(GPU.CULL_FACE)
+                        gpu.enable(gpu.CULL_FACE)
                 }
                 cullFaceState = material.cullFace
                 depthMaskState = material.depthMask
@@ -104,11 +105,13 @@ export default class SceneRenderer {
                 gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
                 if (!depthMaskState) {
+                    console.log("UPDATING STATE")
                     gpu.depthMask(true)
                     depthMaskState = true
                 }
                 if (!cullFaceState) {
-                    gpu.enable(GPU.CULL_FACE)
+                    console.log("UPDATING STATE")
+                    gpu.enable(gpu.CULL_FACE)
                     cullFaceState = true
                 }
             }

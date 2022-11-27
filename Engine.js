@@ -1,9 +1,9 @@
 import CameraAPI from "./lib/utils/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import GlobalIlluminationPass from "./runtime/rendering/GlobalIlluminationPass";
-import AmbientOcclusion from "./runtime/occlusion/AmbientOcclusion";
-import DirectionalShadows from "./runtime/occlusion/DirectionalShadows";
+import SSGI from "./runtime/rendering/SSGI";
+import SSAO from "./runtime/rendering/SSAO";
+import DirectionalShadows from "./runtime/rendering/DirectionalShadows";
 import ConversionAPI from "./lib/math/ConversionAPI";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
@@ -11,7 +11,7 @@ import FrameComposition from "./runtime/post-processing/FrameComposition";
 import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
-import OmnidirectionalShadows from "./runtime/occlusion/OmnidirectionalShadows";
+import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
 import SpritePass from "./runtime/rendering/SpritePass";
 import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
@@ -23,6 +23,7 @@ import COMPONENTS from "./static/COMPONENTS";
 import {mat4, vec3} from "gl-matrix";
 import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
+import SSR from "./runtime/rendering/SSR";
 
 export default class Engine {
     static currentFrameFBO
@@ -47,17 +48,6 @@ export default class Engine {
             CameraAPI.updateAspectRatio()
     }
 
-    static #activeSkylightEntity
-    static set activeSkylightEntity(entity) {
-        Engine.#activeSkylightEntity = entity
-        Engine.updateSkylight()
-    }
-
-    static get activeSkylightEntity() {
-        return Engine.#activeSkylightEntity
-    }
-
-    static skylightProbe
 
     static data = {
         pointLights: [],
@@ -91,8 +81,9 @@ export default class Engine {
         VisibilityBuffer.initialize()
         LensPostProcessing.initialize()
         FrameComposition.initialize()
-        await AmbientOcclusion.initialize()
-        GlobalIlluminationPass.initialize()
+        await SSAO.initialize()
+        SSGI.initialize()
+        SSR.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
         SpritePass.initialize()
@@ -127,19 +118,7 @@ export default class Engine {
         await ScriptsAPI.updateAllScripts()
     }
 
-    static updateSkylight() {
-        const entity = Engine.#activeSkylightEntity
-        if (entity) {
-            const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
-            Engine.skylightProbe.resolution = skylight.resolution
-            Engine.skylightProbe.draw((yaw, pitch, projection, index) => {
-                const position = vec3.add([], Engine.skylightProbe.translation, CUBE_MAP_VIEWS.target[index])
-                const view = mat4.lookAt([], Engine.skylightProbe.translation, position, CUBE_MAP_VIEWS.up[index])
-                const viewProjection = mat4.multiply([], projection, view)
-                SceneRenderer.draw(true, viewProjection, position)
-            })
-        }
-    }
+
 
     static updateParams(data, physicsSteps, physicsSubSteps) {
         Engine.params = data
@@ -149,30 +128,27 @@ export default class Engine {
         if (typeof physicsSteps === "number")
             PhysicsPass.simulationStep = physicsSteps
 
-        GlobalIlluminationPass.blurSamples = data.SSGI.blurSamples || 3
-        GlobalIlluminationPass.ssgiColorGrading[0] = data.SSGI.gamma || 2.2
-        GlobalIlluminationPass.ssgiColorGrading[1] = data.SSGI.exposure || 1
+        SSGI.blurSamples = data.SSGI.blurSamples || 3
+        SSGI.ssgiColorGrading[0] = data.SSGI.gamma || 2.2
+        SSGI.ssgiColorGrading[1] = data.SSGI.exposure || 1
 
-        GlobalIlluminationPass.rayMarchSettings[0] = data.SSR.falloff || 3
-        GlobalIlluminationPass.rayMarchSettings[1] = data.SSR.minRayStep || .1
-        GlobalIlluminationPass.rayMarchSettings[2] = data.SSR.stepSize || 1
+        SSGI.rayMarchSettings[0] = data.SSGI.stepSize || 1
+        SSGI.rayMarchSettings[1] = data.SSGI.maxSteps || 4
+        SSGI.rayMarchSettings[2] = data.SSGI.strength || 1
 
-        GlobalIlluminationPass.rayMarchSettings[3] = data.SSGI.stepSize || 1
-        GlobalIlluminationPass.rayMarchSettings[4] = data.SSGI.strength || 1
 
-        GlobalIlluminationPass.rayMarchSettings[5] = data.SSGI.enabled ? 1 : 0
-        GlobalIlluminationPass.rayMarchSettings[6] = data.SSR.enabled ? 1 : 0
+        SSR.rayMarchSettings[0] = data.SSR.maxSteps || 4
+        SSR.rayMarchSettings[1] =  data.SSR.falloff || 3
+        SSR.rayMarchSettings[2] = data.SSR.minRayStep || .1
+        SSR.rayMarchSettings[3] = data.SSR.stepSize || 1
 
-        GlobalIlluminationPass.SSREnabled = data.SSR.enabled
-        GlobalIlluminationPass.SSGIEnabled = data.SSGI.enabled
+        SSR.enabled = data.SSR.enabled
+        SSGI.enabled = data.SSGI.enabled
 
-        GlobalIlluminationPass.rayMarchSettings[7] = data.SSGI.maxSteps || 4
-        GlobalIlluminationPass.rayMarchSettings[8] = data.SSR.maxSteps || 4
-
-        AmbientOcclusion.settings = [data.SSAO.radius, data.SSAO.power, data.SSAO.bias]
-        AmbientOcclusion.blurSamples = data.SSAO.blurSamples || 2
-        AmbientOcclusion.maxSamples = data.SSAO.maxSamples || 64
-        AmbientOcclusion.enabled = data.SSAO.enabled
+        SSAO.settings = [data.SSAO.radius||.25, data.SSAO.power||1, data.SSAO.bias||.1, data.SSAO.falloffDistance||1000]
+        SSAO.blurSamples = data.SSAO.blurSamples || 2
+        SSAO.maxSamples = data.SSAO.maxSamples || 64
+        SSAO.enabled = data.SSAO.enabled
 
         MotionBlur.velocityScale = data.mbVelocityScale
         MotionBlur.maxSamples = data.mbSamples

@@ -3,18 +3,18 @@ import GPU from "../../GPU";
 
 import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
-import VisibilityBuffer from "../rendering/VisibilityBuffer";
+import VisibilityBuffer from "./VisibilityBuffer";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import Engine from "../../Engine";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
 const RESOLUTION = 4
 
 let shader, uniforms, blurShader, blurShaderUniforms
-export default class AmbientOcclusion {
+let framebuffer, blurredFramebuffer
+export default class SSAO {
     static UBO
     static #ready = false
-    static framebuffer
-    static blurredFBO
     static filteredSampler
     static unfilteredSampler
     static noiseSampler
@@ -24,17 +24,20 @@ export default class AmbientOcclusion {
     static enabled = true
 
     static set settings(data) {
-        AmbientOcclusion.UBO.bind()
-        AmbientOcclusion.UBO.updateData("settings", new Float32Array(data))
-        AmbientOcclusion.UBO.unbind()
+        SSAO.UBO.bind()
+        SSAO.UBO.updateData("settings", new Float32Array(data))
+        SSAO.UBO.unbind()
     }
 
     static async initialize() {
-        AmbientOcclusion.unfilteredSampler = AmbientOcclusion.framebuffer.colors[0]
-        AmbientOcclusion.filteredSampler = AmbientOcclusion.blurredFBO.colors[0]// AmbientOcclusion.blurredFBO.colors[0]
+        framebuffer = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.AO_SRC)
+        blurredFramebuffer = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.AO)
 
-        AmbientOcclusion.noiseScale[0] = GPU.internalResolution.w / RESOLUTION
-        AmbientOcclusion.noiseScale[1] = GPU.internalResolution.h / RESOLUTION
+        SSAO.unfilteredSampler = framebuffer.colors[0]
+        SSAO.filteredSampler = blurredFramebuffer.colors[0]// AmbientOcclusion.blurredFBO.colors[0]
+
+        SSAO.noiseScale[0] = GPU.internalResolution.w / RESOLUTION
+        SSAO.noiseScale[1] = GPU.internalResolution.h / RESOLUTION
 
         shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.AO)
         uniforms = shader.uniformMap
@@ -42,32 +45,33 @@ export default class AmbientOcclusion {
         blurShader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.BOX_BLUR)
         blurShaderUniforms = blurShader.uniformMap
 
-        AmbientOcclusion.UBO = new UBO(
+        SSAO.UBO = new UBO(
             "Settings",
             [
-                {name: "settings", type: "vec3"},
+                {name: "settings", type: "vec4"},
                 {name: "samples", type: "vec4", dataLength: 64},
                 {name: "noiseScale", type: "vec2"}
             ]
         )
 
-        AmbientOcclusion.UBO.bindWithShader(shader.program)
-        AmbientOcclusion.settings = [.5, .7, -.1]
-        AmbientOcclusion.UBO.bind()
-        AmbientOcclusion.UBO.updateData("noiseScale", AmbientOcclusion.noiseScale)
-        AmbientOcclusion.UBO.unbind()
+        SSAO.UBO.bindWithShader(shader.program)
+        SSAO.settings = [.5, .7, -.1, 1000]
+        window.upd = (d) =>  SSAO.settings = [.5, .7, -.1, d]
+        SSAO.UBO.bind()
+        SSAO.UBO.updateData("noiseScale", SSAO.noiseScale)
+        SSAO.UBO.unbind()
 
         const {kernels, noise} = await ImageProcessor.request(
             IMAGE_WORKER_ACTIONS.NOISE_DATA,
             {w: RESOLUTION, h: RESOLUTION}
         )
 
-        AmbientOcclusion.UBO.bind()
-        AmbientOcclusion.UBO.updateData("samples", kernels)
-        AmbientOcclusion.UBO.unbind()
-        AmbientOcclusion.noiseSampler = gpu.createTexture()
+        SSAO.UBO.bind()
+        SSAO.UBO.updateData("samples", kernels)
+        SSAO.UBO.unbind()
+        SSAO.noiseSampler = gpu.createTexture()
 
-        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.noiseSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.noiseSampler)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
         gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
@@ -75,12 +79,11 @@ export default class AmbientOcclusion {
         gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, RESOLUTION, RESOLUTION)
         gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, RESOLUTION, RESOLUTION, gpu.RG, gpu.FLOAT, noise)
 
-        AmbientOcclusion.#ready = true
-
+        SSAO.#ready = true
     }
 
     static #draw() {
-        AmbientOcclusion.framebuffer.startMapping()
+        framebuffer.startMapping()
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
@@ -88,37 +91,35 @@ export default class AmbientOcclusion {
         gpu.uniform1i(uniforms.gDepth, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.noiseSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.noiseSampler)
         gpu.uniform1i(uniforms.noiseSampler, 1)
 
-        gpu.uniform1i(uniforms.maxSamples, AmbientOcclusion.maxSamples)
+        gpu.uniform1i(uniforms.maxSamples, SSAO.maxSamples)
 
         drawQuad()
-        AmbientOcclusion.framebuffer.stopMapping()
+        framebuffer.stopMapping()
     }
 
     static #blur() {
         blurShader.bind()
-        AmbientOcclusion.blurredFBO.startMapping()
+        blurredFramebuffer.startMapping()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, AmbientOcclusion.unfilteredSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.unfilteredSampler)
         gpu.uniform1i(blurShaderUniforms.sampler, 0)
 
-        gpu.uniform1i(blurShaderUniforms.samples, AmbientOcclusion.blurSamples)
+        gpu.uniform1i(blurShaderUniforms.samples, SSAO.blurSamples)
 
         drawQuad()
-        AmbientOcclusion.blurredFBO.stopMapping()
+        blurredFramebuffer.stopMapping()
     }
 
     static execute() {
-        if (!AmbientOcclusion.enabled || !AmbientOcclusion.#ready) {
-            AmbientOcclusion.blurredFBO.clear()
+        if (!SSAO.enabled || !SSAO.#ready)
             return
-        }
 
-        AmbientOcclusion.#draw()
-        AmbientOcclusion.#blur()
+        SSAO.#draw()
+        SSAO.#blur()
 
     }
 

@@ -13,6 +13,10 @@ import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
 import Shader from "./instances/Shader";
 import Framebuffer from "./instances/Framebuffer";
 import Material from "./instances/Material";
+import COMPONENTS from "./static/COMPONENTS";
+import {mat4, vec3} from "gl-matrix";
+import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class GPU {
     static context
@@ -28,9 +32,32 @@ export default class GPU {
     static cubeBuffer
     static BRDF
     static internalResolution
-
     static quad
+    static #activeSkylightEntity
+    static set activeSkylightEntity(entity) {
+        GPU.#activeSkylightEntity = entity
+        GPU.updateSkylight()
+    }
 
+    static get activeSkylightEntity() {
+        return GPU.#activeSkylightEntity
+    }
+
+    static skylightProbe
+
+    static updateSkylight() {
+        const entity = GPU.#activeSkylightEntity
+        if (entity) {
+            const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
+            GPU.skylightProbe.resolution = skylight.resolution
+            GPU.skylightProbe.draw((yaw, pitch, projection, index) => {
+                const position = vec3.add([], GPU.skylightProbe.translation, CUBE_MAP_VIEWS.target[index])
+                const view = mat4.lookAt([], GPU.skylightProbe.translation, position, CUBE_MAP_VIEWS.up[index])
+                const viewProjection = mat4.multiply([], projection, view)
+                SceneRenderer.draw(true, viewProjection, position)
+            })
+        }
+    }
 
     static async initializeContext(canvas, mainResolution) {
         if (GPU.context != null)

@@ -1,8 +1,8 @@
 import COMPONENTS from "../static/COMPONENTS.js";
 import {mat4} from "gl-matrix";
 import Engine from "../Engine";
-import OmnidirectionalShadows from "../runtime/occlusion/OmnidirectionalShadows";
-import DirectionalShadows from "../runtime/occlusion/DirectionalShadows";
+import OmnidirectionalShadows from "../runtime/rendering/OmnidirectionalShadows";
+import DirectionalShadows from "../runtime/rendering/DirectionalShadows";
 import LightsAPI from "../lib/rendering/LightsAPI";
 
 
@@ -10,11 +10,14 @@ import LightsAPI from "../lib/rendering/LightsAPI";
  * "pointLightData" description (mat4 array):
  *
  * Indexes 0 - 2: Light position
+ * Index 3: shadow bias
  * Indexes 4 - 6: Light color
+ * Index 7: Samples
  * Indexes 8 - 10: Attenuation
  * Index 11: zNear
  * Index 12: zFar
  * Index 13: hasShadowMap
+ * Index 14: Shadow attenuation distance
  */
 
 export function packagePointLights(keepOld) {
@@ -56,6 +59,7 @@ export function packagePointLights(keepOld) {
             pointLightData[11 + offset] = component.zNear
             pointLightData[12 + offset] = component.zFar
             pointLightData[13 + offset] = component.shadowMap ? 1 : 0
+            pointLightData[14 + offset] = component.shadowAttenuationMinDistance
 
 
             offset += 16
@@ -73,12 +77,14 @@ export function packagePointLights(keepOld) {
 
 
 /**
- * "directionalLightsData" description (mat3 array):
+ * "directionalLightsData" description (mat4 array):
  *
  * Indexes 0 - 2: Light position
- * Indexes 3 - 5: Light color
- * Indexes 6 - 7: Atlas faces
- * Index 8: hasShadowMap / PCF samples (if positive it has shadow map)
+ * Indexes 4 - 6: Light color
+ * Indexes 8 - 9: Atlas faces
+ * Index 10: hasShadowMap / PCF samples (if positive it has shadow map)
+ * Index 12: Shadow bias
+ * Index 13: Shadow attenuation distance
  */
 
 export function packageDirectionalLights(keepOld) {
@@ -117,6 +123,7 @@ export function packageDirectionalLights(keepOld) {
             directionalLightsData[offset + 9] = component.atlasFace[1]
             directionalLightsData[offset + 10] = (component.shadowMap ? 1 : -1) * component.pcfSamples
             directionalLightsData[offset + 12] = component.shadowBias
+            directionalLightsData[offset + 13] = component.shadowAttenuationMinDistance
 
             if (component.shadowMap) {
                 mat4.lookAt(component.lightView, component.__entity._translation, component.center, [0, 1, 0])

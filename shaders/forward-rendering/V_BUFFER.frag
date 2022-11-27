@@ -3,9 +3,9 @@ precision highp float;
 in vec4 previousScreenPosition;
 in vec4 currentScreenPosition;
 
+
 layout (location = 0) out vec4 v_depth_entityid;
 layout (location = 1) out vec4 v_velocity;
-
 
 uniform vec3 entityID;
 
