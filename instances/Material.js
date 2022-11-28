@@ -6,8 +6,11 @@ import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import GPU from "../GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
+import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag"
+
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import SceneRenderer from "../runtime/rendering/SceneRenderer";
+import Engine from "../Engine";
 
 export default class Material {
     static #uberShader
@@ -20,7 +23,6 @@ export default class Material {
 
         if (!forceCleanShader)
             GPU.materials.forEach(mat => {
-                console.log(mat)
                 const declaration = [`case ${mat.bindID}: {`, mat.functionDeclaration, "break;", "}", ""]
                 methodsToLoad.push(declaration.join("\n"))
                 uniformsToLoad.push(mat.uniformsDeclaration)
@@ -32,11 +34,12 @@ export default class Material {
             }
         `)
 
-        let fragment = BASIS_FRAG
+        let fragment = Engine.developmentMode ? DEBUG_FRAG : BASIS_FRAG
         fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
         fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
-        const shader = GPUAPI.allocateShader(STATIC_SHADERS.UBER_SHADER, VERTEX_SHADER, fragment)
+        const shader = GPUAPI.allocateShader("TEMP_SHADER", VERTEX_SHADER, fragment)
+
         if (shader.messages.hasError) {
             if (!Material.#uberShader) {
                 Material.compileUberShader(true)
@@ -44,6 +47,9 @@ export default class Material {
             ConsoleAPI.error("Invalid shader", shader.messages)
             console.error("Invalid shader", shader.messages)
             return
+        } else {
+            GPU.shaders.delete("TEMP_SHADER")
+            GPU.shaders.set(STATIC_SHADERS.UBER_SHADER, shader)
         }
 
         Material.#uberShader = shader

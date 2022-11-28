@@ -32,6 +32,15 @@ uniform samplerCube shadow_cube;
 
 //uniform samplerCube skylight_diffuse;
 uniform samplerCube skylight_specular;
+
+uniform sampler2D sampler0;
+uniform sampler2D sampler1;
+uniform sampler2D sampler2;
+uniform sampler2D sampler3;
+uniform sampler2D sampler4;
+//uniform sampler2D sampler5;
+//uniform sampler2D sampler6;
+
 uniform float skylight_samples;
 uniform bool hasSkylight;
 

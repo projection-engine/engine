@@ -34,7 +34,7 @@ export default {
 
     DEVELOPMENT: {
         CUBEMAP: "CUBEMAP",
-        DEBUG_DEFERRED: "DEBUG_DEFERRED",
+
         LINE: "LINE",
         WIREFRAME: "WIREFRAME",
 

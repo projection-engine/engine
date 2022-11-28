@@ -23,6 +23,12 @@ import SSR from "./runtime/rendering/SSR";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class Engine {
+    static #development = false
+
+    static get developmentMode() {
+        return Engine.#development
+    }
+
     static currentFrameFBO
     static previousFrameSampler
 
@@ -65,9 +71,12 @@ export default class Engine {
     static benchmarkMode = false
     static #initialized = false
 
-    static async initialize(canvas, mainResolution, readAsset, readMetadata) {
+    static async initialize(canvas, mainResolution, readAsset, readMetadata, devAmbient) {
         if (Engine.#initialized)
             return
+
+
+        Engine.#development = devAmbient
         Engine.#initialized = true
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
@@ -116,7 +125,6 @@ export default class Engine {
     }
 
 
-
     static updateParams(data, physicsSteps, physicsSubSteps) {
         Engine.params = data
 
@@ -135,14 +143,14 @@ export default class Engine {
 
 
         SSR.rayMarchSettings[0] = data.SSR.maxSteps || 4
-        SSR.rayMarchSettings[1] =  data.SSR.falloff || 3
+        SSR.rayMarchSettings[1] = data.SSR.falloff || 3
         SSR.rayMarchSettings[2] = data.SSR.minRayStep || .1
         SSR.rayMarchSettings[3] = data.SSR.stepSize || 1
 
         SSR.enabled = data.SSR.enabled
         SSGI.enabled = data.SSGI.enabled
 
-        SSAO.settings = [data.SSAO.radius||.25, data.SSAO.power||1, data.SSAO.bias||.1, data.SSAO.falloffDistance||1000]
+        SSAO.settings = [data.SSAO.radius || .25, data.SSAO.power || 1, data.SSAO.bias || .1, data.SSAO.falloffDistance || 1000]
         SSAO.blurSamples = data.SSAO.blurSamples || 2
         SSAO.maxSamples = data.SSAO.maxSamples || 64
         SSAO.enabled = data.SSAO.enabled

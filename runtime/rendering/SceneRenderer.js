@@ -10,25 +10,28 @@ import CameraAPI from "../../lib/utils/CameraAPI";
 import SSR from "./SSR";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
+import SHADING_MODELS from "../../static/SHADING_MODELS";
 
 let texOffset, bufferResolution
-
+let isDev
 let shader, uniforms
 export default class SceneRenderer {
     static #ready = false
-
-    static set shader(data){
+    static debugShadingModel = SHADING_MODELS.DETAIL
+    static set shader(data) {
         shader = data
         uniforms = shader?.uniformMap
     }
+
     static initialize() {
-        const FBO =  GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
+        isDev = Engine.developmentMode
+        const FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
         bufferResolution = new Float32Array([FBO.width, FBO.height])
         SceneRenderer.#ready = true
     }
 
     static draw(useCustomView, viewProjection, cameraPosition) {
-        if(useCustomView)
+        if (useCustomView)
             console.log(viewProjection, cameraPosition, GPU.skylightProbe)
         if (!SceneRenderer.#ready || !shader)
             return
@@ -36,6 +39,8 @@ export default class SceneRenderer {
         const size = entities.length
 
         shader.bind()
+        if(isDev)
+            gpu.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
         gpu.uniformMatrix4fv(uniforms.skyboxProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
@@ -68,7 +73,6 @@ export default class SceneRenderer {
         gpu.activeTexture(gpu.TEXTURE5)
         gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
         gpu.uniform1i(uniforms.shadow_cube, 5)
-
 
 
         gpu.activeTexture(gpu.TEXTURE6)
@@ -106,6 +110,8 @@ export default class SceneRenderer {
             if (!entity.active || !mesh)
                 continue
 
+            if (isDev)
+                gpu.uniform3fv(uniforms.entityID, entity.pickID)
             const material = entity.__materialRef
             if (material) {
                 gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
@@ -140,7 +146,7 @@ export default class SceneRenderer {
                     cullFaceState = true
                 }
             }
-            if(useCustomView)
+            if (useCustomView)
                 gpu.uniform1i(uniforms.noDepthChecking, 1)
 
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
