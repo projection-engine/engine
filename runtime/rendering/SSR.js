@@ -30,7 +30,7 @@ export default class SSR {
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.depthSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)

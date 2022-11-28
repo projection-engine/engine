@@ -1,4 +1,5 @@
 precision highp float;
+#define FRAG_DEPTH_THREASHOLD .00001
 
 //--UNIFORMS--
 
@@ -16,13 +17,11 @@ uniform sampler2D sampler1;
 
 void main(){
 
-    quadUV = gl_FragCoord.xy/vec2(textureSize(scene_depth, 0));
+    quadUV = gl_FragCoord.xy/buffer_resolution;
     if(!noDepthChecking){
         vec4 depthData = texture(scene_depth, quadUV);
-        if (abs(depthData.r - gl_FragCoord.z) > .00001) discard;
+        if (abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD) discard;
     }
-
-    // computeTBN();
 
     //--MATERIAL_SELECTION--
 

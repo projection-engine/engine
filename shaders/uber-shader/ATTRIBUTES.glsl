@@ -7,6 +7,7 @@ in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
 
+uniform vec2 buffer_resolution;
 uniform vec3 cameraPosition;
 uniform PointLights{
     mat4 pointLights[24];
@@ -34,7 +35,6 @@ uniform samplerCube skylight_specular;
 uniform float skylight_samples;
 uniform bool hasSkylight;
 
-//uniform sampler2D previous_frame;
 
 uniform bool noDepthChecking;
 uniform bool hasAmbientOcclusion;

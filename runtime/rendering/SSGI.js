@@ -81,7 +81,7 @@ export default class SSGI {
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.depthSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
@@ -121,8 +121,8 @@ export default class SSGI {
 
         blurShader.bind()
         ssgiFinal.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
-        gpu.uniform1i(blurShaderUniforms.depthEntityIDSampler, 0)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.entityIDSampler)
+        gpu.uniform1i(blurShaderUniforms.entityIDSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
         gpu.bindTexture(gpu.TEXTURE_2D, ssgiEighth.colors[0])

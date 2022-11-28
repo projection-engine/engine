@@ -4,7 +4,7 @@ precision highp float;
 //import(pbLightComputation)
 
 void main(){
-    quadUV = gl_FragCoord.xy/vec2(textureSize(scene_depth, 0));
+    quadUV = gl_FragCoord.xy/buffer_resolution;
     N = normalVec;
     fragColor = pbLightComputation();
 }

@@ -20,6 +20,7 @@ import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightProbe from "./instances/LightProbe";
 import SSR from "./runtime/rendering/SSR";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class Engine {
     static currentFrameFBO
@@ -86,7 +87,7 @@ export default class Engine {
 
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
-
+        SceneRenderer.initialize()
 
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         const OBS = new ResizeObserver(() => {
@@ -99,7 +100,7 @@ export default class Engine {
         OBS.observe(gpu.canvas)
         Engine.isReady = true
         Loop.linkParams()
-        GPU.skylightProbe = new LightProbe()
+        GPU.skylightProbe = new LightProbe(128)
         Engine.start()
     }
 

@@ -53,11 +53,12 @@ export default class GPU {
         if (entity) {
             const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
             GPU.skylightProbe.resolution = skylight.resolution
+            const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
             GPU.skylightProbe.draw((yaw, pitch, projection, index) => {
-                const position = vec3.add([], entity._translation, CUBE_MAP_VIEWS.target[index])
-                const view = mat4.lookAt([], entity._translation, position, CUBE_MAP_VIEWS.up[index])
-                const viewProjection = mat4.multiply([], projection, view)
-                SceneRenderer.draw(true, viewProjection, position)
+                 vec3.add(tempPosition, entity._translation, CUBE_MAP_VIEWS.target[index])
+                 mat4.lookAt(tempView, entity._translation, tempPosition, CUBE_MAP_VIEWS.up[index])
+                 mat4.multiply(tempViewProjection, projection, tempView)
+                SceneRenderer.draw(true, tempViewProjection, tempPosition)
             })
         }
     }

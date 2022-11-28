@@ -11,7 +11,6 @@ export default class LightProbe {
     prefiltered
     irradianceTexture
     _resolution
-
     constructor(resolution) {
         if (resolution != null)
             this.resolution = resolution
@@ -23,7 +22,8 @@ export default class LightProbe {
         this._resolution = data
         if (this.texture instanceof WebGLTexture)
             gpu.deleteTexture(this.texture)
-        this.texture = CubeMapAPI.initializeTexture(data)
+
+        this.texture = CubeMapAPI.initializeTexture(false, data, false)
     }
 
     get resolution() {
@@ -97,7 +97,7 @@ export default class LightProbe {
     draw(callback, zFar = 25, zNear = 1, asIrradiance) {
         let resolution = asIrradiance ? 32 : this._resolution, texture
         const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
-        Mesh.finishIfUsed()
+
 
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, CubeMapAPI.frameBuffer)
         gpu.viewport(0, 0, resolution, resolution)
@@ -112,8 +112,10 @@ export default class LightProbe {
             texture = this.irradianceTexture
         }
 
-        if (asIrradiance)
+        if (asIrradiance) {
+            Mesh.finishIfUsed()
             GPU.cubeBuffer.enable()
+        }
 
         for (let i = 0; i < 6; i++) {
             const rotations = getProbeRotation(i)
@@ -124,7 +126,8 @@ export default class LightProbe {
                 texture,
                 0
             )
-            gpu.clear(gpu.COLOR_BUFFER_BIT)
+            gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+
             callback(rotations.yaw, rotations.pitch, perspective, i)
         }
         if (asIrradiance)

@@ -23,7 +23,7 @@ export default class Bokeh {
         gpu.uniform1i(uniforms.sceneColor, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.depthSampler, 1)
 
         gpu.uniform1f(uniforms.radius, window.d||.5)

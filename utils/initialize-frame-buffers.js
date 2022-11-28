@@ -12,11 +12,16 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
         .texture({
             attachment: 0,
-            precision: gpu.RGBA32F,
-            label: "DEPTH_ENTITY"
+            precision: gpu.R32F,
+            format: gpu.RED,
+            label: "DEPTH"
         })
         .texture({
             attachment: 1,
+            label: "ENTITY_ID"
+        })
+        .texture({
+            attachment: 2,
             label: "VELOCITY",
             precision: gpu.RG16F,
             type: gpu.FLOAT,

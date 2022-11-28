@@ -86,7 +86,7 @@ export default class SSAO {
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.gDepth, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)

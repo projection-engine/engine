@@ -8,7 +8,8 @@ import TransformationPass from "../misc/TransformationPass";
 
 let shader, uniforms, fbo
 export default class VisibilityBuffer {
-    static depthEntityIDSampler
+    static depthSampler
+    static entityIDSampler
     static velocitySampler
     static needsUpdate = true
 
@@ -17,8 +18,9 @@ export default class VisibilityBuffer {
         uniforms = shader.uniformMap
         fbo = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
 
-        VisibilityBuffer.depthEntityIDSampler = fbo.colors[0]
-        VisibilityBuffer.velocitySampler = fbo.colors[1]
+        VisibilityBuffer.depthSampler = fbo.colors[0]
+        VisibilityBuffer.entityIDSampler = fbo.colors[1]
+        VisibilityBuffer.velocitySampler = fbo.colors[2]
 
     }
 

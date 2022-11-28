@@ -8,20 +8,34 @@ import VisibilityBuffer from "./VisibilityBuffer";
 import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import SSR from "./SSR";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
-let texOffset
+let texOffset, bufferResolution
+
+let shader, uniforms
 export default class SceneRenderer {
-    static shader
+    static #ready = false
+
+    static set shader(data){
+        shader = data
+        uniforms = shader?.uniformMap
+    }
+    static initialize() {
+        const FBO =  GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
+        bufferResolution = new Float32Array([FBO.width, FBO.height])
+        SceneRenderer.#ready = true
+    }
 
     static draw(useCustomView, viewProjection, cameraPosition) {
+        if(useCustomView)
+            console.log(viewProjection, cameraPosition, GPU.skylightProbe)
+        if (!SceneRenderer.#ready || !shader)
+            return
         const entities = Engine.data.meshes
         const size = entities.length
-        const shader = SceneRenderer.shader
-        if (!shader) return
-        const uniforms = shader.uniformMap
 
         shader.bind()
-
         gpu.uniformMatrix4fv(uniforms.skyboxProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
@@ -55,28 +69,28 @@ export default class SceneRenderer {
         gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
         gpu.uniform1i(uniforms.shadow_cube, 5)
 
-        gpu.activeTexture(gpu.TEXTURE6)
-        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
-        gpu.uniform1i(uniforms.previous_frame, 6)
 
-        gpu.activeTexture(gpu.TEXTURE7)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthEntityIDSampler)
-        gpu.uniform1i(uniforms.scene_depth, 7)
+
+        gpu.activeTexture(gpu.TEXTURE6)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
+        gpu.uniform1i(uniforms.scene_depth, 6)
 
         gpu.uniform1i(uniforms.hasAmbientOcclusion, SSAO.enabled ? 1 : 0)
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
-        texOffset = 8
+        gpu.uniform2fv(uniforms.buffer_resolution, bufferResolution)
+        texOffset = 7
 
         // uniform samplerCube skylight_diffuse;
         // uniform samplerCube skylight_specular;
         // uniform float skylight_samples;
 
-        if(GPU.__activeSkylightEntity !== null) {
+        if (GPU.__activeSkylightEntity !== null && !useCustomView) {
             gpu.uniform1i(uniforms.hasSkylight, 1)
             texOffset++
-            gpu.activeTexture(gpu.TEXTURE8)
+            gpu.activeTexture(gpu.TEXTURE7)
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
-            gpu.uniform1i(uniforms.skylight_specular, 8)
+            gpu.uniform1i(uniforms.skylight_specular, 7)
+            console.log("ADDING SKYLIGHT")
         }
 
         let depthMaskState = true, cullFaceState = true
@@ -127,6 +141,9 @@ export default class SceneRenderer {
                     cullFaceState = true
                 }
             }
+            if(useCustomView)
+                gpu.uniform1i(uniforms.noDepthChecking, 1)
+
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()
         }
