@@ -111,6 +111,7 @@ export default class Engine {
         Loop.linkParams()
         GPU.skylightProbe = new LightProbe(128)
         Engine.start()
+
     }
 
     static async startSimulation() {
