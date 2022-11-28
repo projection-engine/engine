@@ -69,6 +69,8 @@ vec3 computeSkylightAmbient(vec3 V){
     return specular;//diffuse + specular;
 }
 
+
+
 vec4 pbLightComputation() {
     if (flatShading) return vec4(albedo + emission, alpha);
     vec3 directIllumination = vec3(0.0);

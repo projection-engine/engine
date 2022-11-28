@@ -12,6 +12,7 @@ export default class VisibilityBuffer {
     static entityIDSampler
     static velocitySampler
     static needsUpdate = true
+    static needsSSAOUpdate = false
 
     static initialize() {
         shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.VISIBILITY_BUFFER)
@@ -25,9 +26,10 @@ export default class VisibilityBuffer {
     }
 
     static execute() {
-        if(!VisibilityBuffer.needsUpdate && !TransformationPass.hasChangeBuffer[0])
+        if (!VisibilityBuffer.needsUpdate && !TransformationPass.hasChangeBuffer[0])
             return
 
+        VisibilityBuffer.needsSSAOUpdate = true
         const toRender = Engine.data.meshes
         const size = toRender.length
         const meshes = GPU.meshes

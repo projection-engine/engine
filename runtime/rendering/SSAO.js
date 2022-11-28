@@ -114,7 +114,7 @@ export default class SSAO {
     }
 
     static execute() {
-        if (!SSAO.enabled || !SSAO.#ready)
+        if (!SSAO.enabled || !SSAO.#ready || !VisibilityBuffer.needsSSAOUpdate)
             return
 
         SSAO.#draw()
