@@ -3,6 +3,8 @@ precision highp float;
 
 //--UNIFORMS--
 
+//import(parallaxOcclusionMapping)
+
 //import(uberAttributes)
 
 uniform int shadingModel;

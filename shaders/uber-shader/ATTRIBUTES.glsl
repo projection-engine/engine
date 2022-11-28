@@ -2,6 +2,7 @@
 
 mat3 TBN;
 vec2 quadUV;
+vec3 viewDirection;
 
 in vec2 texCoords;
 in vec3 normalVec;
@@ -38,8 +39,9 @@ uniform sampler2D sampler1;
 uniform sampler2D sampler2;
 uniform sampler2D sampler3;
 uniform sampler2D sampler4;
-//uniform sampler2D sampler5;
-//uniform sampler2D sampler6;
+uniform sampler2D sampler5;
+uniform sampler2D sampler6;
+uniform sampler2D sampler7;
 
 uniform float skylight_samples;
 uniform bool hasSkylight;
@@ -52,7 +54,14 @@ uniform int materialID;
 
 out vec4 fragColor;
 
+bool hasTBNComputed = false;
+bool hasViewDirectionComputed = false;
+
 void computeTBN() {
+    if(hasTBNComputed)
+        return;
+    hasTBNComputed = true;
+
     vec3 dp1 = dFdx(worldSpacePosition);
     vec3 dp2 = dFdy(worldSpacePosition);
     vec2 duv1 = dFdx(texCoords);
