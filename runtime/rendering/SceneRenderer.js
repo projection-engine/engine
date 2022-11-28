@@ -90,7 +90,6 @@ export default class SceneRenderer {
             gpu.activeTexture(gpu.TEXTURE7)
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
             gpu.uniform1i(uniforms.skylight_specular, 7)
-            console.log("ADDING SKYLIGHT")
         }
 
         let depthMaskState = true, cullFaceState = true

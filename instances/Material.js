@@ -31,6 +31,7 @@ export default class Material {
                 break;
             }
         `)
+
         let fragment = BASIS_FRAG
         fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
         fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
@@ -57,7 +58,6 @@ export default class Material {
         Material.compileUberShader()
         SceneRenderer.shader = Material.uberShader
     }
-
 
     static get uberShader() {
         return Material.#uberShader
