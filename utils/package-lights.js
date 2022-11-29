@@ -13,11 +13,13 @@ import LightsAPI from "../lib/rendering/LightsAPI";
  * Index 3: shadow bias
  * Indexes 4 - 6: Light color
  * Index 7: Samples
- * Indexes 8 - 10: Attenuation
+ * Indexes 8 - 9: Attenuation
+ * Index 10: outerCutoff
  * Index 11: zNear
  * Index 12: zFar
  * Index 13: hasShadowMap
  * Index 14: Shadow attenuation distance
+ * Index 15: Cutoff radius
  */
 
 export function packagePointLights(keepOld) {
@@ -53,14 +55,17 @@ export function packagePointLights(keepOld) {
             pointLightData[7 + offset] = component.shadowSamples
 
             const attenuation = component.attenuation
+
             pointLightData[8 + offset] = attenuation[0]
             pointLightData[9 + offset] = attenuation[1]
-            pointLightData[10 + offset] = attenuation[2]
+
+            pointLightData[10 + offset] = component.outerCutoff
+
             pointLightData[11 + offset] = component.zNear
             pointLightData[12 + offset] = component.zFar
             pointLightData[13 + offset] = component.shadowMap ? 1 : 0
             pointLightData[14 + offset] = component.shadowAttenuationMinDistance
-
+            pointLightData[15 + offset] = component.cutoff
 
             offset += 16
 

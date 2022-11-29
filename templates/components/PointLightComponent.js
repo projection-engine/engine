@@ -7,21 +7,27 @@ export default class PointLightComponent extends Component {
     name = "POINT_LIGHT"
     _color = [255, 255, 255]
 
-    attenuation = [1, 0, 0]
+    attenuation = [0, 0]
     _changed = true
 
     _zNear = .1
     _zFar = 25
+    cutoff = 500
+    outerCutoff = 1000
+
     _shadowMap = true
     shadowAttenuationMinDistance = 50
-    get shadowMap(){
+
+    get shadowMap() {
         return this._shadowMap
     }
-    set shadowMap(data){
-        if(this._shadowMap !== data)
+
+    set shadowMap(data) {
+        if (this._shadowMap !== data)
             this.__entity.needsLightUpdate = true
         this._shadowMap = data
     }
+
     intensity = 1
     shadowSamples = 10
     shadowBias = .05

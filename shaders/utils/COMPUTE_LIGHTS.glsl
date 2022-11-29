@@ -1,4 +1,3 @@
-
 float sampleShadowMap (vec2 coord, float compare, sampler2D shadowMapTexture){
     return step(compare, texture(shadowMapTexture, coord.xy).r);
 }
@@ -38,7 +37,7 @@ float sampleSoftShadows(vec2 coord, float compare, sampler2D shadowMapTexture, f
 
 float directionalLightShadows(float distanceFromCamera, float shadowFalloffDistance, float bias, vec4 fragPosLightSpace, vec2 faceOffset, sampler2D shadowMapTexture, float shadowMapsQuantity, float shadowMapResolution, float pcfSamples){
     float attenuation = clamp(mix(1., 0., shadowFalloffDistance - distanceFromCamera), 0., 1.);
-    if(attenuation == 1.) return 1.;
+    if (attenuation == 1.) return 1.;
 
     float response = 1.0;
     vec3 pos = (fragPosLightSpace.xyz / fragPosLightSpace.w)* 0.5 + 0.5;
@@ -49,23 +48,23 @@ float directionalLightShadows(float distanceFromCamera, float shadowFalloffDista
     float compare = pos.z - bias;
 
     response = sampleSoftShadows(vec2(pos.x/shadowMapsQuantity + faceOffset.x/shadowMapsQuantity, pos.y/shadowMapsQuantity + faceOffset.y/shadowMapsQuantity), compare, shadowMapTexture, shadowMapResolution, pcfSamples);
-    if(response < 1.)
-        return min(1., response + attenuation);
+    if (response < 1.)
+    return min(1., response + attenuation);
     return response;
 }
 
 
 const vec3 sampleOffsetDirections[20] = vec3[]
 (
-vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1),
-vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
-vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
-vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
-vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
+vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
+vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
+vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, samplerCube shadowMap, vec3 lightPos, mat4 lightMatrix, float viewDistance, vec3 fragPosition) {
     float attenuation = clamp(mix(1., 0., shadowFalloffDistance - distanceFromCamera), 0., 1.);
-    if(attenuation == 1.) return 1.;
+    if (attenuation == 1.) return 1.;
 
     float farPlane = lightMatrix[3][0];
     float bias   = lightMatrix[0][3];
@@ -73,21 +72,21 @@ float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, sa
 
     vec3 fragToLight = fragPosition - lightPos;
     float currentDepth = length(fragToLight) / farPlane;
-    if(currentDepth > 1.)
+    if (currentDepth > 1.)
     currentDepth = 1.;
 
     float shadow = 0.0;
     float diskRadius = 0.05;
-    for(int i = 0; i < samples; ++i){
+    for (int i = 0; i < samples; ++i){
         float closestDepth = texture(shadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
-        if(currentDepth - bias > closestDepth)
+        if (currentDepth - bias > closestDepth)
         shadow += 1.0;
     }
     shadow /= float(samples);
 
     float response = 1. - shadow;
-    if(response < 1.)
-        return min(1., response + attenuation);
+    if (response < 1.)
+    return min(1., response + attenuation);
     return response;
 }
 
@@ -103,20 +102,23 @@ vec4 computeDirectionalLight(float distanceFromCamera, sampler2D shadowMap, floa
         shadows = directionalLightShadows(distanceFromCamera, lightData[3][1], lightData[3][0], fragPosLightSpace, atlasFace, shadowMap, lightsPerShadowAtlas, shadowAtlasResolution, lightData[2][2]);
     }
 
-    vec3 H = normalize(viewDirection + lightDirection);
-    float NDF = distributionGGX(surfaceNormal, H, roughness);
-    float G   = geometrySmith(surfaceNormal, viewDirection, lightDirection, roughness);
-    vec3 F    = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0, roughness);
-    vec3 kD = vec3(1.0) - F;
-    kD *= 1.0 - metallic;
+    if (shadows > 0.){
+        vec3 H = normalize(viewDirection + lightDirection);
+        float NDF = distributionGGX(surfaceNormal, H, roughness);
+        float G   = geometrySmith(surfaceNormal, viewDirection, lightDirection, roughness);
+        vec3 F    = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0, roughness);
+        vec3 kD = vec3(1.0) - F;
+        kD *= 1.0 - metallic;
 
-    vec3 numerator    = NDF * G * F;
-    float denominator = 4.0 * max(dot(surfaceNormal, viewDirection), 0.0) * max(dot(surfaceNormal, lightDirection), 0.0) + 0.0001;
-    vec3 specular     = numerator / denominator;
+        vec3 numerator    = NDF * G * F;
+        float denominator = 4.0 * max(dot(surfaceNormal, viewDirection), 0.0) * max(dot(surfaceNormal, lightDirection), 0.0) + 0.0001;
+        vec3 specular     = numerator / denominator;
 
-    float NdotL = max(dot(surfaceNormal, lightDirection), 0.0);
+        float NdotL = max(dot(surfaceNormal, lightDirection), 0.0);
 
-    return vec4((kD * albedo / PI + specular) * lightColor * NdotL, shadows);
+        return vec4((kD * albedo / PI + specular) * lightColor * NdotL, shadows);
+    }
+    return vec4(0., 0., .0, shadows);
 }
 
 
@@ -124,29 +126,44 @@ vec4 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 p
     vec3 lightPosition = vec3(pointLight[0][0], pointLight[0][1], pointLight[0][2]);
 
     float shadows = 1.;
+
     if (pointLight[3][1] == 1.)
     shadows = pointLightShadow(distanceFromCamera, pointLight[3][2], shadowMap, lightPosition, pointLight, viewDistance, fragPosition)/quantityToDivide;
+    if (shadows > 0.){
+        float outerCutoff = pointLight[3][3];
+        float cutoff = pointLight[2][2];
 
-    vec3 lightColor = vec3(pointLight[1][0], pointLight[1][1], pointLight[1][2]);
-    vec3 attenuationPLight = vec3(pointLight[2][0], pointLight[2][1], pointLight[2][2]);
-    float distance    = length(lightPosition - fragPosition);
-    float attFactor = 1.0 / (attenuationPLight.x + (attenuationPLight.y * distance) + (attenuationPLight.z * pow(distance, 2.)));
+        vec3 lightColor = vec3(pointLight[1][0], pointLight[1][1], pointLight[1][2]);
+        vec2 attenuationPLight = vec2(pointLight[2][0], pointLight[2][1]);
+        float distance    = length(lightPosition - fragPosition);
 
-    vec3 L = normalize(lightPosition - fragPosition);
-    vec3 H = normalize(V + L);
 
-    float NDF = distributionGGX(N, H, roughness);
-    float G   = geometrySmith(N, V, L, roughness);
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0, roughness);
+        float intensity = 1.;
+        if(distance > cutoff)
+            intensity = clamp(mix(1., 0., (distance - cutoff)/(outerCutoff - cutoff)), 0., 1.);
 
-    vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - metallic;
+        if (distance > outerCutoff)
+        return vec4(vec3(0.), 1.);
 
-    vec3 numerator    = NDF * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-    vec3 specular  = numerator / denominator;
-    float NdotL = max(dot(N, L), 0.0);
+        float attFactor = intensity / (1. + (attenuationPLight.x * distance) + (attenuationPLight.y * pow(distance, 2.)));
 
-    return vec4((kD * albedo / PI + specular) * lightColor * NdotL * attFactor, shadows);
+        vec3 L = normalize(lightPosition - fragPosition);
+        vec3 H = normalize(V + L);
+
+        float NDF = distributionGGX(N, H, roughness);
+        float G   = geometrySmith(N, V, L, roughness);
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0, roughness);
+
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        vec3 numerator    = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        vec3 specular  = numerator / denominator;
+        float NdotL = max(dot(N, L), 0.0);
+
+        return vec4((kD * albedo / PI + specular) * lightColor * NdotL * attFactor, shadows);
+    }
+    return vec4(vec3(0.), 1.);
 }
