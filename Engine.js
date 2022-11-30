@@ -19,7 +19,7 @@ import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightProbe from "./instances/LightProbe";
-import SSR from "./runtime/rendering/SSR";
+
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
 export default class Engine {
@@ -89,7 +89,6 @@ export default class Engine {
         FrameComposition.initialize()
         await SSAO.initialize()
         SSGI.initialize()
-        SSR.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
         SpritePass.initialize()
@@ -143,12 +142,12 @@ export default class Engine {
         SSGI.rayMarchSettings[2] = data.SSGI.strength || 1
 
 
-        SSR.rayMarchSettings[0] = data.SSR.maxSteps || 4
-        SSR.rayMarchSettings[1] = data.SSR.falloff || 3
-        SSR.rayMarchSettings[2] = data.SSR.minRayStep || .1
-        SSR.rayMarchSettings[3] = data.SSR.stepSize || 1
+        SceneRenderer.rayMarchSettings[0] = data.SSR.maxSteps || 4
+        SceneRenderer.rayMarchSettings[1] = data.SSR.falloff || 3
+        SceneRenderer.rayMarchSettings[2] = data.SSR.minRayStep || .1
+        SceneRenderer.rayMarchSettings[3] = data.SSR.stepSize || 1
 
-        SSR.enabled = data.SSR.enabled
+
         SSGI.enabled = data.SSGI.enabled
 
         SSAO.settings = [data.SSAO.radius || .25, data.SSAO.power || 1, data.SSAO.bias || .1, data.SSAO.falloffDistance || 1000]

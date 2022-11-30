@@ -5,7 +5,8 @@
     "cullFace": true,
     "noDepthTest": false,
     "isAlphaTested": false,
-    "depthMask": true
+    "depthMask": true,
+    "ssrEnabled": false
   },
   "uniforms": [],
   "uniformValues": []

@@ -7,7 +7,7 @@ import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import VisibilityBuffer from "./VisibilityBuffer";
 import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
-import SSR from "./SSR";
+
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import SHADING_MODELS from "../../static/SHADING_MODELS";
@@ -19,6 +19,8 @@ let shader, uniforms
 export default class SceneRenderer {
     static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
+    static rayMarchSettings = new Float32Array([4, 3, .1, 1])
+
     static set shader(data) {
         shader = data
         uniforms = shader?.uniformMap
@@ -40,10 +42,15 @@ export default class SceneRenderer {
         const size = entities.length
 
         shader.bind()
-        if(isDev)
+        if (isDev)
             gpu.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
+
         gpu.uniformMatrix4fv(uniforms.skyboxProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
+
         if (!useCustomView) {
+            gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
+            gpu.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
+            gpu.uniform4fv(uniforms.rayMarchSettings, SceneRenderer.rayMarchSettings)
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
         } else {
@@ -64,8 +71,8 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.SSGI, 2)
 
         gpu.activeTexture(gpu.TEXTURE3)
-        gpu.bindTexture(gpu.TEXTURE_2D, SSR.SSRSampler)
-        gpu.uniform1i(uniforms.SSR, 3)
+        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
+        gpu.uniform1i(uniforms.previousFrame, 3)
 
         gpu.activeTexture(gpu.TEXTURE4)
         gpu.bindTexture(gpu.TEXTURE_2D, DirectionalShadows.sampler)
@@ -97,7 +104,7 @@ export default class SceneRenderer {
             gpu.uniform1i(uniforms.skylight_specular, 7)
         }
 
-        let depthMaskState = true, cullFaceState = true
+        let depthMaskState = true, cullFaceState = true, stateWasCleared = false
 
         gpu.enable(gpu.CULL_FACE)
         gpu.cullFace(gpu.BACK)
@@ -129,14 +136,18 @@ export default class SceneRenderer {
                 cullFaceState = material.cullFace
                 depthMaskState = material.depthMask
 
-                const component = entity.components.get(COMPONENTS.MESH)
+                // const component = entity.components.get(COMPONENTS.MESH)
                 const data = material.uniformValues, toBind = material.uniforms
                 for (let j = 0; j < toBind.length; j++) {
                     const current = toBind[j]
                     const dataAttribute = data[current.key]
                     Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                 }
-            } else {
+                gpu.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
+                stateWasCleared = false
+            } else if (!stateWasCleared) {
+                stateWasCleared = true
+                gpu.uniform1i(uniforms.ssrEnabled, 0)
                 gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
                 if (!depthMaskState) {
@@ -150,8 +161,11 @@ export default class SceneRenderer {
                     cullFaceState = true
                 }
             }
-            if (useCustomView)
+
+            if (useCustomView) {
                 gpu.uniform1i(uniforms.noDepthChecking, 1)
+                gpu.uniform1i(uniforms.ssrEnabled, 0)
+            }
 
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()

@@ -77,6 +77,7 @@ export default class Material {
     #uniformsDeclaration
     texturesInUse = {}
     isAlphaTested = false
+    ssrEnabled = false
     depthMask = true
     cullFace = true
     noDepthTest

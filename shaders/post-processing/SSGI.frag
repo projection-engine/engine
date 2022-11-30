@@ -10,12 +10,12 @@ precision mediump float;
 in vec2 texCoords;
 
 uniform sampler2D previousFrame;
-uniform sampler2D depthSampler;
+uniform sampler2D scene_depth;
 uniform vec2 ssgiColorGrading;
 uniform vec3 rayMarchSettings;
 out vec4 fragColor;
 
-
+vec2 quadUV;
 //import(depthReconstructionUtils)
 
 //import(rayMarcher)
@@ -38,11 +38,11 @@ vec3 cosHemisphereSample(vec3 hitNorm)
     return tangent * (r * cos(phi)) + bitangent * (r * sin(phi)) + hitNorm.xyz * sqrt(max(0.0, 1. - randVal.x));
 }
 
-
-
 void main(){
-    vec4 pixelDepth = texture(depthSampler, texCoords);
+
+    vec4 pixelDepth = texture(scene_depth, texCoords);
     if (pixelDepth.a < 1.) discard;
+    quadUV = texCoords;
 
     float stepSize = rayMarchSettings.x;
     int maxSteps = int(rayMarchSettings.y);
@@ -50,7 +50,7 @@ void main(){
 
     vec3 viewPos = getViewPosition(texCoords);
     vec3 jitt =vec3(hash(viewPos));
-    vec3 worldNormal = normalFromDepth(pixelDepth.r, texCoords, depthSampler);
+    vec3 worldNormal = normalFromDepth(pixelDepth.r, texCoords, scene_depth);
 
 
     vec3 normal = cosHemisphereSample(worldNormal);

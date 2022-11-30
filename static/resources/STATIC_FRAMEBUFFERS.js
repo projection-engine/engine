@@ -3,7 +3,7 @@ export default {
     POST_PROCESSING_WORKER: "POST_PROCESSING_WORKER",
 
     RECONSTRUCTED_NORMALS:  "RECONSTRUCTED_NORMALS",
-    SSR:                    "SSR",
+
     AO:                     "AO",
     AO_SRC:                 "AO_SRC",
 

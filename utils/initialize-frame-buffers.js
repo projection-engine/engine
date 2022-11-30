@@ -40,12 +40,7 @@ export default function initializeFrameBuffers() {
             type: gpu.UNSIGNED_BYTE,
             label: "SSGI"
         })
-    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSR).texture({
-        attachment: 1,
-        precision: gpu.RGBA8,
-        type: gpu.UNSIGNED_BYTE,
-        label: "SSR"
-    })
+
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, halfResW, halfResH)
         .texture({
             precision: gpu.R8,

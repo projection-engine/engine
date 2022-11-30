@@ -1,15 +1,46 @@
 #define PI 3.14159265359
 
-mat3 TBN;
-vec2 quadUV;
-vec3 viewDirection;
+#define CLAMP_MIN .1
+#define CLAMP_MAX .9
+#define SEARCH_STEPS 5;
+#define DEPTH_THRESHOLD 1.2;
+#define PI_SQUARED 6.2831853
+
+// GLOBAL
+uniform mat4 projectionMatrix;
+uniform mat4 invProjectionMatrix;
+uniform vec4 rayMarchSettings;
+uniform vec2 buffer_resolution;
+uniform float skylight_samples;
+uniform bool hasSkylight;
+uniform bool hasAmbientOcclusion;
+uniform float elapsedTime;
+uniform vec3 cameraPosition;
+
+uniform sampler2D scene_depth;
+uniform sampler2D brdf_sampler;
+uniform sampler2D SSAO;
+uniform sampler2D SSGI;
+uniform sampler2D previousFrame;
+uniform sampler2D shadow_atlas;
+uniform samplerCube shadow_cube;
+uniform samplerCube skylight_specular;
+uniform sampler2D sampler0;
+uniform sampler2D sampler1;
+uniform sampler2D sampler2;
+uniform sampler2D sampler3;
+uniform sampler2D sampler4;
+uniform sampler2D sampler5;
+uniform sampler2D sampler6;
+uniform sampler2D sampler7;
+// GLOBAL
+
 
 in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
 
-uniform vec2 buffer_resolution;
-uniform vec3 cameraPosition;
+
 uniform PointLights{
     mat4 pointLights[24];
     int pointLightsQuantity;
@@ -23,37 +54,15 @@ uniform DirectionalLights{
     float shadowMapResolution;
 };
 
-uniform sampler2D scene_depth;
-uniform sampler2D brdf_sampler;
-uniform sampler2D SSAO;
-uniform sampler2D SSGI;
-uniform sampler2D SSR;
-uniform sampler2D shadow_atlas;
-uniform samplerCube shadow_cube;
-
-//uniform samplerCube skylight_diffuse;
-uniform samplerCube skylight_specular;
-
-uniform sampler2D sampler0;
-uniform sampler2D sampler1;
-uniform sampler2D sampler2;
-uniform sampler2D sampler3;
-uniform sampler2D sampler4;
-uniform sampler2D sampler5;
-uniform sampler2D sampler6;
-uniform sampler2D sampler7;
-
-uniform float skylight_samples;
-uniform bool hasSkylight;
-
-
+uniform bool ssrEnabled;
 uniform bool noDepthChecking;
-uniform bool hasAmbientOcclusion;
-uniform float elapsedTime;
 uniform int materialID;
 
 out vec4 fragColor;
 
+mat3 TBN;
+vec2 quadUV;
+vec3 viewDirection;
 bool hasTBNComputed = false;
 bool hasViewDirectionComputed = false;
 

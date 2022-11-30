@@ -19,24 +19,22 @@ import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
 import LightsAPI from "./lib/rendering/LightsAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
-import SSR from "./runtime/rendering/SSR";
+import GPU from "./GPU";
+import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
+import GPUAPI from "./lib/rendering/GPUAPI";
 
-let FBO, previous = 0
+
+let FBO, previous = 0, targetFBO
 export default class Loop {
     static #beforeDrawing = () => null
-    static #duringDrawing = () => null
+
     static #afterDrawing = () => null
 
-    static linkToExecutionPipeline(before, during, after) {
+    static linkToExecutionPipeline(before, after) {
         if (typeof before === "function") {
             Loop.#beforeDrawing = before
         } else
             Loop.#beforeDrawing = () => null
-
-        if (typeof during === "function") {
-            Loop.#duringDrawing = during
-        } else
-            Loop.#duringDrawing = () => null
 
         if (typeof after === "function") {
             Loop.#afterDrawing = after
@@ -45,7 +43,8 @@ export default class Loop {
     }
 
     static linkParams() {
-        FBO = Engine.currentFrameFBO
+        targetFBO = Engine.currentFrameFBO
+        FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
     }
 
     static #benchmarkMode() {
@@ -70,9 +69,10 @@ export default class Loop {
         VisibilityBuffer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
-        Loop.#beforeDrawing()
+
+
         FBO.startMapping()
-        Loop.#duringDrawing()
+        Loop.#beforeDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
         gpu.clear(gpu.DEPTH_BUFFER_BIT)
@@ -83,16 +83,12 @@ export default class Loop {
         SpritePass.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
 
-        Loop.#afterDrawing()
         FBO.stopMapping()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.SSGI)
         SSGI.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SSGI)
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.SSR)
-        SSR.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SSR)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.POST_PROCESSING)
         LensPostProcessing.execute()
@@ -105,6 +101,8 @@ export default class Loop {
         BenchmarkAPI.track(BENCHMARK_KEYS.FRAME_COMPOSITION)
         FrameComposition.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FRAME_COMPOSITION)
+
+        Loop.#afterDrawing()
     }
 
     static #callback() {
@@ -116,19 +114,22 @@ export default class Loop {
         OmnidirectionalShadows.execute()
         SSAO.execute()
         VisibilityBuffer.execute()
-        Loop.#beforeDrawing()
+
         FBO.startMapping()
-        Loop.#duringDrawing()
+        Loop.#beforeDrawing()
         gpu.clear(gpu.DEPTH_BUFFER_BIT)
         SceneRenderer.draw()
         SpritePass.execute()
-        Loop.#afterDrawing()
+
         FBO.stopMapping()
+
+        GPUAPI.copyTexture(targetFBO, FBO, gpu.COLOR_BUFFER_BIT)
+
         SSGI.execute()
-        SSR.execute()
         LensPostProcessing.execute()
         MotionBlur.execute()
         FrameComposition.execute()
+        Loop.#afterDrawing()
     }
 
     static loop(current) {

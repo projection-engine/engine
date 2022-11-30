@@ -13,7 +13,7 @@ import FrameComposition from "../runtime/post-processing/FrameComposition";
 import FXAA_FRAG from "../shaders/post-processing/FXAA.frag";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/post-processing/BRIGHTNESS_FILTER.frag";
-import SSR from "../shaders/post-processing/SSR.frag"
+
 import SSGI from "../shaders/post-processing/SSGI.frag"
 import CUBEMAP from "../shaders/forward-rendering/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/post-processing/PREFILTERED_MAP.frag"
@@ -41,7 +41,6 @@ export default function initializeShaders() {
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOKEH, QUAD_VERTEX, BOKEH_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, CUBEMAP, IRRADIANCE_MAP)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)
-    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SSR, QUAD_VERTEX, SSR)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SSGI, QUAD_VERTEX, SSGI)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.MOTION_BLUR, QUAD_VERTEX, MOTION_BLUR_FRAG)
 
