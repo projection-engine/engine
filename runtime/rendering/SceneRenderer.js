@@ -11,6 +11,7 @@ import SSR from "./SSR";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import SHADING_MODELS from "../../static/SHADING_MODELS";
+import COMPONENTS from "../../static/COMPONENTS";
 
 let texOffset, bufferResolution
 let isDev
@@ -100,6 +101,7 @@ export default class SceneRenderer {
 
         gpu.enable(gpu.CULL_FACE)
         gpu.cullFace(gpu.BACK)
+
         gpu.depthMask(true)
 
         for (let i = 0; i < size; i++) {
@@ -126,6 +128,8 @@ export default class SceneRenderer {
                 }
                 cullFaceState = material.cullFace
                 depthMaskState = material.depthMask
+
+                const component = entity.components.get(COMPONENTS.MESH)
                 const data = material.uniformValues, toBind = material.uniforms
                 for (let j = 0; j < toBind.length; j++) {
                     const current = toBind[j]
