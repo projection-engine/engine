@@ -21,29 +21,29 @@ float NdotV;
 //import(rayMarcher)
 
 vec3 computeSSR(){
-    if (metallic < 0.01)return vec3(0.);
+    if (metallic < 0.01)
+    return vec3(0.);
     int maxSteps = int(rayMarchSettings.x);
     float falloff = rayMarchSettings.y;
     float minRayStep = rayMarchSettings.z;
     float stepSize = rayMarchSettings.w;
 
-    vec3 viewPos = getViewPosition(quadUV);
-    vec3 jitt = mix(vec3(0.0), vec3(hash(viewPos)), roughness);
-    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(normalVec)));
+    vec3 worldNormal = normalVec;
+    vec3 viewPos = getViewPosition(quadUV, quadUV);
+    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 
     vec3 hitPos = viewPos;
     float dDepth;
-
-    vec4 coords = RayMarch(maxSteps, (reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth, stepSize);
+    vec3 jitt = mix(vec3(0.0), vec3(hash(viewPos)), roughness);
+    vec4 coords = RayMarch(maxSteps, (vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth, stepSize, quadUV);
 
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
-    float reflectionMultiplier =   pow(metallic, falloff) * screenEdgefactor * -reflected.z;
+    float reflectionMultiplier = pow(metallic, falloff) * screenEdgefactor * -reflected.z;
     vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
 
     return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.);
 }
-
 vec3 fresnelSchlick (float cosTheta, vec3 F0, float roughness){
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow (1.0 - cosTheta, 5.0);
 }

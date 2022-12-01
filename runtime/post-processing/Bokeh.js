@@ -9,7 +9,7 @@ let FBO, shader, uniforms, T
 export default class Bokeh {
     static initialize() {
         FBO = GPUAPI.allocateFramebuffer("TESTE").texture()
-        T = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
+        T = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER)
         shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.BOKEH)
         uniforms = shader.uniformMap
         console.log(shader, uniforms)

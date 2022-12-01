@@ -44,7 +44,7 @@ export default class Loop {
 
     static linkParams() {
         targetFBO = Engine.currentFrameFBO
-        FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
+        FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER)
     }
 
     static #benchmarkMode() {

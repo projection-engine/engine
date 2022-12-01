@@ -29,8 +29,8 @@ export default function initializeFrameBuffers() {
         })
         .depthTest()
 
-    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
-    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER, GPU.internalResolution.w, GPU.internalResolution.h).texture().depthTest()
+    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME).texture()
+    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CHACHE_BUFFER).texture().depthTest()
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI, halfResW, halfResH)
         .texture({
@@ -55,12 +55,12 @@ export default function initializeFrameBuffers() {
         })
 
     MotionBlur.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})
-    MotionBlur.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER).colors[0]
+    MotionBlur.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER).colors[0]
     FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
 
 
     LensPostProcessing.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.BLUR_BLOOM).texture()
-    LensPostProcessing.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.POST_PROCESSING_WORKER)
+    LensPostProcessing.outputFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER)
     LensPostProcessing.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME).colors[0]
 
 }

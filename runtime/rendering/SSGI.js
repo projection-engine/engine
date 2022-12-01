@@ -81,7 +81,7 @@ export default class SSGI {
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.scene_depth)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.scene_depth, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
