@@ -53,6 +53,7 @@ export default class Engine {
 
 
     static data = {
+        spotLights: [],
         pointLights: [],
         meshes: [],
         directionalLights: [],

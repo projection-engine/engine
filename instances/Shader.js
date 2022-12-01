@@ -60,6 +60,8 @@ export default class Shader {
 
         if (fCode.includes("DirectionalLights"))
             LightsAPI.directionalLightsUBO.bindWithShader(this.program)
+        if (fCode.includes("SpotLights"))
+            LightsAPI.spotLightsUBO.bindWithShader(this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

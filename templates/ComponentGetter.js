@@ -10,6 +10,7 @@ import RigidBodyComponent from "./components/RigidBodyComponent";
 import CullingComponent from "./components/CullingComponent";
 import UIComponent from "./components/UIComponent";
 import TerrainComponent from "./components/TerrainComponent";
+import SpotlightComponent from "./components/SpotlightComponent";
 
 export default {
     [COMPONENTS.DIRECTIONAL_LIGHT]: DirectionalLightComponent,
@@ -23,6 +24,7 @@ export default {
     [COMPONENTS.RIGID_BODY]: RigidBodyComponent,
     [COMPONENTS.CULLING]: CullingComponent,
     [COMPONENTS.UI]: UIComponent,
+    [COMPONENTS.SPOTLIGHT]: SpotlightComponent,
 
     [COMPONENTS.TERRAIN]: TerrainComponent,
 }

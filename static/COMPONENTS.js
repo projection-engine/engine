@@ -9,5 +9,6 @@ export default {
   "RIGID_BODY": "RigidBody",
   "CULLING": "CullingComponent",
   "UI": "UI",
-  "TERRAIN": "TERRAIN"
+  "TERRAIN": "TERRAIN",
+  SPOTLIGHT: "SPOTLIGHT"
 }
