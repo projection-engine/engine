@@ -78,6 +78,9 @@ export default class Material {
     texturesInUse = {}
     isAlphaTested = false
     ssrEnabled = false
+    isSky = false
+    doubleSided = false
+
     depthMask = true
     cullFace = true
     noDepthTest

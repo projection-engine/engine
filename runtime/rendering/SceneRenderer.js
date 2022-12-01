@@ -33,9 +33,7 @@ export default class SceneRenderer {
         SceneRenderer.#ready = true
     }
 
-    static draw(useCustomView, viewProjection, cameraPosition) {
-        if (useCustomView)
-            console.log(viewProjection, cameraPosition, GPU.skylightProbe)
+    static draw(useCustomView, viewProjection, staticViewMatrix, cameraPosition) {
         if (!SceneRenderer.#ready || !shader)
             return
         const entities = Engine.data.meshes
@@ -44,16 +42,16 @@ export default class SceneRenderer {
         shader.bind()
         if (isDev)
             gpu.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
-
-        gpu.uniformMatrix4fv(uniforms.skyboxProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
-
+        gpu.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
+            gpu.uniformMatrix4fv(uniforms.staticViewMatrix, false, CameraAPI.staticViewMatrix)
             gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             gpu.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
             gpu.uniform4fv(uniforms.rayMarchSettings, SceneRenderer.rayMarchSettings)
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
         } else {
+            gpu.uniformMatrix4fv(uniforms.staticViewMatrix, false, staticViewMatrix)
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
             gpu.uniform3fv(uniforms.cameraPosition, cameraPosition)
         }
@@ -104,39 +102,45 @@ export default class SceneRenderer {
             gpu.uniform1i(uniforms.skylight_specular, 7)
         }
 
-        let depthMaskState = true, cullFaceState = true, stateWasCleared = false
+        let stateWasCleared = false, isDoubleSided = false, isSky = false
 
         gpu.enable(gpu.CULL_FACE)
-        gpu.cullFace(gpu.BACK)
-
         gpu.depthMask(true)
 
         for (let i = 0; i < size; i++) {
 
             const entity = entities[i]
             const mesh = entity.__meshRef
-
             if (!entity.active || !mesh)
                 continue
 
             if (isDev)
                 gpu.uniform3fv(uniforms.entityID, entity.pickID)
+
             const material = entity.__materialRef
             if (material) {
+                if (material.doubleSided) {
+                    gpu.disable(gpu.CULL_FACE)
+                    isDoubleSided = true
+                } else if (isDoubleSided) {
+                    gpu.enable(gpu.CULL_FACE)
+                    isDoubleSided = false
+                }
+
+                if (material.isSky) {
+                    gpu.uniform1i(uniforms.isSky, 1)
+                    gpu.disable(gpu.DEPTH_TEST)
+                    isSky = true
+                } else if (isSky) {
+                    gpu.uniform1i(uniforms.isSky, 0)
+                    gpu.enable(gpu.DEPTH_TEST)
+                    isSky = false
+                }
+
+
+
                 gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
                 gpu.uniform1i(uniforms.materialID, material.bindID)
-                if (material.depthMask !== depthMaskState)
-                    gpu.depthMask(material.depthMask)
-                if (material.cullFace !== cullFaceState) {
-                    if (!material.cullFace)
-                        gpu.disable(gpu.CULL_FACE)
-                    else
-                        gpu.enable(gpu.CULL_FACE)
-                }
-                cullFaceState = material.cullFace
-                depthMaskState = material.depthMask
-
-                // const component = entity.components.get(COMPONENTS.MESH)
                 const data = material.uniformValues, toBind = material.uniforms
                 for (let j = 0; j < toBind.length; j++) {
                     const current = toBind[j]
@@ -144,22 +148,27 @@ export default class SceneRenderer {
                     Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                 }
                 gpu.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
+
+
                 stateWasCleared = false
             } else if (!stateWasCleared) {
+
                 stateWasCleared = true
+                if (isDoubleSided) {
+                    gpu.enable(gpu.CULL_FACE)
+                    isDoubleSided = false
+                }
+
+                if (isSky) {
+                    gpu.uniform1i(uniforms.isSky, 0)
+                    gpu.enable(gpu.DEPTH_TEST)
+                    isSky = false
+                }
+
                 gpu.uniform1i(uniforms.ssrEnabled, 0)
                 gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
-                if (!depthMaskState) {
-                    console.log("UPDATING STATE")
-                    gpu.depthMask(true)
-                    depthMaskState = true
-                }
-                if (!cullFaceState) {
-                    console.log("UPDATING STATE")
-                    gpu.enable(gpu.CULL_FACE)
-                    cullFaceState = true
-                }
+
             }
 
             if (useCustomView) {

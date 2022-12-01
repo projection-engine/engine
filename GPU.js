@@ -58,7 +58,8 @@ export default class GPU {
                  vec3.add(tempPosition, entity._translation, CUBE_MAP_VIEWS.target[index])
                  mat4.lookAt(tempView, entity._translation, tempPosition, CUBE_MAP_VIEWS.up[index])
                  mat4.multiply(tempViewProjection, projection, tempView)
-                SceneRenderer.draw(true, tempViewProjection, tempPosition)
+                tempView[12] = tempView[13]= tempView[14] = 0
+                SceneRenderer.draw(true, tempViewProjection, tempView, tempPosition)
             })
         }
     }

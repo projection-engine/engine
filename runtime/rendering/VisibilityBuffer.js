@@ -39,7 +39,12 @@ export default class VisibilityBuffer {
         gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         fbo.startMapping()
         Mesh.finishIfUsed()
-        let isAlphaTested = 0
+
+        let isAlphaTested = 0, isDoubleSided = false, stateWasCleared = false
+
+        gpu.enable(gpu.CULL_FACE)
+        gpu.depthMask(true)
+
         for (let i = 0; i < size; i++) {
             isAlphaTested = 0
             const entity = toRender[i]
@@ -51,14 +56,32 @@ export default class VisibilityBuffer {
             if (entity.__materialID) {
                 const material = materials.get(entity.__materialID)
                 entity.__materialRef = material
-                if (material && material.isAlphaTested)
-                    isAlphaTested = 1
+                if (material) {
+                    if (material.isSky)
+                        continue
+                    isAlphaTested = material.isAlphaTested ? 1 : 0
+                    if (material.doubleSided) {
+                        gpu.disable(gpu.CULL_FACE)
+                        isDoubleSided = true
+                    } else if (isDoubleSided) {
+                        gpu.enable(gpu.CULL_FACE)
+                        isDoubleSided = false
+                    }
+                    stateWasCleared = false
+                } else if (!stateWasCleared) {
+                    stateWasCleared = true
+                    if (isDoubleSided) {
+                        gpu.enable(gpu.CULL_FACE)
+                        isDoubleSided = false
+                    }
+                }
             }
 
             gpu.uniform1i(uniforms.isAlphaTested, isAlphaTested)
             gpu.uniform3fv(uniforms.entityID, entity.pickID)
             gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             gpu.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
+
 
             mesh.simplifiedDraw()
         }

@@ -2,11 +2,10 @@
   "functionDeclaration": "",
   "uniformsDeclaration": "",
   "settings": {
-    "cullFace": true,
-    "noDepthTest": false,
     "isAlphaTested": false,
-    "depthMask": true,
-    "ssrEnabled": false
+    "ssrEnabled": false,
+    "isSky": false,
+    "doubleSided": false
   },
   "uniforms": [],
   "uniformValues": []

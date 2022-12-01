@@ -28,7 +28,7 @@ vec3 computeSSR(){
     float minRayStep = rayMarchSettings.z;
     float stepSize = rayMarchSettings.w;
 
-    vec3 worldNormal = normalVec;
+    vec3 worldNormal = normalFromDepth(gl_FragCoord.z, quadUV, scene_depth);
     vec3 viewPos = getViewPosition(quadUV, quadUV);
     vec3 reflected = normalize(reflect(normalize(viewPos), normalize(worldNormal)));
 
