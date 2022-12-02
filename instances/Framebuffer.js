@@ -46,7 +46,7 @@ export default class Framebuffer {
         gpu.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
     }
 
-    depthTexture(precision = gpu.DEPTH_COMPONENT32F) {
+    depthTexture(precision = gpu.DEPTH_COMPONENT24) {
         this.use()
         this.depthSampler = Texture.createTexture(
             this.width,

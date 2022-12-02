@@ -5,7 +5,7 @@ layout (location = 2) in vec2 uvTexture;
 uniform mat4 viewProjection;
 uniform mat4 modelMatrix;
 
-uniform mat4 staticViewMatrix;
+uniform mat4 viewMatrix;
 uniform mat4 skyProjectionMatrix;
 
 uniform bool isSky;
@@ -20,8 +20,13 @@ void main(){
     normalVec = normalize(mat3(modelMatrix) * normal);
     texCoords = uvTexture;
 
-    if(isSky)
-        gl_Position = skyProjectionMatrix * staticViewMatrix * wPosition;
+    if(isSky){
+        mat4 V = viewMatrix;
+        V[3][0] = 0.;
+        V[3][1] = 0.;
+        V[3][2] = 0.;
+        gl_Position = skyProjectionMatrix * V * wPosition;
+    }
     else
         gl_Position = viewProjection * wPosition;
 }

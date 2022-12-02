@@ -7,11 +7,8 @@ import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import VisibilityBuffer from "./VisibilityBuffer";
 import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
-
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import SHADING_MODELS from "../../static/SHADING_MODELS";
-import COMPONENTS from "../../static/COMPONENTS";
 
 let texOffset, bufferResolution
 let isDev
@@ -33,7 +30,7 @@ export default class SceneRenderer {
         SceneRenderer.#ready = true
     }
 
-    static draw(useCustomView, viewProjection, staticViewMatrix, cameraPosition) {
+    static draw(useCustomView, viewProjection, viewMatrix, cameraPosition) {
         if (!SceneRenderer.#ready || !shader)
             return
         const entities = Engine.data.meshes
@@ -44,14 +41,15 @@ export default class SceneRenderer {
             gpu.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
         gpu.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
-            gpu.uniformMatrix4fv(uniforms.staticViewMatrix, false, CameraAPI.staticViewMatrix)
+
+            gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
             gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             gpu.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
             gpu.uniform4fv(uniforms.rayMarchSettings, SceneRenderer.rayMarchSettings)
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
         } else {
-            gpu.uniformMatrix4fv(uniforms.staticViewMatrix, false, staticViewMatrix)
+            gpu.uniformMatrix4fv(uniforms.viewMatrix, false, viewMatrix)
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
             gpu.uniform3fv(uniforms.cameraPosition, cameraPosition)
         }

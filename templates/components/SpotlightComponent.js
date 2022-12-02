@@ -1,5 +1,4 @@
 import Component from "./Component"
-import POINT_LIGHT_PROPS from "../../static/component-props/POINT_LIGHT_PROPS";
 import SPOTLIGHT_PROPS from "../../static/component-props/SPOTLIGHT_PROPS";
 
 export default class SpotlightComponent extends Component {

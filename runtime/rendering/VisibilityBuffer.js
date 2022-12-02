@@ -5,6 +5,7 @@ import Engine from "../../Engine";
 import Mesh from "../../instances/Mesh";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import TransformationPass from "../misc/TransformationPass";
+import SSAO from "./SSAO";
 
 let shader, uniforms, fbo
 export default class VisibilityBuffer {
@@ -85,7 +86,8 @@ export default class VisibilityBuffer {
 
             mesh.simplifiedDraw()
         }
-
         fbo.stopMapping()
+
+        SSAO.execute()
     }
 }

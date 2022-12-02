@@ -1,7 +1,6 @@
 import {v4} from "uuid"
 import MaterialAPI from "../lib/rendering/MaterialAPI";
 import GPUAPI from "../lib/rendering/GPUAPI";
-import DEFAULT_VERTEX from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import GPU from "../GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";

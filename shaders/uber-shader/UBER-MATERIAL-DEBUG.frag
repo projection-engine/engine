@@ -53,12 +53,12 @@ void main(){
     quadUV = gl_FragCoord.xy/buffer_resolution;
     vec4 depthData = texture(scene_depth, quadUV);
     if (shadingModel != OVERDRAW)
-        if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD) discard;
+    if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD) discard;
 
     //--MATERIAL_SELECTION--
 
-    if(shadingModel == LIGHT_ONLY)
-        albedo = vec3(.5);
+    if (shadingModel == LIGHT_ONLY)
+    albedo = vec3(.5);
 
     if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
     fragColor = pbLightComputation();
@@ -94,12 +94,23 @@ void main(){
             case RANDOM:
             fragColor = vec4(randomColor(length(entityID)), 1.);
             break;
-            case OVERDRAW:
-            if(!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD)
-                fragColor = vec4(1., 0., 0., .75);
-            else
-                fragColor = vec4(0., 0., 1., .3);
-            break;
+            case OVERDRAW:{
+                vec2 a = floor(gl_FragCoord.xy);
+                float checkerVal = 4.;
+
+                if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD){
+                    fragColor = vec4(1., 0., 0., 1.);
+                    checkerVal = 2.;
+                }
+                else
+                    fragColor = vec4(0., 0., 1., 1.);
+
+                bool checker = mod(a.x + a.y, checkerVal) > 0.0;
+                if( checker ) discard;
+
+
+                break;
+            }
         }
     }
 }

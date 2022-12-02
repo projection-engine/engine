@@ -1,11 +1,12 @@
 // THANKS TO https://imanolfotia.com/blog/1
+float raymarcherDepth;
 
 vec3 getViewPosition(vec2 coords, vec2 quadUV){
     float depth = textureLod(scene_depth, coords, 2.).r;
     return viewSpacePositionFromDepth(depth, quadUV);
 }
 
-vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth, vec2 quadUV)
+vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, vec2 quadUV)
 {
     float depth;
     vec4 projectedCoord;
@@ -16,9 +17,9 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth, vec2 
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 
         depth = getViewPosition(projectedCoord.xy, quadUV).z;
-        dDepth = hitCoord.z - depth;
+        raymarcherDepth = hitCoord.z - depth;
         dir *= 0.5;
-        if(dDepth > 0.0)
+        if(raymarcherDepth > 0.0)
         hitCoord += dir;
         else
         hitCoord -= dir;
@@ -31,7 +32,8 @@ vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth, vec2 
     return vec3(projectedCoord.xy, depth);
 }
 
-vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord, out float dDepth, float stepSize, vec2 quadUV){
+vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord,  float stepSize, vec2 quadUV){
+
     dir *= stepSize;
     float depth;
     int steps;
@@ -47,13 +49,13 @@ vec4 RayMarch(int maxSteps, vec3 dir, inout vec3 hitCoord, out float dDepth, flo
         if(depth > 1000.0)
         continue;
 
-        dDepth = hitCoord.z - depth;
+        raymarcherDepth = hitCoord.z - depth;
         float Q = DEPTH_THRESHOLD;
-        if((dir.z - dDepth) < Q){
-            if(dDepth <= 0.0)
+        if((dir.z - raymarcherDepth) < Q){
+            if(raymarcherDepth <= 0.0)
             {
                 vec4 Result;
-                Result = vec4(BinarySearch(dir, hitCoord, dDepth, quadUV), 1.0);
+                Result = vec4(BinarySearch(dir, hitCoord, quadUV), 1.0);
 
                 return Result;
             }

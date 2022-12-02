@@ -60,9 +60,9 @@ void main(){
     vec3 reflected = normalize(reflect(normalize(viewPos), normal));
 
     vec3 hitPos = viewPos;
-    float dDepth;
+
     float step =  stepSize * (clamp(jitt.x, 0., 1.) + clamp(jitt.y, 0., 1.)) + stepSize;
-    vec4 coords = RayMarch(maxSteps,  normal, hitPos, dDepth, step, texCoords);
+    vec4 coords = RayMarch(maxSteps, normal, hitPos, step, texCoords);
 
     vec4 tracedAlbedo = texture(previousFrame, coords.xy);
     if(tracedAlbedo.a < 1.)

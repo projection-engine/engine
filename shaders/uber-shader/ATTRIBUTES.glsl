@@ -11,6 +11,7 @@
 #define PI_SQUARED 6.2831853
 
 // GLOBAL
+uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
 uniform vec4 rayMarchSettings;

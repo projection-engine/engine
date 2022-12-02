@@ -1,12 +1,16 @@
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
-import CAMERA_UBO from "../shaders/utils/CAMERA_METADATA_UNIFORM.glsl";
-import COMPUTE_TBN from "../shaders/utils/COMPUTE_TBN.glsl";
-import PARALLAX_OCCLUSION_MAPPING from "../shaders/utils/PARALLAX_OCCLUSION_MAPPING.glsl";
-import RAY_MARCHER from "../shaders/utils/RAY_MARCHER.glsl";
-import ACES from "../shaders/utils/ACES.glsl";
-import DEPTH_UTILS from "../shaders/utils/DEPTH_RECONSTRUCTION_UTILS.glsl"
-import COMPUTE_LIGHTS from "../shaders/utils/COMPUTE_LIGHTS.glsl"
+import CAMERA_UBO from "../shaders/functions/CAMERA_METADATA_UNIFORM.glsl";
+import COMPUTE_TBN from "../shaders/functions/COMPUTE_TBN.glsl";
+import PARALLAX_OCCLUSION_MAPPING from "../shaders/functions/PARALLAX_OCCLUSION_MAPPING.glsl";
+import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
+import ACES from "../shaders/functions/ACES.glsl";
+import DEPTH_UTILS from "../shaders/functions/DEPTH_RECONSTRUCTION_UTILS.glsl"
+import COMPUTE_LIGHTS from "../shaders/functions/COMPUTE_DIRECTIONAL_LIGHTS.glsl"
+import COMPUTE_POINT_LIGHTS from "../shaders/functions/COMPUTE_POINT_LIGHTS.glsl"
+import BRDF_FUNCTIONS from "../shaders/functions/BRDF_FUNCTIONS.glsl"
+
 import UBER_ATTRIBUTES from "../shaders/uber-shader/ATTRIBUTES.glsl"
+import SSS from "../shaders/functions/SSS.glsl"
 
 const METHODS = {
     cameraUBO: "//import(cameraUBO)",
@@ -18,7 +22,9 @@ const METHODS = {
     parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)",
     depthReconstructionUtils: "//import(depthReconstructionUtils)",
     pbLightComputation: "//import(pbLightComputation)",
-
+    SSS: "//import(SSS)",
+    computePointLights: "//import(computePointLights)",
+    brdf: "//import(brdf)"
 }
 
 
@@ -28,6 +34,15 @@ export default function applyShaderMethods(shaderCode) {
     for (let i = 0; i < 3; i++) {
         Object.keys(METHODS).forEach(key => {
             switch (true) {
+                case key === "brdf":
+                    response = response.replaceAll(METHODS[key], BRDF_FUNCTIONS)
+                    break
+                case key === "SSS":
+                    response = response.replaceAll(METHODS[key], SSS)
+                    break
+                case key === "computePointLights":
+                    response = response.replaceAll(METHODS[key], COMPUTE_POINT_LIGHTS)
+                    break
                 case key === "uberAttributes":
                     response = response.replaceAll(METHODS[key], UBER_ATTRIBUTES)
                     break

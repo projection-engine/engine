@@ -1,4 +1,3 @@
-import SSAO from "./runtime/rendering/SSAO";
 
 import SSGI from "./runtime/rendering/SSGI";
 import DirectionalShadows from "./runtime/rendering/DirectionalShadows";
@@ -61,9 +60,6 @@ export default class Loop {
         OmnidirectionalShadows.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
-        SSAO.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.AMBIENT_OCCLUSION)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.VISIBILITY_BUFFER)
         VisibilityBuffer.execute()
@@ -112,7 +108,7 @@ export default class Loop {
         PhysicsPass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
-        SSAO.execute()
+
         VisibilityBuffer.execute()
 
         FBO.startMapping()
