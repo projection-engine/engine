@@ -137,22 +137,20 @@ export default class SceneRenderer {
                     isSky = false
                 }
 
-
-
                 gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
                 gpu.uniform1i(uniforms.materialID, material.bindID)
+
                 const data = material.uniformValues, toBind = material.uniforms
                 for (let j = 0; j < toBind.length; j++) {
                     const current = toBind[j]
                     const dataAttribute = data[current.key]
                     Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                 }
-                gpu.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
 
+                gpu.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
 
                 stateWasCleared = false
             } else if (!stateWasCleared) {
-
                 stateWasCleared = true
                 if (isDoubleSided) {
                     gpu.enable(gpu.CULL_FACE)
@@ -168,7 +166,6 @@ export default class SceneRenderer {
                 gpu.uniform1i(uniforms.ssrEnabled, 0)
                 gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
-
             }
 
             if (useCustomView) {

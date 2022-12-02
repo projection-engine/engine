@@ -95,11 +95,10 @@ void main(){
             fragColor = vec4(randomColor(length(entityID)), 1.);
             break;
             case OVERDRAW:
-            if(abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD)
-                fragColor = vec4(normalVec, 1.);
+            if(!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD)
+                fragColor = vec4(1., 0., 0., .75);
             else
-                discard;
-//                fragColor = vec4(0., 0., 1., .5);
+                fragColor = vec4(0., 0., 1., .3);
             break;
         }
     }

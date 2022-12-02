@@ -78,8 +78,7 @@ export default class GPU {
             antialias: false,
             // preserveDrawingBuffer: true,
             premultipliedAlpha: false,
-            powerPreference: "high-performance",
-            depth: false
+            powerPreference: "high-performance"
         })
         GPU.context = gpu
 

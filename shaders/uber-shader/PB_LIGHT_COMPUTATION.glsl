@@ -89,9 +89,9 @@ vec3 computeSkylightAmbient(vec3 V){
     vec3 kD = (1.0 - F) * (1.0 - metallic);
     vec3 prefilteredColor = textureLod(skylight_specular, reflect(-V, N), 0.).rgb;
 
-    specular = prefilteredColor ;//* (F * brdf.r + brdf.g);
+    specular = prefilteredColor;//* (F * brdf.r + brdf.g);
 
-//    vec3 diffuse = texture(skylight_diffuse, N).rgb * albedo * kD ;
+    //    vec3 diffuse = texture(skylight_diffuse, N).rgb * albedo * kD ;
     return specular;//diffuse + specular;
 }
 
@@ -117,15 +117,20 @@ vec4 pbLightComputation() {
     }
 
     float viewDistance = length(V);
-    for (int i = 0; i < int(pointLightsQuantity); ++i){
-        vec4 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, quantityToDivide, roughness, metallic, albedo, F0);
+    for (int i = 0; i < pointLightsQuantity; ++i){
+        vec4 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N,  roughness, metallic, albedo, F0);
         directIllumination += lightInformation.rgb;
         shadows += lightInformation.a/quantityToDivide;
     }
 
+    for (int i = 0; i < spotLightsQuantity; ++i){
+        vec3 lightInformation = computeSpotLights(distanceFromCamera, spotLights[i], worldSpacePosition, V, N, roughness, metallic, albedo, F0);
+        directIllumination += lightInformation;
+    }
+
     indirectIllumination = sampleIndirectLight(shadows, metallic, roughness, albedo);
-    if(hasSkylight)
-        indirectIllumination += computeSkylightAmbient(V);
+    if (hasSkylight)
+    indirectIllumination += computeSkylightAmbient(V);
     return vec4((directIllumination * shadows + indirectIllumination) * ao + emission, alpha);
 
 }

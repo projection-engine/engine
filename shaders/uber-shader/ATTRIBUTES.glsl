@@ -1,9 +1,13 @@
 #define PI 3.14159265359
 
+#define MAX_SPOTLIGHTS 24
+#define MAX_POINTLIGHTS 24
+#define MAX_DIRECTIONAL_LIGHTS 16
+
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
-#define SEARCH_STEPS 5;
-#define DEPTH_THRESHOLD 1.2;
+#define SEARCH_STEPS 5
+#define DEPTH_THRESHOLD 1.2
 #define PI_SQUARED 6.2831853
 
 // GLOBAL
@@ -40,15 +44,19 @@ in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
 
+uniform SpotLights{
+    mat4 spotLights[MAX_SPOTLIGHTS];
+    int spotLightsQuantity;
+};
 
 uniform PointLights{
-    mat4 pointLights[24];
+    mat4 pointLights[MAX_POINTLIGHTS];
     int pointLightsQuantity;
 };
 
 uniform DirectionalLights{
-    mat4 directionalLights[16];
-    mat4 directionalLightsPOV[16];
+    mat4 directionalLights[MAX_DIRECTIONAL_LIGHTS];
+    mat4 directionalLightsPOV[MAX_DIRECTIONAL_LIGHTS];
     int directionalLightsQuantity;
     float shadowMapsQuantity;
     float shadowMapResolution;
