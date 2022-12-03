@@ -10,6 +10,9 @@ export default [
     Component.group("DIRECTION", [
         Component.array(["X", "Y", "Z"], "direction")
     ]),
+    Component.group("SHADOWS", [
+        Component.boolean("HAS_SSS", "hasSSS")
+    ]),
 
     Component.group("ATTENUATION", [
         Component.array(["DISTANCE", "DISTANCE_SQUARED"], "attenuation",   undefined, undefined, 0),

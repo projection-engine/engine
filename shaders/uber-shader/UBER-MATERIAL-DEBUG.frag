@@ -50,7 +50,7 @@ vec3 randomColor(float seed){
 
 void main(){
 
-    quadUV = gl_FragCoord.xy/buffer_resolution;
+    quadUV = gl_FragCoord.xy/bufferResolution;
     vec4 depthData = texture(scene_depth, quadUV);
     if (shadingModel != OVERDRAW)
     if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD) discard;
@@ -83,7 +83,8 @@ void main(){
             fragColor = vec4(vec3(roughness), 1.);
             break;
             case AO:
-            fragColor = vec4(vec3(texture(SSAO, quadUV).r), 1.);
+
+            fragColor = vec4(vec3(hasAmbientOcclusion ? texture(SSAO, quadUV).r : 1.), 1.);
             break;
             case POSITION:
             fragColor = vec4(vec3(worldSpacePosition), 1.);

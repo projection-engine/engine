@@ -22,6 +22,8 @@ import LightProbe from "./instances/LightProbe";
 
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 
+const boolBuffer = new Uint8Array(1)
+const singleFloatBuffer = new Float32Array(1)
 export default class Engine {
     static #development = false
 
@@ -96,7 +98,6 @@ export default class Engine {
 
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
-        SceneRenderer.initialize()
 
         ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
         const OBS = new ResizeObserver(() => {
@@ -126,7 +127,7 @@ export default class Engine {
     }
 
 
-    static updateParams(data, physicsSteps, physicsSubSteps) {
+    static updateParams(data, SSGISettings, SSRSettings, SSSSettings, SSAOSettings, physicsSteps, physicsSubSteps) {
         Engine.params = data
 
         if (typeof physicsSteps === "number")
@@ -134,33 +135,49 @@ export default class Engine {
         if (typeof physicsSteps === "number")
             PhysicsPass.simulationStep = physicsSteps
 
-        SSGI.blurSamples = data.SSGI.blurSamples || 3
-        SSGI.ssgiColorGrading[0] = data.SSGI.gamma || 2.2
-        SSGI.ssgiColorGrading[1] = data.SSGI.exposure || 1
+        SSGI.blurSamples = SSGISettings.blurSamples || 3
+        SSGI.ssgiColorGrading[0] = SSGISettings.gamma || 2.2
+        SSGI.ssgiColorGrading[1] = SSGISettings.exposure || 1
 
-        SSGI.rayMarchSettings[0] = data.SSGI.stepSize || 1
-        SSGI.rayMarchSettings[1] = data.SSGI.maxSteps || 4
-        SSGI.rayMarchSettings[2] = data.SSGI.strength || 1
+        SSGI.rayMarchSettings[0] = SSGISettings.stepSize || 1
+        SSGI.rayMarchSettings[1] = SSGISettings.maxSteps || 4
+        SSGI.rayMarchSettings[2] = SSGISettings.strength || 1
 
+        const sceneUBO = SceneRenderer.UBO
 
-        SceneRenderer.rayMarchSettings[0] = data.SSR.maxSteps || 4
-        SceneRenderer.rayMarchSettings[1] = data.SSR.falloff || 3
-        SceneRenderer.rayMarchSettings[2] = data.SSR.minRayStep || .1
-        SceneRenderer.rayMarchSettings[3] = data.SSR.stepSize || 1
+        sceneUBO.bind()
+        singleFloatBuffer[0] = SSRSettings.falloff || 3
+        sceneUBO.updateData("SSRFalloff", singleFloatBuffer)
+        singleFloatBuffer[0] = SSRSettings.stepSize || 1
+        sceneUBO.updateData("stepSizeSSR", singleFloatBuffer)
+        singleFloatBuffer[0] = SSSSettings.maxDistance || .05
+        sceneUBO.updateData("maxSSSDistance", singleFloatBuffer)
+        singleFloatBuffer[0] = SSSSettings.depthThickness || .05
+        sceneUBO.updateData("SSSDepthThickness", singleFloatBuffer)
+        singleFloatBuffer[0] = SSSSettings.edgeFalloff || 12
+        sceneUBO.updateData("SSSEdgeAttenuation", singleFloatBuffer)
+        singleFloatBuffer[0] = SSRSettings.maxSteps || 4
+        sceneUBO.updateData("maxStepsSSR", singleFloatBuffer)
+        console.trace(SSSSettings)
+        boolBuffer[0] = SSSSettings.maxSteps || 24
+        sceneUBO.updateData("maxStepsSSS", boolBuffer)
+        boolBuffer[0] = SSAOSettings.enabled ? 1 : 0
+        sceneUBO.updateData("hasAmbientOcclusion", boolBuffer)
+        sceneUBO.unbind()
 
+        SSGI.enabled = SSGISettings.enabled
 
-        SSGI.enabled = data.SSGI.enabled
-
-        SSAO.settings = [data.SSAO.radius || .25, data.SSAO.power || 1, data.SSAO.bias || .1, data.SSAO.falloffDistance || 1000]
-        SSAO.blurSamples = data.SSAO.blurSamples || 2
-        SSAO.maxSamples = data.SSAO.maxSamples || 64
-        SSAO.enabled = data.SSAO.enabled
+        SSAO.settings = [SSAOSettings.radius || .25, SSAOSettings.power || 1, SSAOSettings.bias || .1, SSAOSettings.falloffDistance || 1000]
+        SSAO.blurSamples = SSAOSettings.blurSamples || 2
+        SSAO.maxSamples = SSAOSettings.maxSamples || 64
+        SSAO.enabled = SSAOSettings.enabled
 
         MotionBlur.velocityScale = data.mbVelocityScale
         MotionBlur.maxSamples = data.mbSamples
 
         FrameComposition.UBO.bind()
-        FrameComposition.UBO.updateData("fxaaEnabled", new Uint8Array([data.fxaa ? 1 : 0]))
+        boolBuffer[0] = data.fxaa ? 1 : 0
+        FrameComposition.UBO.updateData("fxaaEnabled", boolBuffer)
         FrameComposition.UBO.updateData("FXAASpanMax", new Float32Array([data.FXAASpanMax || 8]))
         FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
         FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))

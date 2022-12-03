@@ -36,7 +36,7 @@ float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, sa
 }
 
 
-vec4 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 pointLight, vec3 worldPosition, float viewDistance, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0) {
+vec3 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 pointLight, vec3 worldPosition, float viewDistance, vec3 V, vec3 N, float roughness, float metallic, vec3 albedo, vec3 F0) {
     vec3 lightPosition = vec3(pointLight[0][0], pointLight[0][1], pointLight[0][2]);
 
     float shadows = 1.;
@@ -57,7 +57,7 @@ vec4 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 p
         intensity = clamp(mix(1., 0., (distanceFromFrag - cutoff)/(outerCutoff - cutoff)), 0., 1.);
 
         if (distanceFromFrag > outerCutoff)
-        return vec4(vec3(0.), 1.);
+        return vec3(0.);
 
         float attFactor = intensity / (1. + (attenuationPLight.x * distanceFromFrag) + (attenuationPLight.y * pow(distanceFromFrag, 2.)));
 
@@ -76,9 +76,9 @@ vec4 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 p
         vec3 specular  = numerator / denominator;
         float NdotL = max(dot(N, L), 0.0);
 
-        return vec4((kD * albedo / PI + specular) * lightColor * NdotL * attFactor, shadows);
+        return vec3(shadows * (kD * albedo / PI + specular) * lightColor * NdotL * attFactor);
     }
-    return vec4(vec3(0.), 1.);
+    return vec3(0.);
 }
 
 

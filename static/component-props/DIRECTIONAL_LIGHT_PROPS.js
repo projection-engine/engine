@@ -19,6 +19,7 @@ export default [
         Component.number("BIAS", "shadowBias", undefined, undefined, .00001),
         Component.number("PCF_SAMPLES", "pcfSamples", 10, 1, 1, false, false, v => !v.shadowMap),
         Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, undefined, false, false, v => !v.shadowMap),
+        Component.boolean("HAS_SSS", "hasSSS")
 
     ]),
 

@@ -48,10 +48,19 @@ export default class GPU {
 
     static updateSkylight() {
         const entity = GPU.__activeSkylightEntity
-        if(!GPU.skylightProbe)
+        if(!GPU.skylightProbe) {
+            SceneRenderer.UBO.bind()
+            SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([0]))
+            SceneRenderer.UBO.unbind()
             return
+        }
         if (entity) {
+
             const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
+            SceneRenderer.UBO.bind()
+            SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([1]))
+            SceneRenderer.UBO.updateData("skylightSamples", skylight.mipmaps)
+            SceneRenderer.UBO.unbind()
             GPU.skylightProbe.resolution = skylight.resolution
             const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
             GPU.skylightProbe.draw((yaw, pitch, projection, index) => {
@@ -95,14 +104,16 @@ export default class GPU {
 
         CameraAPI.initialize()
         LightsAPI.initialize()
-        TransformationPass.initialize()
-        TerrainGenerator.initialize()
-        ImageProcessor.initialize()
-        Material.initialize()
 
         initializeFrameBuffers()
         initializeStaticMeshes()
         initializeShaders()
+
+        SceneRenderer.initialize()
+        TransformationPass.initialize()
+        TerrainGenerator.initialize()
+        ImageProcessor.initialize()
+        Material.initialize()
 
         CubeMapAPI.initialize()
         LineAPI.initialize()

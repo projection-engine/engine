@@ -54,7 +54,7 @@ export default class Framebuffer {
             precision,
             0,
             gpu.DEPTH_COMPONENT,
-            gpu.FLOAT,
+            gpu.UNSIGNED_INT,
             null,
             gpu.NEAREST,
             gpu.NEAREST,

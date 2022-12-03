@@ -14,13 +14,29 @@
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
-uniform vec4 rayMarchSettings;
-uniform vec2 buffer_resolution;
-uniform float skylight_samples;
-uniform bool hasSkylight;
-uniform bool hasAmbientOcclusion;
-uniform float elapsedTime;
 uniform vec3 cameraPosition;
+uniform float elapsedTime;
+
+uniform UberShaderSettings{
+    float SSRFalloff;
+
+    float stepSizeSSR;
+    float maxSSSDistance;
+
+    float SSSDepthThickness;
+    float SSSEdgeAttenuation;
+    float skylightSamples;
+
+    int maxStepsSSR;
+    int maxStepsSSS;
+    bool hasSkylight;
+    bool hasAmbientOcclusion;
+
+    vec2 bufferResolution;
+};
+
+
+
 
 uniform sampler2D scene_depth;
 uniform sampler2D brdf_sampler;
@@ -44,6 +60,8 @@ uniform sampler2D sampler7;
 in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
+
+
 
 uniform SpotLights{
     mat4 spotLights[MAX_SPOTLIGHTS];

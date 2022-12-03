@@ -2,10 +2,10 @@ vec3 fresnelSchlick (float cosTheta, vec3 F0, float roughness){
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow (1.0 - cosTheta, 5.0);
 }
 
-vec3 sampleIndirectLight(float shadowValue, float metallic, float roughness, vec3 albedo){
+vec3 sampleIndirectLight(bool ssrEnabled, float metallic, float roughness, vec3 albedo){
     vec3 diffuseColor = texture(SSGI, quadUV).rgb;
 
-    vec3 specularColor = ssrEnabled ? computeSSR() * shadowValue : vec3(0.);
+    vec3 specularColor = ssrEnabled ? computeSSR() : vec3(0.);
 
     if (length(diffuseColor) > 0. || length(specularColor) > 0.){
         vec3 F  = fresnelSchlick(NdotV, F0, roughness);

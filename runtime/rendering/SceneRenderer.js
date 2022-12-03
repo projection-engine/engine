@@ -9,27 +9,49 @@ import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import SHADING_MODELS from "../../static/SHADING_MODELS";
+import UBO from "../../instances/UBO";
 
-let texOffset, bufferResolution
+let texOffset
 let isDev
 let shader, uniforms
 export default class SceneRenderer {
     static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
-    static rayMarchSettings = new Float32Array([4, 3, .1, 1])
-
+    static UBO
+    
+    static initialize() {
+        if (SceneRenderer.#ready)
+            return
+        isDev = Engine.developmentMode
+        const FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
+         
+        SceneRenderer.#ready = true
+        SceneRenderer.UBO = new UBO(
+            "UberShaderSettings",
+            [
+                {type: "float", name: "SSRFalloff"},
+                {type: "float", name: "stepSizeSSR"},
+                {type: "float", name: "maxSSSDistance"},
+                {type: "float", name: "SSSDepthThickness"},
+                {type: "float", name: "SSSEdgeAttenuation"},
+                {type: "float", name: "skylightSamples"},
+                {type: "int", name: "maxStepsSSR"},
+                {type: "int", name: "maxStepsSSS"},
+                {type: "bool", name: "hasSkylight"},
+                {type: "bool", name: "hasAmbientOcclusion"},
+                {type: "vec2", name: "bufferResolution"},
+            ])
+        SceneRenderer.UBO.bind()
+        SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([FBO.width, FBO.height])) 
+        SceneRenderer.UBO.unbind()
+    }
+    
     static set shader(data) {
         shader = data
         uniforms = shader?.uniformMap
+        SceneRenderer.UBO.bindWithShader(shader.program)
     }
-
-    static initialize() {
-        isDev = Engine.developmentMode
-        const FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
-        bufferResolution = new Float32Array([FBO.width, FBO.height])
-        SceneRenderer.#ready = true
-    }
-
+    
     static draw(useCustomView, viewProjection, viewMatrix, cameraPosition) {
         if (!SceneRenderer.#ready || !shader)
             return
@@ -45,7 +67,6 @@ export default class SceneRenderer {
             gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
             gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             gpu.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
-            gpu.uniform4fv(uniforms.rayMarchSettings, SceneRenderer.rayMarchSettings)
             gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
         } else {
@@ -82,18 +103,16 @@ export default class SceneRenderer {
         gpu.activeTexture(gpu.TEXTURE6)
         gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.scene_depth, 6)
-
-        gpu.uniform1i(uniforms.hasAmbientOcclusion, SSAO.enabled ? 1 : 0)
+ 
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
-        gpu.uniform2fv(uniforms.buffer_resolution, bufferResolution)
+        
         texOffset = 7
 
         // uniform samplerCube skylight_diffuse;
         // uniform samplerCube skylight_specular;
         // uniform float skylight_samples;
 
-        if (GPU.__activeSkylightEntity !== null && !useCustomView) {
-            gpu.uniform1i(uniforms.hasSkylight, 1)
+        if (GPU.__activeSkylightEntity !== null && !useCustomView) { 
             texOffset++
             gpu.activeTexture(gpu.TEXTURE7)
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)

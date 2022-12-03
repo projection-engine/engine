@@ -10,6 +10,7 @@ export default class DirectionalLightComponent extends Component {
     fixedColor = [1, 1, 1]
     zNear = 1
     zFar = 10000
+    hasSSS = false
     lightView = mat4.create()
     lightProjection = mat4.create()
     size = 35
