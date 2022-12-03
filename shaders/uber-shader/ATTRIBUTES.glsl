@@ -26,7 +26,7 @@ uniform UberShaderSettings{
     float SSSDepthThickness;
     float SSSEdgeAttenuation;
     float skylightSamples;
-
+    float SSSDepthDelta;
     int maxStepsSSR;
     int maxStepsSSS;
     bool hasSkylight;

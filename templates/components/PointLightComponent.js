@@ -17,7 +17,7 @@ export default class PointLightComponent extends Component {
 
     _shadowMap = true
     shadowAttenuationMinDistance = 50
-
+    hasSSS = false
     get shadowMap() {
         return this._shadowMap
     }

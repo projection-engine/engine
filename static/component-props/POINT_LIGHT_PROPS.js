@@ -17,6 +17,7 @@ export default [
 
         Component.number("FAR", "zFar", undefined, undefined, .001),
         Component.number("NEAR", "zNear", undefined, undefined, .001),
+        Component.boolean("HAS_SSS", "hasSSS")
     ]),
     Component.group("ATTENUATION", [
         Component.array(["DISTANCE", "DISTANCE_SQUARED"], "attenuation",   undefined, undefined, 0),

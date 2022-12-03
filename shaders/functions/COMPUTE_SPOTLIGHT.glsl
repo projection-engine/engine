@@ -13,9 +13,10 @@ vec3 computeSpotLights (float distanceFromCamera, mat4 spotLight, vec3 worldPosi
     if (theta <= lightCutoff)
     return vec3(0.);
 
-    float occlusion =hasSSS ? screenSpaceShadows(lightPosition) : 1.;
+    float occlusion =hasSSS ? screenSpaceShadows(-lightDirection) : 1.;
+    if(occlusion < 1.) return vec3(0.);
 
-    float attFactor = occlusion / (1. + (lightAttenuation.x * distanceFromFrag) + (lightAttenuation.y * pow(distanceFromFrag, 2.)));
+    float attFactor = 1. / (1. + (lightAttenuation.x * distanceFromFrag) + (lightAttenuation.y * pow(distanceFromFrag, 2.)));
 
     vec3 H = normalize(V + L);
     float NDF = distributionGGX(N, H, roughness);

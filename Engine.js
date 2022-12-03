@@ -156,13 +156,15 @@ export default class Engine {
         sceneUBO.updateData("SSSDepthThickness", singleFloatBuffer)
         singleFloatBuffer[0] = SSSSettings.edgeFalloff || 12
         sceneUBO.updateData("SSSEdgeAttenuation", singleFloatBuffer)
+        singleFloatBuffer[0] = SSSSettings.depthDelta || 0
+        sceneUBO.updateData("SSSDepthDelta", singleFloatBuffer)
         singleFloatBuffer[0] = SSRSettings.maxSteps || 4
         sceneUBO.updateData("maxStepsSSR", singleFloatBuffer)
-        console.trace(SSSSettings)
         boolBuffer[0] = SSSSettings.maxSteps || 24
         sceneUBO.updateData("maxStepsSSS", boolBuffer)
         boolBuffer[0] = SSAOSettings.enabled ? 1 : 0
         sceneUBO.updateData("hasAmbientOcclusion", boolBuffer)
+
         sceneUBO.unbind()
 
         SSGI.enabled = SSGISettings.enabled

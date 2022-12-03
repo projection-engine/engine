@@ -35,6 +35,8 @@ export default class SceneRenderer {
                 {type: "float", name: "SSSDepthThickness"},
                 {type: "float", name: "SSSEdgeAttenuation"},
                 {type: "float", name: "skylightSamples"},
+                {type: "float", name: "SSSDepthDelta"},
+
                 {type: "int", name: "maxStepsSSR"},
                 {type: "int", name: "maxStepsSSS"},
                 {type: "bool", name: "hasSkylight"},
