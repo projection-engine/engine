@@ -68,7 +68,6 @@ export default class Material {
         return Material.#uberShader
     }
 
-    #ready = false
     #id = ""
     #uniformValues = {}
     #uniforms = []
@@ -80,9 +79,6 @@ export default class Material {
     isSky = false
     doubleSided = false
 
-    depthMask = true
-    cullFace = true
-    noDepthTest
     bindID = -1
 
     constructor(id) {
@@ -93,9 +89,6 @@ export default class Material {
         return this.#id
     }
 
-    get ready() {
-        return this.#ready
-    }
 
     get uniforms() {
         return this.#uniforms

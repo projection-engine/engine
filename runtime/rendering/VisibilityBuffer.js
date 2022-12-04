@@ -34,7 +34,6 @@ export default class VisibilityBuffer {
         const toRender = Engine.data.meshes
         const size = toRender.length
         const meshes = GPU.meshes
-        const materials = GPU.materials
         shader.bind()
 
         gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
@@ -55,8 +54,8 @@ export default class VisibilityBuffer {
             if (!entity.active || !mesh)
                 continue
             if (entity.__materialID) {
-                const material = materials.get(entity.__materialID)
-                entity.__materialRef = material
+                const material = entity.__materialRef
+
                 if (material) {
                     if (material.isSky)
                         continue

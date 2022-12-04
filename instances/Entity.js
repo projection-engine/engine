@@ -19,7 +19,8 @@ export default class Entity extends Movable {
     parent
     pickID = [-1, -1, -1]
     instancingGroupID
-
+    __materialRef
+    __meshRef
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
         this.id = id

@@ -7,26 +7,31 @@ export default class MeshComponent extends Component {
     name = "MESH"
     _props = MESH_PROPS
 
+
     castsShadows = true
     _meshID
     _materialID
-    __mapSource = {
-        type: undefined,
-        index: undefined
+
+    __texturesInUse = {}
+    __mappedUniforms = {}
+    uniformsToOverride = []
+
+    set materialUniforms(data) {
+        this.uniformsToOverride = data
+        console.trace(data)
+        MaterialAPI.mapUniforms(data, this.__texturesInUse, this.__mappedUniforms).catch(err => console.error(err))
     }
-    materialUniforms = []
+
+    get materialUniforms() {
+        return this.uniformsToOverride
+    }
+
     contributeToProbes = true
     overrideMaterialUniforms = false
 
     set meshID(data) {
-        if (this._meshID === data)
-            return
         this._meshID = data
-        if (!data && typeof this.__mapSource.index === "number") {
-            MaterialAPI[this.__mapSource.type].splice(this.__mapSource.index, 1)
-            this.__mapSource = {}
-        } else if (data)
-            MaterialAPI.updateMap(this)
+        MaterialAPI.updateMap(this)
     }
 
     get meshID() {
@@ -34,15 +39,16 @@ export default class MeshComponent extends Component {
     }
 
     set materialID(data) {
-        if (this._materialID === data)
-            return
         this._materialID = data
-
-        if (!data && typeof this.__mapSource.index === "number") {
-            MaterialAPI[this.__mapSource.type].splice(this.__mapSource.index, 1)
-            this.__mapSource = {}
-        } else if (data)
-            MaterialAPI.updateMap(this)
+        if (data) {
+            const previous = MaterialAPI.entityMaterial.get(this._materialID) || {}
+            previous[this.__entity.id] = this.__entity
+            MaterialAPI.entityMaterial.set(this._materialID, previous)
+        } else if (this.__entity.__materialRef) {
+            const old = MaterialAPI.entityMaterial.get(this.__entity.__materialRef.id)
+            delete old[this.__entity.id]
+        }
+        MaterialAPI.updateMap(this)
     }
 
     get materialID() {

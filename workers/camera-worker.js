@@ -17,7 +17,7 @@ let nBuffer
 class CameraWorker {
     static #translationBuffer
     static #rotationBuffer
-
+    static isOrtho = false
     static #notificationBuffers
     static #position
     static #viewMatrix
@@ -30,7 +30,7 @@ class CameraWorker {
     static initialized = false
     static #projectionBuffer
     static #skyboxProjectionMatrix
-    static frameID
+
     static currentTranslation = TransformationAPI.vec3.create()
     static currentRotation = TransformationAPI.quat.create()
     static UBOBuffer
@@ -80,19 +80,23 @@ class CameraWorker {
         const isOrthographic = nBuffer[2] === ORTHOGRAPHIC
 
         const buffer = CameraWorker.#projectionBuffer
-        const orthoSize = buffer[4]
+
+
         const aR = buffer[3]
         const fov = buffer[2]
         const zFar = buffer[0]
         const zNear = buffer[1]
 
-        if (isOrthographic)
-            mat4.ortho(CameraWorker.#projectionMatrix, -orthoSize, orthoSize, -orthoSize / aR, orthoSize / aR, zNear, zFar)
-        else
+        CameraWorker.isOrtho = isOrthographic
+        if (isOrthographic) {
+            const distanceFromCamera = vec3.length(CameraWorker.#position)
+            mat4.ortho(CameraWorker.#projectionMatrix, -distanceFromCamera, distanceFromCamera, -distanceFromCamera / aR, distanceFromCamera / aR, zNear, zFar)
+        } else {
             mat4.perspective(CameraWorker.#projectionMatrix, fov, aR, zNear, zFar)
+            mat4.perspective(CameraWorker.#skyboxProjectionMatrix, fov, aR, .1, 1000)
+        }
 
         mat4.invert(CameraWorker.#invProjectionMatrix, CameraWorker.#projectionMatrix)
-        mat4.perspective(CameraWorker.#skyboxProjectionMatrix, fov, aR, .1, 1000)
         CameraWorker.updateVP()
         CameraWorker.updateUBO()
     }
@@ -162,7 +166,7 @@ class CameraWorker {
             nBuffer[0] = 0
             nBuffer[3] = 1
         }
-        if (nBuffer[1] === 1) {
+        if (nBuffer[1] === 1 || CameraWorker.isOrtho) {
             CameraWorker.#updateProjection()
             nBuffer[1] = 0
             nBuffer[3] = 1
@@ -172,7 +176,7 @@ class CameraWorker {
 }
 
 self.onmessage = (event) => {
-    if(!CameraWorker.initialized)
+    if (!CameraWorker.initialized)
         CameraWorker.initialize(...event.data)
     CameraWorker.execute()
 }

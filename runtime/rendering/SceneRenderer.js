@@ -10,6 +10,7 @@ import CameraAPI from "../../lib/utils/CameraAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import SHADING_MODELS from "../../static/SHADING_MODELS";
 import UBO from "../../instances/UBO";
+import COMPONENTS from "../../static/COMPONENTS";
 
 let texOffset
 let isDev
@@ -18,13 +19,13 @@ export default class SceneRenderer {
     static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
     static UBO
-    
+
     static initialize() {
         if (SceneRenderer.#ready)
             return
         isDev = Engine.developmentMode
         const FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
-         
+
         SceneRenderer.#ready = true
         SceneRenderer.UBO = new UBO(
             "UberShaderSettings",
@@ -44,16 +45,16 @@ export default class SceneRenderer {
                 {type: "vec2", name: "bufferResolution"},
             ])
         SceneRenderer.UBO.bind()
-        SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([FBO.width, FBO.height])) 
+        SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([FBO.width, FBO.height]))
         SceneRenderer.UBO.unbind()
     }
-    
+
     static set shader(data) {
         shader = data
         uniforms = shader?.uniformMap
         SceneRenderer.UBO.bindWithShader(shader.program)
     }
-    
+
     static draw(useCustomView, viewProjection, viewMatrix, cameraPosition) {
         if (!SceneRenderer.#ready || !shader)
             return
@@ -105,16 +106,16 @@ export default class SceneRenderer {
         gpu.activeTexture(gpu.TEXTURE6)
         gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
         gpu.uniform1i(uniforms.scene_depth, 6)
- 
+
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
-        
+
         texOffset = 7
 
         // uniform samplerCube skylight_diffuse;
         // uniform samplerCube skylight_specular;
         // uniform float skylight_samples;
 
-        if (GPU.__activeSkylightEntity !== null && !useCustomView) { 
+        if (GPU.__activeSkylightEntity !== null && !useCustomView) {
             texOffset++
             gpu.activeTexture(gpu.TEXTURE7)
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
@@ -127,9 +128,9 @@ export default class SceneRenderer {
         gpu.depthMask(true)
 
         for (let i = 0; i < size; i++) {
-
             const entity = entities[i]
             const mesh = entity.__meshRef
+
             if (!entity.active || !mesh)
                 continue
 
@@ -137,7 +138,8 @@ export default class SceneRenderer {
                 gpu.uniform3fv(uniforms.entityID, entity.pickID)
 
             const material = entity.__materialRef
-            if (material) {
+
+            if (material !== undefined) {
                 if (material.doubleSided) {
                     gpu.disable(gpu.CULL_FACE)
                     isDoubleSided = true
@@ -145,26 +147,20 @@ export default class SceneRenderer {
                     gpu.enable(gpu.CULL_FACE)
                     isDoubleSided = false
                 }
-
-                if (material.isSky) {
-                    gpu.uniform1i(uniforms.isSky, 1)
-                    gpu.disable(gpu.DEPTH_TEST)
-                    isSky = true
-                } else if (isSky) {
-                    gpu.uniform1i(uniforms.isSky, 0)
-                    gpu.enable(gpu.DEPTH_TEST)
-                    isSky = false
-                }
-
+                isSky = material.isSky
                 gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
                 gpu.uniform1i(uniforms.materialID, material.bindID)
+                const component = entity.components.get(COMPONENTS.MESH)
+                const overrideUniforms = component.overrideMaterialUniforms
 
-                const data = material.uniformValues, toBind = material.uniforms
-                for (let j = 0; j < toBind.length; j++) {
-                    const current = toBind[j]
-                    const dataAttribute = data[current.key]
-                    Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
-                }
+                const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues,
+                    toBind = material.uniforms
+                if (data)
+                    for (let j = 0; j < toBind.length; j++) {
+                        const current = toBind[j]
+                        const dataAttribute = data[current.key]
+                        Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+                    }
 
                 gpu.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
 
@@ -175,17 +171,22 @@ export default class SceneRenderer {
                     gpu.enable(gpu.CULL_FACE)
                     isDoubleSided = false
                 }
-
-                if (isSky) {
-                    gpu.uniform1i(uniforms.isSky, 0)
-                    gpu.enable(gpu.DEPTH_TEST)
-                    isSky = false
-                }
-
+                isSky = false
                 gpu.uniform1i(uniforms.ssrEnabled, 0)
                 gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
             }
+
+            if (isSky) {
+                gpu.uniform1i(uniforms.isSky, 1)
+                gpu.disable(gpu.DEPTH_TEST)
+                gpu.depthMask(false)
+            } else {
+                gpu.uniform1i(uniforms.isSky, 0)
+                gpu.enable(gpu.DEPTH_TEST)
+                gpu.depthMask(true)
+            }
+
 
             if (useCustomView) {
                 gpu.uniform1i(uniforms.noDepthChecking, 1)
