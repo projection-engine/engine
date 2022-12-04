@@ -90,7 +90,7 @@ export default class Entity extends Movable {
         this.components.delete(KEY)
 
         if (hasComponent && QueryAPI.getEntityByID(this.id) != null)
-            EntityAPI.registerEntityComponents(this)
+            EntityAPI.registerEntityComponents(this, KEY)
     }
 
 

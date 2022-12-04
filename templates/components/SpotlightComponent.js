@@ -9,6 +9,7 @@ export default class SpotlightComponent extends Component {
     radius = 90
     intensity = 1
     attenuation = [0, 0]
+    cutoff = 100
     hasSSS = false
     get fixedColor() {
         return [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]

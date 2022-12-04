@@ -52,6 +52,7 @@ export default class SceneRenderer {
     static set shader(data) {
         shader = data
         uniforms = shader?.uniformMap
+        window.lightPosition = new Float32Array([0,  10, 0])
         SceneRenderer.UBO.bindWithShader(shader.program)
     }
 
@@ -108,6 +109,7 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.scene_depth, 6)
 
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
+
 
         texOffset = 7
 

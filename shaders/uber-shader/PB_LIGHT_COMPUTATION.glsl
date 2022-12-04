@@ -8,6 +8,7 @@ vec3 albedo= vec3(.5);
 vec3 N = vec3(0.);
 vec3 emission = vec3(0.);
 bool flatShading = false;
+vec3 albedoOverPI;
 // ------------------ ATTRIBUTES TO FILL
 
 
@@ -38,6 +39,7 @@ vec3 computeSSR(){
     return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.);
 }
 
+
 //import(SSS)
 
 //import(brdf)
@@ -50,7 +52,7 @@ vec3 computeSSR(){
 
 vec3 computeSkylightAmbient(vec3 V){
     vec3 specular = vec3(0.);
-    vec3 F  = fresnelSchlick(NdotV, F0, roughness);
+    vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
     vec3 kD = (1.0 - F) * (1.0 - metallic);
     vec3 prefilteredColor = textureLod(skylight_specular, reflect(-V, N), 0.).rgb;
 
@@ -60,11 +62,20 @@ vec3 computeSkylightAmbient(vec3 V){
     return specular;//diffuse + specular;
 }
 
+//vec3 computeSphereLight(vec3 lightPosition, vec3 lightColor, vec3 V, vec3 N, float roughness, float metallic,  vec3 F0){
+//    vec3 L = lightPosition - worldSpacePosition;
+//    vec3 R = reflect(-V, N);
+//    vec3 centerToRay = dot(L, R) * R - L;
+//    vec3 closestPoint = L + centerToRay * clamp(sphereRadius / length(centerToRay), 0., 1.);
+//    vec3 newLightVector = closestPoint - worldSpacePosition;
+//    return computeBRDF(newLightVector, lightColor, V, N, roughness, metallic, F0);
+//}
+
 
 vec4 pbLightComputation() {
     if (flatShading) return vec4(albedo + emission, alpha);
     viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
-
+    albedoOverPI = albedo/PI;
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
     vec3 V = cameraPosition - worldSpacePosition;
@@ -77,23 +88,24 @@ vec4 pbLightComputation() {
 
     float quantityToDivide = float(directionalLightsQuantity) + float(pointLightsQuantity);
     for (int i = 0; i < directionalLightsQuantity; i++){
-        vec3 lightInformation = computeDirectionalLight(distanceFromCamera, shadow_atlas, shadowMapsQuantity, shadowMapResolution, directionalLightsPOV[i], directionalLights[i], worldSpacePosition, V, F0, roughness, metallic, N, albedo);
+        vec3 lightInformation = computeDirectionalLight(distanceFromCamera, directionalLightsPOV[i], directionalLights[i], V, F0, roughness, metallic, N);
         directIllumination += lightInformation;
-
     }
 
     float viewDistance = length(V);
     for (int i = 0; i < pointLightsQuantity; ++i){
-        vec3 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, roughness, metallic, albedo, F0);
+        vec3 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, roughness, metallic, F0);
         directIllumination += lightInformation;
     }
 
     for (int i = 0; i < spotLightsQuantity; ++i){
-        vec3 lightInformation = computeSpotLights(distanceFromCamera, spotLights[i], worldSpacePosition, V, N, roughness, metallic, albedo, F0);
+        vec3 lightInformation = computeSpotLights(distanceFromCamera, spotLights[i], worldSpacePosition, V, N, roughness, metallic, F0);
         directIllumination += lightInformation;
     }
 
-    indirectIllumination = sampleIndirectLight(ssrEnabled, metallic, roughness, albedo);
+//    directIllumination += computeSphereLight(sLightPos, vec3(1.), V, N, roughness, metallic, F0);
+
+    indirectIllumination = sampleIndirectLight(ssrEnabled, metallic, roughness);
     if (hasSkylight)
     indirectIllumination += computeSkylightAmbient(V);
     return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);

@@ -17,7 +17,7 @@ float screenSpaceShadows(vec3 lightDirection){
     vec3 rayDirection = vec3(viewMatrix * vec4(lightDirection, 0.));
     vec3 rayStepIncrement = rayDirection * stepSize;
     vec4 rayUV = vec4(0.);
-    vec3 rayPosition = getViewPosition(quadUV, quadUV);
+    vec3 rayPosition = viewSpacePosition;
 
     rayPosition += rayStepIncrement * interleavedGradientNoise(quadUV);
 

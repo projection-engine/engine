@@ -16,6 +16,9 @@ export default [
 
     Component.group("ATTENUATION", [
         Component.array(["DISTANCE", "DISTANCE_SQUARED"], "attenuation",   undefined, undefined, 0),
-        Component.number("CUTOFF", "radius", undefined, 1, .01),
     ]),
+    Component.group("CUTOFF", [
+        Component.number("RADIUS", "radius", 180, 1, .01),
+        Component.number("CUTOFF_DISTANCE", "cutoff", 100, 1, .01),
+    ])
 ]

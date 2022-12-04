@@ -56,35 +56,21 @@ float directionalLightShadows(float distanceFromCamera, float shadowFalloffDista
 
 
 
-vec3 computeDirectionalLight(float distanceFromCamera, sampler2D shadowMap, float lightsPerShadowAtlas, float shadowAtlasResolution, mat4 lightMatrix, mat4 lightData, vec3 worldPosition, vec3 viewDirection, vec3 F0, float roughness, float metallic, vec3 surfaceNormal, vec3 albedo){
+vec3 computeDirectionalLight(float distanceFromCamera, mat4 lightMatrix, mat4 lightData, vec3 V, vec3 F0, float roughness, float metallic, vec3 N){
     vec3 lightDirection =  vec3(lightData[0][0], lightData[0][1], lightData[0][2]);
     vec3 lightColor =  vec3(lightData[1][0], lightData[1][1], lightData[1][2]);
     bool hasSSS = lightData[3][2] == 1.;
     float shadows = 1.;
-    if (lightData[2][2] > 0.){
-        vec4 fragPosLightSpace  = lightMatrix * vec4(worldPosition, 1.0);
+    bool hasShadowMap = lightData[2][2] > 0.;
+
+    if (hasShadowMap){
+        vec4 fragPosLightSpace  = lightMatrix * vec4(worldSpacePosition, 1.0);
         vec2 atlasFace = vec2(lightData[2][0], lightData[2][1]);
-
-        shadows = directionalLightShadows(distanceFromCamera, lightData[3][1], lightData[3][0], fragPosLightSpace, atlasFace, shadowMap, lightsPerShadowAtlas, shadowAtlasResolution, lightData[2][2]);
+        shadows = directionalLightShadows(distanceFromCamera, lightData[3][1], lightData[3][0], fragPosLightSpace, atlasFace, shadow_atlas, shadowMapsQuantity, shadowMapResolution, lightData[2][2]);
     }
+    if (shadows < 1.) return vec3(0.);
     float occlusion = hasSSS ? screenSpaceShadows(lightDirection) : 1.;
-    if (shadows > 0. && occlusion > 0.){
-        lightDirection = normalize(lightDirection);
-        vec3 H = normalize(viewDirection + lightDirection);
-        float NDF = distributionGGX(surfaceNormal, H, roughness);
-        float G   = geometrySmith(surfaceNormal, viewDirection, lightDirection, roughness);
-        vec3 F    = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0, roughness);
-        vec3 kD = vec3(1.0) - F;
-        kD *= 1.0 - metallic;
+    if (occlusion < 1.) return vec3(0.);
 
-
-        vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(surfaceNormal, viewDirection), 0.0) * max(dot(surfaceNormal, lightDirection), 0.0) + 0.0001;
-        vec3 specular     = numerator / denominator;
-
-        float NdotL = max(dot(surfaceNormal, lightDirection), 0.0);
-
-        return vec3(shadows * (kD * albedo / PI + specular) * lightColor * NdotL);
-    }
-    return vec3(0.);
+    return computeBRDF(lightDirection, lightColor, V, N, roughness, metallic, F0);
 }
