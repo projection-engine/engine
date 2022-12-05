@@ -37,6 +37,8 @@ export default class VisibilityBuffer {
         shader.bind()
 
         gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
+        gpu.uniformMatrix4fv(uniforms.previousViewProjection, false, CameraAPI.previousViewProjectionMatrix)
+
         fbo.startMapping()
         Mesh.finishIfUsed()
 

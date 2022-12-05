@@ -1,7 +1,11 @@
 import Component from "../../templates/components/Component";
 
 export default  [
-    Component.number("FOV", "fov", 150, 10),
+    Component.group("VIEW_CLIPPING", [
+        Component.number("FOV", "fov", 150, 10),
+        Component.number("FAR", "zFar", undefined,0, .01),
+        Component.number("NEAR", "zNear", undefined,0, .01),
+    ]),
     Component.group("MOTION_BLUR", [
         Component.boolean("ENABLED", "motionBlurEnabled"),
     ]),
@@ -15,10 +19,7 @@ export default  [
         Component.number("VALUE", "aspectRatio", undefined, undefined, undefined, false, true, "dynamicAspectRatio")
     ]),
 
-    Component.group("VIEW_PLANES", [
-        Component.number("FAR", "zFar", undefined,0, .01),
-        Component.number("NEAR", "zNear", undefined,0, .01),
-    ]),
+
     Component.group("VIGNETTE", [
         Component.boolean("ENABLED", "vignette"),
         Component.number("STRENGTH", "vignetteStrength", undefined,0, .0001),

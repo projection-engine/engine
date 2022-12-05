@@ -53,7 +53,7 @@ void main(){
     quadUV = gl_FragCoord.xy/bufferResolution;
     vec4 depthData = texture(scene_depth, quadUV);
     if (shadingModel != OVERDRAW)
-    if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD) discard;
+    if (!noDepthChecking &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD || (isSky && depthData.r > 0.)) discard;
 
     //--MATERIAL_SELECTION--
 

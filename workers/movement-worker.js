@@ -12,7 +12,6 @@ class MovementPass {
     static controlBuffers
     static #initialized = false
     static workerSender
-    static frameID
 
     static initialize(controlBuffers, workerSender) {
         if (MovementPass.#initialized)
@@ -21,11 +20,7 @@ class MovementPass {
         MovementPass.controlBuffers = controlBuffers
         MovementPass.workerSender = workerSender
         MovementPass.#initialized = true
-        const callback = () => {
-            MovementPass.execute()
-            MovementPass.frameID = requestAnimationFrame(callback)
-        }
-        MovementPass.frameID = requestAnimationFrame(callback)
+
     }
 
     static execute() {
@@ -80,14 +75,12 @@ class MovementPass {
         entity.absoluteTranslation[0] = entity.matrix[12]
         entity.absoluteTranslation[1] = entity.matrix[13]
         entity.absoluteTranslation[2] = entity.matrix[14]
-
-        if (entity.instancingGroupID)
-            MovementPass.workerSender.postMessage(entity.instancingGroupID)
     }
 }
 
 
 self.onmessage = (event) => {
+    if(event.data){
     const {type, payload} = event.data
     switch (type) {
         case WORKER_MESSAGES.INITIALIZE:
@@ -102,4 +95,7 @@ self.onmessage = (event) => {
         default:
             break
     }
+    }
+    else
+        MovementPass.execute()
 }

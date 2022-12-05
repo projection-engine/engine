@@ -28,7 +28,7 @@ export default class Loop {
 
     static #afterDrawing = () => null
 
-    static linkToExecutionPipeline(before, after) {
+    static linkToExecutionPipeline(after, before) {
         if (typeof before === "function") {
             Loop.#beforeDrawing = before
         } else
@@ -64,13 +64,11 @@ export default class Loop {
         VisibilityBuffer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
-
-
         FBO.startMapping()
         Loop.#beforeDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
-        gpu.clear(gpu.DEPTH_BUFFER_BIT)
+
         SceneRenderer.draw()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
 
@@ -112,7 +110,6 @@ export default class Loop {
 
         FBO.startMapping()
         Loop.#beforeDrawing()
-        gpu.clear(gpu.DEPTH_BUFFER_BIT)
         SceneRenderer.draw()
         SpritePass.execute()
 
@@ -147,7 +144,7 @@ export default class Loop {
             if (transformationChanged === 1)
                 TransformationPass.hasChangeBuffer[0] = 0
 
-
+            TransformationPass.execute()
             CameraAPI.updateFrame()
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {

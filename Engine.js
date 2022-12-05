@@ -35,7 +35,6 @@ export default class Engine {
     static previousFrameSampler
 
     static entitiesMap = new Map()
-    static dataEntity = new Map()
     static queryMap = new Map()
     static UILayouts = new Map()
     static isDev = true
@@ -158,8 +157,8 @@ export default class Engine {
         sceneUBO.updateData("SSSEdgeAttenuation", singleFloatBuffer)
         singleFloatBuffer[0] = SSSSettings.depthDelta || 0
         sceneUBO.updateData("SSSDepthDelta", singleFloatBuffer)
-        singleFloatBuffer[0] = SSRSettings.maxSteps || 4
-        sceneUBO.updateData("maxStepsSSR", singleFloatBuffer)
+        boolBuffer[0] = SSRSettings.maxSteps || 4
+        sceneUBO.updateData("maxStepsSSR", boolBuffer)
         boolBuffer[0] = SSSSettings.maxSteps || 24
         sceneUBO.updateData("maxStepsSSS", boolBuffer)
         boolBuffer[0] = SSAOSettings.enabled ? 1 : 0

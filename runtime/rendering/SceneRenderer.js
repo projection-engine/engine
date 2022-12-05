@@ -141,6 +141,12 @@ export default class SceneRenderer {
 
             const material = entity.__materialRef
 
+            if(isSky){
+                isSky = false
+                gpu.enable(gpu.CULL_FACE)
+                gpu.enable(gpu.DEPTH_TEST)
+            }
+
             if (material !== undefined) {
                 if (material.doubleSided) {
                     gpu.disable(gpu.CULL_FACE)
@@ -150,6 +156,13 @@ export default class SceneRenderer {
                     isDoubleSided = false
                 }
                 isSky = material.isSky
+                gpu.uniform1i(uniforms.isSky, isSky ? 1 : 0)
+
+                if(isSky) {
+                    gpu.disable(gpu.CULL_FACE)
+                    gpu.disable(gpu.DEPTH_TEST)
+                }
+
                 gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
                 gpu.uniform1i(uniforms.materialID, material.bindID)
                 const component = entity.components.get(COMPONENTS.MESH)
@@ -173,21 +186,12 @@ export default class SceneRenderer {
                     gpu.enable(gpu.CULL_FACE)
                     isDoubleSided = false
                 }
-                isSky = false
+
                 gpu.uniform1i(uniforms.ssrEnabled, 0)
                 gpu.uniform1i(uniforms.noDepthChecking, 0)
                 gpu.uniform1i(uniforms.materialID, -1)
             }
 
-            if (isSky) {
-                gpu.uniform1i(uniforms.isSky, 1)
-                gpu.disable(gpu.DEPTH_TEST)
-                gpu.depthMask(false)
-            } else {
-                gpu.uniform1i(uniforms.isSky, 0)
-                gpu.enable(gpu.DEPTH_TEST)
-                gpu.depthMask(true)
-            }
 
 
             if (useCustomView) {

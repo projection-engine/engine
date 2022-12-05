@@ -37,7 +37,7 @@ uniform UberShaderSettings{
 
 
 
-
+uniform bool isSky;
 uniform sampler2D scene_depth;
 uniform sampler2D brdf_sampler;
 uniform sampler2D SSAO;
