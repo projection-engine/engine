@@ -28,7 +28,7 @@ export default class CameraComponent extends Component {
     gamma = 2.2
     exposure = 1
     motionBlurEnabled = true
-
+    cameraMotionBlur = false
     ortho = false
     size = 100
 }

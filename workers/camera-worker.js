@@ -25,7 +25,6 @@ class CameraWorker {
     static #invViewMatrix
     static #invProjectionMatrix
     static viewProjectionMatrix
-    static previousViewProjectionMatrix
     static #staticViewMatrix
     static initialized = false
     static #projectionBuffer
@@ -48,12 +47,11 @@ class CameraWorker {
         skyboxProjectionMatrix,
         projectionBuffer,
         viewProjectionMatrix,
-        previousViewProjectionMatrix,
         UBOBuffer
     ) {
         if (CameraWorker.initialized)
             return
-        CameraWorker.previousViewProjectionMatrix = previousViewProjectionMatrix
+
         CameraWorker.viewProjectionMatrix = viewProjectionMatrix
         CameraWorker.#projectionBuffer = projectionBuffer
         CameraWorker.initialized = true
@@ -71,9 +69,7 @@ class CameraWorker {
         TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.#rotationBuffer)
         CameraWorker.UBOBuffer = UBOBuffer
 
-
-        CameraWorker.updateVP()
-
+        mat4.multiply(CameraWorker.viewProjectionMatrix, CameraWorker.#projectionMatrix, CameraWorker.#viewMatrix)
     }
 
     static #updateProjection() {
@@ -97,7 +93,7 @@ class CameraWorker {
         }
 
         mat4.invert(CameraWorker.#invProjectionMatrix, CameraWorker.#projectionMatrix)
-        CameraWorker.updateVP()
+        mat4.multiply(CameraWorker.viewProjectionMatrix, CameraWorker.#projectionMatrix, CameraWorker.#viewMatrix)
         CameraWorker.updateUBO()
     }
 
@@ -107,10 +103,7 @@ class CameraWorker {
         return matrix
     }
 
-    static updateVP() {
-        mat4.copy(CameraWorker.previousViewProjectionMatrix, CameraWorker.viewProjectionMatrix)
-        mat4.multiply(CameraWorker.viewProjectionMatrix, CameraWorker.#projectionMatrix, CameraWorker.#viewMatrix)
-    }
+
 
     static #updateView() {
         mat4.fromRotationTranslation(CameraWorker.#invViewMatrix, CameraWorker.currentRotation, CameraWorker.currentTranslation)
@@ -120,7 +113,7 @@ class CameraWorker {
         CameraWorker.#position[1] = m[13]
         CameraWorker.#position[2] = m[14]
 
-        CameraWorker.updateVP()
+        mat4.multiply(CameraWorker.viewProjectionMatrix, CameraWorker.#projectionMatrix, CameraWorker.#viewMatrix)
         CameraWorker.updateUBO()
         CameraWorker.#updateStaticViewMatrix()
     }
@@ -160,6 +153,7 @@ class CameraWorker {
                 nBuffer[0] = 0
             }
         }
+
         if (nBuffer[0] === 1) {
             needsUpdate = true
             CameraWorker.#updateView()

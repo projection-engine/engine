@@ -6,8 +6,10 @@ import Mesh from "../../instances/Mesh";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import TransformationPass from "../misc/TransformationPass";
 import SSAO from "./SSAO";
+import {mat4} from "gl-matrix";
 
 let shader, uniforms, fbo
+let viewProjection, previousViewProjection
 export default class VisibilityBuffer {
     static depthSampler
     static entityIDSampler
@@ -24,6 +26,8 @@ export default class VisibilityBuffer {
         VisibilityBuffer.entityIDSampler = fbo.colors[1]
         VisibilityBuffer.velocitySampler = fbo.colors[2]
 
+        viewProjection = CameraAPI.viewProjectionMatrix
+        previousViewProjection = CameraAPI.previousViewProjectionMatrix
     }
 
     static execute() {
@@ -36,8 +40,10 @@ export default class VisibilityBuffer {
         const meshes = GPU.meshes
         shader.bind()
 
-        gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
-        gpu.uniformMatrix4fv(uniforms.previousViewProjection, false, CameraAPI.previousViewProjectionMatrix)
+        gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
+        gpu.uniformMatrix4fv(uniforms.previousViewProjection, false, CameraAPI.metadata.cameraMotionBlur ? previousViewProjection : viewProjection)
+
+        mat4.copy(previousViewProjection, viewProjection)
 
         fbo.startMapping()
         Mesh.finishIfUsed()

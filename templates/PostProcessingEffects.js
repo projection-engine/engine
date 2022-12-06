@@ -26,6 +26,8 @@ export default class PostProcessingEffects {
     _distortion = false
     _distortionStrength = 1
 
+    cameraMotionBlur = false
+
     get vignetteStrength() {
         return this._vignetteStrength
     }

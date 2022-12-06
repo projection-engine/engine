@@ -7,7 +7,9 @@ export default  [
         Component.number("NEAR", "zNear", undefined,0, .01),
     ]),
     Component.group("MOTION_BLUR", [
-        Component.boolean("ENABLED", "motionBlurEnabled"),
+        Component.boolean("PER_OBJECTS", "motionBlurEnabled"),
+        Component.boolean("WORLD", "cameraMotionBlur"),
+
     ]),
     Component.group("ORTHO_PROJECTION", [
         Component.boolean("ENABLED", "ortho"),
