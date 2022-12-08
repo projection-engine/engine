@@ -83,11 +83,12 @@ vec4 pbLightComputation() {
     float distanceFromCamera = length(V);
     V = normalize(V);
     float ao = hasAmbientOcclusion ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
+
     float NdotV = max(dot(N, V), 0.000001);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
+
     F0 = mix(F0, albedo, metallic);
 
-    float quantityToDivide = float(directionalLightsQuantity) + float(pointLightsQuantity);
     for (int i = 0; i < directionalLightsQuantity; i++){
         vec3 lightInformation = computeDirectionalLight(distanceFromCamera, directionalLightsPOV[i], directionalLights[i], V, F0, roughness, metallic, N);
         directIllumination += lightInformation;

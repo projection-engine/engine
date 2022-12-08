@@ -13,6 +13,6 @@ export default {
     POSITION: 11,
     UV: 12,
     RANDOM: 13,
-
-    OVERDRAW: 14
+    OVERDRAW: 14,
+    LIGHT_COMPLEXITY: 15,
 }

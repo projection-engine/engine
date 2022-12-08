@@ -26,6 +26,7 @@ const int POSITION = 11;
 const int UV = 12;
 const int RANDOM = 13;
 const int OVERDRAW =  14;
+const int LIGHT_COMPLEXITY = 15;
 
 float linearize(float depth){
     float near = .1;
@@ -95,6 +96,38 @@ void main(){
             case RANDOM:
             fragColor = vec4(randomColor(length(entityID)), 1.);
             break;
+            case LIGHT_COMPLEXITY:{
+                float total = float(MAX_SPOTLIGHTS + MAX_POINTLIGHTS + MAX_DIRECTIONAL_LIGHTS);
+                float contribution = 0.;
+
+                if (!flatShading){
+                    viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
+                    albedoOverPI = vec3(1.);
+                    vec3 V = cameraPosition - worldSpacePosition;
+                    float distanceFromCamera = length(V);
+                    V = normalize(V);
+                    F0 = mix(F0, vec3(1.), 0.);
+
+                    for (int i = 0; i < directionalLightsQuantity; i++){
+                        vec3 lightInformation = computeDirectionalLight(distanceFromCamera, directionalLightsPOV[i], directionalLights[i], V, F0, roughness, metallic, N);
+                        if (length(lightInformation) > 0.) contribution++;
+                    }
+
+                    float viewDistance = length(V);
+                    for (int i = 0; i < pointLightsQuantity; ++i){
+                        vec3 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, roughness, metallic, F0);
+                        if (length(lightInformation) > 0.) contribution++;
+                    }
+
+                    for (int i = 0; i < spotLightsQuantity; ++i){
+                        vec3 lightInformation = computeSpotLights(distanceFromCamera, spotLights[i], worldSpacePosition, V, N, roughness, metallic, F0);
+                        if (length(lightInformation) > 0.) contribution++;
+                    }
+                }
+
+                fragColor = vec4(mix(vec3(1., 0., 0.), vec3(0., .0, 1.), 1. - contribution/total), 1.);
+                break;
+            }
             case OVERDRAW:{
                 vec2 a = floor(gl_FragCoord.xy);
                 float checkerVal = 4.;
@@ -104,10 +137,10 @@ void main(){
                     checkerVal = 2.;
                 }
                 else
-                    fragColor = vec4(0., 0., 1., 1.);
+                fragColor = vec4(0., 0., 1., 1.);
 
                 bool checker = mod(a.x + a.y, checkerVal) > 0.0;
-                if( checker ) discard;
+                if (checker) discard;
 
 
                 break;
