@@ -5,17 +5,35 @@ vec3 fresnelSchlick (float cosTheta, vec3 F0){
 vec3 fresnelSchlickRoughness (float cosTheta, vec3 F0, float roughness){
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow (1.0 - cosTheta, 5.0);
 }
-vec3 sampleIndirectLight(bool ssrEnabled, float metallic, float roughness){
+
+vec3 computeSSR(){
+    if (metallic < 0.05) return vec3(0.);
+    vec3 worldNormal = normalFromDepth(gl_FragCoord.z, quadUV, scene_depth);
+    vec3 reflected = normalize(reflect(normalize(viewSpacePosition), normalize(worldNormal)));
+    vec3 hitPos = viewSpacePosition;
+    vec3 jitt = mix(vec3(0.0), vec3(hash(viewSpacePosition)), roughness);
+    float step = max(stepSizeSSR, .1);
+    int maxSteps = min(100, max(1, maxStepsSSR));
+    vec4 coords = RayMarch(maxSteps, (vec3(jitt) + reflected * max(.01, -viewSpacePosition.z)), hitPos, step, quadUV);
+
+    vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
+    float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+
+    float reflectionMultiplier = pow(metallic, SSRFalloff) * screenEdgefactor * -reflected.z;
+    vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
+
+    return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.);
+}
+
+
+vec3 sampleIndirectLight(bool ssrEnabled, vec3 albedo, float metallic, float roughness){
     vec3 diffuseColor = texture(SSGI, quadUV).rgb;
-
     vec3 specularColor = ssrEnabled ? computeSSR() : vec3(0.);
+    diffuseColor *= albedo;
 
-    if (length(diffuseColor) > 0. || length(specularColor) > 0.){
-        vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
-        vec3 kD = (1.0 - F) * (1.0 - metallic);
-        diffuseColor *= albedoOverPI * kD;
-        specularColor *=  (F * brdf.r + brdf.g);
-    }
+    vec3 FR  = fresnelSchlickRoughness(NdotV, F0, roughness);
+    specularColor *=  (FR * brdf.r + brdf.g);
+
 
     return diffuseColor + specularColor;
 }

@@ -6,7 +6,7 @@ import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
 
 import Engine from "./Engine";
-import SpritePass from "./runtime/rendering/SpritePass";
+import SpriteRenderer from "./runtime/rendering/SpriteRenderer";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
 import TransformationPass from "./runtime/misc/TransformationPass";
 import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
@@ -14,7 +14,7 @@ import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
-import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
+import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
 import LightsAPI from "./lib/rendering/LightsAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import GPU from "./GPU";
@@ -61,7 +61,7 @@ export default class Loop {
 
 
         BenchmarkAPI.track(BENCHMARK_KEYS.VISIBILITY_BUFFER)
-        VisibilityBuffer.execute()
+        VisibilityRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
         FBO.startMapping()
@@ -73,7 +73,7 @@ export default class Loop {
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.SPRITE_PASS)
-        SpritePass.execute()
+        SpriteRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
 
         FBO.stopMapping()
@@ -106,12 +106,12 @@ export default class Loop {
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
 
-        VisibilityBuffer.execute()
+        VisibilityRenderer.execute()
 
         FBO.startMapping()
         Loop.#beforeDrawing()
         SceneRenderer.draw()
-        SpritePass.execute()
+        SpriteRenderer.execute()
 
         FBO.stopMapping()
 

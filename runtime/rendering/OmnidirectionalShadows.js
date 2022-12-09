@@ -4,6 +4,7 @@ import Engine from "../../Engine";
 import GPU from "../../GPU";
 import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
 import ShadowProbe from "../../instances/ShadowProbe";
+import VisibilityRenderer from "./VisibilityRenderer";
 
 
 let lightsToUpdate
@@ -53,11 +54,12 @@ export default class OmnidirectionalShadows {
     }
 
     static loopMeshes(view, projection, lightPosition, farPlane) {
-        const meshes = Engine.data.meshes
-        const l = meshes.length
-        for (let m = 0; m < l; m++) {
-            const current = meshes[m], meshComponent = current.components.get(COMPONENTS.MESH)
-            const mesh = GPU.meshes.get(meshComponent.meshID)
+        const toRender = VisibilityRenderer.meshesToDraw.array
+        const size = toRender.length
+        for (let m = 0; m < size; m++) {
+            // TODO - DO NOT RENDER IF DISTANCE FROM LIGHT > LIGHT AFFECT DISTANCE
+            const current = toRender[m], meshComponent = current.components.get(COMPONENTS.MESH)
+            const mesh = current.__meshRef
             if (!mesh || !meshComponent.castsShadows || !current.active)
                 continue
             OmnidirectionalShadows.shader.bindForUse({

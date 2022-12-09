@@ -65,8 +65,9 @@ void main(){
     vec4 coords = RayMarch(maxSteps, normal, hitPos, step, texCoords);
 
     vec4 tracedAlbedo = texture(previousFrame, coords.xy);
-    if(tracedAlbedo.a < 1.)
-        discard;
+    vec4 tracedDepth = texture(scene_depth, coords.xy);
+    if(tracedDepth.r == 0.) discard;
+
     vec3 SSGI = tracedAlbedo.rgb;
     SSGI = vec3(1.0) - exp(-SSGI * exposure);
     SSGI = pow(SSGI, vec3(1.0/gamma));

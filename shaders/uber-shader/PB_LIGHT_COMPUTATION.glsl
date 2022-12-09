@@ -21,26 +21,6 @@ vec3 viewSpacePosition;
 
 //import(rayMarcher)
 
-vec3 computeSSR(){
-    if (metallic < 0.05) return vec3(0.);
-    vec3 worldNormal = normalFromDepth(gl_FragCoord.z, quadUV, scene_depth);
-    vec3 reflected = normalize(reflect(normalize(viewSpacePosition), normalize(worldNormal)));
-    vec3 hitPos = viewSpacePosition;
-    vec3 jitt = mix(vec3(0.0), vec3(hash(viewSpacePosition)), roughness);
-    float step = max(stepSizeSSR, .1);
-    int maxSteps = min(100, max(1, maxStepsSSR));
-    vec4 coords = RayMarch(maxSteps, (vec3(jitt) + reflected * max(.01, -viewSpacePosition.z)), hitPos, step, quadUV);
-
-    vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
-    float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
-
-    float reflectionMultiplier = pow(metallic, SSRFalloff) * screenEdgefactor * -reflected.z;
-    vec3 tracedAlbedo = texture(previousFrame, coords.xy).rgb;
-
-    return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.);
-}
-
-
 //import(SSS)
 
 //import(brdf)
@@ -82,7 +62,7 @@ vec4 pbLightComputation() {
     vec3 V = cameraPosition - worldSpacePosition;
     float distanceFromCamera = length(V);
     V = normalize(V);
-    float ao = hasAmbientOcclusion ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
+    float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
 
     float NdotV = max(dot(N, V), 0.000001);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
@@ -105,9 +85,9 @@ vec4 pbLightComputation() {
         directIllumination += lightInformation;
     }
 
-//    directIllumination += computeSphereLight(sLightPos, vec3(1.), V, N, roughness, metallic, F0);
+    //    directIllumination += computeSphereLight(sLightPos, vec3(1.), V, N, roughness, metallic, F0);
 
-    indirectIllumination = sampleIndirectLight(ssrEnabled, metallic, roughness);
+    indirectIllumination = sampleIndirectLight(ssrEnabled, albedoOverPI, metallic, roughness);
     if (hasSkylight)
     indirectIllumination += computeSkylightAmbient(V);
     return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);

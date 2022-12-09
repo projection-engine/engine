@@ -18,7 +18,6 @@ export default class MeshComponent extends Component {
 
     set materialUniforms(data) {
         this.uniformsToOverride = data
-        console.trace(data)
         MaterialAPI.mapUniforms(data, this.__texturesInUse, this.__mappedUniforms).catch(err => console.error(err))
     }
 

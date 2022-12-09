@@ -12,12 +12,12 @@ import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
-import SpritePass from "./runtime/rendering/SpritePass";
+import SpriteRenderer from "./runtime/rendering/SpriteRenderer";
 import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/rendering/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
-import VisibilityBuffer from "./runtime/rendering/VisibilityBuffer";
+import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";
 
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
@@ -52,20 +52,6 @@ export default class Engine {
             CameraAPI.updateAspectRatio()
     }
 
-
-    static data = {
-        spotLights: [],
-        pointLights: [],
-        meshes: [],
-        directionalLights: [],
-
-        cameras: [],
-
-        sprites: [],
-        terrain: [],
-        skylights: []
-    }
-
     static params = {}
     static elapsed = 0
     static frameID
@@ -86,14 +72,14 @@ export default class Engine {
         Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
         Engine.previousFrameSampler = Engine.currentFrameFBO.colors[0]
         // Bokeh.initialize()
-        VisibilityBuffer.initialize()
+        VisibilityRenderer.initialize()
         LensPostProcessing.initialize()
         FrameComposition.initialize()
         await SSAO.initialize()
         SSGI.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
-        SpritePass.initialize()
+        SpriteRenderer.initialize()
 
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
@@ -163,6 +149,8 @@ export default class Engine {
         sceneUBO.updateData("maxStepsSSS", boolBuffer)
         boolBuffer[0] = SSAOSettings.enabled ? 1 : 0
         sceneUBO.updateData("hasAmbientOcclusion", boolBuffer)
+        singleFloatBuffer[0] = SSAOSettings.falloffDistance || 1000
+        sceneUBO.updateData("SSAOFalloff", singleFloatBuffer)
 
         sceneUBO.unbind()
 
@@ -185,6 +173,7 @@ export default class Engine {
 
         FrameComposition.UBO.unbind()
         Loop.linkParams()
+        VisibilityRenderer.needsUpdate = true
     }
 
 

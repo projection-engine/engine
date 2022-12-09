@@ -3,7 +3,7 @@ import Engine from "../../Engine";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import VisibilityBuffer from "./VisibilityBuffer";
+import VisibilityRenderer from "./VisibilityRenderer";
 
 /**
  * rayMarchSettings definition:
@@ -27,8 +27,7 @@ let framebuffer
 
 export default class SSGI {
     static FBO
-    static SSGISampler
-    static SSRSampler
+    static sampler
     static blurSamples = 4
     static enabled = true
     static unfilteredSSGISampler
@@ -55,7 +54,7 @@ export default class SSGI {
 
 
         SSGI.unfilteredSSGISampler = framebuffer.colors[0]
-        SSGI.SSGISampler = ssgiFinal.colors[0]
+        SSGI.sampler = ssgiFinal.colors[0]
 
 
         shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SSGI)
@@ -81,7 +80,7 @@ export default class SSGI {
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
         gpu.uniform1i(uniforms.scene_depth, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
@@ -121,7 +120,7 @@ export default class SSGI {
 
         blurShader.bind()
         ssgiFinal.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.entityIDSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.entityIDSampler)
         gpu.uniform1i(blurShaderUniforms.entityIDSampler, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)

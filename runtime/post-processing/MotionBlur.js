@@ -1,4 +1,4 @@
-import VisibilityBuffer from "../rendering/VisibilityBuffer";
+import VisibilityRenderer from "../rendering/VisibilityRenderer";
 import GPU from "../../GPU";
 import Engine from "../../Engine";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -29,7 +29,7 @@ export default class MotionBlur {
         gpu.uniform1i(uniforms.currentFrame, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.velocitySampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.velocitySampler)
         gpu.uniform1i(uniforms.gVelocity, 1)
 
         gpu.uniform1f(uniforms.velocityScale, MotionBlur.velocityScale)

@@ -4,7 +4,7 @@ import SSAO from "./SSAO";
 import SSGI from "./SSGI";
 import DirectionalShadows from "./DirectionalShadows";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
-import VisibilityBuffer from "./VisibilityBuffer";
+import VisibilityRenderer from "./VisibilityRenderer";
 import Shader from "../../instances/Shader";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
@@ -37,12 +37,14 @@ export default class SceneRenderer {
                 {type: "float", name: "SSSEdgeAttenuation"},
                 {type: "float", name: "skylightSamples"},
                 {type: "float", name: "SSSDepthDelta"},
+                {type: "float", name: "SSAOFalloff"},
 
                 {type: "int", name: "maxStepsSSR"},
                 {type: "int", name: "maxStepsSSS"},
                 {type: "bool", name: "hasSkylight"},
                 {type: "bool", name: "hasAmbientOcclusion"},
                 {type: "vec2", name: "bufferResolution"},
+
             ])
         SceneRenderer.UBO.bind()
         SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([FBO.width, FBO.height]))
@@ -59,8 +61,8 @@ export default class SceneRenderer {
     static draw(useCustomView, viewProjection, viewMatrix, cameraPosition) {
         if (!SceneRenderer.#ready || !shader)
             return
-        const entities = Engine.data.meshes
-        const size = entities.length
+        const toRender = VisibilityRenderer.meshesToDraw.array
+        const size = toRender.length
 
         shader.bind()
         if (isDev)
@@ -88,7 +90,7 @@ export default class SceneRenderer {
         gpu.uniform1i(uniforms.SSAO, 1)
 
         gpu.activeTexture(gpu.TEXTURE2)
-        gpu.bindTexture(gpu.TEXTURE_2D, SSGI.SSGISampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, SSGI.sampler)
         gpu.uniform1i(uniforms.SSGI, 2)
 
         gpu.activeTexture(gpu.TEXTURE3)
@@ -105,7 +107,7 @@ export default class SceneRenderer {
 
 
         gpu.activeTexture(gpu.TEXTURE6)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
         gpu.uniform1i(uniforms.scene_depth, 6)
 
         gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
@@ -130,7 +132,7 @@ export default class SceneRenderer {
         gpu.depthMask(true)
 
         for (let i = 0; i < size; i++) {
-            const entity = entities[i]
+            const entity = toRender[i]
             const mesh = entity.__meshRef
 
             if (!entity.active || !mesh)

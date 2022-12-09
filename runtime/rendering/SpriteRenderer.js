@@ -1,30 +1,32 @@
 import Engine from "../../Engine";
 import GPU from "../../GPU";
 import COMPONENTS from "../../static/COMPONENTS.js";
+import DynamicMap from "../../DynamicMap";
+import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 let shader, uniforms
-export default class SpritePass {
-    static shader
+export default class SpriteRenderer {
+    static sprites = new DynamicMap()
+
     static initialize() {
-        shader = SpritePass.shader
+        shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
         uniforms = shader.uniformMap
     }
 
     static execute() {
-        const sprites = Engine.data.sprites
-        const s = sprites.length
-        if (s === 0)
+        const sprites = SpriteRenderer.sprites.array
+        const size = sprites.length
+        if (size === 0)
             return
+
         const textures = GPU.textures
-
-
         gpu.disable(gpu.CULL_FACE)
         shader.bind()
-        gpu.activeTexture(gpu.TEXTURE0)
 
-        for (let i = 0; i < s; i++) {
+        gpu.activeTexture(gpu.TEXTURE0)
+        for (let i = 0; i < size; i++) {
             const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
-            if (!current.active)
+            if (!current._active)
                 continue
             const texture = textures.get(component.imageID)
             if (!texture)

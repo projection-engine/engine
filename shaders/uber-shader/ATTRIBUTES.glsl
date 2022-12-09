@@ -27,6 +27,8 @@ uniform UberShaderSettings{
     float SSSEdgeAttenuation;
     float skylightSamples;
     float SSSDepthDelta;
+    float SSAOFalloff;
+
     int maxStepsSSR;
     int maxStepsSSS;
     bool hasSkylight;
@@ -34,8 +36,6 @@ uniform UberShaderSettings{
 
     vec2 bufferResolution;
 };
-
-
 
 uniform bool isSky;
 uniform sampler2D scene_depth;
@@ -54,14 +54,11 @@ uniform sampler2D sampler4;
 uniform sampler2D sampler5;
 uniform sampler2D sampler6;
 uniform sampler2D sampler7;
+
 // GLOBAL
-
-
 in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
-
-
 
 uniform SpotLights{
     mat4 spotLights[MAX_SPOTLIGHTS];

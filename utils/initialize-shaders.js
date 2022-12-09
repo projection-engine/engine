@@ -19,7 +19,7 @@ import CUBEMAP from "../shaders/forward-rendering/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/post-processing/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/post-processing/IRRADIANCE_MAP.frag"
 import MOTION_BLUR_FRAG from "../shaders/post-processing/MOTION_BLUR.frag";
-import SpritePass from "../runtime/rendering/SpritePass";
+import SpriteRenderer from "../runtime/rendering/SpriteRenderer";
 import GAUSSIAN_FRAG from "../shaders/post-processing/GAUSSIAN.frag"
 import UPSAMPLING_TEND_FRAG from "../shaders/post-processing/UPSAMPLE_TENT.glsl"
 import BOKEH_FRAG from "../shaders/post-processing/BOKEH.frag"
@@ -31,7 +31,7 @@ import V_BUFFER_VERT from "../shaders/forward-rendering/V_BUFFER.vert"
 import V_BUFFER_FRAG from "../shaders/forward-rendering/V_BUFFER.frag"
 
 export default function initializeShaders() {
-    SpritePass.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
+    SpriteRenderer.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
 
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.VISIBILITY_BUFFER, V_BUFFER_VERT, V_BUFFER_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, QUAD_VERTEX, TO_SCREEN)

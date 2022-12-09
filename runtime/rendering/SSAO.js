@@ -3,7 +3,7 @@ import GPU from "../../GPU";
 
 import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
-import VisibilityBuffer from "./VisibilityBuffer";
+import VisibilityRenderer from "./VisibilityRenderer";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 
@@ -55,7 +55,7 @@ export default class SSAO {
 
         SSAO.UBO.bindWithShader(shader.program)
         SSAO.settings = [.5, .7, -.1, 1000]
-        window.upd = (d) =>  SSAO.settings = [.5, .7, -.1, d]
+
         SSAO.UBO.bind()
         SSAO.UBO.updateData("noiseScale", SSAO.noiseScale)
         SSAO.UBO.unbind()
@@ -86,7 +86,7 @@ export default class SSAO {
         shader.bind()
 
         gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
         gpu.uniform1i(uniforms.gDepth, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
@@ -114,7 +114,7 @@ export default class SSAO {
     }
 
     static execute() {
-        if (!SSAO.enabled || !SSAO.#ready || !VisibilityBuffer.needsSSAOUpdate)
+        if (!SSAO.enabled || !SSAO.#ready || !VisibilityRenderer.needsSSAOUpdate)
             return
 
         SSAO.#draw()

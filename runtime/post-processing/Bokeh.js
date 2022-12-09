@@ -3,7 +3,7 @@ import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import Engine from "../../Engine";
-import VisibilityBuffer from "../rendering/VisibilityBuffer";
+import VisibilityRenderer from "../rendering/VisibilityRenderer";
 
 let FBO, shader, uniforms, T
 export default class Bokeh {
@@ -23,7 +23,7 @@ export default class Bokeh {
         gpu.uniform1i(uniforms.sceneColor, 0)
 
         gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityBuffer.depthSampler)
+        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
         gpu.uniform1i(uniforms.depthSampler, 1)
 
         gpu.uniform1f(uniforms.radius, window.d||.5)

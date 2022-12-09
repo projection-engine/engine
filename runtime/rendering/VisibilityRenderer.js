@@ -1,16 +1,17 @@
 import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import Engine from "../../Engine";
 import Mesh from "../../instances/Mesh";
 import CameraAPI from "../../lib/utils/CameraAPI";
 import TransformationPass from "../misc/TransformationPass";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
+import DynamicMap from "../../DynamicMap";
 
 let shader, uniforms, fbo
 let viewProjection, previousViewProjection
-export default class VisibilityBuffer {
+export default class VisibilityRenderer {
+    static meshesToDraw = new DynamicMap()
     static depthSampler
     static entityIDSampler
     static velocitySampler
@@ -22,22 +23,22 @@ export default class VisibilityBuffer {
         uniforms = shader.uniformMap
         fbo = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
 
-        VisibilityBuffer.depthSampler = fbo.colors[0]
-        VisibilityBuffer.entityIDSampler = fbo.colors[1]
-        VisibilityBuffer.velocitySampler = fbo.colors[2]
+        VisibilityRenderer.depthSampler = fbo.colors[0]
+        VisibilityRenderer.entityIDSampler = fbo.colors[1]
+        VisibilityRenderer.velocitySampler = fbo.colors[2]
 
         viewProjection = CameraAPI.viewProjectionMatrix
         previousViewProjection = CameraAPI.previousViewProjectionMatrix
     }
 
     static execute() {
-        if (!VisibilityBuffer.needsUpdate && !TransformationPass.hasChangeBuffer[0])
+        if (!VisibilityRenderer.needsUpdate && !TransformationPass.hasChangeBuffer[0])
             return
 
-        VisibilityBuffer.needsSSAOUpdate = true
-        const toRender = Engine.data.meshes
+        VisibilityRenderer.needsSSAOUpdate = true
+        const toRender = VisibilityRenderer.meshesToDraw.array
+        console.log(toRender)
         const size = toRender.length
-        const meshes = GPU.meshes
         shader.bind()
 
         gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
@@ -56,10 +57,9 @@ export default class VisibilityBuffer {
         for (let i = 0; i < size; i++) {
             isAlphaTested = 0
             const entity = toRender[i]
-            const mesh = meshes.get(entity.__meshID)
-            entity.__meshRef = mesh
+            const mesh = entity.__meshRef
 
-            if (!entity.active || !mesh)
+            if (!entity._active || !mesh)
                 continue
             if (entity.__materialID) {
                 const material = entity.__materialRef

@@ -6,6 +6,9 @@ import QueryAPI from "../lib/utils/QueryAPI";
 import ComponentGetter from "../templates/ComponentGetter";
 import serializeStructure from "../utils/serialize-structure";
 import LightsAPI from "../lib/rendering/LightsAPI";
+import VisibilityRenderer from "../runtime/rendering/VisibilityRenderer";
+import SpriteRenderer from "../runtime/rendering/SpriteRenderer";
+import MaterialAPI from "../lib/rendering/MaterialAPI";
 
 
 export default class Entity extends Movable {
@@ -18,9 +21,9 @@ export default class Entity extends Movable {
     children = []
     parent
     pickID = [-1, -1, -1]
-    instancingGroupID
     __materialRef
     __meshRef
+
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
         this.id = id
@@ -70,6 +73,9 @@ export default class Entity extends Movable {
         return newEntity
     }
 
+    static isRegistered(entity) {
+        return QueryAPI.getEntityByID(entity.id) != null
+    }
 
     addComponent(KEY) {
         let instance = ComponentGetter[KEY]
@@ -77,9 +83,45 @@ export default class Entity extends Movable {
             instance = new instance()
             instance.__entity = this
             this.components.set(KEY, instance)
-
-            if (QueryAPI.getEntityByID(this.id) != null)
-                EntityAPI.registerEntityComponents(this)
+            switch (KEY) {
+                case COMPONENTS.SPOTLIGHT:
+                    this.__hasSpotLight = true
+                    break
+                case COMPONENTS.DIRECTIONAL_LIGHT:
+                    this.__hasDirectionalLight = true
+                    break
+                case COMPONENTS.POINT_LIGHT:
+                    this.__hasPointLight = true
+                    break
+                case COMPONENTS.MESH:
+                    this.__hasMesh = true
+                    break
+                case COMPONENTS.CAMERA:
+                    this.__hasCamera = true
+                    break
+                case COMPONENTS.SKYLIGHT:
+                    this.__hasSkylight = true
+                    break
+                case COMPONENTS.SPRITE:
+                    this.__hasSprite = true
+                    break
+                case COMPONENTS.PHYSICS_COLLIDER:
+                    this.__hasCollider = true
+                    break
+                case COMPONENTS.RIGID_BODY:
+                    this.__hasRigidBody = true
+                    break
+                case COMPONENTS.CULLING:
+                    this.__hasCulling = true
+                    break
+                case COMPONENTS.UI:
+                    this.__hasUI = true
+                    break
+                case COMPONENTS.TERRAIN:
+                    this.__hasTerrain = true
+                    break
+            }
+            EntityAPI.registerEntityComponents(this)
 
             return instance
         }
@@ -89,8 +131,47 @@ export default class Entity extends Movable {
         const hasComponent = this.components.get(KEY) != null
         this.components.delete(KEY)
 
-        if (hasComponent && QueryAPI.getEntityByID(this.id) != null)
+        if (hasComponent) {
             EntityAPI.registerEntityComponents(this, KEY)
+            switch (KEY) {
+                case COMPONENTS.SPOTLIGHT:
+                    this.__hasSpotLight = false
+                    break
+                case COMPONENTS.DIRECTIONAL_LIGHT:
+                    this.__hasDirectionalLight = false
+                    break
+                case COMPONENTS.POINT_LIGHT:
+                    this.__hasPointLight = false
+                    break
+                case COMPONENTS.MESH:
+                    this.__hasMesh = false
+                    break
+                case COMPONENTS.CAMERA:
+                    this.__hasCamera = false
+                    break
+                case COMPONENTS.SKYLIGHT:
+                    this.__hasSkylight = false
+                    break
+                case COMPONENTS.SPRITE:
+                    this.__hasSprite = false
+                    break
+                case COMPONENTS.PHYSICS_COLLIDER:
+                    this.__hasCollider = false
+                    break
+                case COMPONENTS.RIGID_BODY:
+                    this.__hasRigidBody = false
+                    break
+                case COMPONENTS.CULLING:
+                    this.__hasCulling = false
+                    break
+                case COMPONENTS.UI:
+                    this.__hasUI = false
+                    break
+                case COMPONENTS.TERRAIN:
+                    this.__hasTerrain = false
+                    break
+            }
+        }
     }
 
 
