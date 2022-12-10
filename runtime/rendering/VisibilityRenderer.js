@@ -37,7 +37,6 @@ export default class VisibilityRenderer {
 
         VisibilityRenderer.needsSSAOUpdate = true
         const toRender = VisibilityRenderer.meshesToDraw.array
-        console.log(toRender)
         const size = toRender.length
         shader.bind()
 
@@ -58,30 +57,27 @@ export default class VisibilityRenderer {
             isAlphaTested = 0
             const entity = toRender[i]
             const mesh = entity.__meshRef
-
+            const material = entity.__materialRef
             if (!entity._active || !mesh)
                 continue
-            if (entity.__materialID) {
-                const material = entity.__materialRef
 
-                if (material) {
-                    if (material.isSky)
-                        continue
-                    isAlphaTested = material.isAlphaTested ? 1 : 0
-                    if (material.doubleSided) {
-                        gpu.disable(gpu.CULL_FACE)
-                        isDoubleSided = true
-                    } else if (isDoubleSided) {
-                        gpu.enable(gpu.CULL_FACE)
-                        isDoubleSided = false
-                    }
-                    stateWasCleared = false
-                } else if (!stateWasCleared) {
-                    stateWasCleared = true
-                    if (isDoubleSided) {
-                        gpu.enable(gpu.CULL_FACE)
-                        isDoubleSided = false
-                    }
+            if (material) {
+                if (material.isSky)
+                    continue
+                isAlphaTested = material.isAlphaTested ? 1 : 0
+                if (material.doubleSided) {
+                    gpu.disable(gpu.CULL_FACE)
+                    isDoubleSided = true
+                } else if (isDoubleSided) {
+                    gpu.enable(gpu.CULL_FACE)
+                    isDoubleSided = false
+                }
+                stateWasCleared = false
+            } else if (!stateWasCleared) {
+                stateWasCleared = true
+                if (isDoubleSided) {
+                    gpu.enable(gpu.CULL_FACE)
+                    isDoubleSided = false
                 }
             }
 

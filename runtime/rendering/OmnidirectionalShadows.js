@@ -17,7 +17,7 @@ export default class OmnidirectionalShadows {
     static lightsToUpdate = []
 
     static initialize() {
-        OmnidirectionalShadows.shadowMap =  new ShadowProbe(512)
+        OmnidirectionalShadows.shadowMap = new ShadowProbe(512)
 
 
         OmnidirectionalShadows.sampler = OmnidirectionalShadows.shadowMap.texture
@@ -60,7 +60,7 @@ export default class OmnidirectionalShadows {
             // TODO - DO NOT RENDER IF DISTANCE FROM LIGHT > LIGHT AFFECT DISTANCE
             const current = toRender[m], meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = current.__meshRef
-            if (!mesh || !meshComponent.castsShadows || !current.active)
+            if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
             OmnidirectionalShadows.shader.bindForUse({
                 farPlane,

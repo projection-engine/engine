@@ -15,9 +15,16 @@ out vec3 worldSpacePosition;
 out vec2 texCoords;
 
 void main(){
-    vec4 wPosition = modelMatrix * vec4(position, 1.0);
+    mat4 M = modelMatrix;
+    if(isSky){
+        M[3][0] = 0.;
+        M[3][1] = 0.;
+        M[3][2] = 0.;
+    }
+
+    vec4 wPosition = M * vec4(position, 1.0);
     worldSpacePosition = wPosition.xyz;
-    normalVec = normalize(mat3(modelMatrix) * normal);
+    normalVec = normalize(mat3(M) * normal);
     texCoords = uvTexture;
 
     if(isSky){

@@ -100,7 +100,7 @@ export default class DirectionalShadows {
             // TODO - DO NOT RENDER IF DISTANCE FROM LIGHT > LIGHT AFFECT DISTANCE
             const current = toRender[m], meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = current.__meshRef
-            if (!mesh || !meshComponent.castsShadows || !current.active)
+            if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
             shader.bindForUse({
                 shadowClipNearFar,

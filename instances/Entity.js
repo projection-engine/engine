@@ -9,6 +9,7 @@ import LightsAPI from "../lib/rendering/LightsAPI";
 import VisibilityRenderer from "../runtime/rendering/VisibilityRenderer";
 import SpriteRenderer from "../runtime/rendering/SpriteRenderer";
 import MaterialAPI from "../lib/rendering/MaterialAPI";
+import Engine from "../Engine";
 
 
 export default class Entity extends Movable {
@@ -74,7 +75,7 @@ export default class Entity extends Movable {
     }
 
     static isRegistered(entity) {
-        return QueryAPI.getEntityByID(entity.id) != null
+        return !!Engine.entitiesMap.get(entity.id)
     }
 
     addComponent(KEY) {
