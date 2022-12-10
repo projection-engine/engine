@@ -1,19 +1,20 @@
-export default class DynamicMap{
-    #map = new Map()
+export default class DynamicMap {
     #array = []
-    add(key, value){
-        this.#array.push(value)
-        const index = this.#array.length - 1
-        this.#map.set(key, index)
+    #map = {}
+
+    add(key, value) {
+        this.#map[key] = value
+        this.#array = Object.values(this.#map)
     }
-    delete(key){
-        const position = this.#map.get(key)
-        if(position === undefined)
+
+    delete(key) {
+        if (!this.#map[key])
             return
-        this.#array.splice(position, 1)
-        this.#map.delete(key)
+        delete this.#map[key]
+        this.#array = Object.values(this.#map)
     }
-    get array(){
+
+    get array() {
         return this.#array
     }
 }

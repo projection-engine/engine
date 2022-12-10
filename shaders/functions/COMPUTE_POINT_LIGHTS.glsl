@@ -46,8 +46,8 @@ vec3 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 p
 
     if (shadows < 1.) return vec3(0.);
 
-    float outerCutoff = pointLight[3][3];
-    float cutoff = pointLight[2][2];
+    float cutoff = pointLight[3][3];
+    float outerCutoff = pointLight[2][2];
     float occlusion =hasSSS ? screenSpaceShadows(lightPosition) : 1.;
 
     if (occlusion < 1.) return vec3(0.);

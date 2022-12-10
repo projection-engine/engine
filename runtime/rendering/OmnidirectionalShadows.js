@@ -41,8 +41,7 @@ export default class OmnidirectionalShadows {
                         OmnidirectionalShadows.loopMeshes(
                             mat4.lookAt([], entity._translation, target, CUBE_MAP_VIEWS.up[index]),
                             perspective,
-                            entity._translation,
-                            current.zFar
+                            current
                         )
                     },
                     current.zFar,
@@ -53,21 +52,26 @@ export default class OmnidirectionalShadows {
         lightsToUpdate.length = 0
     }
 
-    static loopMeshes(view, projection, lightPosition, farPlane) {
+    static loopMeshes(view, projection, component) {
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
-            // TODO - DO NOT RENDER IF DISTANCE FROM LIGHT > LIGHT AFFECT DISTANCE
+
             const current = toRender[m], meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = current.__meshRef
             if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
+
+            const distanceFromLight = vec3.length(vec3.sub([], current.absoluteTranslation, component.__entity.absoluteTranslation))
+
+            if (distanceFromLight > component.outerCutoff)
+                continue
             OmnidirectionalShadows.shader.bindForUse({
-                farPlane,
+                farPlane: component.zFar,
                 viewMatrix: view,
                 transformMatrix: current.matrix,
                 projectionMatrix: projection,
-                lightPosition
+                lightPosition: component.__entity.absoluteTranslation
             })
             mesh.draw()
         }

@@ -5,6 +5,7 @@ import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import LightsAPI from "../../lib/rendering/LightsAPI";
 import VisibilityRenderer from "./VisibilityRenderer";
+import {vec3} from "gl-matrix";
 
 
 let lightsToUpdate
@@ -78,7 +79,7 @@ export default class DirectionalShadows {
 
 
                 currentLight.atlasFace = [currentColumn, 0]
-                DirectionalShadows.loopMeshes(DirectionalShadows.shadowMapShader, currentLight.lightView, currentLight.lightProjection)
+                DirectionalShadows.loopMeshes(currentLight)
             }
             if (currentColumn > DirectionalShadows.atlasRatio) {
                 currentColumn = 0
@@ -93,22 +94,20 @@ export default class DirectionalShadows {
         lightsToUpdate.length = 0
     }
 
-    static loopMeshes(shader, view, projection, lightPosition, shadowClipNearFar) {
+    static loopMeshes(light) {
+        if(!light.__entity)
+            return
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
-            // TODO - DO NOT RENDER IF DISTANCE FROM LIGHT > LIGHT AFFECT DISTANCE
             const current = toRender[m], meshComponent = current.components.get(COMPONENTS.MESH)
             const mesh = current.__meshRef
             if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
-            shader.bindForUse({
-                shadowClipNearFar,
-                viewMatrix: view,
+            DirectionalShadows.shadowMapShader.bindForUse({
+                viewMatrix: light.lightView,
                 transformMatrix: current.matrix,
-                projectionMatrix: projection,
-
-                lightPosition
+                projectionMatrix: light.lightProjection,
             })
             mesh.draw()
         }
