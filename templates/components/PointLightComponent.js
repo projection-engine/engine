@@ -13,7 +13,7 @@ export default class PointLightComponent extends Component {
     _zNear = .1
     _zFar = 25
     smoothing = .5
-    outerCutoff = 200
+    cutoff = 100
 
     _shadowMap = true
     shadowAttenuationMinDistance = 50

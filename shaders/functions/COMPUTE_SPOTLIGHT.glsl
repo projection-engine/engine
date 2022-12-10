@@ -6,11 +6,13 @@ vec3 computeSpotLights (float distanceFromCamera, mat4 spotLight, vec3 worldPosi
     float lightRadius = spotLight[3][2];
     float lightCutoff = spotLight[2][3];
 
+    float distanceFromFrag = length(lightPosition - worldPosition);
+    if(distanceFromFrag > lightCutoff) return vec3(0.);
+
     bool hasSSS = spotLight[3][3] == 1.;
     vec3 L = normalize(lightPosition - worldPosition);
 
-    float distanceFromFrag = length(lightPosition - worldPosition);
-    if(distanceFromFrag > lightCutoff) return vec3(0.);
+
 
     float theta = dot(L, normalize(-lightDirection));
     if (theta <= lightRadius) return vec3(0.);

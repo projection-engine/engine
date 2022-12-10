@@ -5,7 +5,7 @@ export default class SpotlightComponent extends Component {
     _props = SPOTLIGHT_PROPS
     name = "SPOTLIGHT"
     _color = [255, 255, 255]
-    direction = [0, 0, 0]
+
     radius = 90
     intensity = 1
     attenuation = [0, 0]

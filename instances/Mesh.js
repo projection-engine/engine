@@ -104,14 +104,25 @@ export default class Mesh {
         this.use()
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
-
-    drawLines() {
-        this.use()
-        gpu.drawElements(gpu.LINE_LOOP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
-    }
-
     drawInstanced(quantity) {
         this.use()
         gpu.drawElementsInstanced(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0, quantity)
     }
+    drawLineLoop() {
+        this.prepareForUse()
+        gpu.drawElements(gpu.LINE_LOOP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+    }
+    drawTriangleStrip() {
+        this.prepareForUse()
+        gpu.drawElements(gpu.TRIANGLE_STRIP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+    }
+    drawTriangleFan() {
+        this.prepareForUse()
+        gpu.drawElements(gpu.TRIANGLE_FAN, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+    }
+    drawLines() {
+        this.prepareForUse()
+        gpu.drawElements(gpu.LINES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+    }
+
 }

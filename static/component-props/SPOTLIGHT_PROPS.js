@@ -7,9 +7,7 @@ export default [
         Component.number("INTENSITY", "intensity", undefined, 0),
     ]),
 
-    Component.group("DIRECTION", [
-        Component.array(["X", "Y", "Z"], "direction")
-    ]),
+
     Component.group("SHADOWS", [
         Component.boolean("HAS_SSS", "hasSSS")
     ]),
@@ -19,6 +17,6 @@ export default [
     ]),
     Component.group("CUTOFF", [
         Component.number("RADIUS", "radius", 180, 1, .01),
-        Component.number("CUTOFF_DISTANCE", "cutoff", 100, 1, .01),
+        Component.number("MAX_DISTANCE", "cutoff", 100, 1, .01),
     ])
 ]

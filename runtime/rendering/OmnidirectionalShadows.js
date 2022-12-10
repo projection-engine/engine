@@ -64,7 +64,7 @@ export default class OmnidirectionalShadows {
 
             const distanceFromLight = vec3.length(vec3.sub([], current.absoluteTranslation, component.__entity.absoluteTranslation))
 
-            if (distanceFromLight > component.outerCutoff)
+            if (distanceFromLight > component.cutoff)
                 continue
             OmnidirectionalShadows.shader.bindForUse({
                 farPlane: component.zFar,

@@ -24,6 +24,6 @@ export default [
     ]),
     Component.group("CUTOFF", [
         Component.number("SMOOTHING", "smoothing", 1, 0),
-        Component.number("RADIUS", "outerCutoff", 100, 1),
+        Component.number("RADIUS", "cutoff", 100, 1),
     ])
 ]
