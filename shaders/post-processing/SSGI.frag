@@ -5,6 +5,8 @@ precision mediump float;
 #define SEARCH_STEPS 5;
 #define DEPTH_THRESHOLD 1.2;
 #define PI_SQUARED 6.2831853
+
+
 //import(cameraUBO)
 
 in vec2 texCoords;
@@ -65,9 +67,6 @@ void main(){
     vec4 coords = RayMarch(maxSteps, normal, hitPos, step, texCoords);
 
     vec4 tracedAlbedo = texture(previousFrame, coords.xy);
-    vec4 tracedDepth = texture(scene_depth, coords.xy);
-    if(tracedDepth.r == 0.) discard;
-
     vec3 SSGI = tracedAlbedo.rgb;
     SSGI = vec3(1.0) - exp(-SSGI * exposure);
     SSGI = pow(SSGI, vec3(1.0/gamma));

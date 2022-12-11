@@ -15,7 +15,7 @@ import CameraAPI from "./lib/utils/CameraAPI";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
-import LightsAPI from "./lib/rendering/LightsAPI";
+import LightsAPI from "./lib/utils/LightsAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";

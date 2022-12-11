@@ -2,7 +2,7 @@ import GPU from "../GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
-import LightsAPI from "../lib/rendering/LightsAPI";
+import LightsAPI from "../lib/utils/LightsAPI";
 import GLSL_TYPES from "../static/GLSL_TYPES.json"
 import trimString from "../utils/trim-string";
 

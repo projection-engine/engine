@@ -7,7 +7,7 @@ import CubeMapAPI from "./lib/rendering/CubeMapAPI";
 import initializeShaders from "./utils/initialize-shaders";
 import initializeStaticMeshes from "./utils/initialize-static-meshes";
 import initializeFrameBuffers from "./utils/initialize-frame-buffers";
-import LightsAPI from "./lib/rendering/LightsAPI";
+import LightsAPI from "./lib/utils/LightsAPI";
 import QUAD_VERT from "./shaders/post-processing/QUAD.vert"
 import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
 import Shader from "./instances/Shader";

@@ -1,11 +1,8 @@
 import COMPONENTS from "../../static/COMPONENTS.js"
-import Engine from "../../Engine";
-import GPU from "../../GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "../../lib/rendering/GPUAPI";
-import LightsAPI from "../../lib/rendering/LightsAPI";
+import LightsAPI from "../../lib/utils/LightsAPI";
 import VisibilityRenderer from "./VisibilityRenderer";
-import {vec3} from "gl-matrix";
 
 
 let lightsToUpdate
@@ -44,10 +41,10 @@ export default class DirectionalShadows {
             DirectionalShadows.changed = true
         }
         DirectionalShadows.atlasRatio = DirectionalShadows.maxResolution / DirectionalShadows.resolutionPerTexture
-        LightsAPI.directionalLightsUBO.bind()
-        LightsAPI.directionalLightsUBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
-        LightsAPI.directionalLightsUBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
-        LightsAPI.directionalLightsUBO.unbind()
+        LightsAPI.lightsMetadataUBO.bind()
+        LightsAPI.lightsMetadataUBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
+        LightsAPI.lightsMetadataUBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
+        LightsAPI.lightsMetadataUBO.unbind()
     }
 
 

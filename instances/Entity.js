@@ -2,13 +2,8 @@ import {v4} from "uuid"
 import Movable from "./Movable";
 import COMPONENTS from "../static/COMPONENTS.js";
 import EntityAPI from "../lib/utils/EntityAPI";
-import QueryAPI from "../lib/utils/QueryAPI";
 import ComponentGetter from "../templates/ComponentGetter";
 import serializeStructure from "../utils/serialize-structure";
-import LightsAPI from "../lib/rendering/LightsAPI";
-import VisibilityRenderer from "../runtime/rendering/VisibilityRenderer";
-import SpriteRenderer from "../runtime/rendering/SpriteRenderer";
-import MaterialAPI from "../lib/rendering/MaterialAPI";
 import Engine from "../Engine";
 
 
@@ -16,7 +11,7 @@ export default class Entity extends Movable {
     id
     queryKey
     name
-    active
+    active = true
     components = new Map()
     scripts = []
     children = []
@@ -30,7 +25,7 @@ export default class Entity extends Movable {
         super()
         this.id = id
         this.name = name
-        this._active = active
+        this.active = active
         this.queryKey = id.slice(0, id.length / 2);
     }
 

@@ -58,7 +58,7 @@ export default class VisibilityRenderer {
             const entity = toRender[i]
             const mesh = entity.__meshRef
             const material = entity.__materialRef
-            if (!entity._active || !mesh)
+            if (!entity.active || !mesh)
                 continue
 
             if (material) {

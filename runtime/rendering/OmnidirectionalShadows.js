@@ -1,7 +1,5 @@
 import {mat4, vec3} from "gl-matrix"
 import COMPONENTS from "../../static/COMPONENTS.js"
-import Engine from "../../Engine";
-import GPU from "../../GPU";
 import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
 import ShadowProbe from "../../instances/ShadowProbe";
 import VisibilityRenderer from "./VisibilityRenderer";

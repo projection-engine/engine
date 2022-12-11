@@ -9,6 +9,7 @@ uniform int shadingModel;
 uniform vec3 entityID;
 
 //import(pbLightComputation)
+
 const int ALBEDO =  0;
 const int NORMAL =  1;
 const int TANGENT =  2;
@@ -101,35 +102,39 @@ void main(){
             case LIGHT_QUANTITY:
             case LIGHT_COMPLEXITY:{
                 bool isLightQuantity = shadingModel == LIGHT_QUANTITY;
-                float total =  isLightQuantity ? float(spotLightsQuantity + pointLightsQuantity + directionalLightsQuantity): float(MAX_LIGHTS * 3);
+                float total =  isLightQuantity ? float(lightQuantityA + lightQuantityB + lightQuantityC): float(MAX_LIGHTS * 3);
                 float contribution = 0.;
 
                 if (!flatShading){
                     viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
                     albedoOverPI = vec3(1.);
-                    vec3 V = cameraPosition - worldSpacePosition;
-                    float distanceFromCamera = length(V);
-                    V = normalize(V);
-                    F0 = mix(F0, vec3(1.), 0.);
+                    F0 = mix(F0, albedoOverPI, 0.);
 
-                    for (int i = 0; i < directionalLightsQuantity; i++){
-                        vec3 lightInformation = computeDirectionalLight(distanceFromCamera, directionalLightsPOV[i], directionalLights[i], V, F0, roughness, metallic, N);
-                        if (length(lightInformation) > 0.) contribution++;
-                    }
-
-                    float viewDistance = length(V);
-                    for (int i = 0; i < pointLightsQuantity; ++i){
-                        vec3 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, roughness, metallic, F0);
-                        if (length(lightInformation) > 0.) contribution++;
-                    }
-
-                    for (int i = 0; i < spotLightsQuantity; ++i){
-                        vec3 lightInformation = computeSpotLights(distanceFromCamera, spotLights[i], worldSpacePosition, V, N, roughness, metallic, F0);
-                        if (length(lightInformation) > 0.) contribution++;
+                    for (int i = 0; i < lightQuantityA; i++){
+                        mat4 primaryBuffer = lightPrimaryBufferA[i];
+                        mat4 secondaryBuffer = lightSecondaryBufferA[i];
+                        int type = lightTypeBufferA[i];
+                        vec3 directIllumination = vec3(0.);
+//                        switch(type){
+//                            case DIRECTIONAL:
+//                            directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
+//                            break;
+//                            case SPOT:
+//                            directIllumination = computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+//                            break;
+//                            case POINT:
+                            directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+//                            break;
+//                            default:
+//                            break;
+//                        }
+                        if (length(directIllumination) > 0.) contribution++;
                     }
                 }
-
-                fragColor = vec4(mix(vec3(1., 0., 0.), vec3(0., .0, 1.), 1. - contribution/total), 1.);
+                if(total > 0.)
+                    fragColor = vec4(mix(vec3(1., 0., 0.), vec3(0., .0, 1.), 1. - contribution/total), 1.);
+                else
+                    fragColor = vec4(0., 0., 1., 1.);
                 break;
             }
             case OVERDRAW:{

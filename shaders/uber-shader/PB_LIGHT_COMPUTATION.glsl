@@ -60,28 +60,30 @@ vec4 pbLightComputation(vec3 V) {
     albedoOverPI = albedo/PI;
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
-
     float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
-
     float NdotV = max(dot(N, V), 0.000001);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
 
     F0 = mix(F0, albedo, metallic);
 
-    for (int i = 0; i < directionalLightsQuantity; i++){
-        vec3 lightInformation = computeDirectionalLight(distanceFromCamera, directionalLightsPOV[i], directionalLights[i], V, F0, roughness, metallic, N);
-        directIllumination += lightInformation;
-    }
 
-    float viewDistance = length(V);
-    for (int i = 0; i < pointLightsQuantity; ++i){
-        vec3 lightInformation = computePointLights(distanceFromCamera, shadow_cube, pointLights[i], worldSpacePosition, viewDistance, V, N, roughness, metallic, F0);
-        directIllumination += lightInformation;
-    }
-
-    for (int i = 0; i < spotLightsQuantity; ++i){
-        vec3 lightInformation = computeSpotLights(distanceFromCamera, spotLights[i], worldSpacePosition, V, N, roughness, metallic, F0);
-        directIllumination += lightInformation;
+    for (int i = 0; i < lightQuantityA; i++){
+        mat4 primaryBuffer= lightPrimaryBufferA[i];
+        mat4 secondaryBuffer = lightSecondaryBufferA[i];
+        int type = lightTypeBufferA[i];
+//        switch(type){
+//            case DIRECTIONAL:
+//            directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, roughness, metallic, N);
+//            break;
+//            case SPOT:
+//            directIllumination += computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, roughness, metallic, F0);
+//            break;
+//            case POINT:
+            directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, roughness, metallic, F0);
+//            break;
+//            default:
+//            break;
+//        }
     }
 
     //    directIllumination += computeSphereLight(sLightPos, vec3(1.), V, N, roughness, metallic, F0);

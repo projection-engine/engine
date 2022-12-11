@@ -1,12 +1,15 @@
 #define PI 3.14159265359
-
-#define MAX_LIGHTS 24
+#define MAX_LIGHTS 4
 #define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
 #define SEARCH_STEPS 5
 #define DEPTH_THRESHOLD 1.2
 #define PI_SQUARED 6.2831853
+const int DIRECTIONAL = 0;
+const int SPOT = 1;
+const int POINT = 2;
+
 
 // GLOBAL
 uniform mat4 viewMatrix;
@@ -67,41 +70,23 @@ uniform LightsMetadata{
 uniform LightDataA{
     mat4 lightPrimaryBufferA[MAX_LIGHTS];
     mat4 lightSecondaryBufferA[MAX_LIGHTS];
-    mat4 lightTypeBufferA[MAX_LIGHTS];
-    int lightQuantityA[MAX_LIGHTS];
+    int lightTypeBufferA[MAX_LIGHTS];
+    int lightQuantityA;
 };
 
 uniform LightDataB{
     mat4 lightPrimaryBufferB[MAX_LIGHTS];
     mat4 lightSecondaryBufferB[MAX_LIGHTS];
-    mat4 lightTypeBufferB[MAX_LIGHTS];
-    int lightQuantityB[MAX_LIGHTS];
+    int lightTypeBufferB[MAX_LIGHTS];
+    int lightQuantityB;
 };
 
 uniform LightDataC{
     mat4 lightPrimaryBufferC[MAX_LIGHTS];
     mat4 lightSecondaryBufferC[MAX_LIGHTS];
-    mat4 lightTypeBufferC[MAX_LIGHTS];
-    int lightQuantityC[MAX_LIGHTS];
+    int lightTypeBufferC[MAX_LIGHTS];
+    int lightQuantityC;
 };
-
-//uniform SpotLights{
-//    mat4 spotLights[MAX_SPOTLIGHTS];
-//    int spotLightsQuantity;
-//};
-//
-//uniform PointLights{
-//    mat4 pointLights[MAX_POINTLIGHTS];
-//    int pointLightsQuantity;
-//};
-//
-//uniform DirectionalLights{
-//    mat4 directionalLights[MAX_DIRECTIONAL_LIGHTS];
-//    mat4 directionalLightsPOV[MAX_DIRECTIONAL_LIGHTS];
-//    int directionalLightsQuantity;
-//    float shadowMapsQuantity;
-//    float shadowMapResolution;
-//};
 
 uniform bool ssrEnabled;
 uniform bool noDepthChecking;

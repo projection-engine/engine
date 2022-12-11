@@ -15,7 +15,7 @@ import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
 import SpriteRenderer from "./runtime/rendering/SpriteRenderer";
 import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
-import ScriptsAPI from "./lib/rendering/ScriptsAPI";
+import ScriptsAPI from "./lib/utils/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";

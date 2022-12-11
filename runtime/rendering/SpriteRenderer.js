@@ -1,4 +1,3 @@
-import Engine from "../../Engine";
 import GPU from "../../GPU";
 import COMPONENTS from "../../static/COMPONENTS.js";
 import DynamicMap from "../../DynamicMap";
@@ -26,7 +25,7 @@ export default class SpriteRenderer {
         gpu.activeTexture(gpu.TEXTURE0)
         for (let i = 0; i < size; i++) {
             const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
-            if (!current._active)
+            if (!current.active)
                 continue
             const texture = textures.get(component.imageID)
             if (!texture)
