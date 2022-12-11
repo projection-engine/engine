@@ -30,10 +30,11 @@ export default class Component {
     onUpdate() {
     }
 
-    static group(label, children) {
+    static group(label, children, disabledIf) {
         return {
             type: Component.propTypes.GROUP,
             label,
+            disabledIf,
             children: Array.isArray(children) ? children : []
         }
     }

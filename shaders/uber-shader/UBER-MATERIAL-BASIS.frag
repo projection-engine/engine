@@ -3,8 +3,6 @@ precision highp float;
 
 //--UNIFORMS--
 
-//import(parallaxOcclusionMapping)
-
 //import(uberAttributes)
 
 //import(pbLightComputation)
@@ -18,9 +16,13 @@ void main(){
         if (abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD || (isSky && depthData.r > 0.)) discard;
     }
 
+    vec3 V = cameraPosition - worldSpacePosition;
+    distanceFromCamera = length(V);
+    V = normalize(V);
+
     //--MATERIAL_SELECTION--
 
-    fragColor = pbLightComputation();
+    fragColor = pbLightComputation(V);
 }
 
 

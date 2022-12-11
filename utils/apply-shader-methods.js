@@ -1,7 +1,7 @@
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
 import CAMERA_UBO from "../shaders/functions/CAMERA_METADATA_UNIFORM.glsl";
 
-import PARALLAX_OCCLUSION_MAPPING from "../shaders/functions/PARALLAX_OCCLUSION_MAPPING.glsl";
+
 import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
 import ACES from "../shaders/functions/ACES.glsl";
 import DEPTH_UTILS from "../shaders/functions/DEPTH_RECONSTRUCTION_UTILS.glsl"
@@ -19,7 +19,6 @@ const METHODS = {
     rayMarcher: "//import(rayMarcher)",
     aces: "//import(aces)",
     uberAttributes: "//import(uberAttributes)",
-    parallaxOcclusionMapping: "//import(parallaxOcclusionMapping)",
     depthReconstructionUtils: "//import(depthReconstructionUtils)",
     pbLightComputation: "//import(pbLightComputation)",
     SSS: "//import(SSS)",
@@ -61,9 +60,6 @@ export default function applyShaderMethods(shaderCode) {
                     break
                 case key === "cameraUBO":
                     response = response.replaceAll(METHODS[key], CAMERA_UBO)
-                    break
-                case key === "parallaxOcclusionMapping":
-                    response = response.replaceAll(METHODS[key], PARALLAX_OCCLUSION_MAPPING)
                     break
                 case key === "rayMarcher":
                     response = response.replaceAll(METHODS[key], RAY_MARCHER)

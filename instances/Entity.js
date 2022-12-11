@@ -16,7 +16,7 @@ export default class Entity extends Movable {
     id
     queryKey
     name
-    _active
+    active
     components = new Map()
     scripts = []
     children = []
@@ -24,6 +24,7 @@ export default class Entity extends Movable {
     pickID = [-1, -1, -1]
     __materialRef
     __meshRef
+    __lightComp
 
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
@@ -32,21 +33,6 @@ export default class Entity extends Movable {
         this._active = active
         this.queryKey = id.slice(0, id.length / 2);
     }
-
-    set active(data) {
-        this._active = data
-
-        if (this.components.get(COMPONENTS.POINT_LIGHT) || this.components.get(COMPONENTS.DIRECTIONAL_LIGHT)) {
-            LightsAPI.packageLights(true)
-            this.needsLightUpdate = true
-        } else
-            EntityAPI.registerEntityComponents(this)
-    }
-
-    get active() {
-        return this._active
-    }
-
 
     get pickIndex() {
         return this.pickID[0] * 255 + this.pickID[1] * 255 + this.pickID[2] * 255
@@ -85,14 +71,9 @@ export default class Entity extends Movable {
             instance.__entity = this
             this.components.set(KEY, instance)
             switch (KEY) {
-                case COMPONENTS.SPOTLIGHT:
-                    this.__hasSpotLight = true
-                    break
-                case COMPONENTS.DIRECTIONAL_LIGHT:
-                    this.__hasDirectionalLight = true
-                    break
-                case COMPONENTS.POINT_LIGHT:
-                    this.__hasPointLight = true
+                case COMPONENTS.LIGHT:
+                    this.__hasLight = true
+                    this.__lightComp = instance
                     break
                 case COMPONENTS.MESH:
                     this.__hasMesh = true
@@ -135,14 +116,9 @@ export default class Entity extends Movable {
         if (hasComponent) {
             EntityAPI.registerEntityComponents(this, KEY)
             switch (KEY) {
-                case COMPONENTS.SPOTLIGHT:
-                    this.__hasSpotLight = false
-                    break
-                case COMPONENTS.DIRECTIONAL_LIGHT:
-                    this.__hasDirectionalLight = false
-                    break
-                case COMPONENTS.POINT_LIGHT:
-                    this.__hasPointLight = false
+                case COMPONENTS.LIGHT:
+                    this.__hasLight = false
+                    this.__lightComp = undefined
                     break
                 case COMPONENTS.MESH:
                     this.__hasMesh = false

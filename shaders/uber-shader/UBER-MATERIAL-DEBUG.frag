@@ -3,8 +3,6 @@ precision highp float;
 
 //--UNIFORMS--
 
-//import(parallaxOcclusionMapping)
-
 //import(uberAttributes)
 
 uniform int shadingModel;
@@ -27,7 +25,7 @@ const int UV = 12;
 const int RANDOM = 13;
 const int OVERDRAW =  14;
 const int LIGHT_COMPLEXITY = 15;
-
+const int LIGHT_QUANTITY = 16;
 float linearize(float depth){
     float near = .1;
     float far = 1000.;
@@ -56,13 +54,17 @@ void main(){
     if (shadingModel != OVERDRAW)
     if (!noDepthChecking &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD || (isSky && depthData.r > 0.)) discard;
 
+    vec3 V = cameraPosition - worldSpacePosition;
+    distanceFromCamera = length(V);
+    V = normalize(V);
+
     //--MATERIAL_SELECTION--
 
     if (shadingModel == LIGHT_ONLY)
     albedo = vec3(.5);
 
     if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
-    fragColor = pbLightComputation();
+    fragColor = pbLightComputation(V);
     else {
         switch (shadingModel){
             case ALBEDO:
@@ -96,8 +98,10 @@ void main(){
             case RANDOM:
             fragColor = vec4(randomColor(length(entityID)), 1.);
             break;
+            case LIGHT_QUANTITY:
             case LIGHT_COMPLEXITY:{
-                float total = float(MAX_SPOTLIGHTS + MAX_POINTLIGHTS + MAX_DIRECTIONAL_LIGHTS);
+                bool isLightQuantity = shadingModel == LIGHT_QUANTITY;
+                float total =  isLightQuantity ? float(spotLightsQuantity + pointLightsQuantity + directionalLightsQuantity): float(MAX_LIGHTS * 3);
                 float contribution = 0.;
 
                 if (!flatShading){

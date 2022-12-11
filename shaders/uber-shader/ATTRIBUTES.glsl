@@ -1,9 +1,7 @@
 #define PI 3.14159265359
 
-#define MAX_SPOTLIGHTS 24
-#define MAX_POINTLIGHTS 24
-#define MAX_DIRECTIONAL_LIGHTS 16
-#define PARALLAX_THRESHOLD 200;
+#define MAX_LIGHTS 24
+#define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
 #define SEARCH_STEPS 5
@@ -60,23 +58,50 @@ in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
 
-uniform SpotLights{
-    mat4 spotLights[MAX_SPOTLIGHTS];
-    int spotLightsQuantity;
-};
 
-uniform PointLights{
-    mat4 pointLights[MAX_POINTLIGHTS];
-    int pointLightsQuantity;
-};
-
-uniform DirectionalLights{
-    mat4 directionalLights[MAX_DIRECTIONAL_LIGHTS];
-    mat4 directionalLightsPOV[MAX_DIRECTIONAL_LIGHTS];
-    int directionalLightsQuantity;
+uniform LightsMetadata{
     float shadowMapsQuantity;
     float shadowMapResolution;
 };
+
+uniform LightDataA{
+    mat4 lightPrimaryBufferA[MAX_LIGHTS];
+    mat4 lightSecondaryBufferA[MAX_LIGHTS];
+    mat4 lightTypeBufferA[MAX_LIGHTS];
+    int lightQuantityA[MAX_LIGHTS];
+};
+
+uniform LightDataB{
+    mat4 lightPrimaryBufferB[MAX_LIGHTS];
+    mat4 lightSecondaryBufferB[MAX_LIGHTS];
+    mat4 lightTypeBufferB[MAX_LIGHTS];
+    int lightQuantityB[MAX_LIGHTS];
+};
+
+uniform LightDataC{
+    mat4 lightPrimaryBufferC[MAX_LIGHTS];
+    mat4 lightSecondaryBufferC[MAX_LIGHTS];
+    mat4 lightTypeBufferC[MAX_LIGHTS];
+    int lightQuantityC[MAX_LIGHTS];
+};
+
+//uniform SpotLights{
+//    mat4 spotLights[MAX_SPOTLIGHTS];
+//    int spotLightsQuantity;
+//};
+//
+//uniform PointLights{
+//    mat4 pointLights[MAX_POINTLIGHTS];
+//    int pointLightsQuantity;
+//};
+//
+//uniform DirectionalLights{
+//    mat4 directionalLights[MAX_DIRECTIONAL_LIGHTS];
+//    mat4 directionalLightsPOV[MAX_DIRECTIONAL_LIGHTS];
+//    int directionalLightsQuantity;
+//    float shadowMapsQuantity;
+//    float shadowMapResolution;
+//};
 
 uniform bool ssrEnabled;
 uniform bool noDepthChecking;
@@ -89,10 +114,12 @@ vec2 quadUV;
 vec3 viewDirection;
 bool hasTBNComputed = false;
 bool hasViewDirectionComputed = false;
+float distanceFromCamera;
+
 
 void computeTBN() {
-    if(hasTBNComputed)
-        return;
+    if (hasTBNComputed)
+    return;
     hasTBNComputed = true;
 
     vec3 dp1 = dFdx(worldSpacePosition);
@@ -107,4 +134,30 @@ void computeTBN() {
 
     float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
     TBN = mat3(T * invmax, B * invmax, normalVec);
+}
+
+vec2 parallaxOcclusionMapping (vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers){
+    if (distanceFromCamera > PARALLAX_THRESHOLD) return texCoords;
+    float layerDepth = 1.0 / layers;
+    float currentLayerDepth = 0.0;
+    vec2 P = viewDir.xy / viewDir.z * heightScale;
+    vec2 deltaTexCoords = P / layers;
+
+    vec2  currentUVs = texCoords;
+    float currentDepthMapValue = texture(heightMap, currentUVs).r;
+    while (currentLayerDepth < currentDepthMapValue) {
+        currentUVs -= deltaTexCoords;
+        currentDepthMapValue = texture(heightMap, currentUVs).r;
+        currentLayerDepth += layerDepth;
+    }
+
+    vec2 prevTexCoords = currentUVs + deltaTexCoords;
+    float afterDepth  = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(heightMap, prevTexCoords).r - currentLayerDepth + layerDepth;
+
+
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentUVs * (1.0 - weight);
+
+    return finalTexCoords;
 }

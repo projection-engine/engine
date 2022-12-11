@@ -13,7 +13,7 @@ vec3 albedoOverPI;
 
 
 // ------------------ INTERNAL ATTRIBUTES
-float distanceFromCamera;
+
 vec2 brdf = vec2(0.);
 vec3 F0 = vec3(0.04);
 float NdotV;
@@ -54,15 +54,13 @@ vec3 computeSkylightAmbient(vec3 V){
 //}
 
 
-vec4 pbLightComputation() {
+vec4 pbLightComputation(vec3 V) {
     if (flatShading) return vec4(albedo + emission, alpha);
     viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
     albedoOverPI = albedo/PI;
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
-    vec3 V = cameraPosition - worldSpacePosition;
-    distanceFromCamera = length(V);
-    V = normalize(V);
+
     float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
 
     float NdotV = max(dot(N, V), 0.000001);

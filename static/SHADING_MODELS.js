@@ -15,4 +15,5 @@ export default {
     RANDOM: 13,
     OVERDRAW: 14,
     LIGHT_COMPLEXITY: 15,
+    LIGHT_QUANTITY: 16
 }

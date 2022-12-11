@@ -55,13 +55,13 @@ export default class Shader {
         if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
 
-        if (fCode.includes("PointLights"))
-            LightsAPI.pointLightsUBO.bindWithShader(this.program)
+        if (fCode.includes("LightsMetadata")) {
+            LightsAPI.lightsMetadataUBO.bindWithShader(this.program)
+            LightsAPI.lightsUBOA.bindWithShader(this.program)
+            LightsAPI.lightsUBOB.bindWithShader(this.program)
+            LightsAPI.lightsUBOC.bindWithShader(this.program)
 
-        if (fCode.includes("DirectionalLights"))
-            LightsAPI.directionalLightsUBO.bindWithShader(this.program)
-        if (fCode.includes("SpotLights"))
-            LightsAPI.spotLightsUBO.bindWithShader(this.program)
+        }
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
