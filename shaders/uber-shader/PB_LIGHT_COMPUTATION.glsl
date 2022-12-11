@@ -13,6 +13,7 @@ vec3 albedoOverPI;
 
 
 // ------------------ INTERNAL ATTRIBUTES
+float distanceFromCamera;
 vec2 brdf = vec2(0.);
 vec3 F0 = vec3(0.04);
 float NdotV;
@@ -60,7 +61,7 @@ vec4 pbLightComputation() {
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
     vec3 V = cameraPosition - worldSpacePosition;
-    float distanceFromCamera = length(V);
+    distanceFromCamera = length(V);
     V = normalize(V);
     float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
 

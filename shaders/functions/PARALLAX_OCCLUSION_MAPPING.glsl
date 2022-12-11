@@ -1,4 +1,6 @@
 vec2 parallaxOcclusionMapping (vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers){
+    if(distanceFromCamera > PARALLAX_THRESHOLD)
+        return texCoords;
     float layerDepth = 1.0 / layers;
     float currentLayerDepth = 0.0;
     vec2 P = viewDir.xy / viewDir.z * heightScale;
