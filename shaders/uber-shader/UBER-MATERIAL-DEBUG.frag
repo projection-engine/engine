@@ -1,5 +1,5 @@
 precision highp float;
-#define FRAG_DEPTH_THREASHOLD .0001
+#define FRAG_DEPTH_THRESHOLD .0001
 
 //--UNIFORMS--
 
@@ -53,7 +53,7 @@ void main(){
     quadUV = gl_FragCoord.xy/bufferResolution;
     vec4 depthData = texture(scene_depth, quadUV);
     if (shadingModel != OVERDRAW)
-    if (!noDepthChecking &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD || (isSky && depthData.r > 0.)) discard;
+    if (!noDepthChecking &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
 
     vec3 V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);
@@ -134,7 +134,7 @@ void main(){
                 vec2 a = floor(gl_FragCoord.xy);
                 float checkerVal = 4.;
 
-                if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD){
+                if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD){
                     fragColor = vec4(1., 0., 0., 1.);
                     checkerVal = 2.;
                 }

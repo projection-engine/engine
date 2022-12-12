@@ -1,5 +1,5 @@
 precision highp float;
-#define FRAG_DEPTH_THREASHOLD .00001
+#define FRAG_DEPTH_THRESHOLD .00001
 
 //--UNIFORMS--
 
@@ -13,7 +13,7 @@ void main(){
     if(!noDepthChecking){
         vec4 depthData = texture(scene_depth, quadUV);
 
-        if (abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THREASHOLD || (isSky && depthData.r > 0.)) discard;
+        if (abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
     }
 
     vec3 V = cameraPosition - worldSpacePosition;
