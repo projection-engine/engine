@@ -31,11 +31,10 @@ export default [
     ], comp => comp.type === LIGHT_TYPES.DIRECTIONAL),
 
     Component.group("CUTOFF", [
-        Component.number("SMOOTHING", "smoothing", 1, 0),
-        Component.number("MAX_DISTANCE", "cutoff", 100, 1),
+        Component.number("SMOOTHING", "smoothing", 1, 0, .01),
+        Component.number("MAX_DISTANCE", "cutoff", 100, 1, .1),
         Component.number("RADIUS", "radius", 180, 1, .01, undefined, undefined, comp => comp.type !== LIGHT_TYPES.SPOT),
     ], comp => comp.type === LIGHT_TYPES.DIRECTIONAL),
-
 
     Component.group("SHADOWS", [
         Component.boolean("ENABLED", "shadowMap"),

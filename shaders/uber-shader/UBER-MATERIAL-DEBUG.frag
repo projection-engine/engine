@@ -115,26 +115,19 @@ void main(){
                         mat4 secondaryBuffer = lightSecondaryBufferA[i];
                         int type = lightTypeBufferA[i];
                         vec3 directIllumination = vec3(0.);
-//                        switch(type){
-//                            case DIRECTIONAL:
-//                            directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
-//                            break;
-//                            case SPOT:
-//                            directIllumination = computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
-//                            break;
-//                            case POINT:
-                            directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
-//                            break;
-//                            default:
-//                            break;
-//                        }
-                        if (length(directIllumination) > 0.) contribution++;
+                        if (type == DIRECTIONAL)
+                        directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
+                        else if (type == POINT)
+                        directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+                        else
+                        directIllumination = computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+                        contribution++;
                     }
                 }
-                if(total > 0.)
-                    fragColor = vec4(mix(vec3(1., 0., 0.), vec3(0., .0, 1.), 1. - contribution/total), 1.);
+                if (total > 0.)
+                fragColor = vec4(mix(vec3(1., 0., 0.), vec3(0., .0, 1.), 1. - contribution/total), 1.);
                 else
-                    fragColor = vec4(0., 0., 1., 1.);
+                fragColor = vec4(0., 0., 1., 1.);
                 break;
             }
             case OVERDRAW:{

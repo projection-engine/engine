@@ -63,32 +63,23 @@ vec4 pbLightComputation(vec3 V) {
     float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
     float NdotV = max(dot(N, V), 0.000001);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
-
     F0 = mix(F0, albedo, metallic);
-
 
     for (int i = 0; i < lightQuantityA; i++){
         mat4 primaryBuffer= lightPrimaryBufferA[i];
         mat4 secondaryBuffer = lightSecondaryBufferA[i];
         int type = lightTypeBufferA[i];
-//        switch(type){
-//            case DIRECTIONAL:
-//            directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, roughness, metallic, N);
-//            break;
-//            case SPOT:
-//            directIllumination += computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, roughness, metallic, F0);
-//            break;
-//            case POINT:
-            directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, roughness, metallic, F0);
-//            break;
-//            default:
-//            break;
-//        }
+        if (type == DIRECTIONAL)
+        directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
+        else if (type == POINT)
+        directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+        else
+        directIllumination += computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
     }
 
     //    directIllumination += computeSphereLight(sLightPos, vec3(1.), V, N, roughness, metallic, F0);
 
-    indirectIllumination = sampleIndirectLight(ssrEnabled, albedoOverPI, metallic, roughness);
+    indirectIllumination = sampleIndirectLight();
     if (hasSkylight)
     indirectIllumination += computeSkylightAmbient(V);
     return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);

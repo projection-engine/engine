@@ -1,5 +1,5 @@
 #define PI 3.14159265359
-#define MAX_LIGHTS 4
+#define MAX_LIGHTS 24
 #define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
@@ -65,27 +65,28 @@ in vec3 worldSpacePosition;
 uniform LightsMetadata{
     float shadowMapsQuantity;
     float shadowMapResolution;
+    int lightQuantityA;
+    int lightQuantityB;
+    int lightQuantityC;
 };
 
 uniform LightDataA{
     mat4 lightPrimaryBufferA[MAX_LIGHTS];
     mat4 lightSecondaryBufferA[MAX_LIGHTS];
     int lightTypeBufferA[MAX_LIGHTS];
-    int lightQuantityA;
+
 };
 
 uniform LightDataB{
     mat4 lightPrimaryBufferB[MAX_LIGHTS];
     mat4 lightSecondaryBufferB[MAX_LIGHTS];
     int lightTypeBufferB[MAX_LIGHTS];
-    int lightQuantityB;
 };
 
 uniform LightDataC{
     mat4 lightPrimaryBufferC[MAX_LIGHTS];
     mat4 lightSecondaryBufferC[MAX_LIGHTS];
     int lightTypeBufferC[MAX_LIGHTS];
-    int lightQuantityC;
 };
 
 uniform bool ssrEnabled;

@@ -25,19 +25,6 @@ vec3 computeSSR(){
     return tracedAlbedo * clamp(reflectionMultiplier, 0.0, 1.);
 }
 
-
-vec3 sampleIndirectLight(bool ssrEnabled, vec3 albedo, float metallic, float roughness){
-    vec3 diffuseColor = texture(SSGI, quadUV).rgb;
-    vec3 specularColor = ssrEnabled ? computeSSR() : vec3(0.);
-    diffuseColor *= albedo;
-
-    vec3 FR  = fresnelSchlickRoughness(NdotV, F0, roughness);
-    specularColor *=  (FR * brdf.r + brdf.g);
-
-
-    return diffuseColor + specularColor;
-}
-
 float distributionGGX (vec3 N, vec3 H, float roughness){
     float a2    = roughness * roughness * roughness * roughness;
     float NdotH = max (dot (N, H), 0.0);
@@ -54,6 +41,12 @@ float geometrySchlickGGX (float NdotV, float roughness){
 float geometrySmith (vec3 N, vec3 V, vec3 L, float roughness){
     return geometrySchlickGGX (max (dot (N, L), 0.0), roughness) *
     geometrySchlickGGX (max (dot (N, V), 0.0), roughness);
+}
+
+vec3 sampleIndirectLight(){
+    vec3 diffuseColor = texture(SSGI, quadUV).rgb * albedo;
+    vec3 specularColor = ssrEnabled ? computeSSR() : vec3(0.);
+    return diffuseColor + specularColor;
 }
 
 vec3 computeBRDF (vec3 lightPosition, vec3 lightColor, vec3 V, vec3 N, float roughness, float metallic, vec3 F0) {

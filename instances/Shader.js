@@ -56,6 +56,8 @@ export default class Shader {
             CameraAPI.UBO.bindWithShader(this.program)
 
         if (fCode.includes("LightsMetadata")) {
+            console.trace("BINGIND")
+            console.trace(fCode)
             LightsAPI.lightsMetadataUBO.bindWithShader(this.program)
             LightsAPI.lightsUBOA.bindWithShader(this.program)
             LightsAPI.lightsUBOB.bindWithShader(this.program)
