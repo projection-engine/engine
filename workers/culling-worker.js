@@ -1,5 +1,0 @@
-
-
-self.onmessage = (event) => {
-
-}

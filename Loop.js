@@ -8,7 +8,7 @@ import FrameComposition from "./runtime/post-processing/FrameComposition";
 import Engine from "./Engine";
 import SpriteRenderer from "./runtime/rendering/SpriteRenderer";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
-import TransformationPass from "./runtime/misc/TransformationPass";
+import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
@@ -126,12 +126,10 @@ export default class Loop {
 
     static loop(current) {
         try {
-            // CameraAPI.updateFrame()
-
             Engine.elapsed = current - previous
             previous = current
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
-            const transformationChanged = TransformationPass.hasChangeBuffer[0]
+            const transformationChanged = EntityWorkerAPI.hasChangeBuffer[0]
             if (transformationChanged === 1)
                 LightsAPI.packageLights(false, true)
             if (!Engine.benchmarkMode)
@@ -142,10 +140,13 @@ export default class Loop {
                 BenchmarkAPI.endTrack(BENCHMARK_KEYS.ALL)
             }
             if (transformationChanged === 1)
-                TransformationPass.hasChangeBuffer[0] = 0
+                EntityWorkerAPI.hasChangeBuffer[0] = 0
 
-            TransformationPass.execute()
-            CameraAPI.updateFrame()
+            EntityWorkerAPI.syncThreads()
+
+            CameraAPI.syncThreads()
+            CameraAPI.updateUBOs()
+
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {
             console.error(err)

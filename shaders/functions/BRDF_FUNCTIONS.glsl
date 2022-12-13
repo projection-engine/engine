@@ -44,8 +44,11 @@ float geometrySmith (vec3 N, vec3 V, vec3 L, float roughness){
 }
 
 vec3 sampleIndirectLight(){
-    vec3 diffuseColor = texture(SSGI, quadUV).rgb * albedoOverPI;
-    vec3 specularColor = ssrEnabled ? computeSSR() : vec3(0.);
+    vec3 F  = fresnelSchlick(NdotV, F0);
+    vec3 kD =  (1.0 - F) * (1.0 - metallic);
+
+    vec3 diffuseColor = texture(SSGI, quadUV).rgb * albedoOverPI * kD;
+    vec3 specularColor = ssrEnabled ? computeSSR() * (F * brdf.r + brdf.g) : vec3(0.);
     return diffuseColor + specularColor;
 }
 

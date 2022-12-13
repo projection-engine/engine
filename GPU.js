@@ -2,7 +2,7 @@ import LineAPI from "./lib/rendering/LineAPI";
 import ImageProcessor from "./lib/math/ImageProcessor";
 import TerrainGenerator from "./lib/math/TerrainGenerator";
 import CameraAPI from "./lib/utils/CameraAPI";
-import TransformationPass from "./runtime/misc/TransformationPass";
+import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import CubeMapAPI from "./lib/rendering/CubeMapAPI";
 import initializeShaders from "./utils/initialize-shaders";
 import initializeStaticMeshes from "./utils/initialize-static-meshes";
@@ -110,7 +110,7 @@ export default class GPU {
         initializeShaders()
 
         SceneRenderer.initialize()
-        TransformationPass.initialize()
+        EntityWorkerAPI.initialize()
         TerrainGenerator.initialize()
         ImageProcessor.initialize()
         Material.initialize()

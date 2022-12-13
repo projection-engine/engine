@@ -34,8 +34,6 @@ export default {
 
     DEVELOPMENT: {
         ICONS: "ICONS",
-        CUBEMAP: "CUBEMAP",
-
         LINE: "LINE",
         WIREFRAME: "WIREFRAME",
 

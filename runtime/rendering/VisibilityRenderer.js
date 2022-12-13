@@ -3,7 +3,7 @@ import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import Mesh from "../../instances/Mesh";
 import CameraAPI from "../../lib/utils/CameraAPI";
-import TransformationPass from "../misc/TransformationPass";
+import EntityWorkerAPI from "../../lib/utils/EntityWorkerAPI";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
 import DynamicMap from "../../DynamicMap";
@@ -32,7 +32,7 @@ export default class VisibilityRenderer {
     }
 
     static execute() {
-        if (!VisibilityRenderer.needsUpdate && !TransformationPass.hasChangeBuffer[0])
+        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
 
         VisibilityRenderer.needsSSAOUpdate = true
