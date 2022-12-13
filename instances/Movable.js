@@ -2,7 +2,7 @@ import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
 
 
 /**
- * @field __changedBuffer {Uint8Array [changed, changesApplied]} - Transferable array buffer that worker thread reads and writes in;
+ * @field __changedBuffer {Uint8Array [changed, changesApplied, isUnderChange]} - Transferable array buffer that worker thread reads and writes in;
  * @field __workerGroup {int} - Transformation group which entity is linked to
  */
 
@@ -14,14 +14,13 @@ export default class Movable {
     matrix = ArrayBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     previousModelMatrix = ArrayBufferAPI.allocateMatrix(4, true)
-    __changedBuffer = new Uint8Array(new SharedArrayBuffer(2))
-
+    __changedBuffer = new Uint8Array(new SharedArrayBuffer(3))
+    distanceFromCamera = new Float32Array(new SharedArrayBuffer(4))
     lockedRotation = false
     lockedTranslation = false
     lockedScaling = false
 
     absoluteTranslation = ArrayBufferAPI.allocateVector(3)
-    __workerGroup
 
     get position() {
         return this._translation
@@ -47,5 +46,8 @@ export default class Movable {
 
     get changesApplied() {
         return this.__changedBuffer[1] === 1
+    }
+    get isUnderChange(){
+        return this.__changedBuffer[2] === 1
     }
 }

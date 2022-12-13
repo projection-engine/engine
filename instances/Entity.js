@@ -17,9 +17,14 @@ export default class Entity extends Movable {
     children = []
     parent
     pickID = [-1, -1, -1]
+    #isCulled = false
+    get isCulled(){
+        return this.#isCulled
+    }
     __materialRef
     __meshRef
     __lightComp
+    __cullingComponent
 
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
@@ -58,7 +63,10 @@ export default class Entity extends Movable {
     static isRegistered(entity) {
         return !!Engine.entitiesMap.get(entity.id)
     }
-
+    updateCullingState(){
+        const cullComponent = this.__cullingComponent
+        this.#isCulled = cullComponent && cullComponent.distanceCulling && cullComponent.distance < this.distanceFromCamera[0]
+    }
     addComponent(KEY) {
         let instance = ComponentGetter[KEY]
         if (instance != null) {
@@ -89,6 +97,7 @@ export default class Entity extends Movable {
                     this.__hasRigidBody = true
                     break
                 case COMPONENTS.CULLING:
+                    this.__cullingComponent = instance
                     this.__hasCulling = true
                     break
                 case COMPONENTS.UI:
@@ -134,6 +143,7 @@ export default class Entity extends Movable {
                     this.__hasRigidBody = false
                     break
                 case COMPONENTS.CULLING:
+                    this.__cullingComponent = undefined
                     this.__hasCulling = false
                     break
                 case COMPONENTS.UI:

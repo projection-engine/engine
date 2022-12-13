@@ -102,6 +102,11 @@ export default class Loop {
         if (!Engine.isDev)
             executeScripts()
 
+        const allEntities = Engine.entities
+        const size = allEntities.length
+        for(let i =0; i < size; i++)
+            allEntities[i].updateCullingState()
+
         PhysicsPass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
@@ -121,6 +126,7 @@ export default class Loop {
         LensPostProcessing.execute()
         MotionBlur.execute()
         FrameComposition.execute()
+
         Loop.#afterDrawing()
     }
 
@@ -129,9 +135,11 @@ export default class Loop {
             Engine.elapsed = current - previous
             previous = current
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+
             const transformationChanged = EntityWorkerAPI.hasChangeBuffer[0]
             if (transformationChanged === 1)
                 LightsAPI.packageLights(false, true)
+
             if (!Engine.benchmarkMode)
                 Loop.#callback()
             else {
@@ -139,12 +147,12 @@ export default class Loop {
                 Loop.#benchmarkMode()
                 BenchmarkAPI.endTrack(BENCHMARK_KEYS.ALL)
             }
+
             if (transformationChanged === 1)
                 EntityWorkerAPI.hasChangeBuffer[0] = 0
 
-            EntityWorkerAPI.syncThreads()
-
             CameraAPI.syncThreads()
+            EntityWorkerAPI.syncThreads()
             CameraAPI.updateUBOs()
 
             Engine.frameID = requestAnimationFrame(Loop.loop)

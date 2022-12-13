@@ -135,7 +135,7 @@ export default class SceneRenderer {
             const entity = toRender[i]
             const mesh = entity.__meshRef
 
-            if (!entity.active || !mesh)
+            if (!entity.active || !mesh || entity.isCulled)
                 continue
 
             if (isDev)

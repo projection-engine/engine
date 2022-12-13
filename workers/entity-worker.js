@@ -1,18 +1,21 @@
 import WORKER_MESSAGES from "../static/WORKER_MESSAGES.json"
 import TransformationPass from "../runtime/misc/TransformationPass";
 
+
 self.onmessage = (event) => {
     if (event.data) {
         const {type, payload} = event.data
         switch (type) {
             case WORKER_MESSAGES.INITIALIZE:
-                TransformationPass.initialize(payload, self)
+                TransformationPass.initialize(payload)
                 break
             case WORKER_MESSAGES.REGISTER_ENTITY:
-                TransformationPass.targets.push(payload)
+                TransformationPass.targets.add(payload.id, payload)
+                TransformationPass.updateThreadInfo()
                 break
             case WORKER_MESSAGES.REMOVE_ENTITY:
-                TransformationPass.targets = TransformationPass.targets.filter(e => e.id !== payload)
+                TransformationPass.targets.delete(payload)
+                TransformationPass.updateThreadInfo()
                 break
             default:
                 break
