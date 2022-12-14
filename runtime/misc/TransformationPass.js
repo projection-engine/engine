@@ -34,6 +34,11 @@ export default class TransformationPass {
     static updateThreadInfo() {
         TransformationPass.threadMaxEntities = Math.ceil(TransformationPass.targets.array.length / TransformationPass.maxWorkers)
         TransformationPass.threadEntityOffset = TransformationPass.index * TransformationPass.threadMaxEntities
+        console.trace(
+            TransformationPass.maxWorkers,
+            TransformationPass.threadMaxEntities,
+            TransformationPass.threadEntityOffset
+        )
     }
 
     static execute() {
@@ -66,8 +71,11 @@ export default class TransformationPass {
             const entity = entities[i + TransformationPass.threadEntityOffset]
             if (!entity)
                 continue
-            if (entity.__changedBuffer[1] || TransformationPass.cameraBuffer[3])
-                entity.distanceFromCamera[0] = vec3.length(vec3.sub(cacheDistance, entity.absoluteTranslation, TransformationPass.cameraPosition))
+            if (entity.__changedBuffer[1] || TransformationPass.cameraBuffer[3]) {
+                const cullingBuffer = entity.cullingMetadata
+                cullingBuffer[0] = vec3.length(vec3.sub(cacheDistance, entity.absoluteTranslation, TransformationPass.cameraPosition))
+                cullingBuffer[3] = cullingBuffer[2] && cullingBuffer[0] > cullingBuffer[1] ? 1 : 0
+            }
         }
     }
 

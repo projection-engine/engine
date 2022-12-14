@@ -102,11 +102,6 @@ export default class Loop {
         if (!Engine.isDev)
             executeScripts()
 
-        const allEntities = Engine.entities
-        const size = allEntities.length
-        for(let i =0; i < size; i++)
-            allEntities[i].updateCullingState()
-
         PhysicsPass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
@@ -152,8 +147,9 @@ export default class Loop {
                 EntityWorkerAPI.hasChangeBuffer[0] = 0
 
             CameraAPI.syncThreads()
-            EntityWorkerAPI.syncThreads()
             CameraAPI.updateUBOs()
+            
+            EntityWorkerAPI.syncThreads()
 
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {

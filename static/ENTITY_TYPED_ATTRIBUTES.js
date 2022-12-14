@@ -7,5 +7,7 @@ export default [
     "_scaling",
     "baseTransformationMatrix",
     "pivotPoint",
-    "previousModelMatrix"
+    "previousModelMatrix",
+    "distanceFromCamera",
+    "__cullingMetadata"
 ]
