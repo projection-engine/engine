@@ -28,10 +28,10 @@ export default class LightComponent extends Component {
     shadowSamples = 3
     zNear = 1
     zFar = 10000
-    cutoff = 100
+    cutoff = 50
     shadowAttenuationMinDistance = 50
 
-    // -------------- POINT AND SPOT --------------
+    // -------------- NOT DIRECTIONAL --------------
     attenuation = [0, 0]
     smoothing = .5
 
@@ -42,6 +42,11 @@ export default class LightComponent extends Component {
     size = 35
     atlasFace = [0, 0]
     _center = [0, 0, 0]
+
+    // -------------- AREA --------------
+    areaRadius = 2
+    planeAreaWidth = 1
+    planeAreaHeight = 1
 
     get center() {
         return this._center

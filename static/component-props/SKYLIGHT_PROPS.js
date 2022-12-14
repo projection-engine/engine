@@ -3,7 +3,10 @@ import Component from "../../templates/components/Component";
 export default [
     Component.group("SPECULAR_LIGHT", [
         Component.number("LOD", "mipmaps", 10, 1, 1, false, true, "isDiffuse"),
-        Component.options("RESOLUTION", "resolution", [
+
+    ]),
+    Component.group("RESOLUTION", [
+        Component.options("resolution", [
             {
                 label: "128p",
                 value: 128,
@@ -21,6 +24,5 @@ export default [
                 value: 2048,
             }
         ])
-    ]),
-
+    ])
 ]

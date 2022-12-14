@@ -52,6 +52,18 @@ vec3 sampleIndirectLight(){
     return diffuseColor + specularColor;
 }
 
+vec3 computeSkylightAmbient(vec3 V){
+    vec3 specular = vec3(0.);
+    vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
+    vec3 kD = (1.0 - F) * (1.0 - metallic);
+    vec3 prefilteredColor = textureLod(skylight_specular, reflect(-V, N), 0.).rgb;
+
+    specular = prefilteredColor;//* (F * brdf.r + brdf.g);
+
+    //    vec3 diffuse = texture(skylight_diffuse, N).rgb * albedo * kD ;
+    return specular;//diffuse + specular;
+}
+
 vec3 computeBRDF (vec3 lightPosition, vec3 lightColor, vec3 V, vec3 N, float roughness, float metallic, vec3 F0) {
     float distanceFromFrag = length(lightPosition - worldSpacePosition);
     vec3 L = normalize(lightPosition - worldSpacePosition);

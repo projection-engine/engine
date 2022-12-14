@@ -53,10 +53,10 @@ export default class Component {
         return {type: Component.propTypes.STRING, label, key}
     }
 
-    static options(label, key, options, disabledIf) {
+    static options(key, options, disabledIf) {
         return {
             type: Component.propTypes.OPTIONS,
-            label,
+
             options,
             key,
             disabledIf

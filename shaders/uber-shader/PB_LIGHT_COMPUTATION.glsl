@@ -32,27 +32,7 @@ vec3 viewSpacePosition;
 
 //import(computeSpotLights)
 
-vec3 computeSkylightAmbient(vec3 V){
-    vec3 specular = vec3(0.);
-    vec3 F  = fresnelSchlickRoughness(NdotV, F0, roughness);
-    vec3 kD = (1.0 - F) * (1.0 - metallic);
-    vec3 prefilteredColor = textureLod(skylight_specular, reflect(-V, N), 0.).rgb;
-
-    specular = prefilteredColor;//* (F * brdf.r + brdf.g);
-
-    //    vec3 diffuse = texture(skylight_diffuse, N).rgb * albedo * kD ;
-    return specular;//diffuse + specular;
-}
-
-//vec3 computeSphereLight(vec3 lightPosition, vec3 lightColor, vec3 V, vec3 N, float roughness, float metallic,  vec3 F0){
-//    vec3 L = lightPosition - worldSpacePosition;
-//    vec3 R = reflect(-V, N);
-//    vec3 centerToRay = dot(L, R) * R - L;
-//    vec3 closestPoint = L + centerToRay * clamp(sphereRadius / length(centerToRay), 0., 1.);
-//    vec3 newLightVector = closestPoint - worldSpacePosition;
-//    return computeBRDF(newLightVector, lightColor, V, N, roughness, metallic, F0);
-//}
-
+//import(computeAreaLights)
 
 vec4 pbLightComputation(vec3 V) {
     if (flatShading) return vec4(albedo + emission, alpha);
@@ -73,12 +53,12 @@ vec4 pbLightComputation(vec3 V) {
         if (type == DIRECTIONAL)
         directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
         else if (type == POINT)
-        directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
-        else
-        directIllumination += computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+        directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
+        else if (type == SPOT)
+        directIllumination += computeSpotLights(distanceFromCamera, primaryBuffer, V, N, 1., .0, F0);
+        else if (type == SPHERE)
+        directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
     }
-
-    //    directIllumination += computeSphereLight(sLightPos, vec3(1.), V, N, roughness, metallic, F0);
 
     indirectIllumination = sampleIndirectLight();
     if (hasSkylight)

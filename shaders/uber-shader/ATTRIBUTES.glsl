@@ -9,6 +9,9 @@
 const int DIRECTIONAL = 0;
 const int SPOT = 1;
 const int POINT = 2;
+const int SPHERE = 3;
+const int DISK = 4;
+const int PLANE = 5;
 
 
 // GLOBAL

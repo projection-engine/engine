@@ -25,7 +25,7 @@ export default class SpriteRenderer {
         gpu.activeTexture(gpu.TEXTURE0)
         for (let i = 0; i < size; i++) {
             const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
-            if (!current.active)
+            if (!current.active || current.isCulled)
                 continue
             const texture = textures.get(component.imageID)
             if (!texture)

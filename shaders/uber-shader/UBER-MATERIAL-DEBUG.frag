@@ -118,9 +118,9 @@ void main(){
                         if (type == DIRECTIONAL)
                         directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
                         else if (type == POINT)
-                        directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+                        directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer,  V, N, 1., .0, F0);
                         else
-                        directIllumination = computeSpotLights(distanceFromCamera, primaryBuffer, worldSpacePosition, V, N, 1., .0, F0);
+                        directIllumination = computeSpotLights(distanceFromCamera, primaryBuffer,  V, N, 1., .0, F0);
                         contribution++;
                     }
                 }

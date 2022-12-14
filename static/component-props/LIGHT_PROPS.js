@@ -2,20 +2,42 @@ import Component from "../../templates/components/Component";
 import LIGHT_TYPES from "../LIGHT_TYPES";
 
 export default [
-    Component.options("TYPE", "type", [
-        {
-            key: "DIRECTIONAL",
-            value: LIGHT_TYPES.DIRECTIONAL
-        },
-        {
-            key: "SPOT",
-            value: LIGHT_TYPES.SPOT
-        },
-        {
-            key: "POINT",
-            value: LIGHT_TYPES.POINT
-        }
+    Component.group("TYPE", [
+        Component.options("type", [
+            {
+                label: "DIRECTIONAL_LIGHT",
+                value: LIGHT_TYPES.DIRECTIONAL
+            },
+            {
+                label: "SPOTLIGHT",
+                value: LIGHT_TYPES.SPOT
+            },
+            {
+                label: "POINT_LIGHT",
+                value: LIGHT_TYPES.POINT
+            },
+
+            {
+                label: "SPHERE_AREA",
+                value: LIGHT_TYPES.SPHERE
+            },
+            {
+                label: "DISK_AREA",
+                value: LIGHT_TYPES.DISK
+            },
+            {
+                label: "PLANE_AREA",
+                value: LIGHT_TYPES.PLANE
+            }
+        ]),
     ]),
+
+    Component.group("AREA_LIGHT", [
+        Component.number("RADIUS", "areaRadius", undefined, 0, undefined,undefined,undefined,comp => comp.type === LIGHT_TYPES.PLANE),
+
+        Component.number("WIDTH", "planeAreaWidth", undefined, 0, undefined,undefined,undefined,comp => comp.type !== LIGHT_TYPES.PLANE),
+        Component.number("HEIGHT", "planeAreaHeight", undefined, 0, undefined,undefined,undefined,comp => comp.type !== LIGHT_TYPES.PLANE)
+    ], comp => comp.type !== LIGHT_TYPES.SPHERE && comp.type !== LIGHT_TYPES.DISK && comp.type !== LIGHT_TYPES.PLANE),
 
     Component.group("INTENSITY_COLOR", [
         Component.color("COLOR", "color"),

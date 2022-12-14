@@ -1,17 +1,16 @@
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
 import CAMERA_UBO from "../shaders/functions/CAMERA_METADATA_UNIFORM.glsl";
-
-
+import COMPUTE_AREA_LIGHT from "../shaders/lights/COMPUTE_AREALIGHT.glsl"
 import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
 import ACES from "../shaders/functions/ACES.glsl";
 import DEPTH_UTILS from "../shaders/functions/DEPTH_RECONSTRUCTION_UTILS.glsl"
-import COMPUTE_LIGHTS from "../shaders/functions/COMPUTE_DIRECTIONAL_LIGHTS.glsl"
-import COMPUTE_POINT_LIGHTS from "../shaders/functions/COMPUTE_POINT_LIGHTS.glsl"
-import COMPUTE_SPOTLIGHTS from "../shaders/functions/COMPUTE_SPOTLIGHT.glsl"
-import BRDF_FUNCTIONS from "../shaders/functions/BRDF_FUNCTIONS.glsl"
+import COMPUTE_LIGHTS from "../shaders/lights/COMPUTE_DIRECTIONAL_LIGHTS.glsl"
+import COMPUTE_POINT_LIGHTS from "../shaders/lights/COMPUTE_POINT_LIGHTS.glsl"
+import COMPUTE_SPOTLIGHTS from "../shaders/lights/COMPUTE_SPOTLIGHT.glsl"
+import BRDF_FUNCTIONS from "../shaders/lights/BRDF_FUNCTIONS.glsl"
 
 import UBER_ATTRIBUTES from "../shaders/uber-shader/ATTRIBUTES.glsl"
-import SSS from "../shaders/functions/SSS.glsl"
+import SSS from "../shaders/lights/SSS.glsl"
 
 const METHODS = {
     cameraUBO: "//import(cameraUBO)",
@@ -24,7 +23,8 @@ const METHODS = {
     SSS: "//import(SSS)",
     computePointLights: "//import(computePointLights)",
     brdf: "//import(brdf)",
-    computeSpotLights: "//import(computeSpotLights)"
+    computeSpotLights: "//import(computeSpotLights)",
+    computeAreaLights: "//import(computeAreaLights)"
 }
 
 
@@ -34,6 +34,8 @@ export default function applyShaderMethods(shaderCode) {
     for (let i = 0; i < 3; i++) {
         Object.keys(METHODS).forEach(key => {
             switch (true) {
+                case key === "computeAreaLights":
+                    response = response.replaceAll(METHODS[key], COMPUTE_AREA_LIGHT)
                 case key === "computeSpotLights":
                     response = response.replaceAll(METHODS[key], COMPUTE_SPOTLIGHTS)
                     break

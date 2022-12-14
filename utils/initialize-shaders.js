@@ -7,7 +7,6 @@ import LENS_POST_PROCESSING_FRAG from "../shaders/post-processing/LENS_POST_PROC
 import SSAO from "../shaders/post-processing/SSAO.frag";
 import BOX_BLUR_FRAG from "../shaders/post-processing/BOX-BLUR.frag";
 import DirectionalShadows from "../runtime/rendering/DirectionalShadows";
-import * as smShaders from "../shaders/forward-rendering/SHADOW_MAP.glsl";
 import OmnidirectionalShadows from "../runtime/rendering/OmnidirectionalShadows";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
 import FXAA_FRAG from "../shaders/post-processing/FXAA.frag";
@@ -29,6 +28,9 @@ import BILINEAR_DOWNSCALE from "../shaders/post-processing/BILINEAR_DOWNSCALE.gl
 import TO_SCREEN from "../shaders/post-processing/TO_SCREEN.vert"
 import V_BUFFER_VERT from "../shaders/forward-rendering/V_BUFFER.vert"
 import V_BUFFER_FRAG from "../shaders/forward-rendering/V_BUFFER.frag"
+import OMNIDIRECTIONAL_SHADOWS from "../shaders/forward-rendering/OMNIDIRECTIONAL_SHADOWS.frag"
+import SHADOWS_VERTEX from "../shaders/forward-rendering/SHADOWS.vert"
+import DIRECTIONAL_SHADOWS from "../shaders/forward-rendering/DIRECTIONAL_SHADOWS.frag"
 
 export default function initializeShaders() {
     SpriteRenderer.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.SPRITE, SPRITE_VERTEX, SPRITE_FRAG)
@@ -46,8 +48,8 @@ export default function initializeShaders() {
 
     SSAO.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.AO, QUAD_VERTEX, SSAO)
     SSAO.blurShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOX_BLUR, QUAD_VERTEX, BOX_BLUR_FRAG)
-    DirectionalShadows.shadowMapShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, smShaders.vertex, smShaders.fragment)
-    OmnidirectionalShadows.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, smShaders.vertex, smShaders.omniFragment)
+    DirectionalShadows.shadowMapShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DIRECT_SHADOWS, SHADOWS_VERTEX, DIRECTIONAL_SHADOWS)
+    OmnidirectionalShadows.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.OMNIDIRECTIONAL_SHADOWS, SHADOWS_VERTEX, OMNIDIRECTIONAL_SHADOWS)
     FrameComposition.shader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.FRAME_COMPOSITION, QUAD_VERTEX, FXAA_FRAG)
 
     LensPostProcessing.brightShader = GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BLOOM_MASK, QUAD_VERTEX, BRIGHTNESS_FILTER_FRAG)
