@@ -62,7 +62,7 @@ void main(){
     //--MATERIAL_SELECTION--
 
     if (shadingModel == LIGHT_ONLY)
-    albedo = vec3(.5);
+    albedo = vec3(1.);
 
     if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
     fragColor = pbLightComputation(V);
@@ -118,9 +118,11 @@ void main(){
                         if (type == DIRECTIONAL)
                         directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
                         else if (type == POINT)
-                        directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer,  V, N, 1., .0, F0);
-                        else
-                        directIllumination = computeSpotLights(distanceFromCamera, primaryBuffer,  V, N, 1., .0, F0);
+                        directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
+                        else if (type == SPOT)
+                        directIllumination = computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
+                        else if (type == SPHERE)
+                        directIllumination = computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
                         contribution++;
                     }
                 }

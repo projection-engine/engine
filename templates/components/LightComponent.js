@@ -3,7 +3,7 @@ import LIGHT_PROPS from "../../static/component-props/LIGHT_PROPS";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import Entity from "../../instances/Entity";
 import LightsAPI from "../../lib/utils/LightsAPI";
-
+const toRad = Math.PI / 180
 
 export default class LightComponent extends Component {
 
@@ -44,7 +44,7 @@ export default class LightComponent extends Component {
     _center = [0, 0, 0]
 
     // -------------- AREA --------------
-    areaRadius = 2
+    areaRadius = 1
     planeAreaWidth = 1
     planeAreaHeight = 1
 

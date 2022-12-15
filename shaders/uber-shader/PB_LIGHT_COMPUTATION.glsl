@@ -55,7 +55,7 @@ vec4 pbLightComputation(vec3 V) {
         else if (type == POINT)
         directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
         else if (type == SPOT)
-        directIllumination += computeSpotLights(distanceFromCamera, primaryBuffer, V, N, 1., .0, F0);
+        directIllumination += computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
         else if (type == SPHERE)
         directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
     }
