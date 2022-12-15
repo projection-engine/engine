@@ -1,6 +1,9 @@
 import Component from "../../templates/components/Component";
 import LIGHT_TYPES from "../LIGHT_TYPES";
 
+function checkShadows(comp){
+    return  !comp.shadowMap || comp.type !== LIGHT_TYPES.DIRECTIONAL && comp.type !== LIGHT_TYPES.POINT
+}
 export default [
     Component.group("TYPE", [
         Component.options("type", [
@@ -60,12 +63,12 @@ export default [
 
     Component.group("SHADOWS", [
         Component.boolean("ENABLED", "shadowMap"),
-        Component.number("SIZE", "size", undefined, 1, undefined, false, v => !v.shadowMap, comp => comp.type !== LIGHT_TYPES.DIRECTIONAL),
-        Component.number("FAR", "zFar", undefined, undefined, .001, false, true, v => !v.shadowMap),
-        Component.number("NEAR", "zNear", undefined, undefined, .001, false, true, v => !v.shadowMap),
-        Component.number("BIAS", "shadowBias", undefined, undefined, .00001),
-        Component.number("PCF_SAMPLES", "shadowSamples", 10, 1, 1, false, false, v => !v.shadowMap),
-        Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, undefined, false, false, v => !v.shadowMap),
+        Component.number("SIZE", "size", undefined, 1, undefined, false, v => !v.shadowMap, comp => !comp.shadowMap || comp.type !== LIGHT_TYPES.DIRECTIONAL),
+        Component.number("FAR", "zFar", undefined, undefined, .001, false, true, checkShadows),
+        Component.number("NEAR", "zNear", undefined, undefined, .001, false, true,checkShadows),
+        Component.number("BIAS", "shadowBias", undefined, undefined, .00001, undefined, undefined, checkShadows),
+        Component.number("PCF_SAMPLES", "shadowSamples", 10, 1, 1, false, false, checkShadows),
+        Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, undefined, false, false, checkShadows),
         Component.boolean("HAS_SSS", "hasSSS")
 
     ]),

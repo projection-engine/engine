@@ -123,7 +123,10 @@ void main(){
                         directIllumination = computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
                         else if (type == SPHERE)
                         directIllumination = computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
-                        contribution++;
+                        else if (type == DISK)
+                        directIllumination = computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
+
+                        if(length(directIllumination) > 0.) contribution++;
                     }
                 }
                 if (total > 0.)

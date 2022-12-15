@@ -9,6 +9,7 @@ vec3 N = vec3(0.);
 vec3 emission = vec3(0.);
 bool flatShading = false;
 vec3 albedoOverPI;
+vec3 VrN;
 // ------------------ ATTRIBUTES TO FILL
 
 
@@ -36,6 +37,7 @@ vec3 viewSpacePosition;
 
 vec4 pbLightComputation(vec3 V) {
     if (flatShading) return vec4(albedo + emission, alpha);
+    VrN		= reflect( -V, N );
     viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
     albedoOverPI = albedo/PI;
     vec3 directIllumination = vec3(0.0);
@@ -58,6 +60,9 @@ vec4 pbLightComputation(vec3 V) {
         directIllumination += computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
         else if (type == SPHERE)
         directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
+        else if (type == DISK)
+        directIllumination += computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
+
     }
 
     indirectIllumination = sampleIndirectLight();

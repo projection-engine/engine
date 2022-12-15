@@ -44,13 +44,13 @@ vec3 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 p
 
     if (hasShadowMap) shadows = pointLightShadow(distanceFromCamera, pointLight[3][2], shadowMap, lightPosition, pointLight);
 
-    if (shadows < 1.) return vec3(0.);
+    if (shadows == 0.) return vec3(0.);
 
     float cutoff = pointLight[3][3];
     float outerCutoff = pointLight[2][2];
-    float occlusion =hasSSS ? screenSpaceShadows(lightPosition) : 1.;
+    float occlusion =hasSSS ? screenSpaceShadows(lightPosition - worldSpacePosition) : 1.;
 
-    if (occlusion < 1.) return vec3(0.);
+    if (occlusion == 0. ) return vec3(0.);
 
     vec3 lightColor = vec3(pointLight[1][0], pointLight[1][1], pointLight[1][2]);
     vec2 attenuationPLight = vec2(pointLight[2][0], pointLight[2][1]);

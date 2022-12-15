@@ -68,9 +68,9 @@ vec3 computeDirectionalLight(float distanceFromCamera, mat4 lightMatrix, mat4 li
         vec2 atlasFace = vec2(lightData[2][0], lightData[2][1]);
         shadows = directionalLightShadows(distanceFromCamera, lightData[3][1], lightData[3][0], lightSpacePosition, atlasFace, shadow_atlas, shadowMapsQuantity, shadowMapResolution, lightData[2][2]);
     }
-    if (shadows < 1.) return vec3(0.);
+    if (shadows == 0.) return vec3(0.);
     float occlusion = hasSSS ? screenSpaceShadows(lightDirection) : 1.;
-    if (occlusion < 1.) return vec3(0.);
+    if (occlusion == 0. ) return vec3(0.);
 
     return computeBRDF(lightDirection, lightColor, V, N, roughness, metallic, F0);
 }

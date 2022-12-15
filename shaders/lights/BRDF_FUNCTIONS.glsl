@@ -65,7 +65,6 @@ vec3 computeSkylightAmbient(vec3 V){
 }
 
 vec3 computeBRDF (vec3 lightPosition, vec3 lightColor, vec3 V, vec3 N, float roughness, float metallic, vec3 F0) {
-    float distanceFromFrag = length(lightPosition - worldSpacePosition);
     vec3 L = normalize(lightPosition - worldSpacePosition);
     vec3 H = normalize(V + L);
 

@@ -12,13 +12,11 @@ vec3 computeSpotLights (mat4 spotLight, vec3 V, vec3 N, float roughness, float m
     bool hasSSS = spotLight[3][3] == 1.;
     vec3 L = normalize(lightPosition - worldSpacePosition);
 
-
-
     float theta = dot(L, normalize(-lightDirection));
     if (theta <= lightRadius) return vec3(0.);
 
     float occlusion =hasSSS ? screenSpaceShadows(-lightDirection) : 1.;
-    if(occlusion < 1.) return vec3(0.);
+    if (occlusion == 0. ) return vec3(0.);
 
     float attFactor = 1. / (1. + (lightAttenuation.x * distanceFromFrag) + (lightAttenuation.y * pow(distanceFromFrag, 2.)));
 

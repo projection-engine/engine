@@ -1,19 +1,49 @@
-vec3 computeSphereLight( mat4 areaLight, vec3 V, vec3 N, float roughness, float metallic,  vec3 F0){
-    vec3 L = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
+vec3 computeSphereLight(mat4 areaLight, vec3 V, vec3 N, float roughness, float metallic, vec3 F0){
+    vec3 lightPosition      = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
+    vec3 lightColor         = vec3(areaLight[1][0], areaLight[1][1], areaLight[1][2]);
+    float lightCutoff       = areaLight[2][3];
+    float lightRadius      = areaLight[2][0];
+    vec2 lightAttenuation   = vec2(areaLight[3][0], areaLight[3][1]);
+    bool hasSSS             = areaLight[3][3] == 1.;
+    vec3 L                    = lightPosition - worldSpacePosition;
+
+    float distanceFromFrag  = length(L);
+    if (distanceFromFrag > lightCutoff) return vec3(0.);
+
+    float occlusion         = hasSSS ? screenSpaceShadows(L) : 1.;
+    if (occlusion == 0.) return vec3(0.);
+
+    float attFactor         = 1. / (1. + (lightAttenuation.x * distanceFromFrag) + (lightAttenuation.y * pow(distanceFromFrag, 2.)));
+    vec3 centerToRay        = dot(L, VrN) * VrN - L;
+    vec3 closestPoint        = L + centerToRay * clamp(lightRadius / length(centerToRay), 0.0, 1.0);
+
+    return computeBRDF(closestPoint + worldSpacePosition, lightColor, V, N, roughness, metallic, F0) * attFactor;
+}
+
+
+vec3 computeDiskLight(mat4 areaLight, vec3 V, vec3 N, float roughness, float metallic, vec3 F0){
+    vec3 lightPosition = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
     vec3 lightColor = vec3(areaLight[1][0], areaLight[1][1], areaLight[1][2]);
-    float lightCutoff = areaLight[2][3];
-    float sphereRadius = areaLight[2][0];
-    vec2 lightAttenuation = vec2(areaLight[3][0], areaLight[3][1]);
+    vec3 lightNormal = vec3(areaLight[2][3], areaLight[3][0], areaLight[3][1]);
+    float lightCutoff = areaLight[3][2];
+    float lightRadius = areaLight[2][0];
+    vec2 lightAttenuation = vec2(areaLight[2][1], areaLight[2][2]);
+    bool hasSSS = areaLight[3][3] == 1.;
+    vec3 L = lightPosition - worldSpacePosition;
+    float distanceFromFrag = length(L);
 
-    float distanceFromFrag = length(L - worldSpacePosition);
-    if(distanceFromFrag > lightCutoff) return vec3(0.);
+    if (distanceFromFrag > lightCutoff) return vec3(0.);
 
-    float attFactor = 1. / (1. + (lightAttenuation.x * distanceFromFrag) + (lightAttenuation.y * pow(distanceFromFrag, 2.)));
+    float occlusion         = hasSSS ? screenSpaceShadows(L) : 1.;
+    if (occlusion == 0.) return vec3(0.);
 
-    vec3 R = reflect(-V, N);
-    vec3 centerToRay = dot(L, R) * R - L;
-    vec3 closestPoint = L + centerToRay * clamp(sphereRadius / length(centerToRay), 0., 1.);
-    vec3 newLightVector = closestPoint - worldSpacePosition;
+    vec3 dir = worldSpacePosition - lightPosition;
+    vec3 planeIntersect = (worldSpacePosition - dot(dir, lightNormal) * lightNormal) - lightPosition;
+    float halfSize = lightRadius * 0.5;
+    vec2 dist2D = vec2(dot(dir, _LightRight), dot(dir, _LightUp));
+    vec2 rectHalf = vec2(halfSize, halfSize);
+    dist2D = clamp(dist2D, -rectHalf, rectHalf);
+    vec3 closestPoint = (lightPosition + (_LightRight * dist2D.x + _LightUp * dist2D.y));
 
-    return computeBRDF(newLightVector, lightColor, V, N, roughness, metallic, F0) * attFactor;
+    return computeBRDF(closestPoint, lightColor, V, N, roughness, metallic, F0) * attFactor;
 }

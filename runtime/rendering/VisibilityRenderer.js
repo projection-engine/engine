@@ -17,11 +17,12 @@ export default class VisibilityRenderer {
     static velocitySampler
     static needsUpdate = true
     static needsSSAOUpdate = false
+    static FBO
 
     static initialize() {
         shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.VISIBILITY_BUFFER)
         uniforms = shader.uniformMap
-        fbo = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
+        VisibilityRenderer.FBO = fbo = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
 
         VisibilityRenderer.depthSampler = fbo.colors[0]
         VisibilityRenderer.entityIDSampler = fbo.colors[1]
