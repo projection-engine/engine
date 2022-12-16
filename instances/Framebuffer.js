@@ -1,4 +1,4 @@
-import GPU from "../GPU";
+import GPU from "../lib/GPU";
 import Texture from "./Texture";
 
 export default class Framebuffer {

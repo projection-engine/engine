@@ -1,6 +1,6 @@
 import GPUAPI from "../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
-import GPU from "../GPU";
+import GPU from "../lib/GPU";
 import SSGI from "../runtime/rendering/SSGI";
 
 import MotionBlur from "../runtime/post-processing/MotionBlur";
@@ -30,6 +30,7 @@ export default function initializeFrameBuffers() {
         .depthTest()
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CURRENT_FRAME).texture()
+    GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.TAA_CACHE).texture()
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.CHACHE_BUFFER).texture().depthTest()
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI, halfResW, halfResH)
@@ -57,6 +58,7 @@ export default function initializeFrameBuffers() {
     MotionBlur.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})
     MotionBlur.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER).colors[0]
     FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
+
 
 
     LensPostProcessing.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.BLUR_BLOOM).texture()

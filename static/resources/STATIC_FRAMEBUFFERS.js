@@ -16,6 +16,7 @@ export default {
     GI:                     "GI",
     SCREEN_EFFECTS:         "SCREEN_EFFECTS",
     VISIBILITY_BUFFER:      "VISIBILITY_BUFFER",
+    TAA_CACHE: "TAA_CACHE",
     EDITOR: {
         OUTLINE: "OUTLINE",
         PREVIEW: "PREVIEW"

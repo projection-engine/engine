@@ -1,4 +1,4 @@
-import GPU from "../GPU";
+import GPU from "../lib/GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";

@@ -7,7 +7,7 @@ import PLANE from "../static/meshes/PLANE_SM.json";
 import VertexBuffer from "../instances/VertexBuffer";
 import cube from "../static/meshes/CUBE.json";
 import QUAD from "../static/meshes/QUAD.json";
-import GPU from "../GPU";
+import GPU from "../lib/GPU";
 
 export default function initializeStaticMeshes() {
     GPU.cubeBuffer = new VertexBuffer(0, new Float32Array(cube), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)

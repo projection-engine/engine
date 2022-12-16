@@ -1,4 +1,4 @@
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import Mesh from "../../instances/Mesh";
@@ -6,7 +6,7 @@ import CameraAPI from "../../lib/utils/CameraAPI";
 import EntityWorkerAPI from "../../lib/utils/EntityWorkerAPI";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
-import DynamicMap from "../../DynamicMap";
+import DynamicMap from "../../lib/DynamicMap";
 
 let shader, uniforms, fbo
 let viewProjection, previousViewProjection

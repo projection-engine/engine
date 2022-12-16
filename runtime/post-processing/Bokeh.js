@@ -1,4 +1,4 @@
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import GPUAPI from "../../lib/rendering/GPUAPI";

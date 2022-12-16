@@ -1,5 +1,5 @@
 import VisibilityRenderer from "../rendering/VisibilityRenderer";
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 import Engine from "../../Engine";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 

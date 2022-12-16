@@ -1,6 +1,6 @@
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 import COMPONENTS from "../../static/COMPONENTS.js";
-import DynamicMap from "../../DynamicMap";
+import DynamicMap from "../../lib/DynamicMap";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
 let shader, uniforms

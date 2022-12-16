@@ -8,7 +8,7 @@ import ConversionAPI from "./lib/math/ConversionAPI";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
-import GPU from "./GPU";
+import GPU from "./lib/GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
@@ -165,8 +165,9 @@ export default class Engine {
         MotionBlur.maxSamples = data.mbSamples
 
         FrameComposition.UBO.bind()
-        boolBuffer[0] = data.fxaa ? 1 : 0
-        FrameComposition.UBO.updateData("fxaaEnabled", boolBuffer)
+        boolBuffer[0] = data.AAMethod || 0
+        FrameComposition.AAMethodInUse = boolBuffer[0]
+        FrameComposition.UBO.updateData("AAMethod", boolBuffer)
         FrameComposition.UBO.updateData("FXAASpanMax", new Float32Array([data.FXAASpanMax || 8]))
         FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
         FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))

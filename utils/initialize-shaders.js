@@ -9,7 +9,7 @@ import BOX_BLUR_FRAG from "../shaders/post-processing/BOX-BLUR.frag";
 import DirectionalShadows from "../runtime/rendering/DirectionalShadows";
 import OmnidirectionalShadows from "../runtime/rendering/OmnidirectionalShadows";
 import FrameComposition from "../runtime/post-processing/FrameComposition";
-import FXAA_FRAG from "../shaders/post-processing/FXAA.frag";
+import FXAA_FRAG from "../shaders/post-processing/COMPOSITION.frag";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/post-processing/BRIGHTNESS_FILTER.frag";
 
@@ -22,7 +22,6 @@ import SpriteRenderer from "../runtime/rendering/SpriteRenderer";
 import GAUSSIAN_FRAG from "../shaders/post-processing/GAUSSIAN.frag"
 import UPSAMPLING_TEND_FRAG from "../shaders/post-processing/UPSAMPLE_TENT.glsl"
 import BOKEH_FRAG from "../shaders/post-processing/BOKEH.frag"
-import TEMPORAL_SUPERSAMPLING from "../shaders/post-processing/TEMPORAL_SUPERSAMPLING.frag"
 import BILATERAL_BLUR from "../shaders/post-processing/BILATERAL_BLUR.glsl"
 import BILINEAR_DOWNSCALE from "../shaders/post-processing/BILINEAR_DOWNSCALE.glsl"
 import TO_SCREEN from "../shaders/post-processing/TO_SCREEN.vert"
@@ -39,7 +38,6 @@ export default function initializeShaders() {
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.TO_SCREEN, QUAD_VERTEX, TO_SCREEN)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.DOWNSCALE, QUAD_VERTEX, BILINEAR_DOWNSCALE)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BILATERAL_BLUR, QUAD_VERTEX, BILATERAL_BLUR)
-    GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.TAA, QUAD_VERTEX, TEMPORAL_SUPERSAMPLING)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.BOKEH, QUAD_VERTEX, BOKEH_FRAG)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.IRRADIANCE, CUBEMAP, IRRADIANCE_MAP)
     GPUAPI.allocateShader(STATIC_SHADERS.PRODUCTION.PREFILTERED, CUBEMAP, PREFILTERED_MAP)

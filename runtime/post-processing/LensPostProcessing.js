@@ -1,5 +1,5 @@
 import CameraAPI from "../../lib/utils/CameraAPI";
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 import UBO from "../../instances/UBO";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";

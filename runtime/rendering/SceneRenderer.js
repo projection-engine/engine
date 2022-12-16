@@ -1,5 +1,5 @@
 import Engine from "../../Engine";
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 import SSAO from "./SSAO";
 import SSGI from "./SSGI";
 import DirectionalShadows from "./DirectionalShadows";

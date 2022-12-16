@@ -17,7 +17,7 @@ import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
 import LightsAPI from "./lib/utils/LightsAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
-import GPU from "./GPU";
+import GPU from "./lib/GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "./lib/rendering/GPUAPI";
 
@@ -46,6 +46,7 @@ export default class Loop {
     }
 
     static #benchmarkMode() {
+        FrameComposition.copyPreviousFrame()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.PHYSICS_PASS)
         PhysicsPass.execute()
@@ -102,6 +103,8 @@ export default class Loop {
         if (!Engine.isDev)
             executeScripts()
 
+        FrameComposition.copyPreviousFrame()
+
         PhysicsPass.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
@@ -118,6 +121,7 @@ export default class Loop {
         GPUAPI.copyTexture(targetFBO, FBO, gpu.COLOR_BUFFER_BIT)
 
         SSGI.execute()
+
         LensPostProcessing.execute()
         MotionBlur.execute()
         FrameComposition.execute()

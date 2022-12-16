@@ -1,5 +1,5 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
-import GPU from "../../GPU";
+import GPU from "../../lib/GPU";
 
 import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
