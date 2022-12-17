@@ -3,7 +3,6 @@ import CAMERA_PROPS from "../../static/component-props/CAMERA_PROPS";
 
 export default class CameraComponent extends Component {
     _props = CAMERA_PROPS
-    name = "CAMERA"
 
     fov = 90
 

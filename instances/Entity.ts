@@ -2,26 +2,54 @@ import {v4} from "uuid"
 import Movable from "./Movable";
 import COMPONENTS from "../static/COMPONENTS.js";
 import EntityAPI from "../lib/utils/EntityAPI";
-import ComponentGetter from "../templates/ComponentGetter";
+import ComponentGetter from "../utils/get-component-instance";
 import serializeStructure from "../utils/serialize-structure";
 import Engine from "../Engine";
+import Component from "../templates/components/Component";
+import LightComponent from "../templates/components/LightComponent";
+import CullingComponent from "../templates/components/CullingComponent";
+import Material from "./Material";
+import Mesh from "./Mesh";
+import MutableObject from "../MutableObject";
+import MeshComponent from "../templates/components/MeshComponent";
+import SkyLightComponent from "../templates/components/SkyLightComponent";
+import CameraComponent from "../templates/components/CameraComponent";
+import SpriteComponent from "../templates/components/SpriteComponent";
+import PhysicsColliderComponent from "../templates/components/PhysicsColliderComponent";
+import RigidBodyComponent from "../templates/components/RigidBodyComponent";
+import UIComponent from "../templates/components/UIComponent";
+import TerrainComponent from "../templates/components/TerrainComponent";
+import getComponentInstance from "../utils/get-component-instance";
+type AllComponents = LightComponent |MeshComponent |SkyLightComponent |CameraComponent |SpriteComponent |PhysicsColliderComponent |RigidBodyComponent |CullingComponent |UIComponent |TerrainComponent|undefined
 
 
 export default class Entity extends Movable {
-    id
-    queryKey
-    name
+    readonly id
+    readonly components = new Map<string, Component>()
+    
+    queryKey: string
+    name: string
     active = true
-    components = new Map()
     scripts = []
-    children = []
-    parent
-    pickID = [-1, -1, -1]
-
-    __materialRef
-    __meshRef
-    __lightComp
-    __cullingComponent
+    children: Entity[] = []
+    parent?: Entity
+    pickID: [number, number, number] = [-1, -1, -1]
+    __lightComp?: LightComponent
+    __cullingComponent?: CullingComponent
+    __hasLight: boolean = false
+    __hasMesh: boolean = false
+    __hasCamera: boolean = false
+    __hasSkylight: boolean = false
+    __hasSprite: boolean = false
+    __hasCollider: boolean = false
+    __hasRigidBody: boolean = false
+    __hasCulling: boolean = false
+    __hasUI: boolean = false
+    __hasTerrain: boolean = false
+    __materialRef?: Material
+    __meshRef?: Mesh
+    parentCache?: string
+    __isSelected: boolean;
 
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
@@ -36,11 +64,12 @@ export default class Entity extends Movable {
     }
 
     serializable() {
-        const temp = {...this}
-        delete temp.parent
-        temp.parent = this.parent?.id
+        const temp:any = {...this}
+        const parsedComponents:{components:Component[]} = {components: []}
+
         delete temp.children
-        const parsedComponents = {}
+        temp.parent = this.parent?.id
+
         Array.from(this.components.entries())
             .forEach(([k, v]) => {
                 parsedComponents[k] = v
@@ -51,10 +80,7 @@ export default class Entity extends Movable {
 
     clone() {
         const str = serializeStructure(this.serializable())
-        const newEntity = EntityAPI.parseEntityObject(JSON.parse(str))
-        newEntity.id = v4()
-        newEntity.queryKey = newEntity.id.slice(0, newEntity.id.length / 2);
-        return newEntity
+        return EntityAPI.parseEntityObject(JSON.parse(str), true)
     }
 
     static isRegistered(entity) {
@@ -63,15 +89,14 @@ export default class Entity extends Movable {
 
 
     addComponent(KEY) {
-        let instance = ComponentGetter[KEY]
+        const instance: AllComponents = getComponentInstance(KEY)
         if (instance != null) {
-            instance = new instance()
             instance.__entity = this
             this.components.set(KEY, instance)
             switch (KEY) {
                 case COMPONENTS.LIGHT:
                     this.__hasLight = true
-                    this.__lightComp = instance
+                    this.__lightComp = <LightComponent>instance
                     break
                 case COMPONENTS.MESH:
                     this.__hasMesh = true
@@ -92,7 +117,7 @@ export default class Entity extends Movable {
                     this.__hasRigidBody = true
                     break
                 case COMPONENTS.CULLING:
-                    this.__cullingComponent = instance
+                    this.__cullingComponent = <CullingComponent>instance
                     this.__hasCulling = true
                     break
                 case COMPONENTS.UI:

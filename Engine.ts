@@ -21,10 +21,24 @@ import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";
 
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
+import {mat4, vec3, vec4} from "gl-matrix";
+import Controller from "./lib/Controller";
+import Entity from "./instances/Entity";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)
-export default class Engine {
+
+declare global {
+    let gpu: WebGL2RenderingContext
+    let cacheVec3: vec3
+    let cacheVec4: vec4
+    let cacheMat4: mat4
+    let GPUCanvas: HTMLCanvasElement
+    let drawQuad: Function
+}
+
+
+export default class Engine extends Controller {
     static #development = false
 
     static get developmentMode() {
@@ -34,11 +48,11 @@ export default class Engine {
     static currentFrameFBO
     static previousFrameSampler
 
-    static entitiesMap = new Map()
-    static queryMap = new Map()
+    static entitiesMap = new Map<string, Entity>()
+    static queryMap = new Map<string, Entity>()
     static UILayouts = new Map()
     static isDev = true
-    static entities = []
+    static entities: Entity[] = []
     static #environment = ENVIRONMENT.DEV
 
     static get environment() {
@@ -57,15 +71,15 @@ export default class Engine {
     static frameID
     static isReady = false
     static benchmarkMode = false
-    static #initialized = false
 
-    static async initialize(canvas, mainResolution, readAsset, readMetadata, devAmbient) {
-        if (Engine.#initialized)
-            return
+    static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata:Function, devAmbient:boolean) {
+        super.initialize()
 
+        cacheVec3 = vec3.create()
+        cacheVec4 = vec4.create()
+        cacheMat4 = mat4.create()
 
         Engine.#development = devAmbient
-        Engine.#initialized = true
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
 
@@ -84,15 +98,15 @@ export default class Engine {
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
 
-        ConversionAPI.canvasBBox = gpu.canvas.getBoundingClientRect()
+        ConversionAPI.canvasBBox = GPUCanvas.getBoundingClientRect()
         const OBS = new ResizeObserver(() => {
-            const bBox = gpu.canvas.getBoundingClientRect()
+            const bBox = GPUCanvas.getBoundingClientRect()
             ConversionAPI.canvasBBox = bBox
             CameraAPI.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
         })
-        OBS.observe(gpu.canvas.parentElement)
-        OBS.observe(gpu.canvas)
+        OBS.observe(GPUCanvas.parentElement)
+        OBS.observe(GPUCanvas)
         Engine.isReady = true
         Loop.linkParams()
         GPU.skylightProbe = new LightProbe(128)
@@ -102,7 +116,7 @@ export default class Engine {
 
     static async startSimulation() {
         Engine.environment = ENVIRONMENT.EXECUTION
-        UIAPI.buildUI(gpu.canvas.parentElement)
+        UIAPI.buildUI(GPUCanvas.parentElement)
         const entities = Engine.entities
         for (let i = 0; i < entities.length; i++) {
             const current = entities[i]

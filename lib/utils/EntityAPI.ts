@@ -13,22 +13,27 @@ import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
 import GPU from "../GPU";
 import SpriteRenderer from "../../runtime/rendering/SpriteRenderer";
+import MutableObject from "../../MutableObject";
+import {v4} from "uuid";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
-    static addEntity(entity) {
+    static addEntity(entity?: Entity): Entity {
         let target = entity || new Entity()
+
         Engine.entitiesMap.set(target.id, target)
         Engine.entities.push(target)
 
         EntityWorkerAPI.removeEntity(target)
         EntityWorkerAPI.registerEntity(target)
         EntityAPI.registerEntityComponents(target)
+
         VisibilityRenderer.needsUpdate = true
+
         return entity
     }
 
-    static toggleVisibility(entity) {
+    static toggleVisibility(entity: Entity): void {
         const newValue = !entity.active
         let needsLightUpdate = false, needsVisibilityUpdate = false
         const loopHierarchy = (entity) => {
@@ -44,7 +49,7 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = needsVisibilityUpdate
     }
 
-    static linkEntities(child, parent) {
+    static linkEntities(child: Entity, parent?: Entity | undefined): void {
 
         if (child.parent != null) {
             EntityWorkerAPI.updateEntityLinks(child, child.parent)
@@ -61,7 +66,8 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = true
     }
 
-    static registerEntityComponents(entity, previouslyRemoved) {
+    static registerEntityComponents(entity: Entity, previouslyRemoved?: string): void {
+
         if (!Entity.isRegistered(entity))
             return
         if (Engine.environment !== ENVIRONMENT.DEV)
@@ -85,9 +91,9 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = true
     }
 
-    static removeEntity(id) {
+    static removeEntity(id: string): void {
         const entity = QueryAPI.getEntityByID(id)
-        if (!entity)
+        if (entity === undefined)
             return
 
         if (GPU.activeSkylightEntity === entity)
@@ -103,12 +109,9 @@ export default class EntityAPI {
         Engine.entitiesMap.delete(id)
         Engine.entities = Engine.entities.filter(e => e.id !== id)
 
-        if (entity.__hasSpotLight)
-            LightsAPI.spotLights.delete(entity.id)
-        if (entity.__hasDirectionalLight)
-            LightsAPI.directionalLights.delete(entity.id)
-        if (entity.__hasPointLight)
-            LightsAPI.pointLights.delete(entity.id)
+
+        if (entity.__hasLight)
+            LightsAPI.lights.delete(entity.id)
         if (entity.__hasSprite)
             SpriteRenderer.sprites.delete(entity.id)
         if (entity.__hasMesh)
@@ -126,15 +129,15 @@ export default class EntityAPI {
             entity.__materialRef = undefined
         }
 
-        if (entity.__hasPointLight || entity.__hasDirectionalLight || entity.__hasSpotLight || entity.__hasMesh) {
+        if (entity.__hasLight || entity.__hasMesh) {
             LightsAPI.packageLights(false, true)
             VisibilityRenderer.needsUpdate = true
         }
     }
 
 
-    static parseEntityObject(entity) {
-        const parsedEntity = new Entity(entity.id, entity.name, entity.active)
+    static parseEntityObject(entity: MutableObject, asNew?: boolean): Entity {
+        const parsedEntity = new Entity(asNew ? v4() : entity.id, entity.name, entity.active)
         const keys = Object.keys(entity)
 
         for (let i = 0; i < keys.length; i++) {

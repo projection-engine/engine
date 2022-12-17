@@ -1,8 +1,16 @@
 import GPUAPI from "../lib/rendering/GPUAPI";
 
 export default class VertexBuffer {
-    constructor(index, data, type, size, dataType, normalized = false, renderingType, stride = 0) {
+    private readonly id:WebGLBuffer
+    private readonly stride:number
+    private readonly index:number
+    private readonly type:number
+    private readonly size:number
+    private readonly normalized:boolean
+    length:number = 0
+    constructor(index:number, data, type:number, size, dataType, normalized:boolean = false, renderingType, stride = 0) {
         this.id = GPUAPI.createBuffer(type, data, renderingType)
+
         gpu.vertexAttribPointer(
             index,
             size,
@@ -12,10 +20,10 @@ export default class VertexBuffer {
             0)
         gpu.bindBuffer(type, null)
 
-        this.stride = stride
-        this.index = index
-        this.type = type
-        this.size = size
+        this.stride         = stride
+        this.index      = index
+        this.type       = type
+        this.size       = size
         this.normalized = normalized
 
         this.length = data.length

@@ -4,7 +4,6 @@ import PHYSICS_COLLIDER_PROPS from "../../static/component-props/PHYSICS_COLLIDE
 
 export default class PhysicsColliderComponent extends Component {
     _props = PHYSICS_COLLIDER_PROPS
-    name = "PHYSICS_COLLIDER"
 
     collisionType = COLLISION_TYPES.BOX
     direction = "Y"

@@ -1,29 +1,27 @@
 import GPU from "../lib/GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
-import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import LightsAPI from "../lib/utils/LightsAPI";
+// @ts-ignore
 import GLSL_TYPES from "../static/GLSL_TYPES.ts"
 import trimString from "../utils/trim-string";
 
+const regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
+const structRegex = (type) => {
+    return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, "gs")
+}
+const defineRegex = (global) => {
+    return new RegExp("#define(\\s+)((\\w|_)+)(\\s+)(.+)", global ? "gmi" : "mi")
+}
+const regexMatch = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/m
+const regexArray = (global) => {
+    return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
+}
+
 export default class Shader {
+    program?:WebGLProgram
 
-    static regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
-    static structRegex = (type) => {
-        return new RegExp(`(struct\\s+${type}\\s*\\s*{.+?(?<=}))`, "gs")
-    }
-    static defineRegex = (global) => {
-        return new RegExp("#define(\\s+)((\\w|_)+)(\\s+)(.+)", global ? "gmi" : "mi")
-    }
-    static regexMatch = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);$/m
-    static regexArray = (global) => {
-        return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
-    }
-
-    #available = false
-    get available() {
-        return this.#available
-    }
+    uniforms
 
     uniformMap = {}
     length = 0
@@ -75,17 +73,13 @@ export default class Shader {
         let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
 
         if (!compiled) {
-            ConsoleAPI.error(shaderCode)
-            console.trace(bundledCode)
             const error = gpu.getShaderInfoLog(shader)
-            console.error(error)
+            console.error({error, shaderCode})
             pushMessage(error)
-            this.#available = false
         } else {
             gpu.attachShader(this.program, shader)
             gpu.linkProgram(this.program)
 
-            this.#available = true
         }
         return bundledCode
     }
@@ -93,10 +87,10 @@ export default class Shader {
 
     #extractUniforms(code) {
         let uniformObjects = []
-        const uniforms = code.match(Shader.regex)
+        const uniforms = code.match(regex)
         if (uniforms)
             uniforms.forEach(u => {
-                const match = u.match(Shader.regexMatch)
+                const match = u.match(regexMatch)
                 if (!match)
                     return;
                 const type = match[4]
@@ -110,7 +104,7 @@ export default class Shader {
                     })
                     return
                 }
-                let struct = code.match(Shader.structRegex(type))
+                let struct = code.match(structRegex(type))
                 const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
                 if (!struct)
                     return
@@ -129,17 +123,17 @@ export default class Shader {
                     }).filter(e => e !== undefined)
                 )
             })
-        const arrayUniforms = code.match(Shader.regexArray(true))
-        const definitions = code.match(Shader.defineRegex(true))
+        const arrayUniforms = code.match(regexArray(true))
+        const definitions = code.match(defineRegex(true))
         if (arrayUniforms)
             arrayUniforms.forEach(u => {
-                const match = u.match(Shader.regexArray(false))
+                const match = u.match(regexArray(false))
 
                 if (!match)
                     return
                 const type = match[4]
                 const name = match[6].replace(" ", "")
-                const define = definitions.find(d => d.includes(match[8]))?.match(Shader.defineRegex(false))
+                const define = definitions.find(d => d.includes(match[8]))?.match(defineRegex(false))
 
                 if (!define) return;
                 const arraySize = parseInt(define[5])
@@ -152,7 +146,7 @@ export default class Shader {
                     })
                     return
                 }
-                let struct = code.match(Shader.structRegex(type))
+                let struct = code.match(structRegex(type))
                 const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
 
                 if (!struct)

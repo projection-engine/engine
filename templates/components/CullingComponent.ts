@@ -3,7 +3,7 @@ import CULLING_COMPONENT_PROPS from "../../static/component-props/CULLING_COMPON
 
 export default class CullingComponent extends Component{
     _props = CULLING_COMPONENT_PROPS
-    name = "CULLING"
+
     _distance = 100
     _distanceCulling = false
 

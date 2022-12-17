@@ -7,8 +7,6 @@ import LightsAPI from "../../lib/utils/LightsAPI";
 const toRad = Math.PI / 180
 
 export default class LightComponent extends Component {
-
-    name = "LIGHT"
     _props = LIGHT_PROPS
 
     // -------------- GLOBAL --------------

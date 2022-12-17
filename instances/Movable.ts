@@ -7,10 +7,10 @@ import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
  */
 
 export default class Movable {
-    _rotationQuat = ArrayBufferAPI.allocateVector(4, 0, true)
-    _translation = ArrayBufferAPI.allocateVector(3)
-    _scaling = ArrayBufferAPI.allocateVector(3, 1)
-    pivotPoint = ArrayBufferAPI.allocateVector(3)
+    _rotationQuat = ArrayBufferAPI.allocateVector(4, 0, true, true, false)
+    _translation = ArrayBufferAPI.allocateVector(3, 0, false, true, false)
+    _scaling = ArrayBufferAPI.allocateVector(3, 1, false, true, false)
+    pivotPoint = ArrayBufferAPI.allocateVector(3, 0, false, true, false)
     matrix = ArrayBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     previousModelMatrix = ArrayBufferAPI.allocateMatrix(4, true)
@@ -20,7 +20,7 @@ export default class Movable {
     lockedTranslation = false
     lockedScaling = false
 
-    absoluteTranslation = ArrayBufferAPI.allocateVector(3)
+    absoluteTranslation = ArrayBufferAPI.allocateVector(3, 0, false, true, false)
 
     get isCulled(){
         return this.__cullingMetadata[3] === 1

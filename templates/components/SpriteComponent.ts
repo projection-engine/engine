@@ -1,26 +1,25 @@
 import SPRITE_PROPS from "../../static/component-props/SPRITE_PROPS";
 import Component from "./Component";
 
-export default class SpriteComponent extends Component{
+export default class SpriteComponent extends Component {
     _props = SPRITE_PROPS
-    name = "SPRITE"
+    imageID: string
+    attributes: [number, number] = [0, 0]
 
-    imageID
-    isInstanced = false
-    attributes = [0, 0] // [ alwaysFaceCamera, keepSameSize, iconSize ]
-
-    get alwaysFaceCamera(){
+    get alwaysFaceCamera() {
         return this.attributes[0] === 1
     }
-    get keepSameSize(){
+
+    get keepSameSize() {
         return this.attributes[1] === 1
     }
 
 
-    set alwaysFaceCamera(d){
+    set alwaysFaceCamera(d) {
         this.attributes[0] = d ? 1 : 0
     }
-    set keepSameSize(d){
+
+    set keepSameSize(d) {
         this.attributes[1] = d ? 1 : 0
     }
 }

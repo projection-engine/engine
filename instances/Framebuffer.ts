@@ -1,14 +1,29 @@
 import GPU from "../lib/GPU";
 import Texture from "./Texture";
 
-export default class Framebuffer {
+interface FBOTexture {
+    w?: number,
+    h?: number,
+    attachment?: number,
+    precision?: number,
+    format?: number,
+    type?: number,
+    linear?: boolean,
+    repeat?: boolean
 
-    FBO
-    RBO
-    depthSampler
-    colors = []
-    attachments = []
-    colorsMetadata = []
+}
+
+export default class Framebuffer {
+    private readonly fallback:FBOTexture
+
+    readonly width:number
+    readonly height:number
+    readonly FBO:WebGLFramebuffer
+    RBO:WebGLRenderbuffer
+    depthSampler:WebGLTexture
+    readonly colors:WebGLTexture[] = []
+    readonly attachments:number[] = []
+    readonly colorsMetadata:FBOTexture[] = []
 
     constructor(width = GPU.internalResolution.w, height = GPU.internalResolution.h) {
 
@@ -24,13 +39,12 @@ export default class Framebuffer {
             format: gpu.RGBA,
             type: gpu.FLOAT,
             linear: false,
-            repeat: false,
-            flip: false
+            repeat: false
         }
     }
 
 
-    startMapping(noClearing) {
+    startMapping(noClearing?:boolean): void {
         this.use()
         gpu.viewport(0, 0, this.width, this.height)
         if (!noClearing)
@@ -40,18 +54,18 @@ export default class Framebuffer {
     }
 
 
-    stopMapping() {
+    stopMapping(): void {
         GPU.activeFramebuffer = undefined
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         gpu.viewport(0, 0, gpu.drawingBufferWidth, gpu.drawingBufferHeight)
     }
 
-    depthTexture(precision = gpu.DEPTH_COMPONENT24) {
+    depthTexture(): Framebuffer {
         this.use()
         this.depthSampler = Texture.createTexture(
             this.width,
             this.height,
-            precision,
+            gpu.DEPTH_COMPONENT24,
             0,
             gpu.DEPTH_COMPONENT,
             gpu.UNSIGNED_INT,
@@ -73,27 +87,26 @@ export default class Framebuffer {
         return this
     }
 
-    depthTest(typeStorage = gpu.DEPTH_COMPONENT24) {
+    depthTest(): Framebuffer {
         this.use()
         this.RBO = gpu.createRenderbuffer()
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, this.RBO)
-        gpu.renderbufferStorage(gpu.RENDERBUFFER, typeStorage, this.width, this.height)
+        gpu.renderbufferStorage(gpu.RENDERBUFFER, gpu.DEPTH_COMPONENT24, this.width, this.height)
         gpu.framebufferRenderbuffer(gpu.FRAMEBUFFER, gpu.DEPTH_ATTACHMENT, gpu.RENDERBUFFER, this.RBO)
 
         return this
     }
 
-    texture(obj) {
-        const {
-            w,
-            h,
-            attachment,
-            precision,
-            format,
-            type,
-            linear,
-            repeat
-        } = {...this.fallback, ...obj}
+    texture(obj?: FBOTexture): Framebuffer {
+        const w = obj?.w || this.fallback.w
+        const h = obj?.h || this.fallback.h
+        const attachment = obj?.attachment || this.fallback.attachment
+        const precision = obj?.precision || this.fallback.precision
+        const format = obj?.format || this.fallback.format
+        const type = obj?.type || this.fallback.type
+        const linear = obj?.linear || this.fallback.linear
+        const repeat = obj?.repeat || this.fallback.repeat
+
 
         this.colorsMetadata.push({...this.fallback, ...obj})
         this.use()
@@ -123,15 +136,14 @@ export default class Framebuffer {
         return this
     }
 
-
-    use() {
+    use(): void {
         if (GPU.activeFramebuffer !== this.FBO) {
             gpu.bindFramebuffer(gpu.FRAMEBUFFER, this.FBO)
             GPU.activeFramebuffer = this.FBO
         }
     }
 
-    clear() {
+    clear(): void {
         this.use()
         if (this.RBO)
             gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
@@ -139,12 +151,12 @@ export default class Framebuffer {
             gpu.clear(gpu.COLOR_BUFFER_BIT)
     }
 
-    stop() {
+    stop(): void {
         GPU.activeFramebuffer = undefined
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
     }
 
-    static toImage(fbo, w = 300, h = 300) {
+    static toImage(fbo, w = 300, h = 300): string {
         const canvas = document.createElement("canvas")
         canvas.width = w
         canvas.height = h
@@ -163,7 +175,6 @@ export default class Framebuffer {
         imageData.data.set(data)
         context.putImageData(imageData, 0, 0)
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
-        data = canvas.toDataURL()
-        return data
+        return canvas.toDataURL()
     }
 }

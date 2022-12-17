@@ -3,7 +3,6 @@ import TERRAIN_PROPS from "../../static/component-props/TERRAIN_PROPS";
 import TERRAIN_MATERIAL from "../../static/TERRAIN_MATERIAL";
 
 export default class TerrainComponent extends Component {
-    name = "TERRAIN_COMPONENT"
     _props = TERRAIN_PROPS
 
     terrainID

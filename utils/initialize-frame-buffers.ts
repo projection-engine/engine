@@ -8,7 +8,7 @@ import FrameComposition from "../runtime/post-processing/FrameComposition";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 
 export default function initializeFrameBuffers() {
-    let halfResW = GPU.internalResolution.w / 2, halfResH = GPU.internalResolution.h / 2
+
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
         .texture({
             attachment: 0,

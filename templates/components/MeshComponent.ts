@@ -4,7 +4,6 @@ import MESH_PROPS from "../../static/component-props/MESH_PROPS";
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
 
 export default class MeshComponent extends Component {
-    name = "MESH"
     _props = MESH_PROPS
 
 

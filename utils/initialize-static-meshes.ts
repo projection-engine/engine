@@ -9,10 +9,10 @@ export default async function initializeStaticMeshes() {
         const res = await fetch("./STATIC_MESHES.json")
         const {QUAD, SPHERE, CUBE, CYLINDER, PLANE, CUBE_LINEAR} = await res.json()
         console.trace({QUAD, SPHERE, CUBE, CYLINDER, PLANE, CUBE_LINEAR})
-        GPU.cubeBuffer = new VertexBuffer(0, new Float32Array(CUBE_LINEAR), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        GPU.cubeBuffer = new VertexBuffer(0, new Float32Array(CUBE_LINEAR), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false, undefined, 0)
         GPU.quad = GPUAPI.allocateMesh(STATIC_MESHES.PRODUCTION.QUAD, QUAD)
         const q = GPU.quad
-        window.drawQuad = () => {
+        drawQuad = () => {
             const last = GPU.activeMesh
             if (last && last !== q)
                 last.finish()

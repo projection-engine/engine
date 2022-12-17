@@ -3,6 +3,8 @@ import Engine from "../../Engine";
 import InputEventsAPI from "../utils/InputEventsAPI";
 import QueryAPI from "../utils/QueryAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
+import UIComponent from "../../templates/components/UIComponent";
+import MutableObject from "../../MutableObject";
 
 const STYLES = {
     position: "absolute",
@@ -32,10 +34,10 @@ body {
 </style>
 `
 export default class UIAPI {
-    static document
-    static uiMountingPoint
+    static document?: Document
+    static uiMountingPoint?: HTMLElement
     static #useIframe = false
-    static iframeParent
+    static iframeParent?: HTMLElement
 
     static set useIframe(data) {
         UIAPI.#useIframe = data
@@ -45,8 +47,10 @@ export default class UIAPI {
         const uiElements = Array.from(Engine.UILayouts.keys())
         for (let i = 0; i < uiElements.length; i++) {
             const found = uiElements[i]
-
-            const entities = Engine.entities.filter(e => e.components.get(COMPONENTS.UI)?.uiLayoutID === found)
+            const entities = Engine.entities.filter(e => {
+                const component = <UIComponent | undefined>e.components.get(COMPONENTS.UI)
+                return component?.uiLayoutID === found
+            })
             if (!entities.length) {
                 Engine.UILayouts.delete(found)
                 continue
@@ -74,17 +78,19 @@ export default class UIAPI {
             p.removeChild(UI.__element)
     }
 
+    static mapToObject(el: HTMLElement, component: UIComponent): void {
+        const obj: { [key: string]: string } = {}
+        component.wrapperStyles.forEach(([k, v]) => obj[k] = v)
+        Object.assign(el.style, obj)
+    }
+
     static createUIEntity(entity) {
         const UI = entity.__hasUI ? entity.components.get(COMPONENTS.UI) : undefined
         if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
             return
 
         const el = UIAPI.document.createElement("div")
-        const obj = {}
-        UI.wrapperStyles.forEach(([k, v]) => {
-            obj[k] = v
-        })
-        Object.assign(el.style, obj)
+        UIAPI.mapToObject(el, UI)
         el.id = entity.queryKey
         const html = Engine.UILayouts.get(UI.uiLayoutID)
         el.innerHTML = html ? html : ""
@@ -130,15 +136,14 @@ export default class UIAPI {
     }
 
     static updateUIEntity(entity) {
-        const UI = entity.components.get(COMPONENTS.UI)
+        const UI = <UIComponent>entity.components.get(COMPONENTS.UI)
         if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
             return
-
         const el = UI.__element
+        if (!el)
+            return;
         el.removeAttribute("style")
-        const obj = {}
-        UI.wrapperStyles.forEach(([k, v]) => obj[k] = v)
-        Object.assign(el.style, obj)
+        UIAPI.mapToObject(el, UI)
         el.id = entity.queryKey
         const html = Engine.UILayouts.get(UI.uiLayoutID)
         el.innerHTML = html ? html : ""
@@ -152,7 +157,7 @@ export default class UIAPI {
         const entities = Engine.entities
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
-            const UI = entity.components.get(COMPONENTS.UI)
+            const UI = <UIComponent | undefined>entity.components.get(COMPONENTS.UI)
             if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
                 continue
             UI.__element = undefined

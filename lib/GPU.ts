@@ -8,8 +8,12 @@ import initializeShaders from "../utils/initialize-shaders";
 import initializeStaticMeshes from "../utils/initialize-static-meshes";
 import initializeFrameBuffers from "../utils/initialize-frame-buffers";
 import LightsAPI from "./utils/LightsAPI";
+
+// @ts-ignore
 import QUAD_VERT from "../shaders/post-processing/QUAD.vert"
+// @ts-ignore
 import BRDF_FRAG from "../shaders/post-processing/BRDF_GEN.frag"
+
 import Shader from "../instances/Shader";
 import Framebuffer from "../instances/Framebuffer";
 import Material from "../instances/Material";
@@ -17,21 +21,23 @@ import COMPONENTS from "../static/COMPONENTS";
 import {mat4, vec3} from "gl-matrix";
 import CUBE_MAP_VIEWS from "../static/CUBE_MAP_VIEWS";
 import SceneRenderer from "../runtime/rendering/SceneRenderer";
+import Mesh from "../instances/Mesh";
+import Texture from "../instances/Texture";
+import VertexBuffer from "../instances/VertexBuffer";
 
 export default class GPU {
-    static context
+    static context: WebGL2RenderingContext
     static activeShader
     static activeFramebuffer
     static activeMesh
-    static materials = new Map()
-    static shaders = new Map()
-    static frameBuffers = new Map()
-    static meshes = new Map()
-    static instancingGroup = new Map()
-    static textures = new Map()
-    static cubeBuffer
-    static BRDF
-    static internalResolution
+    static materials = new Map<string, Material>()
+    static shaders = new Map<string, Shader>()
+    static frameBuffers = new Map<string, Framebuffer>()
+    static meshes = new Map<string, Mesh>()
+    static textures = new Map<string, Texture>()
+    static cubeBuffer: VertexBuffer
+    static BRDF: WebGLTexture
+    static internalResolution = {w: 0, h: 0}
     static quad
     static __activeSkylightEntity
 
@@ -48,7 +54,7 @@ export default class GPU {
 
     static updateSkylight() {
         const entity = GPU.__activeSkylightEntity
-        if(!GPU.skylightProbe) {
+        if (!GPU.skylightProbe) {
             SceneRenderer.UBO.bind()
             SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([0]))
             SceneRenderer.UBO.unbind()
@@ -64,26 +70,24 @@ export default class GPU {
             GPU.skylightProbe.resolution = skylight.resolution
             const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
             GPU.skylightProbe.draw((yaw, pitch, projection, index) => {
-                 vec3.add(tempPosition, entity._translation, CUBE_MAP_VIEWS.target[index])
-                 mat4.lookAt(tempView, entity._translation, tempPosition, CUBE_MAP_VIEWS.up[index])
-                 mat4.multiply(tempViewProjection, projection, tempView)
+                vec3.add(tempPosition, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
+                mat4.lookAt(tempView, entity._translation, tempPosition, <vec3>CUBE_MAP_VIEWS.up[index])
+                mat4.multiply(tempViewProjection, projection, tempView)
 
                 SceneRenderer.draw(true, tempViewProjection, tempView, tempPosition)
             })
         }
     }
 
-    static async initializeContext(canvas, mainResolution) {
+    static async initializeContext(canvas:HTMLCanvasElement, mainResolution: { w: number, h: number } |undefined) {
         if (GPU.context != null)
             return
+
         const screen = window.screen
-        GPU.internalResolution = {w: screen.width, h: screen.height}
+        GPU.internalResolution.w = mainResolution?.w || screen.width
+        GPU.internalResolution.h = mainResolution?.h || screen.height
 
-        if (mainResolution?.w > 0 && mainResolution?.h > 0)
-            GPU.internalResolution = mainResolution
-
-
-        window.gpu = canvas.getContext("webgl2", {
+        gpu = canvas.getContext("webgl2", {
             antialias: false,
             // preserveDrawingBuffer: true,
             premultipliedAlpha: false,

@@ -5,6 +5,8 @@ import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import {mat4, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/rendering/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/rendering/OmnidirectionalShadows";
+import Entity from "../../instances/Entity";
+
 
 const MAX_LIGHTS = 24
 let lightTimeout
@@ -19,13 +21,13 @@ export default class LightsAPI {
 
     static #initialized = false
 
-    static primaryBufferA = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false)
-    static primaryBufferB = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false)
-    static primaryBufferC = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false)
+    static primaryBufferA = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
+    static primaryBufferB = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
+    static primaryBufferC = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
 
-    static secondaryBufferA = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false)
-    static secondaryBufferB = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false)
-    static secondaryBufferC = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false)
+    static secondaryBufferA = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
+    static secondaryBufferB = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
+    static secondaryBufferC = ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
 
     static typeBufferA = ArrayBufferAPI.allocateVector(MAX_LIGHTS, 0, false, false, true)
     static typeBufferB = ArrayBufferAPI.allocateVector(MAX_LIGHTS, 0, false, false, true)
@@ -185,7 +187,7 @@ export default class LightsAPI {
             LightsAPI.updateCBuffer()
     }
 
-    static updateBuffer(entity, primaryBuffer, secondaryBuffer, typeBuffer, offset) {
+    static updateBuffer(entity:Entity, primaryBuffer:Float32Array, secondaryBuffer:Float32Array, typeBuffer:Uint8Array, offset:number) {
         const component = entity.__lightComp
         const color = component.fixedColor
         const position = entity.absoluteTranslation
@@ -194,23 +196,23 @@ export default class LightsAPI {
 
         switch (component.type) {
             case LIGHT_TYPES.DIRECTIONAL: {
-                const direction = vec3.add([], position, component._center)
+                vec3.add(cacheVec3, position, component._center)
                 const color = component.fixedColor
 
-                primaryBuffer[offset] = direction[0]
-                primaryBuffer[offset + 1] = direction[1]
-                primaryBuffer[offset + 2] = direction[2]
+                primaryBuffer[offset]       = cacheVec3[0]
+                primaryBuffer[offset + 1]   = cacheVec3[1]
+                primaryBuffer[offset + 2]   = cacheVec3[2]
 
-                primaryBuffer[offset + 4] = color[0]
-                primaryBuffer[offset + 5] = color[1]
-                primaryBuffer[offset + 6] = color[2]
+                primaryBuffer[offset + 4]   = color[0]
+                primaryBuffer[offset + 5]   = color[1]
+                primaryBuffer[offset + 6]   = color[2]
 
-                primaryBuffer[offset + 8] = component.atlasFace[0]
-                primaryBuffer[offset + 9] = component.atlasFace[1]
-                primaryBuffer[offset + 10] = (component.shadowMap ? 1 : -1) * component.shadowSamples
-                primaryBuffer[offset + 12] = component.shadowBias
-                primaryBuffer[offset + 13] = component.shadowAttenuationMinDistance
-                primaryBuffer[offset + 14] = component.hasSSS ? 1 : 0
+                primaryBuffer[offset + 8]   = component.atlasFace[0]
+                primaryBuffer[offset + 9]   = component.atlasFace[1]
+                primaryBuffer[offset + 10]  = (component.shadowMap ? 1 : -1) * component.shadowSamples
+                primaryBuffer[offset + 12]  = component.shadowBias
+                primaryBuffer[offset + 13]  = component.shadowAttenuationMinDistance
+                primaryBuffer[offset + 14]  = component.hasSSS ? 1 : 0
 
                 if (component.shadowMap) {
                     mat4.lookAt(lightView, component.__entity.absoluteTranslation, component.center, [0, 1, 0])
@@ -253,52 +255,52 @@ export default class LightsAPI {
             }
             case LIGHT_TYPES.SPOT: {
 
-                const rotatedDirection = vec3.transformQuat([], position, entity._rotationQuat)
+                vec3.transformQuat(cacheVec3, position, entity._rotationQuat)
                 const radius = Math.cos(component.radius * toRad)
 
-                primaryBuffer[offset] = position[0]
-                primaryBuffer[1 + offset] = position[1]
-                primaryBuffer[2 + offset] = position[2]
+                primaryBuffer[offset]       = position[0]
+                primaryBuffer[1 + offset]   = position[1]
+                primaryBuffer[2 + offset]   = position[2]
 
-                primaryBuffer[4 + offset] = color[0]
-                primaryBuffer[5 + offset] = color[1]
-                primaryBuffer[6 + offset] = color[2]
+                primaryBuffer[4 + offset]   = color[0]
+                primaryBuffer[5 + offset]   = color[1]
+                primaryBuffer[6 + offset]   = color[2]
 
-                primaryBuffer[8 + offset] = rotatedDirection[0]
-                primaryBuffer[9 + offset] = rotatedDirection[1]
-                primaryBuffer[10 + offset] = rotatedDirection[2]
+                primaryBuffer[8 + offset]   = cacheVec3[0]
+                primaryBuffer[9 + offset]   = cacheVec3[1]
+                primaryBuffer[10 + offset]  = cacheVec3[2]
 
-                primaryBuffer[11 + offset] = component.cutoff
+                primaryBuffer[11 + offset]  = component.cutoff
 
-                primaryBuffer[12 + offset] = attenuation[0]
-                primaryBuffer[13 + offset] = attenuation[1]
+                primaryBuffer[12 + offset]  = attenuation[0]
+                primaryBuffer[13 + offset]  = attenuation[1]
 
-                primaryBuffer[14 + offset] = radius
-                primaryBuffer[15 + offset] = component.hasSSS ? 1 : 0
+                primaryBuffer[14 + offset]  = radius
+                primaryBuffer[15 + offset]  = component.hasSSS ? 1 : 0
 
                 break
             }
             case LIGHT_TYPES.SPHERE: {
 
-                primaryBuffer[offset] = position[0]
-                primaryBuffer[1 + offset] = position[1]
-                primaryBuffer[2 + offset] = position[2]
+                primaryBuffer[offset]       = position[0]
+                primaryBuffer[1 + offset]   = position[1]
+                primaryBuffer[2 + offset]   = position[2]
 
-                primaryBuffer[4 + offset] = color[0]
-                primaryBuffer[5 + offset] = color[1]
-                primaryBuffer[6 + offset] = color[2]
+                primaryBuffer[4 + offset]   = color[0]
+                primaryBuffer[5 + offset]   = color[1]
+                primaryBuffer[6 + offset]   = color[2]
 
-                primaryBuffer[8 + offset] = component.areaRadius
-                primaryBuffer[9 + offset] = 0
-                primaryBuffer[10 + offset] = 0
+                primaryBuffer[8 + offset]   = component.areaRadius
+                primaryBuffer[9 + offset]   = 0
+                primaryBuffer[10 + offset]  = 0
 
-                primaryBuffer[11 + offset] = component.cutoff
+                primaryBuffer[11 + offset]  = component.cutoff
 
-                primaryBuffer[12 + offset] = attenuation[0]
-                primaryBuffer[13 + offset] = attenuation[1]
+                primaryBuffer[12 + offset]  = attenuation[0]
+                primaryBuffer[13 + offset]  = attenuation[1]
 
-                primaryBuffer[14 + offset] = 0
-                primaryBuffer[15 + offset] = component.hasSSS ? 1 : 0
+                primaryBuffer[14 + offset]  = 0
+                primaryBuffer[15 + offset]  = component.hasSSS ? 1 : 0
 
                 break
             }
