@@ -67,6 +67,7 @@ export default class SceneRenderer {
         shader.bind()
         if (isDev)
             gpu.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
+
         gpu.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
 

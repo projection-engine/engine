@@ -1,4 +1,4 @@
-export default function serializeStructure(obj) {
+export default function serializeStructure(obj:any) {
     const visited = new WeakSet();
     return JSON.stringify(
         obj,

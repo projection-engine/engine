@@ -3,7 +3,7 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import LightsAPI from "../lib/utils/LightsAPI";
-import GLSL_TYPES from "../static/GLSL_TYPES.json"
+import GLSL_TYPES from "../static/GLSL_TYPES.ts"
 import trimString from "../utils/trim-string";
 
 export default class Shader {

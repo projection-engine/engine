@@ -1,6 +1,5 @@
 export default {
  ICONS: "ICONS",
- ROTATION_GIZMO: "ROTATION_GIZMO",
  PIXEL: "PIXEL",
  BRDF: "BRDF"
 }

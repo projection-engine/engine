@@ -1,4 +1,4 @@
-{
+export default {
   "functionDeclaration": "",
   "uniformsDeclaration": "",
   "settings": {
