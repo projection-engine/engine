@@ -10,7 +10,6 @@ import LightComponent from "../templates/components/LightComponent";
 import CullingComponent from "../templates/components/CullingComponent";
 import Material from "./Material";
 import Mesh from "./Mesh";
-import MutableObject from "../MutableObject";
 import MeshComponent from "../templates/components/MeshComponent";
 import SkyLightComponent from "../templates/components/SkyLightComponent";
 import CameraComponent from "../templates/components/CameraComponent";
@@ -20,13 +19,27 @@ import RigidBodyComponent from "../templates/components/RigidBodyComponent";
 import UIComponent from "../templates/components/UIComponent";
 import TerrainComponent from "../templates/components/TerrainComponent";
 import getComponentInstance from "../utils/get-component-instance";
-type AllComponents = LightComponent |MeshComponent |SkyLightComponent |CameraComponent |SpriteComponent |PhysicsColliderComponent |RigidBodyComponent |CullingComponent |UIComponent |TerrainComponent|undefined
+
+type AllComponents =
+    LightComponent
+    | MeshComponent
+    | SkyLightComponent
+    | CameraComponent
+    | SpriteComponent
+    | PhysicsColliderComponent
+    | RigidBodyComponent
+    | CullingComponent
+    | UIComponent
+    | TerrainComponent
+    | undefined
 
 
 export default class Entity extends Movable {
+    [key: string]: any;
+
     readonly id
     readonly components = new Map<string, Component>()
-    
+
     queryKey: string
     name: string
     active = true
@@ -49,7 +62,6 @@ export default class Entity extends Movable {
     __materialRef?: Material
     __meshRef?: Mesh
     parentCache?: string
-    __isSelected: boolean;
 
     constructor(id = v4(), name = "Empty entity", active = true) {
         super()
@@ -59,13 +71,22 @@ export default class Entity extends Movable {
         this.queryKey = id.slice(0, id.length / 2);
     }
 
+    addProperty<T>(key: string, initialValue: T): void {
+        this[key] = <T>initialValue
+
+    }
+
+    hasProperty(key: string): boolean {
+        return this[key] !== undefined
+    }
+
     get pickIndex() {
         return this.pickID[0] * 255 + this.pickID[1] * 255 + this.pickID[2] * 255
     }
 
     serializable() {
-        const temp:any = {...this}
-        const parsedComponents:{components:Component[]} = {components: []}
+        const temp: any = {...this}
+        const parsedComponents: { components: Component[] } = {components: []}
 
         delete temp.children
         temp.parent = this.parent?.id

@@ -35,7 +35,7 @@ export default class InputEventsAPI {
     }
 
     static get targetElement() {
-        return window.gpu.canvas.parentElement
+        return window.GPUCanvas.parentElement
     }
 
     static get isCursorLocked() {

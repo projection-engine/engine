@@ -2,9 +2,9 @@ import GPU from "../lib/GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import LightsAPI from "../lib/utils/LightsAPI";
-// @ts-ignore
-import GLSL_TYPES from "../static/GLSL_TYPES.ts"
+import GLSL_TYPES from "../static/GLSL_TYPES"
 import trimString from "../utils/trim-string";
+import GLSLTypes from "../static/GLSL_TYPES";
 
 const regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
 const structRegex = (type) => {
@@ -18,12 +18,19 @@ const regexArray = (global) => {
     return new RegExp("uniform(\\s+)(highp|mediump|lowp)?(\\s*)((\\w|_)+)((\\s|\\w|_)*)\\[(\\w+)\\](\\s*);$", global ? "gm" : "m")
 }
 
+interface Uniform {
+    type: string,
+    name: string,
+    parent?: string,
+    arraySize?: number,
+    uLocations?: WebGLUniformLocation[],
+    uLocation?: WebGLUniformLocation
+}
+
 export default class Shader {
-    program?:WebGLProgram
-
+    program?: WebGLProgram
     uniforms
-
-    uniformMap = {}
+    uniformMap: { [key: string]: WebGLUniformLocation } = {}
     length = 0
     messages = {
         error: undefined,
@@ -85,16 +92,16 @@ export default class Shader {
     }
 
 
-    #extractUniforms(code) {
-        let uniformObjects = []
+    #extractUniforms(code): Uniform[] {
+        const uniformObjects:Uniform[] = []
         const uniforms = code.match(regex)
         if (uniforms)
             uniforms.forEach(u => {
-                const match = u.match(regexMatch)
-                if (!match)
-                    return;
+                const match: string[] | number = u.match(regexMatch)
+                if (match === null)
+                    return []
                 const type = match[4]
-                const name = match[6].replace(" ", "").trim()
+                const name: string = match[6].replace(" ", "").trim()
 
                 if (GLSL_TYPES[type] != null) {
                     uniformObjects.push({
@@ -104,13 +111,14 @@ export default class Shader {
                     })
                     return
                 }
-                let struct = code.match(structRegex(type))
+
+                let struct: string[] | number = code.match(structRegex(type))
                 const reg = /^(\s*)(\w+)(\s*)((\w|_)+)/m
-                if (!struct)
-                    return
-                struct = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
+                if (struct === null)
+                    return []
+                const partial: string[] = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
                 uniformObjects.push(
-                    ...struct.map(s => {
+                    ...partial.map((s): Uniform | undefined => {
                         const current = s.match(reg)
                         if (current) {
                             return {
@@ -120,7 +128,8 @@ export default class Shader {
                                 uLocation: gpu.getUniformLocation(this.program, name + "." + current[4])
                             }
                         }
-                    }).filter(e => e !== undefined)
+                    })
+                        .filter((e: Uniform | undefined): boolean => e !== undefined)
                 )
             })
         const arrayUniforms = code.match(regexArray(true))
@@ -151,11 +160,11 @@ export default class Shader {
 
                 if (!struct)
                     return;
-                struct = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
+                const partial = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
                 uniformObjects.push(
-                    ...struct.map(s => {
-                        const current = s.match(reg)
-                        if (!current)
+                    ...partial.map((s):Uniform|undefined => {
+                        const current:string[]|null = s.match(reg)
+                        if (current === null)
                             return
                         return {
                             type: current[2],
@@ -164,7 +173,8 @@ export default class Shader {
                             arraySize,
                             uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
                         }
-                    }).filter(e => e !== undefined)
+                    })
+                    .filter((e:Uniform|undefined):boolean => e !== undefined)
                 )
             })
 

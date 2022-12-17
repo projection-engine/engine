@@ -6,28 +6,29 @@ import getProbeRotation from "../utils/get-probe-rotation";
 import getProbeLookat from "../utils/get-probe-lookat";
 
 
+const perspective = mat4.create()
 export default class LightProbe {
-    texture
-    prefiltered
-    irradianceTexture
-    _resolution
-    constructor(resolution) {
-        if (resolution != null)
-            this.resolution = resolution
+    texture?: WebGLTexture
+    prefiltered?: WebGLTexture
+    irradianceTexture?: WebGLTexture
+    #resolution?: number
+
+    constructor(resolution: number) {
+        this.resolution = resolution
     }
 
-    set resolution(data) {
-        if (data === this._resolution || typeof data !== "number")
+    set resolution(data: number) {
+        if (data === this.#resolution || typeof data !== "number")
             return
-        this._resolution = data
+        this.#resolution = data
         if (this.texture instanceof WebGLTexture)
             gpu.deleteTexture(this.texture)
 
         this.texture = CubeMapAPI.initializeTexture(false, data, false)
     }
 
-    get resolution() {
-        return this._resolution
+    get resolution(): number {
+        return this.#resolution
     }
 
     drawDiffuseMap(sampler = this.texture, multiplier = [1, 1, 1]) {
@@ -48,7 +49,7 @@ export default class LightProbe {
     }
 
     drawSpecularMap(mipLevels = 6, resolution = 128) {
-        const perspective = mat4.perspective([], 1.57, 1, .1, 10)
+        mat4.perspective(perspective, 1.57, 1, .1, 10)
         Mesh.finishIfUsed()
         gpu.viewport(0, 0, resolution, resolution)
         if (!this.prefiltered)
@@ -90,13 +91,11 @@ export default class LightProbe {
 
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
         gpu.deleteRenderbuffer(rbo)
-
-
     }
 
-    draw(callback, zFar = 25, zNear = 1, asIrradiance) {
-        let resolution = asIrradiance ? 32 : this._resolution, texture
-        const perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
+    draw(callback: Function, zFar?:number, zNear?:number, asIrradiance?: boolean): LightProbe {
+        let resolution = asIrradiance ? 32 : this.#resolution, texture
+        mat4.perspective(perspective, Math.PI / 2, 1, zNear||1, zFar || 25)
 
 
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, CubeMapAPI.frameBuffer)

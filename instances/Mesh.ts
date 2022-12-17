@@ -3,28 +3,41 @@ import {v4 as uuidv4} from "uuid"
 import GPU from "../lib/GPU";
 import GPUAPI from "../lib/rendering/GPUAPI";
 
+interface MeshProps {
+
+    id?: string,
+    vertices?: number[] | Float32Array,
+    indices?: number[] | Float32Array,
+    normals?: number[] | Float32Array,
+    uvs?: number[] | Float32Array,
+    tangents?: number[] | Float32Array,
+    maxBoundingBox?: number[],
+    minBoundingBox?: number[]
+
+}
+
 export default class Mesh {
-    verticesQuantity = 0
-    trianglesQuantity = 0
+    readonly verticesQuantity:number
+    readonly trianglesQuantity:number
 
+    private readonly id: string
+    readonly maxBoundingBox: number[]
+    readonly minBoundingBox: number[]
+    readonly VAO: WebGLVertexArrayObject
+    readonly indexVBO?:WebGLBuffer
 
-    maxBoundingBox = []
-    minBoundingBox = []
-    VAO
-    vertexVBO
-    indexVBO
-    normalVBO
-    uvVBO
-    tangentVBO
+    readonly vertexVBO?:VertexBuffer
+    readonly normalVBO?:VertexBuffer
+    readonly uvVBO?:VertexBuffer
+    readonly tangentVBO?:VertexBuffer
 
-    constructor(attributes) {
+    constructor(attributes:MeshProps) {
         const {
             id = uuidv4(),
             vertices,
             indices,
             normals,
             uvs,
-            tangents,
             maxBoundingBox,
             minBoundingBox
         } = attributes
@@ -40,12 +53,12 @@ export default class Mesh {
         gpu.bindVertexArray(this.VAO)
 
         this.indexVBO = GPUAPI.createBuffer(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
-        this.vertexVBO = new VertexBuffer(0, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        this.vertexVBO = new VertexBuffer(0, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false, undefined, 0)
 
         if (normals && normals.length > 0)
-            this.normalVBO = new VertexBuffer(1, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+            this.normalVBO = new VertexBuffer(1, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false, undefined, 0)
         if (uvs && uvs.length > 0)
-            this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT)
+            this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT, false, undefined, 0)
         // if (tangents && tangents.length > 0)
         //     this.tangentVBO = new VertexBuffer(3, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
 
@@ -59,7 +72,8 @@ export default class Mesh {
         if (lastUsed != null)
             lastUsed.finish()
     }
-    prepareForUse(){
+
+    prepareForUse() {
         const last = GPU.activeMesh
         if (last === this)
             return
@@ -72,6 +86,7 @@ export default class Mesh {
         gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
         this.vertexVBO.enable()
     }
+
     use() {
         this.prepareForUse()
         if (this.normalVBO)
@@ -95,7 +110,7 @@ export default class Mesh {
         GPU.activeMesh = undefined
     }
 
-    simplifiedDraw(){
+    simplifiedDraw() {
         this.prepareForUse()
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
@@ -104,22 +119,27 @@ export default class Mesh {
         this.use()
         gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
+
     drawInstanced(quantity) {
         this.use()
         gpu.drawElementsInstanced(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0, quantity)
     }
+
     drawLineLoop() {
         this.prepareForUse()
         gpu.drawElements(gpu.LINE_LOOP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
+
     drawTriangleStrip() {
         this.prepareForUse()
         gpu.drawElements(gpu.TRIANGLE_STRIP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
+
     drawTriangleFan() {
         this.prepareForUse()
         gpu.drawElements(gpu.TRIANGLE_FAN, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
     }
+
     drawLines() {
         this.prepareForUse()
         gpu.drawElements(gpu.LINES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)

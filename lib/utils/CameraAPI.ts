@@ -98,7 +98,7 @@ export default class CameraAPI {
         ])
 
         new ResizeObserver(CameraAPI.updateAspectRatio)
-            .observe(gpu.canvas)
+            .observe(GPUCanvas)
         notificationBuffers[3] = 1
         CameraAPI.initialized = true
     }
@@ -123,7 +123,7 @@ export default class CameraAPI {
     }
 
     static updateAspectRatio() {
-        const bBox = gpu.canvas.getBoundingClientRect()
+        const bBox = GPUCanvas.getBoundingClientRect()
         ConversionAPI.canvasBBox = bBox
         if (Engine.environment === ENVIRONMENT.DEV || CameraAPI.#dynamicAspectRatio) {
             CameraAPI.aspectRatio = bBox.width / bBox.height

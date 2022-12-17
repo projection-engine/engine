@@ -42,7 +42,7 @@ export default class PickingAPI {
 
 
     static readEntityID(x, y) {
-        const w = window.gpu.canvas.width, h = window.gpu.canvas.height
+        const w = window.GPUCanvas.width, h = window.GPUCanvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
         const picked = PickingAPI.readPixels(GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER).FBO, 1, coords)
 

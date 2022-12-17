@@ -1,29 +1,29 @@
 import GPU from "../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import LightProbe from "../../instances/LightProbe";
+import ShadowProbe from "../../instances/ShadowProbe";
+import Controller from "../Controller";
+import Shader from "../../instances/Shader";
 
 
-export default class CubeMapAPI {
-    static frameBuffer
-    static #initialized
+export default class CubeMapAPI  extends Controller{
+    static frameBuffer?:WebGLFramebuffer
 
-    static get irradianceShader() {
+    static get irradianceShader():Shader {
         return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.IRRADIANCE)
     }
 
-    static get prefilteredShader() {
+    static get prefilteredShader():Shader {
         return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.PREFILTERED)
     }
 
     static initialize() {
-        if (CubeMapAPI.#initialized)
-            return
-
-        CubeMapAPI.#initialized = true
+        super.initialize()
         gpu.bindVertexArray(null)
         CubeMapAPI.frameBuffer = gpu.createFramebuffer()
     }
 
-    static createRenderBuffer(resolution) {
+    static createRenderBuffer(resolution:number):WebGLRenderbuffer {
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, CubeMapAPI.frameBuffer)
         const rbo = gpu.createRenderbuffer()
         gpu.bindRenderbuffer(gpu.RENDERBUFFER, rbo)
@@ -32,8 +32,7 @@ export default class CubeMapAPI {
         return rbo
     }
 
-    static initializeTexture(asDepth, resolution, mipmap) {
-
+    static initializeTexture(asDepth:boolean, resolution:number, mipmap?:boolean):WebGLTexture {
         const texture = gpu.createTexture()
         gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, texture)
         gpu.texParameteri(gpu.TEXTURE_CUBE_MAP, gpu.TEXTURE_MAG_FILTER, asDepth ? gpu.NEAREST : gpu.LINEAR)
@@ -68,10 +67,7 @@ export default class CubeMapAPI {
         return texture
     }
 
-    static delete(probe) {
-        if (!probe)
-            return
-
+    static delete(probe:LightProbe) {
         if (probe.texture)
             gpu.deleteTexture(probe.texture)
         if (probe.irradianceTexture)

@@ -30,13 +30,9 @@ const singleFloatBuffer = new Float32Array(1)
 
 declare global {
     let gpu: WebGL2RenderingContext
-    let cacheVec3: vec3
-    let cacheVec4: vec4
-    let cacheMat4: mat4
     let GPUCanvas: HTMLCanvasElement
     let drawQuad: Function
 }
-
 
 export default class Engine extends Controller {
     static #development = false
@@ -74,11 +70,6 @@ export default class Engine extends Controller {
 
     static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata:Function, devAmbient:boolean) {
         super.initialize()
-
-        cacheVec3 = vec3.create()
-        cacheVec4 = vec4.create()
-        cacheMat4 = mat4.create()
-
         Engine.#development = devAmbient
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)

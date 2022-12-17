@@ -24,12 +24,15 @@ import SceneRenderer from "../runtime/rendering/SceneRenderer";
 import Mesh from "../instances/Mesh";
 import Texture from "../instances/Texture";
 import VertexBuffer from "../instances/VertexBuffer";
+import Entity from "../instances/Entity";
+import LightProbe from "../instances/LightProbe";
+import SkyLightComponent from "../templates/components/SkyLightComponent";
 
 export default class GPU {
     static context: WebGL2RenderingContext
-    static activeShader
-    static activeFramebuffer
-    static activeMesh
+    static activeShader?:WebGLProgram
+    static activeFramebuffer?:WebGLFramebuffer
+    static activeMesh?:Mesh
     static materials = new Map<string, Material>()
     static shaders = new Map<string, Shader>()
     static frameBuffers = new Map<string, Framebuffer>()
@@ -38,22 +41,23 @@ export default class GPU {
     static cubeBuffer: VertexBuffer
     static BRDF: WebGLTexture
     static internalResolution = {w: 0, h: 0}
-    static quad
-    static __activeSkylightEntity
+    static quad?:Mesh
+    static #activeSkylightEntity?:Entity
+    static skylightProbe:LightProbe
 
-    static set activeSkylightEntity(entity) {
-        GPU.__activeSkylightEntity = entity
+    static set activeSkylightEntity(entity:Entity|undefined) {
+        GPU.#activeSkylightEntity = entity
         GPU.updateSkylight()
     }
 
-    static get activeSkylightEntity() {
-        return GPU.__activeSkylightEntity
+    static get activeSkylightEntity():Entity|undefined {
+        return GPU.#activeSkylightEntity
     }
 
-    static skylightProbe
 
-    static updateSkylight() {
-        const entity = GPU.__activeSkylightEntity
+
+    static updateSkylight():void {
+        const entity = GPU.#activeSkylightEntity
         if (!GPU.skylightProbe) {
             SceneRenderer.UBO.bind()
             SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([0]))
@@ -62,18 +66,19 @@ export default class GPU {
         }
         if (entity) {
 
-            const skylight = entity.components.get(COMPONENTS.SKYLIGHT)
+            const skylight = <SkyLightComponent>entity.components.get(COMPONENTS.SKYLIGHT)
+
             SceneRenderer.UBO.bind()
             SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([1]))
             SceneRenderer.UBO.updateData("skylightSamples", skylight.mipmaps)
             SceneRenderer.UBO.unbind()
+
             GPU.skylightProbe.resolution = skylight.resolution
             const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
-            GPU.skylightProbe.draw((yaw, pitch, projection, index) => {
+            GPU.skylightProbe.draw((yaw, pitch, projection, index):void => {
                 vec3.add(tempPosition, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
                 mat4.lookAt(tempView, entity._translation, tempPosition, <vec3>CUBE_MAP_VIEWS.up[index])
                 mat4.multiply(tempViewProjection, projection, tempView)
-
                 SceneRenderer.draw(true, tempViewProjection, tempView, tempPosition)
             })
         }

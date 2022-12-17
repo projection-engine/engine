@@ -1,7 +1,7 @@
 import {glMatrix, mat3, mat4, quat, vec2, vec3, vec4} from "gl-matrix"
+import Movable from "../../instances/Movable";
+import Entity from "../../instances/Entity";
 
-const toDeg = 57.2957795131
-const quaternion = quat.create()
 
 export default class TransformationAPI {
     static utils = glMatrix
@@ -12,12 +12,13 @@ export default class TransformationAPI {
     static vec2 = vec2
     static vec4 = vec4
 
-    static transformMovable(movable) {
-        const translation = movable._translation,rotate = movable._rotationQuat, scale = movable._scaling, matrix = movable.matrix
-        TransformationAPI.quat.normalize(quaternion, rotate.length > 3 ? rotate : TransformationAPI.quat.fromEuler([], rotate[0] * toDeg, rotate[1] * toDeg, rotate[2] * toDeg))
-        if (matrix)
-            return TransformationAPI.mat4.fromRotationTranslationScale(matrix, quaternion, translation, scale)
-        return TransformationAPI.mat4.fromRotationTranslationScale([], quaternion, translation, scale)
+    static transformMovable(movable:Movable|Entity):void {
+        const translation = movable._translation
+        const rotate = movable._rotationQuat
+        const scale = movable._scaling
+        const matrix = movable.matrix
+        quat.normalize(cacheVec4, <quat>rotate)
+        mat4.fromRotationTranslationScale(matrix, cacheVec4, <vec3>translation, <vec3>scale)
     }
 
 
