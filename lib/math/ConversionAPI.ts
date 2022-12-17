@@ -1,4 +1,4 @@
-import {vec4} from "gl-matrix"
+import {vec3, vec4} from "gl-matrix"
 import CameraAPI from "../utils/CameraAPI";
 
 /**
@@ -6,9 +6,9 @@ import CameraAPI from "../utils/CameraAPI";
  */
 
 export default class ConversionAPI {
-    static canvasBBox
+    static canvasBBox?:DOMRect
 
-    static toQuadCoord(coords, quadSize) {
+    static toQuadCoord(coords:{x: number, y: number}, quadSize:{w: number, h: number}): {x: number, y: number} {
         const target = ConversionAPI.canvasBBox
         const {x, y} = coords
         const {w, h} = quadSize
@@ -22,7 +22,8 @@ export default class ConversionAPI {
         }
     }
 
-    static toWorldCoordinates(x, y) {
+    static toWorldCoordinates(x, y): vec4 {
+        const eyeCoords = vec4.create()
 
         // NORMALIZED DEVICE SPACE
         const bBox = ConversionAPI.canvasBBox
@@ -30,30 +31,31 @@ export default class ConversionAPI {
             yNormalized = -((y - bBox.y) / bBox.height) * 2 + 1
 
         // HOMOGENEOUS CLIP SPACE
-        const homogeneousCoords = [xNormalized, yNormalized, 0, 0]
+        const homogeneousCoords = <vec4>[xNormalized, yNormalized, 0, 0]
 
         // EYE SPACE
 
-        const eyeCoords = vec4.transformMat4([], homogeneousCoords, CameraAPI.invProjectionMatrix)
+        vec4.transformMat4(eyeCoords, homogeneousCoords, CameraAPI.invProjectionMatrix)
         eyeCoords[2] = -1
         eyeCoords[3] = 1
 
         // WORLD SPACE
-        return vec4.transformMat4([], eyeCoords, CameraAPI.invViewMatrix)
+        return vec4.transformMat4(vec4.create(), eyeCoords, CameraAPI.invViewMatrix)
     }
-    static toLinearWorldCoordinates(x, y) {
-        // EYE SPACE
 
-        const eyeCoords = vec4.transformMat4([],  [x, y, 0, 0], CameraAPI.invProjectionMatrix)
+    static toLinearWorldCoordinates(x, y): vec4 {
+        const eyeCoords = vec4.create()
+        // EYE SPACE
+        vec4.transformMat4(eyeCoords, [x, y, 0, 0], CameraAPI.invProjectionMatrix)
         eyeCoords[2] = -1
         eyeCoords[3] = 1
 
         // WORLD SPACE
-        return vec4.transformMat4([], eyeCoords, CameraAPI.invViewMatrix)
+        return vec4.transformMat4(vec4.create(), eyeCoords, CameraAPI.invViewMatrix)
     }
 
-    static toScreenCoordinates(vec) {
-        const target = [...vec, 1]
+    static toScreenCoordinates(vec: vec3): [number, number] {
+        const target = <vec4>[...vec, 1]
         vec4.transformMat4(target, target, CameraAPI.viewMatrix)
         vec4.transformMat4(target, target, CameraAPI.projectionMatrix)
 
@@ -62,8 +64,8 @@ export default class ConversionAPI {
         const widthHalf = bBox.width / 2
         const heightHalf = bBox.height / 2
 
-        target[0] = ((target[0]/target[3] + 1) * widthHalf);
-        target[1] = ((target[1]/target[3] + 1) * heightHalf);
+        target[0] = ((target[0] / target[3] + 1) * widthHalf);
+        target[1] = ((target[1] / target[3] + 1) * heightHalf);
 
         return [target[0], target[1]]
     }

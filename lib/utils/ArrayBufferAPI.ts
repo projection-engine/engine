@@ -1,10 +1,9 @@
 export default class ArrayBufferAPI {
-    static allocateVector(size:number, defaultValue = 0, asQuaternion:boolean, shared=true, integer:boolean):Uint8Array|Float32Array {
+    static allocateVector(size:number, defaultValue?:number, asQuaternion?:boolean, shared=true, integer?:boolean):Uint8Array|Float32Array {
         const arrayBuffer = shared ? new SharedArrayBuffer(size  * 4) : new ArrayBuffer( size * 4)
         const b:Uint8Array|Float32Array =  integer ? new Uint8Array(arrayBuffer) : new Float32Array(arrayBuffer)
         for (let i = 0; i < size; i++)
-            b[i] = defaultValue
-
+            b[i] = defaultValue||0
         if (asQuaternion)
             b[3] = 1
         return b

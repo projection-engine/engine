@@ -1,15 +1,26 @@
+// @ts-ignore
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
+// @ts-ignore
 import CAMERA_UBO from "../shaders/functions/CAMERA_METADATA_UNIFORM.glsl";
+// @ts-ignore
 import COMPUTE_AREA_LIGHT from "../shaders/lights/COMPUTE_AREALIGHT.glsl"
+// @ts-ignore
 import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
+// @ts-ignore
 import ACES from "../shaders/functions/ACES.glsl";
+// @ts-ignore
 import DEPTH_UTILS from "../shaders/functions/DEPTH_RECONSTRUCTION_UTILS.glsl"
+// @ts-ignore
 import COMPUTE_LIGHTS from "../shaders/lights/COMPUTE_DIRECTIONAL_LIGHTS.glsl"
+// @ts-ignore
 import COMPUTE_POINT_LIGHTS from "../shaders/lights/COMPUTE_POINT_LIGHTS.glsl"
+// @ts-ignore
 import COMPUTE_SPOTLIGHTS from "../shaders/lights/COMPUTE_SPOTLIGHT.glsl"
+// @ts-ignore
 import BRDF_FUNCTIONS from "../shaders/lights/BRDF_FUNCTIONS.glsl"
-
+// @ts-ignore
 import UBER_ATTRIBUTES from "../shaders/uber-shader/ATTRIBUTES.glsl"
+// @ts-ignore
 import SSS from "../shaders/lights/SSS.glsl"
 
 const METHODS = {

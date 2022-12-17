@@ -3,12 +3,13 @@ import COMPONENTS from "../../static/COMPONENTS.js";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import ArrayBufferAPI from "./ArrayBufferAPI";
-import {mat4, vec3, vec4} from "gl-matrix";
+import {mat4, quat, vec3, vec4} from "gl-matrix";
 import ConversionAPI from "../math/ConversionAPI";
 import UBO from "../../instances/UBO";
 import MotionBlur from "../../runtime/post-processing/MotionBlur";
 import FrameComposition from "../../runtime/post-processing/FrameComposition";
 import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
+import Controller from "../Controller";
 
 
 /**
@@ -19,7 +20,7 @@ import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
 
 
 const ORTHOGRAPHIC = 1, PERSPECTIVE = 0
-let notificationBuffers, worker
+let notificationBuffers
 
 function getNotificationBuffer() {
     const b = ArrayBufferAPI.allocateVector(6, 0)
@@ -32,9 +33,17 @@ function getNotificationBuffer() {
     return b
 }
 
+interface Serialization {
+    rotationSmoothing: number,
+    translationSmoothing: number,
+    metadata: any,
+    rotation: number[],
+    translation: number[]
+}
+
 const toRad = Math.PI / 180
-export default class CameraAPI {
-    static UBO
+export default class CameraAPI extends Controller {
+    static UBO: UBO
     static #dynamicAspectRatio = false
     static metadata = new PostProcessingEffects()
     static position = ArrayBufferAPI.allocateVector(3)
@@ -44,28 +53,22 @@ export default class CameraAPI {
     static invProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static viewProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static previousViewProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
-
     static staticViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static #UBOBuffer = ArrayBufferAPI.allocateVector(84)
-
     static #projectionBuffer = ArrayBufferAPI.allocateVector(5)
-    static translationBuffer = ArrayBufferAPI.allocateVector(3)
-    static rotationBuffer = ArrayBufferAPI.allocateVector(4, 0, true)
-
+    static translationBuffer = <vec3>ArrayBufferAPI.allocateVector(3)
+    static rotationBuffer = <quat>ArrayBufferAPI.allocateVector(4, 0, true)
     static #notificationBuffers = getNotificationBuffer()
-    static get notificationBuffers(){
+    static get notificationBuffers() {
         return CameraAPI.#notificationBuffers
     }
-    static #worker
-    static initialized = false
 
+    static #worker: Worker
     static trackingEntity
 
     static initialize() {
-        if (CameraAPI.initialized)
-            return
-
+        super.initialize()
         CameraAPI.UBO = new UBO(
             "CameraMetadata",
             [
@@ -78,10 +81,10 @@ export default class CameraAPI {
             ])
 
 
-        worker = new Worker("./camera-worker.js")
-        CameraAPI.#worker = worker
+        CameraAPI.#worker = new Worker("./camera-worker.js")
+
         notificationBuffers = CameraAPI.#notificationBuffers
-        worker.postMessage([
+        CameraAPI.#worker.postMessage([
             notificationBuffers,
             CameraAPI.position,
             CameraAPI.viewMatrix,
@@ -100,12 +103,12 @@ export default class CameraAPI {
         new ResizeObserver(CameraAPI.updateAspectRatio)
             .observe(GPUCanvas)
         notificationBuffers[3] = 1
-        CameraAPI.initialized = true
     }
 
-    static syncThreads(){
-        worker.postMessage(0)
+    static syncThreads() {
+        CameraAPI.#worker.postMessage(0)
     }
+
     static updateUBOs() {
         const entity = CameraAPI.trackingEntity
         if (entity && entity.__changedBuffer[1])
@@ -118,7 +121,7 @@ export default class CameraAPI {
             UBO.bind()
             UBO.updateBuffer(CameraAPI.#UBOBuffer)
             UBO.unbind()
-        }else
+        } else
             VisibilityRenderer.needsUpdate = false
     }
 
@@ -131,11 +134,11 @@ export default class CameraAPI {
         }
     }
 
-    static get didChange() {
+    static get didChange(): number {
         return notificationBuffers[3]
     }
 
-    static get isOrthographic() {
+    static get isOrthographic(): boolean {
         return notificationBuffers[2] === ORTHOGRAPHIC
     }
 
@@ -145,59 +148,59 @@ export default class CameraAPI {
     }
 
 
-    static get zFar() {
+    static get zFar(): number {
         return CameraAPI.#projectionBuffer[0]
     }
 
-    static get zNear() {
+    static get zNear(): number {
         return CameraAPI.#projectionBuffer[1]
     }
 
-    static get fov() {
+    static get fov(): number {
         return CameraAPI.#projectionBuffer[2]
     }
 
-    static get aspectRatio() {
+    static get aspectRatio(): number {
         return CameraAPI.#projectionBuffer[3]
     }
 
-    static get size() {
+    static get size(): number {
         return CameraAPI.#projectionBuffer[4]
     }
 
-    static set zFar(data) {
+    static set zFar(data: number) {
         CameraAPI.#projectionBuffer[0] = data
     }
 
-    static set zNear(data) {
+    static set zNear(data: number) {
         CameraAPI.#projectionBuffer[1] = data
     }
 
-    static set fov(data) {
+    static set fov(data: number) {
         CameraAPI.#projectionBuffer[2] = data
     }
 
-    static set aspectRatio(data) {
+    static set aspectRatio(data: number) {
         CameraAPI.#projectionBuffer[3] = data
     }
 
-    static set size(data) {
+    static set size(data: number) {
         CameraAPI.#projectionBuffer[4] = data
     }
 
-    static set translationSmoothing(data) {
+    static set translationSmoothing(data: number) {
         notificationBuffers[4] = data
     }
 
-    static get translationSmoothing() {
+    static get translationSmoothing(): number {
         return notificationBuffers[4]
     }
 
-    static set rotationSmoothing(data) {
+    static set rotationSmoothing(data: number) {
         notificationBuffers[5] = data
     }
 
-    static get rotationSmoothing() {
+    static get rotationSmoothing(): number {
         return notificationBuffers[5]
     }
 
@@ -217,15 +220,18 @@ export default class CameraAPI {
         notificationBuffers[0] = 1
     }
 
-    static serializeState(translation = CameraAPI.translationBuffer, rotation = CameraAPI.rotationBuffer, rotationSmoothing = CameraAPI.rotationSmoothing, translationSmoothing = CameraAPI.translationSmoothing, metadata = CameraAPI.metadata) {
-        const state = {rotationSmoothing, translationSmoothing}
-        state.metadata = {...CameraAPI.metadata}
-        state.rotation = [...rotation]
-        state.translation = [...translation]
-        return state
+    static serializeState(translation = CameraAPI.translationBuffer, rotation = CameraAPI.rotationBuffer, rotationSmoothing = CameraAPI.rotationSmoothing, translationSmoothing = CameraAPI.translationSmoothing, metadata = CameraAPI.metadata): Serialization {
+        return {
+            rotationSmoothing,
+            translationSmoothing,
+            metadata: {...CameraAPI.metadata},
+            rotation: [...rotation],
+            translation: [...translation]
+        }
     }
 
-    static restoreState({rotation, translation, rotationSmoothing, translationSmoothing, metadata}) {
+    static restoreState(state:Serialization) {
+        const {rotation, translation, rotationSmoothing, translationSmoothing, metadata} = state
         if (metadata) {
             const keys = Object.keys(metadata)
             for (let i = 0; i < keys.length; i++) {

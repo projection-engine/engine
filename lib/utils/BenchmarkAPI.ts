@@ -1,13 +1,11 @@
 let currentSamples = 0, maxSamples = 1000
 export default class BenchmarkAPI {
     static contexts = new Map()
-
-    static lastTimestamp = 0
     static currentSamples = 0
-    static onUpdate = () => null
-    static onReset = () => null
-
-    static get maxSamples() {
+    static onUpdate?:Function
+    static onReset?:Function
+    static onSampleCount?:Function
+    static get maxSamples():number {
         return maxSamples
     }
 
@@ -17,7 +15,7 @@ export default class BenchmarkAPI {
         labels.forEach(k => BenchmarkAPI.registerTrack(k))
     }
 
-    static onSampleCount = () => null
+
 
     static registerTrack(label) {
         BenchmarkAPI.contexts.set(label, [0, new Float32Array(maxSamples), -1])
@@ -32,13 +30,12 @@ export default class BenchmarkAPI {
         context[2] = performance.now()
     }
 
-    static endTrack(label) {
+    static endTrack(label:string) {
 
         currentSamples++
         if (currentSamples >= maxSamples) {
             currentSamples = 0
-
-            BenchmarkAPI.onSampleCount()
+            BenchmarkAPI.onSampleCount?.()
         }
         BenchmarkAPI.currentSamples = currentSamples
         const context = BenchmarkAPI.contexts.get(label)
@@ -47,9 +44,9 @@ export default class BenchmarkAPI {
 
         ARR[context[0]] = currentElapsed
         context[0] += 1
-        BenchmarkAPI.onUpdate(label, currentElapsed)
+        BenchmarkAPI.onUpdate?.(label, currentElapsed)
         if (maxSamples <= context[0]) {
-            BenchmarkAPI.onReset(label, Array.from(ARR))
+            BenchmarkAPI.onReset?.(label, Array.from(ARR))
             context[0] = 0
         }
     }
