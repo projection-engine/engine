@@ -4,62 +4,79 @@ import TEXTURE_FILTERING from "../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../static/texture/TEXTURE_FORMATS";
 import ImageProcessor from "../lib/math/ImageProcessor";
 
+interface TextureAttributes {
+    img?: string | ImageBitmap | HTMLImageElement
+    wrapS?: string
+    wrapT?: string
+    minFilter?: string
+    magFilter?: string
+
+    internalFormat?: string
+    format?: string
+    width?: number
+    height?: number
+    type?: string
+}
+
 export default class Texture {
     loaded = false
-    texture
-    attributes = {}
+    texture?: WebGLTexture
+    attributes: TextureAttributes = {}
 
-    async initialize(attributes) {
+    async initialize(attributes: TextureAttributes) {
         const img = attributes.img
         this.attributes = attributes
         if (typeof img === "string") {
             if (img.includes("data:image/")) {
-                const res = await ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
-                res.naturalHeight = res.height
-                res.naturalWidth = res.width
-                this.attributes.img = res
-                this.texture = Texture.#initializeTexture(this.attributes)
+                this.attributes.img = <ImageBitmap | undefined>await ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
+                this.texture = this.#initializeTexture()
             } else {
                 const i = new Image()
                 i.src = img
                 await i.decode()
                 this.attributes.img = i
-                this.texture = Texture.#initializeTexture(this.attributes)
+                i.height = i.naturalHeight
+                i.width = i.naturalWidth
+                this.texture = this.#initializeTexture()
             }
         } else
-            this.texture = Texture.#initializeTexture(this.attributes)
+            this.texture = this.#initializeTexture()
         this.loaded = true
         this.attributes = {}
     }
 
-    static #initializeTexture(attributes) {
+    #initializeTexture(): WebGLTexture | undefined {
         const {
             img,
-
             wrapS = TEXTURE_WRAPPING.REPEAT,
             wrapT = TEXTURE_WRAPPING.REPEAT,
             minFilter = TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR,
             magFilter = TEXTURE_FILTERING.MAG.LINEAR,
-
             internalFormat = TEXTURE_FORMATS.SRGBA.internalFormat,
             format = TEXTURE_FORMATS.SRGBA.format,
-
-            width = img.naturalWidth,
-            height = img.naturalHeight,
+            width,
+            height,
             type
-        } = attributes
+        } = this.attributes
 
+        if (!img)
+            return
 
-        let newTexture = gpu.createTexture()
-
-        gpu.bindTexture(gpu.TEXTURE_2D, newTexture)
-        gpu.texImage2D(gpu.TEXTURE_2D, 0, gpu[internalFormat], width, height, 0, gpu[format], typeof type === "string" ? gpu[type] : gpu.UNSIGNED_BYTE, img)
-
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu[minFilter])
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu[magFilter])
-
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu[wrapS]);
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu[wrapT]);
+        const newTexture = Texture.createTexture(
+            width,
+            height,
+            gpu[internalFormat],
+            0,
+            gpu[format],
+            gpu[type],
+            <ImageBitmap | HTMLImageElement>img,
+            gpu[minFilter],
+            gpu[magFilter],
+            gpu[wrapS],
+            gpu[wrapT],
+            false,
+            false
+        )
 
         if (minFilter === TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR) {
             const anisotropicEXT = gpu.getExtension("EXT_texture_filter_anisotropic")
@@ -73,17 +90,32 @@ export default class Texture {
         return newTexture
     }
 
-    update(newImage) {
+    update(newImage: string) {
         if (this.loaded) {
             gpu.deleteTexture(this.texture)
-            ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage}).then(res => {
-                this.attributes.img = res
-                Texture.#initializeTexture(this.attributes)
-            })
+            ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage})
+                .then(res => {
+                    this.attributes.img = <ImageBitmap | undefined>res
+                    this.#initializeTexture()
+                })
         }
     }
 
-    static createTexture(width, height, internalFormat, border, format, type, data, minFilter, magFilter, wrapS, wrapT, yFlip, autoUnbind = true) {
+    static createTexture(
+        width: number,
+        height: number,
+        internalFormat: number,
+        border: number,
+        format: number,
+        type: number,
+        data: null | HTMLImageElement | ImageBitmap,
+        minFilter: number,
+        magFilter: number,
+        wrapS: number,
+        wrapT: number,
+        yFlip: boolean,
+        autoUnbind = true
+    ): WebGLTexture {
         const texture = gpu.createTexture()
 
         gpu.bindTexture(gpu.TEXTURE_2D, texture)

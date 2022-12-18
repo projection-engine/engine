@@ -38,7 +38,7 @@ export default class Entity extends Movable {
     [key: string]: any;
 
     readonly id
-    readonly components = new Map<string, Component>()
+    readonly components = new Map<string, AllComponents>()
 
     queryKey: string
     name: string
@@ -49,6 +49,7 @@ export default class Entity extends Movable {
     pickID: [number, number, number] = [-1, -1, -1]
     __lightComp?: LightComponent
     __cullingComponent?: CullingComponent
+    __rigidBodyComponent?: RigidBodyComponent
     __hasLight: boolean = false
     __hasMesh: boolean = false
     __hasCamera: boolean = false
@@ -136,6 +137,7 @@ export default class Entity extends Movable {
                     break
                 case COMPONENTS.RIGID_BODY:
                     this.__hasRigidBody = true
+                    this.__rigidBodyComponent = <RigidBodyComponent>instance
                     break
                 case COMPONENTS.CULLING:
                     this.__cullingComponent = <CullingComponent>instance
@@ -182,6 +184,7 @@ export default class Entity extends Movable {
                     break
                 case COMPONENTS.RIGID_BODY:
                     this.__hasRigidBody = false
+                    this.__rigidBodyComponent = undefined
                     break
                 case COMPONENTS.CULLING:
                     this.__cullingComponent = undefined

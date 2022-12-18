@@ -1,8 +1,8 @@
 import Engine from "../../Engine";
 import COMPONENTS from "../../static/COMPONENTS.js";
 import PhysicsAPI from "../../lib/rendering/PhysicsAPI";
+import RigidBodyComponent from "../../templates/components/RigidBodyComponent";
 
-const COMP = COMPONENTS.RIGID_BODY
 export default class PhysicsPass {
     static simulationStep = 0.01666666
     static subSteps = 10
@@ -10,6 +10,7 @@ export default class PhysicsPass {
     static execute() {
         if (Engine.isDev || !PhysicsAPI.ammo)
             return
+
         const rigidBodies = PhysicsAPI.rigidBodies
         const length = rigidBodies.length
         const tempTransformation = PhysicsAPI.tempTransformation
@@ -18,13 +19,13 @@ export default class PhysicsPass {
 
         for (let i = 0; i < length; i++) {
             const current = rigidBodies[i]
-            const component = current.components.get(COMP)
-            if (!component?.__initialized) {
+            const component = current.__rigidBodyComponent
+            if (!component?.motionState) {
                 if (!component)
                     PhysicsAPI.removeRigidBody(current)
                 continue
             }
-            component.__motionState.getWorldTransform(tempTransformation)
+            component.motionState.getWorldTransform(tempTransformation)
             const position = tempTransformation.getOrigin()
             const quaternion = tempTransformation.getRotation()
 

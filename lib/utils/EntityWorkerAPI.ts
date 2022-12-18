@@ -1,4 +1,4 @@
-import WORKER_MESSAGES from "../../static/WORKER_MESSAGES.ts"
+import WORKER_MESSAGES from "../../static/WORKER_MESSAGES"
 import CameraAPI from "./CameraAPI";
 
 
@@ -52,7 +52,7 @@ export default class EntityWorkerAPI {
             return
         EntityWorkerAPI.linkedEntities.set(entity.id, entity)
 
-        const newEntity = {
+        const newEntity = <WorkerEntity> {
             id: entity.id,
             __changedBuffer: entity.__changedBuffer,
             previousModelMatrix: entity.previousModelMatrix,

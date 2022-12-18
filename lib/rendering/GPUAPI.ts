@@ -4,7 +4,7 @@ import Material from "../../instances/Material";
 import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import Framebuffer from "../../instances/Framebuffer";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import Mesh from "../../instances/Mesh";
+import Mesh, {MeshProps} from "../../instances/Mesh";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import Shader from "../../instances/Shader";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -12,6 +12,7 @@ import GPU from "../GPU";
 import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
 import COMPONENTS from "../../static/COMPONENTS";
+import MeshComponent from "../../templates/components/MeshComponent";
 
 export default class GPUAPI {
     static async allocateTexture(imageData, id) {
@@ -60,7 +61,7 @@ export default class GPUAPI {
         const inUse = MaterialAPI.entityMaterial.get(id)
         try {
             if (inUse)
-                Object.values(inUse).forEach(entity => MaterialAPI.updateMap(entity.components.get(COMPONENTS.MESH)))
+                Object.values(inUse).forEach(entity => MaterialAPI.updateMap(<MeshComponent>entity.components.get(COMPONENTS.MESH)))
         } catch (err) {
             console.error(err)
         }
@@ -139,13 +140,10 @@ export default class GPUAPI {
         GPU.frameBuffers.delete(id)
     }
 
-    static allocateMesh(id, bufferData) {
-        if (!bufferData || !id)
-            return
+    static allocateMesh(id:string, bufferData:MeshProps) {
         if (GPU.meshes.get(id) != null)
             GPUAPI.destroyMesh(GPU.meshes.get(id))
-        const instance = new Mesh(bufferData)
-        instance.id = id
+        const instance = new Mesh({...bufferData, id})
         GPU.meshes.set(id, instance)
         VisibilityRenderer.needsUpdate = true
         return instance
@@ -177,7 +175,7 @@ export default class GPUAPI {
         return instance
     }
 
-    static destroyShader(id) {
+    static destroyShader(id:string) {
         if (Object.values(STATIC_SHADERS.PRODUCTION).find(m => m === id) || Object.values(STATIC_SHADERS.DEVELOPMENT).find(m => m === id))
             return
         const instance = GPU.shaders.get(id)

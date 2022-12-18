@@ -6,11 +6,44 @@ export default class RigidBodyComponent extends Component {
 
     mass = 1
     drag = 0
-    inertia = [0, 0, 0]
+    inertia: [number, number, number] = [0, 0, 0]
 
-    __transform
-    __motionState
-    __body
-    __inertia
-    __initialized
+    #motionState?: btDefaultMotionState
+    #body?: btRigidBody
+    #transform?: btTransform
+    #inertia?: btVector3
+
+    initialized: boolean =false
+
+    get body(): btRigidBody | undefined {
+        return this.#body
+    }
+
+    set body(data) {
+        this.#body = data
+    }
+
+    get transform(): btTransform | undefined {
+        return this.#transform
+    }
+
+    set transform(data) {
+        this.#transform = data
+    }
+
+    get inertiaBody(): btVector3 | undefined {
+        return this.#inertia
+    }
+
+    set inertiaBody(data: btVector3) {
+        this.#inertia = data
+    }
+
+    get motionState(): btDefaultMotionState | undefined {
+        return this.#motionState
+    }
+
+    set motionState(data) {
+        this.#motionState = data
+    }
 }

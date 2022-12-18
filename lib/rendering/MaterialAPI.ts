@@ -8,7 +8,7 @@ import Entity from "../../instances/Entity";
 
 export default class MaterialAPI {
     static #incrementalMap = new Map()
-    static entityMaterial = new Map()
+    static entityMaterial = new Map<string,{[key:string]:Entity}>()
 
     static* #getIncrementalID() {
         let counter = 0

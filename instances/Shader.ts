@@ -5,6 +5,7 @@ import LightsAPI from "../lib/utils/LightsAPI";
 import GLSL_TYPES from "../static/GLSL_TYPES"
 import trimString from "../utils/trim-string";
 import GLSLTypes from "../static/GLSL_TYPES";
+import MutableObject from "../MutableObject";
 
 const regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
 const structRegex = (type) => {
@@ -187,7 +188,7 @@ export default class Shader {
         GPU.activeShader = this.program
     }
 
-    bindForUse(data) {
+    bindForUse(data:MutableObject) {
         this.bind()
         let currentSamplerIndex = 0
         const increase = () => currentSamplerIndex++

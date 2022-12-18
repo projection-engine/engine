@@ -1,4 +1,4 @@
-import WORKER_MESSAGES from "../static/WORKER_MESSAGES.ts"
+import WORKER_MESSAGES from "../static/WORKER_MESSAGES"
 import TransformationPass from "../runtime/misc/TransformationPass";
 
 

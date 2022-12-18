@@ -22,7 +22,7 @@ export default class ImageProcessor {
 
     }
 
-    static #doWork(type, data, callback) {
+    static #doWork(type:string, data:any, callback:Function) {
         const id = v4()
         ImageProcessor.callbacks.push({
             callback,
@@ -32,7 +32,7 @@ export default class ImageProcessor {
         ImageProcessor.#worker.postMessage({data, type, id})
     }
 
-    static async request(type, data) {
+    static async request(type:string, data):Promise<any> {
         return new Promise(resolve => ImageProcessor.#doWork(type, data, (res) => resolve(res)))
     }
 }

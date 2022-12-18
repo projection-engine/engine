@@ -3,8 +3,7 @@ import {v4 as uuidv4} from "uuid"
 import GPU from "../lib/GPU";
 import GPUAPI from "../lib/rendering/GPUAPI";
 
-interface MeshProps {
-
+export interface MeshProps {
     id?: string,
     vertices?: number[] | Float32Array,
     indices?: number[] | Float32Array,
@@ -20,7 +19,7 @@ export default class Mesh {
     readonly verticesQuantity:number
     readonly trianglesQuantity:number
 
-    private readonly id: string
+    readonly id: string
     readonly maxBoundingBox: number[]
     readonly minBoundingBox: number[]
     readonly VAO: WebGLVertexArrayObject

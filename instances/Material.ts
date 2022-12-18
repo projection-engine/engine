@@ -1,21 +1,24 @@
 import {v4} from "uuid"
 import MaterialAPI from "../lib/rendering/MaterialAPI";
 import GPUAPI from "../lib/rendering/GPUAPI";
+// @ts-ignore
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import GPU from "../lib/GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
+// @ts-ignore
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
+// @ts-ignore
 import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag"
-
 import ConsoleAPI from "../lib/utils/ConsoleAPI";
 import SceneRenderer from "../runtime/rendering/SceneRenderer";
 import Engine from "../Engine";
+import Shader from "./Shader";
 
 export default class Material {
-    static #uberShader
+    static #uberShader?:Shader
     static #initialized = false
 
-    static compileUberShader(forceCleanShader) {
+    static compileUberShader(forceCleanShader?:boolean) {
         if (Material.#uberShader)
             GPUAPI.destroyShader(STATIC_SHADERS.UBER_SHADER)
         const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
@@ -57,7 +60,7 @@ export default class Material {
     }
 
     static initialize() {
-        if (Material.#initialized || !window.gpu)
+        if (Material.#initialized || !gpu)
             return
         Material.#initialized = true
         Material.compileUberShader()

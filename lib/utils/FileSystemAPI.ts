@@ -2,7 +2,8 @@ import ScriptsAPI from "./ScriptsAPI";
 import GPU from "../GPU";
 import GPUAPI from "../rendering/GPUAPI";
 import ConsoleAPI from "./ConsoleAPI";
-import FILE_TYPES from "static/FILE_TYPES";
+import FILE_TYPES from "../../../static/FILE_TYPES";
+
 
 export default class FileSystemAPI {
     static #callback
@@ -18,13 +19,14 @@ export default class FileSystemAPI {
         return null
     }
 
-    static async loadMesh(ID) {
+    static async loadMesh(ID:string):Promise<boolean> {
         try {
             const file = JSON.parse(await FileSystemAPI.readAsset(ID))
             GPUAPI.allocateMesh(ID, file)
+            return true
         } catch (err) {
-            console.error(err)
             ConsoleAPI.error(err)
+            return false
         }
     }
 

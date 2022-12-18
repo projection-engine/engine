@@ -8,8 +8,8 @@ export default class MeshComponent extends Component {
 
 
     castsShadows = true
-    _meshID
-    _materialID
+    _meshID?:string
+    _materialID?:string
 
     __texturesInUse = {}
     __mappedUniforms = {}

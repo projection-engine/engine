@@ -26,7 +26,7 @@ export default class Bokeh {
         gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
         gpu.uniform1i(uniforms.depthSampler, 1)
 
-        gpu.uniform1f(uniforms.radius, window.d||.5)
+        gpu.uniform1f(uniforms.radius, .5)
 
         drawQuad()
         FBO.stopMapping()

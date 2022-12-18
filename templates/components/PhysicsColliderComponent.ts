@@ -4,15 +4,24 @@ import PHYSICS_COLLIDER_PROPS from "../../static/component-props/PHYSICS_COLLIDE
 
 export default class PhysicsColliderComponent extends Component {
     _props = PHYSICS_COLLIDER_PROPS
-
     collisionType = COLLISION_TYPES.BOX
     direction = "Y"
     _center = [0, 0, 0]
     _size = [1, 1, 1]
     _height = 1
     _radius = 1
+    initialized: boolean =false
+    #shape?: btBoxShape | btSphereShape
 
-    get center() {
+    get shape(): btBoxShape | btSphereShape | undefined {
+        return this.#shape
+    }
+
+    set shape(data) {
+        this.#shape = data
+    }
+
+    get center(): number[] {
         return this._center
     }
 
@@ -21,7 +30,7 @@ export default class PhysicsColliderComponent extends Component {
         this.__entity.changed = true
     }
 
-    get size() {
+    get size(): number[] {
         return this._size
     }
 
@@ -30,7 +39,7 @@ export default class PhysicsColliderComponent extends Component {
         this.__entity.changed = true
     }
 
-    get height() {
+    get height(): number {
         return this._height
     }
 
@@ -39,7 +48,7 @@ export default class PhysicsColliderComponent extends Component {
         this.__entity.changed = true
     }
 
-    get radius() {
+    get radius(): number {
         return this._radius
     }
 
@@ -48,7 +57,5 @@ export default class PhysicsColliderComponent extends Component {
         this.__entity.changed = true
     }
 
-    __shape
-    __initialized
 
 }

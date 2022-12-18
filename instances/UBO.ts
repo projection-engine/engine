@@ -1,16 +1,28 @@
 import getGlslSizes from "../utils/get-glsl-sizes";
 
-
+interface Item{
+    offset:number,
+    dataSize:number,
+    chunkSize:number
+}
+interface Data{
+    name:string
+    type:string
+    offset?:number
+    dataSize?:number
+    chunkSize?:number
+    dataLength?:number
+}
 export default class UBO {
-    items = []
-    keys = []
-    buffer
-    blockName
-    blockPoint
+    items:Item[] = []
+    keys:string[] = []
+    buffer?:WebGLBuffer
+    blockName?:string
+    blockPoint?:number
 
     static #blockPointIncrement = 0
 
-    constructor(blockName, dataArray) {
+    constructor(blockName:string, dataArray:Data[]) {
         const bufferSize = UBO.#calculate(dataArray);
         for (let i = 0; i < dataArray.length; i++) {
             this.items[dataArray[i].name] = {
@@ -26,7 +38,6 @@ export default class UBO {
         this.blockPoint = UBO.#blockPointIncrement;
         UBO.#blockPointIncrement += 1
 
-
         this.buffer = gpu.createBuffer();
         gpu.bindBuffer(gpu.UNIFORM_BUFFER, this.buffer);
         gpu.bufferData(gpu.UNIFORM_BUFFER, bufferSize, gpu.DYNAMIC_DRAW);
@@ -34,7 +45,7 @@ export default class UBO {
         gpu.bindBufferBase(gpu.UNIFORM_BUFFER, this.blockPoint, this.buffer);
     }
 
-    bindWithShader(shaderProgram) {
+    bindWithShader(shaderProgram:WebGLProgram) {
         gpu.useProgram(shaderProgram)
         const index = gpu.getUniformBlockIndex(shaderProgram, this.blockName)
         gpu.uniformBlockBinding(shaderProgram, index, this.blockPoint)
@@ -54,7 +65,7 @@ export default class UBO {
     updateBuffer(data) {
         gpu.bufferSubData(gpu.UNIFORM_BUFFER, 0, data, 0, null)
     }
-    static #calculate(dataArray) {
+    static #calculate(dataArray:Data[]):number {
         let chunk = 16,
             tsize = 0,
             offset = 0,

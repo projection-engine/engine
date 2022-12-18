@@ -3,21 +3,22 @@ import COMPONENTS from "../../static/COMPONENTS.js"
 import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
 import ShadowProbe from "../../instances/ShadowProbe";
 import VisibilityRenderer from "./VisibilityRenderer";
+import LightComponent from "../../templates/components/LightComponent";
+import Shader from "../../instances/Shader";
 
-
-let lightsToUpdate
+const cacheVec3 = vec3.create()
+const cacheMat4 = mat4.create()
+let lightsToUpdate:LightComponent[]
 export default class OmnidirectionalShadows {
     static changed = false
     static maxCubeMaps = 2
-    static shadowMap
-    static sampler
-    static shader
-    static lightsToUpdate = []
+    static shadowMap?:ShadowProbe
+    static sampler?:WebGLTexture
+    static shader?:Shader
+    static lightsToUpdate:LightComponent[] = []
 
     static initialize() {
         OmnidirectionalShadows.shadowMap = new ShadowProbe(512)
-
-
         OmnidirectionalShadows.sampler = OmnidirectionalShadows.shadowMap.texture
         lightsToUpdate = OmnidirectionalShadows.lightsToUpdate
     }
@@ -35,9 +36,10 @@ export default class OmnidirectionalShadows {
             const entity = current.__entity
             OmnidirectionalShadows.shadowMap
                 .draw((yaw, pitch, perspective, index) => {
-                        const target = vec3.add([], entity._translation, CUBE_MAP_VIEWS.target[index])
+                        vec3.add(cacheVec3, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
+                        mat4.lookAt(cacheMat4, entity._translation, cacheVec3, <vec3>CUBE_MAP_VIEWS.up[index])
                         OmnidirectionalShadows.loopMeshes(
-                            mat4.lookAt([], entity._translation, target, CUBE_MAP_VIEWS.up[index]),
+                            cacheMat4,
                             perspective,
                             current
                         )
@@ -60,7 +62,8 @@ export default class OmnidirectionalShadows {
             if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
 
-            const distanceFromLight = vec3.length(vec3.sub([], current.absoluteTranslation, component.__entity.absoluteTranslation))
+            vec3.sub(cacheVec3, current.absoluteTranslation, component.__entity.absoluteTranslation)
+            const distanceFromLight = vec3.length(cacheVec3)
 
             if (distanceFromLight > component.cutoff)
                 continue

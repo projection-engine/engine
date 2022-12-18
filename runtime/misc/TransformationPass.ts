@@ -10,9 +10,9 @@ const cache = quat.create()
 const cacheDistance = vec3.create()
 export default class TransformationPass {
     static targets = new DynamicMap()
-    static controlBuffer
-    static cameraPosition
-    static cameraBuffer
+    static controlBuffer?: Float32Array
+    static cameraPosition?: Float32Array
+    static cameraBuffer?: Float32Array
     static #initialized = false
     static index = -1
     static maxWorkers = -1
@@ -44,7 +44,7 @@ export default class TransformationPass {
     static execute() {
         if (!TransformationPass.#initialized)
             return
-        const entities = TransformationPass.targets.array
+        const entities = <WorkerEntity[]>TransformationPass.targets.array
         const size = entities.length
 
         for (let i = 0; i < size; i++) {
@@ -79,7 +79,7 @@ export default class TransformationPass {
         }
     }
 
-    static transform(entity) {
+    static transform(entity:WorkerEntity) {
         entity.__changedBuffer[2] = 1
         entity.__changedBuffer[0] = 0
         const scaling = entity._scaling
@@ -103,8 +103,6 @@ export default class TransformationPass {
                 entity.parentMatrix,
                 entity.matrix
             )
-
-
         entity.absoluteTranslation[0] = entity.matrix[12]
         entity.absoluteTranslation[1] = entity.matrix[13]
         entity.absoluteTranslation[2] = entity.matrix[14]
