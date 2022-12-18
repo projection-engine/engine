@@ -1,3 +1,14 @@
+import MutableObject from "../../MutableObject";
+
+interface ComponentValueGeneric {
+    [key:string]:any
+    type: string
+    label?: string
+    key?: string
+    disabledIf?: string | Function
+}
+
+
 export default class Component {
     static propTypes = Object.freeze({
         NUMBER: "number",
@@ -15,7 +26,7 @@ export default class Component {
     })
     __entity
 
-    _props = []
+    _props: ComponentValueGeneric[]= []
     _name = ""
     #entity
     get entity() {
@@ -30,7 +41,7 @@ export default class Component {
     onUpdate() {
     }
 
-    static group(label, children, disabledIf) {
+    static group(label, children, disabledIf?: Function | string): ComponentValueGeneric {
         return {
             type: Component.propTypes.GROUP,
             label,
@@ -39,49 +50,49 @@ export default class Component {
         }
     }
 
-    static number(label, key, max, min, increment = .001, isAngle, realtime = true, disabledIf) {
-        return {label, max, min, increment, type: Component.propTypes.NUMBER, key, isAngle, realtime, disabledIf}
-    }
-    static quaternionToEuler(label, key, disabledIf) {
-        return {label, type: Component.propTypes.QUAT_EULER, key, disabledIf}
-    }
-    static array(labels, key, increment, max, min, isAngle, disabledIf, defaultValue) {
-        return {labels, max, min, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle, defaultValue}
+    static number(label: string, key: string, max?:number, min?:number, increment?:number, isAngle?:boolean, realtime?:boolean, disabledIf?: Function | string): ComponentValueGeneric {
+        return {label, max, min, increment: increment ? increment : .001, type: Component.propTypes.NUMBER, key, isAngle, realtime: !!realtime , disabledIf}
     }
 
-    static string(label, key) {
-        return {type: Component.propTypes.STRING, label, key}
+    static array(labels: string[], key: string, increment, max?:number, min?:number, isAngle?:boolean, disabledIf?: Function | string): ComponentValueGeneric {
+        return {labels, max, min, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle}
     }
 
-    static options(key, options, disabledIf) {
+    static string(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
+        return {type: Component.propTypes.STRING, label, key, disabledIf}
+    }
+
+    static options(key:string, options?:MutableObject[], disabledIf?: Function | string): ComponentValueGeneric {
         return {
             type: Component.propTypes.OPTIONS,
-
             options,
             key,
             disabledIf
         }
     }
 
-    static color(label, key, disabledIf) {
+    static color(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
         return {type: Component.propTypes.COLOR, label, key, disabledIf}
     }
 
-    static boolean(label, key) {
-        return {type: Component.propTypes.BOOLEAN, label, key}
+    static boolean(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
+        return {type: Component.propTypes.BOOLEAN, label, key, disabledIf}
     }
 
-    static imageTexture(label, key) {
-        return {type: Component.propTypes.IMAGE, label, key}
+    static imageTexture(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
+        return {type: Component.propTypes.IMAGE, label, key, disabledIf}
     }
-    static materialInstance(label, key, terrainMaterials) {
-        return {type: Component.propTypes.MATERIAL, label, key, terrainMaterials}
+
+    static materialInstance(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
+        return {type: Component.propTypes.MATERIAL, label, key, disabledIf}
     }
-    static terrainInstance(label, key) {
-        return {type: Component.propTypes.TERRAIN, label, key}
+
+    static terrainInstance(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
+        return {type: Component.propTypes.TERRAIN, label, key, disabledIf}
     }
-    static meshInstance(label, key) {
-        return {type: Component.propTypes.MESH, label, key}
+
+    static meshInstance(label: string, key: string, disabledIf?: Function | string): ComponentValueGeneric {
+        return {type: Component.propTypes.MESH, label, key, disabledIf}
     }
 
 

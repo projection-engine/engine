@@ -54,11 +54,10 @@ export default class SceneRenderer {
     static set shader(data) {
         shader = data
         uniforms = shader?.uniformMap
-        window.lightPosition = new Float32Array([0,  10, 0])
         SceneRenderer.UBO.bindWithShader(shader.program)
     }
 
-    static draw(useCustomView, viewProjection, viewMatrix, cameraPosition) {
+    static draw(useCustomView?:boolean, viewProjection?:Float32Array, viewMatrix?:Float32Array, cameraPosition?:Float32Array) {
         if (!SceneRenderer.#ready || !shader)
             return
         const toRender = VisibilityRenderer.meshesToDraw.array
@@ -120,7 +119,7 @@ export default class SceneRenderer {
         // uniform samplerCube skylight_specular;
         // uniform float skylight_samples;
 
-        if (GPU.__activeSkylightEntity !== null && !useCustomView) {
+        if (!!GPU.activeSkylightEntity  && !useCustomView) {
             texOffset++
             gpu.activeTexture(gpu.TEXTURE7)
             gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)

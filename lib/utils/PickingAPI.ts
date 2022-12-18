@@ -32,8 +32,8 @@ export default class PickingAPI {
             coords.y,
             1,
             1,
-            window.gpu.RGBA,
-            window.gpu.FLOAT,
+            gpu.RGBA,
+            gpu.FLOAT,
             dd
         )
         gpu.bindFramebuffer(gpu.FRAMEBUFFER, null)
@@ -42,7 +42,7 @@ export default class PickingAPI {
 
 
     static readEntityID(x, y) {
-        const w = window.GPUCanvas.width, h = window.GPUCanvas.height
+        const w = GPUCanvas.width, h = GPUCanvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
         const picked = PickingAPI.readPixels(GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER).FBO, 1, coords)
 

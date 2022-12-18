@@ -3,6 +3,7 @@ import Mesh from "./Mesh";
 import getProbeRotation from "../utils/get-probe-rotation";
 import CubeMapAPI from "../lib/rendering/CubeMapAPI";
 
+const cacheMat4 = mat4.create()
 export default class ShadowProbe {
     texture
     _resolution
@@ -22,8 +23,8 @@ export default class ShadowProbe {
 
     draw(callback, zFar = 25, zNear = 1) {
         const resolution = this._resolution,
-            texture = this.texture,
-            perspective = mat4.perspective([], Math.PI / 2, 1, zNear, zFar)
+            texture = this.texture
+        mat4.perspective(cacheMat4, Math.PI / 2, 1, zNear, zFar)
 
         Mesh.finishIfUsed()
         const rbo = CubeMapAPI.createRenderBuffer(resolution)
@@ -38,7 +39,7 @@ export default class ShadowProbe {
                 0
             )
             gpu.clear(gpu.DEPTH_BUFFER_BIT)
-            callback(rotations.yaw, rotations.pitch, perspective, i)
+            callback(rotations.yaw, rotations.pitch, cacheMat4, i)
         }
 
         gpu.deleteRenderbuffer(rbo)

@@ -11,17 +11,4 @@ export default class TransformationAPI {
     static vec3 = vec3
     static vec2 = vec2
     static vec4 = vec4
-
-    static transformMovable(movable:Movable|Entity):void {
-        const translation = movable._translation
-        const rotate = movable._rotationQuat
-        const scale = movable._scaling
-        const matrix = movable.matrix
-        quat.normalize(cacheVec4, <quat>rotate)
-        mat4.fromRotationTranslationScale(matrix, cacheVec4, <vec3>translation, <vec3>scale)
-    }
-
-
-
-
 }

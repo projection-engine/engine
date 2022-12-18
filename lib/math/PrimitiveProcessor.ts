@@ -39,10 +39,10 @@ export default class PrimitiveProcessor {
                     m21 = 0
 
                 if (v0 && v1 && v2) {
-                    vec3.sub(d01, v0, v1)
-                    vec3.sub(d21, v2, v1)
-                    m01 = vec3.dot(d01, d01)
-                    m21 = vec3.dot(d21, d21)
+                    vec3.sub(<vec3>d01, v0, v1)
+                    vec3.sub(<vec3>d21, v2, v1)
+                    m01 = vec3.dot(<vec3>d01, <vec3>d01)
+                    m21 = vec3.dot(<vec3>d21, <vec3>d21)
 
                     if (m01 * m21 > 1e-6) {
                         let norm = normals[c]
@@ -87,8 +87,8 @@ export default class PrimitiveProcessor {
             let e1 = [], e2 = []
 
             if (v1 && v0 && v2) {
-                vec3.sub(e1, v1, v0)
-                vec3.sub(e2, v2, v0)
+                vec3.sub(<vec3>e1, v1, v0)
+                vec3.sub(<vec3>e2, v2, v0)
 
                 let x1 = uv1[0] - uv0[0],
                     x2 = uv2[0] - uv0[0],
@@ -103,14 +103,14 @@ export default class PrimitiveProcessor {
                     tangentP1 = [],
                     tangentP2 = []
                 // TANGENT
-                vec3.scale(tangentP1, e1, y2)
-                vec3.scale(tangentP2, e2, y1)
-                vec3.sub(tangent, tangentP1, tangentP2)
-                vec3.scale(tangent, tangent, r)
+                vec3.scale(<vec3>tangentP1, <vec3>e1, y2)
+                vec3.scale(<vec3>tangentP2, <vec3>e2, y1)
+                vec3.sub(<vec3>tangent, <vec3>tangentP1, <vec3>tangentP2)
+                vec3.scale(<vec3>tangent, <vec3>tangent, r)
 
-                vec3.add(tangents[i0], tangents[i0], tangent)
-                vec3.add(tangents[i1], tangents[i1], tangent)
-                vec3.add(tangents[i2], tangents[i2], tangent)
+                vec3.add(tangents[i0], tangents[i0], <vec3>tangent)
+                vec3.add(tangents[i1], tangents[i1], <vec3>tangent)
+                vec3.add(tangents[i2], tangents[i2], <vec3>tangent)
             }
         }
 
@@ -120,9 +120,9 @@ export default class PrimitiveProcessor {
 
             let t = [0, 0, 0]
             const nCop = [0, 0, 0]
-            vec3.scale(nCop, n, vec3.dot(n, t0))
-            vec3.sub(t, t0, nCop)
-            vec3.normalize(t, t)
+            vec3.scale(<vec3>nCop, n, vec3.dot(n, t0))
+            vec3.sub(<vec3>t, t0, <vec3>nCop)
+            vec3.normalize(<vec3>t, <vec3>t)
             tangentArray[i] = [t[0], t[1], t[2]]
 
         }

@@ -27,7 +27,6 @@ export default  [
         Component.number("STRENGTH", "vignetteStrength", undefined,0, .0001),
     ]),
 
-
     Component.group("DISTORTION", [
         Component.boolean("ENABLED", "distortion"),
         Component.number("STRENGTH", "distortionStrength", undefined,0, .0001),

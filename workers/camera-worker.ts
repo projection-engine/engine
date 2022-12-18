@@ -34,21 +34,22 @@ class CameraWorker {
     static currentRotation = TransformationAPI.quat.create()
     static UBOBuffer
 
-    static initialize(
-        notificationBuffers,
-        position,
-        viewMatrix,
-        projectionMatrix,
-        invViewMatrix,
-        invProjectionMatrix,
-        staticViewMatrix,
-        translationBuffer,
-        rotationBuffer,
-        skyboxProjectionMatrix,
-        projectionBuffer,
-        viewProjectionMatrix,
-        UBOBuffer
-    ) {
+    static initialize(data:Float32Array[]) {
+        const [
+            notificationBuffers,
+            position,
+            viewMatrix,
+            projectionMatrix,
+            invViewMatrix,
+            invProjectionMatrix,
+            staticViewMatrix,
+            translationBuffer,
+            rotationBuffer,
+            skyboxProjectionMatrix,
+            projectionBuffer,
+            viewProjectionMatrix,
+            UBOBuffer
+        ] = data
         if (CameraWorker.initialized)
             return
 
@@ -102,7 +103,6 @@ class CameraWorker {
         matrix[12] = matrix[13] = matrix[14] = 0
         return matrix
     }
-
 
 
     static #updateView() {
@@ -171,6 +171,6 @@ class CameraWorker {
 
 self.onmessage = (event) => {
     if (!CameraWorker.initialized)
-        CameraWorker.initialize(...event.data)
+        CameraWorker.initialize(<Float32Array[]>event.data)
     CameraWorker.execute()
 }

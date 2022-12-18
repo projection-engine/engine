@@ -16,7 +16,10 @@ self.onmessage = async ({data: {type, data, id}}) => {
                 else {
                     const canvas = new OffscreenCanvas(widthF, heightF),
                         ctx = canvas.getContext("2d")
+
+                    // @ts-ignore
                     ctx.drawImage(imageToLoad, 0, 0, widthF, heightF)
+                    // @ts-ignore
                     const canvasBlob = await canvas.convertToBlob({
                         type: "image/png",
                         quality: quality
@@ -34,8 +37,11 @@ self.onmessage = async ({data: {type, data, id}}) => {
                 } = data
                 const c = new OffscreenCanvas(resolution, resolution)
                 let ctx = c.getContext("2d")
+                // @ts-ignore
                 ctx.fillStyle = typeof color === "string" ? color : "rgba(" + color[0] + "," + color[1] + "," + color[2] + "," + color[3] + ")"
+                // @ts-ignore
                 ctx.fillRect(0, 0, resolution, resolution)
+                // @ts-ignore
                 const canvasBlob = await c.convertToBlob({
                     type: "image/png",
                     quality: .1
@@ -93,15 +99,15 @@ self.onmessage = async ({data: {type, data, id}}) => {
                     noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0
                     noiseTextureData[index + 2] = 0
                 }
+
                 self.postMessage(
                     {
                         data: {
                             noise: noiseTextureData,
                             kernels
                         }, id
-                    },
-                    [noiseTextureData.buffer, kernels.buffer]
-                )
+                        // @ts-ignore
+                    }, [noiseTextureData.buffer, kernels.buffer])
                 break
             }
             default:

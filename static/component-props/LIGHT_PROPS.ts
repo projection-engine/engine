@@ -48,7 +48,7 @@ export default [
     ]),
 
     Component.group("CENTER_POINT", [
-        Component.array(["X", "Y", "Z"], "center",  undefined, undefined, undefined, false, undefined, [0, 0, 0])
+        Component.array(["X", "Y", "Z"], "center",  undefined, undefined, undefined, false, undefined)
     ], comp => comp.type !== LIGHT_TYPES.DIRECTIONAL),
 
     Component.group("ATTENUATION", [
@@ -63,12 +63,12 @@ export default [
 
     Component.group("SHADOWS", [
         Component.boolean("ENABLED", "shadowMap"),
-        Component.number("SIZE", "size", undefined, 1, undefined, false, v => !v.shadowMap, comp => !comp.shadowMap || comp.type !== LIGHT_TYPES.DIRECTIONAL),
-        Component.number("FAR", "zFar", undefined, undefined, .001, false, true, checkShadows),
-        Component.number("NEAR", "zNear", undefined, undefined, .001, false, true,checkShadows),
-        Component.number("BIAS", "shadowBias", undefined, undefined, .00001, undefined, undefined, checkShadows),
+        Component.number("SIZE", "size", undefined, 1, undefined, false, false, comp => !comp.shadowMap || comp.type !== LIGHT_TYPES.DIRECTIONAL),
+        Component.number("FAR", "zFar", undefined, undefined, .001, false, false, checkShadows),
+        Component.number("NEAR", "zNear", undefined, undefined, .001, false, false,checkShadows),
+        Component.number("BIAS", "shadowBias", undefined, undefined, .00001, false, undefined, checkShadows),
         Component.number("PCF_SAMPLES", "shadowSamples", 10, 1, 1, false, false, checkShadows),
-        Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, undefined, false, false, checkShadows),
+        Component.number("FALLOFF", "shadowAttenuationMinDistance", undefined, 1, .001, false, false, checkShadows),
         Component.boolean("HAS_SSS", "hasSSS")
 
     ]),

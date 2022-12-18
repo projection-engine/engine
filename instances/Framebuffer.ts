@@ -2,6 +2,7 @@ import GPU from "../lib/GPU";
 import Texture from "./Texture";
 
 interface FBOTexture {
+    [key:string]:any,
     w?: number,
     h?: number,
     attachment?: number,

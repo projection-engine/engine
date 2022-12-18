@@ -3,7 +3,7 @@ import Component from "./Component";
 
 export default class SpriteComponent extends Component {
     _props = SPRITE_PROPS
-    imageID: string
+    imageID?: string
     attributes: [number, number] = [0, 0]
 
     get alwaysFaceCamera() {

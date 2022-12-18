@@ -8,6 +8,8 @@ import FrameComposition from "../runtime/post-processing/FrameComposition";
 import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
 
 export default function initializeFrameBuffers() {
+    const halfResW = GPU.internalResolution.w / 2
+    const halfResH = GPU.internalResolution.h / 2
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
         .texture({
@@ -58,7 +60,6 @@ export default function initializeFrameBuffers() {
     MotionBlur.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})
     MotionBlur.workerTexture = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER).colors[0]
     FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
-
 
 
     LensPostProcessing.baseFBO = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.BLUR_BLOOM).texture()

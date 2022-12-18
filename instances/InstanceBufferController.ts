@@ -1,16 +1,17 @@
-export default class IntanceBuffer {
-    id
+import Entity from "./Entity";
+
+export default class InstanceBufferController {
+    id?:string
     bufferSize = 0
-    entities = new Map()
+    entities = new Map<string,Entity>()
+    transformVBO?:WebGLBuffer
 
     constructor(materialID) {
         this.id = materialID
         this.transformVBO = gpu.createBuffer()
     }
 
-
     updateBuffer() {
-
         this.bufferSize = this.entities.size
         if (this.bufferSize > 0) {
             const data = []

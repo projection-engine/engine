@@ -11,9 +11,9 @@ export default function getProbeLookat(yaw, pitch, position) {
         zAxis = [sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw]
     let p1, p2, p3
 
-    p1 = vec3.dot(position, xAxis)
-    p2 = vec3.dot(position, yAxis)
-    p3 = vec3.dot(position, zAxis)
+    p1 = vec3.dot(position, <vec3>xAxis)
+    p2 = vec3.dot(position, <vec3>yAxis)
+    p3 = vec3.dot(position, <vec3>zAxis)
 
     return [
         xAxis[0], yAxis[0], zAxis[0], 0,
