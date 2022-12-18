@@ -1,5 +1,5 @@
 import VisibilityRenderer from "../rendering/VisibilityRenderer";
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import Engine from "../../Engine";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 
@@ -24,18 +24,18 @@ export default class MotionBlur {
         MotionBlur.frameBuffer.startMapping()
         shader.bind()
 
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
-        gpu.uniform1i(uniforms.currentFrame, 0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, Engine.previousFrameSampler)
+        GPU.context.uniform1i(uniforms.currentFrame, 0)
 
-        gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.velocitySampler)
-        gpu.uniform1i(uniforms.gVelocity, 1)
+        GPU.context.activeTexture(GPU.context.TEXTURE1)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, VisibilityRenderer.velocitySampler)
+        GPU.context.uniform1i(uniforms.gVelocity, 1)
 
-        gpu.uniform1f(uniforms.velocityScale, MotionBlur.velocityScale)
-        gpu.uniform1i(uniforms.maxSamples, MotionBlur.maxSamples)
+        GPU.context.uniform1f(uniforms.velocityScale, MotionBlur.velocityScale)
+        GPU.context.uniform1i(uniforms.maxSamples, MotionBlur.maxSamples)
 
-        drawQuad()
+        GPU.drawQuad()
         MotionBlur.frameBuffer.stopMapping()
     }
 }

@@ -1,4 +1,4 @@
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import Mesh from "../../instances/Mesh";
@@ -41,8 +41,8 @@ export default class VisibilityRenderer {
         const size = toRender.length
         shader.bind()
 
-        gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
-        gpu.uniformMatrix4fv(uniforms.previousViewProjection, false, CameraAPI.metadata.cameraMotionBlur ? previousViewProjection : viewProjection)
+        GPU.context.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
+        GPU.context.uniformMatrix4fv(uniforms.previousViewProjection, false, CameraAPI.metadata.cameraMotionBlur ? previousViewProjection : viewProjection)
 
         mat4.copy(previousViewProjection, viewProjection)
 
@@ -51,8 +51,8 @@ export default class VisibilityRenderer {
 
         let isAlphaTested = 0, isDoubleSided = false, stateWasCleared = false
 
-        gpu.enable(gpu.CULL_FACE)
-        gpu.depthMask(true)
+        GPU.context.enable(GPU.context.CULL_FACE)
+        GPU.context.depthMask(true)
 
         for (let i = 0; i < size; i++) {
             isAlphaTested = 0
@@ -67,25 +67,25 @@ export default class VisibilityRenderer {
                     continue
                 isAlphaTested = material.isAlphaTested ? 1 : 0
                 if (material.doubleSided) {
-                    gpu.disable(gpu.CULL_FACE)
+                    GPU.context.disable(GPU.context.CULL_FACE)
                     isDoubleSided = true
                 } else if (isDoubleSided) {
-                    gpu.enable(gpu.CULL_FACE)
+                    GPU.context.enable(GPU.context.CULL_FACE)
                     isDoubleSided = false
                 }
                 stateWasCleared = false
             } else if (!stateWasCleared) {
                 stateWasCleared = true
                 if (isDoubleSided) {
-                    gpu.enable(gpu.CULL_FACE)
+                    GPU.context.enable(GPU.context.CULL_FACE)
                     isDoubleSided = false
                 }
             }
 
-            gpu.uniform1i(uniforms.isAlphaTested, isAlphaTested)
-            gpu.uniform3fv(uniforms.entityID, entity.pickID)
-            gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
-            gpu.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
+            GPU.context.uniform1i(uniforms.isAlphaTested, isAlphaTested)
+            GPU.context.uniform3fv(uniforms.entityID, entity.pickID)
+            GPU.context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+            GPU.context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
 
 
             mesh.simplifiedDraw()

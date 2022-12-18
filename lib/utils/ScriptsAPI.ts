@@ -1,4 +1,4 @@
-import GPU from "../GPU";
+import GPU from "../../GPU";
 import GPUAPI from "../rendering/GPUAPI";
 import PhysicsAPI from "../rendering/PhysicsAPI";
 import UIAPI from "../rendering/UIAPI";

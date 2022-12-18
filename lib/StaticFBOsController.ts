@@ -1,5 +1,5 @@
 import Controller from "./Controller";
-import GPU from "./GPU";
+import GPU from "../GPU";
 
 export default class StaticFBOsController extends Controller{
 

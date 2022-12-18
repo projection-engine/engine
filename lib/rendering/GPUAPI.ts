@@ -8,19 +8,20 @@ import Mesh, {MeshProps} from "../../instances/Mesh";
 import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import Shader from "../../instances/Shader";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import GPU from "../GPU";
+import GPU from "../../GPU";
 import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
 import COMPONENTS from "../../static/COMPONENTS";
 import MeshComponent from "../../templates/components/MeshComponent";
+import MutableObject from "../../MutableObject";
 
 export default class GPUAPI {
-    static async allocateTexture(imageData, id) {
+    static async allocateTexture(imageData:string|MutableObject, id:string) {
         if (GPU.textures.get(id) != null)
             return GPU.textures.get(id)
         const texture = new Texture()
         GPU.textures.set(id, texture)
-        await texture.initialize(typeof imageData === "object" ? imageData : {img: imageData})
+        await texture.initialize(typeof imageData === "string" ? {img: imageData} : imageData)
         GPU.materials.forEach(material => {
             if (material.texturesInUse[id] != null) {
                 const data = material.texturesInUse[id]
@@ -36,7 +37,7 @@ export default class GPUAPI {
         if (!found)
             return
         if (found.texture instanceof WebGLTexture)
-            gpu.deleteTexture(found.texture)
+            GPU.context.deleteTexture(found.texture)
         GPU.textures.delete(imageID)
     }
 
@@ -74,12 +75,12 @@ export default class GPUAPI {
     }
 
 
-    static createBuffer(type, data, renderingType = gpu.STATIC_DRAW) {
+    static createBuffer(type, data, renderingType = GPU.context.STATIC_DRAW) {
         if (!data && data.buffer instanceof ArrayBuffer && data.byteLength !== undefined || data.length === 0)
             return null
-        const buffer = gpu.createBuffer()
-        gpu.bindBuffer(type, buffer)
-        gpu.bufferData(type, data, renderingType)
+        const buffer = GPU.context.createBuffer()
+        GPU.context.bindBuffer(type, buffer)
+        GPU.context.bufferData(type, data, renderingType)
         return buffer
     }
 
@@ -102,10 +103,10 @@ export default class GPUAPI {
         })
     }
 
-    static copyTexture(target, source, type = gpu.DEPTH_BUFFER_BIT, blitType = gpu.NEAREST) {
-        gpu.bindFramebuffer(gpu.READ_FRAMEBUFFER, source.FBO)
-        gpu.bindFramebuffer(gpu.DRAW_FRAMEBUFFER, target.FBO)
-        gpu.blitFramebuffer(
+    static copyTexture(target, source, type = GPU.context.DEPTH_BUFFER_BIT, blitType = GPU.context.NEAREST) {
+        GPU.context.bindFramebuffer(GPU.context.READ_FRAMEBUFFER, source.FBO)
+        GPU.context.bindFramebuffer(GPU.context.DRAW_FRAMEBUFFER, target.FBO)
+        GPU.context.blitFramebuffer(
             0, 0,
             source.width, source.height,
             0, 0,
@@ -130,13 +131,13 @@ export default class GPUAPI {
         if (!fbo)
             return
         for (let i = 0; i < fbo.colors.length; i++) {
-            gpu.deleteTexture(fbo.colors[i])
+            GPU.context.deleteTexture(fbo.colors[i])
         }
         if (fbo.depthSampler instanceof WebGLTexture)
-            gpu.deleteTexture(fbo.depthSampler)
+            GPU.context.deleteTexture(fbo.depthSampler)
         if (fbo.RBO)
-            gpu.deleteRenderbuffer(fbo.RBO)
-        gpu.deleteFramebuffer(fbo.FBO)
+            GPU.context.deleteRenderbuffer(fbo.RBO)
+        GPU.context.deleteFramebuffer(fbo.FBO)
         GPU.frameBuffers.delete(id)
     }
 
@@ -154,8 +155,8 @@ export default class GPUAPI {
             return
         const mesh = typeof instance === "string" ? GPU.meshes.get(instance) : instance
         if (mesh instanceof Mesh) {
-            gpu.deleteVertexArray(mesh.VAO)
-            gpu.deleteBuffer(mesh.indexVBO)
+            GPU.context.deleteVertexArray(mesh.VAO)
+            GPU.context.deleteBuffer(mesh.indexVBO)
 
             if (mesh.uvVBO)
                 mesh.uvVBO.delete()
@@ -181,7 +182,7 @@ export default class GPUAPI {
         const instance = GPU.shaders.get(id)
         if (!instance)
             return
-        gpu.deleteProgram(instance.program)
+        GPU.context.deleteProgram(instance.program)
         GPU.shaders.delete(id)
     }
 }

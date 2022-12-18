@@ -1,10 +1,11 @@
-import GPU from "../GPU";
+import GPU from "../../GPU";
 import DATA_TYPES from "../../static/DATA_TYPES";
 import GPUAPI from "./GPUAPI";
 
 import FileSystemAPI from "../utils/FileSystemAPI";
 import ConsoleAPI from "../utils/ConsoleAPI";
 import Entity from "../../instances/Entity";
+import Material from "../../instances/Material";
 
 export default class MaterialAPI {
     static #incrementalMap = new Map()
@@ -77,7 +78,7 @@ export default class MaterialAPI {
             entity.__meshRef = undefined
     }
 
-    static async updateMaterialUniforms(material) {
+    static async updateMaterialUniforms(material:Material) {
         const data = material.uniforms
         if (!Array.isArray(data))
             return

@@ -1,4 +1,4 @@
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import COMPONENTS from "../../static/COMPONENTS.js";
 import DynamicMap from "../../lib/DynamicMap";
 import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
@@ -19,10 +19,10 @@ export default class SpriteRenderer {
             return
 
         const textures = GPU.textures
-        gpu.disable(gpu.CULL_FACE)
+        GPU.context.disable(GPU.context.CULL_FACE)
         shader.bind()
 
-        gpu.activeTexture(gpu.TEXTURE0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
         for (let i = 0; i < size; i++) {
             const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
             if (!current.active || current.isCulled)
@@ -31,14 +31,14 @@ export default class SpriteRenderer {
             if (!texture)
                 continue
 
-            gpu.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
-            gpu.uniform3fv(uniforms.scale, current._scaling)
-            gpu.uniform2fv(uniforms.attributes, component.attributes)
-            gpu.bindTexture(gpu.TEXTURE_2D, texture.texture)
-            gpu.uniform1i(uniforms.iconSampler, 0)
-            drawQuad()
+            GPU.context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
+            GPU.context.uniform3fv(uniforms.scale, current._scaling)
+            GPU.context.uniform2fv(uniforms.attributes, component.attributes)
+            GPU.context.bindTexture(GPU.context.TEXTURE_2D, texture.texture)
+            GPU.context.uniform1i(uniforms.iconSampler, 0)
+            GPU.drawQuad()
         }
 
-        gpu.enable(gpu.CULL_FACE)
+        GPU.context.enable(GPU.context.CULL_FACE)
     }
 }

@@ -1,5 +1,6 @@
 import VertexBuffer from "../../instances/VertexBuffer"
 import Mesh from "../../instances/Mesh";
+import GPU from "../../GPU";
 
 const X = [
         0, 0, 0,
@@ -29,36 +30,36 @@ export default class LineAPI {
         if (LineAPI.#initialized) return
         LineAPI.#initialized = true
 
-        LineAPI.vaoX = gpu.createVertexArray()
-        gpu.bindVertexArray(LineAPI.vaoX)
+        LineAPI.vaoX = GPU.context.createVertexArray()
+        GPU.context.bindVertexArray(LineAPI.vaoX)
         LineAPI.vboX = new VertexBuffer(
             0,
             new Float32Array(X),
-            gpu.ARRAY_BUFFER,
+            GPU.context.ARRAY_BUFFER,
             3,
-            gpu.FLOAT
+            GPU.context.FLOAT
         )
-        gpu.bindVertexArray(null)
+        GPU.context.bindVertexArray(null)
 
-        LineAPI.vaoY = gpu.createVertexArray()
-        gpu.bindVertexArray(LineAPI.vaoY)
+        LineAPI.vaoY = GPU.context.createVertexArray()
+        GPU.context.bindVertexArray(LineAPI.vaoY)
         LineAPI.vboY = new VertexBuffer(
             0,
             new Float32Array(Y),
-            gpu.ARRAY_BUFFER,
+            GPU.context.ARRAY_BUFFER,
             3,
-            gpu.FLOAT
+            GPU.context.FLOAT
         )
-        gpu.bindVertexArray(null)
+        GPU.context.bindVertexArray(null)
 
-        LineAPI.vaoZ = gpu.createVertexArray()
-        gpu.bindVertexArray(LineAPI.vaoZ)
+        LineAPI.vaoZ = GPU.context.createVertexArray()
+        GPU.context.bindVertexArray(LineAPI.vaoZ)
         LineAPI.vboZ = new VertexBuffer(
             0,
             new Float32Array(Z),
-            gpu.ARRAY_BUFFER,
+            GPU.context.ARRAY_BUFFER,
             3,
-            gpu.FLOAT
+            GPU.context.FLOAT
         )
 
     }
@@ -69,11 +70,11 @@ export default class LineAPI {
 
         Mesh.finishIfUsed()
 
-        gpu.bindVertexArray(vao)
+        GPU.context.bindVertexArray(vao)
         vbo.enable()
-        gpu.drawArrays(gpu.LINES, 0, 2)
+        GPU.context.drawArrays(GPU.context.LINES, 0, 2)
 
-        gpu.bindVertexArray(null)
+        GPU.context.bindVertexArray(null)
         vbo.disable()
     }
 
@@ -84,12 +85,12 @@ export default class LineAPI {
 
         Mesh.finishIfUsed()
 
-        gpu.bindVertexArray(vao)
+        GPU.context.bindVertexArray(vao)
         vbo.enable()
-        gpu.drawArrays(gpu.LINES, 0, 2)
+        GPU.context.drawArrays(GPU.context.LINES, 0, 2)
 
 
-        gpu.bindVertexArray(null)
+        GPU.context.bindVertexArray(null)
         vbo.disable()
     }
 
@@ -100,11 +101,11 @@ export default class LineAPI {
 
         Mesh.finishIfUsed()
 
-        gpu.bindVertexArray(vao)
+        GPU.context.bindVertexArray(vao)
         vbo.enable()
-        gpu.drawArrays(gpu.LINES, 0, 2)
+        GPU.context.drawArrays(GPU.context.LINES, 0, 2)
 
-        gpu.bindVertexArray(null)
+        GPU.context.bindVertexArray(null)
         vbo.disable()
     }
 

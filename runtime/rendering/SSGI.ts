@@ -1,4 +1,4 @@
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import Engine from "../../Engine";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
@@ -79,18 +79,18 @@ export default class SSGI {
         framebuffer.startMapping()
         shader.bind()
 
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
-        gpu.uniform1i(uniforms.scene_depth, 0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, VisibilityRenderer.depthSampler)
+        GPU.context.uniform1i(uniforms.scene_depth, 0)
 
-        gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
-        gpu.uniform1i(uniforms.previousFrame, 1)
+        GPU.context.activeTexture(GPU.context.TEXTURE1)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, Engine.previousFrameSampler)
+        GPU.context.uniform1i(uniforms.previousFrame, 1)
 
-        gpu.uniform2fv(uniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
-        gpu.uniform3fv(uniforms.rayMarchSettings,  SSGI.rayMarchSettings)
+        GPU.context.uniform2fv(uniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
+        GPU.context.uniform3fv(uniforms.rayMarchSettings,  SSGI.rayMarchSettings)
 
-        drawQuad()
+        GPU.drawQuad()
         framebuffer.stopMapping()
 
         if (SSGI.enabled)
@@ -101,34 +101,34 @@ export default class SSGI {
     }
 
     static #applyBlur() {
-        gpu.activeTexture(gpu.TEXTURE0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
 
         gaussianBlurShader.bind()
         ssgiQuarter.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, SSGI.unfilteredSSGISampler)
-        gpu.uniform1i(gaussianBlurShaderUniforms.sceneColor, 0)
-        gpu.uniform1i(gaussianBlurShaderUniforms.blurRadius, SSGI.blurSamples)
-        drawQuad()
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, SSGI.unfilteredSSGISampler)
+        GPU.context.uniform1i(gaussianBlurShaderUniforms.sceneColor, 0)
+        GPU.context.uniform1i(gaussianBlurShaderUniforms.blurRadius, SSGI.blurSamples)
+        GPU.drawQuad()
         ssgiQuarter.stopMapping()
 
         ssgiEighth.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, ssgiQuarter.colors[0])
-        gpu.uniform1i(gaussianBlurShaderUniforms.sceneColor, 0)
-        gpu.uniform1i(gaussianBlurShaderUniforms.blurRadius, SSGI.blurSamples * 2)
-        drawQuad()
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, ssgiQuarter.colors[0])
+        GPU.context.uniform1i(gaussianBlurShaderUniforms.sceneColor, 0)
+        GPU.context.uniform1i(gaussianBlurShaderUniforms.blurRadius, SSGI.blurSamples * 2)
+        GPU.drawQuad()
         ssgiEighth.stopMapping()
 
         blurShader.bind()
         ssgiFinal.startMapping()
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.entityIDSampler)
-        gpu.uniform1i(blurShaderUniforms.entityIDSampler, 0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, VisibilityRenderer.entityIDSampler)
+        GPU.context.uniform1i(blurShaderUniforms.entityIDSampler, 0)
 
-        gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, ssgiEighth.colors[0])
-        gpu.uniform1i(blurShaderUniforms.sceneColor, 1)
-        gpu.uniform1i(blurShaderUniforms.blurRadius, SSGI.blurSamples)
+        GPU.context.activeTexture(GPU.context.TEXTURE1)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, ssgiEighth.colors[0])
+        GPU.context.uniform1i(blurShaderUniforms.sceneColor, 1)
+        GPU.context.uniform1i(blurShaderUniforms.blurRadius, SSGI.blurSamples)
 
-        drawQuad()
+        GPU.drawQuad()
         ssgiFinal.stopMapping()
     }
 }

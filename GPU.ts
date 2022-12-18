@@ -1,35 +1,38 @@
-import LineAPI from "./rendering/LineAPI";
-import ImageProcessor from "./math/ImageProcessor";
-import TerrainGenerator from "./math/TerrainGenerator";
-import CameraAPI from "./utils/CameraAPI";
-import EntityWorkerAPI from "./utils/EntityWorkerAPI";
-import CubeMapAPI from "./rendering/CubeMapAPI";
-import initializeShaders from "../utils/initialize-shaders";
-import initializeStaticMeshes from "../utils/initialize-static-meshes";
-import initializeFrameBuffers from "../utils/initialize-frame-buffers";
-import LightsAPI from "./utils/LightsAPI";
+import LineAPI from "./lib/rendering/LineAPI";
+import ImageProcessor from "./lib/math/ImageProcessor";
+import TerrainGenerator from "./lib/math/TerrainGenerator";
+import CameraAPI from "./lib/utils/CameraAPI";
+import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
+import CubeMapAPI from "./lib/rendering/CubeMapAPI";
+import initializeShaders from "./utils/initialize-shaders";
+import initializeStaticMeshes from "./utils/initialize-static-meshes";
+import initializeFrameBuffers from "./utils/initialize-frame-buffers";
+import LightsAPI from "./lib/utils/LightsAPI";
 
 // @ts-ignore
-import QUAD_VERT from "../shaders/post-processing/QUAD.vert"
+import QUAD_VERT from "./shaders/post-processing/QUAD.vert"
 // @ts-ignore
-import BRDF_FRAG from "../shaders/post-processing/BRDF_GEN.frag"
+import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
 
-import Shader from "../instances/Shader";
-import Framebuffer from "../instances/Framebuffer";
-import Material from "../instances/Material";
-import COMPONENTS from "../static/COMPONENTS";
+import Shader from "./instances/Shader";
+import Framebuffer from "./instances/Framebuffer";
+import Material from "./instances/Material";
+import COMPONENTS from "./static/COMPONENTS";
 import {mat4, vec3} from "gl-matrix";
-import CUBE_MAP_VIEWS from "../static/CUBE_MAP_VIEWS";
-import SceneRenderer from "../runtime/rendering/SceneRenderer";
-import Mesh from "../instances/Mesh";
-import Texture from "../instances/Texture";
-import VertexBuffer from "../instances/VertexBuffer";
-import Entity from "../instances/Entity";
-import LightProbe from "../instances/LightProbe";
-import SkyLightComponent from "../templates/components/SkyLightComponent";
+import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
+import SceneRenderer from "./runtime/rendering/SceneRenderer";
+import Mesh from "./instances/Mesh";
+import Texture from "./instances/Texture";
+import VertexBuffer from "./instances/VertexBuffer";
+import Entity from "./instances/Entity";
+import LightProbe from "./instances/LightProbe";
+import SkyLightComponent from "./templates/components/SkyLightComponent";
 
 export default class GPU {
-    static context: WebGL2RenderingContext
+    static context?: WebGL2RenderingContext
+    static canvas?: HTMLCanvasElement
+    static drawQuad?: Function
+    
     static activeShader?: WebGLProgram
     static activeFramebuffer?: WebGLFramebuffer
     static activeMesh?: Mesh
@@ -91,24 +94,24 @@ export default class GPU {
         GPU.internalResolution.w = mainResolution?.w || screen.width
         GPU.internalResolution.h = mainResolution?.h || screen.height
 
-        gpu = canvas.getContext("webgl2", {
+        GPU.context = canvas.getContext("webgl2", {
             antialias: false,
             // preserveDrawingBuffer: true,
             premultipliedAlpha: false,
             powerPreference: "high-performance"
         })
-        GPU.context = gpu
+        GPU.canvas = canvas
 
-        gpu.getExtension("EXT_color_buffer_float")
-        gpu.getExtension("OES_texture_float")
-        gpu.getExtension("OES_texture_float_linear")
-        gpu.enable(gpu.BLEND)
-        gpu.blendFunc(gpu.SRC_ALPHA, gpu.ONE_MINUS_SRC_ALPHA)
-        gpu.enable(gpu.CULL_FACE)
-        gpu.cullFace(gpu.BACK)
-        gpu.enable(gpu.DEPTH_TEST)
-        gpu.depthFunc(gpu.LESS)
-        gpu.frontFace(gpu.CCW)
+        GPU.context.getExtension("EXT_color_buffer_float")
+        GPU.context.getExtension("OES_texture_float")
+        GPU.context.getExtension("OES_texture_float_linear")
+        GPU.context.enable(GPU.context.BLEND)
+        GPU.context.blendFunc(GPU.context.SRC_ALPHA, GPU.context.ONE_MINUS_SRC_ALPHA)
+        GPU.context.enable(GPU.context.CULL_FACE)
+        GPU.context.cullFace(GPU.context.BACK)
+        GPU.context.enable(GPU.context.DEPTH_TEST)
+        GPU.context.depthFunc(GPU.context.LESS)
+        GPU.context.frontFace(GPU.context.CCW)
 
         CameraAPI.initialize()
         LightsAPI.initialize()
@@ -126,15 +129,15 @@ export default class GPU {
         CubeMapAPI.initialize()
         LineAPI.initialize()
 
-        const FBO = new Framebuffer(512, 512).texture({precision: gpu.RG32F, format: gpu.RG})
+        const FBO = new Framebuffer(512, 512).texture({precision: GPU.context.RG32F, format: GPU.context.RG})
         const brdfShader = new Shader(QUAD_VERT, BRDF_FRAG)
 
         FBO.startMapping()
         brdfShader.bind()
-        drawQuad()
+        GPU.drawQuad()
         FBO.stopMapping()
         GPU.BRDF = FBO.colors[0]
-        gpu.deleteProgram(brdfShader.program)
+        GPU.context.deleteProgram(brdfShader.program)
     }
 
 }

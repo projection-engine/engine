@@ -1,5 +1,5 @@
 import IMAGE_WORKER_ACTIONS from "../../static/IMAGE_WORKER_ACTIONS"
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 
 import ImageProcessor from "../../lib/math/ImageProcessor";
 import UBO from "../../instances/UBO";
@@ -68,15 +68,15 @@ export default class SSAO {
         SSAO.UBO.bind()
         SSAO.UBO.updateData("samples", kernels)
         SSAO.UBO.unbind()
-        SSAO.noiseSampler = gpu.createTexture()
+        SSAO.noiseSampler = GPU.context.createTexture()
 
-        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.noiseSampler)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MAG_FILTER, gpu.NEAREST)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_MIN_FILTER, gpu.NEAREST)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_S, gpu.REPEAT)
-        gpu.texParameteri(gpu.TEXTURE_2D, gpu.TEXTURE_WRAP_T, gpu.REPEAT)
-        gpu.texStorage2D(gpu.TEXTURE_2D, 1, gpu.RG16F, RESOLUTION, RESOLUTION)
-        gpu.texSubImage2D(gpu.TEXTURE_2D, 0, 0, 0, RESOLUTION, RESOLUTION, gpu.RG, gpu.FLOAT, noise)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, SSAO.noiseSampler)
+        GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_MAG_FILTER, GPU.context.NEAREST)
+        GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_MIN_FILTER, GPU.context.NEAREST)
+        GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_WRAP_S, GPU.context.REPEAT)
+        GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_WRAP_T, GPU.context.REPEAT)
+        GPU.context.texStorage2D(GPU.context.TEXTURE_2D, 1, GPU.context.RG16F, RESOLUTION, RESOLUTION)
+        GPU.context.texSubImage2D(GPU.context.TEXTURE_2D, 0, 0, 0, RESOLUTION, RESOLUTION, GPU.context.RG, GPU.context.FLOAT, noise)
 
         SSAO.#ready = true
     }
@@ -85,17 +85,17 @@ export default class SSAO {
         framebuffer.startMapping()
         shader.bind()
 
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
-        gpu.uniform1i(uniforms.gDepth, 0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, VisibilityRenderer.depthSampler)
+        GPU.context.uniform1i(uniforms.gDepth, 0)
 
-        gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.noiseSampler)
-        gpu.uniform1i(uniforms.noiseSampler, 1)
+        GPU.context.activeTexture(GPU.context.TEXTURE1)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, SSAO.noiseSampler)
+        GPU.context.uniform1i(uniforms.noiseSampler, 1)
 
-        gpu.uniform1i(uniforms.maxSamples, SSAO.maxSamples)
+        GPU.context.uniform1i(uniforms.maxSamples, SSAO.maxSamples)
 
-        drawQuad()
+        GPU.drawQuad()
         framebuffer.stopMapping()
     }
 
@@ -103,13 +103,13 @@ export default class SSAO {
         blurShader.bind()
         blurredFramebuffer.startMapping()
 
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.unfilteredSampler)
-        gpu.uniform1i(blurShaderUniforms.sampler, 0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, SSAO.unfilteredSampler)
+        GPU.context.uniform1i(blurShaderUniforms.sampler, 0)
 
-        gpu.uniform1i(blurShaderUniforms.samples, SSAO.blurSamples)
+        GPU.context.uniform1i(blurShaderUniforms.samples, SSAO.blurSamples)
 
-        drawQuad()
+        GPU.drawQuad()
         blurredFramebuffer.stopMapping()
     }
 

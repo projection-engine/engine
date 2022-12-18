@@ -34,11 +34,7 @@ export default class TransformationPass {
     static updateThreadInfo() {
         TransformationPass.threadMaxEntities = Math.ceil(TransformationPass.targets.array.length / TransformationPass.maxWorkers)
         TransformationPass.threadEntityOffset = TransformationPass.index * TransformationPass.threadMaxEntities
-        console.trace(
-            TransformationPass.maxWorkers,
-            TransformationPass.threadMaxEntities,
-            TransformationPass.threadEntityOffset
-        )
+
     }
 
     static execute() {

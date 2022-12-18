@@ -5,6 +5,7 @@ import ShadowProbe from "../../instances/ShadowProbe";
 import VisibilityRenderer from "./VisibilityRenderer";
 import LightComponent from "../../templates/components/LightComponent";
 import Shader from "../../instances/Shader";
+import GPU from "../../GPU";
 
 const cacheVec3 = vec3.create()
 const cacheMat4 = mat4.create()
@@ -27,8 +28,8 @@ export default class OmnidirectionalShadows {
         if (!OmnidirectionalShadows.changed && lightsToUpdate.length === 0)
             return;
 
-        gpu.cullFace(gpu.BACK)
-        gpu.viewport(0, 0, 512, 512)
+        GPU.context.cullFace(GPU.context.BACK)
+        GPU.context.viewport(0, 0, 512, 512)
         for (let i = 0; i < OmnidirectionalShadows.maxCubeMaps; i++) {
             const current = lightsToUpdate[i]
             if (!current)

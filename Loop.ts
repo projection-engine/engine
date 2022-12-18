@@ -17,18 +17,18 @@ import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
 import LightsAPI from "./lib/utils/LightsAPI";
 import SceneRenderer from "./runtime/rendering/SceneRenderer";
-import GPU from "./lib/GPU";
+import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "./lib/rendering/GPUAPI";
 
 
 let FBO, previous = 0, targetFBO
 export default class Loop {
-    static #beforeDrawing = () => null
+    static #beforeDrawing?: Function = () => null
 
-    static #afterDrawing = () => null
+    static #afterDrawing?: Function = () => null
 
-    static linkToExecutionPipeline(after, before) {
+    static linkToExecutionPipeline(after?: Function, before?: Function) {
         if (typeof before === "function") {
             Loop.#beforeDrawing = before
         } else
@@ -118,7 +118,7 @@ export default class Loop {
 
         FBO.stopMapping()
 
-        GPUAPI.copyTexture(targetFBO, FBO, gpu.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(targetFBO, FBO, GPU.context.COLOR_BUFFER_BIT)
 
         SSGI.execute()
 
@@ -133,7 +133,7 @@ export default class Loop {
         try {
             Engine.elapsed = current - previous
             previous = current
-            gpu.clear(gpu.COLOR_BUFFER_BIT | gpu.DEPTH_BUFFER_BIT)
+            GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
 
             const transformationChanged = EntityWorkerAPI.hasChangeBuffer[0]
             if (transformationChanged === 1)
@@ -152,7 +152,7 @@ export default class Loop {
 
             CameraAPI.syncThreads()
             CameraAPI.updateUBOs()
-            
+
             EntityWorkerAPI.syncThreads()
 
             Engine.frameID = requestAnimationFrame(Loop.loop)

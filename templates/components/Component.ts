@@ -1,7 +1,8 @@
 import MutableObject from "../../MutableObject";
 
 interface ComponentValueGeneric {
-    [key:string]:any
+    [key: string]: any
+
     type: string
     label?: string
     key?: string
@@ -26,7 +27,7 @@ export default class Component {
     })
     __entity
 
-    _props: ComponentValueGeneric[]= []
+    _props: ComponentValueGeneric[] = []
     _name = ""
     #entity
     get entity() {
@@ -50,11 +51,21 @@ export default class Component {
         }
     }
 
-    static number(label: string, key: string, max?:number, min?:number, increment?:number, isAngle?:boolean, realtime?:boolean, disabledIf?: Function | string): ComponentValueGeneric {
-        return {label, max, min, increment: increment ? increment : .001, type: Component.propTypes.NUMBER, key, isAngle, realtime: !!realtime , disabledIf}
+    static number(label: string, key: string, max?: number, min?: number, increment?: number, isAngle?: boolean, realtime?: boolean, disabledIf?: Function | string): ComponentValueGeneric {
+        return {
+            label,
+            max,
+            min,
+            increment: increment ? increment : .001,
+            type: Component.propTypes.NUMBER,
+            key,
+            isAngle,
+            realtime: !!realtime,
+            disabledIf
+        }
     }
 
-    static array(labels: string[], key: string, increment, max?:number, min?:number, isAngle?:boolean, disabledIf?: Function | string): ComponentValueGeneric {
+    static array(labels: string[], key: string, increment, max?: number, min?: number, isAngle?: boolean, disabledIf?: Function | string): ComponentValueGeneric {
         return {labels, max, min, increment, type: Component.propTypes.ARRAY, key, disabledIf, isAngle}
     }
 
@@ -62,7 +73,7 @@ export default class Component {
         return {type: Component.propTypes.STRING, label, key, disabledIf}
     }
 
-    static options(key:string, options?:MutableObject[], disabledIf?: Function | string): ComponentValueGeneric {
+    static options(key: string, options?: MutableObject[], disabledIf?: Function | string): ComponentValueGeneric {
         return {
             type: Component.propTypes.OPTIONS,
             options,
@@ -101,8 +112,11 @@ export default class Component {
     }
 
 
-    get name() {
+    get name():string {
         return this._name
     }
 
+    set name(data) {
+        this._name = data
+    }
 }

@@ -14,22 +14,19 @@ export default class ConsoleAPI {
     private static registeredConsoles = []
     private static messages:MessageInterface[] = []
     private static metadata = {errors: 0, logs: 0, warns: 0}
-    private static onMessageCallback
+    static onMessageCallback?:Function
     static onLog = (messages?: any[]) => null
     static onError = (messages?: any[]) => null
     static onWarn = (messages?: any[]) => null
 
-    private static oldError
-    private static oldWarn
-    private static oldLog
+    private static oldError?:Function
+    private static oldWarn?:Function
+    private static oldLog?:Function
 
-    static initialize(onMessageCallback) {
-        if (onMessageCallback)
-            ConsoleAPI.onMessageCallback = onMessageCallback
+    static initialize() {
         ConsoleAPI.oldError = console.error
         ConsoleAPI.oldWarn = console.warn
         ConsoleAPI.oldLog = console.log
-
     }
 
     static getErrorMessages() {
@@ -84,7 +81,7 @@ export default class ConsoleAPI {
     }
 
     static log(...messages: any[]) {
-        ConsoleAPI.oldLog(...messages)
+        ConsoleAPI.oldLog?.(...messages)
         let src;
         try {
             throw new Error();
@@ -98,7 +95,7 @@ export default class ConsoleAPI {
     }
 
     static warn(...messages) {
-        ConsoleAPI.oldWarn(...messages)
+        ConsoleAPI.oldWarn?.(...messages)
         let src;
         try {
             throw new Error();
@@ -112,7 +109,7 @@ export default class ConsoleAPI {
     }
 
     static error(...messages: any[]) {
-        ConsoleAPI.oldError(...messages)
+        ConsoleAPI.oldError?.(...messages)
         let src;
         try {
             throw new Error();

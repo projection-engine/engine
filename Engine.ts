@@ -8,7 +8,7 @@ import ConversionAPI from "./lib/math/ConversionAPI";
 import PhysicsPass from "./runtime/misc/PhysicsPass";
 import MotionBlur from "./runtime/post-processing/MotionBlur";
 import FrameComposition from "./runtime/post-processing/FrameComposition";
-import GPU from "./lib/GPU";
+import GPU from "./GPU";
 import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
 import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
@@ -24,15 +24,11 @@ import SceneRenderer from "./runtime/rendering/SceneRenderer";
 import {mat4, vec3, vec4} from "gl-matrix";
 import Controller from "./lib/Controller";
 import Entity from "./instances/Entity";
+import ConsoleAPI from "./lib/utils/ConsoleAPI";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)
 
-declare global {
-    let gpu: WebGL2RenderingContext
-    let GPUCanvas: HTMLCanvasElement
-    let drawQuad: Function
-}
 
 export default class Engine extends Controller {
     static #development = false
@@ -49,13 +45,13 @@ export default class Engine extends Controller {
     static UILayouts = new Map()
     static isDev = true
     static entities: Entity[] = []
-    static #environment = ENVIRONMENT.DEV
+    static #environment:number = ENVIRONMENT.DEV
 
-    static get environment() {
+    static get environment():number {
         return Engine.#environment
     }
 
-    static set environment(data) {
+    static set environment(data:number) {
         Engine.isDev = data === ENVIRONMENT.DEV
         Engine.#environment = data
         if (Engine.isDev)
@@ -68,8 +64,9 @@ export default class Engine extends Controller {
     static isReady = false
     static benchmarkMode = false
 
-    static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata:Function, devAmbient:boolean) {
+    static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata: Function, devAmbient: boolean) {
         super.initialize()
+        ConsoleAPI.initialize()
         Engine.#development = devAmbient
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
@@ -89,15 +86,15 @@ export default class Engine extends Controller {
         MotionBlur.initialize()
         await PhysicsAPI.initialize()
 
-        ConversionAPI.canvasBBox = GPUCanvas.getBoundingClientRect()
+        ConversionAPI.canvasBBox = GPU.canvas.getBoundingClientRect()
         const OBS = new ResizeObserver(() => {
-            const bBox = GPUCanvas.getBoundingClientRect()
+            const bBox = GPU.canvas.getBoundingClientRect()
             ConversionAPI.canvasBBox = bBox
             CameraAPI.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
         })
-        OBS.observe(GPUCanvas.parentElement)
-        OBS.observe(GPUCanvas)
+        OBS.observe(GPU.canvas.parentElement)
+        OBS.observe(GPU.canvas)
         Engine.isReady = true
         Loop.linkParams()
         GPU.skylightProbe = new LightProbe(128)
@@ -107,7 +104,7 @@ export default class Engine extends Controller {
 
     static async startSimulation() {
         Engine.environment = ENVIRONMENT.EXECUTION
-        UIAPI.buildUI(GPUCanvas.parentElement)
+        UIAPI.buildUI(GPU.canvas.parentElement)
         const entities = Engine.entities
         for (let i = 0; i < entities.length; i++) {
             const current = entities[i]

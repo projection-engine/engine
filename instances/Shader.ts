@@ -1,4 +1,4 @@
-import GPU from "../lib/GPU";
+import GPU from "../GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import LightsAPI from "../lib/utils/LightsAPI";
@@ -41,9 +41,9 @@ export default class Shader {
 
     constructor(vertex, fragment) {
         let alert = []
-        this.program = gpu.createProgram()
-        const vCode = trimString(this.#compileShader(vertex, gpu.VERTEX_SHADER, m => alert.push(m)))
-        const fCode = trimString(this.#compileShader(fragment, gpu.FRAGMENT_SHADER, m => alert.push(m)))
+        this.program = GPU.context.createProgram()
+        const vCode = trimString(this.#compileShader(vertex, GPU.context.VERTEX_SHADER, m => alert.push(m)))
+        const fCode = trimString(this.#compileShader(fragment, GPU.context.FRAGMENT_SHADER, m => alert.push(m)))
 
         this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat().filter(u => {
             return typeof u.uLocation === "object" || typeof u.uLocations === "object"
@@ -52,7 +52,7 @@ export default class Shader {
         for (let i = 0; i < this.uniforms.length; i++)
             this.uniformMap[this.uniforms[i].name] = this.uniforms[i].uLocation || this.uniforms[i].uLocations
         this.messages = {
-            error: gpu.getError(),
+            error: GPU.context.getError(),
             messages: alert,
             hasError: alert.length > 0
         }
@@ -61,32 +61,23 @@ export default class Shader {
         if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
 
-        if (fCode.includes("LightsMetadata")) {
-            console.trace("BINGIND")
-            console.trace(fCode)
-            LightsAPI.lightsMetadataUBO.bindWithShader(this.program)
-            LightsAPI.lightsUBOA.bindWithShader(this.program)
-            LightsAPI.lightsUBOB.bindWithShader(this.program)
-            LightsAPI.lightsUBOC.bindWithShader(this.program)
-
-        }
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
         const bundledCode = "#version 300 es\n" + applyShaderMethods(shaderCode)
 
-        const shader = gpu.createShader(shaderType)
-        gpu.shaderSource(shader, bundledCode)
-        gpu.compileShader(shader)
-        let compiled = gpu.getShaderParameter(shader, gpu.COMPILE_STATUS)
+        const shader = GPU.context.createShader(shaderType)
+        GPU.context.shaderSource(shader, bundledCode)
+        GPU.context.compileShader(shader)
+        let compiled = GPU.context.getShaderParameter(shader, GPU.context.COMPILE_STATUS)
 
         if (!compiled) {
-            const error = gpu.getShaderInfoLog(shader)
+            const error = GPU.context.getShaderInfoLog(shader)
             console.error({error, shaderCode})
             pushMessage(error)
         } else {
-            gpu.attachShader(this.program, shader)
-            gpu.linkProgram(this.program)
+            GPU.context.attachShader(this.program, shader)
+            GPU.context.linkProgram(this.program)
 
         }
         return bundledCode
@@ -108,7 +99,7 @@ export default class Shader {
                     uniformObjects.push({
                         type,
                         name,
-                        uLocation: gpu.getUniformLocation(this.program, name)
+                        uLocation: GPU.context.getUniformLocation(this.program, name)
                     })
                     return
                 }
@@ -126,7 +117,7 @@ export default class Shader {
                                 type: current[2],
                                 name: current[4],
                                 parent: name,
-                                uLocation: gpu.getUniformLocation(this.program, name + "." + current[4])
+                                uLocation: GPU.context.getUniformLocation(this.program, name + "." + current[4])
                             }
                         }
                     })
@@ -152,7 +143,7 @@ export default class Shader {
                         type,
                         name,
                         arraySize,
-                        uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]`))
+                        uLocations: (new Array(arraySize).fill(null)).map((_, i) => GPU.context.getUniformLocation(this.program, name + `[${i}]`))
                     })
                     return
                 }
@@ -172,7 +163,7 @@ export default class Shader {
                             name: current[4],
                             parent: name,
                             arraySize,
-                            uLocations: (new Array(arraySize).fill(null)).map((_, i) => gpu.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
+                            uLocations: (new Array(arraySize).fill(null)).map((_, i) => GPU.context.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
                         }
                     })
                     .filter((e:Uniform|undefined):boolean => e !== undefined)
@@ -184,7 +175,7 @@ export default class Shader {
 
     bind() {
         if (GPU.activeShader !== this.program)
-            gpu.useProgram(this.program)
+            GPU.context.useProgram(this.program)
         GPU.activeShader = this.program
     }
 
@@ -227,28 +218,28 @@ export default class Shader {
             case "bool":
                 if (data == null)
                     return
-                gpu[GLSL_TYPES[type]](uLocation, data)
+                GPU.context[GLSL_TYPES[type]](uLocation, data)
                 break
             case "mat3":
                 if (data == null)
                     return
-                gpu.uniformMatrix3fv(uLocation, false, data)
+                GPU.context.uniformMatrix3fv(uLocation, false, data)
                 break
             case "mat4":
                 if (data == null)
                     return
-                gpu.uniformMatrix4fv(uLocation, false, data)
+                GPU.context.uniformMatrix4fv(uLocation, false, data)
                 break
             case "samplerCube":
-                gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
-                gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, data)
-                gpu.uniform1i(uLocation, currentSamplerIndex)
+                GPU.context.activeTexture(GPU.context.TEXTURE0 + currentSamplerIndex)
+                GPU.context.bindTexture(GPU.context.TEXTURE_CUBE_MAP, data)
+                GPU.context.uniform1i(uLocation, currentSamplerIndex)
                 increaseIndex()
                 break
             case "sampler2D":
-                gpu.activeTexture(gpu.TEXTURE0 + currentSamplerIndex)
-                gpu.bindTexture(gpu.TEXTURE_2D, data)
-                gpu.uniform1i(uLocation, currentSamplerIndex)
+                GPU.context.activeTexture(GPU.context.TEXTURE0 + currentSamplerIndex)
+                GPU.context.bindTexture(GPU.context.TEXTURE_2D, data)
+                GPU.context.uniform1i(uLocation, currentSamplerIndex)
                 increaseIndex()
                 break
             default:

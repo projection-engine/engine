@@ -1,5 +1,5 @@
 import Engine from "../../Engine";
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import SSAO from "./SSAO";
 import SSGI from "./SSGI";
 import DirectionalShadows from "./DirectionalShadows";
@@ -11,10 +11,12 @@ import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import SHADING_MODELS from "../../static/SHADING_MODELS";
 import UBO from "../../instances/UBO";
 import COMPONENTS from "../../static/COMPONENTS";
+import MutableObject from "../../MutableObject";
+import LightsAPI from "../../lib/utils/LightsAPI";
 
 let texOffset
 let isDev
-let shader, uniforms
+let shader:Shader, uniforms:MutableObject
 export default class SceneRenderer {
     static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
@@ -51,9 +53,15 @@ export default class SceneRenderer {
         SceneRenderer.UBO.unbind()
     }
 
-    static set shader(data) {
+    static set shader(data:Shader) {
         shader = data
-        uniforms = shader?.uniformMap
+        uniforms = shader.uniformMap
+        console.trace(uniforms, shader)
+        LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
+        LightsAPI.lightsUBOA.bindWithShader(shader.program)
+        LightsAPI.lightsUBOB.bindWithShader(shader.program)
+        LightsAPI.lightsUBOC.bindWithShader(shader.program)
+
         SceneRenderer.UBO.bindWithShader(shader.program)
     }
 
@@ -62,55 +70,56 @@ export default class SceneRenderer {
             return
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
+        const context = GPU.context
 
         shader.bind()
         if (isDev)
-            gpu.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
+            context.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
 
-        gpu.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
+        context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
 
-            gpu.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
-            gpu.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
-            gpu.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
-            gpu.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
-            gpu.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
+            context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
+            context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
+            context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
+            context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
+            context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
         } else {
-            gpu.uniformMatrix4fv(uniforms.viewMatrix, false, viewMatrix)
-            gpu.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
-            gpu.uniform3fv(uniforms.cameraPosition, cameraPosition)
+            context.uniformMatrix4fv(uniforms.viewMatrix, false, viewMatrix)
+            context.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
+            context.uniform3fv(uniforms.cameraPosition, cameraPosition)
         }
 
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, GPU.BRDF)
-        gpu.uniform1i(uniforms.brdf_sampler, 0)
+        context.activeTexture(context.TEXTURE0)
+        context.bindTexture(context.TEXTURE_2D, GPU.BRDF)
+        context.uniform1i(uniforms.brdf_sampler, 0)
 
-        gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, SSAO.filteredSampler)
-        gpu.uniform1i(uniforms.SSAO, 1)
+        context.activeTexture(context.TEXTURE1)
+        context.bindTexture(context.TEXTURE_2D, SSAO.filteredSampler)
+        context.uniform1i(uniforms.SSAO, 1)
 
-        gpu.activeTexture(gpu.TEXTURE2)
-        gpu.bindTexture(gpu.TEXTURE_2D, SSGI.sampler)
-        gpu.uniform1i(uniforms.SSGI, 2)
+        context.activeTexture(context.TEXTURE2)
+        context.bindTexture(context.TEXTURE_2D, SSGI.sampler)
+        context.uniform1i(uniforms.SSGI, 2)
 
-        gpu.activeTexture(gpu.TEXTURE3)
-        gpu.bindTexture(gpu.TEXTURE_2D, Engine.previousFrameSampler)
-        gpu.uniform1i(uniforms.previousFrame, 3)
+        context.activeTexture(context.TEXTURE3)
+        context.bindTexture(context.TEXTURE_2D, Engine.previousFrameSampler)
+        context.uniform1i(uniforms.previousFrame, 3)
 
-        gpu.activeTexture(gpu.TEXTURE4)
-        gpu.bindTexture(gpu.TEXTURE_2D, DirectionalShadows.sampler)
-        gpu.uniform1i(uniforms.shadow_atlas, 4)
+        context.activeTexture(context.TEXTURE4)
+        context.bindTexture(context.TEXTURE_2D, DirectionalShadows.sampler)
+        context.uniform1i(uniforms.shadow_atlas, 4)
 
-        gpu.activeTexture(gpu.TEXTURE5)
-        gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
-        gpu.uniform1i(uniforms.shadow_cube, 5)
+        context.activeTexture(context.TEXTURE5)
+        context.bindTexture(context.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
+        context.uniform1i(uniforms.shadow_cube, 5)
 
 
-        gpu.activeTexture(gpu.TEXTURE6)
-        gpu.bindTexture(gpu.TEXTURE_2D, VisibilityRenderer.depthSampler)
-        gpu.uniform1i(uniforms.scene_depth, 6)
+        context.activeTexture(context.TEXTURE6)
+        context.bindTexture(context.TEXTURE_2D, VisibilityRenderer.depthSampler)
+        context.uniform1i(uniforms.scene_depth, 6)
 
-        gpu.uniform1f(uniforms.elapsedTime, Engine.elapsed)
+        context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
 
 
         texOffset = 7
@@ -121,15 +130,15 @@ export default class SceneRenderer {
 
         if (!!GPU.activeSkylightEntity  && !useCustomView) {
             texOffset++
-            gpu.activeTexture(gpu.TEXTURE7)
-            gpu.bindTexture(gpu.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
-            gpu.uniform1i(uniforms.skylight_specular, 7)
+            context.activeTexture(context.TEXTURE7)
+            context.bindTexture(context.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
+            context.uniform1i(uniforms.skylight_specular, 7)
         }
 
         let stateWasCleared = false, isDoubleSided = false, isSky = false
 
-        gpu.enable(gpu.CULL_FACE)
-        gpu.depthMask(true)
+        context.enable(context.CULL_FACE)
+        context.depthMask(true)
 
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
@@ -139,34 +148,34 @@ export default class SceneRenderer {
                 continue
 
             if (isDev)
-                gpu.uniform3fv(uniforms.entityID, entity.pickID)
+                context.uniform3fv(uniforms.entityID, entity.pickID)
 
             const material = entity.__materialRef
 
             if(isSky){
                 isSky = false
-                gpu.enable(gpu.CULL_FACE)
-                gpu.enable(gpu.DEPTH_TEST)
+                context.enable(context.CULL_FACE)
+                context.enable(context.DEPTH_TEST)
             }
 
             if (material !== undefined) {
                 if (material.doubleSided) {
-                    gpu.disable(gpu.CULL_FACE)
+                    context.disable(context.CULL_FACE)
                     isDoubleSided = true
                 } else if (isDoubleSided) {
-                    gpu.enable(gpu.CULL_FACE)
+                    context.enable(context.CULL_FACE)
                     isDoubleSided = false
                 }
                 isSky = material.isSky
-                gpu.uniform1i(uniforms.isSky, isSky ? 1 : 0)
+                context.uniform1i(uniforms.isSky, isSky ? 1 : 0)
 
                 if(isSky) {
-                    gpu.disable(gpu.CULL_FACE)
-                    gpu.disable(gpu.DEPTH_TEST)
+                    context.disable(context.CULL_FACE)
+                    context.disable(context.DEPTH_TEST)
                 }
 
-                gpu.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
-                gpu.uniform1i(uniforms.materialID, material.bindID)
+                context.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
+                context.uniform1i(uniforms.materialID, material.bindID)
                 const component = entity.components.get(COMPONENTS.MESH)
                 const overrideUniforms = component.overrideMaterialUniforms
 
@@ -179,29 +188,29 @@ export default class SceneRenderer {
                         Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                     }
 
-                gpu.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
+                context.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
 
                 stateWasCleared = false
             } else if (!stateWasCleared) {
                 stateWasCleared = true
                 if (isDoubleSided) {
-                    gpu.enable(gpu.CULL_FACE)
+                    context.enable(context.CULL_FACE)
                     isDoubleSided = false
                 }
 
-                gpu.uniform1i(uniforms.ssrEnabled, 0)
-                gpu.uniform1i(uniforms.noDepthChecking, 0)
-                gpu.uniform1i(uniforms.materialID, -1)
+                context.uniform1i(uniforms.ssrEnabled, 0)
+                context.uniform1i(uniforms.noDepthChecking, 0)
+                context.uniform1i(uniforms.materialID, -1)
             }
 
 
 
             if (useCustomView) {
-                gpu.uniform1i(uniforms.noDepthChecking, 1)
-                gpu.uniform1i(uniforms.ssrEnabled, 0)
+                context.uniform1i(uniforms.noDepthChecking, 1)
+                context.uniform1i(uniforms.ssrEnabled, 0)
             }
 
-            gpu.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+            context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()
         }
     }

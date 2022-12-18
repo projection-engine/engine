@@ -3,6 +3,7 @@ import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import LightsAPI from "../../lib/utils/LightsAPI";
 import VisibilityRenderer from "./VisibilityRenderer";
+import GPU from "../../GPU";
 
 
 let lightsToUpdate
@@ -51,23 +52,23 @@ export default class DirectionalShadows {
     static execute() {
         if (!DirectionalShadows.changed && lightsToUpdate.length === 0)
             return;
-        gpu.cullFace(gpu.FRONT)
+        GPU.context.cullFace(GPU.context.FRONT)
         let currentColumn = 0, currentRow = 0
 
         DirectionalShadows.shadowsFrameBuffer.startMapping()
-        gpu.enable(gpu.SCISSOR_TEST)
+        GPU.context.enable(GPU.context.SCISSOR_TEST)
         const size = DirectionalShadows.atlasRatio ** 2
         for (let face = 0; face < size; face++) {
             if (face < lightsToUpdate.length) {
                 const currentLight = lightsToUpdate[face]
 
-                gpu.viewport(
+                GPU.context.viewport(
                     currentColumn * DirectionalShadows.resolutionPerTexture,
                     currentRow * DirectionalShadows.resolutionPerTexture,
                     DirectionalShadows.resolutionPerTexture,
                     DirectionalShadows.resolutionPerTexture
                 )
-                gpu.scissor(
+                GPU.context.scissor(
                     currentColumn * DirectionalShadows.resolutionPerTexture,
                     currentRow * DirectionalShadows.resolutionPerTexture,
                     DirectionalShadows.resolutionPerTexture,
@@ -84,9 +85,9 @@ export default class DirectionalShadows {
             } else
                 currentColumn += 1
         }
-        gpu.disable(gpu.SCISSOR_TEST)
+        GPU.context.disable(GPU.context.SCISSOR_TEST)
         DirectionalShadows.shadowsFrameBuffer.stopMapping()
-        gpu.cullFace(gpu.BACK)
+        GPU.context.cullFace(GPU.context.BACK)
         DirectionalShadows.changed = false
         lightsToUpdate.length = 0
     }

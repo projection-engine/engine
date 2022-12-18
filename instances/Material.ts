@@ -3,7 +3,7 @@ import MaterialAPI from "../lib/rendering/MaterialAPI";
 import GPUAPI from "../lib/rendering/GPUAPI";
 // @ts-ignore
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
-import GPU from "../lib/GPU";
+import GPU from "../GPU";
 import STATIC_SHADERS from "../static/resources/STATIC_SHADERS";
 // @ts-ignore
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
@@ -53,18 +53,19 @@ export default class Material {
             GPU.shaders.delete("TEMP_SHADER")
             GPU.shaders.set(STATIC_SHADERS.UBER_SHADER, shader)
         }
-
+        console.trace(fragment)
         Material.#uberShader = shader
 
         SceneRenderer.shader = Material.uberShader
     }
 
     static initialize() {
-        if (Material.#initialized || !gpu)
+        if (Material.#initialized || !GPU.context)
             return
         Material.#initialized = true
         Material.compileUberShader()
         SceneRenderer.shader = Material.uberShader
+
     }
 
     static get uberShader() {

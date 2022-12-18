@@ -1,6 +1,6 @@
 import GPUAPI from "../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../static/resources/STATIC_FRAMEBUFFERS";
-import GPU from "../lib/GPU";
+import GPU from "../GPU";
 import SSGI from "../runtime/rendering/SSGI";
 
 import MotionBlur from "../runtime/post-processing/MotionBlur";
@@ -14,8 +14,8 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
         .texture({
             attachment: 0,
-            precision: gpu.R32F,
-            format: gpu.RED,
+            precision: GPU.context.R32F,
+            format: GPU.context.RED,
             label: "DEPTH"
         })
         .texture({
@@ -25,9 +25,9 @@ export default function initializeFrameBuffers() {
         .texture({
             attachment: 2,
             label: "VELOCITY",
-            precision: gpu.RG16F,
-            type: gpu.FLOAT,
-            format: gpu.RG,
+            precision: GPU.context.RG16F,
+            type: GPU.context.FLOAT,
+            format: GPU.context.RG,
         })
         .depthTest()
 
@@ -38,23 +38,23 @@ export default function initializeFrameBuffers() {
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SSGI, halfResW, halfResH)
         .texture({
             attachment: 0,
-            precision: gpu.RGB,
-            format: gpu.RGB,
-            type: gpu.UNSIGNED_BYTE,
+            precision: GPU.context.RGB,
+            format: GPU.context.RGB,
+            type: GPU.context.UNSIGNED_BYTE,
             label: "SSGI"
         })
 
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO_SRC, halfResW, halfResH)
         .texture({
-            precision: gpu.R8,
-            format: gpu.RED,
-            type: gpu.UNSIGNED_BYTE
+            precision: GPU.context.R8,
+            format: GPU.context.RED,
+            type: GPU.context.UNSIGNED_BYTE
         })
     GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.AO, halfResW, halfResH)
         .texture({
-            precision: gpu.R8,
-            format: gpu.RED,
-            type: gpu.UNSIGNED_BYTE
+            precision: GPU.context.R8,
+            format: GPU.context.RED,
+            type: GPU.context.UNSIGNED_BYTE
         })
 
     MotionBlur.frameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.MOTION_BLUR).texture({linear: true})

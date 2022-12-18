@@ -10,6 +10,7 @@ import MotionBlur from "../../runtime/post-processing/MotionBlur";
 import FrameComposition from "../../runtime/post-processing/FrameComposition";
 import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
 import Controller from "../Controller";
+import GPU from "../../GPU";
 
 
 /**
@@ -101,7 +102,7 @@ export default class CameraAPI extends Controller {
         ])
 
         new ResizeObserver(CameraAPI.updateAspectRatio)
-            .observe(GPUCanvas)
+            .observe(GPU.canvas)
         notificationBuffers[3] = 1
     }
 
@@ -126,7 +127,7 @@ export default class CameraAPI extends Controller {
     }
 
     static updateAspectRatio() {
-        const bBox = GPUCanvas.getBoundingClientRect()
+        const bBox = GPU.canvas.getBoundingClientRect()
         ConversionAPI.canvasBBox = bBox
         if (Engine.environment === ENVIRONMENT.DEV || CameraAPI.#dynamicAspectRatio) {
             CameraAPI.aspectRatio = bBox.width / bBox.height

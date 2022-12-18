@@ -67,7 +67,6 @@ export default class PostProcessingEffects {
 
     set filmGrainStrength(data) {
         this._filmGrainStrength = data
-        console.trace(data)
         FrameComposition.UBO.bind()
         FrameComposition.UBO.updateData("filmGrainStrength", new Float32Array([data]))
         FrameComposition.UBO.unbind()

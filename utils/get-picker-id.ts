@@ -1,4 +1,4 @@
-export default function getPickerId(i) {
+export default function getPickerId(i):[number, number, number] {
     return [
         ((i >>  0) & 0xFF) / 0xFF,
         ((i >>  8) & 0xFF) / 0xFF,

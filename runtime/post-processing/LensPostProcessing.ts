@@ -1,5 +1,5 @@
 import CameraAPI from "../../lib/utils/CameraAPI";
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
@@ -70,25 +70,25 @@ export default class LensPostProcessing {
 
             shader.bind()
 
-            gpu.activeTexture(gpu.TEXTURE0)
-            gpu.bindTexture(gpu.TEXTURE_2D, LensPostProcessing.workerTexture)
-            gpu.uniform1i(uniforms.sceneColor, 0)
+            GPU.context.activeTexture(GPU.context.TEXTURE0)
+            GPU.context.bindTexture(GPU.context.TEXTURE_2D, LensPostProcessing.workerTexture)
+            GPU.context.uniform1i(uniforms.sceneColor, 0)
 
-            gpu.uniform1f(uniforms.threshold, metadata.bloomThreshold)
+            GPU.context.uniform1f(uniforms.threshold, metadata.bloomThreshold)
 
-            drawQuad()
+            GPU.drawQuad()
             outputFBO.stopMapping()
 
             blurShader.bind()
             for (let i = 0; i < downscale.length; i++) {
                 const fbo = downscale[i]
                 fbo.startMapping()
-                gpu.activeTexture(gpu.TEXTURE0)
-                gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? downscale[i - 1].colors[0] : outputFBO.colors[0])
-                gpu.uniform1i(blurShaderUniforms.sceneColor, 0)
-                gpu.uniform1i(blurShaderUniforms.blurRadius, metadata.bloomQuality)
+                GPU.context.activeTexture(GPU.context.TEXTURE0)
+                GPU.context.bindTexture(GPU.context.TEXTURE_2D, i > 0 ? downscale[i - 1].colors[0] : outputFBO.colors[0])
+                GPU.context.uniform1i(blurShaderUniforms.sceneColor, 0)
+                GPU.context.uniform1i(blurShaderUniforms.blurRadius, metadata.bloomQuality)
 
-                drawQuad()
+                GPU.drawQuad()
                 fbo.stopMapping()
             }
 
@@ -96,28 +96,28 @@ export default class LensPostProcessing {
             for (let i = 0; i < upscale.length; i++) {
                 const fbo = upscale[i]
                 fbo.startMapping()
-                gpu.activeTexture(gpu.TEXTURE0)
-                gpu.bindTexture(gpu.TEXTURE_2D, i > 0 ? upscale[i - 1].colors[0] : undefined)
-                gpu.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
+                GPU.context.activeTexture(GPU.context.TEXTURE0)
+                GPU.context.bindTexture(GPU.context.TEXTURE_2D, i > 0 ? upscale[i - 1].colors[0] : undefined)
+                GPU.context.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
 
-                gpu.activeTexture(gpu.TEXTURE1)
-                gpu.bindTexture(gpu.TEXTURE_2D, downscale[downscale.length - 1 - i].colors[0])
-                gpu.uniform1i(upSamplingShaderUniforms.blurred, 1)
-                gpu.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
-                drawQuad()
+                GPU.context.activeTexture(GPU.context.TEXTURE1)
+                GPU.context.bindTexture(GPU.context.TEXTURE_2D, downscale[downscale.length - 1 - i].colors[0])
+                GPU.context.uniform1i(upSamplingShaderUniforms.blurred, 1)
+                GPU.context.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
+                GPU.drawQuad()
                 fbo.stopMapping()
             }
 
             LensPostProcessing.baseFBO.startMapping()
-            gpu.activeTexture(gpu.TEXTURE0)
-            gpu.bindTexture(gpu.TEXTURE_2D, outputFBO.colors[0])
-            gpu.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
+            GPU.context.activeTexture(GPU.context.TEXTURE0)
+            GPU.context.bindTexture(GPU.context.TEXTURE_2D, outputFBO.colors[0])
+            GPU.context.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
 
-            gpu.activeTexture(gpu.TEXTURE1)
-            gpu.bindTexture(gpu.TEXTURE_2D, upscale[upscale.length - 1].colors[0])
-            gpu.uniform1i(upSamplingShaderUniforms.blurred, 1)
-            gpu.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
-            drawQuad()
+            GPU.context.activeTexture(GPU.context.TEXTURE1)
+            GPU.context.bindTexture(GPU.context.TEXTURE_2D, upscale[upscale.length - 1].colors[0])
+            GPU.context.uniform1i(upSamplingShaderUniforms.blurred, 1)
+            GPU.context.uniform1f(upSamplingShaderUniforms.sampleScale, metadata.bloomOffset)
+            GPU.drawQuad()
             LensPostProcessing.baseFBO.stopMapping()
         } else
             LensPostProcessing.baseFBO.clear()
@@ -125,15 +125,15 @@ export default class LensPostProcessing {
         outputFBO.startMapping()
         shader.bind()
 
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, LensPostProcessing.baseFBO.colors[0])
-        gpu.uniform1i(uniforms.blurred, 0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, LensPostProcessing.baseFBO.colors[0])
+        GPU.context.uniform1i(uniforms.blurred, 0)
 
-        gpu.activeTexture(gpu.TEXTURE1)
-        gpu.bindTexture(gpu.TEXTURE_2D, LensPostProcessing.workerTexture)
-        gpu.uniform1i(uniforms.sceneColor, 1)
+        GPU.context.activeTexture(GPU.context.TEXTURE1)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, LensPostProcessing.workerTexture)
+        GPU.context.uniform1i(uniforms.sceneColor, 1)
 
-        drawQuad()
+        GPU.drawQuad()
         outputFBO.stopMapping()
     }
 

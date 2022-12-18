@@ -1,4 +1,4 @@
-import GPU from "../../lib/GPU";
+import GPU from "../../GPU";
 import UBO from "../../instances/UBO";
 import AA_METHODS from "../../static/AA_METHODS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
@@ -64,25 +64,25 @@ export default class FrameComposition {
     static copyPreviousFrame(){
         if(FrameComposition.AAMethodInUse !== AA_METHODS.TAA)
             return
-        GPUAPI.copyTexture(FrameComposition.#cacheFBO, Engine.currentFrameFBO, gpu.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(FrameComposition.#cacheFBO, Engine.currentFrameFBO, GPU.context.COLOR_BUFFER_BIT)
     }
 
     static execute() {
         FrameComposition.currentNoise = FrameComposition.lookup()
 
         shader.bind()
-        gpu.activeTexture(gpu.TEXTURE0)
-        gpu.bindTexture(gpu.TEXTURE_2D, FrameComposition.workerTexture)
-        gpu.uniform1i(uniforms.currentFrame, 0)
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, FrameComposition.workerTexture)
+        GPU.context.uniform1i(uniforms.currentFrame, 0)
 
         if(FrameComposition.AAMethodInUse === AA_METHODS.TAA) {
-            gpu.activeTexture(gpu.TEXTURE1)
-            gpu.bindTexture(gpu.TEXTURE_2D, FrameComposition.#taaCacheSampler)
-            gpu.uniform1i(uniforms.previousFrame, 1)
+            GPU.context.activeTexture(GPU.context.TEXTURE1)
+            GPU.context.bindTexture(GPU.context.TEXTURE_2D, FrameComposition.#taaCacheSampler)
+            GPU.context.uniform1i(uniforms.previousFrame, 1)
         }
 
-        gpu.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
-        drawQuad()
+        GPU.context.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
+        GPU.drawQuad()
 
     }
 }

@@ -1,6 +1,6 @@
 import VertexBuffer from "./VertexBuffer"
 import {v4 as uuidv4} from "uuid"
-import GPU from "../lib/GPU";
+import GPU from "../GPU";
 import GPUAPI from "../lib/rendering/GPUAPI";
 
 export interface MeshProps {
@@ -48,21 +48,21 @@ export default class Mesh {
         this.trianglesQuantity = l / 3
         this.verticesQuantity = l
 
-        this.VAO = gpu.createVertexArray()
-        gpu.bindVertexArray(this.VAO)
+        this.VAO = GPU.context.createVertexArray()
+        GPU.context.bindVertexArray(this.VAO)
 
-        this.indexVBO = GPUAPI.createBuffer(gpu.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
-        this.vertexVBO = new VertexBuffer(0, new Float32Array(vertices), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false, undefined, 0)
+        this.indexVBO = GPUAPI.createBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
+        this.vertexVBO = new VertexBuffer(0, new Float32Array(vertices), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
 
         if (normals && normals.length > 0)
-            this.normalVBO = new VertexBuffer(1, new Float32Array(normals), gpu.ARRAY_BUFFER, 3, gpu.FLOAT, false, undefined, 0)
+            this.normalVBO = new VertexBuffer(1, new Float32Array(normals), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
         if (uvs && uvs.length > 0)
-            this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), gpu.ARRAY_BUFFER, 2, gpu.FLOAT, false, undefined, 0)
+            this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), GPU.context.ARRAY_BUFFER, 2, GPU.context.FLOAT, false, undefined, 0)
         // if (tangents && tangents.length > 0)
-        //     this.tangentVBO = new VertexBuffer(3, new Float32Array(tangents), gpu.ARRAY_BUFFER, 3, gpu.FLOAT)
+        //     this.tangentVBO = new VertexBuffer(3, new Float32Array(tangents), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT)
 
-        gpu.bindVertexArray(null)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
+        GPU.context.bindVertexArray(null)
+        GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, null)
 
     }
 
@@ -81,8 +81,8 @@ export default class Mesh {
 
         GPU.activeMesh = this
         this.prepareForUse()
-        gpu.bindVertexArray(this.VAO)
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, this.indexVBO)
+        GPU.context.bindVertexArray(this.VAO)
+        GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, this.indexVBO)
         this.vertexVBO.enable()
     }
 
@@ -97,7 +97,7 @@ export default class Mesh {
     }
 
     finish() {
-        gpu.bindBuffer(gpu.ELEMENT_ARRAY_BUFFER, null)
+        GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, null)
         this.vertexVBO.disable()
 
         if (this.uvVBO)
@@ -105,43 +105,43 @@ export default class Mesh {
         if (this.normalVBO)
             this.normalVBO.disable()
 
-        gpu.bindVertexArray(null)
+        GPU.context.bindVertexArray(null)
         GPU.activeMesh = undefined
     }
 
     simplifiedDraw() {
         this.prepareForUse()
-        gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GPU.context.drawElements(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }
 
     draw() {
         this.use()
-        gpu.drawElements(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GPU.context.drawElements(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }
 
     drawInstanced(quantity) {
         this.use()
-        gpu.drawElementsInstanced(gpu.TRIANGLES, this.verticesQuantity, gpu.UNSIGNED_INT, 0, quantity)
+        GPU.context.drawElementsInstanced(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0, quantity)
     }
 
     drawLineLoop() {
         this.prepareForUse()
-        gpu.drawElements(gpu.LINE_LOOP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GPU.context.drawElements(GPU.context.LINE_LOOP, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }
 
     drawTriangleStrip() {
         this.prepareForUse()
-        gpu.drawElements(gpu.TRIANGLE_STRIP, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GPU.context.drawElements(GPU.context.TRIANGLE_STRIP, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }
 
     drawTriangleFan() {
         this.prepareForUse()
-        gpu.drawElements(gpu.TRIANGLE_FAN, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GPU.context.drawElements(GPU.context.TRIANGLE_FAN, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }
 
     drawLines() {
         this.prepareForUse()
-        gpu.drawElements(gpu.LINES, this.verticesQuantity, gpu.UNSIGNED_INT, 0)
+        GPU.context.drawElements(GPU.context.LINES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }
 
 }

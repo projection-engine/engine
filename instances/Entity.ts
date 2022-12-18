@@ -110,7 +110,7 @@ export default class Entity extends Movable {
     }
 
 
-    addComponent(KEY) {
+    addComponent<T>(KEY):T {
         const instance: AllComponents = getComponentInstance(KEY)
         if (instance != null) {
             instance.__entity = this
@@ -152,7 +152,7 @@ export default class Entity extends Movable {
             }
             EntityAPI.registerEntityComponents(this)
 
-            return instance
+            return <T>instance
         }
     }
 

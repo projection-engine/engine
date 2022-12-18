@@ -1,5 +1,5 @@
 import ScriptsAPI from "./ScriptsAPI";
-import GPU from "../GPU";
+import GPU from "../../GPU";
 import GPUAPI from "../rendering/GPUAPI";
 import ConsoleAPI from "./ConsoleAPI";
 import FILE_TYPES from "../../../static/objects/FILE_TYPES";

@@ -1,4 +1,5 @@
 import getGlslSizes from "../utils/get-glsl-sizes";
+import GPU from "../GPU";
 
 interface Item{
     offset:number,
@@ -38,32 +39,32 @@ export default class UBO {
         this.blockPoint = UBO.#blockPointIncrement;
         UBO.#blockPointIncrement += 1
 
-        this.buffer = gpu.createBuffer();
-        gpu.bindBuffer(gpu.UNIFORM_BUFFER, this.buffer);
-        gpu.bufferData(gpu.UNIFORM_BUFFER, bufferSize, gpu.DYNAMIC_DRAW);
-        gpu.bindBuffer(gpu.UNIFORM_BUFFER, null);
-        gpu.bindBufferBase(gpu.UNIFORM_BUFFER, this.blockPoint, this.buffer);
+        this.buffer = GPU.context.createBuffer();
+        GPU.context.bindBuffer(GPU.context.UNIFORM_BUFFER, this.buffer);
+        GPU.context.bufferData(GPU.context.UNIFORM_BUFFER, bufferSize, GPU.context.DYNAMIC_DRAW);
+        GPU.context.bindBuffer(GPU.context.UNIFORM_BUFFER, null);
+        GPU.context.bindBufferBase(GPU.context.UNIFORM_BUFFER, this.blockPoint, this.buffer);
     }
 
     bindWithShader(shaderProgram:WebGLProgram) {
-        gpu.useProgram(shaderProgram)
-        const index = gpu.getUniformBlockIndex(shaderProgram, this.blockName)
-        gpu.uniformBlockBinding(shaderProgram, index, this.blockPoint)
+        GPU.context.useProgram(shaderProgram)
+        const index = GPU.context.getUniformBlockIndex(shaderProgram, this.blockName)
+        GPU.context.uniformBlockBinding(shaderProgram, index, this.blockPoint)
     }
 
     bind() {
-        gpu.bindBuffer(gpu.UNIFORM_BUFFER, this.buffer)
+        GPU.context.bindBuffer(GPU.context.UNIFORM_BUFFER, this.buffer)
     }
 
     unbind() {
-        gpu.bindBuffer(gpu.UNIFORM_BUFFER, null)
+        GPU.context.bindBuffer(GPU.context.UNIFORM_BUFFER, null)
     }
 
     updateData(name, data) {
-        gpu.bufferSubData(gpu.UNIFORM_BUFFER, this.items[name].offset, data, 0, null)
+        GPU.context.bufferSubData(GPU.context.UNIFORM_BUFFER, this.items[name].offset, data, 0, null)
     }
     updateBuffer(data) {
-        gpu.bufferSubData(gpu.UNIFORM_BUFFER, 0, data, 0, null)
+        GPU.context.bufferSubData(GPU.context.UNIFORM_BUFFER, 0, data, 0, null)
     }
     static #calculate(dataArray:Data[]):number {
         let chunk = 16,

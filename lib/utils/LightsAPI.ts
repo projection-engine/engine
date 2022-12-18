@@ -123,7 +123,7 @@ export default class LightsAPI {
     }
 
 
-    static packageLights(keepOld, force) {
+    static packageLights(keepOld?:boolean, force?:boolean) {
         if (force) {
             LightsAPI.#package(keepOld)
             return
@@ -172,10 +172,11 @@ export default class LightsAPI {
             if (offset + 16 > MAX_LIGHTS * 16 && primaryBuffer === LightsAPI.primaryBufferC || !current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
             LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, typeBuffer, offset)
+            console.trace(primaryBuffer)
+            console.trace(typeBuffer)
             offset += 16
             size[sizeIndex] += 1
         }
-        console.trace(size)
         LightsAPI.lightsQuantityA = size[0]
         if (LightsAPI.lightsQuantityA > 0 || !keepOld)
             LightsAPI.updateABuffer()
