@@ -66,8 +66,6 @@ vec4 pbLightComputation(vec3 V) {
     }
 
     indirectIllumination = sampleIndirectLight();
-    if (hasSkylight)
-    indirectIllumination += computeSkylightAmbient(V);
     return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);
 
 }

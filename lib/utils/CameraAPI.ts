@@ -81,7 +81,6 @@ export default class CameraAPI extends Controller {
                 {name: "placement", type: "vec4"},
             ])
 
-
         CameraAPI.#worker = new Worker("./camera-worker.js")
 
         notificationBuffers = CameraAPI.#notificationBuffers

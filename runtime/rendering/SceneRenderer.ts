@@ -65,7 +65,7 @@ export default class SceneRenderer {
         SceneRenderer.UBO.bindWithShader(shader.program)
     }
 
-    static draw(useCustomView?:boolean, viewProjection?:Float32Array, viewMatrix?:Float32Array, cameraPosition?:Float32Array) {
+    static execute(useCustomView?:boolean, viewProjection?:Float32Array, viewMatrix?:Float32Array, cameraPosition?:Float32Array) {
         if (!SceneRenderer.#ready || !shader)
             return
         const toRender = VisibilityRenderer.meshesToDraw.array

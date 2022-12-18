@@ -57,10 +57,10 @@ export default class ScriptsAPI {
             try {
                 return generator(GPU, GPUAPI, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, null, FileSystemAPI)
             } catch (runtimeError) {
-                ConsoleAPI.error(runtimeError)
+                console.error(runtimeError)
             }
         } catch (syntaxError) {
-            ConsoleAPI.error(syntaxError)
+            console.error(syntaxError)
         }
     }
     static #updateEntityScript(scriptID, entity, index) {
@@ -93,10 +93,10 @@ export default class ScriptsAPI {
                 }
                 return true
             } catch (runtimeError) {
-                ConsoleAPI.error(runtimeError)
+                console.error(runtimeError)
             }
         } catch (syntaxError) {
-            ConsoleAPI.error(syntaxError)
+            console.error(syntaxError)
         }
     }
 }

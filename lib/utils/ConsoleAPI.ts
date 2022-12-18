@@ -9,7 +9,9 @@ export enum Types {
     WARN = "WARN"
 }
 
-
+let oldError
+let oldWarn
+let oldLog
 export default class ConsoleAPI {
     private static registeredConsoles = []
     private static messages:MessageInterface[] = []
@@ -19,14 +21,18 @@ export default class ConsoleAPI {
     static onError = (messages?: any[]) => null
     static onWarn = (messages?: any[]) => null
 
-    private static oldError?:Function
-    private static oldWarn?:Function
-    private static oldLog?:Function
+
+
+
 
     static initialize() {
-        ConsoleAPI.oldError = console.error
-        ConsoleAPI.oldWarn = console.warn
-        ConsoleAPI.oldLog = console.log
+        oldError = console.error
+        oldWarn  = console.warn
+        oldLog   = console.log
+
+        console.error = ConsoleAPI.error
+        console.warn = ConsoleAPI.warn
+        console.log = ConsoleAPI.log
     }
 
     static getErrorMessages() {
@@ -81,7 +87,7 @@ export default class ConsoleAPI {
     }
 
     static log(...messages: any[]) {
-        ConsoleAPI.oldLog?.(...messages)
+        oldLog(...messages)
         let src;
         try {
             throw new Error();
@@ -95,7 +101,7 @@ export default class ConsoleAPI {
     }
 
     static warn(...messages) {
-        ConsoleAPI.oldWarn?.(...messages)
+        oldWarn(...messages)
         let src;
         try {
             throw new Error();
@@ -109,7 +115,8 @@ export default class ConsoleAPI {
     }
 
     static error(...messages: any[]) {
-        ConsoleAPI.oldError?.(...messages)
+        console.trace("HERE")
+        oldError(...messages)
         let src;
         try {
             throw new Error();

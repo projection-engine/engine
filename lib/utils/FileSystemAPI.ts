@@ -25,7 +25,7 @@ export default class FileSystemAPI {
             GPUAPI.allocateMesh(ID, file)
             return true
         } catch (err) {
-            ConsoleAPI.error(err)
+            console.error(err)
             return false
         }
     }
@@ -48,7 +48,7 @@ export default class FileSystemAPI {
             }
         } catch (err) {
             console.error(err)
-            ConsoleAPI.error(err)
+            console.error(err)
         }
         return false
     }

@@ -46,7 +46,7 @@ export default class Material {
             if (!Material.#uberShader) {
                 Material.compileUberShader(true)
             }
-            ConsoleAPI.error("Invalid shader", shader.messages)
+            console.error("Invalid shader", shader.messages)
             console.error("Invalid shader", shader.messages)
             return
         } else {
@@ -131,7 +131,7 @@ export default class Material {
                 return true
             }
         } catch (err) {
-            ConsoleAPI.error(err)
+            console.error(err)
         }
         return false
     }

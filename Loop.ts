@@ -69,8 +69,7 @@ export default class Loop {
         Loop.#beforeDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
-
-        SceneRenderer.draw()
+        SceneRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
 
         BenchmarkAPI.track(BENCHMARK_KEYS.SPRITE_PASS)
@@ -113,9 +112,8 @@ export default class Loop {
 
         FBO.startMapping()
         Loop.#beforeDrawing()
-        SceneRenderer.draw()
+        SceneRenderer.execute()
         SpriteRenderer.execute()
-
         FBO.stopMapping()
 
         GPUAPI.copyTexture(targetFBO, FBO, GPU.context.COLOR_BUFFER_BIT)

@@ -4,19 +4,20 @@ import AA_METHODS from "../../static/AA_METHODS";
 import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import Engine from "../../Engine";
+import VisibilityRenderer from "../rendering/VisibilityRenderer";
+import Shader from "../../instances/Shader";
 
 let shader, uniforms
 export default class FrameComposition {
-    static lookUpRandom
+    static lookUpRandom = new Float32Array(2e+3)
     static lookUpIndex = 0
-    static workerTexture
-    static shader
-    static UBO
+    static workerTexture?:WebGLTexture
+    static shader?:Shader
+    static UBO?:UBO
     static currentNoise = 0
     static #cacheFBO
-    static #sourceFBO
     static AAMethodInUse = AA_METHODS.DISABLED
-    static #taaCacheSampler
+    static #taaCacheSampler?:WebGLTexture
 
     static initialize() {
         FrameComposition.UBO = new UBO(
@@ -47,13 +48,9 @@ export default class FrameComposition {
         FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([1.0 / 8.0]))
         FrameComposition.UBO.updateData("inverseFilterTextureSize", new Float32Array([1 / GPU.internalResolution.w, 1 / GPU.internalResolution.h]))
         FrameComposition.UBO.unbind()
-        FrameComposition.lookUpRandom = new Float32Array(2e+3)
+
         for (let i = 0; i < FrameComposition.lookUpRandom.length; i++)
             FrameComposition.lookUpRandom[i] = Math.random()
-        FrameComposition.updateShader()
-    }
-
-    static updateShader() {
         shader = FrameComposition.shader
         uniforms = shader.uniformMap
     }
@@ -61,6 +58,7 @@ export default class FrameComposition {
     static lookup() {
         return ++FrameComposition.lookUpIndex >= FrameComposition.lookUpRandom.length ? FrameComposition.lookUpRandom[FrameComposition.lookUpIndex = 0] : FrameComposition.lookUpRandom[FrameComposition.lookUpIndex]
     }
+
     static copyPreviousFrame(){
         if(FrameComposition.AAMethodInUse !== AA_METHODS.TAA)
             return

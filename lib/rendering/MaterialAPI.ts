@@ -61,7 +61,7 @@ export default class MaterialAPI {
                     if (res)
                         MaterialAPI.updateMap(component)
                     else
-                        ConsoleAPI.error("Material not found")
+                        console.error("Material not found")
                 })
 
 
@@ -72,7 +72,7 @@ export default class MaterialAPI {
                     if (res)
                         MaterialAPI.updateMap(component)
                     else
-                        ConsoleAPI.error("Mesh not found")
+                        console.error("Mesh not found")
                 })
         } else if (!meshID)
             entity.__meshRef = undefined
