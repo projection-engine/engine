@@ -1,19 +1,16 @@
 import Texture from "../../instances/Texture";
 import Material from "../../instances/Material";
 
-import STATIC_TEXTURES from "../../static/resources/STATIC_TEXTURES";
 import Framebuffer from "../../instances/Framebuffer";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
 import Mesh, {MeshProps} from "../../instances/Mesh";
-import STATIC_MESHES from "../../static/resources/STATIC_MESHES";
 import Shader from "../../instances/Shader";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import GPU from "../../GPU";
 import MaterialAPI from "./MaterialAPI";
-import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
+import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import COMPONENTS from "../../static/COMPONENTS";
 import MeshComponent from "../../templates/components/MeshComponent";
 import MutableObject from "../../MutableObject";
+import compileUberShader from "../../utils/compile-uber-shader";
 
 export default class GPUAPI {
     static async allocateTexture(imageData:string|MutableObject, id:string) {
@@ -69,7 +66,7 @@ export default class GPUAPI {
         GPU.materials.set(id, material)
 
 
-        Material.compileUberShader()
+        compileUberShader()
         VisibilityRenderer.needsUpdate = true
         return material
     }
@@ -98,7 +95,7 @@ export default class GPUAPI {
             })
         }
         textures.forEach(t => {
-            if (!inUse[t] && Object.values(STATIC_TEXTURES).find(v => v === t) == null)
+            if (!inUse[t])
                 GPUAPI.destroyTexture(t)
         })
     }
@@ -125,8 +122,6 @@ export default class GPUAPI {
     }
 
     static destroyFramebuffer(id) {
-        if (Object.values(STATIC_FRAMEBUFFERS).find(m => m === id))
-            return
         const fbo = GPU.frameBuffers.get(id)
         if (!fbo)
             return
@@ -151,8 +146,6 @@ export default class GPUAPI {
     }
 
     static destroyMesh(instance) {
-        if ([...Object.values(STATIC_MESHES.PRODUCTION), ...Object.values(STATIC_MESHES.EDITOR)].find(m => m === instance.id))
-            return
         const mesh = typeof instance === "string" ? GPU.meshes.get(instance) : instance
         if (mesh instanceof Mesh) {
             GPU.context.deleteVertexArray(mesh.VAO)
@@ -177,8 +170,6 @@ export default class GPUAPI {
     }
 
     static destroyShader(id:string) {
-        if (Object.values(STATIC_SHADERS.PRODUCTION).find(m => m === id) || Object.values(STATIC_SHADERS.DEVELOPMENT).find(m => m === id))
-            return
         const instance = GPU.shaders.get(id)
         if (!instance)
             return

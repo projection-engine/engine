@@ -1,36 +1,18 @@
-import GPU from "../../GPU";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import Mesh from "../../instances/Mesh";
-import CameraAPI from "../../lib/utils/CameraAPI";
-import EntityWorkerAPI from "../../lib/utils/EntityWorkerAPI";
+import GPU from "../GPU";
+import Mesh from "../instances/Mesh";
+import CameraAPI from "../lib/utils/CameraAPI";
+import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
-import DynamicMap from "../../lib/DynamicMap";
+import DynamicMap from "../templates/DynamicMap";
+import StaticShadersController from "../lib/StaticShadersController";
+import StaticFBOsController from "../lib/StaticFBOsController";
 
-let shader, uniforms, fbo
-let viewProjection, previousViewProjection
+
 export default class VisibilityRenderer {
     static meshesToDraw = new DynamicMap()
-    static depthSampler
-    static entityIDSampler
-    static velocitySampler
     static needsUpdate = true
     static needsSSAOUpdate = false
-    static FBO
-
-    static initialize() {
-        shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.VISIBILITY_BUFFER)
-        uniforms = shader.uniformMap
-        VisibilityRenderer.FBO = fbo = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
-
-        VisibilityRenderer.depthSampler = fbo.colors[0]
-        VisibilityRenderer.entityIDSampler = fbo.colors[1]
-        VisibilityRenderer.velocitySampler = fbo.colors[2]
-
-        viewProjection = CameraAPI.viewProjectionMatrix
-        previousViewProjection = CameraAPI.previousViewProjectionMatrix
-    }
 
     static execute() {
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
@@ -39,14 +21,15 @@ export default class VisibilityRenderer {
         VisibilityRenderer.needsSSAOUpdate = true
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
-        shader.bind()
+        const uniforms = StaticShadersController.visibilityUniforms
+        StaticShadersController.visibility.bind()
+        const VP = CameraAPI.metadata.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
+        GPU.context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
+        GPU.context.uniformMatrix4fv(uniforms.previousViewProjection, false, VP)
 
-        GPU.context.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
-        GPU.context.uniformMatrix4fv(uniforms.previousViewProjection, false, CameraAPI.metadata.cameraMotionBlur ? previousViewProjection : viewProjection)
+        mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
 
-        mat4.copy(previousViewProjection, viewProjection)
-
-        fbo.startMapping()
+        StaticFBOsController.visibility.startMapping()
         Mesh.finishIfUsed()
 
         let isAlphaTested = 0, isDoubleSided = false, stateWasCleared = false
@@ -90,7 +73,7 @@ export default class VisibilityRenderer {
 
             mesh.simplifiedDraw()
         }
-        fbo.stopMapping()
+        StaticFBOsController.visibility.stopMapping()
 
         SSAO.execute()
     }

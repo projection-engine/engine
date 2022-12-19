@@ -1,21 +1,10 @@
 import GPU from "../../GPU";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
 import LightProbe from "../../instances/LightProbe";
-import ShadowProbe from "../../instances/ShadowProbe";
-import Controller from "../Controller";
-import Shader from "../../instances/Shader";
+import Controller from "../../templates/Controller";
 
 
 export default class CubeMapAPI  extends Controller{
     static frameBuffer?:WebGLFramebuffer
-
-    static get irradianceShader():Shader {
-        return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.IRRADIANCE)
-    }
-
-    static get prefilteredShader():Shader {
-        return GPU.shaders.get(STATIC_SHADERS.PRODUCTION.PREFILTERED)
-    }
 
     static initialize() {
         super.initialize()

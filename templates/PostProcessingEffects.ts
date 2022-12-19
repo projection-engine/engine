@@ -1,5 +1,5 @@
-import FrameComposition from "../runtime/post-processing/FrameComposition";
-import LensPostProcessing from "../runtime/post-processing/LensPostProcessing";
+import FrameComposition from "../runtime/FrameComposition";
+import LensPostProcessing from "../runtime/LensPostProcessing";
 
 export default class PostProcessingEffects {
     zNear = .1

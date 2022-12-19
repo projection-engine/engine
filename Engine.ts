@@ -1,28 +1,25 @@
 import CameraAPI from "./lib/utils/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import SSGI from "./runtime/rendering/SSGI";
-import SSAO from "./runtime/rendering/SSAO";
-import DirectionalShadows from "./runtime/rendering/DirectionalShadows";
+import SSGI from "./runtime/SSGI";
+import SSAO from "./runtime/SSAO";
+import DirectionalShadows from "./runtime/DirectionalShadows";
 import ConversionAPI from "./lib/math/ConversionAPI";
-import PhysicsPass from "./runtime/misc/PhysicsPass";
-import MotionBlur from "./runtime/post-processing/MotionBlur";
-import FrameComposition from "./runtime/post-processing/FrameComposition";
+import PhysicsPass from "./runtime/PhysicsPass";
+import MotionBlur from "./runtime/MotionBlur";
+import FrameComposition from "./runtime/FrameComposition";
 import GPU from "./GPU";
-import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
-import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
-import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
-import SpriteRenderer from "./runtime/rendering/SpriteRenderer";
+import LensPostProcessing from "./runtime/LensPostProcessing";
+import OmnidirectionalShadows from "./runtime/OmnidirectionalShadows";
 import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/utils/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
-import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
+import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";
 
-import SceneRenderer from "./runtime/rendering/SceneRenderer";
-import {mat4, vec3, vec4} from "gl-matrix";
-import Controller from "./lib/Controller";
+import SceneRenderer from "./runtime/SceneRenderer";
+import Controller from "./templates/Controller";
 import Entity from "./instances/Entity";
 import ConsoleAPI from "./lib/utils/ConsoleAPI";
 
@@ -36,9 +33,6 @@ export default class Engine extends Controller {
     static get developmentMode() {
         return Engine.#development
     }
-
-    static currentFrameFBO
-    static previousFrameSampler
 
     static entitiesMap = new Map<string, Entity>()
     static queryMap = new Map<string, Entity>()
@@ -71,19 +65,14 @@ export default class Engine extends Controller {
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
 
-        Engine.currentFrameFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CURRENT_FRAME)
-        Engine.previousFrameSampler = Engine.currentFrameFBO.colors[0]
-        // Bokeh.initialize()
-        VisibilityRenderer.initialize()
         LensPostProcessing.initialize()
         FrameComposition.initialize()
         await SSAO.initialize()
         SSGI.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
-        SpriteRenderer.initialize()
 
-        MotionBlur.initialize()
+
         await PhysicsAPI.initialize()
 
         ConversionAPI.canvasBBox = GPU.canvas.getBoundingClientRect()
@@ -96,7 +85,7 @@ export default class Engine extends Controller {
         OBS.observe(GPU.canvas.parentElement)
         OBS.observe(GPU.canvas)
         Engine.isReady = true
-        Loop.linkParams()
+
         GPU.skylightProbe = new LightProbe(128)
         Engine.start()
 
@@ -175,7 +164,6 @@ export default class Engine extends Controller {
         FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))
 
         FrameComposition.UBO.unbind()
-        Loop.linkParams()
         VisibilityRenderer.needsUpdate = true
     }
 

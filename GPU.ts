@@ -4,9 +4,7 @@ import TerrainGenerator from "./lib/math/TerrainGenerator";
 import CameraAPI from "./lib/utils/CameraAPI";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import CubeMapAPI from "./lib/rendering/CubeMapAPI";
-import initializeShaders from "./utils/initialize-shaders";
-import initializeStaticMeshes from "./utils/initialize-static-meshes";
-import initializeFrameBuffers from "./utils/initialize-frame-buffers";
+
 import LightsAPI from "./lib/utils/LightsAPI";
 
 // @ts-ignore
@@ -20,13 +18,16 @@ import Material from "./instances/Material";
 import COMPONENTS from "./static/COMPONENTS";
 import {mat4, vec3} from "gl-matrix";
 import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
-import SceneRenderer from "./runtime/rendering/SceneRenderer";
+import SceneRenderer from "./runtime/SceneRenderer";
 import Mesh from "./instances/Mesh";
 import Texture from "./instances/Texture";
 import VertexBuffer from "./instances/VertexBuffer";
 import Entity from "./instances/Entity";
 import LightProbe from "./instances/LightProbe";
 import SkyLightComponent from "./templates/components/SkyLightComponent";
+import StaticShadersController from "./lib/StaticShadersController";
+import StaticMeshesController from "./lib/StaticMeshesController";
+import StaticFBOsController from "./lib/StaticFBOsController";
 
 export default class GPU {
     static context?: WebGL2RenderingContext
@@ -44,7 +45,6 @@ export default class GPU {
     static cubeBuffer: VertexBuffer
     static BRDF: WebGLTexture
     static internalResolution = {w: 0, h: 0}
-    static quad?: Mesh
     static #activeSkylightEntity?: Entity
     static skylightProbe: LightProbe
 
@@ -81,7 +81,7 @@ export default class GPU {
                 vec3.add(tempPosition, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
                 mat4.lookAt(tempView, entity._translation, tempPosition, <vec3>CUBE_MAP_VIEWS.up[index])
                 mat4.multiply(tempViewProjection, projection, tempView)
-                SceneRenderer.draw(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
+                SceneRenderer.execute(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
             })
         }
     }
@@ -113,18 +113,17 @@ export default class GPU {
         GPU.context.depthFunc(GPU.context.LESS)
         GPU.context.frontFace(GPU.context.CCW)
 
+        await StaticMeshesController.initialize()
+        StaticShadersController.initialize()
+        StaticFBOsController.initialize()
+
         CameraAPI.initialize()
         LightsAPI.initialize()
-
-        initializeFrameBuffers()
-        await initializeStaticMeshes()
-        initializeShaders()
 
         SceneRenderer.initialize()
         EntityWorkerAPI.initialize()
         TerrainGenerator.initialize()
         ImageProcessor.initialize()
-        Material.initialize()
 
         CubeMapAPI.initialize()
         LineAPI.initialize()
@@ -134,7 +133,7 @@ export default class GPU {
 
         FBO.startMapping()
         brdfShader.bind()
-        GPU.drawQuad()
+        StaticMeshesController.drawQuad()
         FBO.stopMapping()
         GPU.BRDF = FBO.colors[0]
         GPU.context.deleteProgram(brdfShader.program)

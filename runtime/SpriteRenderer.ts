@@ -1,16 +1,11 @@
-import GPU from "../../GPU";
-import COMPONENTS from "../../static/COMPONENTS.js";
-import DynamicMap from "../../lib/DynamicMap";
-import STATIC_SHADERS from "../../static/resources/STATIC_SHADERS";
+import GPU from "../GPU";
+import COMPONENTS from "../static/COMPONENTS";
+import DynamicMap from "../templates/DynamicMap";
+import StaticMeshesController from "../lib/StaticMeshesController";
+import StaticShadersController from "../lib/StaticShadersController";
 
-let shader, uniforms
 export default class SpriteRenderer {
     static sprites = new DynamicMap()
-
-    static initialize() {
-        shader = GPU.shaders.get(STATIC_SHADERS.PRODUCTION.SPRITE)
-        uniforms = shader.uniformMap
-    }
 
     static execute() {
         const sprites = SpriteRenderer.sprites.array
@@ -20,7 +15,8 @@ export default class SpriteRenderer {
 
         const textures = GPU.textures
         GPU.context.disable(GPU.context.CULL_FACE)
-        shader.bind()
+        StaticShadersController.sprite.bind()
+        const uniforms = StaticShadersController.spriteUniforms
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
         for (let i = 0; i < size; i++) {
@@ -36,7 +32,7 @@ export default class SpriteRenderer {
             GPU.context.uniform2fv(uniforms.attributes, component.attributes)
             GPU.context.bindTexture(GPU.context.TEXTURE_2D, texture.texture)
             GPU.context.uniform1i(uniforms.iconSampler, 0)
-            GPU.drawQuad()
+            StaticMeshesController.drawQuad()
         }
 
         GPU.context.enable(GPU.context.CULL_FACE)

@@ -2,7 +2,6 @@ import Ammo from "../ammo.wasm";
 
 import COMPONENTS from "../../static/COMPONENTS.js";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
-import getImageData from "../../utils/get-image-data";
 import PhysicsColliderComponent from "../../templates/components/PhysicsColliderComponent";
 import Entity from "../../instances/Entity";
 import RigidBodyComponent from "../../templates/components/RigidBodyComponent";

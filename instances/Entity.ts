@@ -2,7 +2,7 @@ import {v4} from "uuid"
 import Movable from "./Movable";
 import COMPONENTS from "../static/COMPONENTS.js";
 import EntityAPI from "../lib/utils/EntityAPI";
-import ComponentGetter from "../utils/get-component-instance";
+import getComponentInstance from "../utils/get-component-instance";
 import serializeStructure from "../utils/serialize-structure";
 import Engine from "../Engine";
 import Component from "../templates/components/Component";
@@ -18,7 +18,6 @@ import PhysicsColliderComponent from "../templates/components/PhysicsColliderCom
 import RigidBodyComponent from "../templates/components/RigidBodyComponent";
 import UIComponent from "../templates/components/UIComponent";
 import TerrainComponent from "../templates/components/TerrainComponent";
-import getComponentInstance from "../utils/get-component-instance";
 
 type AllComponents =
     LightComponent

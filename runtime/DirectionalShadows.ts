@@ -1,9 +1,9 @@
-import COMPONENTS from "../../static/COMPONENTS.js"
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import GPUAPI from "../../lib/rendering/GPUAPI";
-import LightsAPI from "../../lib/utils/LightsAPI";
+import COMPONENTS from "../static/COMPONENTS"
+import LightsAPI from "../lib/utils/LightsAPI";
 import VisibilityRenderer from "./VisibilityRenderer";
-import GPU from "../../GPU";
+import GPU from "../GPU";
+import StaticFBOsController from "../lib/StaticFBOsController";
+import StaticShadersController from "../lib/StaticShadersController";
 
 
 let lightsToUpdate
@@ -11,29 +11,18 @@ export default class DirectionalShadows {
     static changed = false
     static resolutionPerTexture = 1024
     static maxResolution = 4096
-    static shadowMapShader
-    static shadowsFrameBuffer
     static lightsToUpdate = []
     static atlasRatio = 0
     static sampler
 
     static initialize() {
-        DirectionalShadows.allocateData()
-
         lightsToUpdate = DirectionalShadows.lightsToUpdate
-    }
-
-    static allocateData() {
-        if (DirectionalShadows.shadowsFrameBuffer)
-            GPUAPI.destroyFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS)
-        DirectionalShadows.shadowsFrameBuffer = GPUAPI.allocateFramebuffer(STATIC_FRAMEBUFFERS.SHADOWS, DirectionalShadows.maxResolution, DirectionalShadows.maxResolution).depthTexture()
-        DirectionalShadows.sampler = DirectionalShadows.shadowsFrameBuffer.depthSampler
     }
 
     static allocateBuffers(shadowAtlasQuantity, shadowMapResolution) {
         if (DirectionalShadows.maxResolution !== shadowMapResolution && shadowMapResolution) {
             DirectionalShadows.maxResolution = shadowMapResolution
-            DirectionalShadows.allocateData()
+            StaticFBOsController.updateDirectionalShadowsFBO()
             DirectionalShadows.changed = true
         }
 
@@ -55,7 +44,7 @@ export default class DirectionalShadows {
         GPU.context.cullFace(GPU.context.FRONT)
         let currentColumn = 0, currentRow = 0
 
-        DirectionalShadows.shadowsFrameBuffer.startMapping()
+        StaticFBOsController.shadows.startMapping()
         GPU.context.enable(GPU.context.SCISSOR_TEST)
         const size = DirectionalShadows.atlasRatio ** 2
         for (let face = 0; face < size; face++) {
@@ -86,14 +75,14 @@ export default class DirectionalShadows {
                 currentColumn += 1
         }
         GPU.context.disable(GPU.context.SCISSOR_TEST)
-        DirectionalShadows.shadowsFrameBuffer.stopMapping()
+        StaticFBOsController.shadows.stopMapping()
         GPU.context.cullFace(GPU.context.BACK)
         DirectionalShadows.changed = false
         lightsToUpdate.length = 0
     }
 
     static loopMeshes(light) {
-        if(!light.__entity)
+        if (!light.__entity)
             return
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
@@ -102,11 +91,13 @@ export default class DirectionalShadows {
             const mesh = current.__meshRef
             if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
-            DirectionalShadows.shadowMapShader.bindForUse({
-                viewMatrix: light.lightView,
-                transformMatrix: current.matrix,
-                projectionMatrix: light.lightProjection,
-            })
+            StaticShadersController.directShadows.bind()
+            const U = StaticShadersController.directShadowsUniforms
+
+            GPU.context.uniformMatrix4fv(U.viewMatrix, false, light.lightView)
+            GPU.context.uniformMatrix4fv(U.transformMatrix, false, current.matrix)
+            GPU.context.uniformMatrix4fv(U.projectionMatrix, false, light.lightProjection)
+
             mesh.draw()
         }
     }

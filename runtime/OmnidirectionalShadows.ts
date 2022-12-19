@@ -1,11 +1,11 @@
 import {mat4, vec3} from "gl-matrix"
-import COMPONENTS from "../../static/COMPONENTS.js"
-import CUBE_MAP_VIEWS from "../../static/CUBE_MAP_VIEWS";
-import ShadowProbe from "../../instances/ShadowProbe";
+import COMPONENTS from "../static/COMPONENTS"
+import CUBE_MAP_VIEWS from "../static/CUBE_MAP_VIEWS";
+import ShadowProbe from "../instances/ShadowProbe";
 import VisibilityRenderer from "./VisibilityRenderer";
-import LightComponent from "../../templates/components/LightComponent";
-import Shader from "../../instances/Shader";
-import GPU from "../../GPU";
+import LightComponent from "../templates/components/LightComponent";
+import GPU from "../GPU";
+import StaticShadersController from "../lib/StaticShadersController";
 
 const cacheVec3 = vec3.create()
 const cacheMat4 = mat4.create()
@@ -15,7 +15,6 @@ export default class OmnidirectionalShadows {
     static maxCubeMaps = 2
     static shadowMap?:ShadowProbe
     static sampler?:WebGLTexture
-    static shader?:Shader
     static lightsToUpdate:LightComponent[] = []
 
     static initialize() {
@@ -68,7 +67,7 @@ export default class OmnidirectionalShadows {
 
             if (distanceFromLight > component.cutoff)
                 continue
-            OmnidirectionalShadows.shader.bindForUse({
+            StaticShadersController.omniDirectShadows.bindForUse({
                 farPlane: component.zFar,
                 viewMatrix: view,
                 transformMatrix: current.matrix,

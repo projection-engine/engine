@@ -1,10 +1,10 @@
 import UBO from "../../instances/UBO";
 import ArrayBufferAPI from "./ArrayBufferAPI";
-import DynamicMap from "../DynamicMap";
+import DynamicMap from "../../templates/DynamicMap";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import {mat4, vec3} from "gl-matrix";
-import DirectionalShadows from "../../runtime/rendering/DirectionalShadows";
-import OmnidirectionalShadows from "../../runtime/rendering/OmnidirectionalShadows";
+import DirectionalShadows from "../../runtime/DirectionalShadows";
+import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import Entity from "../../instances/Entity";
 
 

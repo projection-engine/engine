@@ -6,10 +6,9 @@ import ArrayBufferAPI from "./ArrayBufferAPI";
 import {mat4, quat, vec3, vec4} from "gl-matrix";
 import ConversionAPI from "../math/ConversionAPI";
 import UBO from "../../instances/UBO";
-import MotionBlur from "../../runtime/post-processing/MotionBlur";
-import FrameComposition from "../../runtime/post-processing/FrameComposition";
-import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
-import Controller from "../Controller";
+import MotionBlur from "../../runtime/MotionBlur";
+import VisibilityRenderer from "../../runtime/VisibilityRenderer";
+import Controller from "../../templates/Controller";
 import GPU from "../../GPU";
 
 
@@ -254,15 +253,6 @@ export default class CameraAPI extends Controller {
         CameraAPI.updateView()
     }
 
-    static updateMotionBlurState(enabled) {
-        MotionBlur.enabled = enabled
-
-        if (!MotionBlur.enabled)
-            FrameComposition.workerTexture = MotionBlur.workerTexture
-        else
-            FrameComposition.workerTexture = MotionBlur.frameBuffer.colors[0]
-    }
-
     static updateViewTarget(entity) {
         if (!entity)
             CameraAPI.trackingEntity = undefined
@@ -274,7 +264,7 @@ export default class CameraAPI extends Controller {
             return
 
         CameraAPI.trackingEntity = entity
-        CameraAPI.updateMotionBlurState(cameraObj.motionBlurEnabled)
+        MotionBlur.enabled = cameraObj.motionBlurEnabled
 
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear

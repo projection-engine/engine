@@ -1,22 +1,17 @@
-import Engine from "../../Engine";
-import GPU from "../../GPU";
-import SSAO from "./SSAO";
-import SSGI from "./SSGI";
-import DirectionalShadows from "./DirectionalShadows";
+import Engine from "../Engine";
+import GPU from "../GPU";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import VisibilityRenderer from "./VisibilityRenderer";
-import Shader from "../../instances/Shader";
-import CameraAPI from "../../lib/utils/CameraAPI";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import SHADING_MODELS from "../../static/SHADING_MODELS";
-import UBO from "../../instances/UBO";
-import COMPONENTS from "../../static/COMPONENTS";
-import MutableObject from "../../MutableObject";
-import LightsAPI from "../../lib/utils/LightsAPI";
+import Shader from "../instances/Shader";
+import CameraAPI from "../lib/utils/CameraAPI";
+import SHADING_MODELS from "../static/SHADING_MODELS";
+import UBO from "../instances/UBO";
+import COMPONENTS from "../static/COMPONENTS";
+import StaticFBOsController from "../lib/StaticFBOsController";
+import StaticShadersController from "../lib/StaticShadersController";
 
 let texOffset
-let isDev
-let shader:Shader, uniforms:MutableObject
+
 export default class SceneRenderer {
     static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
@@ -25,9 +20,6 @@ export default class SceneRenderer {
     static initialize() {
         if (SceneRenderer.#ready)
             return
-        isDev = Engine.developmentMode
-        const FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.VISIBILITY_BUFFER)
-
         SceneRenderer.#ready = true
         SceneRenderer.UBO = new UBO(
             "UberShaderSettings",
@@ -49,36 +41,28 @@ export default class SceneRenderer {
 
             ])
         SceneRenderer.UBO.bind()
-        SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([FBO.width, FBO.height]))
+        SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([GPU.internalResolution.w, GPU.internalResolution.h]))
         SceneRenderer.UBO.unbind()
     }
 
-    static set shader(data:Shader) {
-        shader = data
-        uniforms = shader.uniformMap
-        console.trace(uniforms, shader)
-        LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
-        LightsAPI.lightsUBOA.bindWithShader(shader.program)
-        LightsAPI.lightsUBOB.bindWithShader(shader.program)
-        LightsAPI.lightsUBOC.bindWithShader(shader.program)
 
-        SceneRenderer.UBO.bindWithShader(shader.program)
-    }
-
-    static execute(useCustomView?:boolean, viewProjection?:Float32Array, viewMatrix?:Float32Array, cameraPosition?:Float32Array) {
+    static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
+        const shader = StaticShadersController.uber
         if (!SceneRenderer.#ready || !shader)
             return
+
+        const uniforms = StaticShadersController.uberUniforms
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         const context = GPU.context
 
         shader.bind()
-        if (isDev)
+
+        if (Engine.developmentMode)
             context.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         if (!useCustomView) {
-
             context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
             context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
@@ -95,19 +79,19 @@ export default class SceneRenderer {
         context.uniform1i(uniforms.brdf_sampler, 0)
 
         context.activeTexture(context.TEXTURE1)
-        context.bindTexture(context.TEXTURE_2D, SSAO.filteredSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.ssaoBlurredSampler)
         context.uniform1i(uniforms.SSAO, 1)
 
         context.activeTexture(context.TEXTURE2)
-        context.bindTexture(context.TEXTURE_2D, SSGI.sampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.ssgiFinalSampler)
         context.uniform1i(uniforms.SSGI, 2)
 
         context.activeTexture(context.TEXTURE3)
-        context.bindTexture(context.TEXTURE_2D, Engine.previousFrameSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.cacheSampler)
         context.uniform1i(uniforms.previousFrame, 3)
 
         context.activeTexture(context.TEXTURE4)
-        context.bindTexture(context.TEXTURE_2D, DirectionalShadows.sampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.shadowsSampler)
         context.uniform1i(uniforms.shadow_atlas, 4)
 
         context.activeTexture(context.TEXTURE5)
@@ -116,7 +100,7 @@ export default class SceneRenderer {
 
 
         context.activeTexture(context.TEXTURE6)
-        context.bindTexture(context.TEXTURE_2D, VisibilityRenderer.depthSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.visibilityDepthSampler)
         context.uniform1i(uniforms.scene_depth, 6)
 
         context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
@@ -128,7 +112,7 @@ export default class SceneRenderer {
         // uniform samplerCube skylight_specular;
         // uniform float skylight_samples;
 
-        if (!!GPU.activeSkylightEntity  && !useCustomView) {
+        if (!!GPU.activeSkylightEntity && !useCustomView) {
             texOffset++
             context.activeTexture(context.TEXTURE7)
             context.bindTexture(context.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
@@ -147,12 +131,12 @@ export default class SceneRenderer {
             if (!entity.active || !mesh || entity.isCulled)
                 continue
 
-            if (isDev)
+            if ( Engine.developmentMode)
                 context.uniform3fv(uniforms.entityID, entity.pickID)
 
             const material = entity.__materialRef
 
-            if(isSky){
+            if (isSky) {
                 isSky = false
                 context.enable(context.CULL_FACE)
                 context.enable(context.DEPTH_TEST)
@@ -169,7 +153,7 @@ export default class SceneRenderer {
                 isSky = material.isSky
                 context.uniform1i(uniforms.isSky, isSky ? 1 : 0)
 
-                if(isSky) {
+                if (isSky) {
                     context.disable(context.CULL_FACE)
                     context.disable(context.DEPTH_TEST)
                 }
@@ -202,7 +186,6 @@ export default class SceneRenderer {
                 context.uniform1i(uniforms.noDepthChecking, 0)
                 context.uniform1i(uniforms.materialID, -1)
             }
-
 
 
             if (useCustomView) {

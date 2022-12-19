@@ -1,6 +1,7 @@
 import {v4} from "uuid";
 import MessageInterface from "./MessageInterface";
 import serializeStructure from "../../utils/serialize-structure";
+
 const isPlainObject = value => value?.constructor === Object;
 
 export default function parseMessage(messages: any[], type, src):MessageInterface[] {

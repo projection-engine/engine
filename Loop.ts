@@ -1,31 +1,29 @@
-import SSGI from "./runtime/rendering/SSGI";
-import DirectionalShadows from "./runtime/rendering/DirectionalShadows";
+import SSGI from "./runtime/SSGI";
+import DirectionalShadows from "./runtime/DirectionalShadows";
 
-import executeScripts from "./runtime/misc/execute-scripts";
-import LensPostProcessing from "./runtime/post-processing/LensPostProcessing";
-import FrameComposition from "./runtime/post-processing/FrameComposition";
+import executeScripts from "./runtime/execute-scripts";
+import LensPostProcessing from "./runtime/LensPostProcessing";
+import FrameComposition from "./runtime/FrameComposition";
 
 import Engine from "./Engine";
-import SpriteRenderer from "./runtime/rendering/SpriteRenderer";
-import PhysicsPass from "./runtime/misc/PhysicsPass";
+import SpriteRenderer from "./runtime/SpriteRenderer";
+import PhysicsPass from "./runtime/PhysicsPass";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
-import OmnidirectionalShadows from "./runtime/rendering/OmnidirectionalShadows";
-import MotionBlur from "./runtime/post-processing/MotionBlur";
+import OmnidirectionalShadows from "./runtime/OmnidirectionalShadows";
+import MotionBlur from "./runtime/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
-import VisibilityRenderer from "./runtime/rendering/VisibilityRenderer";
+import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightsAPI from "./lib/utils/LightsAPI";
-import SceneRenderer from "./runtime/rendering/SceneRenderer";
+import SceneRenderer from "./runtime/SceneRenderer";
 import GPU from "./GPU";
-import STATIC_FRAMEBUFFERS from "./static/resources/STATIC_FRAMEBUFFERS";
 import GPUAPI from "./lib/rendering/GPUAPI";
+import StaticFBOsController from "./lib/StaticFBOsController";
 
-
-let FBO, previous = 0, targetFBO
+let previous = 0
 export default class Loop {
     static #beforeDrawing?: Function = () => null
-
     static #afterDrawing?: Function = () => null
 
     static linkToExecutionPipeline(after?: Function, before?: Function) {
@@ -40,10 +38,6 @@ export default class Loop {
             Loop.#afterDrawing = () => null
     }
 
-    static linkParams() {
-        targetFBO = Engine.currentFrameFBO
-        FBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.CHACHE_BUFFER)
-    }
 
     static #benchmarkMode() {
         FrameComposition.copyPreviousFrame()
@@ -65,7 +59,7 @@ export default class Loop {
         VisibilityRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
-        FBO.startMapping()
+        StaticFBOsController.cache.startMapping()
         Loop.#beforeDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
@@ -76,7 +70,7 @@ export default class Loop {
         SpriteRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
 
-        FBO.stopMapping()
+        StaticFBOsController.cache.stopMapping()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.SSGI)
         SSGI.execute()
@@ -110,13 +104,13 @@ export default class Loop {
 
         VisibilityRenderer.execute()
 
-        FBO.startMapping()
+        StaticFBOsController.cache.startMapping()
         Loop.#beforeDrawing()
         SceneRenderer.execute()
         SpriteRenderer.execute()
-        FBO.stopMapping()
+        StaticFBOsController.cache.stopMapping()
 
-        GPUAPI.copyTexture(targetFBO, FBO, GPU.context.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(StaticFBOsController.currentFrame, StaticFBOsController.cache, GPU.context.COLOR_BUFFER_BIT)
 
         SSGI.execute()
 

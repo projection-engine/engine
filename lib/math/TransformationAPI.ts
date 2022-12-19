@@ -1,6 +1,4 @@
 import {glMatrix, mat3, mat4, quat, vec2, vec3, vec4} from "gl-matrix"
-import Movable from "../../instances/Movable";
-import Entity from "../../instances/Entity";
 
 
 export default class TransformationAPI {

@@ -10,9 +10,9 @@ import Entity from "../../instances/Entity";
 import ENTITY_TYPED_ATTRIBUTES from "../../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
 import MaterialAPI from "../rendering/MaterialAPI";
-import VisibilityRenderer from "../../runtime/rendering/VisibilityRenderer";
+import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import GPU from "../../GPU";
-import SpriteRenderer from "../../runtime/rendering/SpriteRenderer";
+import SpriteRenderer from "../../runtime/SpriteRenderer";
 import MutableObject from "../../MutableObject";
 import {v4} from "uuid";
 

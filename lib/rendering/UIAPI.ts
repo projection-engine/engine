@@ -4,7 +4,6 @@ import InputEventsAPI from "../utils/InputEventsAPI";
 import QueryAPI from "../utils/QueryAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
 import UIComponent from "../../templates/components/UIComponent";
-import MutableObject from "../../MutableObject";
 
 const STYLES = {
     position: "absolute",

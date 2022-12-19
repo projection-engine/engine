@@ -1,7 +1,5 @@
-import Engine from "../../Engine";
-import COMPONENTS from "../../static/COMPONENTS.js";
-import PhysicsAPI from "../../lib/rendering/PhysicsAPI";
-import RigidBodyComponent from "../../templates/components/RigidBodyComponent";
+import Engine from "../Engine";
+import PhysicsAPI from "../lib/rendering/PhysicsAPI";
 
 export default class PhysicsPass {
     static simulationStep = 0.01666666

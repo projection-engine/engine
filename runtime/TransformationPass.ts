@@ -1,5 +1,5 @@
 import {mat4, quat, vec3} from "gl-matrix";
-import DynamicMap from "../../lib/DynamicMap";
+import DynamicMap from "../templates/DynamicMap";
 
 /**
  * @field controlBuffer {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.

@@ -1,23 +1,19 @@
-import GPU from "../../GPU";
-import UBO from "../../instances/UBO";
-import AA_METHODS from "../../static/AA_METHODS";
-import STATIC_FRAMEBUFFERS from "../../static/resources/STATIC_FRAMEBUFFERS";
-import GPUAPI from "../../lib/rendering/GPUAPI";
-import Engine from "../../Engine";
-import VisibilityRenderer from "../rendering/VisibilityRenderer";
-import Shader from "../../instances/Shader";
+import GPU from "../GPU";
+import UBO from "../instances/UBO";
+import AA_METHODS from "../static/AA_METHODS";
+import GPUAPI from "../lib/rendering/GPUAPI";
+import StaticMeshesController from "../lib/StaticMeshesController";
+import StaticFBOsController from "../lib/StaticFBOsController";
+import StaticShadersController from "../lib/StaticShadersController";
+import MotionBlur from "./MotionBlur";
 
-let shader, uniforms
+
 export default class FrameComposition {
     static lookUpRandom = new Float32Array(2e+3)
     static lookUpIndex = 0
-    static workerTexture?:WebGLTexture
-    static shader?:Shader
-    static UBO?:UBO
+    static UBO?: UBO
     static currentNoise = 0
-    static #cacheFBO
     static AAMethodInUse = AA_METHODS.DISABLED
-    static #taaCacheSampler?:WebGLTexture
 
     static initialize() {
         FrameComposition.UBO = new UBO(
@@ -37,9 +33,8 @@ export default class FrameComposition {
             ]
         )
 
-        FrameComposition.#cacheFBO = GPU.frameBuffers.get(STATIC_FRAMEBUFFERS.TAA_CACHE)
-        FrameComposition.#taaCacheSampler = FrameComposition.#cacheFBO.colors[0]
-        FrameComposition.UBO.bindWithShader(FrameComposition.shader.program)
+        FrameComposition.UBO.bindWithShader(StaticShadersController.composition.program)
+
         FrameComposition.UBO.bind()
         FrameComposition.UBO.updateData("gamma", new Float32Array([2.2]))
         FrameComposition.UBO.updateData("exposure", new Float32Array([1]))
@@ -51,36 +46,38 @@ export default class FrameComposition {
 
         for (let i = 0; i < FrameComposition.lookUpRandom.length; i++)
             FrameComposition.lookUpRandom[i] = Math.random()
-        shader = FrameComposition.shader
-        uniforms = shader.uniformMap
     }
 
     static lookup() {
         return ++FrameComposition.lookUpIndex >= FrameComposition.lookUpRandom.length ? FrameComposition.lookUpRandom[FrameComposition.lookUpIndex = 0] : FrameComposition.lookUpRandom[FrameComposition.lookUpIndex]
     }
 
-    static copyPreviousFrame(){
-        if(FrameComposition.AAMethodInUse !== AA_METHODS.TAA)
+    static copyPreviousFrame() {
+        if (FrameComposition.AAMethodInUse !== AA_METHODS.TAA)
             return
-        GPUAPI.copyTexture(FrameComposition.#cacheFBO, Engine.currentFrameFBO, GPU.context.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(StaticFBOsController.cache, StaticFBOsController.currentFrame, GPU.context.COLOR_BUFFER_BIT)
     }
 
     static execute() {
+        const context = GPU.context
+        const sampler = MotionBlur.enabled ? StaticFBOsController.mbSampler : StaticFBOsController.cacheSampler
+        const shader = StaticShadersController.composition, uniforms = StaticShadersController.compositionUniforms
+
         FrameComposition.currentNoise = FrameComposition.lookup()
 
         shader.bind()
-        GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, FrameComposition.workerTexture)
-        GPU.context.uniform1i(uniforms.currentFrame, 0)
+        context.activeTexture(context.TEXTURE0)
+        context.bindTexture(context.TEXTURE_2D, sampler)
+        context.uniform1i(uniforms.currentFrame, 0)
 
-        if(FrameComposition.AAMethodInUse === AA_METHODS.TAA) {
-            GPU.context.activeTexture(GPU.context.TEXTURE1)
-            GPU.context.bindTexture(GPU.context.TEXTURE_2D, FrameComposition.#taaCacheSampler)
-            GPU.context.uniform1i(uniforms.previousFrame, 1)
+        if (FrameComposition.AAMethodInUse === AA_METHODS.TAA) {
+            context.activeTexture(context.TEXTURE1)
+            context.bindTexture(context.TEXTURE_2D, StaticFBOsController.TAACacheSampler)
+            context.uniform1i(uniforms.previousFrame, 1)
         }
 
-        GPU.context.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
-        GPU.drawQuad()
+        context.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
+        StaticMeshesController.drawQuad()
 
     }
 }

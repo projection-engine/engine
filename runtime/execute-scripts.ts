@@ -1,5 +1,5 @@
-import Engine from "../../Engine";
-import ScriptsAPI from "../../lib/utils/ScriptsAPI";
+import Engine from "../Engine";
+import ScriptsAPI from "../lib/utils/ScriptsAPI";
 
 export default function executeScripts() {
     const scripts = ScriptsAPI.mountedScripts

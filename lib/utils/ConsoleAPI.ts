@@ -1,5 +1,3 @@
-import {v4} from "uuid";
-
 import parseMessage from "./parse-console-message";
 import MessageInterface from "./MessageInterface";
 

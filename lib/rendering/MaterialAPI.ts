@@ -3,7 +3,6 @@ import DATA_TYPES from "../../static/DATA_TYPES";
 import GPUAPI from "./GPUAPI";
 
 import FileSystemAPI from "../utils/FileSystemAPI";
-import ConsoleAPI from "../utils/ConsoleAPI";
 import Entity from "../../instances/Entity";
 import Material from "../../instances/Material";
 

@@ -1,5 +1,5 @@
 import WORKER_MESSAGES from "../static/WORKER_MESSAGES"
-import TransformationPass from "../runtime/misc/TransformationPass";
+import TransformationPass from "../runtime/TransformationPass";
 
 
 self.onmessage = (event) => {
