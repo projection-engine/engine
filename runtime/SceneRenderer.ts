@@ -43,6 +43,8 @@ export default class SceneRenderer {
         SceneRenderer.UBO.bind()
         SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([GPU.internalResolution.w, GPU.internalResolution.h]))
         SceneRenderer.UBO.unbind()
+
+        StaticShaders.bindWithUberShader()
     }
 
 
@@ -58,7 +60,7 @@ export default class SceneRenderer {
 
         shader.bind()
 
-        if (Engine.developmentMode)
+        // if (Engine.developmentMode)
             context.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
@@ -87,7 +89,7 @@ export default class SceneRenderer {
         context.uniform1i(uniforms.SSGI, 2)
 
         context.activeTexture(context.TEXTURE3)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.cacheSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.currentFrameSampler)
         context.uniform1i(uniforms.previousFrame, 3)
 
         context.activeTexture(context.TEXTURE4)
@@ -131,7 +133,7 @@ export default class SceneRenderer {
             if (!entity.active || !mesh || entity.isCulled)
                 continue
 
-            if ( Engine.developmentMode)
+            // if ( Engine.developmentMode)
                 context.uniform3fv(uniforms.entityID, entity.pickID)
 
             const material = entity.__materialRef

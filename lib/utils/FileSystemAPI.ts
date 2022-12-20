@@ -2,6 +2,7 @@ import ScriptsAPI from "./ScriptsAPI";
 import GPU from "../../GPU";
 import GPUAPI from "../rendering/GPUAPI";
 import FILE_TYPES from "../../../static/objects/FILE_TYPES";
+import MaterialInformation from "../../templates/MaterialInformation";
 
 
 export default class FileSystemAPI {
@@ -41,12 +42,12 @@ export default class FileSystemAPI {
                 if (!file?.response)
                     return
                 const materialInformation = file.response
-                await GPUAPI.allocateMaterial(materialInformation, ID)
-
-                return true
+                if(materialInformation) {
+                    await GPUAPI.allocateMaterial(<MaterialInformation>materialInformation, ID)
+                    return true
+                }
             }
         } catch (err) {
-            console.error(err)
             console.error(err)
         }
         return false

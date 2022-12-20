@@ -16,7 +16,7 @@ export default class MotionBlur {
         StaticShaders.mb.bind()
         const uniforms = StaticShaders.mbUniforms
         GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.cacheSampler)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.currentFrameSampler)
         GPU.context.uniform1i(uniforms.currentFrame, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)

@@ -113,14 +113,15 @@ export default class GPU {
         GPU.context.depthFunc(GPU.context.LESS)
         GPU.context.frontFace(GPU.context.CCW)
 
+
+        LightsAPI.initialize()
+        CameraAPI.initialize()
         await StaticMeshes.initialize()
         StaticShaders.initialize()
         StaticFBO.initialize()
 
-        CameraAPI.initialize()
-        LightsAPI.initialize()
-
         SceneRenderer.initialize()
+
         EntityWorkerAPI.initialize()
         TerrainGenerator.initialize()
         ImageProcessor.initialize()

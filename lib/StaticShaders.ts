@@ -2,6 +2,8 @@ import Controller from "../templates/Controller";
 import SHADERS from "../static/SHADERS"
 import Shader from "../instances/Shader";
 import compileUberShader from "../utils/compile-uber-shader";
+import LightsAPI from "./utils/LightsAPI";
+import SceneRenderer from "../runtime/SceneRenderer";
 
 export default class StaticShaders extends Controller {
     static uber?:Shader
@@ -108,5 +110,15 @@ export default class StaticShaders extends Controller {
         StaticShaders.gaussianUniforms = StaticShaders.gaussian.uniformMap
         StaticShaders.upSamplingUniforms = StaticShaders.upSampling.uniformMap
 
+    }
+    static bindWithUberShader(){
+        const shader = StaticShaders.uber
+        LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
+        LightsAPI.lightsUBOA.bindWithShader(shader.program)
+        LightsAPI.lightsUBOB.bindWithShader(shader.program)
+        LightsAPI.lightsUBOC.bindWithShader(shader.program)
+        SceneRenderer.UBO.bindWithShader(shader.program)
+        StaticShaders.uber = shader
+        StaticShaders.uberUniforms = shader.uniformMap
     }
 }

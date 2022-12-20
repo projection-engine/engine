@@ -7,8 +7,6 @@ import StaticShaders from "../lib/StaticShaders";
 
 
 export default class LensPostProcessing {
-    static compositeShader
-    static brightShader
     static UBO
 
     static initialize() {
@@ -21,9 +19,7 @@ export default class LensPostProcessing {
                 {type: "bool", name: "chromaticAberrationEnabled"},
                 {type: "bool", name: "bloomEnabled"},]
         )
-        LensPostProcessing.UBO.bindWithShader(LensPostProcessing.compositeShader.program)
-
-
+        LensPostProcessing.UBO.bindWithShader(StaticShaders.composition.program)
     }
 
 

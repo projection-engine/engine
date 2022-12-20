@@ -60,7 +60,7 @@ export default class FrameComposition {
 
     static execute() {
         const context = GPU.context
-        const sampler = MotionBlur.enabled ? StaticFBO.mbSampler : StaticFBO.cacheSampler
+        const sampler = MotionBlur.enabled ? StaticFBO.mbSampler : StaticFBO.currentFrameSampler
         const shader = StaticShaders.composition, uniforms = StaticShaders.compositionUniforms
 
         FrameComposition.currentNoise = FrameComposition.lookup()

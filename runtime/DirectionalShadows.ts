@@ -94,9 +94,9 @@ export default class DirectionalShadows {
             StaticShaders.directShadows.bind()
             const U = StaticShaders.directShadowsUniforms
 
-            GPU.context.uniformMatrix4fv(U.viewMatrix, false, light.lightView)
+            GPU.context.uniformMatrix4fv(U.viewMatrix, false, light.__lightView)
             GPU.context.uniformMatrix4fv(U.transformMatrix, false, current.matrix)
-            GPU.context.uniformMatrix4fv(U.projectionMatrix, false, light.lightProjection)
+            GPU.context.uniformMatrix4fv(U.projectionMatrix, false, light.__lightProjection)
 
             mesh.draw()
         }

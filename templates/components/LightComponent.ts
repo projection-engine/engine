@@ -3,6 +3,7 @@ import LIGHT_PROPS from "../../static/component-props/LIGHT_PROPS";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import Entity from "../../instances/Entity";
 import LightsAPI from "../../lib/utils/LightsAPI";
+import {mat4} from "gl-matrix";
 
 const toRad = Math.PI / 180
 
@@ -41,7 +42,8 @@ export default class LightComponent extends Component {
     size = 35
     atlasFace = [0, 0]
     _center = [0, 0, 0]
-
+    __lightView = mat4.create()
+    __lightProjection = mat4.create()
     // -------------- AREA --------------
     areaRadius = 1
     planeAreaWidth = 1

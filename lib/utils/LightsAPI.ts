@@ -11,9 +11,7 @@ import Entity from "../../instances/Entity";
 const MAX_LIGHTS = 24
 let lightTimeout
 const toRad = Math.PI / 180
-const lightView = mat4.create(),
-    lightProjection = mat4.create(),
-    transformedNormalCache = vec3.create(),
+const transformedNormalCache = vec3.create(),
     lightViewProjection = mat4.create()
 
 const cacheVec3 = vec3.create()
@@ -39,10 +37,10 @@ export default class LightsAPI {
     static lightsQuantityB = 0
     static lightsQuantityC = 0
 
-    static lightsUBOA?:UBO
-    static lightsUBOB?:UBO
-    static lightsUBOC?:UBO
-    static lightsMetadataUBO?:UBO
+    static lightsUBOA?: UBO
+    static lightsUBOB?: UBO
+    static lightsUBOC?: UBO
+    static lightsMetadataUBO?: UBO
 
     static initialize() {
         if (LightsAPI.#initialized)
@@ -123,7 +121,7 @@ export default class LightsAPI {
     }
 
 
-    static packageLights(keepOld?:boolean, force?:boolean) {
+    static packageLights(keepOld?: boolean, force?: boolean) {
         if (force) {
             LightsAPI.#package(keepOld)
             return
@@ -218,10 +216,10 @@ export default class LightsAPI {
                 primaryBuffer[offset + 14] = component.hasSSS ? 1 : 0
 
                 if (component.shadowMap) {
-                    mat4.lookAt(lightView, component.__entity.absoluteTranslation, <vec3>component.center, [0, 1, 0])
-                    mat4.ortho(lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
+                    mat4.lookAt(component.__lightView, component.__entity.absoluteTranslation, <vec3>component.center, [0, 1, 0])
+                    mat4.ortho(component.__lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
 
-                    mat4.multiply(lightViewProjection, lightProjection, lightView)
+                    mat4.multiply(lightViewProjection, component.__lightProjection, component.__lightView)
                     for (let i = 0; i < 16; i++)
                         secondaryBuffer[offset + i] = lightViewProjection[i]
 

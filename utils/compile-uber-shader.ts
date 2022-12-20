@@ -8,8 +8,6 @@ import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag";
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert";
 import StaticShaders from "../lib/StaticShaders";
 import Shader from "../instances/Shader";
-import LightsAPI from "../lib/utils/LightsAPI";
-import SceneRenderer from "../runtime/SceneRenderer";
 
 export default function compileUberShader(forceCleanShader?: boolean) {
     const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
@@ -32,7 +30,7 @@ export default function compileUberShader(forceCleanShader?: boolean) {
     fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
     const shader = new Shader(VERTEX_SHADER, fragment)
-
+    console.trace(fragment)
     if (shader.messages.hasError) {
         if (!StaticShaders.uber)
             compileUberShader(true)
@@ -41,12 +39,7 @@ export default function compileUberShader(forceCleanShader?: boolean) {
         return
     } else if (StaticShaders.uber)
         GPU.context.deleteProgram(StaticShaders.uber.program)
-
-    LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
-    LightsAPI.lightsUBOA.bindWithShader(shader.program)
-    LightsAPI.lightsUBOB.bindWithShader(shader.program)
-    LightsAPI.lightsUBOC.bindWithShader(shader.program)
-    SceneRenderer.UBO.bindWithShader(shader.program)
     StaticShaders.uber = shader
     StaticShaders.uberUniforms = shader.uniformMap
+
 }

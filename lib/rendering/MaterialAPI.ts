@@ -5,10 +5,15 @@ import GPUAPI from "./GPUAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
 import Entity from "../../instances/Entity";
 import Material from "../../instances/Material";
+import MeshComponent from "../../templates/components/MeshComponent";
+import MaterialUniform from "../../templates/MaterialUniform";
+import TextureParams from "../../templates/TextureParams";
+import TextureInUse from "../../templates/TextureInUse";
+import MutableObject from "../../MutableObject";
 
 export default class MaterialAPI {
     static #incrementalMap = new Map()
-    static entityMaterial = new Map<string,{[key:string]:Entity}>()
+    static entityMaterial = new Map<string, { [key: string]: Entity }>()
 
     static* #getIncrementalID() {
         let counter = 0
@@ -33,7 +38,7 @@ export default class MaterialAPI {
         MaterialAPI.#incrementalMap.delete(matID)
     }
 
-    static updateMap(component) {
+    static updateMap(component: MeshComponent) {
         const entity = component?.__entity
 
         if (!entity || !Entity.isRegistered(entity)) return;
@@ -52,6 +57,10 @@ export default class MaterialAPI {
         if (hasToUpdate)
             component.materialUniforms = JSON.parse(JSON.stringify(possibleNewUniforms))
         entity.__materialRef = referenceMat
+        if (!entity.__materialRef) {
+            component.overrideMaterialUniforms = false
+            component.materialUniforms = []
+        }
         if (referenceMat)
             MaterialAPI.mapUniforms(component.materialUniforms, component.__texturesInUse, component.__mappedUniforms).catch(err => console.error(err))
         if (!referenceMat && materialID != null)
@@ -77,14 +86,14 @@ export default class MaterialAPI {
             entity.__meshRef = undefined
     }
 
-    static async updateMaterialUniforms(material:Material) {
+    static async updateMaterialUniforms(material: Material) {
         const data = material.uniforms
         if (!Array.isArray(data))
             return
         await MaterialAPI.mapUniforms(data, material.texturesInUse, material.uniformValues)
     }
 
-    static async mapUniforms(data, texturesInUse, uniformValues) {
+    static async mapUniforms(data: MaterialUniform[], texturesInUse: TextureInUse, uniformValues: MutableObject) {
         if (!Array.isArray(data))
             return
         for (let i = 0; i < data.length; i++) {
@@ -101,11 +110,10 @@ export default class MaterialAPI {
                     } else {
                         const asset = await FileSystemAPI.readAsset(textureID)
                         if (asset) {
-                            const textureData = GPU.textures.get(textureID) || typeof asset === "string" ? JSON.parse(asset) : asset
-                            let texture = await GPUAPI.allocateTexture({
+                            const textureData = <TextureParams>(typeof asset === "string" ? JSON.parse(asset) : asset)
+                            const texture = await GPUAPI.allocateTexture({
                                 ...textureData,
-                                img: textureData.base64,
-                                yFlip: textureData.flipY,
+                                img: textureData.base64
                             }, textureID)
 
                             if (texture) {

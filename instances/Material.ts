@@ -6,14 +6,18 @@ import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
 // @ts-ignore
 import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag"
+import MaterialUniform from "../templates/MaterialUniform";
+import TextureInUse from "../templates/TextureInUse";
+import MutableObject from "../MutableObject";
+
 
 export default class Material {
     #id = ""
-    #uniformValues = {}
+    #uniformValues:MutableObject = {}
     #uniforms = []
-    #functionDeclaration
-    #uniformsDeclaration
-    texturesInUse = {}
+    #functionDeclaration?:string
+    #uniformsDeclaration?:string
+    texturesInUse:TextureInUse = {}
     isAlphaTested = false
     ssrEnabled = false
     isSky = false
@@ -25,24 +29,23 @@ export default class Material {
         this.#id = id ? id : v4()
     }
 
-    get id() {
+    get id():string {
         return this.#id
     }
 
-
-    get uniforms() {
+    get uniforms():MaterialUniform[] {
         return this.#uniforms
     }
 
-    get uniformValues() {
+    get uniformValues():MutableObject {
         return this.#uniformValues
     }
 
-    get functionDeclaration() {
+    get functionDeclaration():string|undefined {
         return this.#functionDeclaration
     }
 
-    get uniformsDeclaration() {
+    get uniformsDeclaration():string|undefined {
         return this.#uniformsDeclaration
     }
 
@@ -51,7 +54,7 @@ export default class Material {
         this.#uniformsDeclaration = uniforms
     }
 
-    async updateUniformGroup(uniforms) {
+    async updateUniformGroup(uniforms:MaterialUniform[]) {
         this.#uniforms = uniforms
         await MaterialAPI.updateMaterialUniforms(this)
     }

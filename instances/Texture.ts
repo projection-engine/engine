@@ -4,28 +4,16 @@ import TEXTURE_FILTERING from "../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../static/texture/TEXTURE_FORMATS";
 import ImageProcessor from "../lib/math/ImageProcessor";
 import GPU from "../GPU";
+import TextureParams from "../templates/TextureParams";
 
-interface TextureAttributes {
-    img?: string | ImageBitmap | HTMLImageElement
-    wrapS?: string
-    wrapT?: string
-    minFilter?: string
-    magFilter?: string
-
-    internalFormat?: string
-    format?: string
-    width?: number
-    height?: number
-    type?: string
-}
 
 export default class Texture {
     loaded = false
     texture?: WebGLTexture
-    attributes: TextureAttributes = {}
+    attributes: TextureParams = {}
     #image?: ImageBitmap | HTMLImageElement
 
-    async initialize(attributes: TextureAttributes) {
+    async initialize(attributes: TextureParams) {
         const img = attributes.img
 
         this.attributes = attributes

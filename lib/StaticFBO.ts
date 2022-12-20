@@ -47,8 +47,8 @@ export default class StaticFBO extends Controller {
     static mb?: Framebuffer
     static mbSampler?: WebGLTexture
 
-    static downscaleBloom: Framebuffer[]
-    static upscaleBloom: Framebuffer[]
+    static downscaleBloom: Framebuffer[] = []
+    static upscaleBloom: Framebuffer[]= []
 
     static shadows?: Framebuffer
     static shadowsSampler?: WebGLTexture

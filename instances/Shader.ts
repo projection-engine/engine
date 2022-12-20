@@ -58,7 +58,6 @@ export default class Shader {
         this.length = this.uniforms.length
         if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
-
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

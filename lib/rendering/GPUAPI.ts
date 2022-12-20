@@ -9,12 +9,14 @@ import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import COMPONENTS from "../../static/COMPONENTS";
 import MeshComponent from "../../templates/components/MeshComponent";
-import MutableObject from "../../MutableObject";
 import compileUberShader from "../../utils/compile-uber-shader";
 import StaticMeshes from "../StaticMeshes";
+import TextureParams from "../../templates/TextureParams";
+import MaterialInformation from "../../templates/MaterialInformation";
+import StaticShaders from "../StaticShaders";
 
 export default class GPUAPI {
-    static async allocateTexture(imageData: string | MutableObject, id: string) {
+    static async allocateTexture(imageData: string | TextureParams, id: string) {
         if (GPU.textures.get(id) != null)
             return GPU.textures.get(id)
         const texture = new Texture()
@@ -39,12 +41,12 @@ export default class GPUAPI {
         GPU.textures.delete(imageID)
     }
 
-    static asyncDestroyMaterial(id) {
+    static asyncDestroyMaterial(id:string) {
         MaterialAPI.removeMaterial(id)
         GPU.materials.delete(id)
     }
 
-    static async allocateMaterial(materialInformation, id) {
+    static async allocateMaterial(materialInformation:MaterialInformation, id:string) {
         if (GPU.materials.get(id) !== undefined)
             return GPU.materials.get(id)
         const material = new Material(id)
@@ -58,6 +60,7 @@ export default class GPUAPI {
         material.doubleSided = settings.doubleSided
         material.isAlphaTested = settings.isAlphaTested
         material.ssrEnabled = settings.ssrEnabled
+
         const inUse = MaterialAPI.entityMaterial.get(id)
         try {
             if (inUse)
@@ -69,6 +72,7 @@ export default class GPUAPI {
 
 
         compileUberShader()
+        StaticShaders.bindWithUberShader()
         VisibilityRenderer.needsUpdate = true
         return material
     }

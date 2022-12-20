@@ -3,7 +3,7 @@ import VertexBuffer from "../instances/VertexBuffer";
 
 import Mesh from "../instances/Mesh";
 import GPUAPI from "./rendering/GPUAPI";
-import STATIC_MESHES from "../static/STATIC_MESHES";
+import EmbeddedMeshes from "../templates/EmbeddedMeshes";
 
 export default class StaticMeshes {
     static #initialized = false
@@ -22,10 +22,10 @@ export default class StaticMeshes {
         try {
             const res = await fetch("./STATIC_MESHES.json")
             const {QUAD, SPHERE, CUBE, CYLINDER, PLANE, CUBE_LINEAR} = await res.json()
-            StaticMeshes.sphere = GPUAPI.allocateMesh(STATIC_MESHES.SPHERE, SPHERE)
-            StaticMeshes.cube = GPUAPI.allocateMesh(STATIC_MESHES.CUBE, CUBE)
-            StaticMeshes.cylinder = GPUAPI.allocateMesh(STATIC_MESHES.CYLINDER, CYLINDER)
-            StaticMeshes.plane = GPUAPI.allocateMesh(STATIC_MESHES.PLANE, PLANE)
+            StaticMeshes.sphere = GPUAPI.allocateMesh(EmbeddedMeshes.SPHERE, SPHERE)
+            StaticMeshes.cube = GPUAPI.allocateMesh(EmbeddedMeshes.CUBE, CUBE)
+            StaticMeshes.cylinder = GPUAPI.allocateMesh(EmbeddedMeshes.CYLINDER, CYLINDER)
+            StaticMeshes.plane = GPUAPI.allocateMesh(EmbeddedMeshes.PLANE, PLANE)
             StaticMeshes.quad = new Mesh({...QUAD, id: "QUAD"})
             StaticMeshes.cubeBuffer = new VertexBuffer(0, new Float32Array(CUBE_LINEAR), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
         } catch (err) {
