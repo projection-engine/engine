@@ -19,7 +19,7 @@ import LightsAPI from "./lib/utils/LightsAPI";
 import SceneRenderer from "./runtime/SceneRenderer";
 import GPU from "./GPU";
 import GPUAPI from "./lib/rendering/GPUAPI";
-import StaticFBOsController from "./lib/StaticFBOsController";
+import StaticFBO from "./lib/StaticFBO";
 
 let previous = 0
 export default class Loop {
@@ -59,7 +59,7 @@ export default class Loop {
         VisibilityRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
-        StaticFBOsController.cache.startMapping()
+        StaticFBO.cache.startMapping()
         Loop.#beforeDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
@@ -70,7 +70,7 @@ export default class Loop {
         SpriteRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
 
-        StaticFBOsController.cache.stopMapping()
+        StaticFBO.cache.stopMapping()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.SSGI)
         SSGI.execute()
@@ -104,13 +104,13 @@ export default class Loop {
 
         VisibilityRenderer.execute()
 
-        StaticFBOsController.cache.startMapping()
+        StaticFBO.cache.startMapping()
         Loop.#beforeDrawing()
         SceneRenderer.execute()
         SpriteRenderer.execute()
-        StaticFBOsController.cache.stopMapping()
+        StaticFBO.cache.stopMapping()
 
-        GPUAPI.copyTexture(StaticFBOsController.currentFrame, StaticFBOsController.cache, GPU.context.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(StaticFBO.currentFrame, StaticFBO.cache, GPU.context.COLOR_BUFFER_BIT)
 
         SSGI.execute()
 

@@ -2,8 +2,8 @@ import COMPONENTS from "../static/COMPONENTS"
 import LightsAPI from "../lib/utils/LightsAPI";
 import VisibilityRenderer from "./VisibilityRenderer";
 import GPU from "../GPU";
-import StaticFBOsController from "../lib/StaticFBOsController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticFBO from "../lib/StaticFBO";
+import StaticShaders from "../lib/StaticShaders";
 
 
 let lightsToUpdate
@@ -22,7 +22,7 @@ export default class DirectionalShadows {
     static allocateBuffers(shadowAtlasQuantity, shadowMapResolution) {
         if (DirectionalShadows.maxResolution !== shadowMapResolution && shadowMapResolution) {
             DirectionalShadows.maxResolution = shadowMapResolution
-            StaticFBOsController.updateDirectionalShadowsFBO()
+            StaticFBO.updateDirectionalShadowsFBO()
             DirectionalShadows.changed = true
         }
 
@@ -44,7 +44,7 @@ export default class DirectionalShadows {
         GPU.context.cullFace(GPU.context.FRONT)
         let currentColumn = 0, currentRow = 0
 
-        StaticFBOsController.shadows.startMapping()
+        StaticFBO.shadows.startMapping()
         GPU.context.enable(GPU.context.SCISSOR_TEST)
         const size = DirectionalShadows.atlasRatio ** 2
         for (let face = 0; face < size; face++) {
@@ -75,7 +75,7 @@ export default class DirectionalShadows {
                 currentColumn += 1
         }
         GPU.context.disable(GPU.context.SCISSOR_TEST)
-        StaticFBOsController.shadows.stopMapping()
+        StaticFBO.shadows.stopMapping()
         GPU.context.cullFace(GPU.context.BACK)
         DirectionalShadows.changed = false
         lightsToUpdate.length = 0
@@ -91,8 +91,8 @@ export default class DirectionalShadows {
             const mesh = current.__meshRef
             if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue
-            StaticShadersController.directShadows.bind()
-            const U = StaticShadersController.directShadowsUniforms
+            StaticShaders.directShadows.bind()
+            const U = StaticShaders.directShadowsUniforms
 
             GPU.context.uniformMatrix4fv(U.viewMatrix, false, light.lightView)
             GPU.context.uniformMatrix4fv(U.transformMatrix, false, current.matrix)

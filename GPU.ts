@@ -25,9 +25,9 @@ import VertexBuffer from "./instances/VertexBuffer";
 import Entity from "./instances/Entity";
 import LightProbe from "./instances/LightProbe";
 import SkyLightComponent from "./templates/components/SkyLightComponent";
-import StaticShadersController from "./lib/StaticShadersController";
-import StaticMeshesController from "./lib/StaticMeshesController";
-import StaticFBOsController from "./lib/StaticFBOsController";
+import StaticShaders from "./lib/StaticShaders";
+import StaticMeshes from "./lib/StaticMeshes";
+import StaticFBO from "./lib/StaticFBO";
 
 export default class GPU {
     static context?: WebGL2RenderingContext
@@ -113,9 +113,9 @@ export default class GPU {
         GPU.context.depthFunc(GPU.context.LESS)
         GPU.context.frontFace(GPU.context.CCW)
 
-        await StaticMeshesController.initialize()
-        StaticShadersController.initialize()
-        StaticFBOsController.initialize()
+        await StaticMeshes.initialize()
+        StaticShaders.initialize()
+        StaticFBO.initialize()
 
         CameraAPI.initialize()
         LightsAPI.initialize()
@@ -133,7 +133,7 @@ export default class GPU {
 
         FBO.startMapping()
         brdfShader.bind()
-        StaticMeshesController.drawQuad()
+        StaticMeshes.drawQuad()
         FBO.stopMapping()
         GPU.BRDF = FBO.colors[0]
         GPU.context.deleteProgram(brdfShader.program)

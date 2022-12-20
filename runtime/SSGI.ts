@@ -1,7 +1,7 @@
 import GPU from "../GPU";
-import StaticMeshesController from "../lib/StaticMeshesController";
-import StaticFBOsController from "../lib/StaticFBOsController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticFBO from "../lib/StaticFBO";
+import StaticShaders from "../lib/StaticShaders";
 
 /**
  * rayMarchSettings definition:
@@ -31,67 +31,67 @@ export default class SSGI {
 
     static execute() {
         if (!SSGI.enabled) {
-            StaticFBOsController.ssgiFinal.clear()
+            StaticFBO.ssgiFinal.clear()
             return
         }
         const context = GPU.context
-        StaticFBOsController.ssgi.startMapping()
-        StaticShadersController.ssgi.bind()
+        StaticFBO.ssgi.startMapping()
+        StaticShaders.ssgi.bind()
 
         context.activeTexture(context.TEXTURE0)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.visibilityDepthSampler)
-        context.uniform1i(StaticShadersController.ssgiUniforms.scene_depth, 0)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
+        context.uniform1i(StaticShaders.ssgiUniforms.scene_depth, 0)
 
         context.activeTexture(context.TEXTURE1)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.currentFrameSampler)
-        context.uniform1i(StaticShadersController.ssgiUniforms.previousFrame, 1)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.currentFrameSampler)
+        context.uniform1i(StaticShaders.ssgiUniforms.previousFrame, 1)
 
-        context.uniform2fv(StaticShadersController.ssgiUniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
-        context.uniform3fv(StaticShadersController.ssgiUniforms.rayMarchSettings, SSGI.rayMarchSettings)
+        context.uniform2fv(StaticShaders.ssgiUniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
+        context.uniform3fv(StaticShaders.ssgiUniforms.rayMarchSettings, SSGI.rayMarchSettings)
 
-        StaticMeshesController.drawQuad()
-        StaticFBOsController.ssgi.stopMapping()
+        StaticMeshes.drawQuad()
+        StaticFBO.ssgi.stopMapping()
 
         if (SSGI.enabled)
             SSGI.#applyBlur()
         else
-            StaticFBOsController.ssgiFinal.clear()
+            StaticFBO.ssgiFinal.clear()
 
     }
 
     static #applyBlur() {
         const context = GPU.context
         context.activeTexture(context.TEXTURE0)
-        const ssgiQuarter = StaticFBOsController.ssgiQuarter,
-            ssgiEighth = StaticFBOsController.ssgiEighth,
-            ssgiFinal = StaticFBOsController.ssgiFinal
+        const ssgiQuarter = StaticFBO.ssgiQuarter,
+            ssgiEighth = StaticFBO.ssgiEighth,
+            ssgiFinal = StaticFBO.ssgiFinal
 
-        StaticShadersController.gaussian.bind()
+        StaticShaders.gaussian.bind()
         ssgiQuarter.startMapping()
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.ssgiSampler)
-        context.uniform1i(StaticShadersController.gaussianUniforms.sceneColor, 0)
-        context.uniform1i(StaticShadersController.gaussianUniforms.blurRadius, SSGI.blurSamples)
-        StaticMeshesController.drawQuad()
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssgiSampler)
+        context.uniform1i(StaticShaders.gaussianUniforms.sceneColor, 0)
+        context.uniform1i(StaticShaders.gaussianUniforms.blurRadius, SSGI.blurSamples)
+        StaticMeshes.drawQuad()
         ssgiQuarter.stopMapping()
 
         ssgiEighth.startMapping()
         context.bindTexture(context.TEXTURE_2D, ssgiQuarter.colors[0])
-        context.uniform1i(StaticShadersController.gaussianUniforms.sceneColor, 0)
-        context.uniform1i(StaticShadersController.gaussianUniforms.blurRadius, SSGI.blurSamples * 2)
-        StaticMeshesController.drawQuad()
+        context.uniform1i(StaticShaders.gaussianUniforms.sceneColor, 0)
+        context.uniform1i(StaticShaders.gaussianUniforms.blurRadius, SSGI.blurSamples * 2)
+        StaticMeshes.drawQuad()
         ssgiEighth.stopMapping()
 
-        StaticShadersController.bilateralBlur.bind()
+        StaticShaders.bilateralBlur.bind()
         ssgiFinal.startMapping()
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.visibilityEntitySampler)
-        context.uniform1i(StaticShadersController.bilateralBlurUniforms.entityIDSampler, 0)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityEntitySampler)
+        context.uniform1i(StaticShaders.bilateralBlurUniforms.entityIDSampler, 0)
 
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, ssgiEighth.colors[0])
-        context.uniform1i(StaticShadersController.bilateralBlurUniforms.sceneColor, 1)
-        context.uniform1i(StaticShadersController.bilateralBlurUniforms.blurRadius, SSGI.blurSamples)
+        context.uniform1i(StaticShaders.bilateralBlurUniforms.sceneColor, 1)
+        context.uniform1i(StaticShaders.bilateralBlurUniforms.blurRadius, SSGI.blurSamples)
 
-        StaticMeshesController.drawQuad()
+        StaticMeshes.drawQuad()
         ssgiFinal.stopMapping()
     }
 }

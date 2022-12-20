@@ -4,8 +4,8 @@ import GPU from "../GPU";
 import CubeMapAPI from "../lib/rendering/CubeMapAPI";
 import getProbeRotation from "../utils/get-probe-rotation";
 import getProbeLookat from "../utils/get-probe-lookat";
-import StaticMeshesController from "../lib/StaticMeshesController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticShaders from "../lib/StaticShaders";
 
 
 const perspective = mat4.create()
@@ -36,7 +36,7 @@ export default class LightProbe {
     drawDiffuseMap(sampler = this.texture, multiplier = [1, 1, 1]) {
         this.draw(
             (yaw, pitch, perspective) => {
-                StaticShadersController.irradiance.bindForUse({
+                StaticShaders.irradiance.bindForUse({
                     projectionMatrix: perspective,
                     viewMatrix: getProbeLookat(yaw, pitch, [0, 0, 0]),
                     uSampler: sampler,
@@ -59,7 +59,7 @@ export default class LightProbe {
 
 
         const rbo = CubeMapAPI.createRenderBuffer(resolution)
-        StaticMeshesController.cubeBuffer.enable()
+        StaticMeshes.cubeBuffer.enable()
 
         for (let i = 0; i < mipLevels; i++) {
             const currentRes = resolution * Math.pow(0.5, i)
@@ -75,7 +75,7 @@ export default class LightProbe {
                     this.prefiltered,
                     i
                 )
-                const shader = StaticShadersController.prefiltered
+                const shader = StaticShaders.prefiltered
                 const uniforms = shader.uniformMap
                 shader.bind()
                 GPU.context.uniformMatrix4fv(uniforms.projectionMatrix, false, perspective)
@@ -89,7 +89,7 @@ export default class LightProbe {
                 GPU.context.drawArrays(GPU.context.TRIANGLES, 0, 36)
             }
         }
-        StaticMeshesController.cubeBuffer.disable()
+        StaticMeshes.cubeBuffer.disable()
 
         GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, null)
         GPU.context.deleteRenderbuffer(rbo)
@@ -115,7 +115,7 @@ export default class LightProbe {
 
         if (asIrradiance) {
             Mesh.finishIfUsed()
-            StaticMeshesController.cubeBuffer.enable()
+            StaticMeshes.cubeBuffer.enable()
         }
 
         for (let i = 0; i < 6; i++) {
@@ -132,7 +132,7 @@ export default class LightProbe {
             callback(rotations.yaw, rotations.pitch, perspective, i)
         }
         if (asIrradiance)
-            StaticMeshesController.cubeBuffer.disable()
+            StaticMeshes.cubeBuffer.disable()
 
         GPU.context.deleteRenderbuffer(rbo)
         return this

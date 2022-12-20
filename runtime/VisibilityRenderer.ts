@@ -5,8 +5,8 @@ import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
 import DynamicMap from "../templates/DynamicMap";
-import StaticShadersController from "../lib/StaticShadersController";
-import StaticFBOsController from "../lib/StaticFBOsController";
+import StaticShaders from "../lib/StaticShaders";
+import StaticFBO from "../lib/StaticFBO";
 
 
 export default class VisibilityRenderer {
@@ -21,15 +21,15 @@ export default class VisibilityRenderer {
         VisibilityRenderer.needsSSAOUpdate = true
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
-        const uniforms = StaticShadersController.visibilityUniforms
-        StaticShadersController.visibility.bind()
+        const uniforms = StaticShaders.visibilityUniforms
+        StaticShaders.visibility.bind()
         const VP = CameraAPI.metadata.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
         GPU.context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         GPU.context.uniformMatrix4fv(uniforms.previousViewProjection, false, VP)
 
         mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
 
-        StaticFBOsController.visibility.startMapping()
+        StaticFBO.visibility.startMapping()
         Mesh.finishIfUsed()
 
         let isAlphaTested = 0, isDoubleSided = false, stateWasCleared = false
@@ -73,7 +73,7 @@ export default class VisibilityRenderer {
 
             mesh.simplifiedDraw()
         }
-        StaticFBOsController.visibility.stopMapping()
+        StaticFBO.visibility.stopMapping()
 
         SSAO.execute()
     }

@@ -1,9 +1,9 @@
 import GPU from "../GPU";
 import UBO from "../instances/UBO";
 import VisibilityRenderer from "./VisibilityRenderer";
-import StaticMeshesController from "../lib/StaticMeshesController";
-import StaticFBOsController from "../lib/StaticFBOsController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticFBO from "../lib/StaticFBO";
+import StaticShaders from "../lib/StaticShaders";
 
 const RESOLUTION = 4
 
@@ -34,46 +34,46 @@ export default class SSAO {
             ]
         )
 
-        SSAO.UBO.bindWithShader(StaticShadersController.ssao.program)
+        SSAO.UBO.bindWithShader(StaticShaders.ssao.program)
         SSAO.settings = [.5, .7, -.1, 1000]
 
         SSAO.UBO.bind()
         SSAO.UBO.updateData("noiseScale", SSAO.noiseScale)
         SSAO.UBO.unbind()
 
-        await StaticFBOsController.generateSSAONoise()
+        await StaticFBO.generateSSAONoise()
     }
 
     static #draw() {
-        StaticFBOsController.ssao.startMapping()
-        StaticShadersController.ssao.bind()
+        StaticFBO.ssao.startMapping()
+        StaticShaders.ssao.bind()
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBOsController.visibilityDepthSampler)
-        GPU.context.uniform1i(StaticShadersController.ssaoUniforms.gDepth, 0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
+        GPU.context.uniform1i(StaticShaders.ssaoUniforms.gDepth, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBOsController.noiseSampler)
-        GPU.context.uniform1i(StaticShadersController.ssaoUniforms.noiseSampler, 1)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.noiseSampler)
+        GPU.context.uniform1i(StaticShaders.ssaoUniforms.noiseSampler, 1)
 
-        GPU.context.uniform1i(StaticShadersController.ssaoUniforms.maxSamples, SSAO.maxSamples)
+        GPU.context.uniform1i(StaticShaders.ssaoUniforms.maxSamples, SSAO.maxSamples)
 
-        StaticMeshesController.drawQuad()
-        StaticFBOsController.ssao.stopMapping()
+        StaticMeshes.drawQuad()
+        StaticFBO.ssao.stopMapping()
     }
 
     static #blur() {
-        StaticShadersController.boxBlur.bind()
-        StaticFBOsController.ssaoBlurred.startMapping()
+        StaticShaders.boxBlur.bind()
+        StaticFBO.ssaoBlurred.startMapping()
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBOsController.ssaoSampler)
-        GPU.context.uniform1i(StaticShadersController.boxBlurUniforms.sampler, 0)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.ssaoSampler)
+        GPU.context.uniform1i(StaticShaders.boxBlurUniforms.sampler, 0)
 
-        GPU.context.uniform1i(StaticShadersController.boxBlurUniforms.samples, SSAO.blurSamples)
+        GPU.context.uniform1i(StaticShaders.boxBlurUniforms.samples, SSAO.blurSamples)
 
-        StaticMeshesController.drawQuad()
-        StaticFBOsController.ssaoBlurred.stopMapping()
+        StaticMeshes.drawQuad()
+        StaticFBO.ssaoBlurred.stopMapping()
     }
 
     static execute() {

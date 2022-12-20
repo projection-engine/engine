@@ -2,9 +2,9 @@ import GPU from "../GPU";
 import UBO from "../instances/UBO";
 import AA_METHODS from "../static/AA_METHODS";
 import GPUAPI from "../lib/rendering/GPUAPI";
-import StaticMeshesController from "../lib/StaticMeshesController";
-import StaticFBOsController from "../lib/StaticFBOsController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticFBO from "../lib/StaticFBO";
+import StaticShaders from "../lib/StaticShaders";
 import MotionBlur from "./MotionBlur";
 
 
@@ -33,7 +33,7 @@ export default class FrameComposition {
             ]
         )
 
-        FrameComposition.UBO.bindWithShader(StaticShadersController.composition.program)
+        FrameComposition.UBO.bindWithShader(StaticShaders.composition.program)
 
         FrameComposition.UBO.bind()
         FrameComposition.UBO.updateData("gamma", new Float32Array([2.2]))
@@ -55,13 +55,13 @@ export default class FrameComposition {
     static copyPreviousFrame() {
         if (FrameComposition.AAMethodInUse !== AA_METHODS.TAA)
             return
-        GPUAPI.copyTexture(StaticFBOsController.cache, StaticFBOsController.currentFrame, GPU.context.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(StaticFBO.cache, StaticFBO.currentFrame, GPU.context.COLOR_BUFFER_BIT)
     }
 
     static execute() {
         const context = GPU.context
-        const sampler = MotionBlur.enabled ? StaticFBOsController.mbSampler : StaticFBOsController.cacheSampler
-        const shader = StaticShadersController.composition, uniforms = StaticShadersController.compositionUniforms
+        const sampler = MotionBlur.enabled ? StaticFBO.mbSampler : StaticFBO.cacheSampler
+        const shader = StaticShaders.composition, uniforms = StaticShaders.compositionUniforms
 
         FrameComposition.currentNoise = FrameComposition.lookup()
 
@@ -72,12 +72,12 @@ export default class FrameComposition {
 
         if (FrameComposition.AAMethodInUse === AA_METHODS.TAA) {
             context.activeTexture(context.TEXTURE1)
-            context.bindTexture(context.TEXTURE_2D, StaticFBOsController.TAACacheSampler)
+            context.bindTexture(context.TEXTURE_2D, StaticFBO.TAACacheSampler)
             context.uniform1i(uniforms.previousFrame, 1)
         }
 
         context.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
-        StaticMeshesController.drawQuad()
+        StaticMeshes.drawQuad()
 
     }
 }

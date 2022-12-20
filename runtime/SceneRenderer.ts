@@ -7,8 +7,8 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import UBO from "../instances/UBO";
 import COMPONENTS from "../static/COMPONENTS";
-import StaticFBOsController from "../lib/StaticFBOsController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticFBO from "../lib/StaticFBO";
+import StaticShaders from "../lib/StaticShaders";
 
 let texOffset
 
@@ -47,11 +47,11 @@ export default class SceneRenderer {
 
 
     static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
-        const shader = StaticShadersController.uber
+        const shader = StaticShaders.uber
         if (!SceneRenderer.#ready || !shader)
             return
 
-        const uniforms = StaticShadersController.uberUniforms
+        const uniforms = StaticShaders.uberUniforms
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         const context = GPU.context
@@ -79,19 +79,19 @@ export default class SceneRenderer {
         context.uniform1i(uniforms.brdf_sampler, 0)
 
         context.activeTexture(context.TEXTURE1)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.ssaoBlurredSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssaoBlurredSampler)
         context.uniform1i(uniforms.SSAO, 1)
 
         context.activeTexture(context.TEXTURE2)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.ssgiFinalSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssgiFinalSampler)
         context.uniform1i(uniforms.SSGI, 2)
 
         context.activeTexture(context.TEXTURE3)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.cacheSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.cacheSampler)
         context.uniform1i(uniforms.previousFrame, 3)
 
         context.activeTexture(context.TEXTURE4)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.shadowsSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.shadowsSampler)
         context.uniform1i(uniforms.shadow_atlas, 4)
 
         context.activeTexture(context.TEXTURE5)
@@ -100,7 +100,7 @@ export default class SceneRenderer {
 
 
         context.activeTexture(context.TEXTURE6)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.visibilityDepthSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
         context.uniform1i(uniforms.scene_depth, 6)
 
         context.uniform1f(uniforms.elapsedTime, Engine.elapsed)

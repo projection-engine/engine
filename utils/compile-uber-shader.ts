@@ -6,7 +6,7 @@ import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag";
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag";
 // @ts-ignore
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticShaders from "../lib/StaticShaders";
 import Shader from "../instances/Shader";
 import LightsAPI from "../lib/utils/LightsAPI";
 import SceneRenderer from "../runtime/SceneRenderer";
@@ -34,19 +34,19 @@ export default function compileUberShader(forceCleanShader?: boolean) {
     const shader = new Shader(VERTEX_SHADER, fragment)
 
     if (shader.messages.hasError) {
-        if (!StaticShadersController.uber)
+        if (!StaticShaders.uber)
             compileUberShader(true)
         console.error("Invalid shader", shader.messages)
         console.error("Invalid shader", shader.messages)
         return
-    } else if (StaticShadersController.uber)
-        GPU.context.deleteProgram(StaticShadersController.uber.program)
+    } else if (StaticShaders.uber)
+        GPU.context.deleteProgram(StaticShaders.uber.program)
 
     LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
     LightsAPI.lightsUBOA.bindWithShader(shader.program)
     LightsAPI.lightsUBOB.bindWithShader(shader.program)
     LightsAPI.lightsUBOC.bindWithShader(shader.program)
     SceneRenderer.UBO.bindWithShader(shader.program)
-    StaticShadersController.uber = shader
-    StaticShadersController.uberUniforms = shader.uniformMap
+    StaticShaders.uber = shader
+    StaticShaders.uberUniforms = shader.uniformMap
 }

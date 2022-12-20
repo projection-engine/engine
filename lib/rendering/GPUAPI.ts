@@ -11,9 +11,10 @@ import COMPONENTS from "../../static/COMPONENTS";
 import MeshComponent from "../../templates/components/MeshComponent";
 import MutableObject from "../../MutableObject";
 import compileUberShader from "../../utils/compile-uber-shader";
+import StaticMeshes from "../StaticMeshes";
 
 export default class GPUAPI {
-    static async allocateTexture(imageData:string|MutableObject, id:string) {
+    static async allocateTexture(imageData: string | MutableObject, id: string) {
         if (GPU.textures.get(id) != null)
             return GPU.textures.get(id)
         const texture = new Texture()
@@ -38,10 +39,11 @@ export default class GPUAPI {
         GPU.textures.delete(imageID)
     }
 
-    static asyncDestroyMaterial(id){
+    static asyncDestroyMaterial(id) {
         MaterialAPI.removeMaterial(id)
         GPU.materials.delete(id)
     }
+
     static async allocateMaterial(materialInformation, id) {
         if (GPU.materials.get(id) !== undefined)
             return GPU.materials.get(id)
@@ -136,7 +138,7 @@ export default class GPUAPI {
         GPU.frameBuffers.delete(id)
     }
 
-    static allocateMesh(id:string, bufferData:MeshProps) {
+    static allocateMesh(id: string, bufferData: MeshProps) {
         if (GPU.meshes.get(id) != null)
             GPUAPI.destroyMesh(GPU.meshes.get(id))
         const instance = new Mesh({...bufferData, id})
@@ -145,8 +147,11 @@ export default class GPUAPI {
         return instance
     }
 
-    static destroyMesh(instance) {
+    static destroyMesh(instance: string | Mesh) {
         const mesh = typeof instance === "string" ? GPU.meshes.get(instance) : instance
+        if ([StaticMeshes.cube, StaticMeshes.plane, StaticMeshes.cylinder, StaticMeshes.sphere].includes(mesh))
+            return
+
         if (mesh instanceof Mesh) {
             GPU.context.deleteVertexArray(mesh.VAO)
             GPU.context.deleteBuffer(mesh.indexVBO)
@@ -169,7 +174,7 @@ export default class GPUAPI {
         return instance
     }
 
-    static destroyShader(id:string) {
+    static destroyShader(id: string) {
         const instance = GPU.shaders.get(id)
         if (!instance)
             return

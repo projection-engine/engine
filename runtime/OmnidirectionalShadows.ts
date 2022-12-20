@@ -5,7 +5,7 @@ import ShadowProbe from "../instances/ShadowProbe";
 import VisibilityRenderer from "./VisibilityRenderer";
 import LightComponent from "../templates/components/LightComponent";
 import GPU from "../GPU";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticShaders from "../lib/StaticShaders";
 
 const cacheVec3 = vec3.create()
 const cacheMat4 = mat4.create()
@@ -67,7 +67,7 @@ export default class OmnidirectionalShadows {
 
             if (distanceFromLight > component.cutoff)
                 continue
-            StaticShadersController.omniDirectShadows.bindForUse({
+            StaticShaders.omniDirectShadows.bindForUse({
                 farPlane: component.zFar,
                 viewMatrix: view,
                 transformMatrix: current.matrix,

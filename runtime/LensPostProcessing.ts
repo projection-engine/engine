@@ -1,9 +1,9 @@
 import CameraAPI from "../lib/utils/CameraAPI";
 import GPU from "../GPU";
 import UBO from "../instances/UBO";
-import StaticMeshesController from "../lib/StaticMeshesController";
-import StaticFBOsController from "../lib/StaticFBOsController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticFBO from "../lib/StaticFBO";
+import StaticShaders from "../lib/StaticShaders";
 
 
 export default class LensPostProcessing {
@@ -30,36 +30,36 @@ export default class LensPostProcessing {
     static execute() {
         const context = GPU.context
         if (CameraAPI.metadata.bloom) {
-            StaticFBOsController.cache.startMapping()
-            StaticShadersController.bloom.bind()
+            StaticFBO.cache.startMapping()
+            StaticShaders.bloom.bind()
             context.activeTexture(context.TEXTURE0)
-            context.bindTexture(context.TEXTURE_2D, StaticFBOsController.cacheSampler)
-            context.uniform1i(StaticShadersController.bloomUniforms.sceneColor, 0)
+            context.bindTexture(context.TEXTURE_2D, StaticFBO.cacheSampler)
+            context.uniform1i(StaticShaders.bloomUniforms.sceneColor, 0)
 
-            context.uniform1f(StaticShadersController.bloomUniforms.threshold, CameraAPI.metadata.bloomThreshold)
+            context.uniform1f(StaticShaders.bloomUniforms.threshold, CameraAPI.metadata.bloomThreshold)
 
-            StaticMeshesController.drawQuad()
-            StaticFBOsController.cache.stopMapping()
+            StaticMeshes.drawQuad()
+            StaticFBO.cache.stopMapping()
 
-            StaticShadersController.gaussian.bind()
-            const downscale = StaticFBOsController.downscaleBloom
-            const upscale = StaticFBOsController.upscaleBloom
+            StaticShaders.gaussian.bind()
+            const downscale = StaticFBO.downscaleBloom
+            const upscale = StaticFBO.upscaleBloom
 
             for (let i = 0; i < downscale.length; i++) {
                 const fbo = downscale[i]
                 fbo.startMapping()
                 context.activeTexture(context.TEXTURE0)
-                context.bindTexture(context.TEXTURE_2D, i > 0 ? downscale[i - 1].colors[0] : StaticFBOsController.cache.colors[0])
-                context.uniform1i(StaticShadersController.gaussianUniforms.sceneColor, 0)
-                context.uniform1i(StaticShadersController.gaussianUniforms.blurRadius, CameraAPI.metadata.bloomQuality)
+                context.bindTexture(context.TEXTURE_2D, i > 0 ? downscale[i - 1].colors[0] : StaticFBO.cache.colors[0])
+                context.uniform1i(StaticShaders.gaussianUniforms.sceneColor, 0)
+                context.uniform1i(StaticShaders.gaussianUniforms.blurRadius, CameraAPI.metadata.bloomQuality)
 
-                StaticMeshesController.drawQuad()
+                StaticMeshes.drawQuad()
                 fbo.stopMapping()
             }
 
 
-            StaticShadersController.upSampling.bind()
-            const upSamplingShaderUniforms = StaticShadersController.upSamplingUniforms
+            StaticShaders.upSampling.bind()
+            const upSamplingShaderUniforms = StaticShaders.upSamplingUniforms
             for (let i = 0; i < upscale.length; i++) {
                 const fbo = upscale[i]
                 fbo.startMapping()
@@ -71,37 +71,37 @@ export default class LensPostProcessing {
                 context.bindTexture(context.TEXTURE_2D, downscale[downscale.length - 1 - i].colors[0])
                 context.uniform1i(upSamplingShaderUniforms.blurred, 1)
                 context.uniform1f(upSamplingShaderUniforms.sampleScale, CameraAPI.metadata.bloomOffset)
-                StaticMeshesController.drawQuad()
+                StaticMeshes.drawQuad()
                 fbo.stopMapping()
             }
 
-            StaticFBOsController.lens.startMapping()
+            StaticFBO.lens.startMapping()
             context.activeTexture(context.TEXTURE0)
-            context.bindTexture(context.TEXTURE_2D, StaticFBOsController.cache.colors[0])
+            context.bindTexture(context.TEXTURE_2D, StaticFBO.cache.colors[0])
             context.uniform1i(upSamplingShaderUniforms.nextSampler, 0)
 
             context.activeTexture(context.TEXTURE1)
             context.bindTexture(context.TEXTURE_2D, upscale[upscale.length - 1].colors[0])
             context.uniform1i(upSamplingShaderUniforms.blurred, 1)
             context.uniform1f(upSamplingShaderUniforms.sampleScale, CameraAPI.metadata.bloomOffset)
-            StaticMeshesController.drawQuad()
-            StaticFBOsController.lens.stopMapping()
+            StaticMeshes.drawQuad()
+            StaticFBO.lens.stopMapping()
         } else
-            StaticFBOsController.lens.clear()
+            StaticFBO.lens.clear()
 
-        StaticFBOsController.cache.startMapping()
-        StaticShadersController.lens.bind()
+        StaticFBO.cache.startMapping()
+        StaticShaders.lens.bind()
 
         context.activeTexture(context.TEXTURE0)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.lens.colors[0])
-        context.uniform1i(StaticShadersController.lensUniforms.blurred, 0)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.lens.colors[0])
+        context.uniform1i(StaticShaders.lensUniforms.blurred, 0)
 
         context.activeTexture(context.TEXTURE1)
-        context.bindTexture(context.TEXTURE_2D, StaticFBOsController.cacheSampler)
-        context.uniform1i(StaticShadersController.lensUniforms.sceneColor, 1)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.cacheSampler)
+        context.uniform1i(StaticShaders.lensUniforms.sceneColor, 1)
 
-        StaticMeshesController.drawQuad()
-        StaticFBOsController.cache.stopMapping()
+        StaticMeshes.drawQuad()
+        StaticFBO.cache.stopMapping()
     }
 
 }

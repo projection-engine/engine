@@ -1,8 +1,8 @@
 import GPU from "../GPU";
 import COMPONENTS from "../static/COMPONENTS";
 import DynamicMap from "../templates/DynamicMap";
-import StaticMeshesController from "../lib/StaticMeshesController";
-import StaticShadersController from "../lib/StaticShadersController";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticShaders from "../lib/StaticShaders";
 
 export default class SpriteRenderer {
     static sprites = new DynamicMap()
@@ -15,8 +15,8 @@ export default class SpriteRenderer {
 
         const textures = GPU.textures
         GPU.context.disable(GPU.context.CULL_FACE)
-        StaticShadersController.sprite.bind()
-        const uniforms = StaticShadersController.spriteUniforms
+        StaticShaders.sprite.bind()
+        const uniforms = StaticShaders.spriteUniforms
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
         for (let i = 0; i < size; i++) {
@@ -32,7 +32,7 @@ export default class SpriteRenderer {
             GPU.context.uniform2fv(uniforms.attributes, component.attributes)
             GPU.context.bindTexture(GPU.context.TEXTURE_2D, texture.texture)
             GPU.context.uniform1i(uniforms.iconSampler, 0)
-            StaticMeshesController.drawQuad()
+            StaticMeshes.drawQuad()
         }
 
         GPU.context.enable(GPU.context.CULL_FACE)

@@ -1,12 +1,12 @@
 import ConversionAPI from "../math/ConversionAPI";
 import GPU from "../../GPU";
-import StaticFBOsController from "../StaticFBOsController";
+import StaticFBO from "../StaticFBO";
 
 export default class PickingAPI {
     static readBlock(start, end) {
         const w = Math.round(Math.abs(start.x - end.x))
         const h = Math.round(Math.abs(start.y - end.y))
-        GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, StaticFBOsController.visibility.FBO)
+        GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, StaticFBO.visibility.FBO)
         GPU.context.readBuffer(GPU.context.COLOR_ATTACHMENT1)
         let dd = new Float32Array(w * h * 4)
         GPU.context.readPixels(
@@ -44,7 +44,7 @@ export default class PickingAPI {
     static readEntityID(x, y) {
         const w = GPU.canvas.width, h = GPU.canvas.height
         const coords = ConversionAPI.toQuadCoord({x, y}, {w, h})
-        const picked = PickingAPI.readPixels(StaticFBOsController.visibility.FBO, 1, coords)
+        const picked = PickingAPI.readPixels(StaticFBO.visibility.FBO, 1, coords)
 
         return Math.round(( picked[0] +picked[1] + picked[2]) * 255)
     }
