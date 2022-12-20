@@ -32,7 +32,6 @@ import StaticFBO from "./lib/StaticFBO";
 export default class GPU {
     static context?: WebGL2RenderingContext
     static canvas?: HTMLCanvasElement
-    static drawQuad?: Function
     
     static activeShader?: WebGLProgram
     static activeFramebuffer?: WebGLFramebuffer
@@ -42,7 +41,6 @@ export default class GPU {
     static frameBuffers = new Map<string, Framebuffer>()
     static meshes = new Map<string, Mesh>()
     static textures = new Map<string, Texture>()
-    static cubeBuffer: VertexBuffer
     static BRDF: WebGLTexture
     static internalResolution = {w: 0, h: 0}
     static #activeSkylightEntity?: Entity

@@ -37,7 +37,7 @@ import BILATERAL_BLUR from "../shaders/post-processing/BILATERAL_BLUR.glsl"
 // @ts-ignore
 import BILINEAR_DOWNSCALE from "../shaders/post-processing/BILINEAR_DOWNSCALE.glsl"
 // @ts-ignore
-import TO_SCREEN from "../shaders/post-processing/TO_SCREEN.vert"
+import TO_SCREEN from "../shaders/post-processing/TO_SCREEN.frag"
 // @ts-ignore
 import V_BUFFER_VERT from "../shaders/forward-rendering/V_BUFFER.vert"
 // @ts-ignore

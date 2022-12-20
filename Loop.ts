@@ -20,6 +20,8 @@ import SceneRenderer from "./runtime/SceneRenderer";
 import GPU from "./GPU";
 import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
+import StaticShaders from "./lib/StaticShaders";
+import StaticMeshes from "./lib/StaticMeshes";
 
 let previous = 0
 export default class Loop {
@@ -37,7 +39,9 @@ export default class Loop {
         } else
             Loop.#afterDrawing = () => null
     }
-
+    static copyToCurrentFrame(){
+        GPUAPI.copyTexture(StaticFBO.currentFrame, StaticFBO.cache, GPU.context.COLOR_BUFFER_BIT)
+    }
 
     static #benchmarkMode() {
         FrameComposition.copyPreviousFrame()
@@ -72,6 +76,8 @@ export default class Loop {
 
         StaticFBO.cache.stopMapping()
 
+        Loop.copyToCurrentFrame()
+
         BenchmarkAPI.track(BENCHMARK_KEYS.SSGI)
         SSGI.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SSGI)
@@ -95,7 +101,6 @@ export default class Loop {
     static #callback() {
         if (!Engine.isDev)
             executeScripts()
-
         FrameComposition.copyPreviousFrame()
 
         PhysicsPass.execute()
@@ -110,7 +115,7 @@ export default class Loop {
         SpriteRenderer.execute()
         StaticFBO.cache.stopMapping()
 
-        GPUAPI.copyTexture(StaticFBO.currentFrame, StaticFBO.cache, GPU.context.COLOR_BUFFER_BIT)
+        Loop.copyToCurrentFrame()
 
         SSGI.execute()
 
@@ -120,6 +125,7 @@ export default class Loop {
 
         Loop.#afterDrawing()
     }
+
 
     static loop(current) {
         try {

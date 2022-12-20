@@ -80,6 +80,8 @@ export default class SceneRenderer {
         context.bindTexture(context.TEXTURE_2D, GPU.BRDF)
         context.uniform1i(uniforms.brdf_sampler, 0)
 
+
+
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.ssaoBlurredSampler)
         context.uniform1i(uniforms.SSAO, 1)
