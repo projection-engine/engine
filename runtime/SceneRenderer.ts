@@ -60,7 +60,8 @@ export default class SceneRenderer {
 
         shader.bind()
 
-        // if (Engine.developmentMode)
+
+        if (Engine.developmentMode)
             context.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
@@ -135,7 +136,7 @@ export default class SceneRenderer {
             if (!entity.active || !mesh || entity.isCulled)
                 continue
 
-            // if ( Engine.developmentMode)
+            if ( Engine.developmentMode)
                 context.uniform3fv(uniforms.entityID, entity.pickID)
 
             const material = entity.__materialRef

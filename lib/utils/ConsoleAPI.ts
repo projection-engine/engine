@@ -29,8 +29,8 @@ export default class ConsoleAPI {
         oldLog   = console.log
 
         console.error = ConsoleAPI.error
-        console.warn = ConsoleAPI.warn
-        console.log = ConsoleAPI.log
+        // console.warn = ConsoleAPI.warn
+        // console.log = ConsoleAPI.log
     }
 
     static getErrorMessages() {
