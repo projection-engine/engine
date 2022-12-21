@@ -1,6 +1,6 @@
-import Ammo from "../ammo.wasm";
+import Ammo from "../Ammo.js";
 
-import COMPONENTS from "../../static/COMPONENTS.js";
+import COMPONENTS from "../../static/COMPONENTS";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import PhysicsColliderComponent from "../../templates/components/PhysicsColliderComponent";
 import Entity from "../../instances/Entity";

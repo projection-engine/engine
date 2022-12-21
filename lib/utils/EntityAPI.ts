@@ -15,6 +15,7 @@ import GPU from "../../GPU";
 import SpriteRenderer from "../../runtime/SpriteRenderer";
 import MutableObject from "../../MutableObject";
 import {v4} from "uuid";
+import MeshComponent from "../../templates/components/MeshComponent";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -82,7 +83,7 @@ export default class EntityAPI {
             SpriteRenderer.sprites.add<Entity>(entity.id, entity)
         if (entity.__hasMesh) {
             VisibilityRenderer.meshesToDraw.add<Entity>(entity.id, entity)
-            MaterialAPI.updateMap(entity.components.get(COMPONENTS.MESH))
+            MaterialAPI.updateMap(<MeshComponent>entity.components.get(COMPONENTS.MESH))
         }
 
 

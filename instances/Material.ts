@@ -1,11 +1,5 @@
 import {v4} from "uuid"
 import MaterialAPI from "../lib/rendering/MaterialAPI";
-// @ts-ignore
-import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert"
-// @ts-ignore
-import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag"
-// @ts-ignore
-import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag"
 import MaterialUniform from "../templates/MaterialUniform";
 import TextureInUse from "../templates/TextureInUse";
 import MutableObject from "../MutableObject";

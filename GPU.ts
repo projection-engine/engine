@@ -4,14 +4,9 @@ import TerrainGenerator from "./lib/math/TerrainGenerator";
 import CameraAPI from "./lib/utils/CameraAPI";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import CubeMapAPI from "./lib/rendering/CubeMapAPI";
-
 import LightsAPI from "./lib/utils/LightsAPI";
-
-// @ts-ignore
 import QUAD_VERT from "./shaders/post-processing/QUAD.vert"
-// @ts-ignore
 import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
-
 import Shader from "./instances/Shader";
 import Framebuffer from "./instances/Framebuffer";
 import Material from "./instances/Material";

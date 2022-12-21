@@ -1,10 +1,7 @@
 import GPU from "../GPU";
 import Engine from "../Engine";
-// @ts-ignore
 import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag";
-// @ts-ignore
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag";
-// @ts-ignore
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert";
 import StaticShaders from "../lib/StaticShaders";
 import Shader from "../instances/Shader";

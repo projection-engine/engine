@@ -55,6 +55,7 @@ self.onmessage = async ({data: {type, data, id}}) => {
             case IMAGE_WORKER_ACTIONS.IMAGE_BITMAP: {
                 const {base64, onlyData} = data
                 const b = onlyData ? base64 : base64.split(";base64,")[1]
+                // @ts-ignore
                 const buffer = Buffer.from(b, "base64")
                 const blob = new Blob([buffer], {type: "base64"})
                 const bitmap = await createImageBitmap(blob)
