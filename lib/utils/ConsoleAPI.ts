@@ -113,7 +113,6 @@ export default class ConsoleAPI {
     }
 
     static error(...messages: any[]) {
-        console.trace("HERE")
         oldError(...messages)
         let src;
         try {

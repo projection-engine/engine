@@ -1,5 +1,5 @@
 precision highp float;
-#define FRAG_DEPTH_THRESHOLD .0001
+
 
 //--UNIFORMS--
 
@@ -46,14 +46,20 @@ vec3 randomColor(float seed){
     rand(vec2(seed + g))
     );
 }
-
-
+bool checkDither(){
+    if (screenDoorEffect){
+        vec2 a = floor(gl_FragCoord.xy);
+        bool checker = mod(a.x + a.y, 2.) > 0.0;
+        return checker;
+    }
+    return false;
+}
 void main(){
-
+    if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
     vec4 depthData = texture(scene_depth, quadUV);
     if (shadingModel != OVERDRAW)
-    if (!noDepthChecking &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
+    if (!noDepthChecking && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
 
     vec3 V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);
@@ -126,7 +132,7 @@ void main(){
                         else if (type == DISK)
                         directIllumination = computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
 
-                        if(length(directIllumination) > 0.) contribution++;
+                        if (length(directIllumination) > 0.) contribution++;
                     }
                 }
                 if (total > 0.)

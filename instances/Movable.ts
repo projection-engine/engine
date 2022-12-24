@@ -3,7 +3,7 @@ import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
 
 /**
  * @field __changedBuffer {Uint8Array [changed, changesApplied, isUnderChange]} - Transferable array buffer that worker thread reads and writes in;
- * @field __cullingMetadata [distanceFromCamera, cullingDistance, hasDistanceCullingEnabled, isDistanceCulled]
+ * @field __cullingMetadata [distanceFromCamera, cullingDistance, hasDistanceCullingEnabled, isDistanceCulled, screenDoorDistance, isScreenDoorEnabled]
  */
 
 export default class Movable {
@@ -15,7 +15,7 @@ export default class Movable {
     baseTransformationMatrix = <Float32Array>ArrayBufferAPI.allocateMatrix(4, true)
     previousModelMatrix = <Float32Array>ArrayBufferAPI.allocateMatrix(4, true)
     __changedBuffer = new Uint8Array(new SharedArrayBuffer(3))
-    __cullingMetadata = new Float32Array(new SharedArrayBuffer(16))
+    __cullingMetadata = new Float32Array(new SharedArrayBuffer(24))
     lockedRotation = false
     lockedTranslation = false
     lockedScaling = false
@@ -30,11 +30,6 @@ export default class Movable {
         return this.__cullingMetadata[0]
     }
 
-    get position() {
-        return this._translation
-    }
-
-
     get scaling() {
         return this._scaling
     }
@@ -42,7 +37,6 @@ export default class Movable {
     get translation() {
         return this._translation
     }
-
 
     get changed() {
         return this.__changedBuffer[0] === 1

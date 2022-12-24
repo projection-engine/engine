@@ -69,13 +69,22 @@ export default class TransformationPass {
                 continue
             if (entity.__changedBuffer[1] || TransformationPass.cameraBuffer[3]) {
                 const cullingBuffer = entity.cullingMetadata
+
                 cullingBuffer[0] = vec3.length(vec3.sub(cacheDistance, entity.absoluteTranslation, TransformationPass.cameraPosition))
-                cullingBuffer[3] = cullingBuffer[2] && cullingBuffer[0] > cullingBuffer[1] ? 1 : 0
+
+                const distanceFromCamera = cullingBuffer[0]
+                const cullingDistance = cullingBuffer[1]
+                const hasDistanceCullingEnabled = cullingBuffer[2]
+                const screenDoorDistance = cullingBuffer[4]
+
+                cullingBuffer[3] = hasDistanceCullingEnabled && distanceFromCamera > cullingDistance ? 1 : 0
+
+                cullingBuffer[5] = screenDoorDistance < distanceFromCamera ? 1 : 0
             }
         }
     }
 
-    static transform(entity:WorkerEntity) {
+    static transform(entity: WorkerEntity) {
         entity.__changedBuffer[2] = 1
         entity.__changedBuffer[0] = 0
         const scaling = entity._scaling

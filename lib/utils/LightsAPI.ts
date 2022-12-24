@@ -170,8 +170,7 @@ export default class LightsAPI {
             if (offset + 16 > MAX_LIGHTS * 16 && primaryBuffer === LightsAPI.primaryBufferC || !current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
             LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, typeBuffer, offset)
-            console.trace(primaryBuffer)
-            console.trace(typeBuffer)
+
             offset += 16
             size[sizeIndex] += 1
         }

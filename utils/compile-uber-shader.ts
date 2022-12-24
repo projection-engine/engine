@@ -27,7 +27,7 @@ export default function compileUberShader(forceCleanShader?: boolean) {
     fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
     const shader = new Shader(VERTEX_SHADER, fragment)
-    console.trace(fragment)
+
     if (shader.messages.hasError) {
         if (!StaticShaders.uber)
             compileUberShader(true)

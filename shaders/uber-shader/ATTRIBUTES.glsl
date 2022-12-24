@@ -1,4 +1,5 @@
 #define PI 3.14159265359
+#define FRAG_DEPTH_THRESHOLD .0001
 #define MAX_LIGHTS 24
 #define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
@@ -20,6 +21,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
 uniform vec3 cameraPosition;
 uniform float elapsedTime;
+uniform bool screenDoorEffect;
 
 uniform UberShaderSettings{
     float SSRFalloff;

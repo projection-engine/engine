@@ -82,7 +82,6 @@ export default class SceneRenderer {
         context.uniform1i(uniforms.brdf_sampler, 0)
 
 
-
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.ssaoBlurredSampler)
         context.uniform1i(uniforms.SSAO, 1)
@@ -136,7 +135,7 @@ export default class SceneRenderer {
             if (!entity.active || !mesh || entity.isCulled)
                 continue
 
-            if ( Engine.developmentMode)
+            if (Engine.developmentMode)
                 context.uniform3fv(uniforms.entityID, entity.pickID)
 
             const material = entity.__materialRef
@@ -146,6 +145,13 @@ export default class SceneRenderer {
                 context.enable(context.CULL_FACE)
                 context.enable(context.DEPTH_TEST)
             }
+
+            const culling = entity?.__cullingComponent
+
+            if (culling && culling.screenDoorEffect) {
+                context.uniform1i(uniforms.screenDoorEffect, entity.__cullingMetadata[5])
+            } else
+                context.uniform1i(uniforms.screenDoorEffect, 0)
 
             if (material !== undefined) {
                 if (material.doubleSided) {
@@ -162,6 +168,7 @@ export default class SceneRenderer {
                     context.disable(context.CULL_FACE)
                     context.disable(context.DEPTH_TEST)
                 }
+
 
                 context.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
                 context.uniform1i(uniforms.materialID, material.bindID)

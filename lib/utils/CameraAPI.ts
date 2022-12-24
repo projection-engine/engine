@@ -59,10 +59,7 @@ export default class CameraAPI extends Controller {
     static #projectionBuffer = ArrayBufferAPI.allocateVector(5)
     static translationBuffer = <vec3>ArrayBufferAPI.allocateVector(3)
     static rotationBuffer = <quat>ArrayBufferAPI.allocateVector(4, 0, true)
-    static #notificationBuffers = getNotificationBuffer()
-    static get notificationBuffers() {
-        return CameraAPI.#notificationBuffers
-    }
+    static notificationBuffers = getNotificationBuffer()
 
     static #worker: Worker
     static trackingEntity
@@ -82,7 +79,7 @@ export default class CameraAPI extends Controller {
 
         CameraAPI.#worker = new Worker("./camera-worker.js")
 
-        notificationBuffers = CameraAPI.#notificationBuffers
+        notificationBuffers = CameraAPI.notificationBuffers
         CameraAPI.#worker.postMessage([
             notificationBuffers,
             CameraAPI.position,

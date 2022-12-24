@@ -54,18 +54,7 @@ export default class Texture {
             height,
             type = "UNSIGNED_BYTE"
         } = this.attributes
-        console.trace(
-            this.#image,
-            wrapS,
-            wrapT,
-            minFilter,
-            magFilter,
-            internalFormat,
-            format,
-            width,
-            height,
-            type
-        )
+
         let newTexture = GPU.context.createTexture()
 
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, newTexture)
