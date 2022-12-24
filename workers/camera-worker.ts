@@ -34,7 +34,7 @@ class CameraWorker {
     static currentRotation = TransformationAPI.quat.create()
     static UBOBuffer
 
-    static initialize(data:Float32Array[]) {
+    static initialize(data: Float32Array[]) {
         const [
             notificationBuffers,
             position,
@@ -83,11 +83,11 @@ class CameraWorker {
         const fov = buffer[2]
         const zFar = buffer[0]
         const zNear = buffer[1]
-
+        const orthographicProjectionSize = buffer[4]
         CameraWorker.isOrtho = isOrthographic
         if (isOrthographic) {
-            const distanceFromCamera = vec3.length(CameraWorker.#position)
-            mat4.ortho(CameraWorker.#projectionMatrix, -distanceFromCamera, distanceFromCamera, -distanceFromCamera / aR, distanceFromCamera / aR, zNear, zFar)
+
+            mat4.ortho(CameraWorker.#projectionMatrix, -orthographicProjectionSize, orthographicProjectionSize, -orthographicProjectionSize / aR, orthographicProjectionSize / aR, zNear, zFar)
         } else {
             mat4.perspective(CameraWorker.#projectionMatrix, fov, aR, zNear, zFar)
             mat4.perspective(CameraWorker.#skyboxProjectionMatrix, fov, aR, .1, 1000)

@@ -80,6 +80,7 @@ export default class CameraAPI extends Controller {
         CameraAPI.#worker = new Worker("./camera-worker.js")
 
         notificationBuffers = CameraAPI.notificationBuffers
+        CameraAPI.#projectionBuffer[4] = 10
         CameraAPI.#worker.postMessage([
             notificationBuffers,
             CameraAPI.position,
@@ -160,9 +161,10 @@ export default class CameraAPI extends Controller {
         return CameraAPI.#projectionBuffer[3]
     }
 
-    static get size(): number {
+    static get orthographicProjectionSize(): number {
         return CameraAPI.#projectionBuffer[4]
     }
+
 
     static set zFar(data: number) {
         CameraAPI.#projectionBuffer[0] = data
@@ -180,7 +182,7 @@ export default class CameraAPI extends Controller {
         CameraAPI.#projectionBuffer[3] = data
     }
 
-    static set size(data: number) {
+    static set orthographicProjectionSize(data: number) {
         CameraAPI.#projectionBuffer[4] = data
     }
 
@@ -226,7 +228,7 @@ export default class CameraAPI extends Controller {
         }
     }
 
-    static restoreState(state:Serialization) {
+    static restoreState(state: Serialization) {
         const {rotation, translation, rotationSmoothing, translationSmoothing, metadata} = state
         if (metadata) {
             const keys = Object.keys(metadata)
