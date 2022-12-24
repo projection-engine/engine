@@ -54,6 +54,22 @@ bool checkDither(){
     }
     return false;
 }
+
+bool checkLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type){
+    vec3 directIllumination = vec3(0.);
+    if (type == DIRECTIONAL)
+    directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
+    else if (type == POINT)
+    directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
+    else if (type == SPOT)
+    directIllumination = computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
+    else if (type == SPHERE)
+    directIllumination = computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
+    else if (type == DISK)
+    directIllumination = computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
+
+    return length(directIllumination) > 0.;
+}
 void main(){
     if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
@@ -61,7 +77,7 @@ void main(){
     if (shadingModel != OVERDRAW)
     if (!noDepthChecking && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
 
-    vec3 V = cameraPosition - worldSpacePosition;
+    V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);
     V = normalize(V);
 
@@ -71,7 +87,7 @@ void main(){
     albedo = vec3(1.);
 
     if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
-    fragColor = pbLightComputation(V);
+    fragColor = pbLightComputation();
     else {
         switch (shadingModel){
             case ALBEDO:
@@ -117,22 +133,25 @@ void main(){
                     F0 = mix(F0, albedoOverPI, 0.);
 
                     for (int i = 0; i < lightQuantityA; i++){
-                        mat4 primaryBuffer = lightPrimaryBufferA[i];
-                        mat4 secondaryBuffer = lightSecondaryBufferA[i];
-                        int type = lightTypeBufferA[i];
-                        vec3 directIllumination = vec3(0.);
-                        if (type == DIRECTIONAL)
-                        directIllumination = computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
-                        else if (type == POINT)
-                        directIllumination = computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
-                        else if (type == SPOT)
-                        directIllumination = computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
-                        else if (type == SPHERE)
-                        directIllumination = computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
-                        else if (type == DISK)
-                        directIllumination = computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
-
-                        if (length(directIllumination) > 0.) contribution++;
+                        if(checkLight(
+                            lightPrimaryBufferA[i],
+                            lightSecondaryBufferA[i],
+                            lightTypeBufferA[i]
+                        )) contribution++;
+                    }
+                    for (int i = 0; i < lightQuantityB; i++){
+                        if(checkLight(
+                        lightPrimaryBufferB[i],
+                        lightSecondaryBufferB[i],
+                        lightTypeBufferB[i]
+                        )) contribution++;
+                    }
+                    for (int i = 0; i < lightQuantityC; i++){
+                        if(checkLight(
+                        lightPrimaryBufferC[i],
+                        lightSecondaryBufferC[i],
+                        lightTypeBufferC[i]
+                        )) contribution++;
                     }
                 }
                 if (total > 0.)

@@ -14,6 +14,7 @@ export default class CullingComponent extends Component{
     set screenDoorEffectDistanceMultiplier(data){
         this._screenDoorEffectDistanceMultiplier = data
         this.__entity.__cullingMetadata[4] = data
+
     }
     get distanceCulling(){
         return this._distanceCulling
@@ -22,6 +23,7 @@ export default class CullingComponent extends Component{
         this._distanceCulling = data
         this.__entity.__cullingMetadata[2] = data ? 1 : 0
         this.__entity.__cullingMetadata[3] = 0
+        this.__entity.__cullingMetadata[1] = this._distance
     }
 
     get distance(){
@@ -30,9 +32,10 @@ export default class CullingComponent extends Component{
     set distance(data){
         this._distance = data
         this.__entity.__cullingMetadata[1] = data
+
     }
     get screenDoorEnabled(){
         return this.__entity.__cullingMetadata[5] === 1
     }
-    occlusionCulling
+    occlusionCulling:boolean
 }

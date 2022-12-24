@@ -21,13 +21,13 @@ void main(){
         if (abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
     }
 
-    vec3 V = cameraPosition - worldSpacePosition;
+    V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);
     V = normalize(V);
 
     //--MATERIAL_SELECTION--
 
-    fragColor = pbLightComputation(V);
+    fragColor = pbLightComputation();
 }
 
 

@@ -35,7 +35,20 @@ vec3 viewSpacePosition;
 
 //import(computeAreaLights)
 
-vec4 pbLightComputation(vec3 V) {
+void processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type, inout  vec3 directIllumination){
+    if (type == DIRECTIONAL)
+    directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
+    else if (type == POINT)
+    directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
+    else if (type == SPOT)
+    directIllumination += computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
+    else if (type == SPHERE)
+    directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
+    else if (type == DISK)
+    directIllumination += computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
+}
+
+vec4 pbLightComputation() {
     if (flatShading) return vec4(albedo + emission, alpha);
     VrN		= reflect( -V, N );
     viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
@@ -49,21 +62,30 @@ vec4 pbLightComputation(vec3 V) {
     F0 = mix(F0, albedo, metallic);
 
     for (int i = 0; i < lightQuantityA; i++){
-        mat4 primaryBuffer= lightPrimaryBufferA[i];
-        mat4 secondaryBuffer = lightSecondaryBufferA[i];
-        int type = lightTypeBufferA[i];
-        if (type == DIRECTIONAL)
-        directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
-        else if (type == POINT)
-        directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
-        else if (type == SPOT)
-        directIllumination += computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
-        else if (type == SPHERE)
-        directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
-        else if (type == DISK)
-        directIllumination += computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
-
+        processLight(
+            lightPrimaryBufferA[i],
+            lightSecondaryBufferA[i],
+            lightTypeBufferA[i],
+            directIllumination
+        );
     }
+    for (int i = 0; i < lightQuantityB; i++){
+        processLight(
+            lightPrimaryBufferB[i],
+            lightSecondaryBufferB[i],
+            lightTypeBufferB[i],
+            directIllumination
+        );
+    }
+    for (int i = 0; i < lightQuantityC; i++){
+        processLight(
+            lightPrimaryBufferC[i],
+            lightSecondaryBufferC[i],
+            lightTypeBufferC[i],
+            directIllumination
+        );
+    }
+
 
     indirectIllumination = sampleIndirectLight();
     return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);

@@ -106,7 +106,7 @@ vec3 viewDirection;
 bool hasTBNComputed = false;
 bool hasViewDirectionComputed = false;
 float distanceFromCamera;
-
+vec3 V;
 
 void computeTBN() {
     if (hasTBNComputed)
