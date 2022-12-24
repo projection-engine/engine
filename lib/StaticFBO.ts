@@ -1,4 +1,4 @@
-import Controller from "../templates/Controller";
+
 import GPU from "../GPU";
 import Framebuffer from "../instances/Framebuffer";
 import DirectionalShadows from "../runtime/DirectionalShadows";
@@ -8,7 +8,7 @@ import SSAO from "../runtime/SSAO";
 
 const RESOLUTION = 4
 
-export default class StaticFBO extends Controller {
+export default class StaticFBO  {
     static visibility?: Framebuffer
     static visibilityDepthSampler?: WebGLTexture
     static visibilityEntitySampler?: WebGLTexture
@@ -54,9 +54,11 @@ export default class StaticFBO extends Controller {
     static shadowsSampler?: WebGLTexture
 
     static noiseSampler?: WebGLTexture
-
+static #initialized = false
     static initialize() {
-        super.initialize()
+        if (StaticFBO.#initialized)
+            return
+        StaticFBO.#initialized = true
         const context = GPU.context
         const halfResW = GPU.internalResolution.w / 2
         const halfResH = GPU.internalResolution.h / 2

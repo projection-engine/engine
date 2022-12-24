@@ -8,7 +8,7 @@ import ConversionAPI from "../math/ConversionAPI";
 import UBO from "../../instances/UBO";
 import MotionBlur from "../../runtime/MotionBlur";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
-import Controller from "../../templates/Controller";
+
 import GPU from "../../GPU";
 
 
@@ -42,7 +42,7 @@ interface Serialization {
 }
 
 const toRad = Math.PI / 180
-export default class CameraAPI extends Controller {
+export default class CameraAPI {
     static UBO: UBO
     static #dynamicAspectRatio = false
     static metadata = new PostProcessingEffects()
@@ -64,8 +64,12 @@ export default class CameraAPI extends Controller {
     static #worker: Worker
     static trackingEntity
 
+    static #initialized = false
     static initialize() {
-        super.initialize()
+        if (CameraAPI.#initialized)
+            return
+        CameraAPI.#initialized = true
+
         CameraAPI.UBO = new UBO(
             "CameraMetadata",
             [

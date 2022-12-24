@@ -18,7 +18,7 @@ import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";
 import SceneRenderer from "./runtime/SceneRenderer";
-import Controller from "./templates/Controller";
+
 import Entity from "./instances/Entity";
 import ConsoleAPI from "./lib/utils/ConsoleAPI";
 
@@ -26,7 +26,7 @@ const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)
 
 
-export default class Engine extends Controller {
+export default class Engine  {
     static #development = false
 
     static get developmentMode() {
@@ -38,13 +38,13 @@ export default class Engine extends Controller {
     static UILayouts = new Map()
     static isDev = true
     static entities: Entity[] = []
-    static #environment:number = ENVIRONMENT.DEV
+    static #environment: number = ENVIRONMENT.DEV
 
-    static get environment():number {
+    static get environment(): number {
         return Engine.#environment
     }
 
-    static set environment(data:number) {
+    static set environment(data: number) {
         Engine.isDev = data === ENVIRONMENT.DEV
         Engine.#environment = data
         if (Engine.isDev)
@@ -56,9 +56,13 @@ export default class Engine extends Controller {
     static frameID
     static isReady = false
     static benchmarkMode = false
+    static #initialized = false;
 
     static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata: Function, devAmbient: boolean) {
-        super.initialize()
+        if (Engine.#initialized)
+            return
+        Engine.#initialized = true
+
         ConsoleAPI.initialize()
         Engine.#development = devAmbient
         await GPU.initializeContext(canvas, mainResolution)

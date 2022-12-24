@@ -1,13 +1,15 @@
 import GPU from "../../GPU";
 import LightProbe from "../../instances/LightProbe";
-import Controller from "../../templates/Controller";
 
 
-export default class CubeMapAPI  extends Controller{
+export default class CubeMapAPI{
     static frameBuffer?:WebGLFramebuffer
 
+    static #initialized = false
     static initialize() {
-        super.initialize()
+        if (CubeMapAPI.#initialized)
+            return
+        CubeMapAPI.#initialized = true
         GPU.context.bindVertexArray(null)
         CubeMapAPI.frameBuffer = GPU.context.createFramebuffer()
     }

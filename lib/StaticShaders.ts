@@ -1,11 +1,11 @@
-import Controller from "../templates/Controller";
+
 import SHADERS from "../static/SHADERS"
 import Shader from "../instances/Shader";
 import compileUberShader from "../utils/compile-uber-shader";
 import LightsAPI from "./utils/LightsAPI";
 import SceneRenderer from "../runtime/SceneRenderer";
 
-export default class StaticShaders extends Controller {
+export default class StaticShaders {
     static uber?:Shader
     static uberUniforms?:{ [key: string]: WebGLUniformLocation }
 
@@ -66,8 +66,11 @@ export default class StaticShaders extends Controller {
     static upSampling?:Shader
     static upSamplingUniforms?:{ [key: string]: WebGLUniformLocation }
 
+    static #initialized = false
     static initialize() {
-        super.initialize()
+        if (StaticShaders.#initialized)
+            return
+        StaticShaders.#initialized = true
         compileUberShader()
 
         StaticShaders.sprite      = new Shader( SHADERS.SPRITE_VERTEX, SHADERS.SPRITE_FRAG )
