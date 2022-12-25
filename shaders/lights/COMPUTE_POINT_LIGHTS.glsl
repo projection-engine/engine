@@ -38,6 +38,9 @@ float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, sa
 vec3 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 pointLight, vec3 V, vec3 N, float roughness, float metallic, vec3 F0) {
     vec3 lightPosition = vec3(pointLight[0][0], pointLight[0][1], pointLight[0][2]);
 
+    vec4 baseContribution = precomputeContribution(lightPosition, N);
+    if(baseContribution.a == 0.) return vec3(0.);
+
     float shadows = 1.;
     bool hasShadowMap = pointLight[3][1] < 0.;
     bool hasSSS = abs(pointLight[3][1]) == 2.;
@@ -64,7 +67,7 @@ vec3 computePointLights (float distanceFromCamera, samplerCube shadowMap, mat4 p
 
     float attFactor = intensity / (1. + (attenuationPLight.x * distanceFromFrag) + (attenuationPLight.y * pow(distanceFromFrag, 2.)));
     if (attFactor == 0.) return vec3(0.);
-    return computeBRDF(lightPosition, lightColor, V, N, roughness, metallic, F0) * attFactor;
+    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor, V, N, roughness, metallic, F0) * attFactor;
 }
 
 

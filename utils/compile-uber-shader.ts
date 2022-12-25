@@ -7,6 +7,7 @@ import StaticShaders from "../lib/StaticShaders";
 import Shader from "../instances/Shader";
 
 export default function compileUberShader(forceCleanShader?: boolean) {
+    console.time("A")
     const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
 
     if (!forceCleanShader)
@@ -27,11 +28,9 @@ export default function compileUberShader(forceCleanShader?: boolean) {
     fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
     const shader = new Shader(VERTEX_SHADER, fragment)
-
     if (shader.messages.hasError) {
         if (!StaticShaders.uber)
             compileUberShader(true)
-        console.error("Invalid shader", shader.messages)
         console.error("Invalid shader", shader.messages)
         return
     } else if (StaticShaders.uber)
