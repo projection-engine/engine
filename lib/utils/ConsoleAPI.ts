@@ -15,23 +15,6 @@ export default class ConsoleAPI {
     private static messages:MessageInterface[] = []
     private static metadata = {errors: 0, logs: 0, warns: 0}
     static onMessageCallback?:Function
-    static onLog = (messages?: any[]) => null
-    static onError = (messages?: any[]) => null
-    static onWarn = (messages?: any[]) => null
-
-
-
-
-
-    static initialize() {
-        oldError = console.error
-        oldWarn  = console.warn
-        oldLog   = console.log
-
-        console.error = ConsoleAPI.error
-        // console.warn = ConsoleAPI.warn
-        // console.log = ConsoleAPI.log
-    }
 
     static getErrorMessages() {
         return ConsoleAPI.messages.map(m => m.type === Types.ERROR)
@@ -93,8 +76,7 @@ export default class ConsoleAPI {
             const stack = e.stack.split("\n")
             src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
         }
-        if (ConsoleAPI.onLog)
-            ConsoleAPI.onLog(messages)
+
         ConsoleAPI.pushMessages(Types.LOG, messages, src)
     }
 
@@ -107,8 +89,7 @@ export default class ConsoleAPI {
             const stack = e.stack.split("\n")
             src = stack[2].replace(/\(eval\sat\s(\w+)\s\(((\/|\:|\w|\.|\W)+)\), <anonymous>:/gm, "").replace(")", "")
         }
-        if (ConsoleAPI.onWarn)
-            ConsoleAPI.onWarn(messages)
+
         ConsoleAPI.pushMessages(Types.WARN, messages, src)
     }
 
@@ -123,8 +104,7 @@ export default class ConsoleAPI {
         }
         if (src.includes("file:///"))
             src = "Internal error"
-        if (ConsoleAPI.onError)
-            ConsoleAPI.onError(messages)
+
         ConsoleAPI.pushMessages(Types.ERROR, messages, src)
     }
 

@@ -63,7 +63,6 @@ export default class Engine  {
             return
         Engine.#initialized = true
 
-        ConsoleAPI.initialize()
         Engine.#development = devAmbient
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)

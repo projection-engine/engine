@@ -46,7 +46,6 @@ export default class VisibilityRenderer {
                 continue
 
             if (material) {
-                console.log(material)
                 if (material.isSky)
                     continue
                 isAlphaTested = material.isAlphaTested ? 1 : 0
