@@ -1,4 +1,3 @@
-
 import SHADERS from "../static/SHADERS"
 import Shader from "../instances/Shader";
 import compileUberShader from "../utils/compile-uber-shader";

@@ -1,5 +1,4 @@
 import Component from "../../templates/components/Component";
-import CullingComponent from "../../templates/components/CullingComponent";
 
 export default [
     Component.group("DISTANCE_CULLING", [

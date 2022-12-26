@@ -1,6 +1,5 @@
 import GPU from "../GPU";
 import UBO from "../instances/UBO";
-import VisibilityRenderer from "./VisibilityRenderer";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";

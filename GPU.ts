@@ -16,7 +16,6 @@ import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
 import SceneRenderer from "./runtime/SceneRenderer";
 import Mesh from "./instances/Mesh";
 import Texture from "./instances/Texture";
-import VertexBuffer from "./instances/VertexBuffer";
 import Entity from "./instances/Entity";
 import LightProbe from "./instances/LightProbe";
 import SkyLightComponent from "./templates/components/SkyLightComponent";

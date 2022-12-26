@@ -20,7 +20,6 @@ import LightProbe from "./instances/LightProbe";
 import SceneRenderer from "./runtime/SceneRenderer";
 
 import Entity from "./instances/Entity";
-import ConsoleAPI from "./lib/utils/ConsoleAPI";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)

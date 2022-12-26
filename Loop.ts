@@ -20,8 +20,6 @@ import SceneRenderer from "./runtime/SceneRenderer";
 import GPU from "./GPU";
 import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
-import StaticShaders from "./lib/StaticShaders";
-import StaticMeshes from "./lib/StaticMeshes";
 
 let previous = 0
 export default class Loop {
