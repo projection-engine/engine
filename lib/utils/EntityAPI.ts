@@ -78,12 +78,12 @@ export default class EntityAPI {
             UIAPI.createUIEntity(entity)
 
         if (entity.__hasLight)
-            LightsAPI.lights.add<Entity>(entity.id, entity)
+            LightsAPI.lights.add(entity.id, entity)
         if (entity.__hasSprite)
-            SpriteRenderer.sprites.add<Entity>(entity.id, entity)
+            SpriteRenderer.sprites.add(entity.id, entity)
         if (entity.__hasMesh) {
-            VisibilityRenderer.meshesToDraw.add<Entity>(entity.id, entity)
-            MaterialAPI.updateMap(<MeshComponent>entity.components.get(COMPONENTS.MESH))
+            VisibilityRenderer.meshesToDraw.add(entity.id, entity)
+            MaterialAPI.updateMap(entity.__meshComponent)
         }
 
 

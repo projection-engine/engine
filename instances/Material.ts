@@ -6,40 +6,41 @@ import MutableObject from "../MutableObject";
 
 
 export default class Material {
-    #id = ""
-    #uniformValues:MutableObject = {}
+    readonly #id = crypto.randomUUID()
+    #uniformValues: MutableObject = {}
     #uniforms = []
-    #functionDeclaration?:string
-    #uniformsDeclaration?:string
-    texturesInUse:TextureInUse = {}
+    #functionDeclaration?: string
+    #uniformsDeclaration?: string
+    texturesInUse: TextureInUse = {}
     isAlphaTested = false
     ssrEnabled = false
     isSky = false
     doubleSided = false
-
     bindID = -1
 
-    constructor(id) {
-        this.#id = id ? id : v4()
+    constructor(id?: string) {
+        if (!id)
+            return
+        this.#id = id
     }
 
-    get id():string {
+    get id(): string {
         return this.#id
     }
 
-    get uniforms():MaterialUniform[] {
+    get uniforms(): MaterialUniform[] {
         return this.#uniforms
     }
 
-    get uniformValues():MutableObject {
+    get uniformValues(): MutableObject {
         return this.#uniformValues
     }
 
-    get functionDeclaration():string|undefined {
+    get functionDeclaration(): string | undefined {
         return this.#functionDeclaration
     }
 
-    get uniformsDeclaration():string|undefined {
+    get uniformsDeclaration(): string | undefined {
         return this.#uniformsDeclaration
     }
 
@@ -48,7 +49,9 @@ export default class Material {
         this.#uniformsDeclaration = uniforms
     }
 
-    async updateUniformGroup(uniforms:MaterialUniform[]) {
+    async updateUniformGroup(uniforms: MaterialUniform[]) {
+        if (!uniforms)
+            return;
         this.#uniforms = uniforms
         await MaterialAPI.updateMaterialUniforms(this)
     }

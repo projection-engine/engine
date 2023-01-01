@@ -9,8 +9,17 @@ import UBO from "../instances/UBO";
 import COMPONENTS from "../static/COMPONENTS";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
+import {mat3} from "gl-matrix";
 
 let texOffset
+
+const materialAttributes = mat3.create()
+
+/** Material attributes
+ * entityID[0] (0), entityID[1] (1), entityID[2] (2)
+ * screenDoorEffect (3), isSky (4), noDepthChecking (5)
+ * materialID (6), ssrEnabled (7)
+ */
 
 export default class SceneRenderer {
     static #ready = false
@@ -134,9 +143,9 @@ export default class SceneRenderer {
 
             if (!entity.active || !mesh || entity.isCulled)
                 continue
-
-            if (Engine.developmentMode)
-                context.uniform3fv(uniforms.entityID, entity.pickID)
+            materialAttributes[0] = entity.pickID[0]
+            materialAttributes[1] = entity.pickID[1]
+            materialAttributes[2] = entity.pickID[2]
 
             const material = entity.__materialRef
 
@@ -149,9 +158,9 @@ export default class SceneRenderer {
             const culling = entity?.__cullingComponent
 
             if (culling && culling.screenDoorEffect) {
-                context.uniform1i(uniforms.screenDoorEffect, entity.__cullingMetadata[5])
+                materialAttributes[3] = entity.__cullingMetadata[5]
             } else
-                context.uniform1i(uniforms.screenDoorEffect, 0)
+                materialAttributes[3] = 0
 
             if (material !== undefined) {
                 if (material.doubleSided) {
@@ -162,7 +171,8 @@ export default class SceneRenderer {
                     isDoubleSided = false
                 }
                 isSky = material.isSky
-                context.uniform1i(uniforms.isSky, isSky ? 1 : 0)
+
+                materialAttributes[4] = isSky ? 1 : 0
 
                 if (isSky) {
                     context.disable(context.CULL_FACE)
@@ -170,13 +180,13 @@ export default class SceneRenderer {
                 }
 
 
-                context.uniform1i(uniforms.noDepthChecking, material.isAlphaTested ? 1 : 0)
-                context.uniform1i(uniforms.materialID, material.bindID)
-                const component = entity.components.get(COMPONENTS.MESH)
-                const overrideUniforms = component.overrideMaterialUniforms
+                materialAttributes[5] = material.isAlphaTested ? 1 : 0
+                materialAttributes[6] = material.bindID
 
-                const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues,
-                    toBind = material.uniforms
+                const component = entity.__meshComponent
+                const overrideUniforms = component.overrideMaterialUniforms
+                const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues
+                const toBind = material.uniforms
                 if (data)
                     for (let j = 0; j < toBind.length; j++) {
                         const current = toBind[j]
@@ -184,7 +194,7 @@ export default class SceneRenderer {
                         Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                     }
 
-                context.uniform1i(uniforms.ssrEnabled, material.ssrEnabled ? 1 : 0)
+                materialAttributes[7] = material.ssrEnabled ? 1 : 0
 
                 stateWasCleared = false
             } else if (!stateWasCleared) {
@@ -194,17 +204,18 @@ export default class SceneRenderer {
                     isDoubleSided = false
                 }
 
-                context.uniform1i(uniforms.ssrEnabled, 0)
-                context.uniform1i(uniforms.noDepthChecking, 0)
-                context.uniform1i(uniforms.materialID, -1)
+                materialAttributes[7] = 0
+                materialAttributes[5] = 0
+                materialAttributes[6] = -1
             }
 
 
             if (useCustomView) {
-                context.uniform1i(uniforms.noDepthChecking, 1)
-                context.uniform1i(uniforms.ssrEnabled, 0)
+                materialAttributes[5] = 1
+                materialAttributes[7] = 0
             }
 
+            context.uniformMatrix3fv(uniforms.materialAttributes, false, materialAttributes)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()
         }

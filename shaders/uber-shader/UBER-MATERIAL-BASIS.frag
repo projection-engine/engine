@@ -14,11 +14,12 @@ bool checkDither(){
     return false;
 }
 void main(){
+    extractData();
     if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
     if(!noDepthChecking){
         vec4 depthData = texture(scene_depth, quadUV);
-        if (abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
+        if ((!isSky && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData.r > 0.)) discard;
     }
 
     V = cameraPosition - worldSpacePosition;

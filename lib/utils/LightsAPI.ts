@@ -5,7 +5,7 @@ import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import {mat4, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
-import Entity from "../../instances/Entity";
+import type Entity from "../../instances/Entity";
 
 
 const MAX_LIGHTS = 24
@@ -17,7 +17,7 @@ const transformedNormalCache = vec3.create(),
 const cacheVec3 = vec3.create()
 
 export default class LightsAPI {
-    static lights = new DynamicMap()
+    static lights = new DynamicMap<Entity>()
 
     static #initialized = false
 

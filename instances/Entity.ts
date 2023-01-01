@@ -49,6 +49,8 @@ export default class Entity extends Movable {
     __lightComp?: LightComponent
     __cullingComponent?: CullingComponent
     __rigidBodyComponent?: RigidBodyComponent
+    __meshComponent?: MeshComponent
+    __spriteComponent?: SpriteComponent
     __hasLight: boolean = false
     __hasMesh: boolean = false
     __hasCamera: boolean = false
@@ -121,6 +123,7 @@ export default class Entity extends Movable {
                     break
                 case COMPONENTS.MESH:
                     this.__hasMesh = true
+                    this.__meshComponent = <MeshComponent>instance
                     break
                 case COMPONENTS.CAMERA:
                     this.__hasCamera = true
@@ -130,6 +133,7 @@ export default class Entity extends Movable {
                     break
                 case COMPONENTS.SPRITE:
                     this.__hasSprite = true
+                    this.__spriteComponent = <SpriteComponent>instance
                     break
                 case COMPONENTS.PHYSICS_COLLIDER:
                     this.__hasCollider = true
@@ -168,6 +172,7 @@ export default class Entity extends Movable {
                     break
                 case COMPONENTS.MESH:
                     this.__hasMesh = false
+                    this.__meshComponent = undefined
                     break
                 case COMPONENTS.CAMERA:
                     this.__hasCamera = false
@@ -177,6 +182,7 @@ export default class Entity extends Movable {
                     break
                 case COMPONENTS.SPRITE:
                     this.__hasSprite = false
+                    this.__spriteComponent = undefined
                     break
                 case COMPONENTS.PHYSICS_COLLIDER:
                     this.__hasCollider = false

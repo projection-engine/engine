@@ -6,7 +6,6 @@ precision highp float;
 //import(uberAttributes)
 
 uniform int shadingModel;
-uniform vec3 entityID;
 
 //import(pbLightComputation)
 
@@ -71,11 +70,12 @@ bool checkLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type){
     return length(directIllumination) > 0.;
 }
 void main(){
+    extractData();
     if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
     vec4 depthData = texture(scene_depth, quadUV);
     if (shadingModel != OVERDRAW)
-    if (!noDepthChecking && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD || (isSky && depthData.r > 0.)) discard;
+    if ((!isSky && !noDepthChecking && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData.r > 0.)) discard;
 
     V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);

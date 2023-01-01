@@ -49,7 +49,7 @@ void processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type, inout  vec
 }
 
 vec4 pbLightComputation() {
-    if (flatShading) return vec4(albedo + emission, alpha);
+    if (flatShading || isSky) return vec4(albedo + emission, alpha);
     VrN		= reflect( -V, N );
     viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
     albedoOverPI = albedo/PI;

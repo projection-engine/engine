@@ -57,7 +57,7 @@ export default class OmnidirectionalShadows {
         const size = toRender.length
         for (let m = 0; m < size; m++) {
 
-            const current = toRender[m], meshComponent = current.components.get(COMPONENTS.MESH)
+            const current = toRender[m], meshComponent = current.__meshComponent
             const mesh = current.__meshRef
             if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
                 continue

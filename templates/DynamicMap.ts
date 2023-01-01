@@ -1,20 +1,17 @@
-export default class DynamicMap {
-    #array = []
-    #map = {}
+export default class DynamicMap <T>{
+    array:T[] = []
+    #map:{[key:string]:T} = {}
 
-    add<T>(key:string, value:T) {
+    add(key:string, value:T) {
         this.#map[key] = value
-        this.#array = Object.values(this.#map)
+        this.array.push(value)
     }
 
     delete(key:string) {
         if (!this.#map[key])
             return
+        this.array.splice(this.array.indexOf(this.#map[key]), 1)
         delete this.#map[key]
-        this.#array = Object.values(this.#map)
     }
 
-    get array():any[] {
-        return this.#array
-    }
 }

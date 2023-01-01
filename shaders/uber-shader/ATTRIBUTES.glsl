@@ -14,14 +14,13 @@ const int SPHERE = 3;
 const int DISK = 4;
 const int PLANE = 5;
 
-
 // GLOBAL
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
 uniform vec3 cameraPosition;
 uniform float elapsedTime;
-uniform bool screenDoorEffect;
+
 
 uniform UberShaderSettings{
     float SSRFalloff;
@@ -43,7 +42,8 @@ uniform UberShaderSettings{
     vec2 bufferResolution;
 };
 
-uniform bool isSky;
+
+
 uniform sampler2D scene_depth;
 uniform sampler2D brdf_sampler;
 uniform sampler2D SSAO;
@@ -62,6 +62,8 @@ uniform sampler2D sampler6;
 uniform sampler2D sampler7;
 
 // GLOBAL
+
+in mat3 matAttr;
 in vec2 texCoords;
 in vec3 normalVec;
 in vec3 worldSpacePosition;
@@ -94,10 +96,6 @@ uniform LightDataC{
     int lightTypeBufferC[MAX_LIGHTS];
 };
 
-uniform bool ssrEnabled;
-uniform bool noDepthChecking;
-uniform int materialID;
-
 out vec4 fragColor;
 
 mat3 TBN;
@@ -107,6 +105,22 @@ bool hasTBNComputed = false;
 bool hasViewDirectionComputed = false;
 float distanceFromCamera;
 vec3 V;
+bool screenDoorEffect;
+vec3 entityID;
+bool isSky;
+bool ssrEnabled;
+bool noDepthChecking;
+int materialID;
+
+void extractData(){
+    screenDoorEffect = matAttr[1][0] == 1.;
+    entityID = vec3(matAttr[0]);
+    isSky = matAttr[1][1] == 1.;
+    ssrEnabled = matAttr[2][1] == 1.;
+    noDepthChecking = matAttr[1][2] == 1.;
+    materialID = int(matAttr[2][0]);
+}
+
 
 void computeTBN() {
     if (hasTBNComputed)

@@ -3,9 +3,11 @@ import COMPONENTS from "../static/COMPONENTS";
 import DynamicMap from "../templates/DynamicMap";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticShaders from "../lib/StaticShaders";
+import type Entity from "../instances/Entity";
+import type SpriteComponent from "../templates/components/SpriteComponent";
 
 export default class SpriteRenderer {
-    static sprites = new DynamicMap()
+    static sprites = new DynamicMap<Entity>()
 
     static execute() {
         const sprites = SpriteRenderer.sprites.array
@@ -20,7 +22,7 @@ export default class SpriteRenderer {
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
         for (let i = 0; i < size; i++) {
-            const current = sprites[i], component = current.components.get(COMPONENTS.SPRITE)
+            const current = sprites[i], component = current.__spriteComponent
             if (!current.active || current.isCulled)
                 continue
             const texture = textures.get(component.imageID)

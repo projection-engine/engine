@@ -7,10 +7,11 @@ import {mat4} from "gl-matrix";
 import DynamicMap from "../templates/DynamicMap";
 import StaticShaders from "../lib/StaticShaders";
 import StaticFBO from "../lib/StaticFBO";
+import type Entity from "../instances/Entity";
 
 
 export default class VisibilityRenderer {
-    static meshesToDraw = new DynamicMap()
+    static meshesToDraw = new DynamicMap<Entity>()
     static needsUpdate = true
 
     static execute() {
