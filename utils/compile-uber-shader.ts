@@ -7,7 +7,7 @@ import StaticShaders from "../lib/StaticShaders";
 import Shader from "../instances/Shader";
 
 export default function compileUberShader(forceCleanShader?: boolean) {
-    console.time("A")
+
     const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
 
     if (!forceCleanShader)
@@ -26,9 +26,10 @@ export default function compileUberShader(forceCleanShader?: boolean) {
     let fragment = Engine.developmentMode ? DEBUG_FRAG : BASIS_FRAG
     fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
     fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
-console.profile("SHADER")
+
+    console.log(fragment)
     const shader = new Shader(VERTEX_SHADER, fragment)
-    console.profileEnd("SHADER")
+
     if (shader.messages.hasError) {
         if (!StaticShaders.uber)
             compileUberShader(true)

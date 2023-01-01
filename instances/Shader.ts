@@ -40,8 +40,12 @@ export default class Shader {
     constructor(vertex, fragment) {
         let alert = []
         this.program = GPU.context.createProgram()
+
         const vCode = trimString(this.#compileShader(vertex, GPU.context.VERTEX_SHADER, m => alert.push(m)))
         const fCode = trimString(this.#compileShader(fragment, GPU.context.FRAGMENT_SHADER, m => alert.push(m)))
+        //
+        // const vertexUniforms = this.#extractUniforms(vCode)
+        // const fragUniforms = this.#extractUniforms(fCode)
 
         this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat().filter(u => {
             return typeof u.uLocation === "object" || typeof u.uLocations === "object"
@@ -65,7 +69,9 @@ export default class Shader {
 
         const shader = GPU.context.createShader(shaderType)
         GPU.context.shaderSource(shader, bundledCode)
+        console.time("COMPILING")
         GPU.context.compileShader(shader)
+        console.timeEnd("COMPILING")
         let compiled = GPU.context.getShaderParameter(shader, GPU.context.COMPILE_STATUS)
 
         if (!compiled) {
@@ -75,7 +81,6 @@ export default class Shader {
         } else {
             GPU.context.attachShader(this.program, shader)
             GPU.context.linkProgram(this.program)
-
         }
         return bundledCode
     }
@@ -109,16 +114,18 @@ export default class Shader {
                 uniformObjects.push(
                     ...partial.map((s): Uniform | undefined => {
                         const current = s.match(reg)
+
                         if (current) {
+                            const LOCATION = GPU.context.getUniformLocation(this.program, name + "." + current[4])
                             return {
                                 type: current[2],
                                 name: current[4],
                                 parent: name,
-                                uLocation: GPU.context.getUniformLocation(this.program, name + "." + current[4])
+                                uLocation: LOCATION
                             }
                         }
-                    })
-                        .filter((e: Uniform | undefined): boolean => e !== undefined)
+
+                    }).filter((e: Uniform | undefined): boolean => e !== undefined)
                 )
             })
         const arrayUniforms = code.match(regexArray(true))

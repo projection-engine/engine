@@ -2,7 +2,7 @@
 function isTypedArray( arr ) {
     return ArrayBuffer.isView( arr ) && !(arr instanceof DataView);
 }
-export default function cloneClass(orig) {
+export default function cloneClass<T>(orig:T):T {
     const newInstance = Object.create(Object.getPrototypeOf(orig))
     const entries = Object.entries(orig)
 

@@ -10,7 +10,7 @@ interface MaterialSettings {
 interface MaterialInformation {
     functionDeclaration: string
     uniformsDeclaration: string
-    uniformsData: MaterialUniform[]
+    uniformValues: MaterialUniform[]
     settings: MaterialSettings
 }
 

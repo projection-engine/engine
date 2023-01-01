@@ -52,7 +52,7 @@ export default class GPUAPI {
         const material = new Material(id)
 
         material.updateMaterialDeclaration(materialInformation.functionDeclaration, materialInformation.uniformsDeclaration)
-        await material.updateUniformGroup(materialInformation.uniformsData)
+        await material.updateUniformGroup(materialInformation.uniformValues)
         MaterialAPI.registerMaterial(material)
         const settings = materialInformation.settings
 
