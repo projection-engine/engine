@@ -222,13 +222,13 @@ export default class CameraAPI {
         notificationBuffers[0] = 1
     }
 
-    static serializeState(translation = CameraAPI.translationBuffer, rotation = CameraAPI.rotationBuffer, rotationSmoothing = CameraAPI.rotationSmoothing, translationSmoothing = CameraAPI.translationSmoothing, metadata = CameraAPI.metadata): Serialization {
+    static serializeState(): Serialization {
         return {
-            rotationSmoothing,
-            translationSmoothing,
+            rotationSmoothing: CameraAPI.rotationSmoothing,
+            translationSmoothing: CameraAPI.translationSmoothing,
             metadata: {...CameraAPI.metadata},
-            rotation: [...rotation],
-            translation: [...translation]
+            rotation: [...CameraAPI.rotationBuffer],
+            translation: [...CameraAPI.translationBuffer]
         }
     }
 
