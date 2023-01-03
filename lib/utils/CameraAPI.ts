@@ -65,6 +65,7 @@ export default class CameraAPI {
     static trackingEntity
 
     static #initialized = false
+
     static initialize() {
         if (CameraAPI.#initialized)
             return
@@ -133,6 +134,10 @@ export default class CameraAPI {
             CameraAPI.aspectRatio = bBox.width / bBox.height
             CameraAPI.updateProjection()
         }
+    }
+
+    static toOrigin() {
+        CameraAPI.update(vec3.create(), quat.create())
     }
 
     static get didChange(): number {

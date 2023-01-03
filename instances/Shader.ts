@@ -69,9 +69,8 @@ export default class Shader {
 
         const shader = GPU.context.createShader(shaderType)
         GPU.context.shaderSource(shader, bundledCode)
-        console.time("COMPILING")
+
         GPU.context.compileShader(shader)
-        console.timeEnd("COMPILING")
         let compiled = GPU.context.getShaderParameter(shader, GPU.context.COMPILE_STATUS)
 
         if (!compiled) {
