@@ -8,5 +8,6 @@ export default {
     "doubleSided": false
   },
   "uniforms": [],
-  "uniformValues": []
+  "uniformValues": [],
+  "executionSignature": ""
 }

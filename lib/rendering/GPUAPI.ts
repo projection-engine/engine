@@ -41,20 +41,27 @@ export default class GPUAPI {
         GPU.textures.delete(imageID)
     }
 
-    static asyncDestroyMaterial(id:string) {
+    static asyncDestroyMaterial(id: string) {
+        const mat = GPU.materials.get(id)
+        if(!mat)
+            return
         MaterialAPI.removeMaterial(id)
+        delete StaticShaders.uberSignature[mat.signature]
         GPU.materials.delete(id)
     }
 
-    static async allocateMaterial(materialInformation:MaterialInformation, id:string) {
+    static async allocateMaterial(materialInformation: MaterialInformation, id: string): Promise<Material | undefined> {
         if (GPU.materials.get(id) !== undefined)
             return GPU.materials.get(id)
-        const material = new Material(id)
+        const signature = materialInformation.executionSignature
+        const material = new Material(id, signature)
 
         material.updateMaterialDeclaration(materialInformation.functionDeclaration, materialInformation.uniformsDeclaration)
         await material.updateUniformGroup(materialInformation.uniformValues)
         MaterialAPI.registerMaterial(material)
         const settings = materialInformation.settings
+
+        StaticShaders.uberSignature[signature] = true
 
         material.isSky = settings.isSky
         material.doubleSided = settings.doubleSided

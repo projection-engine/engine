@@ -17,11 +17,13 @@ export default class Material {
     isSky = false
     doubleSided = false
     bindID = -1
+    signature?:string
 
-    constructor(id?: string) {
+    constructor(id?: string, signature?:string) {
         if (!id)
             return
         this.#id = id
+        this.signature = signature
     }
 
     get id(): string {

@@ -12,6 +12,7 @@ interface MaterialInformation {
     uniformsDeclaration: string
     uniformValues: MaterialUniform[]
     settings: MaterialSettings
+    executionSignature:string
 }
 
 export default MaterialInformation
