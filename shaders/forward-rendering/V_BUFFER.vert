@@ -1,11 +1,10 @@
 layout (location = 0) in vec3 position;
 
 
-
+uniform mat4 viewProjection;
 uniform mat4 previousViewProjection;
 uniform mat4 previousModelMatrix;
 uniform mat4 modelMatrix;
-uniform mat4 viewProjection;
 
 out vec4 previousScreenPosition;
 out vec4 currentScreenPosition;

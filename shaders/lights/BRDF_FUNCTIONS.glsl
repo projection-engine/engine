@@ -70,8 +70,6 @@ vec4 precomputeContribution(vec3 lightPosition,vec3 N){
 
 vec3 computeBRDF (vec3 L, float NdotL, vec3 lightColor, vec3 V, vec3 N, float roughness, float metallic, vec3 F0) {
     vec3 H = normalize(V + L);
-
-
     float NDF = distributionGGX(N, H, roughness);
     float G   = geometrySmith(NdotL, roughness);
     vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);

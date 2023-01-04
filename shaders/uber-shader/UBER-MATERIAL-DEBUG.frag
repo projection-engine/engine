@@ -1,11 +1,10 @@
 precision highp float;
 
-
-//--UNIFORMS--
-
 //import(uberAttributes)
 
 uniform int shadingModel;
+
+//--UNIFORMS--
 
 //import(pbLightComputation)
 
@@ -26,6 +25,7 @@ const int RANDOM = 13;
 const int OVERDRAW =  14;
 const int LIGHT_COMPLEXITY = 15;
 const int LIGHT_QUANTITY = 16;
+
 float linearize(float depth){
     float near = .1;
     float far = 1000.;
