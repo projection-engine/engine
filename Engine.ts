@@ -20,6 +20,7 @@ import LightProbe from "./instances/LightProbe";
 import SceneRenderer from "./runtime/SceneRenderer";
 
 import Entity from "./instances/Entity";
+import UberShader from "./utils/UberShader";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)
@@ -120,7 +121,8 @@ export default class Engine  {
         SSGI.rayMarchSettings[1] = SSGISettings.maxSteps || 4
         SSGI.rayMarchSettings[2] = SSGISettings.strength || 1
 
-        const sceneUBO = SceneRenderer.UBO
+        const sceneUBO = UberShader.UBO
+
 
         sceneUBO.bind()
         singleFloatBuffer[0] = SSRSettings.falloff || 3

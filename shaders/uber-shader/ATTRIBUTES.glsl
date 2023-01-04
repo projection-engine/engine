@@ -1,46 +1,59 @@
 #define PI 3.14159265359
 #define FRAG_DEPTH_THRESHOLD .0001
-#define MAX_LIGHTS 24
+#define MAX_LIGHTS 310
 #define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
 #define SEARCH_STEPS 5
 #define DEPTH_THRESHOLD 1.2
 #define PI_SQUARED 6.2831853
-const int DIRECTIONAL = 0;
-const int SPOT = 1;
-const int POINT = 2;
-const int SPHERE = 3;
-const int DISK = 4;
-const int PLANE = 5;
+#define DIRECTIONAL 0
+#define SPOT 1
+#define POINT 2
+#define SPHERE 3
+#define DISK 4
+#define PLANE 5
+
+
+in mat3 matAttr;
+in vec2 texCoords;
+in vec3 normalVec;
+in vec3 worldSpacePosition;
+
 
 // GLOBAL
+
+uniform vec2 bufferResolution;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
 uniform vec3 cameraPosition;
 uniform float elapsedTime;
 
+uniform UberShaderSettings {
+    float shadowMapsQuantity;
+    float shadowMapResolution;
+    int lightQuantity;
 
-uniform UberShaderSettings{
     float SSRFalloff;
-
     float stepSizeSSR;
     float maxSSSDistance;
-
     float SSSDepthThickness;
     float SSSEdgeAttenuation;
     float skylightSamples;
     float SSSDepthDelta;
     float SSAOFalloff;
-
     int maxStepsSSR;
     int maxStepsSSS;
     bool hasSkylight;
     bool hasAmbientOcclusion;
 
-    vec2 bufferResolution;
+    mat4 lightPrimaryBuffer[MAX_LIGHTS];
+    mat4 lightSecondaryBuffer[MAX_LIGHTS];
+    int lightTypeBuffer[MAX_LIGHTS];
 };
+
+
 
 
 
@@ -61,40 +74,6 @@ uniform sampler2D sampler5;
 uniform sampler2D sampler6;
 uniform sampler2D sampler7;
 
-// GLOBAL
-
-in mat3 matAttr;
-in vec2 texCoords;
-in vec3 normalVec;
-in vec3 worldSpacePosition;
-
-
-uniform LightsMetadata{
-    float shadowMapsQuantity;
-    float shadowMapResolution;
-    int lightQuantityA;
-    int lightQuantityB;
-    int lightQuantityC;
-};
-
-uniform LightDataA{
-    mat4 lightPrimaryBufferA[MAX_LIGHTS];
-    mat4 lightSecondaryBufferA[MAX_LIGHTS];
-    int lightTypeBufferA[MAX_LIGHTS];
-
-};
-
-uniform LightDataB{
-    mat4 lightPrimaryBufferB[MAX_LIGHTS];
-    mat4 lightSecondaryBufferB[MAX_LIGHTS];
-    int lightTypeBufferB[MAX_LIGHTS];
-};
-
-uniform LightDataC{
-    mat4 lightPrimaryBufferC[MAX_LIGHTS];
-    mat4 lightSecondaryBufferC[MAX_LIGHTS];
-    int lightTypeBufferC[MAX_LIGHTS];
-};
 
 out vec4 fragColor;
 
@@ -112,7 +91,7 @@ bool ssrEnabled;
 bool noDepthChecking;
 int materialID;
 
-void extractData(){
+void extractData() {
     screenDoorEffect = matAttr[1][0] == 1.;
     entityID = vec3(matAttr[0]);
     isSky = matAttr[1][1] == 1.;
@@ -141,14 +120,14 @@ void computeTBN() {
     TBN = mat3(T * invmax, B * invmax, normalVec);
 }
 
-vec2 parallaxOcclusionMapping (vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers){
+vec2 parallaxOcclusionMapping(vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers) {
     if (distanceFromCamera > PARALLAX_THRESHOLD) return texCoords;
     float layerDepth = 1.0 / layers;
     float currentLayerDepth = 0.0;
     vec2 P = viewDir.xy / viewDir.z * heightScale;
     vec2 deltaTexCoords = P / layers;
 
-    vec2  currentUVs = texCoords;
+    vec2 currentUVs = texCoords;
     float currentDepthMapValue = texture(heightMap, currentUVs).r;
     while (currentLayerDepth < currentDepthMapValue) {
         currentUVs -= deltaTexCoords;
@@ -157,7 +136,7 @@ vec2 parallaxOcclusionMapping (vec2 texCoords, vec3 viewDir, bool discardOffPixe
     }
 
     vec2 prevTexCoords = currentUVs + deltaTexCoords;
-    float afterDepth  = currentDepthMapValue - currentLayerDepth;
+    float afterDepth = currentDepthMapValue - currentLayerDepth;
     float beforeDepth = texture(heightMap, prevTexCoords).r - currentLayerDepth + layerDepth;
 
 

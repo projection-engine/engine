@@ -1,17 +1,11 @@
 import SHADERS from "../static/SHADERS"
 import Shader from "../instances/Shader";
-import compileUberShader from "../utils/compile-uber-shader";
+import uberShader from "../utils/UberShader";
 import LightsAPI from "./utils/LightsAPI";
 import SceneRenderer from "../runtime/SceneRenderer";
+import UberShader from "../utils/UberShader";
 
 export default class StaticShaders {
-    static #uberSignature = {}
-    static get uberSignature(){
-        return StaticShaders.#uberSignature
-    }
-
-    static uber?: Shader
-    static uberUniforms?: { [key: string]: WebGLUniformLocation }
 
     static sprite?: Shader
     static spriteUniforms?: { [key: string]: WebGLUniformLocation }
@@ -76,7 +70,7 @@ export default class StaticShaders {
         if (StaticShaders.#initialized)
             return
         StaticShaders.#initialized = true
-        compileUberShader()
+
 
         StaticShaders.sprite = new Shader(SHADERS.SPRITE_VERTEX, SHADERS.SPRITE_FRAG)
         StaticShaders.visibility = new Shader(SHADERS.V_BUFFER_VERT, SHADERS.V_BUFFER_FRAG)
@@ -97,7 +91,8 @@ export default class StaticShaders {
         StaticShaders.lens = new Shader(SHADERS.QUAD_VERTEX, SHADERS.LENS_POST_PROCESSING_FRAG)
         StaticShaders.gaussian = new Shader(SHADERS.QUAD_VERTEX, SHADERS.GAUSSIAN_FRAG)
         StaticShaders.upSampling = new Shader(SHADERS.QUAD_VERTEX, SHADERS.UPSAMPLING_TEND_FRAG)
-
+        UberShader.compile()
+        
         StaticShaders.spriteUniforms = StaticShaders.sprite.uniformMap
         StaticShaders.visibilityUniforms = StaticShaders.visibility.uniformMap
         StaticShaders.toScreenUniforms = StaticShaders.toScreen.uniformMap
@@ -120,14 +115,4 @@ export default class StaticShaders {
 
     }
 
-    static bindWithUberShader() {
-        const shader = StaticShaders.uber
-        LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
-        LightsAPI.lightsUBOA.bindWithShader(shader.program)
-        LightsAPI.lightsUBOB.bindWithShader(shader.program)
-        LightsAPI.lightsUBOC.bindWithShader(shader.program)
-        SceneRenderer.UBO.bindWithShader(shader.program)
-        StaticShaders.uber = shader
-        StaticShaders.uberUniforms = shader.uniformMap
-    }
 }
