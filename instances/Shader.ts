@@ -28,7 +28,7 @@ interface Uniform {
 
 export default class Shader {
     program?: WebGLProgram
-    uniforms
+    uniforms = []
     uniformMap: { [key: string]: WebGLUniformLocation } = {}
     length = 0
     messages = {
@@ -38,14 +38,24 @@ export default class Shader {
     }
 
     constructor(vertex, fragment) {
-        let alert = []
+        const alert = []
         this.program = GPU.context.createProgram()
-        const vCode = trimString(this.#compileShader(vertex, GPU.context.VERTEX_SHADER, m => alert.push(m)))
-        const fCode = trimString(this.#compileShader(fragment, GPU.context.FRAGMENT_SHADER, m => alert.push(m)))
 
-        this.uniforms = [...this.#extractUniforms(vCode), ...this.#extractUniforms(fCode)].flat().filter(u => {
-            return typeof u.uLocation === "object" || typeof u.uLocations === "object"
-        })
+        const vertexBuilt = "#version 300 es\n" + applyShaderMethods(vertex)
+        const fragmentBuilt = "#version 300 es\n" + applyShaderMethods(fragment)
+
+        const vertexShader = this.#compileShader(vertexBuilt, GPU.context.VERTEX_SHADER, m => alert.push(m))
+        const fragmentShader = this.#compileShader(fragmentBuilt, GPU.context.FRAGMENT_SHADER, m => alert.push(m))
+
+        GPU.context.attachShader(this.program, vertexShader)
+        GPU.context.attachShader(this.program, fragmentShader)
+
+        GPU.context.linkProgram(this.program)
+
+
+        this.#extractUniforms(vertexBuilt)
+        this.#extractUniforms(fragmentBuilt)
+        this.uniforms = this.uniforms.filter(u => u !== undefined && typeof u.uLocation === "object" || typeof u.uLocations === "object")
 
         for (let i = 0; i < this.uniforms.length; i++)
             this.uniformMap[this.uniforms[i].name] = this.uniforms[i].uLocation || this.uniforms[i].uLocations
@@ -56,15 +66,15 @@ export default class Shader {
         }
 
         this.length = this.uniforms.length
-        if (vCode.includes("CameraMetadata") || fCode.includes("CameraMetadata"))
+        if (fragmentBuilt.includes("CameraMetadata") || vertexBuilt.includes("CameraMetadata"))
             CameraAPI.UBO.bindWithShader(this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {
-        const bundledCode = "#version 300 es\n" + applyShaderMethods(shaderCode)
+
 
         const shader = GPU.context.createShader(shaderType)
-        GPU.context.shaderSource(shader, bundledCode)
+        GPU.context.shaderSource(shader, shaderCode)
         GPU.context.compileShader(shader)
         let compiled = GPU.context.getShaderParameter(shader, GPU.context.COMPILE_STATUS)
 
@@ -72,17 +82,12 @@ export default class Shader {
             const error = GPU.context.getShaderInfoLog(shader)
             console.error({error, shaderCode})
             pushMessage(error)
-        } else {
-            GPU.context.attachShader(this.program, shader)
-            GPU.context.linkProgram(this.program)
-
         }
-        return bundledCode
+        return shader
     }
 
 
-    #extractUniforms(code): Uniform[] {
-        const uniformObjects:Uniform[] = []
+    #extractUniforms(code: string) {
         const uniforms = code.match(regex)
         if (uniforms)
             uniforms.forEach(u => {
@@ -93,7 +98,7 @@ export default class Shader {
                 const name: string = match[6].replace(" ", "").trim()
 
                 if (GLSL_TYPES[type] != null) {
-                    uniformObjects.push({
+                    this.uniforms.push({
                         type,
                         name,
                         uLocation: GPU.context.getUniformLocation(this.program, name)
@@ -106,7 +111,7 @@ export default class Shader {
                 if (struct === null)
                     return []
                 const partial: string[] = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
-                uniformObjects.push(
+                this.uniforms.push(
                     ...partial.map((s): Uniform | undefined => {
                         const current = s.match(reg)
                         if (current) {
@@ -118,7 +123,6 @@ export default class Shader {
                             }
                         }
                     })
-                        .filter((e: Uniform | undefined): boolean => e !== undefined)
                 )
             })
         const arrayUniforms = code.match(regexArray(true))
@@ -136,7 +140,7 @@ export default class Shader {
                 if (!define) return;
                 const arraySize = parseInt(define[5])
                 if (GLSL_TYPES[type] !== undefined) {
-                    uniformObjects.push({
+                    this.uniforms.push({
                         type,
                         name,
                         arraySize,
@@ -150,9 +154,9 @@ export default class Shader {
                 if (!struct)
                     return;
                 const partial = struct[0].split("\n").filter(e => Object.keys(GLSL_TYPES).some(v => e.includes(v)))
-                uniformObjects.push(
-                    ...partial.map((s):Uniform|undefined => {
-                        const current:string[]|null = s.match(reg)
+                this.uniforms.push(
+                    ...partial.map((s): Uniform | undefined => {
+                        const current: string[] | null = s.match(reg)
                         if (current === null)
                             return
                         return {
@@ -163,11 +167,9 @@ export default class Shader {
                             uLocations: (new Array(arraySize).fill(null)).map((_, i) => GPU.context.getUniformLocation(this.program, name + `[${i}]` + "." + current[4]))
                         }
                     })
-                    .filter((e:Uniform|undefined):boolean => e !== undefined)
                 )
             })
 
-        return uniformObjects
     }
 
     bind() {
@@ -176,7 +178,7 @@ export default class Shader {
         GPU.activeShader = this.program
     }
 
-    bindForUse(data:MutableObject) {
+    bindForUse(data: MutableObject) {
         this.bind()
         let currentSamplerIndex = 0
         const increase = () => currentSamplerIndex++

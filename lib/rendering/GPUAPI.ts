@@ -9,11 +9,12 @@ import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import COMPONENTS from "../../static/COMPONENTS";
 import MeshComponent from "../../templates/components/MeshComponent";
-import compileUberShader from "../../utils/compile-uber-shader";
+import uberShader from "../../utils/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../templates/TextureParams";
 import MaterialInformation from "../../templates/MaterialInformation";
 import StaticShaders from "../StaticShaders";
+import UberShader from "../../utils/UberShader";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
@@ -46,7 +47,7 @@ export default class GPUAPI {
         if(!mat)
             return
         MaterialAPI.removeMaterial(id)
-        delete StaticShaders.uberSignature[mat.signature]
+        delete UberShader.uberSignature[mat.signature]
         GPU.materials.delete(id)
     }
 
@@ -61,7 +62,7 @@ export default class GPUAPI {
         MaterialAPI.registerMaterial(material)
         const settings = materialInformation.settings
 
-        StaticShaders.uberSignature[signature] = true
+        UberShader.uberSignature[signature] = true
 
         material.isSky = settings.isSky
         material.doubleSided = settings.doubleSided
@@ -78,8 +79,7 @@ export default class GPUAPI {
         GPU.materials.set(id, material)
 
 
-        compileUberShader()
-        StaticShaders.bindWithUberShader()
+        UberShader.compile()
         VisibilityRenderer.needsUpdate = true
         return material
     }

@@ -26,7 +26,6 @@ import StaticFBO from "./lib/StaticFBO";
 export default class GPU {
     static context?: WebGL2RenderingContext
     static canvas?: HTMLCanvasElement
-    
     static activeShader?: WebGLProgram
     static activeFramebuffer?: WebGLFramebuffer
     static activeMesh?: Mesh
@@ -88,6 +87,7 @@ export default class GPU {
 
         GPU.context = canvas.getContext("webgl2", {
             antialias: false,
+
             // preserveDrawingBuffer: true,
             premultipliedAlpha: false,
             powerPreference: "high-performance"

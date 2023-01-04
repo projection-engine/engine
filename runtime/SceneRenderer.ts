@@ -10,6 +10,7 @@ import COMPONENTS from "../static/COMPONENTS";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import {mat3} from "gl-matrix";
+import UberShader from "../utils/UberShader";
 
 let texOffset
 
@@ -24,7 +25,8 @@ const materialAttributes = mat3.create()
 export default class SceneRenderer {
     static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
-    static UBO
+    static UBO: UBO
+
 
     static initialize() {
         if (SceneRenderer.#ready)
@@ -52,17 +54,17 @@ export default class SceneRenderer {
         SceneRenderer.UBO.bind()
         SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([GPU.internalResolution.w, GPU.internalResolution.h]))
         SceneRenderer.UBO.unbind()
-
-        StaticShaders.bindWithUberShader()
+        if (UberShader.uber !== undefined)
+            SceneRenderer.UBO.bindWithShader(UberShader.uber.program)
     }
 
 
     static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
-        const shader = StaticShaders.uber
+        const shader = UberShader.uber
         if (!SceneRenderer.#ready || !shader)
             return
 
-        const uniforms = StaticShaders.uberUniforms
+        const uniforms = UberShader.uberUniforms
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         const context = GPU.context
