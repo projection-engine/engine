@@ -1,6 +1,6 @@
 #define PI 3.14159265359
 #define FRAG_DEPTH_THRESHOLD .0001
-#define MAX_LIGHTS 24
+#define MAX_LIGHTS 310
 #define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
@@ -22,6 +22,8 @@ in vec3 worldSpacePosition;
 
 
 // GLOBAL
+
+uniform vec2 bufferResolution;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
@@ -29,51 +31,31 @@ uniform vec3 cameraPosition;
 uniform float elapsedTime;
 
 uniform UberShaderSettings {
-    float SSRFalloff;
+    float shadowMapsQuantity;
+    float shadowMapResolution;
+    int lightQuantity;
 
+    float SSRFalloff;
     float stepSizeSSR;
     float maxSSSDistance;
-
     float SSSDepthThickness;
     float SSSEdgeAttenuation;
     float skylightSamples;
     float SSSDepthDelta;
     float SSAOFalloff;
-
     int maxStepsSSR;
     int maxStepsSSS;
     bool hasSkylight;
     bool hasAmbientOcclusion;
 
-    vec2 bufferResolution;
+    mat4 lightPrimaryBuffer[MAX_LIGHTS];
+    mat4 lightSecondaryBuffer[MAX_LIGHTS];
+    int lightTypeBuffer[MAX_LIGHTS];
 };
 
-uniform LightsMetadata {
-    float shadowMapsQuantity;
-    float shadowMapResolution;
-    int lightQuantityA;
-    int lightQuantityB;
-    int lightQuantityC;
-};
 
-uniform LightDataA {
-    mat4 lightPrimaryBufferA[MAX_LIGHTS];
-    mat4 lightSecondaryBufferA[MAX_LIGHTS];
-    int lightTypeBufferA[MAX_LIGHTS];
 
-};
 
-uniform LightDataB {
-    mat4 lightPrimaryBufferB[MAX_LIGHTS];
-    mat4 lightSecondaryBufferB[MAX_LIGHTS];
-    int lightTypeBufferB[MAX_LIGHTS];
-};
-
-uniform LightDataC {
-    mat4 lightPrimaryBufferC[MAX_LIGHTS];
-    mat4 lightSecondaryBufferC[MAX_LIGHTS];
-    int lightTypeBufferC[MAX_LIGHTS];
-};
 
 uniform sampler2D scene_depth;
 uniform sampler2D brdf_sampler;

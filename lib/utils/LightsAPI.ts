@@ -6,9 +6,9 @@ import {mat4, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
+import UberShader from "../../utils/UberShader";
 
 
-const MAX_LIGHTS = 24
 let lightTimeout
 const toRad = Math.PI / 180
 const transformedNormalCache = vec3.create(),
@@ -17,108 +17,12 @@ const transformedNormalCache = vec3.create(),
 const cacheVec3 = vec3.create()
 
 export default class LightsAPI {
+
     static lights = new DynamicMap<Entity>()
-
-    static #initialized = false
-
-    static primaryBufferA = <Float32Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
-    static primaryBufferB = <Float32Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
-    static primaryBufferC = <Float32Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
-
-    static secondaryBufferA = <Float32Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
-    static secondaryBufferB = <Float32Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
-    static secondaryBufferC = <Float32Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS * 16, 0, false, false, false)
-
-    static typeBufferA = <Uint8Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS, 0, false, false, true)
-    static typeBufferB = <Uint8Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS, 0, false, false, true)
-    static typeBufferC = <Uint8Array>ArrayBufferAPI.allocateVector(MAX_LIGHTS, 0, false, false, true)
-
-    static lightsQuantityA = 0
-    static lightsQuantityB = 0
-    static lightsQuantityC = 0
-
-    static lightsUBOA?: UBO
-    static lightsUBOB?: UBO
-    static lightsUBOC?: UBO
-    static lightsMetadataUBO?: UBO
-
-    static initialize() {
-        if (LightsAPI.#initialized)
-            return
-        LightsAPI.#initialized = true
-        LightsAPI.lightsMetadataUBO = new UBO(
-            "LightsMetadata",
-            [
-                {name: "shadowMapsQuantity", type: "float"},
-                {name: "shadowMapResolution", type: "float"},
-                {name: "lightQuantityA", type: "int"},
-                {name: "lightQuantityB", type: "int"},
-                {name: "lightQuantityC", type: "int"}
-            ]
-        )
-        LightsAPI.lightsUBOA = new UBO(
-            "LightDataA",
-            [
-                {name: "lightPrimaryBufferA", type: "mat4", dataLength: MAX_LIGHTS},
-                {name: "lightSecondaryBufferA", type: "mat4", dataLength: MAX_LIGHTS},
-                {name: "lightTypeBufferA", type: "int", dataLength: MAX_LIGHTS}
-            ]
-        )
-        LightsAPI.lightsUBOB = new UBO(
-            "LightDataB",
-            [
-                {name: "lightPrimaryBufferB", type: "mat4", dataLength: MAX_LIGHTS},
-                {name: "lightSecondaryBufferB", type: "mat4", dataLength: MAX_LIGHTS},
-                {name: "lightTypeBufferB", type: "int", dataLength: MAX_LIGHTS}
-            ]
-        )
-        LightsAPI.lightsUBOC = new UBO(
-            "LightDataC",
-            [
-                {name: "lightPrimaryBufferC", type: "mat4", dataLength: MAX_LIGHTS},
-                {name: "lightSecondaryBufferC", type: "mat4", dataLength: MAX_LIGHTS},
-                {name: "lightTypeBufferC", type: "int", dataLength: MAX_LIGHTS}
-            ]
-        )
-    }
-
-    static updateABuffer() {
-        LightsAPI.lightsUBOA.bind()
-        LightsAPI.lightsUBOA.updateData("lightPrimaryBufferA", LightsAPI.primaryBufferA)
-        LightsAPI.lightsUBOA.updateData("lightSecondaryBufferA", LightsAPI.secondaryBufferA)
-        LightsAPI.lightsUBOA.updateData("lightTypeBufferA", LightsAPI.typeBufferA)
-        LightsAPI.lightsUBOA.unbind()
-
-        LightsAPI.lightsMetadataUBO.bind()
-        LightsAPI.lightsMetadataUBO.updateData("lightQuantityA", new Uint8Array([Math.min(LightsAPI.lightsQuantityA, MAX_LIGHTS)]))
-        LightsAPI.lightsMetadataUBO.unbind()
-    }
-
-    static updateBBuffer() {
-        LightsAPI.lightsUBOB.bind()
-
-        LightsAPI.lightsUBOB.updateData("lightPrimaryBufferB", LightsAPI.primaryBufferB)
-        LightsAPI.lightsUBOB.updateData("lightSecondaryBufferB", LightsAPI.secondaryBufferB)
-        LightsAPI.lightsUBOB.updateData("lightTypeBufferB", LightsAPI.typeBufferB)
-        LightsAPI.lightsUBOB.unbind()
-
-        LightsAPI.lightsMetadataUBO.bind()
-        LightsAPI.lightsMetadataUBO.updateData("lightQuantityB", new Uint8Array([Math.min(LightsAPI.lightsQuantityB, MAX_LIGHTS)]))
-        LightsAPI.lightsMetadataUBO.unbind()
-    }
-
-    static updateCBuffer() {
-        LightsAPI.lightsUBOC.bind()
-
-        LightsAPI.lightsUBOC.updateData("lightPrimaryBufferC", LightsAPI.primaryBufferC)
-        LightsAPI.lightsUBOC.updateData("lightSecondaryBufferC", LightsAPI.secondaryBufferC)
-        LightsAPI.lightsUBOC.updateData("lightTypeBufferC", LightsAPI.typeBufferC)
-        LightsAPI.lightsUBOC.unbind()
-
-        LightsAPI.lightsMetadataUBO.bind()
-        LightsAPI.lightsMetadataUBO.updateData("lightQuantityC", new Uint8Array([Math.min(LightsAPI.lightsQuantityC, MAX_LIGHTS)]))
-        LightsAPI.lightsMetadataUBO.unbind()
-    }
+    static primaryBuffer = <Float32Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS * 16, 0, false, false, false)
+    static secondaryBuffer = <Float32Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS * 16, 0, false, false, false)
+    static typeBuffer = <Uint8Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS, 0, false, false, true)
+    static lightsQuantity = 0
 
 
     static packageLights(keepOld?: boolean, force?: boolean) {
@@ -132,9 +36,9 @@ export default class LightsAPI {
 
     static #package(keepOld) {
         const lights = LightsAPI.lights.array
-        let primaryBuffer = LightsAPI.primaryBufferA,
-            secondaryBuffer = LightsAPI.secondaryBufferA,
-            typeBuffer = LightsAPI.typeBufferA
+        let primaryBuffer = LightsAPI.primaryBuffer,
+            secondaryBuffer = LightsAPI.secondaryBuffer,
+            typeBuffer = LightsAPI.typeBuffer
         let size = [0, 0, 0], offset = 0, sizeIndex = 0
 
 
@@ -150,41 +54,24 @@ export default class LightsAPI {
         const toLoopSize = lights.length
         for (let i = 0; i < toLoopSize; i++) {
             const current = lights[i]
-
-            if (offset + 16 > MAX_LIGHTS * 16) {
-                offset = 0
-
-                if (LightsAPI.primaryBufferA === primaryBuffer) {
-                    primaryBuffer = LightsAPI.primaryBufferB
-                    secondaryBuffer = LightsAPI.secondaryBufferB
-                    typeBuffer = LightsAPI.typeBufferB
-                    sizeIndex = 1
-                } else {
-                    primaryBuffer = LightsAPI.primaryBufferC
-                    secondaryBuffer = LightsAPI.secondaryBufferC
-                    typeBuffer = LightsAPI.typeBufferC
-                    sizeIndex = 2
-                }
-            }
-
-            if (offset + 16 > MAX_LIGHTS * 16 && primaryBuffer === LightsAPI.primaryBufferC || !current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
+            if (offset + 16 > UberShader.MAX_LIGHTS * 16)
+                break
+            if (!current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
             LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, typeBuffer, offset)
 
             offset += 16
             size[sizeIndex] += 1
         }
-        LightsAPI.lightsQuantityA = size[0]
-        if (LightsAPI.lightsQuantityA > 0 || !keepOld)
-            LightsAPI.updateABuffer()
-
-        LightsAPI.lightsQuantityB = size[1]
-        if (LightsAPI.lightsQuantityB > 0 || !keepOld)
-            LightsAPI.updateBBuffer()
-
-        LightsAPI.lightsQuantityC = size[2]
-        if (LightsAPI.lightsQuantityC > 0 || !keepOld)
-            LightsAPI.updateCBuffer()
+        LightsAPI.lightsQuantity = size[0]
+        if (LightsAPI.lightsQuantity > 0 || !keepOld) {
+            UberShader.UBO.bind()
+            UberShader.UBO.updateData("lightPrimaryBuffer", LightsAPI.primaryBuffer)
+            UberShader.UBO.updateData("lightSecondaryBuffer", LightsAPI.secondaryBuffer)
+            UberShader.UBO.updateData("lightTypeBuffer", LightsAPI.typeBuffer)
+            UberShader.UBO.updateData("lightQuantity", new Uint8Array([Math.min(LightsAPI.lightsQuantity, UberShader.MAX_LIGHTS)]))
+            UberShader.UBO.unbind()
+        }
     }
 
     static updateBuffer(entity: Entity, primaryBuffer: Float32Array, secondaryBuffer: Float32Array, typeBuffer: Uint8Array, offset: number) {

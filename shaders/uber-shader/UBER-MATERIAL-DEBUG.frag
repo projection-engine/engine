@@ -124,7 +124,7 @@ void main(){
             case LIGHT_QUANTITY:
             case LIGHT_COMPLEXITY:{
                 bool isLightQuantity = shadingModel == LIGHT_QUANTITY;
-                float total =  isLightQuantity ? float(lightQuantityA + lightQuantityB + lightQuantityC): float(MAX_LIGHTS * 3);
+                float total =  isLightQuantity ? float(lightQuantity): float(MAX_LIGHTS * 3);
                 float contribution = 0.;
 
                 if (!flatShading){
@@ -132,27 +132,14 @@ void main(){
                     albedoOverPI = vec3(1.);
                     F0 = mix(F0, albedoOverPI, 0.);
 
-                    for (int i = 0; i < lightQuantityA; i++){
+                    for (int i = 0; i < lightQuantity; i++){
                         if(checkLight(
-                            lightPrimaryBufferA[i],
-                            lightSecondaryBufferA[i],
-                            lightTypeBufferA[i]
+                            lightPrimaryBuffer[i],
+                            lightSecondaryBuffer[i],
+                            lightTypeBuffer[i]
                         )) contribution++;
                     }
-                    for (int i = 0; i < lightQuantityB; i++){
-                        if(checkLight(
-                        lightPrimaryBufferB[i],
-                        lightSecondaryBufferB[i],
-                        lightTypeBufferB[i]
-                        )) contribution++;
-                    }
-                    for (int i = 0; i < lightQuantityC; i++){
-                        if(checkLight(
-                        lightPrimaryBufferC[i],
-                        lightSecondaryBufferC[i],
-                        lightTypeBufferC[i]
-                        )) contribution++;
-                    }
+
                 }
                 if (total > 0.)
                 fragColor = vec4(mix(vec3(1., 0., 0.), vec3(0., .0, 1.), 1. - contribution/total), 1.);

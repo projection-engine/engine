@@ -35,7 +35,8 @@ vec3 viewSpacePosition;
 
 //import(computeAreaLights)
 
-void processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type, inout  vec3 directIllumination){
+vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type){
+    vec3 directIllumination = vec3(0.);
     if (type == DIRECTIONAL)
     directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
     else if (type == POINT)
@@ -46,6 +47,7 @@ void processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type, inout  vec
     directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
     else if (type == DISK)
     directIllumination += computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
+    return directIllumination;
 }
 
 vec4 pbLightComputation() {
@@ -61,30 +63,14 @@ vec4 pbLightComputation() {
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
     F0 = mix(F0, albedo, metallic);
 
-    for (int i = 0; i < lightQuantityA; i++){
-        processLight(
-            lightPrimaryBufferA[i],
-            lightSecondaryBufferA[i],
-            lightTypeBufferA[i],
-            directIllumination
+    for (int i = 0; i < lightQuantity; i++){
+        directIllumination += processLight(
+            lightPrimaryBuffer[i],
+            lightSecondaryBuffer[i],
+            lightTypeBuffer[i]
         );
     }
-    for (int i = 0; i < lightQuantityB; i++){
-        processLight(
-            lightPrimaryBufferB[i],
-            lightSecondaryBufferB[i],
-            lightTypeBufferB[i],
-            directIllumination
-        );
-    }
-    for (int i = 0; i < lightQuantityC; i++){
-        processLight(
-            lightPrimaryBufferC[i],
-            lightSecondaryBufferC[i],
-            lightTypeBufferC[i],
-            directIllumination
-        );
-    }
+
 
 
     indirectIllumination = sampleIndirectLight();

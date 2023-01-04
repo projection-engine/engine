@@ -22,6 +22,7 @@ import SkyLightComponent from "./templates/components/SkyLightComponent";
 import StaticShaders from "./lib/StaticShaders";
 import StaticMeshes from "./lib/StaticMeshes";
 import StaticFBO from "./lib/StaticFBO";
+import UberShader from "./utils/UberShader";
 
 export default class GPU {
     static context?: WebGL2RenderingContext
@@ -38,7 +39,7 @@ export default class GPU {
     static internalResolution = {w: 0, h: 0}
     static #activeSkylightEntity?: Entity
     static skylightProbe: LightProbe
-
+    static bufferResolution = new Float32Array([0,0])
     static set activeSkylightEntity(entity: Entity | undefined) {
         GPU.#activeSkylightEntity = entity
         GPU.updateSkylight()
@@ -52,19 +53,19 @@ export default class GPU {
     static updateSkylight(): void {
         const entity = GPU.#activeSkylightEntity
         if (!GPU.skylightProbe) {
-            SceneRenderer.UBO.bind()
-            SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([0]))
-            SceneRenderer.UBO.unbind()
+            UberShader.UBO.bind()
+            UberShader.UBO.updateData("hasSkylight", new Uint8Array([0]))
+            UberShader.UBO.unbind()
             return
         }
         if (entity) {
 
             const skylight = <SkyLightComponent>entity.components.get(COMPONENTS.SKYLIGHT)
 
-            SceneRenderer.UBO.bind()
-            SceneRenderer.UBO.updateData("hasSkylight", new Uint8Array([1]))
-            SceneRenderer.UBO.updateData("skylightSamples", skylight.mipmaps)
-            SceneRenderer.UBO.unbind()
+            UberShader.UBO.bind()
+            UberShader.UBO.updateData("hasSkylight", new Uint8Array([1]))
+            UberShader.UBO.updateData("skylightSamples", skylight.mipmaps)
+            UberShader.UBO.unbind()
 
             GPU.skylightProbe.resolution = skylight.resolution
             const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
@@ -84,7 +85,8 @@ export default class GPU {
         const screen = window.screen
         GPU.internalResolution.w = mainResolution?.w || screen.width
         GPU.internalResolution.h = mainResolution?.h || screen.height
-
+        GPU.bufferResolution[0] = GPU.internalResolution.w
+        GPU.bufferResolution[1] = GPU.internalResolution.h
         GPU.context = canvas.getContext("webgl2", {
             antialias: false,
 
@@ -93,7 +95,6 @@ export default class GPU {
             powerPreference: "high-performance"
         })
         GPU.canvas = canvas
-
         GPU.context.getExtension("EXT_color_buffer_float")
         GPU.context.getExtension("OES_texture_float")
         GPU.context.getExtension("OES_texture_float_linear")
@@ -106,14 +107,11 @@ export default class GPU {
         GPU.context.frontFace(GPU.context.CCW)
 
 
-        LightsAPI.initialize()
+        UberShader.initialize()
         CameraAPI.initialize()
         await StaticMeshes.initialize()
         StaticShaders.initialize()
         StaticFBO.initialize()
-
-        SceneRenderer.initialize()
-
         EntityWorkerAPI.initialize()
         TerrainGenerator.initialize()
         ImageProcessor.initialize()

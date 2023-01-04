@@ -4,6 +4,7 @@ import VisibilityRenderer from "./VisibilityRenderer";
 import GPU from "../GPU";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
+import UberShader from "../utils/UberShader";
 
 
 let lightsToUpdate
@@ -31,10 +32,10 @@ export default class DirectionalShadows {
             DirectionalShadows.changed = true
         }
         DirectionalShadows.atlasRatio = DirectionalShadows.maxResolution / DirectionalShadows.resolutionPerTexture
-        LightsAPI.lightsMetadataUBO.bind()
-        LightsAPI.lightsMetadataUBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
-        LightsAPI.lightsMetadataUBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
-        LightsAPI.lightsMetadataUBO.unbind()
+        UberShader.UBO.bind()
+        UberShader.UBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
+        UberShader.UBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
+        UberShader.UBO.unbind()
     }
 
 

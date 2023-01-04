@@ -5,8 +5,6 @@ import VisibilityRenderer from "./VisibilityRenderer";
 import Shader from "../instances/Shader";
 import CameraAPI from "../lib/utils/CameraAPI";
 import SHADING_MODELS from "../static/SHADING_MODELS";
-import UBO from "../instances/UBO";
-import COMPONENTS from "../static/COMPONENTS";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import {mat3} from "gl-matrix";
@@ -23,65 +21,31 @@ const materialAttributes = mat3.create()
  */
 
 export default class SceneRenderer {
-    static #ready = false
     static debugShadingModel = SHADING_MODELS.DETAIL
-    static UBO: UBO
-
-
-    static initialize() {
-        if (SceneRenderer.#ready)
-            return
-        SceneRenderer.#ready = true
-        SceneRenderer.UBO = new UBO(
-            "UberShaderSettings",
-            [
-                {type: "float", name: "SSRFalloff"},
-                {type: "float", name: "stepSizeSSR"},
-                {type: "float", name: "maxSSSDistance"},
-                {type: "float", name: "SSSDepthThickness"},
-                {type: "float", name: "SSSEdgeAttenuation"},
-                {type: "float", name: "skylightSamples"},
-                {type: "float", name: "SSSDepthDelta"},
-                {type: "float", name: "SSAOFalloff"},
-
-                {type: "int", name: "maxStepsSSR"},
-                {type: "int", name: "maxStepsSSS"},
-                {type: "bool", name: "hasSkylight"},
-                {type: "bool", name: "hasAmbientOcclusion"},
-                {type: "vec2", name: "bufferResolution"},
-
-            ])
-        SceneRenderer.UBO.bind()
-        SceneRenderer.UBO.updateData("bufferResolution", new Float32Array([GPU.internalResolution.w, GPU.internalResolution.h]))
-        SceneRenderer.UBO.unbind()
-        if (UberShader.uber !== undefined)
-            SceneRenderer.UBO.bindWithShader(UberShader.uber.program)
-    }
-
 
     static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
         const shader = UberShader.uber
-        if (!SceneRenderer.#ready || !shader)
+        if ( !shader)
             return
 
         const uniforms = UberShader.uberUniforms
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         const context = GPU.context
-
         shader.bind()
-
-
         if (Engine.developmentMode)
             context.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
+        context.uniform2fv(uniforms.bufferResolution, GPU.bufferResolution)
+
         if (!useCustomView) {
             context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
             context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
             context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
+
         } else {
             context.uniformMatrix4fv(uniforms.viewMatrix, false, viewMatrix)
             context.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)

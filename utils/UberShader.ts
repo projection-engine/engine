@@ -8,8 +8,14 @@ import Shader from "../instances/Shader";
 import MutableObject from "../MutableObject";
 import LightsAPI from "../lib/utils/LightsAPI";
 import SceneRenderer from "../runtime/SceneRenderer";
+import UBO from "../instances/UBO";
 
 export default class UberShader {
+
+    static #initialized = false
+    static MAX_LIGHTS = 310
+
+    static UBO:UBO
     static #uberSignature = {}
     static get uberSignature() {
         return UberShader.#uberSignature
@@ -18,8 +24,39 @@ export default class UberShader {
     static uber?: Shader
     static uberUniforms?: { [key: string]: WebGLUniformLocation }
 
+    static initialize() {
+        if (UberShader.#initialized)
+            return
+        UberShader.#initialized = true
+        UberShader.UBO = new UBO(
+            "UberShaderSettings",
+            [
+                {name: "shadowMapsQuantity", type: "float"},
+                {name: "shadowMapResolution", type: "float"},
+                {name: "lightQuantity", type: "int"},
+
+                {type: "float", name: "SSRFalloff"},
+                {type: "float", name: "stepSizeSSR"},
+                {type: "float", name: "maxSSSDistance"},
+                {type: "float", name: "SSSDepthThickness"},
+                {type: "float", name: "SSSEdgeAttenuation"},
+                {type: "float", name: "skylightSamples"},
+                {type: "float", name: "SSSDepthDelta"},
+                {type: "float", name: "SSAOFalloff"},
+                {type: "int", name: "maxStepsSSR"},
+                {type: "int", name: "maxStepsSSS"},
+                {type: "bool", name: "hasSkylight"},
+                {type: "bool", name: "hasAmbientOcclusion"},
+
+                {name: "lightPrimaryBuffer", type: "mat4", dataLength: UberShader.MAX_LIGHTS},
+                {name: "lightSecondaryBuffer", type: "mat4", dataLength: UberShader.MAX_LIGHTS},
+                {name: "lightTypeBuffer", type: "int", dataLength: UberShader.MAX_LIGHTS}
+            ]
+        )
+    }
+
     static compile(forceCleanShader?: boolean) {
-        const OLD = UberShader.uber
+
         UberShader.uber = undefined
         const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
         if (!forceCleanShader)
@@ -42,24 +79,17 @@ export default class UberShader {
         const shader = new Shader(VERTEX_SHADER, fragment)
         if (shader.messages.hasError) {
 
-            if (!OLD && !forceCleanShader)
+            if (!UberShader.uber && !forceCleanShader)
                 UberShader.compile(true)
             console.error("Invalid shader", shader.messages)
-            UberShader.uber = OLD
+
             return
         }
-        if (OLD)
-            GPU.context.deleteProgram(OLD.program)
+        if (UberShader.uber)
+            GPU.context.deleteProgram(UberShader.uber.program)
 
         UberShader.uber = shader
         UberShader.uberUniforms = shader.uniformMap
-
-        LightsAPI.lightsMetadataUBO.bindWithShader(shader.program)
-        LightsAPI.lightsUBOA.bindWithShader(shader.program)
-        LightsAPI.lightsUBOB.bindWithShader(shader.program)
-        LightsAPI.lightsUBOC.bindWithShader(shader.program)
-        if (SceneRenderer.UBO !== undefined)
-            SceneRenderer.UBO.bindWithShader(shader.program)
-
+        UberShader.UBO.bindWithShader(shader.program)
     }
 }
