@@ -9,10 +9,10 @@ import CullingComponent from "../templates/components/CullingComponent";
 import UIComponent from "../templates/components/UIComponent";
 import TerrainComponent from "../templates/components/TerrainComponent";
 import LightComponent from "../templates/components/LightComponent";
+import Component from "../templates/components/Component";
 
-type AllComponents = LightComponent |MeshComponent |SkyLightComponent |CameraComponent |SpriteComponent |PhysicsColliderComponent |RigidBodyComponent |CullingComponent |UIComponent |TerrainComponent|undefined
 
-export default function getComponentInstance(key:string):AllComponents{
+export default function getComponentInstance(key:string):Component|undefined{
     switch(key){
         case  COMPONENTS.LIGHT:
             return new LightComponent();

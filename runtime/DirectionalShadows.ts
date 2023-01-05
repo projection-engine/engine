@@ -83,14 +83,14 @@ export default class DirectionalShadows {
     }
 
     static loopMeshes(light) {
-        if (!light.__entity)
+        if (!light.entity)
             return
         const toRender = VisibilityRenderer.meshesToDraw.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
-            const current = toRender[m], meshComponent = current.__meshComponent
-            const mesh = current.__meshRef
-            if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
+            const current = toRender[m], meshComponent = current.meshComponent
+            const mesh = current.meshRef
+            if (!mesh || !meshComponent.castsShadows || !current.active || current.materialRef?.isSky)
                 continue
             StaticShaders.directShadows.bind()
             const U = StaticShaders.directShadowsUniforms

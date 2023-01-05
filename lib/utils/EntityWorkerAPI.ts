@@ -37,18 +37,18 @@ export default class EntityWorkerAPI {
 
 
     static removeEntity(entity) {
-        if (!entity.__hasWorkerBinded)
+        if (!entity.hasWorkerBound)
             return
         EntityWorkerAPI.#workers.forEach(worker => {
             worker.postMessage({type: WORKER_MESSAGES.REMOVE_ENTITY, payload: entity.id})
         })
 
         EntityWorkerAPI.linkedEntities.delete(entity.id)
-        entity.__hasWorkerBinded = false
+        entity.hasWorkerBound = false
     }
 
     static registerEntity(entity) {
-        if (!EntityWorkerAPI.#initialized || (entity.__hasWorkerBinded && EntityWorkerAPI.linkedEntities.get(entity.id)))
+        if (!EntityWorkerAPI.#initialized || (entity.hasWorkerBound && EntityWorkerAPI.linkedEntities.get(entity.id)))
             return
         EntityWorkerAPI.linkedEntities.set(entity.id, entity)
 
@@ -76,7 +76,7 @@ export default class EntityWorkerAPI {
         })
 
         entity.changed = true
-        entity.__hasWorkerBinded = true
+        entity.hasWorkerBound = true
     }
 
     static syncThreads() {

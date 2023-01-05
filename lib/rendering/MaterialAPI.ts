@@ -39,7 +39,7 @@ export default class MaterialAPI {
     }
 
     static updateMap(component: MeshComponent) {
-        const entity = component?.__entity
+        const entity = component?.entity
 
         if (!entity || !Entity.isRegistered(entity)) return;
 
@@ -56,8 +56,8 @@ export default class MaterialAPI {
 
         if (hasToUpdate)
             component.materialUniforms = JSON.parse(JSON.stringify(possibleNewUniforms))
-        entity.__materialRef = referenceMat
-        if (!entity.__materialRef) {
+        entity.materialRef = referenceMat
+        if (!entity.materialRef) {
             component.overrideMaterialUniforms = false
             component.materialUniforms = []
         }
@@ -73,9 +73,9 @@ export default class MaterialAPI {
                 })
 
 
-        if (entity.__meshRef?.id !== meshID && meshID) {
-            entity.__meshRef = GPU.meshes.get(component._meshID)
-            if (!entity.__meshRef)
+        if (entity.meshRef?.id !== meshID && meshID) {
+            entity.meshRef = GPU.meshes.get(component._meshID)
+            if (!entity.meshRef)
                 FileSystemAPI.loadMesh(component._meshID).then(res => {
                     if (res)
                         MaterialAPI.updateMap(component)
@@ -83,7 +83,7 @@ export default class MaterialAPI {
                         console.error("Mesh not found")
                 })
         } else if (!meshID)
-            entity.__meshRef = undefined
+            entity.meshRef = undefined
     }
 
     static async updateMaterialUniforms(material: Material) {

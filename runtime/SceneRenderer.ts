@@ -105,7 +105,7 @@ export default class SceneRenderer {
 
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
-            const mesh = entity.__meshRef
+            const mesh = entity.meshRef
 
             if (!entity.active || !mesh || entity.isCulled)
                 continue
@@ -113,7 +113,7 @@ export default class SceneRenderer {
             materialAttributes[1] = entity.pickID[1]
             materialAttributes[2] = entity.pickID[2]
 
-            const material = entity.__materialRef
+            const material = entity.materialRef
 
             if (isSky) {
                 isSky = false
@@ -121,7 +121,7 @@ export default class SceneRenderer {
                 context.enable(context.DEPTH_TEST)
             }
 
-            const culling = entity?.__cullingComponent
+            const culling = entity?.cullingComponent
 
             if (culling && culling.screenDoorEffect) {
                 materialAttributes[3] = entity.__cullingMetadata[5]
@@ -149,7 +149,7 @@ export default class SceneRenderer {
                 materialAttributes[5] = material.isAlphaTested ? 1 : 0
                 materialAttributes[6] = material.bindID
 
-                const component = entity.__meshComponent
+                const component = entity.meshComponent
                 const overrideUniforms = component.overrideMaterialUniforms
                 const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues
                 const toBind = material.uniforms
