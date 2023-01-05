@@ -267,7 +267,7 @@ export default class CameraAPI {
 
         if (!entity?.components)
             return
-        const cameraObj = entity.components.get(COMPONENTS.CAMERA)
+        const cameraObj = entity.cameraComponent
         if (!cameraObj)
             return
 

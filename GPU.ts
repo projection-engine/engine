@@ -60,7 +60,7 @@ export default class GPU {
         }
         if (entity) {
 
-            const skylight = <SkyLightComponent>entity.components.get(COMPONENTS.SKYLIGHT)
+            const skylight = entity.skylightComponent
 
             UberShader.UBO.bind()
             UberShader.UBO.updateData("hasSkylight", new Uint8Array([1]))

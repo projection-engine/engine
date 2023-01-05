@@ -72,7 +72,7 @@ export default class GPUAPI {
         const inUse = MaterialAPI.entityMaterial.get(id)
         try {
             if (inUse)
-                Object.values(inUse).forEach(entity => MaterialAPI.updateMap(<MeshComponent>entity.components.get(COMPONENTS.MESH)))
+                Object.values(inUse).forEach(entity => MaterialAPI.updateMap(entity.meshComponent))
         } catch (err) {
             console.error(err)
         }

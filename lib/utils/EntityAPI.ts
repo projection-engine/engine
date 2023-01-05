@@ -41,8 +41,8 @@ export default class EntityAPI {
             for (let i = 0; i < entity.children.length; i++)
                 loopHierarchy(entity.children[i])
             entity.active = newValue
-            needsVisibilityUpdate = needsVisibilityUpdate || entity.__hasMesh
-            needsLightUpdate = needsLightUpdate || entity.__hasMesh || entity.__hasLight
+            needsVisibilityUpdate = needsVisibilityUpdate || entity.meshComponent !== undefined
+            needsLightUpdate = needsLightUpdate || entity.meshComponent !== undefined || entity.lightComponent !== undefined
         }
         loopHierarchy(entity)
         if (needsLightUpdate)
@@ -77,17 +77,17 @@ export default class EntityAPI {
         if (UIAPI.uiMountingPoint != null)
             UIAPI.createUIEntity(entity)
 
-        if (entity.__hasLight)
+        if (entity.lightComponent !== undefined)
             LightsAPI.lights.add(entity.id, entity)
-        if (entity.__hasSprite)
+        if (entity.spriteComponent !== undefined)
             SpriteRenderer.sprites.add(entity.id, entity)
-        if (entity.__hasMesh) {
+        if (entity.meshComponent !== undefined) {
             VisibilityRenderer.meshesToDraw.add(entity.id, entity)
-            MaterialAPI.updateMap(entity.__meshComponent)
+            MaterialAPI.updateMap(entity.meshComponent)
         }
 
 
-        if (COMPONENT_TRIGGER_UPDATE.indexOf(<COMPONENTS|undefined>previouslyRemoved) || !!COMPONENT_TRIGGER_UPDATE.find(v => entity.components.get(v) != null))
+        if (COMPONENT_TRIGGER_UPDATE.indexOf(<COMPONENTS | undefined>previouslyRemoved) || !!COMPONENT_TRIGGER_UPDATE.find(v => entity.components.get(v) != null))
             LightsAPI.packageLights(false, true)
         VisibilityRenderer.needsUpdate = true
     }
@@ -111,11 +111,11 @@ export default class EntityAPI {
         Engine.entities = Engine.entities.filter(e => e.id !== id)
 
 
-        if (entity.__hasLight)
+        if (entity.lightComponent !== undefined)
             LightsAPI.lights.delete(entity.id)
-        if (entity.__hasSprite)
+        if (entity.spriteComponent !== undefined)
             SpriteRenderer.sprites.delete(entity.id)
-        if (entity.__hasMesh)
+        if (entity.meshComponent !== undefined)
             VisibilityRenderer.meshesToDraw.delete(entity.id)
 
         PhysicsAPI.removeRigidBody(entity)
@@ -124,13 +124,13 @@ export default class EntityAPI {
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
 
-        if (entity.__materialRef) {
-            const old = MaterialAPI.entityMaterial.get(entity.__materialRef.id)
+        if (entity.materialRef) {
+            const old = MaterialAPI.entityMaterial.get(entity.materialRef.id)
             delete old[entity.id]
-            entity.__materialRef = undefined
+            entity.materialRef = undefined
         }
 
-        if (entity.__hasLight || entity.__hasMesh) {
+        if (entity.lightComponent !== undefined || entity.meshComponent !== undefined) {
             LightsAPI.packageLights(false, true)
             VisibilityRenderer.needsUpdate = true
         }

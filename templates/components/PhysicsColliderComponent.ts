@@ -27,7 +27,6 @@ export default class PhysicsColliderComponent extends Component {
 
     set center(data) {
         this._center = data
-        this.__entity.changed = true
     }
 
     get size(): number[] {
@@ -36,7 +35,6 @@ export default class PhysicsColliderComponent extends Component {
 
     set size(data) {
         this._size = data
-        this.__entity.changed = true
     }
 
     get height(): number {
@@ -45,7 +43,6 @@ export default class PhysicsColliderComponent extends Component {
 
     set height(data) {
         this._height = data
-        this.__entity.changed = true
     }
 
     get radius(): number {
@@ -54,7 +51,6 @@ export default class PhysicsColliderComponent extends Component {
 
     set radius(data) {
         this._radius = data
-        this.__entity.changed = true
     }
 
 

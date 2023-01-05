@@ -42,7 +42,7 @@ export default class PhysicsAPI {
 
     static initializeCollider(entity) {
         const ammo = PhysicsAPI.ammo
-        const colliderComp = <PhysicsColliderComponent>entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
+        const colliderComp = entity.physicsColliderComponent
 
         switch (colliderComp.collisionType) {
             case COLLISION_TYPES.BOX: {
@@ -119,7 +119,7 @@ export default class PhysicsAPI {
 
     static removeRigidBody(entity: Entity) {
         const ammo = PhysicsAPI.ammo
-        const comp = <RigidBodyComponent>entity.components.get(COMPONENTS.RIGID_BODY)
+        const comp = entity.rigidBodyComponent
         if (!ammo || !comp?.motionState)
             return
         comp.initialized = false

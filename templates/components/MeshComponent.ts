@@ -40,11 +40,11 @@ export default class MeshComponent extends Component {
         this._materialID = data
         if (data) {
             const previous = MaterialAPI.entityMaterial.get(this._materialID) || {}
-            previous[this.__entity.id] = this.__entity
+            previous[this.entity.id] = this.entity
             MaterialAPI.entityMaterial.set(this._materialID, previous)
-        } else if (this.__entity.__materialRef) {
-            const old = MaterialAPI.entityMaterial.get(this.__entity.__materialRef.id)
-            delete old[this.__entity.id]
+        } else if (this.entity.materialRef) {
+            const old = MaterialAPI.entityMaterial.get(this.entity.materialRef.id)
+            delete old[this.entity.id]
         }
         MaterialAPI.updateMap(this)
     }

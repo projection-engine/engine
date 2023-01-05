@@ -19,7 +19,7 @@ export default class LightComponent extends Component {
     set type(data) {
         const isDifferent = data !== this._type
         this._type = data
-        if (isDifferent && Entity.isRegistered(this.__entity))
+        if (isDifferent && Entity.isRegistered(this.entity))
             LightsAPI.packageLights(false, true)
     }
 
@@ -55,7 +55,7 @@ export default class LightComponent extends Component {
 
     set center(data) {
         this._center = data
-        this.__entity.needsLightUpdate = true
+        this.entity.needsLightUpdate = true
     }
 
     // -------------- GLOBAL --------------
@@ -88,7 +88,7 @@ export default class LightComponent extends Component {
 
     set shadowMap(data) {
         if (this._shadowMap !== data)
-            this.__entity.needsLightUpdate = true
+            this.entity.needsLightUpdate = true
         this._shadowMap = data
     }
 

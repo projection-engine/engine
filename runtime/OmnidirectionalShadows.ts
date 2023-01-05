@@ -33,7 +33,7 @@ export default class OmnidirectionalShadows {
             const current = lightsToUpdate[i]
             if (!current)
                 continue
-            const entity = current.__entity
+            const entity = current.entity
             OmnidirectionalShadows.shadowMap
                 .draw((yaw, pitch, perspective, index) => {
                         vec3.add(cacheVec3, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
@@ -57,12 +57,12 @@ export default class OmnidirectionalShadows {
         const size = toRender.length
         for (let m = 0; m < size; m++) {
 
-            const current = toRender[m], meshComponent = current.__meshComponent
-            const mesh = current.__meshRef
-            if (!mesh || !meshComponent.castsShadows || !current.active || current.__materialRef?.isSky)
+            const current = toRender[m], meshComponent = current.meshComponent
+            const mesh = current.meshRef
+            if (!mesh || !meshComponent.castsShadows || !current.active || current.materialRef?.isSky)
                 continue
 
-            vec3.sub(cacheVec3, current.absoluteTranslation, component.__entity.absoluteTranslation)
+            vec3.sub(cacheVec3, current.absoluteTranslation, component.entity.absoluteTranslation)
             const distanceFromLight = vec3.length(cacheVec3)
 
             if (distanceFromLight > component.cutoff)
@@ -72,7 +72,7 @@ export default class OmnidirectionalShadows {
                 viewMatrix: view,
                 transformMatrix: current.matrix,
                 projectionMatrix: projection,
-                lightPosition: component.__entity.absoluteTranslation
+                lightPosition: component.entity.absoluteTranslation
             })
             mesh.draw()
         }

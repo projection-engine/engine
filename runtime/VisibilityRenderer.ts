@@ -40,9 +40,9 @@ export default class VisibilityRenderer {
         for (let i = 0; i < size; i++) {
             isAlphaTested = 0
             const entity = toRender[i]
-            const mesh = entity.__meshRef
-            const material = entity.__materialRef
-            const culling = entity.__cullingComponent
+            const mesh = entity.meshRef
+            const material = entity.materialRef
+            const culling = entity.cullingComponent
             if (entity.isCulled || !entity.active || !mesh  || culling && culling.screenDoorEnabled && culling.screenDoorEffect)
                 continue
 

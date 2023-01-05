@@ -1,4 +1,4 @@
-import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
+import ArrayBufferAPI from "../../lib/utils/ArrayBufferAPI";
 
 
 /**
@@ -6,7 +6,8 @@ import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
  * @field __cullingMetadata [distanceFromCamera, cullingDistance, hasDistanceCullingEnabled, isDistanceCulled, screenDoorDistance, isScreenDoorEnabled]
  */
 
-export default class Movable {
+export default abstract class MovableAbstract {
+    #hasWorkerBound = false
     _rotationQuat = <Float32Array>ArrayBufferAPI.allocateVector(4, 0, true, true, false)
     _translation = <Float32Array>ArrayBufferAPI.allocateVector(3, 0, false, true, false)
     _scaling = <Float32Array>ArrayBufferAPI.allocateVector(3, 1, false, true, false)
@@ -19,8 +20,15 @@ export default class Movable {
     lockedRotation = false
     lockedTranslation = false
     lockedScaling = false
-
     absoluteTranslation = <Float32Array>ArrayBufferAPI.allocateVector(3, 0, false, true, false)
+
+    get hasWorkerBound() {
+        return this.#hasWorkerBound
+    }
+
+    set hasWorkerBound(data) {
+        this.#hasWorkerBound = data
+    }
 
     get isCulled() {
         return this.__cullingMetadata[3] === 1

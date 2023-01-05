@@ -75,7 +75,7 @@ export default class LightsAPI {
     }
 
     static updateBuffer(entity: Entity, primaryBuffer: Float32Array, secondaryBuffer: Float32Array, typeBuffer: Uint8Array, offset: number) {
-        const component = entity.__lightComp
+        const component = entity.lightComponent
         const color = component.fixedColor
         const position = entity.absoluteTranslation
         const attenuation = component.attenuation
@@ -102,7 +102,7 @@ export default class LightsAPI {
                 primaryBuffer[offset + 14] = component.hasSSS ? 1 : 0
 
                 if (component.shadowMap) {
-                    mat4.lookAt(component.__lightView, component.__entity.absoluteTranslation, <vec3>component.center, [0, 1, 0])
+                    mat4.lookAt(component.__lightView, component.entity.absoluteTranslation, <vec3>component.center, [0, 1, 0])
                     mat4.ortho(component.__lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
 
                     mat4.multiply(lightViewProjection, component.__lightProjection, component.__lightView)

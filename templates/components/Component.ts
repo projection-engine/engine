@@ -1,4 +1,5 @@
 import MutableObject from "../../MutableObject";
+import Entity from "../../instances/Entity";
 
 interface ComponentValueGeneric {
     [key: string]: any
@@ -25,11 +26,10 @@ export default class Component {
         TERRAIN: "terrain",
         QUAT_EULER: "quatEuler"
     })
-    __entity
-
     _props: ComponentValueGeneric[] = []
     _name = ""
-    #entity
+
+    #entity: Entity
     get entity() {
         return this.#entity
     }
@@ -112,7 +112,7 @@ export default class Component {
     }
 
 
-    get name():string {
+    get name(): string {
         return this._name
     }
 

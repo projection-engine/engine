@@ -47,7 +47,7 @@ export default class UIAPI {
         for (let i = 0; i < uiElements.length; i++) {
             const found = uiElements[i]
             const entities = Engine.entities.filter(e => {
-                const component = <UIComponent | undefined>e.components.get(COMPONENTS.UI)
+                const component = e.uiComponent
                 return component?.uiLayoutID === found
             })
             if (!entities.length) {
@@ -63,7 +63,7 @@ export default class UIAPI {
     }
 
     static deleteUIEntity(entity) {
-        const UI = entity.components.get(COMPONENTS.UI)
+        const UI = entity.uiComponent
         if (!UI || !UI.__element)
             return
         const children = UI.__element.querySelectorAll("[data-enginewrapper='-']")
@@ -84,7 +84,7 @@ export default class UIAPI {
     }
 
     static createUIEntity(entity) {
-        const UI = entity.__hasUI ? entity.components.get(COMPONENTS.UI) : undefined
+        const UI = entity.uiComponent
         if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
             return
 
@@ -135,7 +135,7 @@ export default class UIAPI {
     }
 
     static updateUIEntity(entity) {
-        const UI = <UIComponent>entity.components.get(COMPONENTS.UI)
+        const UI = entity.uiComponent
         if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
             return
         const el = UI.__element
@@ -156,7 +156,7 @@ export default class UIAPI {
         const entities = Engine.entities
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
-            const UI = <UIComponent | undefined>entity.components.get(COMPONENTS.UI)
+            const UI = entity.uiComponent
             if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
                 continue
             UI.__element = undefined

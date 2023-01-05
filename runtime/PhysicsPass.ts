@@ -17,7 +17,7 @@ export default class PhysicsPass {
 
         for (let i = 0; i < length; i++) {
             const current = rigidBodies[i]
-            const component = current.__rigidBodyComponent
+            const component = current.rigidBodyComponent
             if (!component?.motionState) {
                 if (!component)
                     PhysicsAPI.removeRigidBody(current)
