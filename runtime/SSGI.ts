@@ -31,7 +31,7 @@ export default class SSGI {
 
     static execute() {
         if (!SSGI.enabled) {
-            StaticFBO.ssgiFinal.clear()
+            StaticFBO.ssgi.clear()
             return
         }
         const context = GPU.context
@@ -43,7 +43,7 @@ export default class SSGI {
         context.uniform1i(StaticShaders.ssgiUniforms.scene_depth, 0)
 
         context.activeTexture(context.TEXTURE1)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.currentFrameSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.postProcessing2Sampler)
         context.uniform1i(StaticShaders.ssgiUniforms.previousFrame, 1)
 
         context.uniform2fv(StaticShaders.ssgiUniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
@@ -51,11 +51,7 @@ export default class SSGI {
 
         StaticMeshes.drawQuad()
         StaticFBO.ssgi.stopMapping()
-
-        if (SSGI.enabled)
-            SSGI.#applyBlur()
-        else
-            StaticFBO.ssgiFinal.clear()
+        SSGI.#applyBlur()
 
     }
 
@@ -63,8 +59,7 @@ export default class SSGI {
         const context = GPU.context
         context.activeTexture(context.TEXTURE0)
         const ssgiQuarter = StaticFBO.ssgiQuarter,
-            ssgiEighth = StaticFBO.ssgiEighth,
-            ssgiFinal = StaticFBO.ssgiFinal
+            ssgiEighth = StaticFBO.ssgiEighth
 
         StaticShaders.gaussian.bind()
         ssgiQuarter.startMapping()
@@ -82,7 +77,7 @@ export default class SSGI {
         ssgiEighth.stopMapping()
 
         StaticShaders.bilateralBlur.bind()
-        ssgiFinal.startMapping()
+        StaticFBO.ssgi.startMapping()
         context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityEntitySampler)
         context.uniform1i(StaticShaders.bilateralBlurUniforms.entityIDSampler, 0)
 
@@ -92,6 +87,6 @@ export default class SSGI {
         context.uniform1i(StaticShaders.bilateralBlurUniforms.blurRadius, SSGI.blurSamples)
 
         StaticMeshes.drawQuad()
-        ssgiFinal.stopMapping()
+        StaticFBO.ssgi.stopMapping()
     }
 }

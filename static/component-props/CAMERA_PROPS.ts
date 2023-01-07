@@ -1,19 +1,27 @@
 import Component from "../../templates/components/Component";
 
 export default  [
-    Component.group("VIEW_CLIPPING", [
+    Component.group("CAMERA", [
         Component.number("FOV", "fov", 150, 10),
         Component.number("FAR", "zFar", undefined,0, .01),
         Component.number("NEAR", "zNear", undefined,0, .01),
+        Component.boolean("ORTHO_PROJECTION", "ortho"),
+        Component.number("PROJECTION_SIZE", "size", 150, 1)
+    ]),
+
+    Component.group("DEPTH_OF_FIELD", [
+        Component.boolean("ENABLED", "enabledDOF"),
+        Component.group("QUALITY", [
+            Component.options("samplesDOF", [{label: "High", value: 150},{label: "Medium", value: 100}, {label: "Low", value: 50}]),
+        ]),
+        Component.number("FOCUS_DISTANCE", "focusDistanceDOF"),
+        Component.boolean("FOCAL_LENGTH", "focalLengthDOF"),
+        Component.boolean("APERTURE", "apertureDOF"),
     ]),
 
     Component.group("MOTION_BLUR", [
         Component.boolean("PER_OBJECTS", "motionBlurEnabled"),
         Component.boolean("WORLD", "cameraMotionBlur"),
-    ]),
-    Component.group("ORTHO_PROJECTION", [
-        Component.boolean("ENABLED", "ortho"),
-        Component.number("SIZE", "size", 150, 1)
     ]),
 
     Component.group("ASPECT_RATIO", [

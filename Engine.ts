@@ -20,6 +20,7 @@ import LightProbe from "./instances/LightProbe";
 
 import Entity from "./instances/Entity";
 import UberShader from "./utils/UberShader";
+import StaticUBOs from "./lib/StaticUBOs";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)
@@ -65,8 +66,6 @@ export default class Engine  {
         Engine.#development = devAmbient
         await GPU.initializeContext(canvas, mainResolution)
         FileSystemAPI.initialize(readAsset, readMetadata)
-
-        LensPostProcessing.initialize()
         FrameComposition.initialize()
         await SSAO.initialize()
         SSGI.initialize()
@@ -120,7 +119,7 @@ export default class Engine  {
         SSGI.rayMarchSettings[1] = SSGISettings.maxSteps || 4
         SSGI.rayMarchSettings[2] = SSGISettings.strength || 1
 
-        const sceneUBO = UberShader.UBO
+        const sceneUBO = StaticUBOs.uberUBO
 
 
         sceneUBO.bind()
@@ -157,15 +156,15 @@ export default class Engine  {
         MotionBlur.velocityScale = data.mbVelocityScale
         MotionBlur.maxSamples = data.mbSamples
 
-        FrameComposition.UBO.bind()
+        StaticUBOs.frameCompositionUBO.bind()
         boolBuffer[0] = data.AAMethod || 0
         FrameComposition.AAMethodInUse = boolBuffer[0]
-        FrameComposition.UBO.updateData("AAMethod", boolBuffer)
-        FrameComposition.UBO.updateData("FXAASpanMax", new Float32Array([data.FXAASpanMax || 8]))
-        FrameComposition.UBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
-        FrameComposition.UBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))
+        StaticUBOs.frameCompositionUBO.updateData("AAMethod", boolBuffer)
+        StaticUBOs.frameCompositionUBO.updateData("FXAASpanMax", new Float32Array([data.FXAASpanMax || 8]))
+        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
+        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))
 
-        FrameComposition.UBO.unbind()
+        StaticUBOs.frameCompositionUBO.unbind()
         VisibilityRenderer.needsUpdate = true
     }
 

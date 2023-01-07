@@ -38,7 +38,7 @@ export default class Loop {
             Loop.#afterDrawing = () => null
     }
     static copyToCurrentFrame(){
-        GPUAPI.copyTexture(StaticFBO.currentFrame, StaticFBO.cache, GPU.context.COLOR_BUFFER_BIT)
+        GPUAPI.copyTexture(StaticFBO.postProcessing1, StaticFBO.postProcessing2, GPU.context.COLOR_BUFFER_BIT)
     }
 
     static #benchmarkMode() {
@@ -61,7 +61,7 @@ export default class Loop {
         VisibilityRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
 
-        StaticFBO.cache.startMapping()
+        StaticFBO.postProcessing2.startMapping()
         Loop.#beforeDrawing()
 
         BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
@@ -72,7 +72,7 @@ export default class Loop {
         SpriteRenderer.execute()
         BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
 
-        StaticFBO.cache.stopMapping()
+        StaticFBO.postProcessing2.stopMapping()
 
         Loop.copyToCurrentFrame()
 
@@ -107,18 +107,17 @@ export default class Loop {
 
         VisibilityRenderer.execute()
 
-        StaticFBO.cache.startMapping()
+        StaticFBO.postProcessing2.startMapping()
         Loop.#beforeDrawing()
         SceneRenderer.execute()
         SpriteRenderer.execute()
-        StaticFBO.cache.stopMapping()
+        StaticFBO.postProcessing2.stopMapping()
 
         Loop.copyToCurrentFrame()
 
         SSGI.execute()
 
         LensPostProcessing.execute()
-        MotionBlur.execute()
         FrameComposition.execute()
 
         Loop.#afterDrawing()

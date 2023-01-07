@@ -1,5 +1,6 @@
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
 import CAMERA_UBO from "../shaders/functions/CAMERA_METADATA_UNIFORM.glsl";
+import POST_PROCESSING_UNIFORMS from "../shaders/functions/POST_PROCESSING_UNIFORMS.glsl";
 import COMPUTE_AREA_LIGHT from "../shaders/lights/COMPUTE_AREALIGHT.glsl"
 import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
 import ACES from "../shaders/functions/ACES.glsl";
@@ -23,7 +24,8 @@ const METHODS = {
     computePointLights: "//import(computePointLights)",
     brdf: "//import(brdf)",
     computeSpotLights: "//import(computeSpotLights)",
-    computeAreaLights: "//import(computeAreaLights)"
+    computeAreaLights: "//import(computeAreaLights)",
+    ppUBO: "//import(ppUBO)"
 }
 
 
@@ -61,6 +63,9 @@ export default function applyShaderMethods(shaderCode) {
                     break
                 case key === "cameraUBO":
                     response = response.replaceAll(METHODS[key], CAMERA_UBO)
+                    break
+                case key === "ppUBO":
+                    response = response.replaceAll(METHODS[key], POST_PROCESSING_UNIFORMS)
                     break
                 case key === "rayMarcher":
                     response = response.replaceAll(METHODS[key], RAY_MARCHER)

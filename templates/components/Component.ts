@@ -73,7 +73,7 @@ export default class Component {
         return {type: Component.propTypes.STRING, label, key, disabledIf}
     }
 
-    static options(key: string, options?: MutableObject[], disabledIf?: Function | string): ComponentValueGeneric {
+    static options(key: string, options?: { label: string, value: any }[], disabledIf?: Function | string): ComponentValueGeneric {
         return {
             type: Component.propTypes.OPTIONS,
             options,

@@ -24,6 +24,7 @@ export default class UBO {
     static #blockPointIncrement = 0
 
     constructor(blockName:string, dataArray:Data[]) {
+
         const bufferSize = UBO.#calculate(dataArray);
         for (let i = 0; i < dataArray.length; i++) {
             this.items[dataArray[i].name] = {
@@ -33,7 +34,6 @@ export default class UBO {
             };
             this.keys[i] = dataArray[i].name;
         }
-
 
         this.blockName = blockName;
         this.blockPoint = UBO.#blockPointIncrement;

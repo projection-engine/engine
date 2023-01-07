@@ -20,6 +20,7 @@ import StaticShaders from "./lib/StaticShaders";
 import StaticMeshes from "./lib/StaticMeshes";
 import StaticFBO from "./lib/StaticFBO";
 import UberShader from "./utils/UberShader";
+import StaticUBOs from "./lib/StaticUBOs";
 
 export default class GPU {
     static context?: WebGL2RenderingContext
@@ -50,19 +51,19 @@ export default class GPU {
     static updateSkylight(): void {
         const entity = GPU.#activeSkylightEntity
         if (!GPU.skylightProbe) {
-            UberShader.UBO.bind()
-            UberShader.UBO.updateData("hasSkylight", new Uint8Array([0]))
-            UberShader.UBO.unbind()
+            StaticUBOs.uberUBO.bind()
+            StaticUBOs.uberUBO.updateData("hasSkylight", new Uint8Array([0]))
+            StaticUBOs.uberUBO.unbind()
             return
         }
         if (entity) {
 
             const skylight = entity.skylightComponent
 
-            UberShader.UBO.bind()
-            UberShader.UBO.updateData("hasSkylight", new Uint8Array([1]))
-            UberShader.UBO.updateData("skylightSamples", skylight.mipmaps)
-            UberShader.UBO.unbind()
+            StaticUBOs.uberUBO.bind()
+            StaticUBOs.uberUBO.updateData("hasSkylight", new Uint8Array([1]))
+            StaticUBOs.uberUBO.updateData("skylightSamples", skylight.mipmaps)
+            StaticUBOs.uberUBO.unbind()
 
             GPU.skylightProbe.resolution = skylight.resolution
             const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
@@ -104,7 +105,7 @@ export default class GPU {
         GPU.context.frontFace(GPU.context.CCW)
 
 
-        UberShader.initialize()
+        StaticUBOs.initialize()
         CameraAPI.initialize()
         await StaticMeshes.initialize()
         StaticShaders.initialize()

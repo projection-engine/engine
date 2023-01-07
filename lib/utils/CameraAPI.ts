@@ -9,6 +9,7 @@ import MotionBlur from "../../runtime/MotionBlur";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 
 import GPU from "../../GPU";
+import StaticUBOs from "../StaticUBOs";
 
 
 /**
@@ -70,16 +71,7 @@ export default class CameraAPI {
             return
         CameraAPI.#initialized = true
 
-        CameraAPI.UBO = new UBO(
-            "CameraMetadata",
-            [
-                {name: "viewProjection", type: "mat4"},
-                {name: "viewMatrix", type: "mat4"},
-                {name: "projectionMatrix", type: "mat4"},
-                {name: "invViewMatrix", type: "mat4"},
-                {name: "invProjectionMatrix", type: "mat4"},
-                {name: "placement", type: "vec4"},
-            ])
+
 
         CameraAPI.#worker = new Worker("./camera-worker.js")
 
@@ -117,7 +109,7 @@ export default class CameraAPI {
 
         if (notificationBuffers[3]) {
             VisibilityRenderer.needsUpdate = true
-            const UBO = CameraAPI.UBO
+            const UBO = StaticUBOs.cameraUBO
             notificationBuffers[3] = 0
             UBO.bind()
             UBO.updateBuffer(CameraAPI.#UBOBuffer)

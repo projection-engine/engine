@@ -6,6 +6,7 @@ import DirectionalShadows from "../../runtime/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
 import UberShader from "../../utils/UberShader";
+import StaticUBOs from "../StaticUBOs";
 
 
 let lightTimeout
@@ -64,12 +65,12 @@ export default class LightsAPI {
         }
         LightsAPI.lightsQuantity = size[0]
         if (LightsAPI.lightsQuantity > 0 || !keepOld) {
-            UberShader.UBO.bind()
-            UberShader.UBO.updateData("lightPrimaryBuffer", LightsAPI.primaryBuffer)
-            UberShader.UBO.updateData("lightSecondaryBuffer", LightsAPI.secondaryBuffer)
-            UberShader.UBO.updateData("lightTypeBuffer", LightsAPI.typeBuffer)
-            UberShader.UBO.updateData("lightQuantity", new Uint8Array([Math.min(LightsAPI.lightsQuantity, UberShader.MAX_LIGHTS)]))
-            UberShader.UBO.unbind()
+            StaticUBOs.uberUBO.bind()
+            StaticUBOs.uberUBO.updateData("lightPrimaryBuffer", LightsAPI.primaryBuffer)
+            StaticUBOs.uberUBO.updateData("lightSecondaryBuffer", LightsAPI.secondaryBuffer)
+            StaticUBOs.uberUBO.updateData("lightTypeBuffer", LightsAPI.typeBuffer)
+            StaticUBOs.uberUBO.updateData("lightQuantity", new Uint8Array([Math.min(LightsAPI.lightsQuantity, UberShader.MAX_LIGHTS)]))
+            StaticUBOs.uberUBO.unbind()
         }
     }
 

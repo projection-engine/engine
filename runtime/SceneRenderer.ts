@@ -60,11 +60,11 @@ export default class SceneRenderer {
         context.uniform1i(uniforms.SSAO, 1)
 
         context.activeTexture(context.TEXTURE2)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssgiFinalSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssgiSampler)
         context.uniform1i(uniforms.SSGI, 2)
 
         context.activeTexture(context.TEXTURE3)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.currentFrameSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.lensSampler)
         context.uniform1i(uniforms.previousFrame, 3)
 
         context.activeTexture(context.TEXTURE4)

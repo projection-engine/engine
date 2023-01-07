@@ -1,16 +1,9 @@
-
-precision mediump float;
+precision highp float;
 in vec2 texCoords;
 
-uniform LensEffects{
-    float distortionIntensity;
-    float chromaticAberrationIntensity;
-    bool distortionEnabled;
-    bool chromaticAberrationEnabled;
-    bool bloomEnabled;
-};
+//import(ppUBO)
 
-uniform sampler2D blurred;
+uniform sampler2D bloomColor;
 uniform sampler2D sceneColor;
 
 out vec4 fragColor;
@@ -35,9 +28,9 @@ vec2 lensDistortion( vec2 uv, float k){
 }
 
 void main(void){
-    vec2 texCoords = distortionEnabled ? lensDistortion( texCoords, distortionIntensity * .5)  : texCoords;
-    vec3 bloomColor = bloomEnabled ? aces(texture(blurred, texCoords).rgb) : vec3(0.);
-    vec3 color = chromaticAberrationEnabled ? chromaticAberration(texCoords): texture(sceneColor, texCoords).rgb;
+    vec2 distortedTexCoords = distortionEnabled ? lensDistortion( texCoords, distortionIntensity * .5)  : texCoords;
+    vec3 bloomColor = bloomEnabled ? aces(texture(bloomColor, distortedTexCoords).rgb) : vec3(0.);
+    vec3 color = chromaticAberrationEnabled ? chromaticAberration(distortedTexCoords): texture(sceneColor, distortedTexCoords).rgb;
 
 
     fragColor = vec4(color + bloomColor, 1.);
