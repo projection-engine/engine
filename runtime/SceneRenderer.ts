@@ -12,7 +12,7 @@ import UberShader from "../utils/UberShader";
 
 let texOffset
 
-const materialAttributes = mat3.create()
+const materialAttributes = new Float32Array(9)
 
 /** Material attributes
  * entityID[0] (0), entityID[1] (1), entityID[2] (2)
@@ -180,6 +180,7 @@ export default class SceneRenderer {
                 materialAttributes[5] = 1
                 materialAttributes[7] = 0
             }
+
 
             context.uniformMatrix3fv(uniforms.materialAttributes, false, materialAttributes)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
