@@ -3,11 +3,7 @@ import Engine from "../Engine";
 import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag";
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag";
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert";
-import StaticShaders from "../lib/StaticShaders";
 import Shader from "../instances/Shader";
-import MutableObject from "../MutableObject";
-import LightsAPI from "../lib/utils/LightsAPI";
-import SceneRenderer from "../runtime/SceneRenderer";
 import UBO from "../instances/UBO";
 
 export default class UberShader {

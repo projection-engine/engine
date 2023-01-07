@@ -14,8 +14,6 @@ import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import GPU from "../../GPU";
 import SpriteRenderer from "../../runtime/SpriteRenderer";
 import MutableObject from "../../MutableObject";
-import {v4} from "uuid";
-import MeshComponent from "../../templates/components/MeshComponent";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -138,7 +136,7 @@ export default class EntityAPI {
 
 
     static parseEntityObject(entity: MutableObject, asNew?: boolean): Entity {
-        const parsedEntity = new Entity(asNew ? v4() : entity.id, entity.name, entity.active)
+        const parsedEntity = new Entity(asNew ? crypto.randomUUID() : entity.id, entity.name, entity.active)
         const keys = Object.keys(entity)
 
         for (let i = 0; i < keys.length; i++) {

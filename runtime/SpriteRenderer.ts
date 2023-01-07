@@ -1,10 +1,8 @@
 import GPU from "../GPU";
-import COMPONENTS from "../static/COMPONENTS";
 import DynamicMap from "../templates/DynamicMap";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticShaders from "../lib/StaticShaders";
 import type Entity from "../instances/Entity";
-import type SpriteComponent from "../templates/components/SpriteComponent";
 
 export default class SpriteRenderer {
     static sprites = new DynamicMap<Entity>()

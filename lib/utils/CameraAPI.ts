@@ -1,5 +1,4 @@
 import PostProcessingEffects from "../../templates/PostProcessingEffects";
-import COMPONENTS from "../../static/COMPONENTS.js";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import ArrayBufferAPI from "./ArrayBufferAPI";

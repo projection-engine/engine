@@ -1,4 +1,3 @@
-import COMPONENTS from "../../static/COMPONENTS.js";
 import Engine from "../../Engine";
 import InputEventsAPI from "../utils/InputEventsAPI";
 import QueryAPI from "../utils/QueryAPI";

@@ -4,13 +4,11 @@ import TerrainGenerator from "./lib/math/TerrainGenerator";
 import CameraAPI from "./lib/utils/CameraAPI";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import CubeMapAPI from "./lib/rendering/CubeMapAPI";
-import LightsAPI from "./lib/utils/LightsAPI";
 import QUAD_VERT from "./shaders/post-processing/QUAD.vert"
 import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
 import Shader from "./instances/Shader";
 import Framebuffer from "./instances/Framebuffer";
 import Material from "./instances/Material";
-import COMPONENTS from "./static/COMPONENTS";
 import {mat4, vec3} from "gl-matrix";
 import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
 import SceneRenderer from "./runtime/SceneRenderer";
@@ -18,7 +16,6 @@ import Mesh from "./instances/Mesh";
 import Texture from "./instances/Texture";
 import Entity from "./instances/Entity";
 import LightProbe from "./instances/LightProbe";
-import SkyLightComponent from "./templates/components/SkyLightComponent";
 import StaticShaders from "./lib/StaticShaders";
 import StaticMeshes from "./lib/StaticMeshes";
 import StaticFBO from "./lib/StaticFBO";

@@ -17,7 +17,6 @@ import ScriptsAPI from "./lib/utils/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";
-import SceneRenderer from "./runtime/SceneRenderer";
 
 import Entity from "./instances/Entity";
 import UberShader from "./utils/UberShader";

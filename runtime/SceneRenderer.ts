@@ -6,8 +6,6 @@ import Shader from "../instances/Shader";
 import CameraAPI from "../lib/utils/CameraAPI";
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
-import StaticShaders from "../lib/StaticShaders";
-import {mat3} from "gl-matrix";
 import UberShader from "../utils/UberShader";
 
 let texOffset

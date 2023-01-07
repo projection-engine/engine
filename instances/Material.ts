@@ -1,4 +1,3 @@
-import {v4} from "uuid"
 import MaterialAPI from "../lib/rendering/MaterialAPI";
 import MaterialUniform from "../templates/MaterialUniform";
 import TextureInUse from "../templates/TextureInUse";

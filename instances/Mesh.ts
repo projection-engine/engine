@@ -1,5 +1,5 @@
 import VertexBuffer from "./VertexBuffer"
-import {v4 as uuidv4} from "uuid"
+
 import GPU from "../GPU";
 import GPUAPI from "../lib/rendering/GPUAPI";
 
@@ -32,7 +32,7 @@ export default class Mesh {
 
     constructor(attributes:MeshProps) {
         const {
-            id = uuidv4(),
+            id = crypto.randomUUID(),
             vertices,
             indices,
             normals,

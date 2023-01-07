@@ -1,5 +1,3 @@
-import COMPONENTS from "../static/COMPONENTS"
-import LightsAPI from "../lib/utils/LightsAPI";
 import VisibilityRenderer from "./VisibilityRenderer";
 import GPU from "../GPU";
 import StaticFBO from "../lib/StaticFBO";

@@ -1,8 +1,5 @@
 import SHADERS from "../static/SHADERS"
 import Shader from "../instances/Shader";
-import uberShader from "../utils/UberShader";
-import LightsAPI from "./utils/LightsAPI";
-import SceneRenderer from "../runtime/SceneRenderer";
 import UberShader from "../utils/UberShader";
 
 export default class StaticShaders {

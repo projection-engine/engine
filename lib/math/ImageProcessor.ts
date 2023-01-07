@@ -1,4 +1,3 @@
-import {v4} from "uuid";
 
 export default class ImageProcessor {
     static #initialized = false
@@ -23,7 +22,7 @@ export default class ImageProcessor {
     }
 
     static #doWork(type:string, data:any, callback:Function) {
-        const id = v4()
+        const id = crypto.randomUUID()
         ImageProcessor.callbacks.push({
             callback,
             id

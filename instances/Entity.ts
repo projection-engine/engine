@@ -1,23 +1,8 @@
-import {v4} from "uuid"
-import MovableAbstract from "./entity-abstraction/MovableAbstract";
-import COMPONENTS from "../static/COMPONENTS";
 import EntityAPI from "../lib/utils/EntityAPI";
 import getComponentInstance from "../utils/get-component-instance";
 import serializeStructure from "../utils/serialize-structure";
 import Engine from "../Engine";
 import Component from "../templates/components/Component";
-import LightComponent from "../templates/components/LightComponent";
-import CullingComponent from "../templates/components/CullingComponent";
-import Material from "./Material";
-import Mesh from "./Mesh";
-import MeshComponent from "../templates/components/MeshComponent";
-import SkyLightComponent from "../templates/components/SkyLightComponent";
-import CameraComponent from "../templates/components/CameraComponent";
-import SpriteComponent from "../templates/components/SpriteComponent";
-import PhysicsColliderComponent from "../templates/components/PhysicsColliderComponent";
-import RigidBodyComponent from "../templates/components/RigidBodyComponent";
-import UIComponent from "../templates/components/UIComponent";
-import TerrainComponent from "../templates/components/TerrainComponent";
 import ComponentAbstract from "./entity-abstraction/ComponentAbstract";
 
 
@@ -34,7 +19,7 @@ export default class Entity extends ComponentAbstract {
     pickID: [number, number, number] = [-1, -1, -1]
 
 
-    constructor(id = v4(), name = "Empty entity", active = true) {
+    constructor(id = crypto.randomUUID(), name = "Empty entity", active = true) {
         super()
         this.id = id
         this.name = name

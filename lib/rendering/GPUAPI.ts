@@ -7,14 +7,10 @@ import Shader from "../../instances/Shader";
 import GPU from "../../GPU";
 import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
-import COMPONENTS from "../../static/COMPONENTS";
-import MeshComponent from "../../templates/components/MeshComponent";
-import uberShader from "../../utils/UberShader";
+import UberShader from "../../utils/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../templates/TextureParams";
 import MaterialInformation from "../../templates/MaterialInformation";
-import StaticShaders from "../StaticShaders";
-import UberShader from "../../utils/UberShader";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {

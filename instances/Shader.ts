@@ -2,7 +2,6 @@ import GPU from "../GPU";
 import CameraAPI from "../lib/utils/CameraAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import GLSL_TYPES from "../static/GLSL_TYPES"
-import trimString from "../utils/trim-string";
 import MutableObject from "../MutableObject";
 
 const regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
