@@ -15,7 +15,7 @@ export default  [
         ]),
         Component.number("FOCUS_DISTANCE", "focusDistanceDOF"),
         Component.number("FOCAL_LENGTH", "focalLengthDOF", undefined, .001),
-        Component.number("APERTURE", "apertureDOF", undefined, .001)
+        Component.number("APERTURE", "apertureDOF", 2, 0)
     ]),
 
     Component.group("MOTION_BLUR", [
