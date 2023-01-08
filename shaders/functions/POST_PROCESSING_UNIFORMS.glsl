@@ -1,4 +1,7 @@
 uniform LensEffects{
+
+    float textureSizeXDOF;
+    float textureSizeYDOF;
     float distortionIntensity;
     float chromaticAberrationIntensity;
     bool distortionEnabled;
@@ -8,5 +11,11 @@ uniform LensEffects{
     float focusDistanceDOF;
     float apertureDOF;
     float focalLengthDOF;
-    int samplesDOF;
+    float samplesDOF;
+
+    bool vignetteEnabled;
+    float vignetteStrength;
+    float gamma;
+    float exposure;
+
 };

@@ -15,7 +15,7 @@ const materialAttributes = new Float32Array(9)
 /** Material attributes
  * entityID[0] (0), entityID[1] (1), entityID[2] (2)
  * screenDoorEffect (3), isSky (4), noDepthChecking (5)
- * materialID (6), ssrEnabled (7)
+ * materialID (6), ssrEnabled (7), flatShading (8)
  */
 
 export default class SceneRenderer {
@@ -112,7 +112,7 @@ export default class SceneRenderer {
             materialAttributes[2] = entity.pickID[2]
 
             const material = entity.materialRef
-
+            materialAttributes[8] = 0
             if (isSky) {
                 isSky = false
                 context.enable(context.CULL_FACE)
@@ -127,6 +127,7 @@ export default class SceneRenderer {
                 materialAttributes[3] = 0
 
             if (material !== undefined) {
+                materialAttributes[8] = material.flatShading ? 1 : 0
                 if (material.doubleSided) {
                     context.disable(context.CULL_FACE)
                     isDoubleSided = true

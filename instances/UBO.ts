@@ -84,12 +84,11 @@ export default class UBO {
                 offset += chunk;
                 if (i > 0) dataArray[i - 1].chunkSize += chunk;
                 chunk = 16;
-            } else if (tsize < 0 && chunk === 16) {
-            } else if (tsize === 0) {
+            }
+             else if (tsize === 0) {
                 if (dataArray[i].type === "vec3" && chunk === 16) chunk -= size[1];
                 else chunk = 16;
-
-            } else chunk -= size[1];
+            } else if(tsize >= 0 || chunk !== 16) chunk -= size[1];
 
 
             dataArray[i].offset = offset;

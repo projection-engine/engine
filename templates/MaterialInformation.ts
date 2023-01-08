@@ -5,6 +5,7 @@ interface MaterialSettings {
     doubleSided: boolean
     ssrEnabled: boolean
     isAlphaTested: boolean
+    flatShading:boolean
 }
 
 interface MaterialInformation {

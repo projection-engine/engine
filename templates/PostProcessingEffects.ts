@@ -47,10 +47,10 @@ export default class PostProcessingEffects {
 
     set vignetteStrength(data) {
         this._vignetteStrength = data
-        StaticUBOs.frameCompositionUBO.bind()
+        StaticUBOs.lensPostProcessingUBO.bind()
         FLOAT[0] = data
-        StaticUBOs.frameCompositionUBO.updateData("vignetteStrength", FLOAT)
-        StaticUBOs.frameCompositionUBO.unbind()
+        StaticUBOs.lensPostProcessingUBO.updateData("vignetteStrength", FLOAT)
+        StaticUBOs.lensPostProcessingUBO.unbind()
     }
 
     get vignetteEnabled() {
@@ -59,10 +59,10 @@ export default class PostProcessingEffects {
 
     set vignetteEnabled(data) {
         this._vignetteEnabled = data
-        StaticUBOs.frameCompositionUBO.bind()
+        StaticUBOs.lensPostProcessingUBO.bind()
         U_INT[0] = data ? 1 : 0
-        StaticUBOs.frameCompositionUBO.updateData("vignetteEnabled", U_INT)
-        StaticUBOs.frameCompositionUBO.unbind()
+        StaticUBOs.lensPostProcessingUBO.updateData("vignetteEnabled", U_INT)
+        StaticUBOs.lensPostProcessingUBO.unbind()
     }
 
     get filmGrain() {
@@ -143,18 +143,18 @@ export default class PostProcessingEffects {
 
     set gamma(data) {
         this._gamma = data
-        StaticUBOs.frameCompositionUBO.bind()
+        StaticUBOs.lensPostProcessingUBO.bind()
         FLOAT[0] = data
-        StaticUBOs.frameCompositionUBO.updateData("gamma", FLOAT)
-        StaticUBOs.frameCompositionUBO.unbind()
+        StaticUBOs.lensPostProcessingUBO.updateData("gamma", FLOAT)
+        StaticUBOs.lensPostProcessingUBO.unbind()
     }
 
     set exposure(data) {
         this._exposure = data
-        StaticUBOs.frameCompositionUBO.bind()
+        StaticUBOs.lensPostProcessingUBO.bind()
         FLOAT[0] = data
-        StaticUBOs.frameCompositionUBO.updateData("exposure", FLOAT)
-        StaticUBOs.frameCompositionUBO.unbind()
+        StaticUBOs.lensPostProcessingUBO.updateData("exposure", FLOAT)
+        StaticUBOs.lensPostProcessingUBO.unbind()
     }
 
     get distortion() {

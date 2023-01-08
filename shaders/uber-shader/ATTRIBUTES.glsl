@@ -81,6 +81,7 @@ mat3 TBN;
 vec2 quadUV;
 vec3 viewDirection;
 bool hasTBNComputed = false;
+bool flatShading = false;
 bool hasViewDirectionComputed = false;
 float distanceFromCamera;
 vec3 V;
@@ -95,6 +96,7 @@ void extractData() {
     screenDoorEffect = matAttr[1][0] == 1.;
     entityID = vec3(matAttr[0]);
     isSky = matAttr[1][1] == 1.;
+    flatShading = matAttr[2][2] == 1.;
     ssrEnabled = matAttr[2][1] == 1.;
     noDepthChecking = matAttr[1][2] == 1.;
     materialID = int(matAttr[2][0]);

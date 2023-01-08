@@ -65,6 +65,7 @@ export default class GPUAPI {
         material.doubleSided = settings.doubleSided
         material.isAlphaTested = settings.isAlphaTested
         material.ssrEnabled = settings.ssrEnabled
+        material.flatShading = settings.flatShading
 
         const inUse = MaterialAPI.entityMaterial.get(id)
         try {

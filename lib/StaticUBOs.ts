@@ -1,7 +1,8 @@
 import UBO from "../instances/UBO";
 import UberShader from "../utils/UberShader";
+import GPU from "../GPU";
 
-export enum StaticUBONames{
+export enum StaticUBONames {
     CAMERA = "CameraMetadata",
     FRAME_COMPOSITION = "CompositionSettings",
     LENS_PP = "LensEffects",
@@ -9,17 +10,17 @@ export enum StaticUBONames{
     UBER = "UberShaderSettings",
 }
 
-export default class StaticUBOs{
-    static #initialized  = false
+export default class StaticUBOs {
+    static #initialized = false
 
-    static cameraUBO?:UBO
-    static frameCompositionUBO?:UBO
-    static lensPostProcessingUBO?:UBO
-    static ssaoUBO?:UBO
-    static uberUBO?:UBO
+    static cameraUBO?: UBO
+    static frameCompositionUBO?: UBO
+    static lensPostProcessingUBO?: UBO
+    static ssaoUBO?: UBO
+    static uberUBO?: UBO
 
-    static initialize(){
-        if(StaticUBOs.#initialized)
+    static initialize() {
+        if (StaticUBOs.#initialized)
             return
         StaticUBOs.#initialized = true
 
@@ -34,26 +35,27 @@ export default class StaticUBOs{
                 {name: "placement", type: "vec4"},
             ])
 
-        StaticUBOs.frameCompositionUBO= new UBO(
+        StaticUBOs.frameCompositionUBO = new UBO(
             StaticUBONames.FRAME_COMPOSITION,
             [
                 {type: "vec2", name: "inverseFilterTextureSize"},
-                {type: "bool", name: "vignetteEnabled"},
+
                 {type: "int", name: "AAMethod"},
                 {type: "bool", name: "filmGrainEnabled"},
-                {type: "float", name: "vignetteStrength"},
+
                 {type: "float", name: "FXAASpanMax"},
                 {type: "float", name: "FXAAReduceMin"},
                 {type: "float", name: "FXAAReduceMul"},
                 {type: "float", name: "filmGrainStrength"},
-                {type: "float", name: "gamma"},
-                {type: "float", name: "exposure"}
+
             ]
         )
 
         StaticUBOs.lensPostProcessingUBO = new UBO(
             StaticUBONames.LENS_PP,
             [
+                {type: "float", name: "textureSizeXDOF"},
+                {type: "float", name: "textureSizeYDOF"},
                 {type: "float", name: "distortionIntensity"},
                 {type: "float", name: "chromaticAberrationIntensity"},
                 {type: "bool", name: "distortionEnabled"},
@@ -64,9 +66,25 @@ export default class StaticUBOs{
                 {type: "float", name: "focusDistanceDOF"},
                 {type: "float", name: "apertureDOF"},
                 {type: "float", name: "focalLengthDOF"},
-                {type: "int", name: "samplesDOF"},
+                {type: "float", name: "samplesDOF"},
+
+                {type: "bool", name: "vignetteEnabled"},
+                {type: "float", name: "vignetteStrength"},
+                {type: "float", name: "gamma"},
+                {type: "float", name: "exposure"}
             ]
         )
+
+        const F32 = new Float32Array([2.2])
+        StaticUBOs.lensPostProcessingUBO.bind()
+        StaticUBOs.lensPostProcessingUBO.updateData("gamma", F32)
+        F32[0] = 1
+        StaticUBOs.lensPostProcessingUBO.updateData("exposure", F32)
+        F32[0] = GPU.internalResolution.w
+        StaticUBOs.lensPostProcessingUBO.updateData("textureSizeXDOF", F32)
+        F32[0] = GPU.internalResolution.h
+        StaticUBOs.lensPostProcessingUBO.updateData("textureSizeYDOF", F32)
+        StaticUBOs.lensPostProcessingUBO.unbind()
 
         StaticUBOs.ssaoUBO = new UBO(
             StaticUBONames.SSAO,

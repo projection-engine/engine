@@ -17,8 +17,6 @@ export default class FrameComposition {
 
     static initialize() {
         StaticUBOs.frameCompositionUBO.bind()
-        StaticUBOs.frameCompositionUBO.updateData("gamma", new Float32Array([2.2]))
-        StaticUBOs.frameCompositionUBO.updateData("exposure", new Float32Array([1]))
         StaticUBOs.frameCompositionUBO.updateData("FXAASpanMax", new Float32Array([8.0]))
         StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMin", new Float32Array([1.0 / 128.0]))
         StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMul", new Float32Array([1.0 / 8.0]))

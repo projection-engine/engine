@@ -7,7 +7,7 @@ float alpha = 1.;
 vec3 albedo= vec3(.5);
 vec3 N = vec3(0.);
 vec3 emission = vec3(0.);
-bool flatShading = false;
+
 vec3 albedoOverPI;
 vec3 VrN;
 // ------------------ ATTRIBUTES TO FILL
