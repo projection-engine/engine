@@ -5,8 +5,7 @@ export default  [
         Component.number("FOV", "fov", 150, 10),
         Component.number("FAR", "zFar", undefined,0, .01),
         Component.number("NEAR", "zNear", undefined,0, .01),
-        Component.boolean("ORTHO_PROJECTION", "ortho"),
-        Component.number("PROJECTION_SIZE", "size", 150, 1)
+        Component.boolean("ORTHO_PROJECTION", "ortho")
     ]),
 
     Component.group("DEPTH_OF_FIELD", [
@@ -15,13 +14,15 @@ export default  [
             Component.options("samplesDOF", [{label: "High", value: 150},{label: "Medium", value: 100}, {label: "Low", value: 50}]),
         ]),
         Component.number("FOCUS_DISTANCE", "focusDistanceDOF"),
-        Component.boolean("FOCAL_LENGTH", "focalLengthDOF"),
-        Component.boolean("APERTURE", "apertureDOF"),
+        Component.number("FOCAL_LENGTH", "focalLengthDOF", undefined, .001),
+        Component.number("APERTURE", "apertureDOF", undefined, .001)
     ]),
 
     Component.group("MOTION_BLUR", [
         Component.boolean("PER_OBJECTS", "motionBlurEnabled"),
         Component.boolean("WORLD", "cameraMotionBlur"),
+        Component.number("SCALE", "mbVelocityScale", undefined,.0001),
+        Component.number("SAMPLES", "mbSamples", undefined,1, 1)
     ]),
 
     Component.group("ASPECT_RATIO", [

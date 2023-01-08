@@ -153,8 +153,6 @@ export default class Engine  {
         SSAO.maxSamples = SSAOSettings.maxSamples || 64
         SSAO.enabled = SSAOSettings.enabled
 
-        MotionBlur.velocityScale = data.mbVelocityScale
-        MotionBlur.maxSamples = data.mbSamples
 
         StaticUBOs.frameCompositionUBO.bind()
         boolBuffer[0] = data.AAMethod || 0

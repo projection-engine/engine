@@ -10,6 +10,6 @@ out vec4 fragColor;
 
 
 void main() {
-    fragColor = texture(sceneColor, texCoords);
+    fragColor = texture(sceneColor, texCoords)/2.;
 }
 

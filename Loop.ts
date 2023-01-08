@@ -22,78 +22,48 @@ import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
 
 let previous = 0
+const timer = (flag: string, target: Function) => {
+    BenchmarkAPI.track(flag)
+    target()
+    BenchmarkAPI.endTrack(flag)
+}
+
 export default class Loop {
-    static #beforeDrawing?: Function = () => null
     static #afterDrawing?: Function = () => null
 
-    static linkToExecutionPipeline(after?: Function, before?: Function) {
-        if (typeof before === "function") {
-            Loop.#beforeDrawing = before
-        } else
-            Loop.#beforeDrawing = () => null
-
+    static linkToExecutionPipeline(after?: Function) {
         if (typeof after === "function") {
             Loop.#afterDrawing = after
         } else
             Loop.#afterDrawing = () => null
     }
-    static copyToCurrentFrame(){
+
+    static copyToCurrentFrame() {
         GPUAPI.copyTexture(StaticFBO.postProcessing1, StaticFBO.postProcessing2, GPU.context.COLOR_BUFFER_BIT)
     }
 
     static #benchmarkMode() {
         FrameComposition.copyPreviousFrame()
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.PHYSICS_PASS)
-        PhysicsPass.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.PHYSICS_PASS)
+        timer(BENCHMARK_KEYS.PHYSICS_PASS, PhysicsPass.execute)
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS)
-        DirectionalShadows.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS)
+        timer(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS, DirectionalShadows.execute)
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
-        OmnidirectionalShadows.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS)
+        timer(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS, OmnidirectionalShadows.execute)
 
-
-        BenchmarkAPI.track(BENCHMARK_KEYS.VISIBILITY_BUFFER)
-        VisibilityRenderer.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.VISIBILITY_BUFFER)
+        timer(BENCHMARK_KEYS.VISIBILITY_BUFFER, VisibilityRenderer.execute)
 
         StaticFBO.postProcessing2.startMapping()
-        Loop.#beforeDrawing()
-
-        BenchmarkAPI.track(BENCHMARK_KEYS.FORWARD_PASS)
-        SceneRenderer.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.FORWARD_PASS)
-
-        BenchmarkAPI.track(BENCHMARK_KEYS.SPRITE_PASS)
-        SpriteRenderer.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SPRITE_PASS)
-
+        timer(BENCHMARK_KEYS.FORWARD_PASS, SceneRenderer.execute)
+        timer(BENCHMARK_KEYS.SPRITE_PASS, SpriteRenderer.execute)
         StaticFBO.postProcessing2.stopMapping()
 
+        Loop.#afterDrawing()
         Loop.copyToCurrentFrame()
 
-        BenchmarkAPI.track(BENCHMARK_KEYS.SSGI)
-        SSGI.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.SSGI)
-
-
-        BenchmarkAPI.track(BENCHMARK_KEYS.POST_PROCESSING)
-        LensPostProcessing.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.POST_PROCESSING)
-
-        BenchmarkAPI.track(BENCHMARK_KEYS.MOTION_BLUR)
-        MotionBlur.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.MOTION_BLUR)
-
-        BenchmarkAPI.track(BENCHMARK_KEYS.FRAME_COMPOSITION)
-        FrameComposition.execute()
-        BenchmarkAPI.endTrack(BENCHMARK_KEYS.FRAME_COMPOSITION)
-
-        Loop.#afterDrawing()
+        timer(BENCHMARK_KEYS.SSGI, SSGI.execute)
+        timer(BENCHMARK_KEYS.POST_PROCESSING, LensPostProcessing.execute)
+        timer(BENCHMARK_KEYS.FRAME_COMPOSITION, FrameComposition.execute)
     }
 
     static #callback() {
@@ -108,19 +78,16 @@ export default class Loop {
         VisibilityRenderer.execute()
 
         StaticFBO.postProcessing2.startMapping()
-        Loop.#beforeDrawing()
         SceneRenderer.execute()
         SpriteRenderer.execute()
         StaticFBO.postProcessing2.stopMapping()
 
+        Loop.#afterDrawing()
         Loop.copyToCurrentFrame()
 
         SSGI.execute()
-
         LensPostProcessing.execute()
         FrameComposition.execute()
-
-        Loop.#afterDrawing()
     }
 
 

@@ -10,6 +10,9 @@ import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 
 import GPU from "../../GPU";
 import StaticUBOs from "../StaticUBOs";
+import MutableObject from "../../MutableObject";
+import Entity from "../../instances/Entity";
+import CameraComponent from "../../templates/components/CameraComponent";
 
 
 /**
@@ -41,9 +44,9 @@ interface Serialization {
     translation: number[]
 }
 
+const TEMPLATE_CAMERA = new CameraComponent()
 const toRad = Math.PI / 180
 export default class CameraAPI {
-    static UBO: UBO
     static #dynamicAspectRatio = false
     static metadata = new PostProcessingEffects()
     static position = ArrayBufferAPI.allocateVector(3)
@@ -70,7 +73,6 @@ export default class CameraAPI {
         if (CameraAPI.#initialized)
             return
         CameraAPI.#initialized = true
-
 
 
         CameraAPI.#worker = new Worker("./camera-worker.js")
@@ -252,26 +254,32 @@ export default class CameraAPI {
         CameraAPI.updateView()
     }
 
-    static updateViewTarget(entity) {
-        if (!entity)
+    static updateViewTarget(data: Entity | Object) {
+        if (!data)
             CameraAPI.trackingEntity = undefined
 
-        if (!entity?.components)
-            return
-        const cameraObj = entity.cameraComponent
-        if (!cameraObj)
+        let cameraObj
+        if (data instanceof Entity) {
+            CameraAPI.trackingEntity = data
+            cameraObj = data.cameraComponent
+        } else
+            cameraObj = data
+
+        if (!data)
             return
 
-        CameraAPI.trackingEntity = entity
-        MotionBlur.enabled = cameraObj.motionBlurEnabled
+        cameraObj = {...TEMPLATE_CAMERA, ...cameraObj}
+
+        MotionBlur.enabled = cameraObj.motionBlurEnabled ||cameraObj.cameraMotionBlur
+
+        MotionBlur.velocityScale = cameraObj.mbVelocityScale
+        MotionBlur.maxSamples = cameraObj.mbSamples
 
         CameraAPI.zFar = cameraObj.zFar
         CameraAPI.zNear = cameraObj.zNear
-        CameraAPI.fov = cameraObj.fov < 10 ? cameraObj.fov : cameraObj.fov * toRad
+        CameraAPI.fov = cameraObj.fov < Math.PI * 2 ? cameraObj.fov : cameraObj.fov * toRad
         CameraAPI.#dynamicAspectRatio = cameraObj.dynamicAspectRatio
         CameraAPI.isOrthographic = cameraObj.ortho
-
-
         CameraAPI.metadata.cameraMotionBlur = cameraObj.cameraMotionBlur
         CameraAPI.metadata.vignetteEnabled = cameraObj.vignette
         CameraAPI.metadata.vignetteStrength = cameraObj.vignetteStrength
@@ -285,14 +293,21 @@ export default class CameraAPI {
         CameraAPI.metadata.bloomThreshold = cameraObj.bloomThreshold
         CameraAPI.metadata.gamma = cameraObj.gamma
         CameraAPI.metadata.exposure = cameraObj.exposure
-        CameraAPI.metadata.size = cameraObj.size
 
-        if (!cameraObj.dynamicAspectRatio)
+
+        CameraAPI.metadata.apertureDOF = cameraObj.apertureDOF
+        CameraAPI.metadata.focalLengthDOF = cameraObj.focalLengthDOF
+        CameraAPI.metadata.focusDistanceDOF = cameraObj.focusDistanceDOF
+        CameraAPI.metadata.samplesDOF = cameraObj.samplesDOF
+        CameraAPI.metadata.DOF = cameraObj.enabledDOF
+
+        if (!cameraObj.dynamicAspectRatio && cameraObj.aspectRatio)
             CameraAPI.aspectRatio = cameraObj.aspectRatio
         else
             CameraAPI.updateAspectRatio()
 
-        CameraAPI.update(entity._translation, entity._rotationQuat)
+        if (data instanceof Entity)
+            CameraAPI.update(data._translation, data._rotationQuat)
         CameraAPI.updateProjection()
     }
 }

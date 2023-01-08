@@ -136,22 +136,19 @@ export default class Framebuffer {
         return this
     }
 
-    use(): void {
+    use() {
         if (GPU.activeFramebuffer !== this.FBO) {
             GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, this.FBO)
             GPU.activeFramebuffer = this.FBO
         }
     }
 
-    clear(): void {
+    clear() {
         this.use()
-        if (this.RBO)
-            GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
-        else
-            GPU.context.clear(GPU.context.COLOR_BUFFER_BIT)
+        GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
     }
 
-    stop(): void {
+    stop() {
         GPU.activeFramebuffer = undefined
         GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, null)
     }
