@@ -137,8 +137,8 @@ class CameraWorker {
         then = now
 
         if (needsUpdate) {
-            const incrementTranslation = 1 - Math.pow(.001, elapsed * nBuffer[4])
-            const incrementRotation = 1 - Math.pow(.001, elapsed * nBuffer[5])
+            const incrementTranslation = nBuffer[4] === 0 ? 1 : 1 - Math.pow(.001, elapsed * nBuffer[4])
+            const incrementRotation = nBuffer[5] === 0 ? 1 : 1 - Math.pow(.001, elapsed * nBuffer[5])
             vec3.lerp(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.#translationBuffer, incrementTranslation)
 
             CameraWorker.previousRotationLength = quat.length(CameraWorker.currentRotation)
