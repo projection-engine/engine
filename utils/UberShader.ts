@@ -8,10 +8,11 @@ import UBO from "../instances/UBO";
 
 export default class UberShader {
 
-    static #initialized = false
-    static MAX_LIGHTS = 310
+    static #MAX_LIGHTS = 310
+    static get MAX_LIGHTS() {
+        return UberShader.#MAX_LIGHTS
+    }
 
-    static UBO:UBO
     static #uberSignature = {}
     static get uberSignature() {
         return UberShader.#uberSignature
@@ -19,37 +20,6 @@ export default class UberShader {
 
     static uber?: Shader
     static uberUniforms?: { [key: string]: WebGLUniformLocation }
-
-    static initialize() {
-        if (UberShader.#initialized)
-            return
-        UberShader.#initialized = true
-        UberShader.UBO = new UBO(
-            "UberShaderSettings",
-            [
-                {name: "shadowMapsQuantity", type: "float"},
-                {name: "shadowMapResolution", type: "float"},
-                {name: "lightQuantity", type: "int"},
-
-                {type: "float", name: "SSRFalloff"},
-                {type: "float", name: "stepSizeSSR"},
-                {type: "float", name: "maxSSSDistance"},
-                {type: "float", name: "SSSDepthThickness"},
-                {type: "float", name: "SSSEdgeAttenuation"},
-                {type: "float", name: "skylightSamples"},
-                {type: "float", name: "SSSDepthDelta"},
-                {type: "float", name: "SSAOFalloff"},
-                {type: "int", name: "maxStepsSSR"},
-                {type: "int", name: "maxStepsSSS"},
-                {type: "bool", name: "hasSkylight"},
-                {type: "bool", name: "hasAmbientOcclusion"},
-
-                {name: "lightPrimaryBuffer", type: "mat4", dataLength: UberShader.MAX_LIGHTS},
-                {name: "lightSecondaryBuffer", type: "mat4", dataLength: UberShader.MAX_LIGHTS},
-                {name: "lightTypeBuffer", type: "int", dataLength: UberShader.MAX_LIGHTS}
-            ]
-        )
-    }
 
     static compile(forceCleanShader?: boolean) {
 
@@ -86,6 +56,6 @@ export default class UberShader {
 
         UberShader.uber = shader
         UberShader.uberUniforms = shader.uniformMap
-        UberShader.UBO.bindWithShader(shader.program)
+
     }
 }

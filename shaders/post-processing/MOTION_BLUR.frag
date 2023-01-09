@@ -12,20 +12,17 @@ out vec4 fragColor;
 
 
 void main(){
-    vec2 texelSize = 1.0 / vec2(textureSize(currentFrame, 0));
-    vec2 screenTexCoords = gl_FragCoord.xy * texelSize;
+    vec2 velocity = texture(gVelocity, texCoords).rg * velocityScale;
 
-    vec2 velocity = texture(gVelocity, screenTexCoords).rg;
-    velocity *= velocityScale;
-
-    float speed = length(velocity / texelSize);
+    float speed = length(velocity * vec2(textureSize(currentFrame, 0)));
     int nSamples = max(clamp(int(speed), 1, maxSamples), 1);
 
-    fragColor = texture(currentFrame, screenTexCoords);
+    fragColor = vec4(texture(currentFrame, texCoords).rgb, 1.);
+
     for (int i = 1; i < nSamples; ++i) {
         vec2 offset = velocity * (float(i) / float(nSamples - 1) - 0.5);
-        fragColor += texture(currentFrame, screenTexCoords + offset);
+        fragColor.rgb += texture(currentFrame, texCoords + offset).rgb;
     }
-    fragColor /= float(nSamples);
+    fragColor.rgb /= float(nSamples);
 }
 

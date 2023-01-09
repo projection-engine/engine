@@ -12,11 +12,11 @@ export default class MotionBlur {
     static execute() {
         if (!MotionBlur.enabled)
             return
-        StaticFBO.mb.startMapping()
+        StaticFBO.postProcessing1.startMapping()
         StaticShaders.mb.bind()
         const uniforms = StaticShaders.mbUniforms
         GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.currentFrameSampler)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.postProcessing2Sampler)
         GPU.context.uniform1i(uniforms.currentFrame, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)
@@ -27,6 +27,6 @@ export default class MotionBlur {
         GPU.context.uniform1i(uniforms.maxSamples, MotionBlur.maxSamples)
 
         StaticMeshes.drawQuad()
-        StaticFBO.mb.stopMapping()
+        StaticFBO.postProcessing1.stopMapping()
     }
 }

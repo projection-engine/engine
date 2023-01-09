@@ -4,38 +4,34 @@ import DirectionalShadows from "../runtime/DirectionalShadows";
 import ImageProcessor from "./math/ImageProcessor";
 import IMAGE_WORKER_ACTIONS from "../static/IMAGE_WORKER_ACTIONS";
 import SSAO from "../runtime/SSAO";
+import StaticUBOs from "./StaticUBOs";
 
 const RESOLUTION = 4
 
-export default class StaticFBO  {
+export default class StaticFBO {
     static visibility?: Framebuffer
     static visibilityDepthSampler?: WebGLTexture
     static visibilityEntitySampler?: WebGLTexture
     static visibilityVelocitySampler?: WebGLTexture
 
     static lens?: Framebuffer
+    static lensSampler?: WebGLTexture
 
-    static bokeh?: Framebuffer
-    static bokehSampler?: WebGLTexture
+    static postProcessing1?: Framebuffer
+    static postProcessing1Sampler?: WebGLTexture
 
-    static currentFrame?: Framebuffer
-    static currentFrameSampler?: WebGLTexture
+    static postProcessing2?: Framebuffer
+    static postProcessing2Sampler?: WebGLTexture
 
     static TAACache?: Framebuffer
     static TAACacheSampler?: WebGLTexture
 
-    static cache?: Framebuffer
-    static cacheSampler?: WebGLTexture
+
 
     static ssgi?: Framebuffer
     static ssgiSampler?: WebGLTexture
-
     static ssgiQuarter?: Framebuffer
-
     static ssgiEighth?: Framebuffer
-
-    static ssgiFinal?: Framebuffer
-    static ssgiFinalSampler?: WebGLTexture
 
     static ssao?: Framebuffer
     static ssaoSampler?: WebGLTexture
@@ -47,13 +43,14 @@ export default class StaticFBO  {
     static mbSampler?: WebGLTexture
 
     static downscaleBloom: Framebuffer[] = []
-    static upscaleBloom: Framebuffer[]= []
+    static upscaleBloom: Framebuffer[] = []
 
     static shadows?: Framebuffer
     static shadowsSampler?: WebGLTexture
 
     static noiseSampler?: WebGLTexture
-static #initialized = false
+    static #initialized = false
+
     static initialize() {
         if (StaticFBO.#initialized)
             return
@@ -82,61 +79,48 @@ static #initialized = false
             })
             .depthTest()
 
-        StaticFBO.visibilityDepthSampler = StaticFBO.visibility.colors[0]
-        StaticFBO.visibilityEntitySampler = StaticFBO.visibility.colors[1]
-        StaticFBO.visibilityVelocitySampler = StaticFBO.visibility.colors[2]
 
-        StaticFBO.currentFrame = (new Framebuffer()).texture()
-        StaticFBO.currentFrameSampler = StaticFBO.currentFrame.colors[0]
-        StaticFBO.TAACache = (new Framebuffer()).texture()
-        StaticFBO.TAACacheSampler = StaticFBO.TAACache.colors[0]
+        StaticFBO.postProcessing1 = new Framebuffer().texture().depthTest()
+        StaticFBO.postProcessing2 = new Framebuffer().texture().depthTest()
 
-        StaticFBO.cache = (new Framebuffer()).texture().depthTest()
-        StaticFBO.cacheSampler = StaticFBO.cache.colors[0]
-        StaticFBO.ssgi = (new Framebuffer(halfResW, halfResH))
-            .texture({
-                attachment: 0,
-                precision: context.RGB,
-                format: context.RGB,
-                type: context.UNSIGNED_BYTE,
-                label: "SSGI"
-            })
-        StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]
 
-        StaticFBO.ssao = (new Framebuffer(halfResW, halfResH))
-            .texture({
-                precision: context.R8,
-                format: context.RED,
-                type: context.UNSIGNED_BYTE
-            })
-        StaticFBO.ssaoSampler = StaticFBO.ssao.colors[0]
+        // StaticFBO.TAACache = (new Framebuffer()).texture()
+        // StaticFBO.TAACacheSampler = StaticFBO.TAACache.colors[0]
 
-        StaticFBO.ssaoBlurred = (new Framebuffer(halfResW, halfResH))
-            .texture({
-                precision: context.R8,
-                format: context.RED,
-                type: context.UNSIGNED_BYTE
-            })
-        StaticFBO.ssaoBlurredSampler = StaticFBO.ssaoBlurred.colors[0]
 
-        StaticFBO.mb = (new Framebuffer()).texture({linear: true})
-        StaticFBO.mbSampler = StaticFBO.mb.colors[0]
-        StaticFBO.lens = (new Framebuffer()).texture()
 
-        // StaticFBOsController.bokeh = GPUAPI.allocateFramebuffer("BOKEH").texture()
-
+        const SSGI_SETTINGS = {
+            linear: true,
+            precision: context.RGB,
+            format: context.RGB,
+            type: context.UNSIGNED_BYTE
+        }
+        StaticFBO.ssgi = new Framebuffer(halfResW, halfResH)
+            .texture(SSGI_SETTINGS)
         StaticFBO.ssgiQuarter = (new Framebuffer(
             GPU.internalResolution.w / 4,
             GPU.internalResolution.h / 4
-        )).texture({linear: true})
+        )).texture(SSGI_SETTINGS)
 
         StaticFBO.ssgiEighth = (new Framebuffer(
             GPU.internalResolution.w / 8,
             GPU.internalResolution.h / 8
-        )).texture({linear: true})
+        )).texture(SSGI_SETTINGS)
 
-        StaticFBO.ssgiFinal = (new Framebuffer()).texture({linear: true})
-        StaticFBO.ssgiFinalSampler = StaticFBO.ssgiFinal.colors[0]
+
+        const SSAO_SETTINGS = {
+            precision: context.R8,
+            format: context.RED,
+            type: context.UNSIGNED_BYTE
+        }
+        StaticFBO.ssao = new Framebuffer(halfResW, halfResH).texture(SSAO_SETTINGS)
+
+        StaticFBO.ssaoBlurred = new Framebuffer(halfResW, halfResH).texture(SSAO_SETTINGS)
+
+        StaticFBO.mb = new Framebuffer().texture()
+        StaticFBO.lens = new Framebuffer().texture()
+
+
         const Q = 7
         let w = GPU.internalResolution.w, h = GPU.internalResolution.h
         for (let i = 0; i < Q; i++) {
@@ -149,6 +133,17 @@ static #initialized = false
             h *= 4
             StaticFBO.upscaleBloom.push((new Framebuffer(w, h)).texture({linear: true}))
         }
+
+        StaticFBO.mbSampler = StaticFBO.mb.colors[0]
+        StaticFBO.ssaoBlurredSampler = StaticFBO.ssaoBlurred.colors[0]
+        StaticFBO.ssaoSampler = StaticFBO.ssao.colors[0]
+        StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]
+        StaticFBO.visibilityDepthSampler = StaticFBO.visibility.colors[0]
+        StaticFBO.visibilityEntitySampler = StaticFBO.visibility.colors[1]
+        StaticFBO.visibilityVelocitySampler = StaticFBO.visibility.colors[2]
+        StaticFBO.postProcessing1Sampler = StaticFBO.postProcessing1.colors[0]
+        StaticFBO.postProcessing2Sampler = StaticFBO.postProcessing2.colors[0]
+        StaticFBO.lensSampler = StaticFBO.lens.colors[0]
 
         StaticFBO.updateDirectionalShadowsFBO()
     }
@@ -168,9 +163,9 @@ static #initialized = false
             {w: RESOLUTION, h: RESOLUTION}
         )
 
-        SSAO.UBO.bind()
-        SSAO.UBO.updateData("samples", kernels)
-        SSAO.UBO.unbind()
+        StaticUBOs.ssaoUBO.bind()
+        StaticUBOs.ssaoUBO.updateData("samples", kernels)
+        StaticUBOs.ssaoUBO.unbind()
         StaticFBO.noiseSampler = context.createTexture()
 
         context.bindTexture(context.TEXTURE_2D, StaticFBO.noiseSampler)

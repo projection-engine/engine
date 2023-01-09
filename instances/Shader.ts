@@ -3,6 +3,7 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import GLSL_TYPES from "../static/GLSL_TYPES"
 import MutableObject from "../MutableObject";
+import StaticUBOs, {StaticUBONames} from "../lib/StaticUBOs";
 
 const regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm
 const structRegex = (type) => {
@@ -65,8 +66,21 @@ export default class Shader {
         }
 
         this.length = this.uniforms.length
-        if (fragmentBuilt.includes("CameraMetadata") || vertexBuilt.includes("CameraMetadata"))
-            CameraAPI.UBO.bindWithShader(this.program)
+
+        if (fragmentBuilt.includes(StaticUBONames.CAMERA) || vertexBuilt.includes(StaticUBONames.CAMERA))
+            StaticUBOs.cameraUBO.bindWithShader(this.program)
+
+        if (fragmentBuilt.includes(StaticUBONames.FRAME_COMPOSITION) || vertexBuilt.includes(StaticUBONames.FRAME_COMPOSITION))
+            StaticUBOs.frameCompositionUBO.bindWithShader(this.program)
+
+        if (fragmentBuilt.includes(StaticUBONames.LENS_PP) || vertexBuilt.includes(StaticUBONames.LENS_PP))
+            StaticUBOs.lensPostProcessingUBO.bindWithShader(this.program)
+
+        if (fragmentBuilt.includes(StaticUBONames.SSAO) || vertexBuilt.includes(StaticUBONames.SSAO))
+            StaticUBOs.ssaoUBO.bindWithShader(this.program)
+
+        if (fragmentBuilt.includes(StaticUBONames.UBER) || vertexBuilt.includes(StaticUBONames.UBER))
+            StaticUBOs.uberUBO.bindWithShader(this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

@@ -5,7 +5,8 @@ export default {
     "isAlphaTested": false,
     "ssrEnabled": false,
     "isSky": false,
-    "doubleSided": false
+    "doubleSided": false,
+    "flatShading": false
   },
   "uniforms": [],
   "uniformValues": [],

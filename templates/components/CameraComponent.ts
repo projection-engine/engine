@@ -20,6 +20,8 @@ export default class CameraComponent extends Component {
     filmGrain = false
     filmGrainStrength = 1
     bloom = false
+    mbVelocityScale = 1
+    mbSamples = 50
 
     bloomThreshold = .75
     bloomQuality = 8
@@ -30,5 +32,11 @@ export default class CameraComponent extends Component {
     cameraMotionBlur = false
     ortho = false
     size = 100
+
+    apertureDOF = 1.2
+    focalLengthDOF = 10
+    focusDistanceDOF = 100
+    samplesDOF = 100
+    enabledDOF = false
 }
 

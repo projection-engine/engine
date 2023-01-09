@@ -11,6 +11,7 @@ import UberShader from "../../utils/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../templates/TextureParams";
 import MaterialInformation from "../../templates/MaterialInformation";
+import StaticFBO from "../StaticFBO";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
@@ -64,6 +65,7 @@ export default class GPUAPI {
         material.doubleSided = settings.doubleSided
         material.isAlphaTested = settings.isAlphaTested
         material.ssrEnabled = settings.ssrEnabled
+        material.flatShading = settings.flatShading
 
         const inUse = MaterialAPI.entityMaterial.get(id)
         try {
@@ -109,7 +111,7 @@ export default class GPUAPI {
         })
     }
 
-    static copyTexture(target, source, type = GPU.context.DEPTH_BUFFER_BIT, blitType = GPU.context.NEAREST) {
+    static copyTexture(target:Framebuffer, source:Framebuffer, type = GPU.context.DEPTH_BUFFER_BIT, blitType = GPU.context.NEAREST) {
         GPU.context.bindFramebuffer(GPU.context.READ_FRAMEBUFFER, source.FBO)
         GPU.context.bindFramebuffer(GPU.context.DRAW_FRAMEBUFFER, target.FBO)
         GPU.context.blitFramebuffer(

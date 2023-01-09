@@ -14,6 +14,7 @@ export default class Material {
     isAlphaTested = false
     ssrEnabled = false
     isSky = false
+    flatShading=  false
     doubleSided = false
     bindID = -1
     signature?:string

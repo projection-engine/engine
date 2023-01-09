@@ -3,6 +3,7 @@ import GPU from "../GPU";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import UberShader from "../utils/UberShader";
+import StaticUBOs from "../lib/StaticUBOs";
 
 
 let lightsToUpdate
@@ -30,10 +31,10 @@ export default class DirectionalShadows {
             DirectionalShadows.changed = true
         }
         DirectionalShadows.atlasRatio = DirectionalShadows.maxResolution / DirectionalShadows.resolutionPerTexture
-        UberShader.UBO.bind()
-        UberShader.UBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
-        UberShader.UBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
-        UberShader.UBO.unbind()
+        StaticUBOs.uberUBO.bind()
+        StaticUBOs.uberUBO.updateData("shadowMapsQuantity", new Float32Array([shadowAtlasQuantity]))
+        StaticUBOs.uberUBO.updateData("shadowMapResolution", new Float32Array([DirectionalShadows.maxResolution]))
+        StaticUBOs.uberUBO.unbind()
     }
 
 
