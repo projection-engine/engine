@@ -12,8 +12,9 @@ import LightsAPI from "./LightsAPI";
 import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import GPU from "../../GPU";
-import SpriteRenderer from "../../runtime/SpriteRenderer";
+import SceneRenderer from "../../runtime/SceneRenderer";
 import MutableObject from "../../MutableObject";
+import EntityComponentMapping from "../EntityComponentMapping";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -76,11 +77,11 @@ export default class EntityAPI {
             UIAPI.createUIEntity(entity)
 
         if (entity.lightComponent !== undefined)
-            LightsAPI.lights.add(entity.id, entity)
+            EntityComponentMapping.lights.add(entity.id, entity)
         if (entity.spriteComponent !== undefined)
-            SpriteRenderer.sprites.add(entity.id, entity)
+            EntityComponentMapping.sprites.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
-            VisibilityRenderer.meshesToDraw.add(entity.id, entity)
+            EntityComponentMapping.meshesToDraw.add(entity.id, entity)
             MaterialAPI.updateMap(entity.meshComponent)
         }
 
@@ -110,11 +111,11 @@ export default class EntityAPI {
 
 
         if (entity.lightComponent !== undefined)
-            LightsAPI.lights.delete(entity.id)
+            EntityComponentMapping.lights.delete(entity.id)
         if (entity.spriteComponent !== undefined)
-            SpriteRenderer.sprites.delete(entity.id)
+            EntityComponentMapping.sprites.delete(entity.id)
         if (entity.meshComponent !== undefined)
-            VisibilityRenderer.meshesToDraw.delete(entity.id)
+            EntityComponentMapping.meshesToDraw.delete(entity.id)
 
         PhysicsAPI.removeRigidBody(entity)
 

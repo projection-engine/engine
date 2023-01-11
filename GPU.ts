@@ -11,7 +11,7 @@ import Framebuffer from "./instances/Framebuffer";
 import Material from "./instances/Material";
 import {mat4, vec3} from "gl-matrix";
 import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
-import SceneRenderer from "./runtime/SceneRenderer";
+import SceneComposition from "./runtime/SceneComposition";
 import Mesh from "./instances/Mesh";
 import Texture from "./instances/Texture";
 import Entity from "./instances/Entity";
@@ -71,7 +71,7 @@ export default class GPU {
                 vec3.add(tempPosition, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
                 mat4.lookAt(tempView, entity._translation, tempPosition, <vec3>CUBE_MAP_VIEWS.up[index])
                 mat4.multiply(tempViewProjection, projection, tempView)
-                SceneRenderer.execute(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
+                SceneComposition.execute(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
             })
         }
     }

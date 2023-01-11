@@ -7,7 +7,7 @@ import StaticShaders from "../lib/StaticShaders";
 export default class MotionBlur {
     static velocityScale = 1
     static maxSamples = 50
-    static enabled = true
+    static enabled = false
 
     static execute() {
         if (!MotionBlur.enabled)

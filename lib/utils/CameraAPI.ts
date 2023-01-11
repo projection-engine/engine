@@ -270,7 +270,7 @@ export default class CameraAPI {
 
         cameraObj = {...TEMPLATE_CAMERA, ...cameraObj}
 
-        MotionBlur.enabled = cameraObj.motionBlurEnabled ||cameraObj.cameraMotionBlur
+        MotionBlur.enabled = cameraObj.motionBlurEnabled === true || cameraObj.cameraMotionBlur === true
 
         MotionBlur.velocityScale = cameraObj.mbVelocityScale
         MotionBlur.maxSamples = cameraObj.mbSamples

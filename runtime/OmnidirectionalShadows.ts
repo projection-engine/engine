@@ -5,6 +5,7 @@ import VisibilityRenderer from "./VisibilityRenderer";
 import LightComponent from "../templates/components/LightComponent";
 import GPU from "../GPU";
 import StaticShaders from "../lib/StaticShaders";
+import EntityComponentMapping from "../lib/EntityComponentMapping";
 
 const cacheVec3 = vec3.create()
 const cacheMat4 = mat4.create()
@@ -52,7 +53,7 @@ export default class OmnidirectionalShadows {
     }
 
     static loopMeshes(view, projection, component) {
-        const toRender = VisibilityRenderer.meshesToDraw.array
+        const toRender = EntityComponentMapping.meshesToDraw.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
 

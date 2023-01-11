@@ -43,7 +43,6 @@ export default class GPUAPI {
         const mat = GPU.materials.get(id)
         if(!mat)
             return
-        MaterialAPI.removeMaterial(id)
         delete UberShader.uberSignature[mat.signature]
         GPU.materials.delete(id)
     }

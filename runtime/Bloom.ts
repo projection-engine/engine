@@ -5,7 +5,7 @@ import StaticShaders from "../lib/StaticShaders";
 import StaticMeshes from "../lib/StaticMeshes";
 import Framebuffer from "../instances/Framebuffer";
 
-export default class BloomPrePass {
+export default class Bloom {
     static #upSample(fbo: Framebuffer, context: WebGL2RenderingContext, nextSampler: WebGLTexture, blurredSampler: WebGLTexture) {
         const upSamplingShaderUniforms = StaticShaders.upSamplingUniforms
         fbo.startMapping()
@@ -55,9 +55,9 @@ export default class BloomPrePass {
 
         for (let i = 0; i < upscale.length; i++) {
             const fbo = upscale[i]
-            BloomPrePass.#upSample(fbo, context, i > 0 ? upscale[i - 1].colors[0] : undefined, downscale[downscale.length - 1 - i].colors[0])
+            Bloom.#upSample(fbo, context, i > 0 ? upscale[i - 1].colors[0] : undefined, downscale[downscale.length - 1 - i].colors[0])
         }
-        BloomPrePass.#upSample(StaticFBO.postProcessing2, context, StaticFBO.postProcessing1Sampler, upscale[upscale.length - 1].colors[0])
+        Bloom.#upSample(StaticFBO.postProcessing2, context, StaticFBO.postProcessing1Sampler, upscale[upscale.length - 1].colors[0])
     }
 
 }

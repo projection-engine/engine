@@ -6,8 +6,8 @@ import LensPostProcessing from "./runtime/LensPostProcessing";
 import FrameComposition from "./runtime/FrameComposition";
 
 import Engine from "./Engine";
-import SpriteRenderer from "./runtime/SpriteRenderer";
-import PhysicsPass from "./runtime/PhysicsPass";
+import SceneRenderer from "./runtime/SceneRenderer";
+import Physics from "./runtime/Physics";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import OmnidirectionalShadows from "./runtime/OmnidirectionalShadows";
 import MotionBlur from "./runtime/MotionBlur";
@@ -16,7 +16,7 @@ import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
 import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightsAPI from "./lib/utils/LightsAPI";
-import SceneRenderer from "./runtime/SceneRenderer";
+import SceneComposition from "./runtime/SceneComposition";
 import GPU from "./GPU";
 import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
@@ -45,7 +45,7 @@ export default class Loop {
     static #benchmarkMode() {
         FrameComposition.copyPreviousFrame()
 
-        timer(BENCHMARK_KEYS.PHYSICS_PASS, PhysicsPass.execute)
+        timer(BENCHMARK_KEYS.PHYSICS_PASS, Physics.execute)
 
         timer(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS, DirectionalShadows.execute)
 
@@ -53,10 +53,7 @@ export default class Loop {
 
         timer(BENCHMARK_KEYS.VISIBILITY_BUFFER, VisibilityRenderer.execute)
 
-        StaticFBO.postProcessing2.startMapping()
-        timer(BENCHMARK_KEYS.FORWARD_PASS, SceneRenderer.execute)
-        timer(BENCHMARK_KEYS.SPRITE_PASS, SpriteRenderer.execute)
-        StaticFBO.postProcessing2.stopMapping()
+        timer(BENCHMARK_KEYS.FORWARD_PASS, SceneComposition.execute)
 
         Loop.#afterDrawing()
         Loop.copyToCurrentFrame()
@@ -71,17 +68,12 @@ export default class Loop {
             executeScripts()
         FrameComposition.copyPreviousFrame()
 
-        PhysicsPass.execute()
+        Physics.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
-
         VisibilityRenderer.execute()
 
-        StaticFBO.postProcessing2.startMapping()
-        SceneRenderer.execute()
-        SpriteRenderer.execute()
-        StaticFBO.postProcessing2.stopMapping()
-
+        SceneComposition.execute()
         Loop.#afterDrawing()
         Loop.copyToCurrentFrame()
 

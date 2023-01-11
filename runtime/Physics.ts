@@ -1,7 +1,7 @@
 import Engine from "../Engine";
 import PhysicsAPI from "../lib/rendering/PhysicsAPI";
 
-export default class PhysicsPass {
+export default class Physics {
     static simulationStep = 0.01666666
     static subSteps = 10
 
@@ -13,7 +13,7 @@ export default class PhysicsPass {
         const length = rigidBodies.length
         const tempTransformation = PhysicsAPI.tempTransformation
 
-        PhysicsAPI.world.stepSimulation(PhysicsPass.simulationStep, PhysicsPass.subSteps)
+        PhysicsAPI.world.stepSimulation(Physics.simulationStep, Physics.subSteps)
 
         for (let i = 0; i < length; i++) {
             const current = rigidBodies[i]
