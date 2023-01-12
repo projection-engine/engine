@@ -83,6 +83,7 @@ void main(){
 
     //--MATERIAL_SELECTION--
 
+
     if (shadingModel == LIGHT_ONLY)
     albedo = vec3(1.);
 

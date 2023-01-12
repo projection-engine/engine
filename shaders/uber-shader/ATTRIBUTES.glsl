@@ -29,6 +29,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 invProjectionMatrix;
 uniform vec3 cameraPosition;
 uniform float elapsedTime;
+uniform bool isSpritePass;
 
 uniform UberShaderSettings {
     float shadowMapsQuantity;
@@ -52,7 +53,6 @@ uniform UberShaderSettings {
     mat4 lightSecondaryBuffer[MAX_LIGHTS];
     int lightTypeBuffer[MAX_LIGHTS];
 };
-
 
 
 

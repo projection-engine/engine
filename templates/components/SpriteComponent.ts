@@ -4,7 +4,7 @@ import Component from "./Component";
 export default class SpriteComponent extends Component {
     _props = SPRITE_PROPS
     imageID?: string
-    attributes: [number, number] = [0, 0]
+    attributes: [number, number, number] = [0, 0, 1]
 
     get alwaysFaceCamera() {
         return this.attributes[0] === 1
@@ -14,6 +14,12 @@ export default class SpriteComponent extends Component {
         return this.attributes[1] === 1
     }
 
+    get flatShaded() {
+        return this.attributes[2] === 1
+    }
+    set flatShaded(d) {
+        this.attributes[2] = d ? 1 : 0
+    }
 
     set alwaysFaceCamera(d) {
         this.attributes[0] = d ? 1 : 0

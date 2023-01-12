@@ -24,7 +24,16 @@ export default class UberShader {
     static compile(forceCleanShader?: boolean) {
 
         UberShader.uber = undefined
-        const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
+        const methodsToLoad = [
+            `
+            if(isSpritePass){
+                albedo = texture(sampler1, texCoords).rgb;
+                N = normalVec;
+            }
+            else 
+                switch (materialID) {
+            `
+        ], uniformsToLoad = []
         if (!forceCleanShader)
             GPU.materials.forEach(mat => {
                 const declaration = [`case ${mat.bindID}: {`, mat.functionDeclaration, "break;", "}", ""]

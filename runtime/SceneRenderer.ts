@@ -17,7 +17,7 @@ const materialAttributes = new Float32Array(9)
 /** Material attributes
  * entityID[0] (0), entityID[1] (1), entityID[2] (2)
  * screenDoorEffect (3), isSky (4), noDepthChecking (5)
- * materialID (6), ssrEnabled (7), flatShading (8)
+ * materialID (6) | alwaysFaceCamera, ssrEnabled (7) | keepSameSize, flatShading (8)
  */
 
 export default class SceneRenderer {
@@ -120,94 +120,114 @@ export default class SceneRenderer {
         }
 
         context.enable(context.CULL_FACE)
-        context.depthMask(true)
     }
 
-    static drawMeshes(onlyOpaque: boolean, context: WebGL2RenderingContext, size: number, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
-        materialAttributes[0] = materialAttributes[1] = materialAttributes[2] = materialAttributes[3] = materialAttributes[4] = materialAttributes[5] = materialAttributes[6] = materialAttributes[7] = materialAttributes[8] = 0
-
+    static drawMeshes(isSpritePass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
+        const size = toRender.length
+        if (isSpritePass) {
+            materialAttributes[0] = materialAttributes[1] = materialAttributes[2] = materialAttributes[3] = materialAttributes[4] = materialAttributes[5] = materialAttributes[6] = materialAttributes[7] = materialAttributes[8] = 0
+            context.disable(context.CULL_FACE)
+        }
+        context.uniform1i(uniforms.isSpritePass, isSpritePass ? 1 : 0)
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
             const mesh = entity.meshRef
 
-            if (!entity.active || !mesh || entity.isCulled)
+            if (!entity.active || entity.isCulled)
                 continue
+
             materialAttributes[0] = entity.pickID[0]
             materialAttributes[1] = entity.pickID[1]
             materialAttributes[2] = entity.pickID[2]
 
-            const material = entity.materialRef
-            materialAttributes[8] = 0
-            if (isSky) {
-                isSky = false
-                context.enable(context.CULL_FACE)
-                context.enable(context.DEPTH_TEST)
-            }
-
-            const culling = entity?.cullingComponent
-
-            if (culling && culling.screenDoorEffect) {
-                materialAttributes[3] = entity.__cullingMetadata[5]
-            } else
-                materialAttributes[3] = 0
-
-            if (material !== undefined) {
-                materialAttributes[8] = material.flatShading ? 1 : 0
-                if (material.doubleSided) {
-                    context.disable(context.CULL_FACE)
-                    isDoubleSided = true
-                } else if (isDoubleSided) {
-                    context.enable(context.CULL_FACE)
-                    isDoubleSided = false
-                }
-                isSky = material.isSky
-
-                materialAttributes[4] = isSky ? 1 : 0
-
+            if (!isSpritePass) {
+                if (!mesh)
+                    continue
+                const material = entity.materialRef
+                materialAttributes[8] = 0
                 if (isSky) {
-                    context.disable(context.CULL_FACE)
-                    context.disable(context.DEPTH_TEST)
+                    isSky = false
+                    context.enable(context.CULL_FACE)
+                    context.enable(context.DEPTH_TEST)
                 }
+                const culling = entity?.cullingComponent
+                materialAttributes[3] = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
+                if (material !== undefined) {
+                    materialAttributes[8] = material.flatShading ? 1 : 0
+                    if (material.doubleSided) {
+                        context.disable(context.CULL_FACE)
+                        isDoubleSided = true
+                    } else if (isDoubleSided) {
+                        context.enable(context.CULL_FACE)
+                        isDoubleSided = false
+                    }
+                    isSky = material.isSky
 
+                    materialAttributes[4] = isSky ? 1 : 0
 
-                materialAttributes[5] = material.isAlphaTested ? 1 : 0
-                materialAttributes[6] = material.bindID
-
-                const component = entity.meshComponent
-                const overrideUniforms = component.overrideMaterialUniforms
-                const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues
-                const toBind = material.uniforms
-                if (data)
-                    for (let j = 0; j < toBind.length; j++) {
-                        const current = toBind[j]
-                        const dataAttribute = data[current.key]
-                        Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+                    if (isSky) {
+                        context.disable(context.CULL_FACE)
+                        context.disable(context.DEPTH_TEST)
                     }
 
-                materialAttributes[7] = material.ssrEnabled ? 1 : 0
 
-                stateWasCleared = false
-            } else if (!stateWasCleared) {
-                stateWasCleared = true
-                if (isDoubleSided) {
-                    context.enable(context.CULL_FACE)
-                    isDoubleSided = false
+                    materialAttributes[5] = material.isAlphaTested ? 1 : 0
+                    materialAttributes[6] = material.bindID
+
+                    const component = entity.meshComponent
+                    const overrideUniforms = component.overrideMaterialUniforms
+                    const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues
+                    const toBind = material.uniforms
+                    if (data)
+                        for (let j = 0; j < toBind.length; j++) {
+                            const current = toBind[j]
+                            const dataAttribute = data[current.key]
+                            Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+                        }
+
+                    materialAttributes[7] = material.ssrEnabled ? 1 : 0
+
+                    stateWasCleared = false
+                } else if (!stateWasCleared) {
+                    stateWasCleared = true
+                    if (isDoubleSided) {
+                        context.enable(context.CULL_FACE)
+                        isDoubleSided = false
+                    }
+
+                    materialAttributes[7] = 0
+                    materialAttributes[5] = 0
+                    materialAttributes[6] = -1
                 }
+                if (useCustomView) {
+                    materialAttributes[5] = 1
+                    materialAttributes[7] = 0
+                }
+            } else {
+                const sprite = entity.spriteComponent
+                const texture = GPU.textures.get(sprite.imageID)
+                if (!texture)
+                    continue
+                if (useCustomView)
+                    materialAttributes[5] = 1
 
-                materialAttributes[7] = 0
-                materialAttributes[5] = 0
-                materialAttributes[6] = -1
+                materialAttributes[6] = sprite.attributes[0]
+                materialAttributes[7] = sprite.attributes[1]
+                materialAttributes[8] = sprite.attributes[2]
+                context.uniform3fv(uniforms.scale, entity.scaling)
+                context.activeTexture(context.TEXTURE0 + texOffset)
+                console.log(texture.texture)
+                context.bindTexture(context.TEXTURE_2D, texture.texture)
+                context.uniform1i(uniforms.sampler1, texOffset)
             }
 
-
-            if (useCustomView) {
-                materialAttributes[5] = 1
-                materialAttributes[7] = 0
-            }
 
             context.uniformMatrix3fv(uniforms.materialAttributes, false, materialAttributes)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
-            mesh.draw()
+            if(isSpritePass)
+                StaticMeshes.plane.draw()
+            else
+                mesh.draw()
         }
     }
 }
