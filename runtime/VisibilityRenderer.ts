@@ -4,7 +4,6 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
-import DynamicMap from "../templates/DynamicMap";
 import StaticShaders from "../lib/StaticShaders";
 import StaticFBO from "../lib/StaticFBO";
 import type Entity from "../instances/Entity";
@@ -94,7 +93,7 @@ export default class VisibilityRenderer {
             entityMetadata[13] = entity.scaling[1]
             entityMetadata[14] = entity.scaling[2]
 
-            context.uniformMatrix3fv(uniforms.metadata, false, entityMetadata)
+            context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
 

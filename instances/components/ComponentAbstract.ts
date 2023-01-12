@@ -1,18 +1,19 @@
 import MovableAbstract from "./MovableAbstract";
-import LightComponent from "../../templates/components/LightComponent";
-import CullingComponent from "../../templates/components/CullingComponent";
-import RigidBodyComponent from "../../templates/components/RigidBodyComponent";
-import MeshComponent from "../../templates/components/MeshComponent";
-import SpriteComponent from "../../templates/components/SpriteComponent";
+import LightComponent from "./LightComponent";
+import CullingComponent from "./CullingComponent";
+import RigidBodyComponent from "./RigidBodyComponent";
+import MeshComponent from "./MeshComponent";
+import SpriteComponent from "./SpriteComponent";
 import Material from "../Material";
 import Mesh from "../Mesh";
-import COMPONENTS from "../../static/COMPONENTS";
-import Component from "../../templates/components/Component";
-import SkyLightComponent from "../../templates/components/SkyLightComponent";
-import PhysicsColliderComponent from "../../templates/components/PhysicsColliderComponent";
-import TerrainComponent from "../../templates/components/TerrainComponent";
-import UIComponent from "../../templates/components/UIComponent";
-import CameraComponent from "../../templates/components/CameraComponent";
+import COMPONENTS from "../../templates/COMPONENTS";
+import Component from "./Component";
+import SkyLightComponent from "./SkyLightComponent";
+import PhysicsColliderComponent from "./PhysicsColliderComponent";
+import TerrainComponent from "./TerrainComponent";
+import UIComponent from "./UIComponent";
+import CameraComponent from "./CameraComponent";
+import DecalComponent from "./DecalComponent";
 
 export default class ComponentAbstract extends MovableAbstract {
     components = new Map<string, Component>()
@@ -21,6 +22,7 @@ export default class ComponentAbstract extends MovableAbstract {
     #rigidBodyComponent?: RigidBodyComponent
     #meshComponent?: MeshComponent
     #spriteComponent?: SpriteComponent
+    #decalComponent?: DecalComponent
     #uiComponent?: UIComponent
     #cameraComponent?: CameraComponent
     #skylightComponent?: SkyLightComponent
@@ -47,6 +49,9 @@ export default class ComponentAbstract extends MovableAbstract {
 
     get lightComponent(): LightComponent | undefined {
         return this.#lightComponent
+    }
+    get decalComponent(): DecalComponent | undefined {
+        return this.#decalComponent
     }
 
     get cullingComponent(): CullingComponent | undefined {
@@ -81,14 +86,17 @@ export default class ComponentAbstract extends MovableAbstract {
         return this.#physicsColliderComponent
     }
 
-    get terrainComponent(): TerrainComponent | undefined {
-        return this.#terrainComponent
-    }
+    // get terrainComponent(): TerrainComponent | undefined {
+    //     return this.#terrainComponent
+    // }
 
     protected updateInternalComponentRef(KEY: string, instance?: Component) {
         switch (KEY) {
             case COMPONENTS.LIGHT:
                 this.#lightComponent = !instance ? undefined : <LightComponent>instance
+                break
+            case COMPONENTS.DECAL:
+                this.#decalComponent = !instance ? undefined : <DecalComponent>instance
                 break
             case COMPONENTS.MESH:
                 this.#meshComponent = !instance ? undefined : <MeshComponent>instance
@@ -114,9 +122,9 @@ export default class ComponentAbstract extends MovableAbstract {
             case COMPONENTS.UI:
                 this.#uiComponent = !instance ? undefined : <UIComponent>instance
                 break
-            case COMPONENTS.TERRAIN:
-                this.#terrainComponent = !instance ? undefined : <TerrainComponent>instance
-                break
+            // case COMPONENTS.TERRAIN:
+            //     this.#terrainComponent = !instance ? undefined : <TerrainComponent>instance
+            //     break
         }
     }
 

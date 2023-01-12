@@ -19,7 +19,6 @@ import LightProbe from "./instances/LightProbe";
 import StaticShaders from "./lib/StaticShaders";
 import StaticMeshes from "./lib/StaticMeshes";
 import StaticFBO from "./lib/StaticFBO";
-import UberShader from "./utils/UberShader";
 import StaticUBOs from "./lib/StaticUBOs";
 
 export default class GPU {

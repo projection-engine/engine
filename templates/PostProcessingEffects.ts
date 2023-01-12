@@ -1,5 +1,3 @@
-import FrameComposition from "../runtime/FrameComposition";
-import LensPostProcessing from "../runtime/LensPostProcessing";
 import StaticUBOs from "../lib/StaticUBOs";
 
 const U_INT = new Uint8Array(1)

@@ -1,4 +1,4 @@
-import Component from "../../templates/components/Component";
+import Component from "../../instances/components/Component";
 
 export default [
     Component.terrainInstance("TERRAIN", "terrainID"),

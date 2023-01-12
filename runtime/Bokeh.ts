@@ -1,5 +1,4 @@
 import GPU from "../GPU";
-import GPUAPI from "../lib/rendering/GPUAPI";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";

@@ -1,5 +1,4 @@
 import GPU from "../GPU";
-import DynamicMap from "../templates/DynamicMap";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticShaders from "../lib/StaticShaders";
 import type Entity from "../instances/Entity";
@@ -10,7 +9,6 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import StaticFBO from "../lib/StaticFBO";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import SceneComposition from "./SceneComposition";
-import UberShader from "../utils/UberShader";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 const materialAttributes = new Float32Array(9)

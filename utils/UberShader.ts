@@ -4,7 +4,6 @@ import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag";
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag";
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert";
 import Shader from "../instances/Shader";
-import UBO from "../instances/UBO";
 
 export default class UberShader {
 

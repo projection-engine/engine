@@ -1,13 +1,10 @@
-import CameraAPI from "../lib/utils/CameraAPI";
 import GPU from "../GPU";
-import UBO from "../instances/UBO";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import Bloom from "./Bloom";
 import Bokeh from "./Bokeh";
 import MotionBlur from "./MotionBlur";
-import StaticUBOs from "../lib/StaticUBOs";
 
 
 export default class LensPostProcessing {

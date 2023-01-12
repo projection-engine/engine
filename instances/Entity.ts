@@ -2,12 +2,13 @@ import EntityAPI from "../lib/utils/EntityAPI";
 import getComponentInstance from "../utils/get-component-instance";
 import serializeStructure from "../utils/serialize-structure";
 import Engine from "../Engine";
-import Component from "../templates/components/Component";
-import ComponentAbstract from "./entity-abstraction/ComponentAbstract";
+import Component from "./components/Component";
+import ComponentAbstract from "./components/ComponentAbstract";
 
 
 export default class Entity extends ComponentAbstract {
     [key: string]: any;
+
     readonly id
     queryKey: string
     name: string
@@ -16,8 +17,8 @@ export default class Entity extends ComponentAbstract {
     children: Entity[] = []
     parent?: Entity
     parentCache?: string
-    pickID: [number, number, number] = [-1, -1, -1]
-
+    #pickID: [number, number, number] = [-1, -1, -1]
+    #pickIndex: number = -1
 
     constructor(id = crypto.randomUUID(), name = "Empty entity", active = true) {
         super()
@@ -27,8 +28,17 @@ export default class Entity extends ComponentAbstract {
         this.queryKey = id.slice(0, id.length / 2);
     }
 
+    set pickID(data) {
+        this.#pickID = data
+        this.#pickIndex = data[0] * 255 + data[1] * 255 + data[2] * 255
+    }
+
+    get pickID() {
+        return this.#pickID
+    }
+
     get pickIndex() {
-        return this.pickID[0] * 255 + this.pickID[1] * 255 + this.pickID[2] * 255
+        return this.#pickIndex
     }
 
     addComponent<T>(KEY): T {
@@ -76,7 +86,6 @@ export default class Entity extends ComponentAbstract {
     static isRegistered(entity) {
         return !!Engine.entitiesMap.get(entity.id)
     }
-
 
 
 }

@@ -1,15 +1,16 @@
-import COMPONENTS from "../static/COMPONENTS";
-import MeshComponent from "../templates/components/MeshComponent";
-import SkyLightComponent from "../templates/components/SkyLightComponent";
-import CameraComponent from "../templates/components/CameraComponent";
-import SpriteComponent from "../templates/components/SpriteComponent";
-import PhysicsColliderComponent from "../templates/components/PhysicsColliderComponent";
-import RigidBodyComponent from "../templates/components/RigidBodyComponent";
-import CullingComponent from "../templates/components/CullingComponent";
-import UIComponent from "../templates/components/UIComponent";
-import TerrainComponent from "../templates/components/TerrainComponent";
-import LightComponent from "../templates/components/LightComponent";
-import Component from "../templates/components/Component";
+import COMPONENTS from "../templates/COMPONENTS";
+import MeshComponent from "../instances/components/MeshComponent";
+import SkyLightComponent from "../instances/components/SkyLightComponent";
+import CameraComponent from "../instances/components/CameraComponent";
+import SpriteComponent from "../instances/components/SpriteComponent";
+import PhysicsColliderComponent from "../instances/components/PhysicsColliderComponent";
+import RigidBodyComponent from "../instances/components/RigidBodyComponent";
+import CullingComponent from "../instances/components/CullingComponent";
+import UIComponent from "../instances/components/UIComponent";
+import TerrainComponent from "../instances/components/TerrainComponent";
+import LightComponent from "../instances/components/LightComponent";
+import Component from "../instances/components/Component";
+import DecalComponent from "../instances/components/DecalComponent";
 
 
 export default function getComponentInstance(key:string):Component|undefined{
@@ -24,6 +25,8 @@ export default function getComponentInstance(key:string):Component|undefined{
             return new CameraComponent();
         case  COMPONENTS.SPRITE:
             return new SpriteComponent();
+        case  COMPONENTS.DECAL:
+            return new DecalComponent();
         case  COMPONENTS.PHYSICS_COLLIDER:
             return new PhysicsColliderComponent();
         case  COMPONENTS.RIGID_BODY:

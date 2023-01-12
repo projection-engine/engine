@@ -1,5 +1,4 @@
-import MutableObject from "../../MutableObject";
-import Entity from "../../instances/Entity";
+import Entity from "../Entity";
 
 interface ComponentValueGeneric {
     [key: string]: any

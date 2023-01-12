@@ -1,4 +1,4 @@
-import COMPONENTS from "../../static/COMPONENTS.js"
+import COMPONENTS from "../../templates/COMPONENTS"
 import Engine from "../../Engine";
 import QueryAPI from "./QueryAPI";
 
@@ -12,7 +12,6 @@ import LightsAPI from "./LightsAPI";
 import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import GPU from "../../GPU";
-import SceneRenderer from "../../runtime/SceneRenderer";
 import MutableObject from "../../MutableObject";
 import EntityComponentMapping from "../EntityComponentMapping";
 
@@ -80,6 +79,8 @@ export default class EntityAPI {
             EntityComponentMapping.lights.add(entity.id, entity)
         if (entity.spriteComponent !== undefined)
             EntityComponentMapping.sprites.add(entity.id, entity)
+        if (entity.decalComponent !== undefined)
+            EntityComponentMapping.decals.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
             EntityComponentMapping.meshesToDraw.add(entity.id, entity)
             MaterialAPI.updateMap(entity.meshComponent)
@@ -114,6 +115,8 @@ export default class EntityAPI {
             EntityComponentMapping.lights.delete(entity.id)
         if (entity.spriteComponent !== undefined)
             EntityComponentMapping.sprites.delete(entity.id)
+        if (entity.decalComponent !== undefined)
+            EntityComponentMapping.decals.delete(entity.id)
         if (entity.meshComponent !== undefined)
             EntityComponentMapping.meshesToDraw.delete(entity.id)
 

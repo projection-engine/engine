@@ -2,17 +2,15 @@ import PostProcessingEffects from "../../templates/PostProcessingEffects";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import ArrayBufferAPI from "./ArrayBufferAPI";
-import {mat4, quat, vec3, vec4} from "gl-matrix";
+import {quat, vec3, vec4} from "gl-matrix";
 import ConversionAPI from "../math/ConversionAPI";
-import UBO from "../../instances/UBO";
 import MotionBlur from "../../runtime/MotionBlur";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 
 import GPU from "../../GPU";
 import StaticUBOs from "../StaticUBOs";
-import MutableObject from "../../MutableObject";
 import Entity from "../../instances/Entity";
-import CameraComponent from "../../templates/components/CameraComponent";
+import CameraComponent from "../../instances/components/CameraComponent";
 
 
 /**

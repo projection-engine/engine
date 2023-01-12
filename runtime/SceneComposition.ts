@@ -1,18 +1,9 @@
-import Engine from "../Engine";
 import GPU from "../GPU";
-import OmnidirectionalShadows from "./OmnidirectionalShadows";
-import VisibilityRenderer from "./VisibilityRenderer";
-import Shader from "../instances/Shader";
-import CameraAPI from "../lib/utils/CameraAPI";
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
 import UberShader from "../utils/UberShader";
 import EntityComponentMapping from "../lib/EntityComponentMapping";
 import SceneRenderer from "./SceneRenderer";
-import Entity from "../instances/Entity";
-
-
-
 
 
 export default class SceneComposition {

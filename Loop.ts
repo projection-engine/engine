@@ -6,11 +6,9 @@ import LensPostProcessing from "./runtime/LensPostProcessing";
 import FrameComposition from "./runtime/FrameComposition";
 
 import Engine from "./Engine";
-import SceneRenderer from "./runtime/SceneRenderer";
 import Physics from "./runtime/Physics";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import OmnidirectionalShadows from "./runtime/OmnidirectionalShadows";
-import MotionBlur from "./runtime/MotionBlur";
 import CameraAPI from "./lib/utils/CameraAPI";
 import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
 import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";

@@ -1,5 +1,4 @@
 import GPU from "../GPU";
-import CameraAPI from "../lib/utils/CameraAPI";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import GLSL_TYPES from "../static/GLSL_TYPES"
 import MutableObject from "../MutableObject";

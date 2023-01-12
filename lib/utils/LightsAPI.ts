@@ -1,5 +1,4 @@
 import ArrayBufferAPI from "./ArrayBufferAPI";
-import DynamicMap from "../../templates/DynamicMap";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import {mat4, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/DirectionalShadows";
