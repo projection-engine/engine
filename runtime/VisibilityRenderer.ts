@@ -41,7 +41,6 @@ export default class VisibilityRenderer {
         StaticFBO.visibility.startMapping()
         Mesh.finishIfUsed()
 
-        context.disable(GPU.context.CULL_FACE)
 
         entityMetadata[5] = 0 // IS NOT SPRITE
 
@@ -73,6 +72,7 @@ export default class VisibilityRenderer {
 
         entityMetadata[5] = 1 // IS SPRITE
 
+        context.disable(context.CULL_FACE)
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
             const culling = entity.cullingComponent
@@ -102,7 +102,7 @@ export default class VisibilityRenderer {
         }
 
         StaticFBO.visibility.stopMapping()
-        context.enable(GPU.context.CULL_FACE)
+        context.enable(context.CULL_FACE)
 
         SSAO.execute()
     }

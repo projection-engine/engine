@@ -19,22 +19,22 @@ export default class SceneComposition {
     static debugShadingModel = SHADING_MODELS.DETAIL
 
     static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
-        if (!UberShader.uber)
+        const shader = UberShader.uber
+        if (!shader)
             return
 
-        UberShader.uber.bind()
+        shader.bind()
         const uniforms = UberShader.uberUniforms
-        const meshes = EntityComponentMapping.meshesToDraw.array
-        const sprites = EntityComponentMapping.sprites.array
-
+        const toRender = EntityComponentMapping.meshesToDraw.array
+        const size = toRender.length
         const context = GPU.context
 
         SceneRenderer.bindGlobalResources(context, uniforms, useCustomView, viewProjection, viewMatrix, cameraPosition)
 
         StaticFBO.postProcessing2.startMapping()
 
-        SceneRenderer.drawMeshes(false, context, meshes, uniforms, useCustomView)
-        SceneRenderer.drawMeshes(true, context, sprites, uniforms, useCustomView)
+        SceneRenderer.drawMeshes(true, context, size, toRender, uniforms, useCustomView)
+        SceneRenderer.drawSprites()
 
         StaticFBO.postProcessing2.stopMapping()
     }
