@@ -4,7 +4,7 @@ import UBO from "../instances/UBO";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
-import BloomPrePass from "./BloomPrePass";
+import Bloom from "./Bloom";
 import Bokeh from "./Bokeh";
 import MotionBlur from "./MotionBlur";
 import StaticUBOs from "../lib/StaticUBOs";
@@ -17,7 +17,7 @@ export default class LensPostProcessing {
 
         Bokeh.execute()
         MotionBlur.execute()
-        BloomPrePass.execute()
+        Bloom.execute()
 
         StaticFBO.lens.startMapping()
         StaticShaders.lens.bind()

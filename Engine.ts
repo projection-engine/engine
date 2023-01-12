@@ -5,7 +5,7 @@ import SSGI from "./runtime/SSGI";
 import SSAO from "./runtime/SSAO";
 import DirectionalShadows from "./runtime/DirectionalShadows";
 import ConversionAPI from "./lib/math/ConversionAPI";
-import PhysicsPass from "./runtime/PhysicsPass";
+import Physics from "./runtime/Physics";
 import MotionBlur from "./runtime/MotionBlur";
 import FrameComposition from "./runtime/FrameComposition";
 import GPU from "./GPU";
@@ -107,9 +107,9 @@ export default class Engine  {
         Engine.params = data
 
         if (typeof physicsSteps === "number")
-            PhysicsPass.subSteps = physicsSubSteps
+            Physics.subSteps = physicsSubSteps
         if (typeof physicsSteps === "number")
-            PhysicsPass.simulationStep = physicsSteps
+            Physics.simulationStep = physicsSteps
 
         SSGI.blurSamples = SSGISettings.blurSamples || 3
         SSGI.ssgiColorGrading[0] = SSGISettings.gamma || 2.2

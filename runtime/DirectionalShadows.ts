@@ -4,6 +4,7 @@ import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import UberShader from "../utils/UberShader";
 import StaticUBOs from "../lib/StaticUBOs";
+import EntityComponentMapping from "../lib/EntityComponentMapping";
 
 
 let lightsToUpdate
@@ -84,7 +85,7 @@ export default class DirectionalShadows {
     static loopMeshes(light) {
         if (!light.entity)
             return
-        const toRender = VisibilityRenderer.meshesToDraw.array
+        const toRender = EntityComponentMapping.meshesToDraw.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
             const current = toRender[m], meshComponent = current.meshComponent

@@ -7,6 +7,7 @@ import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
 import UberShader from "../../utils/UberShader";
 import StaticUBOs from "../StaticUBOs";
+import EntityComponentMapping from "../EntityComponentMapping";
 
 
 let lightTimeout
@@ -18,7 +19,7 @@ const cacheVec3 = vec3.create()
 
 export default class LightsAPI {
 
-    static lights = new DynamicMap<Entity>()
+
     static primaryBuffer = <Float32Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS * 16, 0, false, false, false)
     static secondaryBuffer = <Float32Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS * 16, 0, false, false, false)
     static typeBuffer = <Uint8Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS, 0, false, false, true)
@@ -35,7 +36,7 @@ export default class LightsAPI {
     }
 
     static #package(keepOld) {
-        const lights = LightsAPI.lights.array
+        const lights = EntityComponentMapping.lights.array
         let primaryBuffer = LightsAPI.primaryBuffer,
             secondaryBuffer = LightsAPI.secondaryBuffer,
             typeBuffer = LightsAPI.typeBuffer

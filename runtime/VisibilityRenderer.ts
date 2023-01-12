@@ -8,73 +8,101 @@ import DynamicMap from "../templates/DynamicMap";
 import StaticShaders from "../lib/StaticShaders";
 import StaticFBO from "../lib/StaticFBO";
 import type Entity from "../instances/Entity";
+import EntityComponentMapping from "../lib/EntityComponentMapping";
+import StaticMeshes from "../lib/StaticMeshes";
 
-
+const entityMetadata = new Float32Array(16)
+let  context, toRender:Entity[], size, uniforms, VP
 export default class VisibilityRenderer {
-    static meshesToDraw = new DynamicMap<Entity>()
     static needsUpdate = true
 
     static execute() {
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
 
-        const context = GPU.context
-        const toRender = VisibilityRenderer.meshesToDraw.array
-        const size = toRender.length
-        const uniforms = StaticShaders.visibilityUniforms
         StaticShaders.visibility.bind()
-        const VP = CameraAPI.metadata.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
+        context = GPU.context
+        toRender = EntityComponentMapping.meshesToDraw.array
+        size = toRender.length
+        uniforms = StaticShaders.visibilityUniforms
+        VP = CameraAPI.metadata.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
+
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         context.uniformMatrix4fv(uniforms.previousViewProjection, false, VP)
 
-        mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
+        context.uniformMatrix4fv(uniforms.viewMatrix, false, VP)
+        context.uniformMatrix4fv(uniforms.projectionMatrix, false, VP)
 
+        context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
+        context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
+        context.uniform3fv(uniforms.cameraPlacement, CameraAPI.position)
+
+        mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
         StaticFBO.visibility.startMapping()
         Mesh.finishIfUsed()
 
-        let isAlphaTested = 0, isDoubleSided = false, stateWasCleared = false
 
-        context.enable(context.CULL_FACE)
-        context.depthMask(true)
+        entityMetadata[5] = 0 // IS NOT SPRITE
 
         for (let i = 0; i < size; i++) {
-            isAlphaTested = 0
+
             const entity = toRender[i]
             const mesh = entity.meshRef
             const material = entity.materialRef
             const culling = entity.cullingComponent
-            if (entity.isCulled || !entity.active || !mesh  || culling && culling.screenDoorEnabled && culling.screenDoorEffect)
+            const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
+            if (entity.isCulled || !entity.active || !mesh || material?.isSky)
                 continue
 
-            if (material) {
-                if (material.isSky)
-                    continue
-                isAlphaTested = material.isAlphaTested ? 1 : 0
-                if (material.doubleSided) {
-                    context.disable(context.CULL_FACE)
-                    isDoubleSided = true
-                } else if (isDoubleSided) {
-                    context.enable(context.CULL_FACE)
-                    isDoubleSided = false
-                }
-                stateWasCleared = false
-            } else if (!stateWasCleared) {
-                stateWasCleared = true
-                if (isDoubleSided) {
-                    context.enable(context.CULL_FACE)
-                    isDoubleSided = false
-                }
-            }
+            entityMetadata[0] = entity.pickID[0]
+            entityMetadata[1] = entity.pickID[1]
+            entityMetadata[2] = entity.pickID[2]
 
-            context.uniform1i(uniforms.isAlphaTested, isAlphaTested)
-            context.uniform3fv(uniforms.entityID, entity.pickID)
+            entityMetadata[4] = hasScreenDoor || material?.isAlphaTested ? 1 : 0
+
+            context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
 
-
             mesh.simplifiedDraw()
         }
+
+        toRender = EntityComponentMapping.sprites.array
+        size = toRender.length
+
+        entityMetadata[5] = 1 // IS SPRITE
+
+        context.disable(context.CULL_FACE)
+        for (let i = 0; i < size; i++) {
+            const entity = toRender[i]
+            const culling = entity.cullingComponent
+            const sprite = entity.spriteComponent
+            const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
+            if (entity.isCulled || !entity.active || hasScreenDoor)
+                continue
+
+            entityMetadata[0] = entity.pickID[0]
+            entityMetadata[1] = entity.pickID[1]
+            entityMetadata[2] = entity.pickID[2]
+
+            entityMetadata[4] = hasScreenDoor ? 1 : 0
+
+            entityMetadata[8] = sprite.attributes[0]
+            entityMetadata[9] = sprite.attributes[1]
+
+            entityMetadata[12] = entity.scaling[0]
+            entityMetadata[13] = entity.scaling[1]
+            entityMetadata[14] = entity.scaling[2]
+
+            context.uniformMatrix3fv(uniforms.metadata, false, entityMetadata)
+            context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+            context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
+
+            StaticMeshes.drawQuad()
+        }
+
         StaticFBO.visibility.stopMapping()
+        context.enable(context.CULL_FACE)
 
         SSAO.execute()
     }

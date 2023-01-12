@@ -1,17 +1,19 @@
-import Engine from "../Engine";
 import GPU from "../GPU";
-import OmnidirectionalShadows from "./OmnidirectionalShadows";
-import VisibilityRenderer from "./VisibilityRenderer";
+import DynamicMap from "../templates/DynamicMap";
+import StaticMeshes from "../lib/StaticMeshes";
+import StaticShaders from "../lib/StaticShaders";
+import type Entity from "../instances/Entity";
+import EntityComponentMapping from "../lib/EntityComponentMapping";
 import Shader from "../instances/Shader";
+import Engine from "../Engine";
 import CameraAPI from "../lib/utils/CameraAPI";
-import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
+import OmnidirectionalShadows from "./OmnidirectionalShadows";
+import SceneComposition from "./SceneComposition";
 import UberShader from "../utils/UberShader";
 
-let texOffset
-
+let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 const materialAttributes = new Float32Array(9)
-
 /** Material attributes
  * entityID[0] (0), entityID[1] (1), entityID[2] (2)
  * screenDoorEffect (3), isSky (4), noDepthChecking (5)
@@ -19,20 +21,42 @@ const materialAttributes = new Float32Array(9)
  */
 
 export default class SceneRenderer {
-    static debugShadingModel = SHADING_MODELS.DETAIL
-
-    static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
-        const shader = UberShader.uber
-        if ( !shader)
+    static drawSprites() {
+        const sprites = EntityComponentMapping.sprites.array
+        const size = sprites.length
+        if (size === 0)
             return
 
-        const uniforms = UberShader.uberUniforms
-        const toRender = VisibilityRenderer.meshesToDraw.array
-        const size = toRender.length
-        const context = GPU.context
-        shader.bind()
+        const textures = GPU.textures
+        GPU.context.disable(GPU.context.CULL_FACE)
+        StaticShaders.sprite.bind()
+        const uniforms = StaticShaders.spriteUniforms
+
+        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        for (let i = 0; i < size; i++) {
+            const current = sprites[i], component = current.spriteComponent
+            if (!current.active || current.isCulled)
+                continue
+            const texture = textures.get(component.imageID)
+            if (!texture)
+                continue
+
+            GPU.context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
+            GPU.context.uniform3fv(uniforms.scale, current._scaling)
+            GPU.context.uniform2fv(uniforms.attributes, component.attributes)
+            GPU.context.bindTexture(GPU.context.TEXTURE_2D, texture.texture)
+            GPU.context.uniform1i(uniforms.iconSampler, 0)
+            StaticMeshes.drawQuad()
+        }
+
+        GPU.context.enable(GPU.context.CULL_FACE)
+    }
+
+    static bindGlobalResources(context: WebGL2RenderingContext, uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
         if (Engine.developmentMode)
-            context.uniform1i(uniforms.shadingModel, SceneRenderer.debugShadingModel)
+            context.uniform1i(uniforms.shadingModel, SceneComposition.debugShadingModel)
+
+        stateWasCleared = isDoubleSided = isSky = false
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         context.uniform2fv(uniforms.bufferResolution, GPU.bufferResolution)
@@ -82,7 +106,6 @@ export default class SceneRenderer {
 
         context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
 
-
         texOffset = 7
 
         // uniform samplerCube skylight_diffuse;
@@ -96,10 +119,12 @@ export default class SceneRenderer {
             context.uniform1i(uniforms.skylight_specular, 7)
         }
 
-        let stateWasCleared = false, isDoubleSided = false, isSky = false
-
         context.enable(context.CULL_FACE)
         context.depthMask(true)
+    }
+
+    static drawMeshes(onlyOpaque: boolean, context: WebGL2RenderingContext, size: number, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
+        materialAttributes[0] = materialAttributes[1] = materialAttributes[2] = materialAttributes[3] = materialAttributes[4] = materialAttributes[5] = materialAttributes[6] = materialAttributes[7] = materialAttributes[8] = 0
 
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
@@ -180,11 +205,9 @@ export default class SceneRenderer {
                 materialAttributes[7] = 0
             }
 
-
             context.uniformMatrix3fv(uniforms.materialAttributes, false, materialAttributes)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()
         }
     }
-
 }

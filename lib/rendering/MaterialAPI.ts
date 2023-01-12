@@ -12,8 +12,8 @@ import TextureInUse from "../../templates/TextureInUse";
 import MutableObject from "../../MutableObject";
 
 export default class MaterialAPI {
-    static #incrementalMap = new Map()
     static entityMaterial = new Map<string, { [key: string]: Entity }>()
+    static #generator?: Generator<number>
 
     static* #getIncrementalID() {
         let counter = 0
@@ -22,21 +22,14 @@ export default class MaterialAPI {
             counter++
         }
     }
-
-    static #generator
-
     static registerMaterial(material) {
         if (material.bindID > -1)
             return
         if (!MaterialAPI.#generator)
             MaterialAPI.#generator = MaterialAPI.#getIncrementalID()
         material.bindID = MaterialAPI.#generator.next().value
-        MaterialAPI.#incrementalMap.set(material.id, material.bindID)
     }
 
-    static removeMaterial(matID) {
-        MaterialAPI.#incrementalMap.delete(matID)
-    }
 
     static updateMap(component: MeshComponent) {
         const entity = component?.entity
