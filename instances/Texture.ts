@@ -14,6 +14,7 @@ export default class Texture {
     #image?: ImageBitmap | HTMLImageElement
 
     async initialize(attributes: TextureParams) {
+        this.loaded = false
         const img = attributes.img
 
         this.attributes = attributes
@@ -55,7 +56,7 @@ export default class Texture {
             type = "UNSIGNED_BYTE"
         } = this.attributes
 
-        let newTexture = GPU.context.createTexture()
+        const newTexture = GPU.context.createTexture()
 
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, newTexture)
         GPU.context.texImage2D(GPU.context.TEXTURE_2D, 0, GPU.context[internalFormat], width, height, 0, GPU.context[format], GPU.context[type], this.#image)
@@ -78,15 +79,10 @@ export default class Texture {
         return newTexture
     }
 
-    update(newImage: string) {
-        if (this.loaded) {
+    update(attributes: TextureParams) {
+        if (this.loaded)
             GPU.context.deleteTexture(this.texture)
-            ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: newImage})
-                .then(res => {
-                    this.attributes.img = <ImageBitmap | undefined>res
-                    this.#initializeTexture()
-                })
-        }
+        this.initialize(attributes).catch()
     }
 
     static createTexture(

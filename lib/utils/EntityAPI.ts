@@ -144,34 +144,63 @@ export default class EntityAPI {
         const keys = Object.keys(entity)
 
         for (let i = 0; i < keys.length; i++) {
-            const k = keys[i]
-            if (k !== "components" && k !== "parent" && k !== "matrix" && !ENTITY_TYPED_ATTRIBUTES.includes(k) && k !== "_props")
-                parsedEntity[k] = entity[k]
+            try {
+                const k = keys[i]
+                if (k !== "components" && k !== "parent" && k !== "matrix" && !ENTITY_TYPED_ATTRIBUTES.includes(k) && k !== "_props")
+                    parsedEntity[k] = entity[k]
+            } catch (err) {
+                console.warn(err)
+            }
         }
 
         for (let i = 0; i < ENTITY_TYPED_ATTRIBUTES.length; i++) {
-            const key = ENTITY_TYPED_ATTRIBUTES[i]
-            if (!entity[key])
-                continue
-            for (let j = 0; j < parsedEntity[key].length; j++)
-                parsedEntity[key][j] = entity[key][j]
+            try {
+                const key = ENTITY_TYPED_ATTRIBUTES[i]
+                if (!entity[key])
+                    continue
+                for (let j = 0; j < parsedEntity[key].length; j++)
+                    parsedEntity[key][j] = entity[key][j]
+            } catch (err) {
+                console.warn(err)
+            }
         }
 
         parsedEntity.parent = undefined
         parsedEntity.parentCache = entity.parent
         for (const k in entity.components) {
+
             const component = parsedEntity.addComponent(k)
             if (!component)
                 continue
             const keys = Object.keys(entity.components[k])
             for (let i = 0; i < keys.length; i++) {
-                let componentValue = keys[i]
-                if (componentValue.includes("__") || componentValue.includes("#") || componentValue === "_props" || componentValue === "_name")
-                    continue
-                if (k === COMPONENTS.MESH && (componentValue === "_meshID" || componentValue === "_materialID")) {
-                    component[componentValue.replace("_", "")] = entity.components[k][componentValue]
-                } else
-                    component[componentValue] = entity.components[k][componentValue]
+                try {
+                    let componentValue = keys[i]
+                    if (componentValue.includes("__") || componentValue.includes("#") || componentValue === "_props" || componentValue === "_name")
+                        continue
+                    switch (k) {
+                        case COMPONENTS.MESH: {
+                            if (componentValue === "_meshID" || componentValue === "_materialID")
+                                component[componentValue.replace("_", "")] = entity.components[k][componentValue]
+                            else
+                                component[componentValue] = entity.components[k][componentValue]
+                            break
+                        }
+                        case COMPONENTS.DECAL: {
+                            if (componentValue.charAt(0) === "_")
+                                component[componentValue.substring(1, componentValue.length)] = entity.components[k][componentValue]
+                            else
+                                component[componentValue] = entity.components[k][componentValue]
+                            break
+                        }
+                        default:
+                            component[componentValue] = entity.components[k][componentValue]
+                    }
+
+
+                } catch (err) {
+                    console.warn(err)
+                }
             }
         }
         parsedEntity.changed = true

@@ -111,7 +111,7 @@ export default class MaterialAPI {
 
                             if (texture) {
                                 texturesInUse[textureID] = {texture, key: currentUniform.key}
-                                uniformValues[currentUniform.key] = texture.texture
+                                uniformValues[currentUniform.key] = texture
                             }
                         }
                     }

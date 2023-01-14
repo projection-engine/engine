@@ -73,7 +73,7 @@ void main(){
     extractData();
     if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
-    float depthData = texture(scene_depth, quadUV).r;
+    depthData = texture(scene_depth, quadUV).r;
 
     if(isDecalPass){
         if (depthData == 0.) discard;
@@ -82,13 +82,17 @@ void main(){
         normalVec = normalize(vec3(invViewMatrix * vec4(normalFromDepth(depthData, quadUV, scene_depth), 0.)));
         worldSpacePosition = vec3(invViewMatrix * vec4(viewSpacePosition, 1.));
         vec3 objectSpacePosition = vec3(invModelMatrix * vec4(worldSpacePosition, 1.));
-        texCoords = objectSpacePosition.rg;
+        texCoords = objectSpacePosition.xz * .5 + .5;
 
         bool inRange =
-        texCoords.x >= -1.0 &&
-        texCoords.x <= 1.0 &&
-        texCoords.y >= -1.0 &&
-        texCoords.y <= 1.0;
+        objectSpacePosition.x >= -1.0 &&
+        objectSpacePosition.x <= 1.0 &&
+
+        objectSpacePosition.y >= -1.0 &&
+        objectSpacePosition.y <= 1.0 &&
+
+        objectSpacePosition.z >= -1.0 &&
+        objectSpacePosition.z <= 1.0;
 
         if(!inRange) discard;
     }else {
@@ -109,7 +113,7 @@ void main(){
     albedo = vec3(1.);
 
     if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
-    fragColor = pbLightComputation();
+        fragColor = pbLightComputation();
     else {
         switch (shadingModel){
             case ALBEDO:
@@ -150,7 +154,7 @@ void main(){
                 float contribution = 0.;
 
                 if (!flatShading){
-                    viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
+                    viewSpacePosition = viewSpacePositionFromDepth(depthData, quadUV);
                     albedoOverPI = vec3(1.);
                     F0 = mix(F0, albedoOverPI, 0.);
 

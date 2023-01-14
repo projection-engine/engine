@@ -93,15 +93,34 @@ vec2 texCoords;
 vec3 viewSpacePosition;
 vec3 worldSpacePosition;
 vec3 normalVec;
+float depthData;
+
+bool useAlbedoDecal;
+bool useMetallicDecal;
+bool useRoughnessDecal;
+bool useNormalDecal;
+bool useOcclusionDecal;
+
 
 void extractData() {
-    screenDoorEffect = matAttr[1][0] == 1.;
+
+    screenDoorEffect = matAttr[1][0] == 1. && !isDecalPass;
+    isSky = matAttr[1][1] == 1. && !isDecalPass;
+    flatShading = matAttr[2][2] == 1. && !isDecalPass;
+    noDepthChecking = matAttr[1][2] == 1. && !isDecalPass;
+
     entityID = vec3(matAttr[0]);
-    isSky = matAttr[1][1] == 1.;
-    flatShading = matAttr[2][2] == 1.;
-    ssrEnabled = matAttr[2][1] == 1.;
-    noDepthChecking = matAttr[1][2] == 1.;
     materialID = int(matAttr[2][0]);
+    ssrEnabled = matAttr[2][1] == 1.;
+
+
+    if(isDecalPass) {
+      useAlbedoDecal     = matAttr[1][1] == 1.;
+      useMetallicDecal   = matAttr[2][2] == 1.;
+      useRoughnessDecal  = matAttr[1][2] == 1.;
+      useNormalDecal   = matAttr[1][0] == 1.;
+      useOcclusionDecal  = matAttr[2][0] == 1.;
+    }
 }
 
 
