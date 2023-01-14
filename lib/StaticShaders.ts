@@ -61,6 +61,7 @@ export default class StaticShaders {
     static upSampling?: Shader
     static upSamplingUniforms?: { [key: string]: WebGLUniformLocation }
 
+
     static #initialized = false
 
     static initialize() {
@@ -88,6 +89,7 @@ export default class StaticShaders {
         StaticShaders.lens = new Shader(SHADERS.QUAD_VERTEX, SHADERS.LENS_POST_PROCESSING_FRAG)
         StaticShaders.gaussian = new Shader(SHADERS.QUAD_VERTEX, SHADERS.GAUSSIAN_FRAG)
         StaticShaders.upSampling = new Shader(SHADERS.QUAD_VERTEX, SHADERS.UPSAMPLING_TEND_FRAG)
+
         UberShader.compile()
         
         StaticShaders.spriteUniforms = StaticShaders.sprite.uniformMap
@@ -109,6 +111,7 @@ export default class StaticShaders {
         StaticShaders.lensUniforms = StaticShaders.lens.uniformMap
         StaticShaders.gaussianUniforms = StaticShaders.gaussian.uniformMap
         StaticShaders.upSamplingUniforms = StaticShaders.upSampling.uniformMap
+
 
     }
 

@@ -16,16 +16,20 @@ export default class SceneComposition {
 
         shader.bind()
         const uniforms = UberShader.uberUniforms
-        const toRender = EntityComponentMapping.meshesToDraw.array
-        const size = toRender.length
+
         const context = GPU.context
 
         SceneRenderer.bindGlobalResources(context, uniforms, useCustomView, viewProjection, viewMatrix, cameraPosition)
 
         StaticFBO.postProcessing2.startMapping()
 
-        SceneRenderer.drawMeshes(true, context, size, toRender, uniforms, useCustomView)
+        SceneRenderer.drawMeshes(true, false, context, EntityComponentMapping.meshesToDraw.array, uniforms, useCustomView)
+        context.disable(context.CULL_FACE)
+        context.disable(context.DEPTH_TEST)
+        SceneRenderer.drawMeshes(true, true, context, EntityComponentMapping.decals.array, uniforms, useCustomView)
+        context.enable(context.DEPTH_TEST)
         SceneRenderer.drawSprites()
+        context.enable(context.CULL_FACE)
 
         StaticFBO.postProcessing2.stopMapping()
     }

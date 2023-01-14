@@ -16,19 +16,21 @@
 
 
 in mat3 matAttr;
-in vec2 texCoords;
-in vec3 normalVec;
-in vec3 worldSpacePosition;
+in vec2 naturalTextureUV;
+in vec3 naturalNormal;
 
+in vec3 worldPosition;
+in mat4 invModelMatrix;
 
 // GLOBAL
-
 uniform vec2 bufferResolution;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 invViewMatrix;
 uniform mat4 invProjectionMatrix;
 uniform vec3 cameraPosition;
 uniform float elapsedTime;
+uniform bool isDecalPass;
 
 uniform UberShaderSettings {
     float shadowMapsQuantity;
@@ -52,10 +54,6 @@ uniform UberShaderSettings {
     mat4 lightSecondaryBuffer[MAX_LIGHTS];
     int lightTypeBuffer[MAX_LIGHTS];
 };
-
-
-
-
 
 uniform sampler2D scene_depth;
 uniform sampler2D brdf_sampler;
@@ -91,6 +89,10 @@ bool isSky;
 bool ssrEnabled;
 bool noDepthChecking;
 int materialID;
+vec2 texCoords;
+vec3 viewSpacePosition;
+vec3 worldSpacePosition;
+vec3 normalVec;
 
 void extractData() {
     screenDoorEffect = matAttr[1][0] == 1.;

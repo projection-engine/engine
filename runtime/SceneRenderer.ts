@@ -9,6 +9,7 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import StaticFBO from "../lib/StaticFBO";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import SceneComposition from "./SceneComposition";
+import VisibilityRenderer from "./VisibilityRenderer";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 const materialAttributes = new Float32Array(9)
@@ -20,17 +21,18 @@ const materialAttributes = new Float32Array(9)
 
 export default class SceneRenderer {
     static drawSprites() {
+        const context = GPU.context
         const sprites = EntityComponentMapping.sprites.array
         const size = sprites.length
         if (size === 0)
             return
 
         const textures = GPU.textures
-        GPU.context.disable(GPU.context.CULL_FACE)
+
         StaticShaders.sprite.bind()
         const uniforms = StaticShaders.spriteUniforms
 
-        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        context.activeTexture(context.TEXTURE0)
         for (let i = 0; i < size; i++) {
             const current = sprites[i], component = current.spriteComponent
             if (!current.active || current.isCulled)
@@ -39,15 +41,14 @@ export default class SceneRenderer {
             if (!texture)
                 continue
 
-            GPU.context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
-            GPU.context.uniform3fv(uniforms.scale, current._scaling)
-            GPU.context.uniform2fv(uniforms.attributes, component.attributes)
-            GPU.context.bindTexture(GPU.context.TEXTURE_2D, texture.texture)
-            GPU.context.uniform1i(uniforms.iconSampler, 0)
+           context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
+           context.uniform3fv(uniforms.scale, current._scaling)
+           context.uniform2fv(uniforms.attributes, component.attributes)
+           context.bindTexture(context.TEXTURE_2D, texture.texture)
+           context.uniform1i(uniforms.iconSampler, 0)
             StaticMeshes.drawQuad()
         }
 
-        GPU.context.enable(GPU.context.CULL_FACE)
     }
 
     static bindGlobalResources(context: WebGL2RenderingContext, uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
@@ -63,6 +64,7 @@ export default class SceneRenderer {
             context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
             context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
+            context.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
             context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
 
@@ -121,12 +123,12 @@ export default class SceneRenderer {
         context.depthMask(true)
     }
 
-    static drawMeshes(onlyOpaque: boolean, context: WebGL2RenderingContext, size: number, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
-        materialAttributes[0] = materialAttributes[1] = materialAttributes[2] = materialAttributes[3] = materialAttributes[4] = materialAttributes[5] = materialAttributes[6] = materialAttributes[7] = materialAttributes[8] = 0
-
+    static drawMeshes(onlyOpaque: boolean, isDecalPass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
+        const size = toRender.length
+        context.uniform1i(uniforms.isDecalPass, isDecalPass ? 1 : 0)
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
-            const mesh = entity.meshRef
+            const mesh =isDecalPass ? StaticMeshes.cube : entity.meshRef
 
             if (!entity.active || !mesh || entity.isCulled)
                 continue
