@@ -56,10 +56,10 @@ float directionalLightShadows(float distanceFromCamera, float shadowFalloffDista
 
 
 
-vec3 computeDirectionalLight(float distanceFromCamera, mat4 lightMatrix, mat4 lightData, vec3 V, vec3 F0, float roughness, float metallic, vec3 N){
+vec3 computeDirectionalLight(mat4 lightMatrix, mat4 lightData){
     vec3 lightDirection =  vec3(lightData[0][0], lightData[0][1], lightData[0][2]);
 
-    vec4 baseContribution = precomputeContribution(lightDirection, N);
+    vec4 baseContribution = precomputeContribution(lightDirection);
     if(baseContribution.a == 0.) return vec3(0.);
 
 
@@ -78,5 +78,5 @@ vec3 computeDirectionalLight(float distanceFromCamera, mat4 lightMatrix, mat4 li
     float occlusion = hasSSS ? screenSpaceShadows(lightDirection) : 1.;
     if (occlusion == 0. ) return vec3(0.);
 
-    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor, V, N, roughness, metallic, F0);
+    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor);
 }

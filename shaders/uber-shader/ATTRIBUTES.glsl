@@ -95,7 +95,7 @@ vec3 VrN;
 vec2 brdf = vec2(0.);
 vec3 F0 = vec3(0.04);
 float NdotV;
-
+vec2 texelSize;
 bool flatShading = false;
 bool isSky;
 bool alphaTested;
@@ -132,16 +132,20 @@ bool useOcclusionDecal;
 
 
 void extractData() {
-     screenDoorEffect = matAttr[1][0] == 1.;
-     ssrEnabled = matAttr[1][1] == 1.;
-     renderingMode = int(matAttr[0][3]);
-     entityID = vec3(matAttr[0]);
-     materialID = matAttr[1][2];
-     anisotropicRotation = matAttr[1][3];
-     anisotropy = matAttr[2][0];
-     clearCoat = matAttr[2][1];
-     sheen = matAttr[2][2];
-     sheenTint = matAttr[2][3];
+    texelSize = 1. / bufferResolution;
+    quadUV = gl_FragCoord.xy / bufferResolution;
+    depthData = texture(scene_depth, quadUV).r;
+
+    screenDoorEffect = matAttr[1][0] == 1.;
+    ssrEnabled = matAttr[1][1] == 1.;
+    renderingMode = int(matAttr[0][3]);
+    entityID = vec3(matAttr[0]);
+    materialID = int(matAttr[1][2]);
+    anisotropicRotation = matAttr[1][3];
+    anisotropy = matAttr[2][0];
+    clearCoat = matAttr[2][1];
+    sheen = matAttr[2][2];
+    sheenTint = matAttr[2][3];
 
     if (isDecalPass) {
         renderingMode = ISOTROPIC;
@@ -152,9 +156,9 @@ void extractData() {
         useOcclusionDecal = matAttr[1][2] == 1.;
     }
 
-     isSky = renderingMode == SKY;
-     flatShading = renderingMode == UNLIT;
-     alphaTested = renderingMode == TRANSPARENCY;
+    isSky = renderingMode == SKY;
+    flatShading = renderingMode == UNLIT;
+    alphaTested = renderingMode == TRANSPARENCY;
 }
 
 

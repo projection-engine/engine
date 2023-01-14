@@ -1,4 +1,3 @@
-
 //import(depthReconstructionUtils)
 
 //import(rayMarcher)
@@ -15,34 +14,34 @@
 
 //import(computeAreaLights)
 
-vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type){
+vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type) {
     vec3 directIllumination = vec3(0.);
     if (type == DIRECTIONAL)
-    directIllumination += computeDirectionalLight(distanceFromCamera, secondaryBuffer, primaryBuffer, V, F0, 1., .0, N);
+    directIllumination += computeDirectionalLight( secondaryBuffer, primaryBuffer);
     else if (type == POINT)
-    directIllumination += computePointLights(distanceFromCamera, shadow_cube, primaryBuffer, V, N, 1., .0, F0);
+    directIllumination += computePointLights( primaryBuffer);
     else if (type == SPOT)
-    directIllumination += computeSpotLights(primaryBuffer, V, N, 1., .0, F0);
+    directIllumination += computeSpotLights(primaryBuffer);
     else if (type == SPHERE)
-    directIllumination += computeSphereLight(primaryBuffer, V, N, roughness, metallic, F0);
+    directIllumination += computeSphereLight(primaryBuffer);
     else if (type == DISK)
-    directIllumination += computeDiskLight(primaryBuffer, V, N, roughness, metallic, F0);
+    directIllumination += computeDiskLight(primaryBuffer);
     return directIllumination;
 }
 
 vec4 pbLightComputation() {
     if (flatShading || isSky) return vec4(albedo + emission, alpha);
-    VrN		= reflect( -V, N );
-    albedoOverPI = albedo/PI;
+    VrN = reflect(-V, N);
+    albedoOverPI = albedo / PI;
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
     float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
 
-    NdotV = max(dot(N, V), 0.000001);
+    NdotV = clamp(dot(N, V), 0., 1.);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
     F0 = mix(F0, albedo, metallic);
 
-    for (int i = 0; i < lightQuantity; i++){
+    for (int i = 0; i < lightQuantity; i++) {
         directIllumination += processLight(
             lightPrimaryBuffer[i],
             lightSecondaryBuffer[i],
@@ -53,6 +52,7 @@ vec4 pbLightComputation() {
 
 
     indirectIllumination = sampleIndirectLight();
+
     return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);
 
 }

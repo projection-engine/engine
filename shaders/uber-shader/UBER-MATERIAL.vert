@@ -1,4 +1,4 @@
-#define SKY 6
+#define SKY 6.
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -45,7 +45,7 @@ void main(){
 
         invModelMatrix = inverse(modelMatrix);
         worldPosition = wPosition.xyz;
-        naturalNormal = normalize(mat3(M) * normal);
+        naturalNormal = normalize(mat3(modelMatrix) * normal);
         naturalTextureUV = uvTexture;
 
         gl_Position = viewProjection * wPosition;

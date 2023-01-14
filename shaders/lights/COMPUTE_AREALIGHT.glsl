@@ -1,4 +1,4 @@
-vec3 computeSphereLight(mat4 areaLight, vec3 V, vec3 N, float roughness, float metallic, vec3 F0){
+vec3 computeSphereLight(mat4 areaLight){
     vec3 lightPosition      = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
 
     vec3 lightColor         = vec3(areaLight[1][0], areaLight[1][1], areaLight[1][2]);
@@ -17,14 +17,14 @@ vec3 computeSphereLight(mat4 areaLight, vec3 V, vec3 N, float roughness, float m
     float attFactor         = 1. / (1. + (lightAttenuation.x * distanceFromFrag) + (lightAttenuation.y * pow(distanceFromFrag, 2.)));
     vec3 centerToRay        = dot(L, VrN) * VrN - L;
     vec3 closestPoint        = L + centerToRay * clamp(lightRadius / length(centerToRay), 0.0, 1.0);
-    vec4 baseContribution = precomputeContribution(closestPoint + worldSpacePosition, N);
+    vec4 baseContribution = precomputeContribution(closestPoint + worldSpacePosition);
     if(baseContribution.a == 0.) return vec3(0.);
 
-    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor, V, N, roughness, metallic, F0) * attFactor;
+    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor) * attFactor;
 }
 
 
-vec3 computeDiskLight(mat4 areaLight, vec3 V, vec3 N, float roughness, float metallic, vec3 F0){
+vec3 computeDiskLight(mat4 areaLight){
     vec3 lightPosition = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
     vec3 lightColor = vec3(areaLight[1][0], areaLight[1][1], areaLight[1][2]);
 //    vec3 lightNormal = vec3(areaLight[2][3], areaLight[3][0], areaLight[3][1]);
@@ -47,8 +47,8 @@ vec3 computeDiskLight(mat4 areaLight, vec3 V, vec3 N, float roughness, float met
 //    vec2 rectHalf = vec2(halfSize, halfSize);
 //    dist2D = clamp(dist2D, -rectHalf, rectHalf);
 //    vec3 closestPoint = (lightPosition + (_LightRight * dist2D.x + _LightUp * dist2D.y));
-    vec4 baseContribution = precomputeContribution(lightPosition, N);
+    vec4 baseContribution = precomputeContribution(lightPosition);
     if(baseContribution.a == 0.) return vec3(0.);
 
-    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor, V, N, roughness, metallic, F0);
+    return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor);
 }
