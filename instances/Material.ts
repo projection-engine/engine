@@ -2,6 +2,7 @@ import MaterialAPI from "../lib/rendering/MaterialAPI";
 import MaterialUniform from "../templates/MaterialUniform";
 import TextureInUse from "../templates/TextureInUse";
 import MutableObject from "../MutableObject";
+import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
 
 export default class Material {
@@ -10,11 +11,9 @@ export default class Material {
     #uniforms = []
     #functionDeclaration?: string
     #uniformsDeclaration?: string
+    renderingMode = MATERIAL_RENDERING_TYPES.UNLIT
     texturesInUse: TextureInUse = {}
-    isAlphaTested = false
     ssrEnabled = false
-    isSky = false
-    flatShading=  false
     doubleSided = false
     bindID = -1
     signature?:string

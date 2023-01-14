@@ -53,11 +53,9 @@ export default class GPUAPI {
 
         UberShader.uberSignature[signature] = true
 
-        material.isSky = settings.isSky
+        material.renderingMode = settings.renderingMode
         material.doubleSided = settings.doubleSided
-        material.isAlphaTested = settings.isAlphaTested
         material.ssrEnabled = settings.ssrEnabled
-        material.flatShading = settings.flatShading
 
         const inUse = MaterialAPI.entityMaterial.get(id)
         try {

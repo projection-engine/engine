@@ -101,7 +101,7 @@ void main(){
         worldSpacePosition = worldPosition;
         texCoords = naturalTextureUV;
         if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
-        if ((!isSky && !noDepthChecking && !screenDoorEffect && abs(depthData - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData > 0.)) discard;
+        if ((!isSky && !alphaTested && !screenDoorEffect && abs(depthData - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData > 0.)) discard;
     }
     V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);
@@ -177,7 +177,7 @@ void main(){
                 vec2 a = floor(gl_FragCoord.xy);
                 float checkerVal = 4.;
 
-                if (!noDepthChecking && abs(depthData - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD){
+                if (!alphaTested && abs(depthData - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD){
                     fragColor = vec4(1., 0., 0., 1.);
                     checkerVal = 2.;
                 }

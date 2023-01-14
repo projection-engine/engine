@@ -10,15 +10,10 @@ import StaticFBO from "../lib/StaticFBO";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import SceneComposition from "./SceneComposition";
 import VisibilityRenderer from "./VisibilityRenderer";
+import UberMaterialAttributeGroup from "../lib/UberMaterialAttributeGroup";
+import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
-const materialAttributes = new Float32Array(9)
-/** Material attributes
- * entityID[0] (0), entityID[1] (1), entityID[2] (2)
- * screenDoorEffect (3), isSky (4), noDepthChecking (5)
- * materialID (6), ssrEnabled (7), flatShading (8)
- */
-
 
 export default class SceneRenderer {
     static #bindTexture(context: WebGL2RenderingContext, location: WebGLUniformLocation, index: number, sampler: WebGLTexture, cubeMap: boolean) {
@@ -104,7 +99,7 @@ export default class SceneRenderer {
     }
 
     static drawMeshes(onlyOpaque: boolean, isDecalPass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
-        materialAttributes[0] = materialAttributes[1] = materialAttributes[2] = materialAttributes[3] = materialAttributes[4] = materialAttributes[5] = materialAttributes[6] = materialAttributes[7] = materialAttributes[8] = 0
+        UberMaterialAttributeGroup.clear()
         const size = toRender.length
         const cube = StaticMeshes.cube
         context.uniform1i(uniforms.isDecalPass, isDecalPass ? 1 : 0)
@@ -114,29 +109,19 @@ export default class SceneRenderer {
 
             if (!entity.active || !mesh || entity.isCulled)
                 continue
-            materialAttributes[0] = entity.pickID[0]
-            materialAttributes[1] = entity.pickID[1]
-            materialAttributes[2] = entity.pickID[2]
+            UberMaterialAttributeGroup.entityID = entity.pickID
 
             if (!isDecalPass) {
                 const material = entity.materialRef
-                materialAttributes[8] = 0
                 if (isSky) {
                     isSky = false
                     context.enable(context.CULL_FACE)
                     context.enable(context.DEPTH_TEST)
                 }
-
                 const culling = entity?.cullingComponent
-
-                if (culling && culling.screenDoorEffect) {
-                    materialAttributes[3] = entity.__cullingMetadata[5]
-                } else
-                    materialAttributes[3] = 0
-
+                UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
 
                 if (material !== undefined) {
-                    materialAttributes[8] = material.flatShading ? 1 : 0
                     if (material.doubleSided) {
                         context.disable(context.CULL_FACE)
                         isDoubleSided = true
@@ -144,9 +129,7 @@ export default class SceneRenderer {
                         context.enable(context.CULL_FACE)
                         isDoubleSided = false
                     }
-                    isSky = material.isSky
-
-                    materialAttributes[4] = isSky ? 1 : 0
+                    isSky = material.renderingMode === MATERIAL_RENDERING_TYPES.SKY
 
                     if (isSky) {
                         context.disable(context.CULL_FACE)
@@ -154,8 +137,8 @@ export default class SceneRenderer {
                     }
 
 
-                    materialAttributes[5] = material.isAlphaTested ? 1 : 0
-                    materialAttributes[6] = material.bindID
+                    UberMaterialAttributeGroup.materialID = material.bindID
+                    UberMaterialAttributeGroup.renderingMode = material.renderingMode
 
                     const component = entity.meshComponent
                     const overrideUniforms = component.overrideMaterialUniforms
@@ -171,7 +154,7 @@ export default class SceneRenderer {
                                 Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
                         }
 
-                    materialAttributes[7] = material.ssrEnabled ? 1 : 0
+                    UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
 
                     stateWasCleared = false
                 } else if (!stateWasCleared) {
@@ -181,9 +164,9 @@ export default class SceneRenderer {
                         isDoubleSided = false
                     }
 
-                    materialAttributes[7] = 0
-                    materialAttributes[5] = 0
-                    materialAttributes[6] = -1
+                    UberMaterialAttributeGroup.ssrEnabled = 0
+                    UberMaterialAttributeGroup.renderingMode = MATERIAL_RENDERING_TYPES.ISOTROPIC
+                    UberMaterialAttributeGroup.materialID = -1
                 }
             } else {
                 const component = entity.decalComponent
@@ -204,20 +187,20 @@ export default class SceneRenderer {
                 if (aoSampler !== undefined)
                     SceneRenderer.#bindTexture(context, uniforms.sampler5, texOffset + 4, aoSampler, false)
 
-                materialAttributes[4] = albedoSampler !== undefined ? 1 : 0
-                materialAttributes[8] = metallicSampler !== undefined ? 1 : 0
-                materialAttributes[5] = roughnessSampler !== undefined ? 1 : 0
-                materialAttributes[3] = normalSampler !== undefined ? 1 : 0
-                materialAttributes[6] = aoSampler !== undefined ? 1 : 0
-                materialAttributes[7] = component.useSSR ? 1 : 0
+                UberMaterialAttributeGroup.useAlbedoDecal = albedoSampler !== undefined ? 1 : 0
+                UberMaterialAttributeGroup.useMetallicDecal = metallicSampler !== undefined ? 1 : 0
+                UberMaterialAttributeGroup.useRoughnessDecal = roughnessSampler !== undefined ? 1 : 0
+                UberMaterialAttributeGroup.useNormalDecal = normalSampler !== undefined ? 1 : 0
+                UberMaterialAttributeGroup.useOcclusionDecal = aoSampler !== undefined ? 1 : 0
+                UberMaterialAttributeGroup.ssrEnabled = component.useSSR ? 1 : 0
             }
 
             if (useCustomView) {
-                materialAttributes[5] = 1
-                materialAttributes[7] = 0
+                // TODO - REPLACE WITH BOOLEAN FOR NO DEPTH TESTING
+                UberMaterialAttributeGroup.ssrEnabled = 0
             }
 
-            context.uniformMatrix3fv(uniforms.materialAttributes, false, materialAttributes)
+            context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
             mesh.draw()
         }

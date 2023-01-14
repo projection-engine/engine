@@ -14,8 +14,15 @@
 #define DISK 4
 #define PLANE 5
 
+#define UNLIT 0
+#define ISOTROPIC 1
+#define ANISOTROPIC 2
+#define SHEEN 3
+#define CLEAR_COAT 4
+#define TRANSPARENCY 5
+#define SKY 6
 
-in mat3 matAttr;
+in mat4 matAttr;
 in vec2 naturalTextureUV;
 in vec3 naturalNormal;
 
@@ -75,26 +82,48 @@ uniform sampler2D sampler7;
 
 out vec4 fragColor;
 
+float naturalAO = 1.;
+float roughness = .5;
+float metallic = .5;
+float refractionIndex = 0.;
+float alpha = 1.;
+vec3 albedo = vec3(.5);
+vec3 N = vec3(0.);
+vec3 emission = vec3(0.);
+vec3 albedoOverPI;
+vec3 VrN;
+vec2 brdf = vec2(0.);
+vec3 F0 = vec3(0.04);
+float NdotV;
+
+bool flatShading = false;
+bool isSky;
+bool alphaTested;
+
 mat3 TBN;
 vec2 quadUV;
 vec3 viewDirection;
 bool hasTBNComputed = false;
-bool flatShading = false;
 bool hasViewDirectionComputed = false;
 float distanceFromCamera;
 vec3 V;
-bool screenDoorEffect;
-vec3 entityID;
-bool isSky;
-bool ssrEnabled;
-bool noDepthChecking;
-int materialID;
 vec2 texCoords;
 vec3 viewSpacePosition;
 vec3 worldSpacePosition;
 vec3 normalVec;
 float depthData;
 
+// MATERIAL ATTRIBUTES
+bool screenDoorEffect;
+bool ssrEnabled;
+int renderingMode;
+vec3 entityID;
+int materialID;
+float anisotropicRotation;
+float anisotropy;
+float clearCoat;
+float sheen;
+float sheenTint;
 bool useAlbedoDecal;
 bool useMetallicDecal;
 bool useRoughnessDecal;
@@ -103,24 +132,29 @@ bool useOcclusionDecal;
 
 
 void extractData() {
+     screenDoorEffect = matAttr[1][0] == 1.;
+     ssrEnabled = matAttr[1][1] == 1.;
+     renderingMode = int(matAttr[0][3]);
+     entityID = vec3(matAttr[0]);
+     materialID = matAttr[1][2];
+     anisotropicRotation = matAttr[1][3];
+     anisotropy = matAttr[2][0];
+     clearCoat = matAttr[2][1];
+     sheen = matAttr[2][2];
+     sheenTint = matAttr[2][3];
 
-    screenDoorEffect = matAttr[1][0] == 1. && !isDecalPass;
-    isSky = matAttr[1][1] == 1. && !isDecalPass;
-    flatShading = matAttr[2][2] == 1. && !isDecalPass;
-    noDepthChecking = matAttr[1][2] == 1. && !isDecalPass;
-
-    entityID = vec3(matAttr[0]);
-    materialID = int(matAttr[2][0]);
-    ssrEnabled = matAttr[2][1] == 1.;
-
-
-    if(isDecalPass) {
-      useAlbedoDecal     = matAttr[1][1] == 1.;
-      useMetallicDecal   = matAttr[2][2] == 1.;
-      useRoughnessDecal  = matAttr[1][2] == 1.;
-      useNormalDecal   = matAttr[1][0] == 1.;
-      useOcclusionDecal  = matAttr[2][0] == 1.;
+    if (isDecalPass) {
+        renderingMode = ISOTROPIC;
+        useAlbedoDecal = matAttr[3][0] == 1.;
+        useMetallicDecal = matAttr[3][1] == 1.;
+        useRoughnessDecal = matAttr[3][2] == 1.;
+        useNormalDecal = matAttr[3][3] == 1.;
+        useOcclusionDecal = matAttr[1][2] == 1.;
     }
+
+     isSky = renderingMode == SKY;
+     flatShading = renderingMode == UNLIT;
+     alphaTested = renderingMode == TRANSPARENCY;
 }
 
 

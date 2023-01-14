@@ -1,11 +1,9 @@
 import MaterialUniform from "./MaterialUniform";
 
 interface MaterialSettings {
-    isSky: boolean
+    renderingMode: number
     doubleSided: boolean
     ssrEnabled: boolean
-    isAlphaTested: boolean
-    flatShading:boolean
 }
 
 interface MaterialInformation {

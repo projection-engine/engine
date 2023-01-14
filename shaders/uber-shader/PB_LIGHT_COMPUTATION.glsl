@@ -1,23 +1,4 @@
-// ------------------ ATTRIBUTES TO FILL
-float naturalAO = 1.;
-float roughness = .5;
-float metallic = .5;
-float refractionIndex=0.;
-float alpha = 1.;
-vec3 albedo= vec3(.5);
-vec3 N = vec3(0.);
-vec3 emission = vec3(0.);
 
-vec3 albedoOverPI;
-vec3 VrN;
-// ------------------ ATTRIBUTES TO FILL
-
-
-// ------------------ INTERNAL ATTRIBUTES
-
-vec2 brdf = vec2(0.);
-vec3 F0 = vec3(0.04);
-float NdotV;
 //import(depthReconstructionUtils)
 
 //import(rayMarcher)
