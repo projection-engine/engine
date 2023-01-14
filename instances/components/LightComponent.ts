@@ -1,7 +1,7 @@
 import Component from "./Component"
 import LIGHT_PROPS from "../../static/component-props/LIGHT_PROPS";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
-import Entity from "../../instances/Entity";
+import Entity from "../Entity";
 import LightsAPI from "../../lib/utils/LightsAPI";
 import {mat4} from "gl-matrix";
 

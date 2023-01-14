@@ -11,7 +11,6 @@ import UberShader from "../../utils/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../templates/TextureParams";
 import MaterialInformation from "../../templates/MaterialInformation";
-import StaticFBO from "../StaticFBO";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
@@ -20,13 +19,7 @@ export default class GPUAPI {
         const texture = new Texture()
         GPU.textures.set(id, texture)
         await texture.initialize(typeof imageData === "string" ? {img: imageData} : imageData)
-        GPU.materials.forEach(material => {
-            if (material.texturesInUse[id] != null) {
-                const data = material.texturesInUse[id]
-                material.uniformValues[data.key] = texture.texture
-            }
-        })
-        VisibilityRenderer.needsUpdate = true
+
         return texture
     }
 
@@ -41,7 +34,7 @@ export default class GPUAPI {
 
     static asyncDestroyMaterial(id: string) {
         const mat = GPU.materials.get(id)
-        if(!mat)
+        if (!mat)
             return
         delete UberShader.uberSignature[mat.signature]
         GPU.materials.delete(id)
@@ -110,7 +103,7 @@ export default class GPUAPI {
         })
     }
 
-    static copyTexture(target:Framebuffer, source:Framebuffer, type = GPU.context.DEPTH_BUFFER_BIT, blitType = GPU.context.NEAREST) {
+    static copyTexture(target: Framebuffer, source: Framebuffer, type = GPU.context.DEPTH_BUFFER_BIT, blitType = GPU.context.NEAREST) {
         GPU.context.bindFramebuffer(GPU.context.READ_FRAMEBUFFER, source.FBO)
         GPU.context.bindFramebuffer(GPU.context.DRAW_FRAMEBUFFER, target.FBO)
         GPU.context.blitFramebuffer(

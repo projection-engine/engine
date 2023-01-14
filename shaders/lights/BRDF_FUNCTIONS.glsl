@@ -8,7 +8,7 @@ vec3 fresnelSchlickRoughness (float cosTheta, vec3 F0, float roughness){
 
 vec3 computeSSR(){
     if (metallic < 0.05) return vec3(0.);
-    vec3 worldNormal = normalFromDepth(gl_FragCoord.z, quadUV, scene_depth);
+    vec3 worldNormal = normalFromDepth(depthData, quadUV, scene_depth);
     vec3 reflected = normalize(reflect(normalize(viewSpacePosition), normalize(worldNormal)));
     vec3 hitPos = viewSpacePosition;
     vec3 jitt = mix(vec3(0.0), vec3(hash(viewSpacePosition)), roughness);

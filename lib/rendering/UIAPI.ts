@@ -2,7 +2,7 @@ import Engine from "../../Engine";
 import InputEventsAPI from "../utils/InputEventsAPI";
 import QueryAPI from "../utils/QueryAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
-import UIComponent from "../../templates/components/UIComponent";
+import UIComponent from "../../instances/components/UIComponent";
 
 const STYLES = {
     position: "absolute",

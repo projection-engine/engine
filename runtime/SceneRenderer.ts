@@ -1,5 +1,4 @@
 import GPU from "../GPU";
-import DynamicMap from "../templates/DynamicMap";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticShaders from "../lib/StaticShaders";
 import type Entity from "../instances/Entity";
@@ -10,7 +9,7 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import StaticFBO from "../lib/StaticFBO";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import SceneComposition from "./SceneComposition";
-import UberShader from "../utils/UberShader";
+import VisibilityRenderer from "./VisibilityRenderer";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 const materialAttributes = new Float32Array(9)
@@ -20,19 +19,27 @@ const materialAttributes = new Float32Array(9)
  * materialID (6), ssrEnabled (7), flatShading (8)
  */
 
+
 export default class SceneRenderer {
+    static #bindTexture(context: WebGL2RenderingContext, location: WebGLUniformLocation, index: number, sampler: WebGLTexture, cubeMap: boolean) {
+        context.activeTexture(context.TEXTURE0 + index)
+        context.bindTexture(cubeMap ? context.TEXTURE_CUBE_MAP : context.TEXTURE_2D, sampler)
+        context.uniform1i(location, index)
+    }
+
     static drawSprites() {
+        const context = GPU.context
         const sprites = EntityComponentMapping.sprites.array
         const size = sprites.length
         if (size === 0)
             return
 
         const textures = GPU.textures
-        GPU.context.disable(GPU.context.CULL_FACE)
+
         StaticShaders.sprite.bind()
         const uniforms = StaticShaders.spriteUniforms
 
-        GPU.context.activeTexture(GPU.context.TEXTURE0)
+        context.activeTexture(context.TEXTURE0)
         for (let i = 0; i < size; i++) {
             const current = sprites[i], component = current.spriteComponent
             if (!current.active || current.isCulled)
@@ -41,15 +48,14 @@ export default class SceneRenderer {
             if (!texture)
                 continue
 
-            GPU.context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
-            GPU.context.uniform3fv(uniforms.scale, current._scaling)
-            GPU.context.uniform2fv(uniforms.attributes, component.attributes)
-            GPU.context.bindTexture(GPU.context.TEXTURE_2D, texture.texture)
-            GPU.context.uniform1i(uniforms.iconSampler, 0)
+            context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
+            context.uniform3fv(uniforms.scale, current._scaling)
+            context.uniform2fv(uniforms.attributes, component.attributes)
+            context.bindTexture(context.TEXTURE_2D, texture.texture)
+            context.uniform1i(uniforms.iconSampler, 0)
             StaticMeshes.drawQuad()
         }
 
-        GPU.context.enable(GPU.context.CULL_FACE)
     }
 
     static bindGlobalResources(context: WebGL2RenderingContext, uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
@@ -57,14 +63,17 @@ export default class SceneRenderer {
             context.uniform1i(uniforms.shadingModel, SceneComposition.debugShadingModel)
 
         stateWasCleared = isDoubleSided = isSky = false
+        texOffset = 7
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
         context.uniform2fv(uniforms.bufferResolution, GPU.bufferResolution)
+        context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
 
         if (!useCustomView) {
             context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
             context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
             context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
+            context.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
             context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
             context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
 
@@ -74,61 +83,34 @@ export default class SceneRenderer {
             context.uniform3fv(uniforms.cameraPosition, cameraPosition)
         }
 
-        context.activeTexture(context.TEXTURE0)
-        context.bindTexture(context.TEXTURE_2D, GPU.BRDF)
-        context.uniform1i(uniforms.brdf_sampler, 0)
+        SceneRenderer.#bindTexture(context, uniforms.brdf_sampler, 0, GPU.BRDF, false)
+        SceneRenderer.#bindTexture(context, uniforms.SSAO, 1, StaticFBO.ssaoBlurredSampler, false)
+        SceneRenderer.#bindTexture(context, uniforms.SSGI, 2, StaticFBO.ssgiSampler, false)
+        SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.lensSampler, false)
+        SceneRenderer.#bindTexture(context, uniforms.shadow_atlas, 4, StaticFBO.shadowsSampler, false)
+        SceneRenderer.#bindTexture(context, uniforms.scene_depth, 5, StaticFBO.visibilityDepthSampler, false)
+        SceneRenderer.#bindTexture(context, uniforms.shadow_cube, 6, OmnidirectionalShadows.sampler, true)
 
-
-        context.activeTexture(context.TEXTURE1)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssaoBlurredSampler)
-        context.uniform1i(uniforms.SSAO, 1)
-
-        context.activeTexture(context.TEXTURE2)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.ssgiSampler)
-        context.uniform1i(uniforms.SSGI, 2)
-
-        context.activeTexture(context.TEXTURE3)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.lensSampler)
-        context.uniform1i(uniforms.previousFrame, 3)
-
-        context.activeTexture(context.TEXTURE4)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.shadowsSampler)
-        context.uniform1i(uniforms.shadow_atlas, 4)
-
-        context.activeTexture(context.TEXTURE5)
-        context.bindTexture(context.TEXTURE_CUBE_MAP, OmnidirectionalShadows.sampler)
-        context.uniform1i(uniforms.shadow_cube, 5)
-
-
-        context.activeTexture(context.TEXTURE6)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
-        context.uniform1i(uniforms.scene_depth, 6)
-
-        context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
-
-        texOffset = 7
+        if (!!GPU.activeSkylightEntity && !useCustomView) {
+            texOffset++
+            SceneRenderer.#bindTexture(context, uniforms.skylight_specular, 7, GPU.skylightProbe.texture, true)
+        }
 
         // uniform samplerCube skylight_diffuse;
         // uniform samplerCube skylight_specular;
         // uniform float skylight_samples;
 
-        if (!!GPU.activeSkylightEntity && !useCustomView) {
-            texOffset++
-            context.activeTexture(context.TEXTURE7)
-            context.bindTexture(context.TEXTURE_CUBE_MAP, GPU.skylightProbe.texture)
-            context.uniform1i(uniforms.skylight_specular, 7)
-        }
-
         context.enable(context.CULL_FACE)
-        context.depthMask(true)
     }
 
-    static drawMeshes(onlyOpaque: boolean, context: WebGL2RenderingContext, size: number, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
+    static drawMeshes(onlyOpaque: boolean, isDecalPass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
         materialAttributes[0] = materialAttributes[1] = materialAttributes[2] = materialAttributes[3] = materialAttributes[4] = materialAttributes[5] = materialAttributes[6] = materialAttributes[7] = materialAttributes[8] = 0
-
+        const size = toRender.length
+        const cube = StaticMeshes.cube
+        context.uniform1i(uniforms.isDecalPass, isDecalPass ? 1 : 0)
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
-            const mesh = entity.meshRef
+            const mesh = isDecalPass ? cube : entity.meshRef
 
             if (!entity.active || !mesh || entity.isCulled)
                 continue
@@ -136,69 +118,99 @@ export default class SceneRenderer {
             materialAttributes[1] = entity.pickID[1]
             materialAttributes[2] = entity.pickID[2]
 
-            const material = entity.materialRef
-            materialAttributes[8] = 0
-            if (isSky) {
-                isSky = false
-                context.enable(context.CULL_FACE)
-                context.enable(context.DEPTH_TEST)
-            }
-
-            const culling = entity?.cullingComponent
-
-            if (culling && culling.screenDoorEffect) {
-                materialAttributes[3] = entity.__cullingMetadata[5]
-            } else
-                materialAttributes[3] = 0
-
-            if (material !== undefined) {
-                materialAttributes[8] = material.flatShading ? 1 : 0
-                if (material.doubleSided) {
-                    context.disable(context.CULL_FACE)
-                    isDoubleSided = true
-                } else if (isDoubleSided) {
-                    context.enable(context.CULL_FACE)
-                    isDoubleSided = false
-                }
-                isSky = material.isSky
-
-                materialAttributes[4] = isSky ? 1 : 0
-
+            if (!isDecalPass) {
+                const material = entity.materialRef
+                materialAttributes[8] = 0
                 if (isSky) {
-                    context.disable(context.CULL_FACE)
-                    context.disable(context.DEPTH_TEST)
+                    isSky = false
+                    context.enable(context.CULL_FACE)
+                    context.enable(context.DEPTH_TEST)
                 }
 
+                const culling = entity?.cullingComponent
 
-                materialAttributes[5] = material.isAlphaTested ? 1 : 0
-                materialAttributes[6] = material.bindID
+                if (culling && culling.screenDoorEffect) {
+                    materialAttributes[3] = entity.__cullingMetadata[5]
+                } else
+                    materialAttributes[3] = 0
 
-                const component = entity.meshComponent
-                const overrideUniforms = component.overrideMaterialUniforms
-                const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues
-                const toBind = material.uniforms
-                if (data)
-                    for (let j = 0; j < toBind.length; j++) {
-                        const current = toBind[j]
-                        const dataAttribute = data[current.key]
-                        Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+
+                if (material !== undefined) {
+                    materialAttributes[8] = material.flatShading ? 1 : 0
+                    if (material.doubleSided) {
+                        context.disable(context.CULL_FACE)
+                        isDoubleSided = true
+                    } else if (isDoubleSided) {
+                        context.enable(context.CULL_FACE)
+                        isDoubleSided = false
+                    }
+                    isSky = material.isSky
+
+                    materialAttributes[4] = isSky ? 1 : 0
+
+                    if (isSky) {
+                        context.disable(context.CULL_FACE)
+                        context.disable(context.DEPTH_TEST)
                     }
 
-                materialAttributes[7] = material.ssrEnabled ? 1 : 0
 
-                stateWasCleared = false
-            } else if (!stateWasCleared) {
-                stateWasCleared = true
-                if (isDoubleSided) {
-                    context.enable(context.CULL_FACE)
-                    isDoubleSided = false
+                    materialAttributes[5] = material.isAlphaTested ? 1 : 0
+                    materialAttributes[6] = material.bindID
+
+                    const component = entity.meshComponent
+                    const overrideUniforms = component.overrideMaterialUniforms
+                    const data = overrideUniforms ? component.__mappedUniforms : material.uniformValues
+                    const toBind = material.uniforms
+                    if (data)
+                        for (let j = 0; j < toBind.length; j++) {
+                            const current = toBind[j]
+                            const dataAttribute = data[current.key]
+                            if (current.type === "sampler2D")
+                                Shader.bind(uniforms[current.key], dataAttribute.texture, current.type, texOffset, () => texOffset++)
+                            else
+                                Shader.bind(uniforms[current.key], dataAttribute, current.type, texOffset, () => texOffset++)
+                        }
+
+                    materialAttributes[7] = material.ssrEnabled ? 1 : 0
+
+                    stateWasCleared = false
+                } else if (!stateWasCleared) {
+                    stateWasCleared = true
+                    if (isDoubleSided) {
+                        context.enable(context.CULL_FACE)
+                        isDoubleSided = false
+                    }
+
+                    materialAttributes[7] = 0
+                    materialAttributes[5] = 0
+                    materialAttributes[6] = -1
                 }
+            } else {
+                const component = entity.decalComponent
+                const albedoSampler = component.albedo?.texture
+                const metallicSampler = component.metallic?.texture
+                const roughnessSampler = component.roughness?.texture
+                const normalSampler = component.normal?.texture
+                const aoSampler = component.occlusion?.texture
 
-                materialAttributes[7] = 0
-                materialAttributes[5] = 0
-                materialAttributes[6] = -1
+                if (albedoSampler !== undefined)
+                    SceneRenderer.#bindTexture(context, uniforms.sampler1, texOffset, albedoSampler, false)
+                if (metallicSampler !== undefined)
+                    SceneRenderer.#bindTexture(context, uniforms.sampler2, texOffset + 1, metallicSampler, false)
+                if (roughnessSampler !== undefined)
+                    SceneRenderer.#bindTexture(context, uniforms.sampler3, texOffset + 2, roughnessSampler, false)
+                if (normalSampler !== undefined)
+                    SceneRenderer.#bindTexture(context, uniforms.sampler4, texOffset + 3, normalSampler, false)
+                if (aoSampler !== undefined)
+                    SceneRenderer.#bindTexture(context, uniforms.sampler5, texOffset + 4, aoSampler, false)
+
+                materialAttributes[4] = albedoSampler !== undefined ? 1 : 0
+                materialAttributes[8] = metallicSampler !== undefined ? 1 : 0
+                materialAttributes[5] = roughnessSampler !== undefined ? 1 : 0
+                materialAttributes[3] = normalSampler !== undefined ? 1 : 0
+                materialAttributes[6] = aoSampler !== undefined ? 1 : 0
+                materialAttributes[7] = component.useSSR ? 1 : 0
             }
-
 
             if (useCustomView) {
                 materialAttributes[5] = 1

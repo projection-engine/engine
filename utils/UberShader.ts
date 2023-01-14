@@ -4,7 +4,6 @@ import DEBUG_FRAG from "../shaders/uber-shader/UBER-MATERIAL-DEBUG.frag";
 import BASIS_FRAG from "../shaders/uber-shader/UBER-MATERIAL-BASIS.frag";
 import VERTEX_SHADER from "../shaders/uber-shader/UBER-MATERIAL.vert";
 import Shader from "../instances/Shader";
-import UBO from "../instances/UBO";
 
 export default class UberShader {
 
@@ -24,7 +23,31 @@ export default class UberShader {
     static compile(forceCleanShader?: boolean) {
 
         UberShader.uber = undefined
-        const methodsToLoad = ["switch (materialID) {"], uniformsToLoad = []
+        const methodsToLoad = [
+            `
+            if(isDecalPass){ 
+                if(useAlbedoDecal)
+                    albedo = texture(sampler1, texCoords).rgb;
+                else
+                    albedo = vec3(1., 0., 0.);
+                if(useMetallicDecal)
+                    metallic = texture(sampler2, texCoords).r;
+                if(useRoughnessDecal)
+                    roughness = texture(sampler3, texCoords).r;
+                if(useNormalDecal){
+                    computeTBN();
+                    N = normalize(TBN * ((texture(sampler4, texCoords).rgb * 2.0)- 1.0));
+                }
+                else
+                    N = normalVec;
+                if(useOcclusionDecal)
+                    naturalAO = texture(sampler5, texCoords).r;
+                
+            }
+            else
+                switch (materialID) {
+            `
+        ], uniformsToLoad = []
         if (!forceCleanShader)
             GPU.materials.forEach(mat => {
                 const declaration = [`case ${mat.bindID}: {`, mat.functionDeclaration, "break;", "}", ""]
@@ -42,6 +65,7 @@ export default class UberShader {
         fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
         fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
 
+        console.log(fragment)
         const shader = new Shader(VERTEX_SHADER, fragment)
         if (shader.messages.hasError) {
 

@@ -1,4 +1,4 @@
-import Component from "../../templates/components/Component";
+import Component from "../../instances/components/Component";
 import LIGHT_TYPES from "../LIGHT_TYPES";
 
 function checkShadows(comp){

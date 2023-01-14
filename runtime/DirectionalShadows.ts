@@ -1,8 +1,6 @@
-import VisibilityRenderer from "./VisibilityRenderer";
 import GPU from "../GPU";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
-import UberShader from "../utils/UberShader";
 import StaticUBOs from "../lib/StaticUBOs";
 import EntityComponentMapping from "../lib/EntityComponentMapping";
 

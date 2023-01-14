@@ -18,7 +18,6 @@ vec3 VrN;
 vec2 brdf = vec2(0.);
 vec3 F0 = vec3(0.04);
 float NdotV;
-vec3 viewSpacePosition;
 //import(depthReconstructionUtils)
 
 //import(rayMarcher)
@@ -53,7 +52,6 @@ vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type){
 vec4 pbLightComputation() {
     if (flatShading || isSky) return vec4(albedo + emission, alpha);
     VrN		= reflect( -V, N );
-    viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
     albedoOverPI = albedo/PI;
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);

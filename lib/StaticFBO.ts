@@ -3,7 +3,6 @@ import Framebuffer from "../instances/Framebuffer";
 import DirectionalShadows from "../runtime/DirectionalShadows";
 import ImageProcessor from "./math/ImageProcessor";
 import IMAGE_WORKER_ACTIONS from "../static/IMAGE_WORKER_ACTIONS";
-import SSAO from "../runtime/SSAO";
 import StaticUBOs from "./StaticUBOs";
 
 const RESOLUTION = 4

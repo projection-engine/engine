@@ -73,10 +73,36 @@ void main(){
     extractData();
     if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
-    vec4 depthData = texture(scene_depth, quadUV);
-    if (shadingModel == DETAIL|| shadingModel == LIGHT_ONLY)
-    if ((!isSky && !noDepthChecking && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData.r > 0.)) discard;
+    depthData = texture(scene_depth, quadUV).r;
 
+    if(isDecalPass){
+        if (depthData == 0.) discard;
+
+        viewSpacePosition = viewSpacePositionFromDepth(depthData, quadUV);
+        normalVec = normalize(vec3(invViewMatrix * vec4(normalFromDepth(depthData, quadUV, scene_depth), 0.)));
+        worldSpacePosition = vec3(invViewMatrix * vec4(viewSpacePosition, 1.));
+        vec3 objectSpacePosition = vec3(invModelMatrix * vec4(worldSpacePosition, 1.));
+        texCoords = objectSpacePosition.xz * .5 + .5;
+
+        bool inRange =
+        objectSpacePosition.x >= -1.0 &&
+        objectSpacePosition.x <= 1.0 &&
+
+        objectSpacePosition.y >= -1.0 &&
+        objectSpacePosition.y <= 1.0 &&
+
+        objectSpacePosition.z >= -1.0 &&
+        objectSpacePosition.z <= 1.0;
+
+        if(!inRange) discard;
+    }else {
+        normalVec = naturalNormal;
+        viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
+        worldSpacePosition = worldPosition;
+        texCoords = naturalTextureUV;
+        if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
+        if ((!isSky && !noDepthChecking && !screenDoorEffect && abs(depthData - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData > 0.)) discard;
+    }
     V = cameraPosition - worldSpacePosition;
     distanceFromCamera = length(V);
     V = normalize(V);
@@ -87,7 +113,7 @@ void main(){
     albedo = vec3(1.);
 
     if (shadingModel == DETAIL || shadingModel == LIGHT_ONLY)
-    fragColor = pbLightComputation();
+        fragColor = pbLightComputation();
     else {
         switch (shadingModel){
             case ALBEDO:
@@ -97,7 +123,7 @@ void main(){
             fragColor = vec4(N, 1.);
             break;
             case DEPTH:
-            fragColor = vec4(vec3(linearize(depthData.r)), 1.);
+            fragColor = vec4(vec3(linearize(depthData)), 1.);
             break;
             case G_AO:
             fragColor = vec4(vec3(naturalAO), 1.);
@@ -128,7 +154,7 @@ void main(){
                 float contribution = 0.;
 
                 if (!flatShading){
-                    viewSpacePosition = viewSpacePositionFromDepth(gl_FragCoord.z, quadUV);
+                    viewSpacePosition = viewSpacePositionFromDepth(depthData, quadUV);
                     albedoOverPI = vec3(1.);
                     F0 = mix(F0, albedoOverPI, 0.);
 
@@ -151,7 +177,7 @@ void main(){
                 vec2 a = floor(gl_FragCoord.xy);
                 float checkerVal = 4.;
 
-                if (!noDepthChecking && abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD){
+                if (!noDepthChecking && abs(depthData - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD){
                     fragColor = vec4(1., 0., 0., 1.);
                     checkerVal = 2.;
                 }

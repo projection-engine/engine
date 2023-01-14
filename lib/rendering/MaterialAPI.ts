@@ -5,7 +5,7 @@ import GPUAPI from "./GPUAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
 import Entity from "../../instances/Entity";
 import Material from "../../instances/Material";
-import MeshComponent from "../../templates/components/MeshComponent";
+import MeshComponent from "../../instances/components/MeshComponent";
 import MaterialUniform from "../../templates/MaterialUniform";
 import TextureParams from "../../templates/TextureParams";
 import TextureInUse from "../../templates/TextureInUse";
@@ -111,7 +111,7 @@ export default class MaterialAPI {
 
                             if (texture) {
                                 texturesInUse[textureID] = {texture, key: currentUniform.key}
-                                uniformValues[currentUniform.key] = texture.texture
+                                uniformValues[currentUniform.key] = texture
                             }
                         }
                     }
