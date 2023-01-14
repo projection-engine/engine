@@ -1,12 +1,13 @@
+import MATERIAL_RENDERING_TYPES from "./MATERIAL_RENDERING_TYPES";
+
 export default {
   "functionDeclaration": "",
   "uniformsDeclaration": "",
   "settings": {
-    "isAlphaTested": false,
+
     "ssrEnabled": false,
-    "isSky": false,
     "doubleSided": false,
-    "flatShading": false
+    "renderingMode": MATERIAL_RENDERING_TYPES.UNLIT
   },
   "uniforms": [],
   "uniformValues": [],
