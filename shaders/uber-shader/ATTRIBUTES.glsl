@@ -105,7 +105,6 @@ bool flatShading = false;
 bool isSky;
 bool alphaTested;
 
-
 vec2 quadUV;
 vec3 viewDirection;
 bool hasTBNComputed = false;
@@ -147,13 +146,17 @@ void extractData() {
     renderingMode = int(matAttr[0][3]);
     entityID = vec3(matAttr[0]);
     materialID = int(matAttr[1][2]);
-    anisotropicRotation = matAttr[1][3];
-    anisotropy = matAttr[2][0];
-    clearCoat = matAttr[2][1];
-    sheen = matAttr[2][2];
-    sheenTint = matAttr[2][3];
+
+
+
 
     if (isDecalPass) {
+        anisotropicRotation = matAttr[1][3];
+        anisotropy = matAttr[2][0];
+        clearCoat = matAttr[2][1];
+        sheen = matAttr[2][2];
+        sheenTint = matAttr[2][3];
+
         renderingMode = ISOTROPIC;
         useAlbedoDecal = matAttr[3][0] == 1.;
         useMetallicDecal = matAttr[3][1] == 1.;
@@ -169,17 +172,17 @@ void extractData() {
 
 
 void computeTBN() {
-    if (hasTBNComputed)
-    return;
-    hasTBNComputed = true;
-    vec3 N = abs(normalVec);
-    if (N.z > N.x && N.z > N.y)
-    T = vec3(1., 0., 0.);
-    else
-    T = vec3(0., 0., 1.);
-    T = normalize(T - N * dot(T, N));
-    B = cross(T, N);
-    TBN = mat3(T, B, N);
+    if (!hasTBNComputed){
+        hasTBNComputed = true;
+        vec3 N = abs(normalVec);
+        if (N.z > N.x && N.z > N.y)
+        T = vec3(1., 0., 0.);
+        else
+        T = vec3(0., 0., 1.);
+        T = normalize(T - N * dot(T, N));
+        B = cross(T, N);
+        TBN = mat3(T, B, N);
+    }
 }
 
 vec2 parallaxOcclusionMapping(vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers) {

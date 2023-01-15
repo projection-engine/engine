@@ -36,7 +36,8 @@ vec4 pbLightComputation() {
     vec3 directIllumination = vec3(0.0);
     vec3 indirectIllumination = vec3(0.0);
     float ao = hasAmbientOcclusion && distanceFromCamera < SSAOFalloff ? naturalAO * texture(SSAO, quadUV).r : naturalAO;
-
+    if(renderingMode == ANISOTROPIC)
+        computeTBN();
     NdotV = clamp(dot(N, V), 0., 1.);
     brdf = texture(brdf_sampler, vec2(NdotV, roughness)).rg;
     F0 = mix(F0, albedo, metallic);
@@ -53,7 +54,7 @@ vec4 pbLightComputation() {
 
     indirectIllumination = sampleIndirectLight();
 
-    return vec4((directIllumination + indirectIllumination) * ao + emission, alpha);
+    return vec4((directIllumination + indirectIllumination) * ao + emission * albedo, alpha);
 
 }
 

@@ -1,4 +1,4 @@
-vec3 computeSphereLight(mat4 areaLight){
+vec3 computeSphereLight(inout mat4 areaLight){
     vec3 lightPosition      = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
 
     vec3 lightColor         = vec3(areaLight[1][0], areaLight[1][1], areaLight[1][2]);
@@ -24,7 +24,7 @@ vec3 computeSphereLight(mat4 areaLight){
 }
 
 
-vec3 computeDiskLight(mat4 areaLight){
+vec3 computeDiskLight(inout mat4 areaLight){
     vec3 lightPosition = vec3(areaLight[0][0], areaLight[0][1], areaLight[0][2]);
     vec3 lightColor = vec3(areaLight[1][0], areaLight[1][1], areaLight[1][2]);
 //    vec3 lightNormal = vec3(areaLight[2][3], areaLight[3][0], areaLight[3][1]);

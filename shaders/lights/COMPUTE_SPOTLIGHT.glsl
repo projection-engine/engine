@@ -1,4 +1,4 @@
-vec3 computeSpotLights (mat4 spotLight) {
+vec3 computeSpotLights (inout mat4 spotLight) {
     vec3 lightPosition = vec3(spotLight[0][0], spotLight[0][1], spotLight[0][2]);
 
     vec4 baseContribution = precomputeContribution(lightPosition);

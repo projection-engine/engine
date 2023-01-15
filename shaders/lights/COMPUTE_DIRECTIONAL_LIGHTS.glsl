@@ -56,7 +56,7 @@ float directionalLightShadows(float distanceFromCamera, float shadowFalloffDista
 
 
 
-vec3 computeDirectionalLight(mat4 lightMatrix, mat4 lightData){
+vec3 computeDirectionalLight(inout mat4 lightMatrix, inout mat4 lightData){
     vec3 lightDirection =  vec3(lightData[0][0], lightData[0][1], lightData[0][2]);
 
     vec4 baseContribution = precomputeContribution(lightDirection);

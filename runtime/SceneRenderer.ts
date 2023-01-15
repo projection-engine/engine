@@ -193,6 +193,9 @@ export default class SceneRenderer {
                 UberMaterialAttributeGroup.useNormalDecal = normalSampler !== undefined ? 1 : 0
                 UberMaterialAttributeGroup.useOcclusionDecal = aoSampler !== undefined ? 1 : 0
                 UberMaterialAttributeGroup.ssrEnabled = component.useSSR ? 1 : 0
+
+
+                // ADD OTHER RENDERING MODES HERE
             }
 
             if (useCustomView) {
