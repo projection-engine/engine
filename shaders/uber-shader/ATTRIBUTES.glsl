@@ -88,11 +88,16 @@ float metallic = .5;
 float refractionIndex = 0.;
 float alpha = 1.;
 vec3 albedo = vec3(.5);
-vec3 N = vec3(0.);
+
+mat3 TBN;
+vec3 T;
+vec3 B;
+vec3 N;
+
 vec3 emission = vec3(0.);
 vec3 albedoOverPI;
 vec3 VrN;
-vec2 brdf = vec2(0.);
+vec2 brdf;
 vec3 F0 = vec3(0.04);
 float NdotV;
 vec2 texelSize;
@@ -100,7 +105,7 @@ bool flatShading = false;
 bool isSky;
 bool alphaTested;
 
-mat3 TBN;
+
 vec2 quadUV;
 vec3 viewDirection;
 bool hasTBNComputed = false;
@@ -112,6 +117,7 @@ vec3 viewSpacePosition;
 vec3 worldSpacePosition;
 vec3 normalVec;
 float depthData;
+
 
 // MATERIAL ATTRIBUTES
 bool screenDoorEffect;
@@ -166,19 +172,14 @@ void computeTBN() {
     if (hasTBNComputed)
     return;
     hasTBNComputed = true;
-
-    vec3 dp1 = dFdx(worldSpacePosition);
-    vec3 dp2 = dFdy(worldSpacePosition);
-    vec2 duv1 = dFdx(texCoords);
-    vec2 duv2 = dFdy(texCoords);
-
-    vec3 dp2perp = cross(dp2, normalVec);
-    vec3 dp1perp = cross(normalVec, dp1);
-    vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-    vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-
-    float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
-    TBN = mat3(T * invmax, B * invmax, normalVec);
+    vec3 N = abs(normalVec);
+    if (N.z > N.x && N.z > N.y)
+    T = vec3(1., 0., 0.);
+    else
+    T = vec3(0., 0., 1.);
+    T = normalize(T - N * dot(T, N));
+    B = cross(T, N);
+    TBN = mat3(T, B, N);
 }
 
 vec2 parallaxOcclusionMapping(vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers) {

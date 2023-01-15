@@ -5,6 +5,12 @@ vec3 fresnelSchlick(float VdotH, vec3 F0) {
     float f = pow(1.0 - VdotH, 5.0);
     return f + F0 * (1.0 - f);
 }
+
+
+vec3 fresnel(vec3 F0, float F90, float HdotV) {
+    return F0 + (F90 - F0) * pow(1.0 - HdotV, 5.0);
+}
+
 vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
@@ -96,15 +102,46 @@ vec4 precomputeContribution(vec3 lightPosition) {
     return vec4(L, NdotL);
 }
 
-vec3 computeBRDF(vec3 L, float NdotL, vec3 lightColor) {
-    vec3 H = normalize(V + L);
-    float HdotV = clamp(dot(H, V), 0., 1.);
-    float NdotH = clamp(dot(N, H), 0., 1.);
+float kelemen(float HdotV){
+    return 1./(4. * pow(HdotV, 2.) + 1e-5);
+}
+vec3 clearCoatCompute(vec3 L, float NdotL, vec3 lightColor, float HdotV, float NdotH) {
+    float D = distributionGGX(NdotH, roughness);
+    float V = kelemen(HdotV);
+    vec3 F = fresnel(vec3(.04), 1.0, HdotV) * clearCoat;
 
+    return clamp(vec3((getDiffuse(F, metallic) * albedoOverPI + D * V * F) * lightColor * NdotL), 0., 1.);
+}
+vec3 sheenCompute(vec3 L, float NdotL, vec3 lightColor, float HdotV, float NdotH) {
+    return vec3(0.);
+}
+
+vec3 isotropicCompute(vec3 L, float NdotL, vec3 lightColor, float HdotV, float NdotH) {
     float D = distributionGGX(NdotH, roughness);
     float S = geometrySmith(NdotL, roughness);
     vec3 F = fresnelSchlick(HdotV, F0);
 
     return clamp(vec3((getDiffuse(F, metallic) * albedoOverPI + D * F * S) * lightColor * NdotL), 0., 1.);
+}
+
+vec3 anisotropicCompute(vec3 L, float NdotL, vec3 lightColor, float HdotV, float NdotH) {
+    return vec3(0.);
+}
+vec3 computeBRDF(vec3 L, float NdotL, vec3 lightColor) {
+    vec3 H = normalize(V + L);
+    float HdotV = clamp(dot(H, V), 0., 1.);
+    float NdotH = clamp(dot(N, H), 0., 1.);
+
+    switch (renderingMode) {
+        case ISOTROPIC:
+            return isotropicCompute(L, NdotL, lightColor, HdotV, NdotH);
+        case ANISOTROPIC:
+            return anisotropicCompute(L, NdotL, lightColor, HdotV, NdotH);
+        case SHEEN:
+            return sheenCompute(L, NdotL, lightColor, HdotV, NdotH);
+        case CLEAR_COAT:
+            return clearCoatCompute(L, NdotL, lightColor, HdotV, NdotH);
+    }
+    return vec3(0.);
 }
 
