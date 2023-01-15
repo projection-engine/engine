@@ -16,7 +16,6 @@ export default class SceneComposition {
 
         shader.bind()
         const uniforms = UberShader.uberUniforms
-
         const context = GPU.context
 
         SceneRenderer.bindGlobalResources(context, uniforms, useCustomView, viewProjection, viewMatrix, cameraPosition)

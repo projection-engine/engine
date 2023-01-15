@@ -9,6 +9,7 @@ import StaticFBO from "../lib/StaticFBO";
 import type Entity from "../instances/Entity";
 import EntityComponentMapping from "../lib/EntityComponentMapping";
 import StaticMeshes from "../lib/StaticMeshes";
+import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
 const entityMetadata = new Float32Array(16)
 let  context, toRender:Entity[], size, uniforms, VP
@@ -50,14 +51,14 @@ export default class VisibilityRenderer {
             const material = entity.materialRef
             const culling = entity.cullingComponent
             const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
-            if (entity.isCulled || !entity.active || !mesh || material?.isSky)
+            if (entity.isCulled || !entity.active || !mesh || material?.renderingMode === MATERIAL_RENDERING_TYPES.SKY)
                 continue
 
             entityMetadata[0] = entity.pickID[0]
             entityMetadata[1] = entity.pickID[1]
             entityMetadata[2] = entity.pickID[2]
 
-            entityMetadata[4] = hasScreenDoor || material?.isAlphaTested ? 1 : 0
+            entityMetadata[4] = hasScreenDoor || material?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
 
             context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)

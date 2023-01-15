@@ -45,7 +45,7 @@ export default class UIAPI {
         const uiElements = Array.from(Engine.UILayouts.keys())
         for (let i = 0; i < uiElements.length; i++) {
             const found = uiElements[i]
-            const entities = Engine.entities.filter(e => {
+            const entities = Engine.entities.array.filter(e => {
                 const component = e.uiComponent
                 return component?.uiLayoutID === found
             })
@@ -118,7 +118,7 @@ export default class UIAPI {
         UIAPI.uiMountingPoint = UIAPI.document.body
 
         const elementsToBind = []
-        const entities = Engine.entities
+        const entities = Engine.entities.array
         for (let i = 0; i < entities.length; i++)
             elementsToBind.push(UIAPI.createUIEntity(entities[i]))
         for (let i = 0; i < elementsToBind.length; i++) {
@@ -152,7 +152,7 @@ export default class UIAPI {
             return
 
         UIAPI.uiMountingPoint.innerHTML = ""
-        const entities = Engine.entities
+        const entities = Engine.entities.array
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
             const UI = entity.uiComponent

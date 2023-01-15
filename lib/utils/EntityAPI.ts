@@ -18,11 +18,11 @@ import EntityComponentMapping from "../EntityComponentMapping";
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
     static addEntity(entity?: Entity): Entity {
+        if(entity && Engine.entities.has(entity.id))
+            return Engine.entities.map.get(entity.id)
         let target = entity || new Entity()
 
-        Engine.entitiesMap.set(target.id, target)
-        Engine.entities.push(target)
-
+        Engine.entities.add(target.id, target)
         EntityWorkerAPI.removeEntity(target)
         EntityWorkerAPI.registerEntity(target)
         EntityAPI.registerEntityComponents(target)
@@ -92,9 +92,10 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = true
     }
 
-    static removeEntity(id: string): void {
-        const entity = QueryAPI.getEntityByID(id)
-        if (entity === undefined)
+    static removeEntity(id: string) {
+
+        const entity = Engine.entities.map.get(id)
+        if (!entity)
             return
 
         if (GPU.activeSkylightEntity === entity)
@@ -107,28 +108,24 @@ export default class EntityAPI {
                     scr.onDestruction()
             }
 
-        Engine.entitiesMap.delete(id)
-        Engine.entities = Engine.entities.filter(e => e.id !== id)
+        Engine.entities.delete(id)
 
+        EntityComponentMapping.lights.delete(id)
+        EntityComponentMapping.sprites.delete(id)
+        EntityComponentMapping.decals.delete(id)
+        console.trace(EntityComponentMapping.meshesToDraw.has(id))
+        EntityComponentMapping.meshesToDraw.delete(id)
+        console.trace(EntityComponentMapping.meshesToDraw.has(id))
 
-        if (entity.lightComponent !== undefined)
-            EntityComponentMapping.lights.delete(entity.id)
-        if (entity.spriteComponent !== undefined)
-            EntityComponentMapping.sprites.delete(entity.id)
-        if (entity.decalComponent !== undefined)
-            EntityComponentMapping.decals.delete(entity.id)
-        if (entity.meshComponent !== undefined)
-            EntityComponentMapping.meshesToDraw.delete(entity.id)
-
+        setTimeout(() => console.trace(EntityComponentMapping.meshesToDraw.has(id)), 250)
         PhysicsAPI.removeRigidBody(entity)
-
         EntityWorkerAPI.removeEntity(entity)
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
 
         if (entity.materialRef) {
             const old = MaterialAPI.entityMaterial.get(entity.materialRef.id)
-            delete old[entity.id]
+            delete old[id]
             entity.materialRef = undefined
         }
 
@@ -140,7 +137,7 @@ export default class EntityAPI {
 
 
     static parseEntityObject(entity: MutableObject, asNew?: boolean): Entity {
-        const parsedEntity = new Entity(asNew ? crypto.randomUUID() : entity.id, entity.name, entity.active)
+        const parsedEntity = new Entity()
         const keys = Object.keys(entity)
 
         for (let i = 0; i < keys.length; i++) {
@@ -205,7 +202,10 @@ export default class EntityAPI {
         }
         parsedEntity.changed = true
         VisibilityRenderer.needsUpdate = true
-
+        if (asNew)
+            parsedEntity.id = crypto.randomUUID()
+        parsedEntity.name = entity.name
+        parsedEntity.active = entity.active
         return parsedEntity
     }
 }

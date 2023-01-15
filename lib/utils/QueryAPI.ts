@@ -7,13 +7,13 @@ export default class QueryAPI {
     }
 
     static getEntityByID(id:string):Entity|undefined {
-        return Engine.entitiesMap.get(id)
+        return Engine.entities.map.get(id)
     }
 
     static getEntitiesWithNativeComponent(componentKey:string):Entity[]{
         const newArr = []
-        for (let i = 0; i < Engine.entities.length; i++) {
-            const entity = Engine.entities[i]
+        for (let i = 0; i < Engine.entities.array.length; i++) {
+            const entity = Engine.entities.array[i]
             if (entity.components.get(componentKey) != null)
                 newArr.push(entity)
         }
@@ -24,7 +24,7 @@ export default class QueryAPI {
     static getEntityByPickerID(id:number):Entity|undefined {
         if (id === 0)
             return
-        const entities = Engine.entities
+        const entities = Engine.entities.array
         return entities.find(e => e?.pickIndex === id)
     }
 

@@ -5,6 +5,7 @@ import LightComponent from "../instances/components/LightComponent";
 import GPU from "../GPU";
 import StaticShaders from "../lib/StaticShaders";
 import EntityComponentMapping from "../lib/EntityComponentMapping";
+import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
 const cacheVec3 = vec3.create()
 const cacheMat4 = mat4.create()
@@ -58,7 +59,7 @@ export default class OmnidirectionalShadows {
 
             const current = toRender[m], meshComponent = current.meshComponent
             const mesh = current.meshRef
-            if (!mesh || !meshComponent.castsShadows || !current.active || current.materialRef?.isSky)
+            if (!mesh || !meshComponent.castsShadows || !current.active || current.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.SKY)
                 continue
 
             vec3.sub(cacheVec3, current.absoluteTranslation, component.entity.absoluteTranslation)

@@ -1,17 +1,24 @@
-export default class DynamicMap <T>{
-    array:T[] = []
-    #map:{[key:string]:T} = {}
+export default class DynamicMap<T> {
+    array: T[] = []
+    map = new Map<string, T>()
 
-    add(key:string, value:T) {
-        this.#map[key] = value
+    add(key: string, value: T) {
+        if (this.map.has(key))
+            return
+        this.map.set(key, value)
         this.array.push(value)
     }
 
-    delete(key:string) {
-        if (!this.#map[key])
+    has(key: string): boolean {
+        return this.map.has(key)
+    }
+
+    delete(key: string) {
+        const found = this.map.get(key)
+        if (!found)
             return
-        this.array.splice(this.array.indexOf(this.#map[key]), 1)
-        delete this.#map[key]
+        this.array.splice(this.array.findIndex(v => v === found), 1)
+        this.map.delete(key)
     }
 
 }

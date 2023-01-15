@@ -3,6 +3,7 @@ import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import StaticUBOs from "../lib/StaticUBOs";
 import EntityComponentMapping from "../lib/EntityComponentMapping";
+import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
 
 let lightsToUpdate
@@ -88,7 +89,7 @@ export default class DirectionalShadows {
         for (let m = 0; m < size; m++) {
             const current = toRender[m], meshComponent = current.meshComponent
             const mesh = current.meshRef
-            if (!mesh || !meshComponent.castsShadows || !current.active || current.materialRef?.isSky)
+            if (!mesh || !meshComponent.castsShadows || !current.active || current.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.SKY)
                 continue
             StaticShaders.directShadows.bind()
             const U = StaticShaders.directShadowsUniforms

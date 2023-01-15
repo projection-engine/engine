@@ -9,7 +9,7 @@ import ComponentAbstract from "./components/ComponentAbstract";
 export default class Entity extends ComponentAbstract {
     [key: string]: any;
 
-    readonly id
+    id
     queryKey: string
     name: string
     active = true
@@ -84,7 +84,7 @@ export default class Entity extends ComponentAbstract {
     }
 
     static isRegistered(entity) {
-        return !!Engine.entitiesMap.get(entity.id)
+        return !!Engine.entities.map.get(entity.id)
     }
 
 

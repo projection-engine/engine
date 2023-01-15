@@ -18,23 +18,24 @@ import LightProbe from "./instances/LightProbe";
 
 import Entity from "./instances/Entity";
 import StaticUBOs from "./lib/StaticUBOs";
+import DynamicMap from "./lib/utils/DynamicMap";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)
 
 
-export default class Engine  {
+export default class Engine {
     static #development = false
 
     static get developmentMode() {
         return Engine.#development
     }
 
-    static entitiesMap = new Map<string, Entity>()
     static queryMap = new Map<string, Entity>()
     static UILayouts = new Map()
     static isDev = true
-    static entities: Entity[] = []
+    static entities = new DynamicMap<Entity>()
+
     static #environment: number = ENVIRONMENT.DEV
 
     static get environment(): number {
@@ -91,7 +92,7 @@ export default class Engine  {
     static async startSimulation() {
         Engine.environment = ENVIRONMENT.EXECUTION
         UIAPI.buildUI(GPU.canvas.parentElement)
-        const entities = Engine.entities
+        const entities = Engine.entities.array
         for (let i = 0; i < entities.length; i++) {
             const current = entities[i]
             PhysicsAPI.registerRigidBody(current)
