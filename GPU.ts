@@ -95,6 +95,7 @@ export default class GPU {
         GPU.context.getExtension("EXT_color_buffer_float")
         GPU.context.getExtension("OES_texture_float")
         GPU.context.getExtension("OES_texture_float_linear")
+
         GPU.context.enable(GPU.context.BLEND)
         GPU.context.blendFunc(GPU.context.SRC_ALPHA, GPU.context.ONE_MINUS_SRC_ALPHA)
         GPU.context.enable(GPU.context.CULL_FACE)

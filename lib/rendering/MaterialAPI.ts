@@ -12,7 +12,6 @@ import TextureInUse from "../../templates/TextureInUse";
 import MutableObject from "../../MutableObject";
 
 export default class MaterialAPI {
-    static entityMaterial = new Map<string, { [key: string]: Entity }>()
     static #generator?: Generator<number>
 
     static* #getIncrementalID() {

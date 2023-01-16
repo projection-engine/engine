@@ -2,12 +2,16 @@ import GPU from "../GPU";
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
 import UberShader from "../utils/UberShader";
-import EntityComponentMapping from "../lib/EntityComponentMapping";
+import ResourceEntityMapper from "../lib/ResourceEntityMapper";
 import SceneRenderer from "./SceneRenderer";
+import Loop from "../Loop";
 
 
 export default class SceneComposition {
     static debugShadingModel = SHADING_MODELS.DETAIL
+    static MAX_TRANSLUCENCY = 1000
+    static transparencyIndexes = new Uint8Array(SceneComposition.MAX_TRANSLUCENCY)
+    static transparenciesToLoopThrough = 0
 
     static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
         const shader = UberShader.uber
@@ -17,20 +21,27 @@ export default class SceneComposition {
         shader.bind()
         const uniforms = UberShader.uberUniforms
         const context = GPU.context
+        const meshes = ResourceEntityMapper.meshesToDraw.array
 
         SceneRenderer.bindGlobalResources(context, uniforms, useCustomView, viewProjection, viewMatrix, cameraPosition)
-
+        SceneComposition.transparenciesToLoopThrough = 0
         StaticFBO.postProcessing2.startMapping()
-
-        SceneRenderer.drawMeshes(true, false, context, EntityComponentMapping.meshesToDraw.array, uniforms, useCustomView)
+        SceneRenderer.drawMeshes(true, false, context, meshes, uniforms, useCustomView)
         context.disable(context.CULL_FACE)
         context.disable(context.DEPTH_TEST)
-        SceneRenderer.drawMeshes(true, true, context, EntityComponentMapping.decals.array, uniforms, useCustomView)
+        SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, uniforms, useCustomView)
         context.enable(context.DEPTH_TEST)
         SceneRenderer.drawSprites()
-        context.enable(context.CULL_FACE)
-
         StaticFBO.postProcessing2.stopMapping()
+
+        if (SceneComposition.transparenciesToLoopThrough > 0) {
+            Loop.copyToCurrentFrame()
+
+            StaticFBO.postProcessing2.use()
+            SceneRenderer.drawMeshes(false, false, context, meshes, uniforms, useCustomView)
+            StaticFBO.postProcessing2.stopMapping()
+        }
+        context.enable(context.CULL_FACE)
     }
 
 }

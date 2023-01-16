@@ -2,10 +2,10 @@ import Component from "./Component"
 
 import MESH_PROPS from "../../static/component-props/MESH_PROPS";
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
+import ResourceEntityMapper from "../../lib/ResourceEntityMapper";
 
 export default class MeshComponent extends Component {
     _props = MESH_PROPS
-
 
     castsShadows = true
     _meshID?:string
@@ -39,11 +39,11 @@ export default class MeshComponent extends Component {
     set materialID(data) {
         this._materialID = data
         if (data) {
-            const previous = MaterialAPI.entityMaterial.get(this._materialID) || {}
+            const previous = ResourceEntityMapper.entityMaterial.get(this._materialID) || {}
             previous[this.entity.id] = this.entity
-            MaterialAPI.entityMaterial.set(this._materialID, previous)
+            ResourceEntityMapper.entityMaterial.set(this._materialID, previous)
         } else if (this.entity.materialRef) {
-            const old = MaterialAPI.entityMaterial.get(this.entity.materialRef.id)
+            const old = ResourceEntityMapper.entityMaterial.get(this.entity.materialRef.id)
             delete old[this.entity.id]
         }
         MaterialAPI.updateMap(this)

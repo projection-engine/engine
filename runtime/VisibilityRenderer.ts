@@ -7,7 +7,7 @@ import {mat4} from "gl-matrix";
 import StaticShaders from "../lib/StaticShaders";
 import StaticFBO from "../lib/StaticFBO";
 import type Entity from "../instances/Entity";
-import EntityComponentMapping from "../lib/EntityComponentMapping";
+import ResourceEntityMapper from "../lib/ResourceEntityMapper";
 import StaticMeshes from "../lib/StaticMeshes";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
@@ -22,7 +22,7 @@ export default class VisibilityRenderer {
 
         StaticShaders.visibility.bind()
         context = GPU.context
-        toRender = EntityComponentMapping.meshesToDraw.array
+        toRender = ResourceEntityMapper.meshesToDraw.array
         size = toRender.length
         uniforms = StaticShaders.visibilityUniforms
         VP = CameraAPI.metadata.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
@@ -67,7 +67,7 @@ export default class VisibilityRenderer {
             mesh.simplifiedDraw()
         }
 
-        toRender = EntityComponentMapping.sprites.array
+        toRender = ResourceEntityMapper.sprites.array
         size = toRender.length
 
         entityMetadata[5] = 1 // IS SPRITE

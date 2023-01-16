@@ -82,11 +82,8 @@ export default class StaticFBO {
         StaticFBO.postProcessing1 = new Framebuffer().texture().depthTest()
         StaticFBO.postProcessing2 = new Framebuffer().texture().depthTest()
 
-
         // StaticFBO.TAACache = (new Framebuffer()).texture()
         // StaticFBO.TAACacheSampler = StaticFBO.TAACache.colors[0]
-
-
 
         const SSGI_SETTINGS = {
             linear: true,
@@ -113,10 +110,7 @@ export default class StaticFBO {
             type: context.UNSIGNED_BYTE
         }
         StaticFBO.ssao = new Framebuffer(halfResW, halfResH).texture(SSAO_SETTINGS)
-
         StaticFBO.ssaoBlurred = new Framebuffer(halfResW, halfResH).texture(SSAO_SETTINGS)
-
-        StaticFBO.mb = new Framebuffer().texture()
         StaticFBO.lens = new Framebuffer().texture()
 
 
@@ -133,7 +127,6 @@ export default class StaticFBO {
             StaticFBO.upscaleBloom.push((new Framebuffer(w, h)).texture({linear: true}))
         }
 
-        StaticFBO.mbSampler = StaticFBO.mb.colors[0]
         StaticFBO.ssaoBlurredSampler = StaticFBO.ssaoBlurred.colors[0]
         StaticFBO.ssaoSampler = StaticFBO.ssao.colors[0]
         StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]

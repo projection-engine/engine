@@ -6,7 +6,7 @@ import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
 import UberShader from "../../utils/UberShader";
 import StaticUBOs from "../StaticUBOs";
-import EntityComponentMapping from "../EntityComponentMapping";
+import ResourceEntityMapper from "../ResourceEntityMapper";
 
 
 let lightTimeout
@@ -35,7 +35,7 @@ export default class LightsAPI {
     }
 
     static #package(keepOld) {
-        const lights = EntityComponentMapping.lights.array
+        const lights = ResourceEntityMapper.lights.array
         let primaryBuffer = LightsAPI.primaryBuffer,
             secondaryBuffer = LightsAPI.secondaryBuffer,
             typeBuffer = LightsAPI.typeBuffer

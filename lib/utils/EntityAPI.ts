@@ -13,7 +13,7 @@ import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import GPU from "../../GPU";
 import MutableObject from "../../MutableObject";
-import EntityComponentMapping from "../EntityComponentMapping";
+import ResourceEntityMapper from "../ResourceEntityMapper";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -76,13 +76,13 @@ export default class EntityAPI {
             UIAPI.createUIEntity(entity)
 
         if (entity.lightComponent !== undefined)
-            EntityComponentMapping.lights.add(entity.id, entity)
+            ResourceEntityMapper.lights.add(entity.id, entity)
         if (entity.spriteComponent !== undefined)
-            EntityComponentMapping.sprites.add(entity.id, entity)
+            ResourceEntityMapper.sprites.add(entity.id, entity)
         if (entity.decalComponent !== undefined)
-            EntityComponentMapping.decals.add(entity.id, entity)
+            ResourceEntityMapper.decals.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
-            EntityComponentMapping.meshesToDraw.add(entity.id, entity)
+            ResourceEntityMapper.meshesToDraw.add(entity.id, entity)
             MaterialAPI.updateMap(entity.meshComponent)
         }
 
@@ -110,21 +110,21 @@ export default class EntityAPI {
 
         Engine.entities.delete(id)
 
-        EntityComponentMapping.lights.delete(id)
-        EntityComponentMapping.sprites.delete(id)
-        EntityComponentMapping.decals.delete(id)
-        console.trace(EntityComponentMapping.meshesToDraw.has(id))
-        EntityComponentMapping.meshesToDraw.delete(id)
-        console.trace(EntityComponentMapping.meshesToDraw.has(id))
+        ResourceEntityMapper.lights.delete(id)
+        ResourceEntityMapper.sprites.delete(id)
+        ResourceEntityMapper.decals.delete(id)
+        console.trace(ResourceEntityMapper.meshesToDraw.has(id))
+        ResourceEntityMapper.meshesToDraw.delete(id)
+        console.trace(ResourceEntityMapper.meshesToDraw.has(id))
 
-        setTimeout(() => console.trace(EntityComponentMapping.meshesToDraw.has(id)), 250)
+        setTimeout(() => console.trace(ResourceEntityMapper.meshesToDraw.has(id)), 250)
         PhysicsAPI.removeRigidBody(entity)
         EntityWorkerAPI.removeEntity(entity)
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
 
         if (entity.materialRef) {
-            const old = MaterialAPI.entityMaterial.get(entity.materialRef.id)
+            const old = ResourceEntityMapper.entityMaterial.get(entity.materialRef.id)
             delete old[id]
             entity.materialRef = undefined
         }

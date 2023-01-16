@@ -11,6 +11,7 @@ import UberShader from "../../utils/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../templates/TextureParams";
 import MaterialInformation from "../../templates/MaterialInformation";
+import ResourceEntityMapper from "../ResourceEntityMapper";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
@@ -57,7 +58,7 @@ export default class GPUAPI {
         material.doubleSided = settings.doubleSided
         material.ssrEnabled = settings.ssrEnabled
 
-        const inUse = MaterialAPI.entityMaterial.get(id)
+        const inUse = ResourceEntityMapper.entityMaterial.get(id)
         try {
             if (inUse)
                 Object.values(inUse).forEach(entity => MaterialAPI.updateMap(entity.meshComponent))
