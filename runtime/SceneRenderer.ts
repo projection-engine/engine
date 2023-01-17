@@ -108,21 +108,14 @@ export default class SceneRenderer {
             }
     }
 
-    static #drawOpaque(index: number, uniforms: { [key: string]: WebGLUniformLocation }, context: WebGL2RenderingContext, entity: Entity) {
+    static #drawOpaque(uniforms: { [key: string]: WebGLUniformLocation }, context: WebGL2RenderingContext, entity: Entity) {
         const material = entity.materialRef
-        if (material?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY) {
-            SceneComposition.transparencyIndexes[SceneComposition.transparenciesToLoopThrough] = index
-            SceneComposition.transparenciesToLoopThrough++
-            return
-        }
 
         if (isSky) {
             isSky = false
             context.enable(context.CULL_FACE)
             context.enable(context.DEPTH_TEST)
         }
-        const culling = entity?.cullingComponent
-        UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
 
         if (material !== undefined) {
             if (material.doubleSided) {
@@ -140,10 +133,10 @@ export default class SceneRenderer {
             }
             UberMaterialAttributeGroup.materialID = material.bindID
             UberMaterialAttributeGroup.renderingMode = material.renderingMode
+            UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
 
             SceneRenderer.#bindComponentUniforms(entity, material, uniforms)
 
-            UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
 
             stateWasCleared = false
         } else if (!stateWasCleared) {
@@ -186,7 +179,6 @@ export default class SceneRenderer {
         UberMaterialAttributeGroup.useOcclusionDecal = aoSampler !== undefined ? 1 : 0
         UberMaterialAttributeGroup.ssrEnabled = component.useSSR ? 1 : 0
 
-
     }
 
 
@@ -208,13 +200,29 @@ export default class SceneRenderer {
             if (!entity.active || !mesh || entity.isCulled)
                 continue
 
+            const culling = entity?.cullingComponent
+            UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
             UberMaterialAttributeGroup.entityID = entity.pickID
-            if (onlyOpaque)
-                SceneRenderer.#drawOpaque(i, uniforms, context, entity)
-            else if (isDecalPass)
+
+            if (isTransparencyPass) {
+                const material = entity.materialRef
+
+                UberMaterialAttributeGroup.materialID = material.bindID
+                UberMaterialAttributeGroup.renderingMode = material.renderingMode
+                UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
+
+                SceneRenderer.#bindComponentUniforms(entity, material, uniforms)
+            } else if (isDecalPass)
                 SceneRenderer.#drawDecal(uniforms, context, entity)
-            else
-                SceneRenderer.#bindComponentUniforms(entity, entity.materialRef, uniforms)
+            else {
+                if (entity.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY) {
+                    SceneComposition.transparencyIndexes[SceneComposition.transparenciesToLoopThrough] = i
+                    SceneComposition.transparenciesToLoopThrough++
+                    continue
+                }
+                SceneRenderer.#drawOpaque(uniforms, context, entity)
+            }
+
 
             context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
