@@ -70,7 +70,8 @@ export default class GPU {
                 vec3.add(tempPosition, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
                 mat4.lookAt(tempView, entity._translation, tempPosition, <vec3>CUBE_MAP_VIEWS.up[index])
                 mat4.multiply(tempViewProjection, projection, tempView)
-                SceneComposition.execute(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
+                // TODO - IMPLEMENT NEW PIPELINE
+                // SceneComposition.execute(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
             })
         }
     }

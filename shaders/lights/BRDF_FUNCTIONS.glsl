@@ -1,6 +1,6 @@
-vec3 gaussian(sampler2D samplerData, vec2 texCoords) {
-    int blurRadius = int(roughness * 20.);
-    float sigma = float(blurRadius) * 0.75;
+vec3 gaussian(sampler2D samplerData, vec2 texCoords, int blurRadius, float sigmaMultiplier, bool useDefaultTexel) {
+    vec2 texel = useDefaultTexel ? texelSize : 1./vec2(textureSize(samplerData, 0));
+    float sigma = float(blurRadius) * sigmaMultiplier;
     vec3 col = vec3(0.0);
     float accum = 0.0;
     float weight;
@@ -12,7 +12,7 @@ vec3 gaussian(sampler2D samplerData, vec2 texCoords) {
         for (int y = -blurRadius / 2; y < blurRadius / 2; ++y) {
             offset = vec2(x, y);
             weight = 1.0 / SIG * PI * exp(-((pow(offset.x, 2.) + pow(offset.y, 2.)) / SIG));
-            col += textureLod(samplerData, texCoords + texelSize * offset, 2.).rgb * weight;
+            col += textureLod(samplerData, texCoords + texel * offset, 2.).rgb * weight;
             accum += weight;
         }
     }
@@ -34,7 +34,7 @@ vec3 computeSSR() {
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float reflectionMultiplier = clamp(pow(metallic, SSRFalloff) * screenEdgefactor * -reflected.z, 0., 1.);
-    vec3 tracedAlbedo = gaussian(previousFrame, coords.xy);
+    vec3 tracedAlbedo = gaussian(previousFrame, coords.xy, int(roughness * 20.), .75, true);
 
     return tracedAlbedo * reflectionMultiplier * (brdf.r + brdf.g);
 }
@@ -196,6 +196,7 @@ vec3 computeBRDF(inout vec3 L, float NdotL, inout vec3 lightColor) {
 
     switch (renderingMode) {
         case ISOTROPIC:
+        case TRANSPARENCY:
             isotropicCompute(diffuseEnergy, specularTotal, L, NdotL, lightColor, HdotV, NdotH);
             break;
         case ANISOTROPIC:

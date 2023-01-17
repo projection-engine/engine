@@ -54,7 +54,7 @@ export default class SceneRenderer {
 
     }
 
-    static bindGlobalResources(context: WebGL2RenderingContext, uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
+    static bindGlobalResources(context: WebGL2RenderingContext, uniforms: { [key: string]: WebGLUniformLocation }, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
         if (Engine.developmentMode)
             context.uniform1i(uniforms.shadingModel, SceneComposition.debugShadingModel)
 
@@ -65,19 +65,12 @@ export default class SceneRenderer {
         context.uniform2fv(uniforms.bufferResolution, GPU.bufferResolution)
         context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
 
-        if (!useCustomView) {
-            context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
-            context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
-            context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
-            context.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
-            context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
-            context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
-
-        } else {
-            context.uniformMatrix4fv(uniforms.viewMatrix, false, viewMatrix)
-            context.uniformMatrix4fv(uniforms.viewProjection, false, viewProjection)
-            context.uniform3fv(uniforms.cameraPosition, cameraPosition)
-        }
+        context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
+        context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
+        context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
+        context.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
+        context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
+        context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
 
         SceneRenderer.#bindTexture(context, uniforms.brdf_sampler, 0, GPU.BRDF, false)
         SceneRenderer.#bindTexture(context, uniforms.SSAO, 1, StaticFBO.ssaoBlurredSampler, false)
@@ -87,7 +80,7 @@ export default class SceneRenderer {
         SceneRenderer.#bindTexture(context, uniforms.scene_depth, 5, StaticFBO.visibilityDepthSampler, false)
         SceneRenderer.#bindTexture(context, uniforms.shadow_cube, 6, OmnidirectionalShadows.sampler, true)
 
-        if (!!GPU.activeSkylightEntity && !useCustomView) {
+        if (!!GPU.activeSkylightEntity) {
             texOffset++
             SceneRenderer.#bindTexture(context, uniforms.skylight_specular, 7, GPU.skylightProbe.texture, true)
         }
@@ -197,18 +190,16 @@ export default class SceneRenderer {
     }
 
 
-    static drawMeshes(onlyOpaque: boolean, isDecalPass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }, useCustomView?: boolean) {
-
+    static drawMeshes(onlyOpaque: boolean, isDecalPass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }) {
         UberMaterialAttributeGroup.clear()
         const isTransparencyPass = !isDecalPass && !onlyOpaque
-
         const size = isTransparencyPass ? SceneComposition.transparenciesToLoopThrough : toRender.length
         const cube = StaticMeshes.cube
 
         context.uniform1i(uniforms.isDecalPass, isDecalPass ? 1 : 0)
 
         if (isTransparencyPass)
-            SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.lensSampler, false)
+            SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.postProcessing1Sampler, false)
 
         for (let i = 0; i < size; i++) {
             const entity = isTransparencyPass ? toRender[SceneComposition.transparencyIndexes[i]] : toRender[i]
@@ -225,13 +216,9 @@ export default class SceneRenderer {
             else
                 SceneRenderer.#bindComponentUniforms(entity, entity.materialRef, uniforms)
 
-            if (useCustomView) {
-                // TODO - REPLACE WITH BOOLEAN FOR NO DEPTH TESTING
-                // UberMaterialAttributeGroup.ssrEnabled = 0
-            }
-
             context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
             context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+
             mesh.draw()
         }
     }

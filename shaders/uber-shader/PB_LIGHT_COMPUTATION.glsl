@@ -30,7 +30,7 @@ vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type) {
 }
 
 vec4 pbLightComputation() {
-    if (flatShading || isSky) return vec4(albedo + emission, alpha);
+    if (flatShading || isSky) return vec4(albedo + emission, 1.);
     VrN = reflect(-V, N);
     albedoOverPI = albedo / PI;
     vec3 directIllumination = vec3(0.0);
@@ -49,8 +49,6 @@ vec4 pbLightComputation() {
             lightTypeBuffer[i]
         );
     }
-
-
 
     indirectIllumination = sampleIndirectLight();
 

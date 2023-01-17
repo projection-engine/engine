@@ -13,7 +13,7 @@ export default class SceneComposition {
     static transparencyIndexes = new Uint8Array(SceneComposition.MAX_TRANSLUCENCY)
     static transparenciesToLoopThrough = 0
 
-    static execute(useCustomView?: boolean, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
+    static execute() {
         const shader = UberShader.uber
         if (!shader)
             return
@@ -23,14 +23,17 @@ export default class SceneComposition {
         const context = GPU.context
         const meshes = ResourceEntityMapper.meshesToDraw.array
 
-        SceneRenderer.bindGlobalResources(context, uniforms, useCustomView, viewProjection, viewMatrix, cameraPosition)
+        SceneRenderer.bindGlobalResources(context, uniforms)
         SceneComposition.transparenciesToLoopThrough = 0
         StaticFBO.postProcessing2.startMapping()
-        SceneRenderer.drawMeshes(true, false, context, meshes, uniforms, useCustomView)
+        SceneRenderer.drawMeshes(true, false, context, meshes, uniforms)
+
         context.disable(context.CULL_FACE)
+
         context.disable(context.DEPTH_TEST)
-        SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, uniforms, useCustomView)
+        SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, uniforms)
         context.enable(context.DEPTH_TEST)
+
         SceneRenderer.drawSprites()
         StaticFBO.postProcessing2.stopMapping()
 
@@ -38,7 +41,7 @@ export default class SceneComposition {
             Loop.copyToCurrentFrame()
 
             StaticFBO.postProcessing2.use()
-            SceneRenderer.drawMeshes(false, false, context, meshes, uniforms, useCustomView)
+            SceneRenderer.drawMeshes(false, false, context, meshes, uniforms)
             StaticFBO.postProcessing2.stopMapping()
         }
         context.enable(context.CULL_FACE)
