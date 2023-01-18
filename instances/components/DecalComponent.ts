@@ -5,6 +5,7 @@ import GPU from "../../GPU";
 import FileSystemAPI from "../../lib/utils/FileSystemAPI";
 import TextureParams from "../../templates/TextureParams";
 import GPUAPI from "../../lib/rendering/GPUAPI";
+import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 
 export default class DecalComponent extends Component {
     _albedoID?: string
@@ -19,7 +20,13 @@ export default class DecalComponent extends Component {
     #normal?: Texture
     #occlusion?: Texture
     useSSR = false
+    renderingMode = MATERIAL_RENDERING_TYPES.ISOTROPIC
 
+    anisotropicRotation = 0
+    anisotropy = 0
+    clearCoat = 0
+    sheen = 0
+    sheenTint = 0
 
     get albedo(): Texture {
         return this.#albedo;
@@ -60,35 +67,35 @@ export default class DecalComponent extends Component {
     set albedoID(value: string) {
         this.#albedo = GPU.textures.get(value)
         if (value && !this.albedo)
-            DecalComponent.#fetchIfNotFound(value).then(res =>  this.#albedo = res)
+            DecalComponent.#fetchIfNotFound(value).then(res => this.#albedo = res)
         this._albedoID = value;
     }
 
     set roughnessID(value: string) {
         this.#roughness = GPU.textures.get(value)
         if (value && !this.roughness)
-            DecalComponent.#fetchIfNotFound(value).then(res =>  this.#roughness = res)
+            DecalComponent.#fetchIfNotFound(value).then(res => this.#roughness = res)
         this._roughnessID = value;
     }
 
     set metallicID(value: string) {
         this.#metallic = GPU.textures.get(value)
         if (value && !this.metallic)
-            DecalComponent.#fetchIfNotFound(value).then(res =>  this.#metallic = res)
+            DecalComponent.#fetchIfNotFound(value).then(res => this.#metallic = res)
         this._metallicID = value;
     }
 
     set normalID(value: string) {
         this.#normal = GPU.textures.get(value)
         if (value && !this.normal)
-            DecalComponent.#fetchIfNotFound(value).then(res =>  this.#normal = res)
+            DecalComponent.#fetchIfNotFound(value).then(res => this.#normal = res)
         this._normalID = value;
     }
 
     set occlusionID(value: string) {
         this.#occlusion = GPU.textures.get(value)
         if (value && !this.occlusion)
-            DecalComponent.#fetchIfNotFound(value).then(res =>  this.#occlusion = res)
+            DecalComponent.#fetchIfNotFound(value).then(res => this.#occlusion = res)
         this._occlusionID = value;
     }
 

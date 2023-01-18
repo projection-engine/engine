@@ -179,6 +179,13 @@ export default class SceneRenderer {
         UberMaterialAttributeGroup.useOcclusionDecal = aoSampler !== undefined ? 1 : 0
         UberMaterialAttributeGroup.ssrEnabled = component.useSSR ? 1 : 0
 
+        UberMaterialAttributeGroup.renderingMode = component.renderingMode
+        UberMaterialAttributeGroup.anisotropicRotation = component.anisotropicRotation
+        UberMaterialAttributeGroup.anisotropy = component.anisotropy
+        UberMaterialAttributeGroup.clearCoat = component.clearCoat
+        UberMaterialAttributeGroup.sheen = component.sheen
+        UberMaterialAttributeGroup.sheenTint = component.sheenTint
+
     }
 
 

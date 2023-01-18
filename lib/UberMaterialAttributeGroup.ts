@@ -40,6 +40,7 @@ export default class UberMaterialAttributeGroup {
     }
 
 
+
     static set anisotropicRotation(value) {
         data[7] = value
     }
@@ -59,6 +60,8 @@ export default class UberMaterialAttributeGroup {
     static set sheenTint(value) {
         data[11] = value
     }
+
+
 
     static set useAlbedoDecal(value) {
         data[12] = value

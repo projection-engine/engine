@@ -159,7 +159,6 @@ void extractData() {
         sheen = matAttr[2][2];
         sheenTint = matAttr[2][3];
 
-        renderingMode = ISOTROPIC;
         useAlbedoDecal = matAttr[3][0] == 1.;
         useMetallicDecal = matAttr[3][1] == 1.;
         useRoughnessDecal = matAttr[3][2] == 1.;

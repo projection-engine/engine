@@ -90,7 +90,7 @@ float kelemen(float HdotV) {
 float charlie(float roughness, float NdotH) {
     const float MAX_SIN2H = 0.0078125;
 
-    float inv = 1.0 / roughness;
+    float inv = 1.0 / max(roughness, .000001);
     float sin2h = max(1.0 - pow(NdotH, 2.), MAX_SIN2H);
 
     return (2. + inv) * pow(sin2h, inv * .5) / (2. * PI);
