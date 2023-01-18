@@ -2,9 +2,9 @@ precision mediump float;
 
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
-#define SEARCH_STEPS 5;
-#define DEPTH_THRESHOLD 1.2;
-#define PI_SQUARED 6.2831853
+#define SEARCH_STEPS 5
+#define DEPTH_THRESHOLD 1.2
+#define PI2 6.2831853
 
 
 //import(cameraUBO)
@@ -35,7 +35,7 @@ vec3 cosHemisphereSample(vec3 hitNorm)
     vec3 bitangent = cross(hitNorm, tangent);
 
     float r = sqrt(randVal.x);
-    float phi = PI_SQUARED * randVal.y;
+    float phi = PI2 * randVal.y;
 
     return tangent * (r * cos(phi)) + bitangent * (r * sin(phi)) + hitNorm.xyz * sqrt(max(0.0, 1. - randVal.x));
 }

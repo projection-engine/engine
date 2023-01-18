@@ -6,13 +6,15 @@
 #define CLAMP_MAX .9
 #define SEARCH_STEPS 5
 #define DEPTH_THRESHOLD 1.2
-#define PI_SQUARED 6.2831853
+#define PI2 6.2831853
+
 #define DIRECTIONAL 0
 #define SPOT 1
 #define POINT 2
 #define SPHERE 3
 #define DISK 4
 #define PLANE 5
+
 #define UNLIT 0
 #define ISOTROPIC 1
 #define ANISOTROPIC 2

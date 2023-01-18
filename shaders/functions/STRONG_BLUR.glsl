@@ -5,9 +5,9 @@ float interleavedGradientNoise(vec2 n) {
 }
 vec3 blur(sampler2D img, vec2 uv, vec2 resolution, int samples, float radius) {
     const float GOLDEN_ANGLE = 2.3999632297286533222315555066336;
-    const float PI2 = 6.283185307179586476925286766559;
+    const float PI_V = 6.283185307179586476925286766559;
 
-    float bias = interleavedGradientNoise( gl_FragCoord.xy ) * PI2;
+    float bias = interleavedGradientNoise( gl_FragCoord.xy ) * PI_V;
     float ar = resolution.x / resolution.y;
     vec3 accum = vec3(0.0);
     float samplesFloat = float(samples);

@@ -1,8 +1,8 @@
 vec4 getFragDepth(vec2 coords){
-    vec4 depth = textureLod(scene_depth, coords, 2.);
-    if(depth.a < 1.)
+    vec4 D = textureLod(scene_depth, coords, 2.);
+    if(D.a < 1.)
         return vec4(0.);
-    return vec4(viewSpacePositionFromDepth(depth.r, quadUV), 1.);
+    return vec4(viewSpacePositionFromDepth(D.r, quadUV), 1.);
 }
 
 float screenSpaceShadows(vec3 lightDirection){
