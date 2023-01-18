@@ -13,7 +13,6 @@
 #define SPHERE 3
 #define DISK 4
 #define PLANE 5
-
 #define UNLIT 0
 #define ISOTROPIC 1
 #define ANISOTROPIC 2
@@ -82,6 +81,8 @@ uniform sampler2D sampler7;
 
 out vec4 fragColor;
 
+//import(blur)
+
 float naturalAO = 1.;
 float roughness = .5;
 float metallic = .5;
@@ -116,7 +117,6 @@ vec3 viewSpacePosition;
 vec3 worldSpacePosition;
 vec3 normalVec;
 float depthData;
-
 
 // MATERIAL ATTRIBUTES
 bool screenDoorEffect;

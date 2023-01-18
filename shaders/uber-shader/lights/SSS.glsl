@@ -1,8 +1,3 @@
-//THANKS TO
-float interleavedGradientNoise(vec2 n) {
-    float f = 0.06711056 * n.x + 0.00583715 * n.y;
-    return fract(52.9829189 * fract(f));
-}
 vec4 getFragDepth(vec2 coords){
     vec4 depth = textureLod(scene_depth, coords, 2.);
     if(depth.a < 1.)

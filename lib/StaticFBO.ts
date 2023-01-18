@@ -29,8 +29,9 @@ export default class StaticFBO {
 
     static ssgi?: Framebuffer
     static ssgiSampler?: WebGLTexture
-    static ssgiQuarter?: Framebuffer
-    static ssgiEighth?: Framebuffer
+
+    static ssgiFallback?: Framebuffer
+    static ssgiFallbackSampler?: WebGLTexture
 
     static ssao?: Framebuffer
     static ssaoSampler?: WebGLTexture
@@ -91,18 +92,8 @@ export default class StaticFBO {
             format: context.RGB,
             type: context.UNSIGNED_BYTE
         }
-        StaticFBO.ssgi = new Framebuffer(halfResW, halfResH)
-            .texture(SSGI_SETTINGS)
-        StaticFBO.ssgiQuarter = (new Framebuffer(
-            GPU.internalResolution.w / 4,
-            GPU.internalResolution.h / 4
-        )).texture(SSGI_SETTINGS)
-
-        StaticFBO.ssgiEighth = (new Framebuffer(
-            GPU.internalResolution.w / 8,
-            GPU.internalResolution.h / 8
-        )).texture(SSGI_SETTINGS)
-
+        StaticFBO.ssgi = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
+        StaticFBO.ssgiFallback = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
 
         const SSAO_SETTINGS = {
             precision: context.R8,
@@ -130,6 +121,8 @@ export default class StaticFBO {
         StaticFBO.ssaoBlurredSampler = StaticFBO.ssaoBlurred.colors[0]
         StaticFBO.ssaoSampler = StaticFBO.ssao.colors[0]
         StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]
+        StaticFBO.ssgiFallbackSampler = StaticFBO.ssgiFallback.colors[0]
+
         StaticFBO.visibilityDepthSampler = StaticFBO.visibility.colors[0]
         StaticFBO.visibilityEntitySampler = StaticFBO.visibility.colors[1]
         StaticFBO.visibilityVelocitySampler = StaticFBO.visibility.colors[2]

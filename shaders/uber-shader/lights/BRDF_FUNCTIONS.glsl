@@ -1,24 +1,6 @@
-vec3 gaussian(sampler2D samplerData, vec2 texCoords, int blurRadius, float sigmaMultiplier, bool useDefaultTexel) {
-    vec2 texel = useDefaultTexel ? texelSize : 1./vec2(textureSize(samplerData, 0));
-    float sigma = float(blurRadius) * sigmaMultiplier;
-    vec3 col = vec3(0.0);
-    float accum = 0.0;
-    float weight;
-    vec2 offset;
-    float SIG = 2.0 * pow(float(blurRadius), 2.);
-    if (blurRadius <= 1)
-    return texture(samplerData, texCoords).rgb;
-    for (int x = -blurRadius / 2; x < blurRadius / 2; ++x) {
-        for (int y = -blurRadius / 2; y < blurRadius / 2; ++y) {
-            offset = vec2(x, y);
-            weight = 1.0 / SIG * PI * exp(-((pow(offset.x, 2.) + pow(offset.y, 2.)) / SIG));
-            col += textureLod(samplerData, texCoords + texel * offset, 2.).rgb * weight;
-            accum += weight;
-        }
-    }
-
-    if (accum > 0.) return col / accum;
-    return texture(samplerData, texCoords).rgb;
+vec3 gaussian(sampler2D samplerData, vec2 texCoords, float blurRadius, int samples, bool useDefaultTexel) {
+    vec2 texel = useDefaultTexel ? bufferResolution : vec2(textureSize(samplerData, 0));
+    return blur(samplerData, texCoords, texel, max(samples, 1), blurRadius);
 }
 
 
@@ -34,7 +16,7 @@ vec3 computeSSR() {
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float reflectionMultiplier = clamp(pow(metallic, SSRFalloff) * screenEdgefactor * -reflected.z, 0., 1.);
-    vec3 tracedAlbedo = gaussian(previousFrame, coords.xy, int(roughness * 20.), .75, true);
+    vec3 tracedAlbedo = gaussian(previousFrame, coords.xy, roughness * 10., 16, true);
 
     return tracedAlbedo * reflectionMultiplier * (brdf.r + brdf.g);
 }
@@ -76,7 +58,7 @@ float geometrySmith(float NdotL, float roughness) {
 }
 
 vec3 sampleIndirectLight() {
-    vec3 diffuseColor = texture(SSGI, quadUV).rgb * albedoOverPI;
+    vec3 diffuseColor = texture(SSGI, quadUV).rgb * albedo;
     vec3 specularColor = ssrEnabled ? computeSSR() : vec3(0.);
     return diffuseColor + specularColor;
 }
@@ -114,7 +96,7 @@ float charlie(float roughness, float NdotH) {
     return (2. + inv) * pow(sin2h, inv * .5) / (2. * PI);
 }
 
-float V_GGX_anisotropic_2cos(float cos_theta_m, float alpha_x, float alpha_y, float cos_phi, float sin_phi)
+float GGXAnisotropicCosine2(float cos_theta_m, float alpha_x, float alpha_y, float cos_phi, float sin_phi)
 {
     float cos2 = cos_theta_m * cos_theta_m;
     float sin2 = (1.0 - cos2);
@@ -122,7 +104,7 @@ float V_GGX_anisotropic_2cos(float cos_theta_m, float alpha_x, float alpha_y, fl
     float s_y = alpha_y * sin_phi;
     return 1.0 / max(cos_theta_m + sqrt(cos2 + (s_x * s_x + s_y * s_y) * sin2), 0.001);
 }
-float D_GGX_Anisotropic(float cos_theta_m, float alpha_x, float alpha_y, float cos_phi, float sin_phi)
+float GGXAnisotropic(float cos_theta_m, float alpha_x, float alpha_y, float cos_phi, float sin_phi)
 {
     float cos2 = cos_theta_m * cos_theta_m;
     float sin2 = (1.0 - cos2);
@@ -143,8 +125,8 @@ void anisotropicCompute(inout vec3 H, inout vec3 dEnergy, inout vec3 specularTot
     float TdotH = dot(t, H);
     float BdotH = dot(b, H);
 
-    float D = D_GGX_Anisotropic(NdotH, ax, ay, TdotH, BdotH);
-    float V = V_GGX_anisotropic_2cos(NdotV, ax, ay, TdotH, BdotH) * V_GGX_anisotropic_2cos(NdotV, ax, ay, TdotH, BdotH);
+    float D = GGXAnisotropic(NdotH, ax, ay, TdotH, BdotH);
+    float V = GGXAnisotropicCosine2(NdotV, ax, ay, TdotH, BdotH) * GGXAnisotropicCosine2(NdotV, ax, ay, TdotH, BdotH);
     vec3 F = fresnel(F0, clamp(dot(F0, vec3(50. * .3333)), 0., 1.), dot(L, H));
 
     specularTotal += D * V * F;

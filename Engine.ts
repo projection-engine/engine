@@ -109,7 +109,8 @@ export default class Engine {
         if (typeof physicsSteps === "number")
             Physics.simulationStep = physicsSteps
 
-        SSGI.blurSamples = SSGISettings.blurSamples || 3
+        SSGI.blurSamples = SSGISettings.blurSamples || 5
+        SSGI.blurRadius = SSGISettings.blurRadius || 5
         SSGI.ssgiColorGrading[0] = SSGISettings.gamma || 2.2
         SSGI.ssgiColorGrading[1] = SSGISettings.exposure || 1
 

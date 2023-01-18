@@ -35,6 +35,7 @@ export default class SceneComposition {
         context.enable(context.DEPTH_TEST)
 
         SceneRenderer.drawSprites()
+        context.enable(context.CULL_FACE)
         StaticFBO.postProcessing2.stopMapping()
 
         if (SceneComposition.transparenciesToLoopThrough > 0) {
@@ -44,7 +45,7 @@ export default class SceneComposition {
             SceneRenderer.drawMeshes(false, false, context, meshes, uniforms)
             StaticFBO.postProcessing2.stopMapping()
         }
-        context.enable(context.CULL_FACE)
+
     }
 
 }

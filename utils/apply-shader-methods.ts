@@ -1,16 +1,17 @@
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
 import CAMERA_UBO from "../shaders/functions/CAMERA_METADATA_UNIFORM.glsl";
 import POST_PROCESSING_UNIFORMS from "../shaders/functions/POST_PROCESSING_UNIFORMS.glsl";
-import COMPUTE_AREA_LIGHT from "../shaders/lights/COMPUTE_AREALIGHT.glsl"
+import COMPUTE_AREA_LIGHT from "../shaders/uber-shader/lights/COMPUTE_AREALIGHT.glsl"
 import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
 import ACES from "../shaders/functions/ACES.glsl";
 import DEPTH_UTILS from "../shaders/functions/DEPTH_RECONSTRUCTION_UTILS.glsl"
-import COMPUTE_LIGHTS from "../shaders/lights/COMPUTE_DIRECTIONAL_LIGHTS.glsl"
-import COMPUTE_POINT_LIGHTS from "../shaders/lights/COMPUTE_POINT_LIGHTS.glsl"
-import COMPUTE_SPOTLIGHTS from "../shaders/lights/COMPUTE_SPOTLIGHT.glsl"
-import BRDF_FUNCTIONS from "../shaders/lights/BRDF_FUNCTIONS.glsl"
+import COMPUTE_LIGHTS from "../shaders/uber-shader/lights/COMPUTE_DIRECTIONAL_LIGHTS.glsl"
+import COMPUTE_POINT_LIGHTS from "../shaders/uber-shader/lights/COMPUTE_POINT_LIGHTS.glsl"
+import COMPUTE_SPOTLIGHTS from "../shaders/uber-shader/lights/COMPUTE_SPOTLIGHT.glsl"
+import BRDF_FUNCTIONS from "../shaders/uber-shader/lights/BRDF_FUNCTIONS.glsl"
+import STRONG_BLUR from "../shaders/functions/STRONG_BLUR.glsl"
 import UBER_ATTRIBUTES from "../shaders/uber-shader/ATTRIBUTES.glsl"
-import SSS from "../shaders/lights/SSS.glsl"
+import SSS from "../shaders/uber-shader/lights/SSS.glsl"
 
 const METHODS = {
     cameraUBO: "//import(cameraUBO)",
@@ -25,7 +26,8 @@ const METHODS = {
     brdf: "//import(brdf)",
     computeSpotLights: "//import(computeSpotLights)",
     computeAreaLights: "//import(computeAreaLights)",
-    ppUBO: "//import(ppUBO)"
+    ppUBO: "//import(ppUBO)",
+    blur: "//import(blur)"
 }
 
 
@@ -37,6 +39,10 @@ export default function applyShaderMethods(shaderCode) {
             switch (true) {
                 case key === "computeAreaLights":
                     response = response.replaceAll(METHODS[key], COMPUTE_AREA_LIGHT)
+                    break
+                case key === "blur":
+                    response = response.replaceAll(METHODS[key], STRONG_BLUR)
+                    break
                 case key === "computeSpotLights":
                     response = response.replaceAll(METHODS[key], COMPUTE_SPOTLIGHTS)
                     break
@@ -72,8 +78,6 @@ export default function applyShaderMethods(shaderCode) {
                     break
                 case key === "aces":
                     response = response.replaceAll(METHODS[key], ACES)
-                    break
-                default:
                     break
             }
         })

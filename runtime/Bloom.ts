@@ -44,7 +44,10 @@ export default class Bloom {
             context.activeTexture(context.TEXTURE0)
             context.bindTexture(context.TEXTURE_2D, i > 0 ? downscale[i - 1].colors[0] : StaticFBO.lensSampler)
             context.uniform1i(StaticShaders.gaussianUniforms.sceneColor, 0)
-            context.uniform1i(StaticShaders.gaussianUniforms.blurRadius, CameraAPI.metadata.bloomQuality)
+
+            context.uniform1f(StaticShaders.gaussianUniforms.blurRadius, 10)
+            context.uniform1i(StaticShaders.gaussianUniforms.samples, CameraAPI.metadata.bloomQuality)
+            context.uniform2fv(StaticShaders.gaussianUniforms.bufferResolution, fbo.resolution)
 
             StaticMeshes.drawQuad()
             fbo.stopMapping()

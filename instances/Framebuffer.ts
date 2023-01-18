@@ -25,11 +25,14 @@ export default class Framebuffer {
     readonly colors:WebGLTexture[] = []
     readonly attachments:number[] = []
     readonly colorsMetadata:FBOTexture[] = []
+    resolution = new Float32Array(2)
 
     constructor(width = GPU.internalResolution.w, height = GPU.internalResolution.h) {
 
         this.width = width
         this.height = height
+        this.resolution[0] = width
+        this.resolution[1] = height
         this.FBO = GPU.context.createFramebuffer()
 
         this.fallback = {

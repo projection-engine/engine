@@ -1,51 +1,41 @@
-
 precision highp float;
 #define PI 3.14159265359
 in vec2 texCoords;
 
-uniform sampler2D sceneColor;//color buffer
-uniform sampler2D entityIDSampler;//ID buffer
-uniform int blurRadius;
+uniform sampler2D sceneColor;
+uniform sampler2D entityIDSampler;
+uniform float blurRadius;
+uniform int samples;
+uniform vec2 bufferResolution;
 out vec4 fragColor;
 
-int samples;
-float sigma;
-vec2 scale;
 
-float gaussian(vec2 i) {
-    return 1.0 / (2.0 * PI * pow(sigma, 2.)) * exp(-((pow(i.x, 2.) + pow(i.y, 2.)) / (2.0 * pow(sigma, 2.))));
+float interleavedGradientNoise(vec2 n) {
+    float f = 0.06711056 * n.x + 0.00583715 * n.y;
+    return fract(52.9829189 * fract(f));
 }
 
-vec3 blur() {
-    vec3 col = vec3(0.0);
-    float accum = 0.0;
-    float weight;
-    vec2 offset;
-    vec2 scaledOffset;
+void main() {
     vec4 root = texture(entityIDSampler, texCoords);
     if (root.a < 1.) discard;
 
-    for (int x = -samples / 2; x < samples / 2; ++x) {
-        for (int y = -samples / 2; y < samples / 2; ++y) {
-            offset = vec2(x, y);
-            scaledOffset = scale * offset;
-            if (root.rgb == texture(entityIDSampler, texCoords + scaledOffset).rgb){
-                weight = gaussian(offset);
-                col += texture(sceneColor, texCoords + scaledOffset).rgb * weight;
-                accum += weight;
-            }
-        }
+    const float GOLDEN_ANGLE = 2.3999632297286533222315555066336;
+    const float PI2 = 6.283185307179586476925286766559;
+
+    float bias = interleavedGradientNoise(gl_FragCoord.xy) * PI2;
+    float ar = bufferResolution.x / bufferResolution.y;
+    vec3 accum = vec3(0.0);
+    float samplesFloat = float(samples);
+
+    for (int i = 1; i <= samples; ++i) {
+        float I = float(i);
+        float a = I * GOLDEN_ANGLE + bias;
+        vec2 p = blurRadius * sqrt(I / samplesFloat) * vec2(cos(a), ar * sin(a)) * 0.002;
+        if (root.rgb == texture(entityIDSampler, texCoords + p).rgb)
+        accum += texture(sceneColor, texCoords + p).rgb;
+
     }
 
-    if(accum > 0.)
-    return col / accum;
-    return texture(sceneColor, texCoords).rgb;
-}
-
-void main(){
-    scale = 1. / vec2(textureSize(sceneColor, 0));
-    samples = blurRadius;
-    sigma = float(samples) * 0.25;
-
-    fragColor = vec4(blur(), 1.);
+    fragColor.rgb =  accum / samplesFloat;
+    fragColor.a = 1.;
 }
