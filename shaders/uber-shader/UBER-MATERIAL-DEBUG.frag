@@ -54,18 +54,19 @@ bool checkDither() {
     return false;
 }
 
-bool checkLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type) {
+bool checkLight(mat4 primaryBuffer, mat4 secondaryBuffer) {
+    int type = int(primaryBuffer[0][0]);
     vec3 directIllumination = vec3(0.);
     if (type == DIRECTIONAL)
-    directIllumination = computeDirectionalLight(secondaryBuffer, primaryBuffer);
+    directIllumination = computeDirectionalLight(primaryBuffer, secondaryBuffer);
     else if (type == POINT)
-    directIllumination = computePointLights(primaryBuffer);
+    directIllumination = computePointLights(primaryBuffer, secondaryBuffer);
     else if (type == SPOT)
-    directIllumination = computeSpotLights(primaryBuffer);
+    directIllumination = computeSpotLights(primaryBuffer, secondaryBuffer);
     else if (type == SPHERE)
-    directIllumination = computeSphereLight(primaryBuffer);
+    directIllumination = computeSphereLight(primaryBuffer, secondaryBuffer);
     else if (type == DISK)
-    directIllumination = computeDiskLight(primaryBuffer);
+    directIllumination = computeDiskLight(primaryBuffer, secondaryBuffer);
 
     return length(directIllumination) > 0.;
 }
@@ -158,8 +159,7 @@ void main() {
                         for (int i = 0; i < lightQuantity; i++) {
                             if (checkLight(
                                 lightPrimaryBuffer[i],
-                                lightSecondaryBuffer[i],
-                                lightTypeBuffer[i]
+                                lightSecondaryBuffer[i]
                             )) contribution++;
                         }
 

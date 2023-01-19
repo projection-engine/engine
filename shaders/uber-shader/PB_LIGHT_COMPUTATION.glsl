@@ -14,18 +14,19 @@
 
 //import(computeAreaLights)
 
-vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer, int type) {
+vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer ) {
+    int type = int(primaryBuffer[0][0]);
     vec3 directIllumination = vec3(0.);
     if (type == DIRECTIONAL)
-    directIllumination += computeDirectionalLight( secondaryBuffer, primaryBuffer);
+    directIllumination += computeDirectionalLight(primaryBuffer, secondaryBuffer);
     else if (type == POINT)
-    directIllumination += computePointLights( primaryBuffer);
+    directIllumination += computePointLights(primaryBuffer, secondaryBuffer);
     else if (type == SPOT)
-    directIllumination += computeSpotLights(primaryBuffer);
+    directIllumination += computeSpotLights(primaryBuffer, secondaryBuffer);
     else if (type == SPHERE)
-    directIllumination += computeSphereLight(primaryBuffer);
+    directIllumination += computeSphereLight(primaryBuffer, secondaryBuffer);
     else if (type == DISK)
-    directIllumination += computeDiskLight(primaryBuffer);
+    directIllumination += computeDiskLight(primaryBuffer, secondaryBuffer);
     return directIllumination;
 }
 
@@ -45,8 +46,7 @@ vec4 pbLightComputation() {
     for (int i = 0; i < lightQuantity; i++) {
         directIllumination += processLight(
             lightPrimaryBuffer[i],
-            lightSecondaryBuffer[i],
-            lightTypeBuffer[i]
+            lightSecondaryBuffer[i]
         );
     }
 

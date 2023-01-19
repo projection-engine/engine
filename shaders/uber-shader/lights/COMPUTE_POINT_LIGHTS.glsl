@@ -6,12 +6,11 @@ const vec3 sampleOffsetDirections[20] = vec3[]
     vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
     vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
-float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, vec3 lightPos, mat4 lightMatrix) {
+float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, vec3 lightPos, float bias, mat4 lightMatrix) {
     float attenuation = clamp(mix(1., 0., shadowFalloffDistance - distanceFromCamera), 0., 1.);
     if (attenuation == 1.) return 1.;
 
     float farPlane = lightMatrix[3][0];
-    float bias = lightMatrix[0][3];
     int samples = int(lightMatrix[1][3]);
 
     vec3 fragToLight = worldSpacePosition - lightPos;
@@ -35,28 +34,28 @@ float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, ve
 }
 
 
-vec3 computePointLights(inout mat4 pointLight) {
-    vec3 lightPosition = vec3(pointLight[0][0], pointLight[0][1], pointLight[0][2]);
+vec3 computePointLights(inout mat4 primaryBuffer, inout mat4 secondaryBuffer) {
+    vec3 lightPosition = vec3(primaryBuffer[1][0], primaryBuffer[1][1], primaryBuffer[1][2]);
+    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][1], primaryBuffer[0][3]);
 
     vec4 baseContribution = precomputeContribution(lightPosition);
     if (baseContribution.a == 0.) return vec3(0.);
 
     float shadows = 1.;
-    bool hasShadowMap = pointLight[3][1] < 0.;
-    bool hasSSS = abs(pointLight[3][1]) == 2.;
+    bool hasShadowMap = primaryBuffer[3][1] < 0.;
+    bool hasSSS = abs(primaryBuffer[3][1]) == 2.;
 
-    if (hasShadowMap) shadows = pointLightShadow(distanceFromCamera, pointLight[3][2], lightPosition, pointLight);
+    if (hasShadowMap) shadows = pointLightShadow(distanceFromCamera, primaryBuffer[3][2], lightPosition, secondaryBuffer[0][0], primaryBuffer);
 
     if (shadows == 0.) return vec3(0.);
 
-    float cutoff = pointLight[3][3];
-    float outerCutoff = pointLight[2][2];
+    float cutoff = primaryBuffer[3][3];
+    float outerCutoff = primaryBuffer[2][2];
     float occlusion = hasSSS ? screenSpaceShadows(lightPosition - worldSpacePosition) : 1.;
 
     if (occlusion == 0.) return vec3(0.);
 
-    vec3 lightColor = vec3(pointLight[1][0], pointLight[1][1], pointLight[1][2]);
-    vec2 attenuationPLight = vec2(pointLight[2][0], pointLight[2][1]);
+    vec2 attenuationPLight = vec2(primaryBuffer[2][0], primaryBuffer[2][1]);
     float distanceFromFrag = length(lightPosition - worldSpacePosition);
     float intensity = 1.;
 

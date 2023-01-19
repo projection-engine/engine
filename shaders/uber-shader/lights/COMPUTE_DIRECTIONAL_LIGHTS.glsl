@@ -56,26 +56,23 @@ float directionalLightShadows(float distanceFromCamera, float shadowFalloffDista
 
 
 
-vec3 computeDirectionalLight(inout mat4 lightMatrix, inout mat4 lightData){
-    vec3 lightDirection =  vec3(lightData[0][0], lightData[0][1], lightData[0][2]);
-
-    vec4 baseContribution = precomputeContribution(lightDirection);
+vec3 computeDirectionalLight(inout mat4 primaryBuffer, inout mat4 secondaryBuffer){
+    vec3 lightPosition = vec3(primaryBuffer[1][0], primaryBuffer[1][1], primaryBuffer[1][2]);
+    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][1], primaryBuffer[0][3]);
+    vec4 baseContribution = precomputeContribution(lightPosition);
     if(baseContribution.a == 0.) return vec3(0.);
 
-
-
-    vec3 lightColor =  vec3(lightData[1][0], lightData[1][1], lightData[1][2]);
-    bool hasSSS = lightData[3][2] == 1.;
+    bool hasSSS = primaryBuffer[3][2] == 1.;
     float shadows = 1.;
-    bool hasShadowMap = lightData[2][2] > 0.;
+    bool hasShadowMap = primaryBuffer[2][2] > 0.;
 
     if (hasShadowMap){
-        vec4 lightSpacePosition  = lightMatrix * vec4(worldSpacePosition, 1.0);
-        vec2 atlasFace = vec2(lightData[2][0], lightData[2][1]);
-        shadows = directionalLightShadows(distanceFromCamera, lightData[3][1], lightData[3][0], lightSpacePosition, atlasFace, shadow_atlas, shadowMapsQuantity, shadowMapResolution, lightData[2][2]);
+        vec4 lightSpacePosition  = secondaryBuffer * vec4(worldSpacePosition, 1.0);
+        vec2 atlasFace = vec2(primaryBuffer[2][0], primaryBuffer[2][1]);
+        shadows = directionalLightShadows(distanceFromCamera, primaryBuffer[3][1], primaryBuffer[3][0], lightSpacePosition, atlasFace, shadow_atlas, shadowMapsQuantity, shadowMapResolution, primaryBuffer[2][2]);
     }
     if (shadows == 0.) return vec3(0.);
-    float occlusion = hasSSS ? screenSpaceShadows(lightDirection) : 1.;
+    float occlusion = hasSSS ? screenSpaceShadows(lightPosition) : 1.;
     if (occlusion == 0. ) return vec3(0.);
 
     return computeBRDF(baseContribution.rgb, baseContribution.a, lightColor);

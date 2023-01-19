@@ -11,6 +11,8 @@ export default class LightComponent extends Component {
     _props = LIGHT_PROPS
 
     // -------------- GLOBAL --------------
+    _color = [255, 255, 255]
+    fixedColor = [1, 1, 1]
     _type = LIGHT_TYPES.DIRECTIONAL
     get type() {
         return this._type
@@ -41,22 +43,12 @@ export default class LightComponent extends Component {
     // -------------- DIRECTIONAL --------------
     size = 35
     atlasFace = [0, 0]
-    _center = [0, 0, 0]
     __lightView = mat4.create()
     __lightProjection = mat4.create()
     // -------------- AREA --------------
     areaRadius = 1
     planeAreaWidth = 1
     planeAreaHeight = 1
-
-    get center() {
-        return this._center
-    }
-
-    set center(data) {
-        this._center = data
-        this.entity.needsLightUpdate = true
-    }
 
     // -------------- GLOBAL --------------
     _intensity = 1
@@ -69,8 +61,7 @@ export default class LightComponent extends Component {
         this.fixedColor = [this._color[0] * this.intensity / 255, this._color[1] * this.intensity / 255, this._color[2] * this.intensity / 255]
     }
 
-    _color = [255, 255, 255]
-    fixedColor = [1, 1, 1]
+
 
     get color() {
         return this._color

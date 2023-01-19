@@ -80,6 +80,9 @@ export default class Shader {
 
         if (fragmentBuilt.includes(StaticUBONames.UBER) || vertexBuilt.includes(StaticUBONames.UBER))
             StaticUBOs.uberUBO.bindWithShader(this.program)
+
+        if (fragmentBuilt.includes(StaticUBONames.LIGHTS) || vertexBuilt.includes(StaticUBONames.LIGHTS))
+            StaticUBOs.lightsUBO.bindWithShader(this.program)
     }
 
     #compileShader(shaderCode, shaderType, pushMessage) {

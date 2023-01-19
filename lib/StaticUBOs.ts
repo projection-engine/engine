@@ -8,6 +8,7 @@ export enum StaticUBONames {
     LENS_PP = "LensEffects",
     SSAO = "Settings",
     UBER = "UberShaderSettings",
+    LIGHTS = "Lights"
 }
 
 export default class StaticUBOs {
@@ -18,6 +19,7 @@ export default class StaticUBOs {
     static lensPostProcessingUBO?: UBO
     static ssaoUBO?: UBO
     static uberUBO?: UBO
+    static lightsUBO?: UBO
 
     static initialize() {
         if (StaticUBOs.#initialized)
@@ -100,8 +102,8 @@ export default class StaticUBOs {
             [
                 {name: "shadowMapsQuantity", type: "float"},
                 {name: "shadowMapResolution", type: "float"},
-                {name: "lightQuantity", type: "int"},
 
+                {name: "lightQuantity", type: "int"},
                 {type: "float", name: "SSRFalloff"},
                 {type: "float", name: "stepSizeSSR"},
                 {type: "float", name: "maxSSSDistance"},
@@ -113,11 +115,14 @@ export default class StaticUBOs {
                 {type: "int", name: "maxStepsSSR"},
                 {type: "int", name: "maxStepsSSS"},
                 {type: "bool", name: "hasSkylight"},
-                {type: "bool", name: "hasAmbientOcclusion"},
-
+                {type: "bool", name: "hasAmbientOcclusion"}
+            ]
+        )
+        StaticUBOs.lightsUBO = new UBO(
+            StaticUBONames.LIGHTS,
+            [
                 {name: "lightPrimaryBuffer", type: "mat4", dataLength: UberShader.MAX_LIGHTS},
                 {name: "lightSecondaryBuffer", type: "mat4", dataLength: UberShader.MAX_LIGHTS},
-                {name: "lightTypeBuffer", type: "int", dataLength: UberShader.MAX_LIGHTS}
             ]
         )
     }

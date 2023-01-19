@@ -15,13 +15,15 @@ const transformedNormalCache = vec3.create(),
     lightViewProjection = mat4.create()
 
 const cacheVec3 = vec3.create()
-
+const quantity = new Uint8Array(1)
+/**
+ * @property primaryBuffer: indexes 0-3 are reserved for [type - color - color - color]
+ */
 export default class LightsAPI {
 
 
     static primaryBuffer = <Float32Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS * 16, 0, false, false, false)
     static secondaryBuffer = <Float32Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS * 16, 0, false, false, false)
-    static typeBuffer = <Uint8Array>ArrayBufferAPI.allocateVector(UberShader.MAX_LIGHTS, 0, false, false, true)
     static lightsQuantity = 0
 
 
@@ -36,9 +38,8 @@ export default class LightsAPI {
 
     static #package(keepOld) {
         const lights = ResourceEntityMapper.lights.array
-        let primaryBuffer = LightsAPI.primaryBuffer,
-            secondaryBuffer = LightsAPI.secondaryBuffer,
-            typeBuffer = LightsAPI.typeBuffer
+        const primaryBuffer = LightsAPI.primaryBuffer,
+            secondaryBuffer = LightsAPI.secondaryBuffer
         let size = [0, 0, 0], offset = 0, sizeIndex = 0
 
 
@@ -47,8 +48,6 @@ export default class LightsAPI {
                 primaryBuffer[i] = 0
                 secondaryBuffer[i] = 0
             }
-            for (let i = 0; i < typeBuffer.length; i++)
-                typeBuffer[i] = 0
         }
 
         const toLoopSize = lights.length
@@ -58,41 +57,42 @@ export default class LightsAPI {
                 break
             if (!current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
-            LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, typeBuffer, offset)
+            LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, offset)
 
             offset += 16
             size[sizeIndex] += 1
         }
         LightsAPI.lightsQuantity = size[0]
         if (LightsAPI.lightsQuantity > 0 || !keepOld) {
+            StaticUBOs.lightsUBO.bind()
+            StaticUBOs.lightsUBO.updateData("lightPrimaryBuffer", LightsAPI.primaryBuffer)
+            StaticUBOs.lightsUBO.updateData("lightSecondaryBuffer", LightsAPI.secondaryBuffer)
+            StaticUBOs.lightsUBO.unbind()
+
             StaticUBOs.uberUBO.bind()
-            StaticUBOs.uberUBO.updateData("lightPrimaryBuffer", LightsAPI.primaryBuffer)
-            StaticUBOs.uberUBO.updateData("lightSecondaryBuffer", LightsAPI.secondaryBuffer)
-            StaticUBOs.uberUBO.updateData("lightTypeBuffer", LightsAPI.typeBuffer)
-            StaticUBOs.uberUBO.updateData("lightQuantity", new Uint8Array([Math.min(LightsAPI.lightsQuantity, UberShader.MAX_LIGHTS)]))
+            quantity[0] = Math.min(LightsAPI.lightsQuantity, UberShader.MAX_LIGHTS)
+            StaticUBOs.uberUBO.updateData("lightQuantity", quantity)
             StaticUBOs.uberUBO.unbind()
         }
     }
 
-    static updateBuffer(entity: Entity, primaryBuffer: Float32Array, secondaryBuffer: Float32Array, typeBuffer: Uint8Array, offset: number) {
+    static updateBuffer(entity: Entity, primaryBuffer: Float32Array, secondaryBuffer: Float32Array, offset: number) {
         const component = entity.lightComponent
         const color = component.fixedColor
         const position = entity.absoluteTranslation
         const attenuation = component.attenuation
-        typeBuffer[offset] = component.type
+
+        primaryBuffer[offset] = component.type
+        primaryBuffer[offset + 1] = color[0]
+        primaryBuffer[offset + 2] = color[1]
+        primaryBuffer[offset + 3] = color[2]
+
+        primaryBuffer[offset + 4] = position[0]
+        primaryBuffer[offset + 5] = position[1]
+        primaryBuffer[offset + 6] = position[2]
 
         switch (component.type) {
             case LIGHT_TYPES.DIRECTIONAL: {
-                vec3.add(cacheVec3, position, <vec3>component.center)
-                const color = component.fixedColor
-
-                primaryBuffer[offset] = cacheVec3[0]
-                primaryBuffer[offset + 1] = cacheVec3[1]
-                primaryBuffer[offset + 2] = cacheVec3[2]
-
-                primaryBuffer[offset + 4] = color[0]
-                primaryBuffer[offset + 5] = color[1]
-                primaryBuffer[offset + 6] = color[2]
 
                 primaryBuffer[offset + 8] = component.atlasFace[0]
                 primaryBuffer[offset + 9] = component.atlasFace[1]
@@ -114,28 +114,17 @@ export default class LightsAPI {
                 break
             }
             case LIGHT_TYPES.POINT: {
-                primaryBuffer[offset] = position[0]
-                primaryBuffer[1 + offset] = position[1]
-                primaryBuffer[2 + offset] = position[2]
-
-                primaryBuffer[3 + offset] = component.shadowBias
-
-                primaryBuffer[4 + offset] = color[0]
-                primaryBuffer[5 + offset] = color[1]
-                primaryBuffer[6 + offset] = color[2]
-
                 primaryBuffer[7 + offset] = component.shadowSamples
-
                 primaryBuffer[8 + offset] = attenuation[0]
                 primaryBuffer[9 + offset] = attenuation[1]
-
                 primaryBuffer[10 + offset] = component.cutoff
-
                 primaryBuffer[11 + offset] = component.zNear
                 primaryBuffer[12 + offset] = component.zFar
                 primaryBuffer[13 + offset] = (component.shadowMap ? -1 : 1) * (component.hasSSS ? 2 : 1)
                 primaryBuffer[14 + offset] = component.shadowAttenuationMinDistance
                 primaryBuffer[15 + offset] = component.cutoff * component.smoothing
+
+                secondaryBuffer[0] = component.shadowBias
                 if (component.shadowMap)
                     OmnidirectionalShadows.lightsToUpdate.push(component)
                 break
@@ -144,14 +133,6 @@ export default class LightsAPI {
 
                 vec3.transformQuat(cacheVec3, position, entity._rotationQuat)
                 const radius = Math.cos(component.radius * toRad)
-
-                primaryBuffer[offset] = position[0]
-                primaryBuffer[1 + offset] = position[1]
-                primaryBuffer[2 + offset] = position[2]
-
-                primaryBuffer[4 + offset] = color[0]
-                primaryBuffer[5 + offset] = color[1]
-                primaryBuffer[6 + offset] = color[2]
 
                 primaryBuffer[8 + offset] = cacheVec3[0]
                 primaryBuffer[9 + offset] = cacheVec3[1]
@@ -168,15 +149,6 @@ export default class LightsAPI {
                 break
             }
             case LIGHT_TYPES.SPHERE: {
-
-                primaryBuffer[offset] = position[0]
-                primaryBuffer[1 + offset] = position[1]
-                primaryBuffer[2 + offset] = position[2]
-
-                primaryBuffer[4 + offset] = color[0]
-                primaryBuffer[5 + offset] = color[1]
-                primaryBuffer[6 + offset] = color[2]
-
                 primaryBuffer[8 + offset] = component.areaRadius
                 primaryBuffer[9 + offset] = 0
                 primaryBuffer[10 + offset] = 0
@@ -188,18 +160,9 @@ export default class LightsAPI {
 
                 primaryBuffer[14 + offset] = 0
                 primaryBuffer[15 + offset] = component.hasSSS ? 1 : 0
-
                 break
             }
             case LIGHT_TYPES.DISK: {
-                primaryBuffer[offset] = position[0]
-                primaryBuffer[1 + offset] = position[1]
-                primaryBuffer[2 + offset] = position[2]
-
-                primaryBuffer[4 + offset] = color[0]
-                primaryBuffer[5 + offset] = color[1]
-                primaryBuffer[6 + offset] = color[2]
-
                 primaryBuffer[8 + offset] = component.areaRadius
                 primaryBuffer[9 + offset] = attenuation[0]
                 primaryBuffer[10 + offset] = attenuation[1]

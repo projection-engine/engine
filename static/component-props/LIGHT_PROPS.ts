@@ -47,10 +47,6 @@ export default [
         Component.number("INTENSITY", "intensity", 100, 0),
     ]),
 
-    Component.group("CENTER_POINT", [
-        Component.array(["X", "Y", "Z"], "center",  undefined, undefined, undefined, false, undefined)
-    ], comp => comp.type !== LIGHT_TYPES.DIRECTIONAL),
-
     Component.group("ATTENUATION", [
         Component.array(["DISTANCE", "DISTANCE_SQUARED"], "attenuation",   undefined, undefined, 0),
     ], comp => comp.type === LIGHT_TYPES.DIRECTIONAL),

@@ -57,10 +57,11 @@ uniform UberShaderSettings {
     int maxStepsSSS;
     bool hasSkylight;
     bool hasAmbientOcclusion;
+};
 
+uniform Lights {
     mat4 lightPrimaryBuffer[MAX_LIGHTS];
     mat4 lightSecondaryBuffer[MAX_LIGHTS];
-    int lightTypeBuffer[MAX_LIGHTS];
 };
 
 uniform sampler2D scene_depth;
