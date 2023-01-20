@@ -1,6 +1,8 @@
+//import(MAX_LIGHTS)
+
 #define PI 3.14159265359
 #define FRAG_DEPTH_THRESHOLD .0001
-#define MAX_LIGHTS 310
+
 #define PARALLAX_THRESHOLD 200.
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9

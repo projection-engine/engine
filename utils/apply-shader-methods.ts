@@ -12,6 +12,7 @@ import BRDF_FUNCTIONS from "../shaders/uber-shader/lights/BRDF_FUNCTIONS.glsl"
 import STRONG_BLUR from "../shaders/functions/STRONG_BLUR.glsl"
 import UBER_ATTRIBUTES from "../shaders/uber-shader/ATTRIBUTES.glsl"
 import SSS from "../shaders/uber-shader/lights/SSS.glsl"
+import UberShader from "./UberShader";
 
 const METHODS = {
     cameraUBO: "//import(cameraUBO)",
@@ -27,7 +28,8 @@ const METHODS = {
     computeSpotLights: "//import(computeSpotLights)",
     computeAreaLights: "//import(computeAreaLights)",
     ppUBO: "//import(ppUBO)",
-    blur: "//import(blur)"
+    blur: "//import(blur)",
+    MAX_LIGHTS: "//import(MAX_LIGHTS)"
 }
 
 
@@ -39,6 +41,9 @@ export default function applyShaderMethods(shaderCode) {
             switch (true) {
                 case key === "computeAreaLights":
                     response = response.replaceAll(METHODS[key], COMPUTE_AREA_LIGHT)
+                    break
+                case key === "MAX_LIGHTS":
+                    response = response.replaceAll(METHODS[key], "#define MAX_LIGHTS " + UberShader.MAX_LIGHTS)
                     break
                 case key === "blur":
                     response = response.replaceAll(METHODS[key], STRONG_BLUR)
