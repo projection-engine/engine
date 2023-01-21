@@ -20,10 +20,13 @@ export default class Texture {
         this.attributes = attributes
         if (typeof img === "string") {
             if (img.includes("data:image/")) {
-                this.#image = <ImageBitmap | undefined>await ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {base64: img})
+                this.#image = <ImageBitmap | undefined>await ImageProcessor.request(IMAGE_WORKER_ACTIONS.IMAGE_BITMAP, {
+                    base64: img,
+                    compressionRatio: attributes.compressionRatio,
+                    resolutionScale: attributes.resolutionScale
+                })
                 this.attributes.height = this.#image.height
                 this.attributes.width = this.#image.width
-                this.texture = this.#initializeTexture()
             } else {
                 const i = new Image()
                 i.src = img
@@ -31,19 +34,13 @@ export default class Texture {
                 this.#image = i
                 this.attributes.height = i.naturalHeight
                 this.attributes.width = i.naturalWidth
-                this.texture = this.#initializeTexture()
             }
         } else {
             this.attributes.height = img.height
             this.attributes.width = img.width
             this.#image = img
         }
-        this.texture = this.#initializeTexture()
-        this.loaded = true
-        this.attributes = {}
-    }
 
-    #initializeTexture(): WebGLTexture | undefined {
         const {
             wrapS = TEXTURE_WRAPPING.REPEAT,
             wrapT = TEXTURE_WRAPPING.REPEAT,
@@ -55,18 +52,13 @@ export default class Texture {
             height,
             type = "UNSIGNED_BYTE"
         } = this.attributes
-
-        const newTexture = GPU.context.createTexture()
-
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, newTexture)
+        this.texture = GPU.context.createTexture()
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, this.texture)
         GPU.context.texImage2D(GPU.context.TEXTURE_2D, 0, GPU.context[internalFormat], width, height, 0, GPU.context[format], GPU.context[type], this.#image)
-
         GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_MIN_FILTER, GPU.context[minFilter])
         GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_MAG_FILTER, GPU.context[magFilter])
-
         GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_WRAP_S, GPU.context[wrapS]);
         GPU.context.texParameteri(GPU.context.TEXTURE_2D, GPU.context.TEXTURE_WRAP_T, GPU.context[wrapT]);
-
         if (minFilter === TEXTURE_FILTERING.MIN.LINEAR_MIPMAP_LINEAR) {
             const anisotropicEXT = GPU.context.getExtension("EXT_texture_filter_anisotropic")
             const anisotropicAmountMin = 8
@@ -74,9 +66,11 @@ export default class Texture {
             GPU.context.texParameterf(GPU.context.TEXTURE_2D, anisotropicEXT.TEXTURE_MAX_ANISOTROPY_EXT, anisotropicAmount)
             GPU.context.generateMipmap(GPU.context.TEXTURE_2D)
         }
-
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, null)
-        return newTexture
+        if (this.#image instanceof ImageBitmap)
+            this.#image.close()
+        this.#image = null
+        this.loaded = true
     }
 
     update(attributes: TextureParams) {

@@ -11,6 +11,8 @@ interface TextureParams {
     width?: number
     height?: number
     type?: string
+    compressionRatio?: number,
+    resolutionScale?: number
 }
 
 export default TextureParams

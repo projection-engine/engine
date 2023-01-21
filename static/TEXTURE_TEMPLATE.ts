@@ -8,4 +8,6 @@ export default {
     magFilter: "LINEAR",
     internalFormat: "RGB",
     format: "RGB",
+    compressionRatio: 1,
+    resolutionScale: 1
 }

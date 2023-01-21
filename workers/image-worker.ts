@@ -17,9 +17,7 @@ self.onmessage = async ({data: {type, data, id}}) => {
                     const canvas = new OffscreenCanvas(widthF, heightF),
                         ctx = canvas.getContext("2d")
 
-                    // @ts-ignore
                     ctx.drawImage(imageToLoad, 0, 0, widthF, heightF)
-                    // @ts-ignore
                     const canvasBlob = await canvas.convertToBlob({
                         type: "image/png",
                         quality: quality
@@ -30,18 +28,43 @@ self.onmessage = async ({data: {type, data, id}}) => {
                 }
                 break
             }
+
+            case IMAGE_WORKER_ACTIONS.IMAGE_BITMAP: {
+                const compressionRatio = data.compressionRatio || 1
+                const base64 = data.base64
+                const resolutionScale = data.resolutionScale || 1
+                console.trace(resolutionScale, compressionRatio)
+                const content = base64.split(";base64,")[1]
+
+                const buffer = Buffer.from(content, "base64")
+                const blob = new Blob([buffer], {type: "base64"})
+                let bitmap = await createImageBitmap(blob)
+                if (compressionRatio < 1 || resolutionScale < 1) {
+                    const W = bitmap.width * resolutionScale, H = bitmap.height * resolutionScale
+                    const canvas = new OffscreenCanvas(W, H),
+                        ctx = canvas.getContext("2d")
+
+                    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+
+                    const canvasBlob = await canvas.convertToBlob({
+                        type: "image/webp",
+                        quality: compressionRatio,
+                    })
+                    bitmap = await createImageBitmap(canvasBlob)
+                }
+
+                self.postMessage({data: bitmap, id})
+                break
+            }
             case IMAGE_WORKER_ACTIONS.COLOR_TO_IMAGE: {
                 const {
                     color,
                     resolution
                 } = data
                 const c = new OffscreenCanvas(resolution, resolution)
-                let ctx = c.getContext("2d")
-                // @ts-ignore
+                const ctx = c.getContext("2d")
                 ctx.fillStyle = typeof color === "string" ? color : "rgba(" + color[0] + "," + color[1] + "," + color[2] + "," + color[3] + ")"
-                // @ts-ignore
                 ctx.fillRect(0, 0, resolution, resolution)
-                // @ts-ignore
                 const canvasBlob = await c.convertToBlob({
                     type: "image/png",
                     quality: .1
@@ -52,21 +75,11 @@ self.onmessage = async ({data: {type, data, id}}) => {
 
                 break
             }
-            case IMAGE_WORKER_ACTIONS.IMAGE_BITMAP: {
-                const {base64, onlyData} = data
-                const b = onlyData ? base64 : base64.split(";base64,")[1]
-                // @ts-ignore
-                const buffer = Buffer.from(b, "base64")
-                const blob = new Blob([buffer], {type: "base64"})
-                const bitmap = await createImageBitmap(blob)
-                self.postMessage({data: bitmap, id})
-                break
-            }
             case IMAGE_WORKER_ACTIONS.NOISE_DATA: {
                 const {w, h} = data
 
                 const KERNEL_SIZE = 64
-                const kernels = new Float32Array(new ArrayBuffer( KERNEL_SIZE * 4 * 4))
+                const kernels = new Float32Array(new ArrayBuffer(KERNEL_SIZE * 4 * 4))
                 let offset = 0
                 for (let i = 0; i < KERNEL_SIZE; i++) {
                     const scale = i / KERNEL_SIZE
