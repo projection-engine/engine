@@ -66,7 +66,6 @@ export default class Engine {
         FileSystemAPI.initialize(readAsset, readMetadata)
         FrameComposition.initialize()
         await SSAO.initialize()
-        SSGI.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
 
@@ -111,8 +110,6 @@ export default class Engine {
 
         SSGI.blurSamples = SSGISettings.blurSamples || 5
         SSGI.blurRadius = SSGISettings.blurRadius || 5
-        SSGI.ssgiColorGrading[0] = SSGISettings.gamma || 2.2
-        SSGI.ssgiColorGrading[1] = SSGISettings.exposure || 1
 
         SSGI.rayMarchSettings[0] = SSGISettings.stepSize || 1
         SSGI.rayMarchSettings[1] = SSGISettings.maxSteps || 4

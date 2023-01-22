@@ -57,8 +57,7 @@ void main(){
 
 
     vec3 normal = cosHemisphereSample(worldNormal);
-    float gamma = ssgiColorGrading.x;
-    float exposure = ssgiColorGrading.y;
+
     vec3 reflected = normalize(reflect(normalize(viewPos), normal));
 
     vec3 hitPos = viewPos;
@@ -67,14 +66,11 @@ void main(){
     vec4 coords = RayMarch(maxSteps, normal, hitPos, step, texCoords);
 
     vec4 tracedAlbedo = texture(previousFrame, coords.xy);
-    vec3 SSGI = tracedAlbedo.rgb;
-    SSGI = vec3(1.0) - exp(-SSGI * exposure);
-    SSGI = pow(SSGI, vec3(1.0/gamma));
 
     vec2 dCoords = smoothstep(CLAMP_MIN, CLAMP_MAX, abs(vec2(0.5) - coords.xy));
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
     float reflectionMultiplier = screenEdgefactor * -reflected.z;
 
-    fragColor = vec4(SSGI * clamp(reflectionMultiplier, 0.0, 1.) * intensity, 1.);
+    fragColor = vec4(tracedAlbedo.rgb * clamp(reflectionMultiplier, 0.0, 1.) * intensity, 1.);
 }
 

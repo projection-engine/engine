@@ -24,13 +24,7 @@ export default class SSGI {
     static blurSamples = 5
     static blurRadius = 5
     static enabled = true
-    static ssgiColorGrading = new Float32Array(2)
     static rayMarchSettings = new Float32Array(3)
-
-    static initialize() {
-        SSGI.ssgiColorGrading[0] = 2.2
-        SSGI.ssgiColorGrading[1] = 1
-    }
 
     static execute() {
         if (!SSGI.enabled) {
@@ -42,19 +36,19 @@ export default class SSGI {
         }
         cleared = false
         const context = GPU.context
+        const uniforms = StaticShaders.ssgiUniforms
         StaticFBO.ssgi.startMapping()
         StaticShaders.ssgi.bind()
 
         context.activeTexture(context.TEXTURE0)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
-        context.uniform1i(StaticShaders.ssgiUniforms.scene_depth, 0)
+        context.uniform1i(uniforms.scene_depth, 0)
 
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.postProcessing2Sampler)
-        context.uniform1i(StaticShaders.ssgiUniforms.previousFrame, 1)
+        context.uniform1i(uniforms.previousFrame, 1)
 
-        context.uniform2fv(StaticShaders.ssgiUniforms.ssgiColorGrading, SSGI.ssgiColorGrading)
-        context.uniform3fv(StaticShaders.ssgiUniforms.rayMarchSettings, SSGI.rayMarchSettings)
+        context.uniform3fv(uniforms.rayMarchSettings, SSGI.rayMarchSettings)
 
         StaticMeshes.drawQuad()
         SSGI.#applyBlur(context, StaticFBO.ssgiFallback, StaticFBO.ssgiSampler, true)
