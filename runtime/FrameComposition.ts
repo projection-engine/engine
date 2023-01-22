@@ -4,6 +4,8 @@ import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import StaticUBOs from "../lib/StaticUBOs";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 
 export default class FrameComposition {
@@ -28,13 +30,9 @@ export default class FrameComposition {
         return ++FrameComposition.lookUpIndex >= FrameComposition.lookUpRandom.length ? FrameComposition.lookUpRandom[FrameComposition.lookUpIndex = 0] : FrameComposition.lookUpRandom[FrameComposition.lookUpIndex]
     }
 
-    static copyPreviousFrame() {
-        // if (FrameComposition.AAMethodInUse !== AA_METHODS.TAA)
-        //     return
-        // GPUAPI.copyTexture(StaticFBO.cache, StaticFBO.currentFrame, GPU.context.COLOR_BUFFER_BIT)
-    }
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.FRAME_COMPOSITION
         const context = GPU.context
         const shader = StaticShaders.composition, uniforms = StaticShaders.compositionUniforms
 
@@ -45,11 +43,6 @@ export default class FrameComposition {
         context.bindTexture(context.TEXTURE_2D, StaticFBO.lensSampler)
         context.uniform1i(uniforms.currentFrame, 0)
 
-        if (FrameComposition.AAMethodInUse === AA_METHODS.TAA) {
-            // context.activeTexture(context.TEXTURE1)
-            // context.bindTexture(context.TEXTURE_2D, StaticFBO.TAACacheSampler)
-            // context.uniform1i(uniforms.previousFrame, 1)
-        }
 
         context.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
         StaticMeshes.drawQuad()

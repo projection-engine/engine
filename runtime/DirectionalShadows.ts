@@ -4,6 +4,8 @@ import StaticShaders from "../lib/StaticShaders";
 import StaticUBOs from "../lib/StaticUBOs";
 import ResourceEntityMapper from "../lib/ResourceEntityMapper";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 
 let lightsToUpdate
@@ -39,6 +41,7 @@ export default class DirectionalShadows {
 
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.DIRECTIONAL_SHADOWS
         if (!DirectionalShadows.changed && lightsToUpdate.length === 0)
             return;
         GPU.context.cullFace(GPU.context.FRONT)

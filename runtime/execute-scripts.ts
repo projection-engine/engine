@@ -1,7 +1,10 @@
 import Engine from "../Engine";
 import ScriptsAPI from "../lib/utils/ScriptsAPI";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 export default function executeScripts() {
+    MetricsController.currentState = METRICS_FLAGS.SCRIPT
     const scripts = ScriptsAPI.mountedScripts
     const size = scripts.length
     if (size === 0)

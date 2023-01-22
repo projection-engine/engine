@@ -26,36 +26,29 @@ const singleFloatBuffer = new Float32Array(1)
 
 export default class Engine {
     static #development = false
-
-    static get developmentMode() {
-        return Engine.#development
-    }
-
     static queryMap = new Map<string, Entity>()
     static UILayouts = new Map()
     static isDev = true
     static entities = new DynamicMap<Entity>()
-
     static #environment: number = ENVIRONMENT.DEV
+    static params = {}
+    static elapsed = 0
+    static frameID
+    static isReady = false
+    static #initialized = false
 
+    static get developmentMode() {
+        return Engine.#development
+    }
     static get environment(): number {
         return Engine.#environment
     }
-
     static set environment(data: number) {
         Engine.isDev = data === ENVIRONMENT.DEV
         Engine.#environment = data
         if (Engine.isDev)
             CameraAPI.updateAspectRatio()
     }
-
-    static params = {}
-    static elapsed = 0
-    static frameID
-    static isReady = false
-    static benchmarkMode = false
-    static #initialized = false;
-
     static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata: Function, devAmbient: boolean) {
         if (Engine.#initialized)
             return

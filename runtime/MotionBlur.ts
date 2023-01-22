@@ -2,6 +2,8 @@ import GPU from "../GPU";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 
 export default class MotionBlur {
@@ -10,6 +12,7 @@ export default class MotionBlur {
     static enabled = false
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.MOTION_BLUR
         if (!MotionBlur.enabled)
             return
         StaticFBO.postProcessing1.startMapping()

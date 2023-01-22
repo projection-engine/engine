@@ -5,6 +5,8 @@ import UberShader from "../utils/UberShader";
 import ResourceEntityMapper from "../lib/ResourceEntityMapper";
 import SceneRenderer from "./SceneRenderer";
 import Loop from "../Loop";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 
 export default class SceneComposition {
@@ -14,6 +16,7 @@ export default class SceneComposition {
     static transparenciesToLoopThrough = 0
 
     static execute() {
+
         const shader = UberShader.uber
         if (!shader)
             return
@@ -26,19 +29,20 @@ export default class SceneComposition {
         SceneRenderer.bindGlobalResources(context, uniforms)
         SceneComposition.transparenciesToLoopThrough = 0
         StaticFBO.postProcessing2.startMapping()
+        MetricsController.currentState = METRICS_FLAGS.OPAQUE
         SceneRenderer.drawMeshes(true, false, context, meshes, uniforms)
-
         context.disable(context.CULL_FACE)
-
         context.disable(context.DEPTH_TEST)
+        MetricsController.currentState = METRICS_FLAGS.DECAL
         SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, uniforms)
         context.enable(context.DEPTH_TEST)
-
+        MetricsController.currentState = METRICS_FLAGS.SPRITE
         SceneRenderer.drawSprites()
         context.enable(context.CULL_FACE)
         StaticFBO.postProcessing2.stopMapping()
 
         if (SceneComposition.transparenciesToLoopThrough > 0) {
+            MetricsController.currentState = METRICS_FLAGS.TRANSPARENCY
             Loop.copyToCurrentFrame()
 
             StaticFBO.postProcessing2.use()

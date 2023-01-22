@@ -3,6 +3,8 @@ import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import StaticUBOs from "../lib/StaticUBOs";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 const RESOLUTION = 4
 
@@ -63,6 +65,7 @@ export default class SSAO {
     }
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.SSAO
         if (!SSAO.enabled)
             return
 

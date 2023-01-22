@@ -10,6 +10,8 @@ import type Entity from "../instances/Entity";
 import ResourceEntityMapper from "../lib/ResourceEntityMapper";
 import StaticMeshes from "../lib/StaticMeshes";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 const entityMetadata = new Float32Array(16)
 let  context, toRender:Entity[], size, uniforms, VP
@@ -17,6 +19,7 @@ export default class VisibilityRenderer {
     static needsUpdate = true
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.VISIBILITY
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
 

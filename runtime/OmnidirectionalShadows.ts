@@ -6,6 +6,8 @@ import GPU from "../GPU";
 import StaticShaders from "../lib/StaticShaders";
 import ResourceEntityMapper from "../lib/ResourceEntityMapper";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 const cacheVec3 = vec3.create()
 const cacheMat4 = mat4.create()
@@ -24,6 +26,7 @@ export default class OmnidirectionalShadows {
     }
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.OMNIDIRECTIONAL_SHADOWS
         if (!OmnidirectionalShadows.changed && lightsToUpdate.length === 0)
             return;
 

@@ -10,8 +10,8 @@ import Physics from "./runtime/Physics";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import OmnidirectionalShadows from "./runtime/OmnidirectionalShadows";
 import CameraAPI from "./lib/utils/CameraAPI";
-import BenchmarkAPI from "./lib/utils/BenchmarkAPI";
-import BENCHMARK_KEYS from "./static/BENCHMARK_KEYS";
+import MetricsController from "./lib/utils/MetricsController";
+
 import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightsAPI from "./lib/utils/LightsAPI";
 import SceneComposition from "./runtime/SceneComposition";
@@ -20,11 +20,6 @@ import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
 
 let previous = 0
-const timer = (flag: string, target: Function) => {
-    BenchmarkAPI.track(flag)
-    target()
-    BenchmarkAPI.endTrack(flag)
-}
 
 export default class Loop {
     static #afterDrawing?: Function = () => null
@@ -40,32 +35,12 @@ export default class Loop {
         GPUAPI.copyTexture(StaticFBO.postProcessing1, StaticFBO.postProcessing2, GPU.context.COLOR_BUFFER_BIT)
     }
 
-    static #benchmarkMode() {
-        FrameComposition.copyPreviousFrame()
 
-        timer(BENCHMARK_KEYS.PHYSICS_PASS, Physics.execute)
-
-        timer(BENCHMARK_KEYS.DIRECTIONAL_SHADOWS, DirectionalShadows.execute)
-
-        timer(BENCHMARK_KEYS.OMNIDIRECTIONAL_SHADOWS, OmnidirectionalShadows.execute)
-
-        timer(BENCHMARK_KEYS.VISIBILITY_BUFFER, VisibilityRenderer.execute)
-
-        timer(BENCHMARK_KEYS.FORWARD_PASS, SceneComposition.execute)
-
-        Loop.#afterDrawing()
-        Loop.copyToCurrentFrame()
-
-        timer(BENCHMARK_KEYS.SSGI, SSGI.execute)
-        timer(BENCHMARK_KEYS.POST_PROCESSING, LensPostProcessing.execute)
-        timer(BENCHMARK_KEYS.FRAME_COMPOSITION, FrameComposition.execute)
-    }
 
     static #callback() {
+        MetricsController.init()
         if (!Engine.isDev)
             executeScripts()
-        FrameComposition.copyPreviousFrame()
-
         Physics.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
@@ -78,6 +53,7 @@ export default class Loop {
         SSGI.execute()
         LensPostProcessing.execute()
         FrameComposition.execute()
+        MetricsController.end()
     }
 
 
@@ -90,15 +66,7 @@ export default class Loop {
             const transformationChanged = EntityWorkerAPI.hasChangeBuffer[0]
             if (transformationChanged === 1)
                 LightsAPI.packageLights(false, true)
-
-            if (!Engine.benchmarkMode)
-                Loop.#callback()
-            else {
-                BenchmarkAPI.track(BENCHMARK_KEYS.ALL)
-                Loop.#benchmarkMode()
-                BenchmarkAPI.endTrack(BENCHMARK_KEYS.ALL)
-            }
-
+            Loop.#callback()
             if (transformationChanged === 1)
                 EntityWorkerAPI.hasChangeBuffer[0] = 0
 

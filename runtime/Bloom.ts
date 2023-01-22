@@ -4,6 +4,8 @@ import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import StaticMeshes from "../lib/StaticMeshes";
 import Framebuffer from "../instances/Framebuffer";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 export default class Bloom {
     static #upSample(fbo: Framebuffer, context: WebGL2RenderingContext, nextSampler: WebGLTexture, blurredSampler: WebGLTexture) {
@@ -22,6 +24,7 @@ export default class Bloom {
     }
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.BLOOM
         const context = GPU.context
         if (!CameraAPI.metadata.bloom)
             return

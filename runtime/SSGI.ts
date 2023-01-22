@@ -4,6 +4,8 @@ import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import CameraAPI from "../lib/utils/CameraAPI";
 import Framebuffer from "../instances/Framebuffer";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 /**
  * rayMarchSettings definition:
@@ -27,6 +29,7 @@ export default class SSGI {
     static rayMarchSettings = new Float32Array(3)
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.SSGI
         if (!SSGI.enabled) {
             if (!cleared) {
                 StaticFBO.ssgi.clear()

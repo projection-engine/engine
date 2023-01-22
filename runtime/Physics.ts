@@ -1,11 +1,14 @@
 import Engine from "../Engine";
 import PhysicsAPI from "../lib/rendering/PhysicsAPI";
+import MetricsController from "../lib/utils/MetricsController";
+import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 export default class Physics {
     static simulationStep = 0.01666666
     static subSteps = 10
 
     static execute() {
+        MetricsController.currentState = METRICS_FLAGS.PHYSICS
         if (Engine.isDev || !PhysicsAPI.ammo)
             return
 
