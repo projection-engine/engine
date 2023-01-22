@@ -21,6 +21,7 @@ export default class MaterialAPI {
             counter++
         }
     }
+
     static registerMaterial(material) {
         if (material.bindID > -1)
             return
@@ -88,17 +89,23 @@ export default class MaterialAPI {
     static async mapUniforms(data: MaterialUniform[], texturesInUse: TextureInUse, uniformValues: MutableObject) {
         if (!Array.isArray(data))
             return
+
+        Object.keys(texturesInUse).forEach((key) => delete texturesInUse[key])
+        Object.keys(uniformValues).forEach((key) => delete uniformValues[key])
+
         for (let i = 0; i < data.length; i++) {
             const currentUniform = data[i]
             if (currentUniform.type === DATA_TYPES.TEXTURE) {
                 const textureID = currentUniform.data
+                console.trace(texturesInUse, textureID)
                 if (texturesInUse[textureID] || !FileSystemAPI.isReady)
                     continue
                 try {
                     const exists = GPU.textures.get(textureID)
+                    console.trace(exists, textureID)
                     if (exists) {
                         texturesInUse[textureID] = {texture: exists, key: currentUniform.key}
-                        uniformValues[currentUniform.key] = exists.texture
+                        uniformValues[currentUniform.key] = exists
                     } else {
                         const asset = await FileSystemAPI.readAsset(textureID)
                         if (asset) {

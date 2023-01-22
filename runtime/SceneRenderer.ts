@@ -101,6 +101,8 @@ export default class SceneRenderer {
             for (let j = 0; j < toBind.length; j++) {
                 const current = toBind[j]
                 const dataAttribute = data[current.key]
+                if(!dataAttribute)
+                    continue
                 if (current.type === "sampler2D")
                     Shader.bind(uniforms[current.key], dataAttribute.texture, current.type, texOffset, () => texOffset++)
                 else

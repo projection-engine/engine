@@ -66,6 +66,7 @@ export default class Texture {
             GPU.context.texParameterf(GPU.context.TEXTURE_2D, anisotropicEXT.TEXTURE_MAX_ANISOTROPY_EXT, anisotropicAmount)
             GPU.context.generateMipmap(GPU.context.TEXTURE_2D)
         }
+        this.attributes = null
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, null)
         if (this.#image instanceof ImageBitmap)
             this.#image.close()
