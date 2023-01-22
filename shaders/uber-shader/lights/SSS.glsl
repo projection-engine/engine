@@ -1,8 +1,6 @@
-vec4 getFragDepth(vec2 coords){
+float getFragDepth(vec2 coords){
     vec4 D = textureLod(scene_depth, coords, 2.);
-    if(D.a < 1.)
-        return vec4(0.);
-    return vec4(viewSpacePositionFromDepth(D.r, quadUV), 1.);
+    return viewSpacePositionFromDepth(D.r, quadUV).z;
 }
 
 float screenSpaceShadows(vec3 lightDirection){
@@ -14,7 +12,7 @@ float screenSpaceShadows(vec3 lightDirection){
     vec4 rayUV = vec4(0.);
     vec3 rayPosition = viewSpacePosition;
 
-    rayPosition += rayStepIncrement * interleavedGradientNoise(quadUV);
+    rayPosition += rayStepIncrement * interleavedGradientNoise(texCoords * bufferResolution);
 
     for (int i = 0; i < maxSteps; i++) {
         rayPosition += rayStepIncrement;
@@ -26,10 +24,8 @@ float screenSpaceShadows(vec3 lightDirection){
         bool isSaturated = rayUV.x == clamp(rayUV.x, 0., 1.) && rayUV.y == clamp(rayUV.y, 0., 1.);
         if (!isSaturated) return 1.;
 
-        vec4 localDepth = getFragDepth(rayUV.xy);
-        if(localDepth.w == 0.) return 1.;
-
-        float currentDepthDelta = rayPosition.z - localDepth.z;
+        float localDepth = getFragDepth(rayUV.xy);
+        float currentDepthDelta = rayPosition.z - localDepth;
         bool isOccludedByOther = currentDepthDelta > SSSDepthDelta && currentDepthDelta < SSSDepthThickness;
 
         if (isOccludedByOther){
