@@ -157,21 +157,13 @@ void isotropicCompute(inout vec3 dEnergy, inout vec3 specularTotal, inout vec3 L
     dEnergy *= getDiffuse(F, metallic);
 }
 
-// "Beyond a Simple Physically Based Blinn-Phong Model in Real-Time" https://blog.selfshadow.com/publications/s2012-shading-course/gotanda/s2012_pbs_beyond_blinn_slides_v3.pdf
-vec3 computeDiffuseContribution(float NdotL, float HdotV) {
-    float s2 = pow(roughness, 4.);
-    float VoL = 2. * pow(HdotV, 2.) - 1.;
-    float consineRI = VoL - NdotV * NdotL;
-    float C1 = 1. - 0.5 * s2 / (s2 + 0.33);
-    float C2 = 0.45 * s2 / (s2 + 0.09) * consineRI * (consineRI >= 0. ? 1. / (max(NdotL, NdotV + 0.0001)) : 1.);
-    return albedoOverPI * (C1 + C2) * (1. + roughness * 0.5);
-}
+
 
 vec3 computeBRDF(inout vec3 L, float NdotL, inout vec3 lightColor) {
     vec3 H = normalize(V + L);
     float HdotV = clamp(dot(H, V), 0., 1.);
     float NdotH = clamp(dot(N, H), 0., 1.);
-    vec3 diffuseTotal = computeDiffuseContribution(NdotL, HdotV);
+
     vec3 specularTotal = vec3(0.);
     vec3 diffuseEnergy = vec3(1.);
 
@@ -192,6 +184,6 @@ vec3 computeBRDF(inout vec3 L, float NdotL, inout vec3 lightColor) {
             break;
     }
 
-    return (diffuseTotal * diffuseEnergy + specularTotal) * lightColor;
+    return (albedoOverPI * diffuseEnergy + specularTotal) * lightColor * NdotL;
 }
 

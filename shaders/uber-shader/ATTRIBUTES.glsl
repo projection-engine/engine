@@ -28,7 +28,6 @@
 in mat4 matAttr;
 in vec2 naturalTextureUV;
 in vec3 naturalNormal;
-
 in vec3 worldPosition;
 in mat4 invModelMatrix;
 
@@ -176,25 +175,47 @@ void extractData() {
 
 
 void computeTBN() {
-    if (!hasTBNComputed){
+    if (!hasTBNComputed) {
         hasTBNComputed = true;
-        vec3 N = abs(normalVec);
-        if (N.z > N.x && N.z > N.y)
-        T = vec3(1., 0., 0.);
-        else
-        T = vec3(0., 0., 1.);
-        T = normalize(T - N * dot(T, N));
-        B = cross(T, N);
-        TBN = mat3(T, B, N);
+        if (isDecalPass) {
+            vec3 N = abs(normalVec);
+            if (N.z > N.x && N.z > N.y)
+            T = vec3(1., 0., 0.);
+            else
+            T = vec3(0., 0., 1.);
+            T = normalize(T - N * dot(T, N));
+            B = cross(T, N);
+            TBN = mat3(T, B, N);
+            return;
+        }
+        vec3 dp1 = dFdx(worldPosition);
+        vec3 dp2 = dFdy(worldPosition);
+        vec2 duv1 = dFdx(naturalTextureUV);
+        vec2 duv2 = dFdy(naturalTextureUV);
+
+        vec3 dp2perp = cross(dp2, naturalNormal);
+        vec3 dp1perp = cross(naturalNormal, dp1);
+        vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+        vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+
+        float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
+        TBN = mat3(T * invmax, B * invmax, naturalNormal);
     }
 }
 
-vec2 parallaxOcclusionMapping(vec2 texCoords, vec3 viewDir, bool discardOffPixes, sampler2D heightMap, float heightScale, float layers) {
+vec2 parallaxOcclusionMapping(sampler2D heightMap, float heightScale, int layers) {
     if (distanceFromCamera > PARALLAX_THRESHOLD) return texCoords;
-    float layerDepth = 1.0 / layers;
+    computeTBN();
+    mat3 transposed = transpose(TBN);
+    if (!hasViewDirectionComputed) {
+        viewDirection = normalize(transposed * (cameraPosition - worldSpacePosition.xyz));
+        hasViewDirectionComputed = true;
+    }
+    float fLayers = float(max(layers, 1));
+    float layerDepth = 1.0 / fLayers;
     float currentLayerDepth = 0.0;
-    vec2 P = viewDir.xy / viewDir.z * heightScale;
-    vec2 deltaTexCoords = P / layers;
+    vec2 P = viewDirection.xy / viewDirection.z * max(heightScale, .00000001);
+    vec2 deltaTexCoords = P / fLayers;
 
     vec2 currentUVs = texCoords;
     float currentDepthMapValue = texture(heightMap, currentUVs).r;

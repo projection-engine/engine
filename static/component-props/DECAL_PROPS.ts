@@ -34,7 +34,7 @@ export default [
 
     Component.group("ANISOTROPIC_PARAMS", [
         Component.number("ROTATION", "anisotropicRotation"),
-        Component.number("ANISOTROPY", "anisotropy")
+        Component.number("ANISOTROPY", "anisotropy", 1, 0)
     ], comp => comp.renderingMode !== MATERIAL_RENDERING_TYPES.ANISOTROPIC),
 
     Component.group("ALBEDO", [

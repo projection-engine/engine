@@ -9,6 +9,7 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 skyProjectionMatrix;
 uniform mat4 materialAttributes;
+uniform bool isDecalPass;
 
 out vec3 naturalNormal;
 out vec3 worldPosition;
@@ -43,7 +44,7 @@ void main(){
     }else{
         wPosition = modelMatrix * wPosition;
 
-        invModelMatrix = inverse(modelMatrix);
+        invModelMatrix = isDecalPass ? inverse(modelMatrix) : mat4(0.);
         worldPosition = wPosition.xyz;
         naturalNormal = normalize(mat3(modelMatrix) * normal);
         naturalTextureUV = uvTexture;
