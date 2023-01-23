@@ -29,25 +29,27 @@ export default class SceneComposition {
         SceneRenderer.bindGlobalResources(context, uniforms)
         SceneComposition.transparenciesToLoopThrough = 0
         StaticFBO.postProcessing2.startMapping()
-        MetricsController.currentState = METRICS_FLAGS.OPAQUE
+
         SceneRenderer.drawMeshes(true, false, context, meshes, uniforms)
+        MetricsController.currentState = METRICS_FLAGS.OPAQUE
         context.disable(context.CULL_FACE)
         context.disable(context.DEPTH_TEST)
-        MetricsController.currentState = METRICS_FLAGS.DECAL
         SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, uniforms)
+        MetricsController.currentState = METRICS_FLAGS.DECAL
         context.enable(context.DEPTH_TEST)
-        MetricsController.currentState = METRICS_FLAGS.SPRITE
         SceneRenderer.drawSprites()
+        MetricsController.currentState = METRICS_FLAGS.SPRITE
         context.enable(context.CULL_FACE)
         StaticFBO.postProcessing2.stopMapping()
 
         if (SceneComposition.transparenciesToLoopThrough > 0) {
-            MetricsController.currentState = METRICS_FLAGS.TRANSPARENCY
             Loop.copyToCurrentFrame()
 
             StaticFBO.postProcessing2.use()
             SceneRenderer.drawMeshes(false, false, context, meshes, uniforms)
             StaticFBO.postProcessing2.stopMapping()
+
+            MetricsController.currentState = METRICS_FLAGS.TRANSPARENCY
         }
 
     }

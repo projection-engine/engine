@@ -8,7 +8,6 @@ export default class Physics {
     static subSteps = 10
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.PHYSICS
         if (Engine.isDev || !PhysicsAPI.ammo)
             return
 
@@ -43,6 +42,7 @@ export default class Physics {
             q[3] = quaternion.w()
 
             current.__changedBuffer[0] = 1
+            MetricsController.currentState = METRICS_FLAGS.PHYSICS
         }
     }
 }

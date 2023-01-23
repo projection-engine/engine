@@ -32,7 +32,7 @@ export default class FrameComposition {
 
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.FRAME_COMPOSITION
+
         const context = GPU.context
         const shader = StaticShaders.composition, uniforms = StaticShaders.compositionUniforms
 
@@ -46,6 +46,6 @@ export default class FrameComposition {
 
         context.uniform1f(uniforms.filmGrainSeed, FrameComposition.currentNoise)
         StaticMeshes.drawQuad()
-
+        MetricsController.currentState = METRICS_FLAGS.FRAME_COMPOSITION
     }
 }

@@ -12,7 +12,7 @@ export default class MotionBlur {
     static enabled = false
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.MOTION_BLUR
+
         if (!MotionBlur.enabled)
             return
         StaticFBO.postProcessing1.startMapping()
@@ -23,13 +23,15 @@ export default class MotionBlur {
         GPU.context.uniform1i(uniforms.currentFrame, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.visibilityVelocitySampler)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.velocitySampler)
         GPU.context.uniform1i(uniforms.gVelocity, 1)
+        GPU.context.uniform2fv(uniforms.bufferResolution,  StaticFBO.visibility.resolution)
 
         GPU.context.uniform1f(uniforms.velocityScale, MotionBlur.velocityScale)
         GPU.context.uniform1i(uniforms.maxSamples, MotionBlur.maxSamples)
 
         StaticMeshes.drawQuad()
         StaticFBO.postProcessing1.stopMapping()
+        MetricsController.currentState = METRICS_FLAGS.MOTION_BLUR
     }
 }

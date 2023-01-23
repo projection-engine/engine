@@ -16,8 +16,8 @@ float interleavedGradientNoise(vec2 n) {
 }
 
 void main() {
-    vec4 root = texture(entityIDSampler, texCoords);
-    if (root.a < 1.) discard;
+    vec2 root = texture(entityIDSampler, texCoords).rg;
+    if (length(root) ==0.) discard;
 
     const float GOLDEN_ANGLE = 2.3999632297286533222315555066336;
     const float PI2 = 6.283185307179586476925286766559;
@@ -31,7 +31,7 @@ void main() {
         float I = float(i);
         float a = I * GOLDEN_ANGLE + bias;
         vec2 p = blurRadius * sqrt(I / samplesFloat) * vec2(cos(a), ar * sin(a)) * 0.002;
-        if (root.rgb == texture(entityIDSampler, texCoords + p).rgb)
+        if (root == texture(entityIDSampler, texCoords + p).rg)
         accum += texture(sceneColor, texCoords + p).rgb;
 
     }

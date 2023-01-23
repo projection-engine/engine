@@ -17,7 +17,7 @@ export default class Entity extends ComponentAbstract {
     children: Entity[] = []
     parent?: Entity
     parentCache?: string
-    #pickID: [number, number, number] = [-1, -1, -1]
+    #pickID = new Float32Array(3)
     #pickIndex: number = -1
 
     constructor(id = crypto.randomUUID(), name = "Empty entity", active = true) {
@@ -28,12 +28,12 @@ export default class Entity extends ComponentAbstract {
         this.queryKey = id.slice(0, id.length / 2);
     }
 
-    set pickID(data) {
-        this.#pickID = data
-        this.#pickIndex = data[0] * 255 + data[1] * 255 + data[2] * 255
+     setPickID(data:number[]) {
+        data.forEach((v, i) => this.#pickID[i] = v)
+        this.#pickIndex = (data[0]  + data[1] + data[2]) * 255
     }
-
-    get pickID() {
+    set pickID(_) {}
+    get pickID():Float32Array {
         return this.#pickID
     }
 

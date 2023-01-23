@@ -24,7 +24,7 @@ export default class Bloom {
     }
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.BLOOM
+
         const context = GPU.context
         if (!CameraAPI.metadata.bloom)
             return
@@ -64,6 +64,7 @@ export default class Bloom {
             Bloom.#upSample(fbo, context, i > 0 ? upscale[i - 1].colors[0] : undefined, downscale[downscale.length - 1 - i].colors[0])
         }
         Bloom.#upSample(StaticFBO.postProcessing2, context, StaticFBO.postProcessing1Sampler, upscale[upscale.length - 1].colors[0])
+        MetricsController.currentState = METRICS_FLAGS.BLOOM
     }
 
 }

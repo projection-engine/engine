@@ -25,7 +25,15 @@ export default class QueryAPI {
         if (id === 0)
             return
         const entities = Engine.entities.array
-        return entities.find(e => e?.pickIndex === id)
+        const size = entities.length
+        for(let i = 0; i < size; i++){
+            const current = entities[i]
+            if(!current.active)
+                continue
+            console.log(current.pickIndex)
+            if(current.pickIndex === id)
+                return current
+        }
     }
 
 }

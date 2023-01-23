@@ -41,7 +41,7 @@ export default class DirectionalShadows {
 
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.DIRECTIONAL_SHADOWS
+
         if (!DirectionalShadows.changed && lightsToUpdate.length === 0)
             return;
         GPU.context.cullFace(GPU.context.FRONT)
@@ -82,6 +82,7 @@ export default class DirectionalShadows {
         GPU.context.cullFace(GPU.context.BACK)
         DirectionalShadows.changed = false
         lightsToUpdate.length = 0
+        MetricsController.currentState = METRICS_FLAGS.DIRECTIONAL_SHADOWS
     }
 
     static loopMeshes(light) {

@@ -37,7 +37,7 @@ export default class SSAO {
         StaticShaders.ssao.bind()
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.sceneDepth)
         GPU.context.uniform1i(StaticShaders.ssaoUniforms.gDepth, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)
@@ -65,13 +65,13 @@ export default class SSAO {
     }
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.SSAO
         if (!SSAO.enabled)
             return
 
         SSAO.#draw()
         SSAO.#blur()
 
+        MetricsController.currentState = METRICS_FLAGS.SSAO
     }
 
 }

@@ -7,6 +7,7 @@ uniform sampler2D currentFrame;
 uniform sampler2D gVelocity;
 uniform float velocityScale;
 uniform int maxSamples;
+uniform vec2 bufferResolution;
 
 out vec4 fragColor;
 
@@ -14,7 +15,7 @@ out vec4 fragColor;
 void main(){
     vec2 velocity = texture(gVelocity, texCoords).rg * velocityScale;
 
-    float speed = length(velocity * vec2(textureSize(currentFrame, 0)));
+    float speed = length(velocity * bufferResolution);
     int nSamples = max(clamp(int(speed), 1, maxSamples), 1);
 
     fragColor = vec4(texture(currentFrame, texCoords).rgb, 1.);

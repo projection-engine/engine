@@ -3,8 +3,10 @@ import InputEventsAPI from "../utils/InputEventsAPI";
 import QueryAPI from "../utils/QueryAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
 import UIComponent from "../../instances/components/UIComponent";
+import ResourceEntityMapper from "../ResourceEntityMapper";
 
 const STYLES = {
+    all: "unset",
     position: "absolute",
     boxSizing: "border-box",
     display: "block",
@@ -12,34 +14,10 @@ const STYLES = {
     height: "100%",
     border: "none",
     outline: "none",
-    background: "none"
+    background: "none",
 }
-const BODY_STYLE = `
-<style>
-html,
-body {
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-   
-    color: #f0f0f0;
-}
-* { 
-    box-sizing: border-box;
-}
-</style>
-`
 export default class UIAPI {
-    static document?: Document
-    static uiMountingPoint?: HTMLElement
-    static #useIframe = false
-    static iframeParent?: HTMLElement
-
-    static set useIframe(data) {
-        UIAPI.#useIframe = data
-    }
+    static document?: HTMLElement
 
     static async updateAllElements() {
         const uiElements = Array.from(Engine.UILayouts.keys())
@@ -58,17 +36,16 @@ export default class UIAPI {
                 UIAPI.updateUIEntity(e)
             })
         }
-
     }
 
     static deleteUIEntity(entity) {
         const UI = entity.uiComponent
-        if (!UI || !UI.__element)
+        if (!UI.__element || !UIAPI.document?.parentElement)
             return
         const children = UI.__element.querySelectorAll("[data-enginewrapper='-']")
         children.forEach(c => {
             UI.__element.removeChild(c)
-            UIAPI.uiMountingPoint.appendChild(c)
+            UIAPI.document.appendChild(c)
             UI.anchorElement = undefined
         })
         const p = UI.__element.parentElement
@@ -83,11 +60,11 @@ export default class UIAPI {
     }
 
     static createUIEntity(entity) {
-        const UI = entity.uiComponent
-        if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity)
+        if (!UIAPI.document?.parentElement || !entity.active)
             return
 
-        const el = UIAPI.document.createElement("div")
+        const UI = entity.uiComponent
+        const el = document.createElement("div")
         UIAPI.mapToObject(el, UI)
         el.id = entity.queryKey
         const html = Engine.UILayouts.get(UI.uiLayoutID)
@@ -96,44 +73,40 @@ export default class UIAPI {
         el.setAttribute("data-enginewrapper", "-")
         el.setAttribute("data-engineentityid", entity.id)
 
-        UIAPI.uiMountingPoint.appendChild(el)
+        UIAPI.document.appendChild(el)
         UI.__element = el
 
         return {parent: UI.anchorElement, element: el}
     }
 
-    static buildUI(t) {
-        const target = t || InputEventsAPI.targetElement
+    static buildUI(mounting: HTMLElement) {
+        const target = mounting || InputEventsAPI.targetElement
         UIAPI.destroyUI()
-        UIAPI.iframeParent = target
-        if (UIAPI.#useIframe) {
-            const iframe = document.createElement("iframe")
-            Object.assign(iframe.style, STYLES)
-            target.appendChild(iframe)
-            UIAPI.document = iframe.contentWindow.document
-            UIAPI.document.body.innerHTML = BODY_STYLE
-        } else
-            UIAPI.document = window.document
 
-        UIAPI.uiMountingPoint = UIAPI.document.body
+        UIAPI.document = document.createElement("div")
+        Object.assign(UIAPI.document.style, STYLES)
+        target.appendChild(UIAPI.document)
 
         const elementsToBind = []
-        const entities = Engine.entities.array
+        const entities = ResourceEntityMapper.ui.array
         for (let i = 0; i < entities.length; i++)
             elementsToBind.push(UIAPI.createUIEntity(entities[i]))
         for (let i = 0; i < elementsToBind.length; i++) {
             if (!elementsToBind[i])
                 continue
             const {parent, element} = elementsToBind[i]
-            const parentElement = UIAPI.document.getElementById(parent)
+            const parentElement = document.getElementById(parent)
             if (!parentElement)
                 continue
-            UIAPI.uiMountingPoint.removeChild(element)
+            UIAPI.document.removeChild(element)
             parentElement.appendChild(element)
         }
     }
 
     static updateUIEntity(entity) {
+        if (!UIAPI.document?.parentElement)
+            return
+
         const UI = entity.uiComponent
         if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
             return
@@ -148,10 +121,10 @@ export default class UIAPI {
     }
 
     static destroyUI() {
-        if (!UIAPI.uiMountingPoint)
+        if (!UIAPI.document?.parentElement)
             return
 
-        UIAPI.uiMountingPoint.innerHTML = ""
+        UIAPI.document.parentElement.removeChild(UIAPI.document)
         const entities = Engine.entities.array
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
@@ -160,12 +133,17 @@ export default class UIAPI {
                 continue
             UI.__element = undefined
         }
+    }
 
+    static hideUI() {
+        if (!UIAPI.document?.parentElement)
+            return
+        UIAPI.document.style.display = "none"
+    }
 
-        if (UIAPI.iframeParent) {
-            UIAPI.iframeParent.removeChild(UIAPI.iframeParent.querySelector("iframe"))
-            UIAPI.iframeParent = undefined
-        }
-
+    static showUI() {
+        if (!UIAPI.document?.parentElement)
+            return
+        UIAPI.document.style.display = "block"
     }
 }

@@ -29,7 +29,6 @@ export default class SSGI {
     static rayMarchSettings = new Float32Array(3)
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.SSGI
         if (!SSGI.enabled) {
             if (!cleared) {
                 StaticFBO.ssgi.clear()
@@ -44,7 +43,7 @@ export default class SSGI {
         StaticShaders.ssgi.bind()
 
         context.activeTexture(context.TEXTURE0)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityDepthSampler)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.sceneDepth)
         context.uniform1i(uniforms.scene_depth, 0)
 
         context.activeTexture(context.TEXTURE1)
@@ -57,6 +56,7 @@ export default class SSGI {
         SSGI.#applyBlur(context, StaticFBO.ssgiFallback, StaticFBO.ssgiSampler, true)
         SSGI.#applyBlur(context, StaticFBO.ssgi, StaticFBO.ssgiFallbackSampler, false)
 
+        MetricsController.currentState = METRICS_FLAGS.SSGI
     }
 
     static #applyBlur(context: WebGL2RenderingContext, FBO: Framebuffer, color: WebGLTexture, first: boolean) {
@@ -71,7 +71,7 @@ export default class SSGI {
             context.uniform2fv(uniforms.bufferResolution, StaticFBO.ssgiFallback.resolution)
 
             context.activeTexture(context.TEXTURE0)
-            context.bindTexture(context.TEXTURE_2D, StaticFBO.visibilityEntitySampler)
+            context.bindTexture(context.TEXTURE_2D, StaticFBO.entityIDSampler)
             context.uniform1i(uniforms.entityIDSampler, 0)
         }
         else

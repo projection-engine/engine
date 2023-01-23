@@ -12,7 +12,6 @@ import METRICS_FLAGS from "../static/METRICS_FLAGS";
 export default class LensPostProcessing {
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.LENS
         const context = GPU.context
 
         Bokeh.execute()
@@ -31,6 +30,7 @@ export default class LensPostProcessing {
 
         StaticMeshes.drawQuad()
         StaticFBO.lens.stopMapping()
+        MetricsController.currentState = METRICS_FLAGS.LENS
     }
 
 }

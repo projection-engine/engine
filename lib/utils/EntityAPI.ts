@@ -72,8 +72,7 @@ export default class EntityAPI {
         if (Engine.environment !== ENVIRONMENT.DEV)
             PhysicsAPI.registerRigidBody(entity)
         Engine.queryMap.set(entity.queryKey, entity)
-        if (UIAPI.uiMountingPoint != null)
-            UIAPI.createUIEntity(entity)
+        UIAPI.createUIEntity(entity)
 
         if (entity.lightComponent !== undefined)
             ResourceEntityMapper.lights.add(entity.id, entity)
@@ -81,6 +80,8 @@ export default class EntityAPI {
             ResourceEntityMapper.sprites.add(entity.id, entity)
         if (entity.decalComponent !== undefined)
             ResourceEntityMapper.decals.add(entity.id, entity)
+        if (entity.uiComponent !== undefined)
+            ResourceEntityMapper.ui.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
             ResourceEntityMapper.meshesToDraw.add(entity.id, entity)
             MaterialAPI.updateMap(entity.meshComponent)
@@ -112,6 +113,7 @@ export default class EntityAPI {
 
         ResourceEntityMapper.lights.delete(id)
         ResourceEntityMapper.sprites.delete(id)
+        ResourceEntityMapper.ui.delete(id)
         ResourceEntityMapper.decals.delete(id)
         console.trace(ResourceEntityMapper.meshesToDraw.has(id))
         ResourceEntityMapper.meshesToDraw.delete(id)

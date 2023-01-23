@@ -6,6 +6,7 @@ export default class ResourceEntityMapper {
     static sprites = new DynamicMap<Entity>()
     static lights = new DynamicMap<Entity>()
     static decals = new DynamicMap<Entity>()
+    static ui = new DynamicMap<Entity>()
 
     static entityMaterial = new Map<string, { [key: string]: Entity }>()
 }

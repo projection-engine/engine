@@ -88,7 +88,7 @@ export default class GPU {
         GPU.context = canvas.getContext("webgl2", {
             antialias: false,
 
-            // preserveDrawingBuffer: true,
+            preserveDrawingBuffer: false,
             premultipliedAlpha: false,
             powerPreference: "high-performance"
         })

@@ -14,17 +14,17 @@ import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 const entityMetadata = new Float32Array(16)
-let  context, toRender:Entity[], size, uniforms, VP
+let  context:WebGL2RenderingContext, toRender:Entity[], size, uniforms, VP
 export default class VisibilityRenderer {
     static needsUpdate = true
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.VISIBILITY
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
 
         StaticShaders.visibility.bind()
         context = GPU.context
+        context.blendFunc(context.ONE, context.ZERO)
         toRender = ResourceEntityMapper.meshesToDraw.array
         size = toRender.length
         uniforms = StaticShaders.visibilityUniforms
@@ -107,6 +107,8 @@ export default class VisibilityRenderer {
         StaticFBO.visibility.stopMapping()
         context.enable(context.CULL_FACE)
 
+        MetricsController.currentState = METRICS_FLAGS.VISIBILITY
         SSAO.execute()
+        context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA)
     }
 }

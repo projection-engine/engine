@@ -26,7 +26,7 @@ export default class OmnidirectionalShadows {
     }
 
     static execute() {
-        MetricsController.currentState = METRICS_FLAGS.OMNIDIRECTIONAL_SHADOWS
+
         if (!OmnidirectionalShadows.changed && lightsToUpdate.length === 0)
             return;
 
@@ -53,6 +53,7 @@ export default class OmnidirectionalShadows {
         }
         OmnidirectionalShadows.changed = false
         lightsToUpdate.length = 0
+        MetricsController.currentState = METRICS_FLAGS.OMNIDIRECTIONAL_SHADOWS
     }
 
     static loopMeshes(view, projection, component) {

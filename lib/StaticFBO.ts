@@ -9,9 +9,9 @@ const RESOLUTION = 4
 
 export default class StaticFBO {
     static visibility?: Framebuffer
-    static visibilityDepthSampler?: WebGLTexture
-    static visibilityEntitySampler?: WebGLTexture
-    static visibilityVelocitySampler?: WebGLTexture
+    static sceneDepth?: WebGLTexture
+    static velocitySampler?: WebGLTexture
+    static entityIDSampler?: WebGLTexture
 
     static lens?: Framebuffer
     static lensSampler?: WebGLTexture
@@ -21,10 +21,6 @@ export default class StaticFBO {
 
     static postProcessing2?: Framebuffer
     static postProcessing2Sampler?: WebGLTexture
-
-    static TAACache?: Framebuffer
-    static TAACacheSampler?: WebGLTexture
-
 
 
     static ssgi?: Framebuffer
@@ -39,8 +35,6 @@ export default class StaticFBO {
     static ssaoBlurred?: Framebuffer
     static ssaoBlurredSampler?: WebGLTexture
 
-    static mb?: Framebuffer
-    static mbSampler?: WebGLTexture
 
     static downscaleBloom: Framebuffer[] = []
     static upscaleBloom: Framebuffer[] = []
@@ -68,13 +62,15 @@ export default class StaticFBO {
             })
             .texture({
                 attachment: 1,
-                label: "ENTITY_ID"
+                label: "ENTITY_ID",
+                precision: context.RGB,
+                format: context.RGB,
+                type: context.UNSIGNED_BYTE
             })
             .texture({
                 attachment: 2,
                 label: "VELOCITY",
                 precision: context.RG16F,
-                type: context.FLOAT,
                 format: context.RG,
             })
             .depthTest()
@@ -123,9 +119,9 @@ export default class StaticFBO {
         StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]
         StaticFBO.ssgiFallbackSampler = StaticFBO.ssgiFallback.colors[0]
 
-        StaticFBO.visibilityDepthSampler = StaticFBO.visibility.colors[0]
-        StaticFBO.visibilityEntitySampler = StaticFBO.visibility.colors[1]
-        StaticFBO.visibilityVelocitySampler = StaticFBO.visibility.colors[2]
+        StaticFBO.sceneDepth = StaticFBO.visibility.colors[0]
+        StaticFBO.entityIDSampler = StaticFBO.visibility.colors[1]
+        StaticFBO.velocitySampler = StaticFBO.visibility.colors[2]
         StaticFBO.postProcessing1Sampler = StaticFBO.postProcessing1.colors[0]
         StaticFBO.postProcessing2Sampler = StaticFBO.postProcessing2.colors[0]
         StaticFBO.lensSampler = StaticFBO.lens.colors[0]
