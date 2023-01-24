@@ -6,9 +6,9 @@ import FileSystemAPI from "../utils/FileSystemAPI";
 import Entity from "../../instances/Entity";
 import Material from "../../instances/Material";
 import MeshComponent from "../../instances/components/MeshComponent";
-import MaterialUniform from "../../templates/MaterialUniform";
-import TextureParams from "../../templates/TextureParams";
-import TextureInUse from "../../templates/TextureInUse";
+import MaterialUniform from "../../static/MaterialUniform";
+import TextureParams from "../../static/TextureParams";
+import TextureInUse from "../../static/TextureInUse";
 import MutableObject from "../../MutableObject";
 
 export default class MaterialAPI {
@@ -97,12 +97,10 @@ export default class MaterialAPI {
             const currentUniform = data[i]
             if (currentUniform.type === DATA_TYPES.TEXTURE) {
                 const textureID = currentUniform.data
-                console.trace(texturesInUse, textureID)
                 if (texturesInUse[textureID] || !FileSystemAPI.isReady)
                     continue
                 try {
                     const exists = GPU.textures.get(textureID)
-                    console.trace(exists, textureID)
                     if (exists) {
                         texturesInUse[textureID] = {texture: exists, key: currentUniform.key}
                         uniformValues[currentUniform.key] = exists

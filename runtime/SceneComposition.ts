@@ -2,7 +2,7 @@ import GPU from "../GPU";
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
 import UberShader from "../utils/UberShader";
-import ResourceEntityMapper from "../lib/ResourceEntityMapper";
+import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
 import SceneRenderer from "./SceneRenderer";
 import Loop from "../Loop";
 import MetricsController from "../lib/utils/MetricsController";

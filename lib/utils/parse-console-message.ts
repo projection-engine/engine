@@ -1,4 +1,4 @@
-import MessageInterface from "./MessageInterface";
+import MessageInterface from "../../static/MessageInterface";
 import serializeStructure from "../../utils/serialize-structure";
 
 const isPlainObject = value => value?.constructor === Object;

@@ -2,7 +2,7 @@ import Component from "./Component"
 
 import MESH_PROPS from "../../static/component-props/MESH_PROPS";
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
-import ResourceEntityMapper from "../../lib/ResourceEntityMapper";
+import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 export default class MeshComponent extends Component {
     _props = MESH_PROPS

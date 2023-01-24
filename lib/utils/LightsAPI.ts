@@ -6,7 +6,7 @@ import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
 import UberShader from "../../utils/UberShader";
 import StaticUBOs from "../StaticUBOs";
-import ResourceEntityMapper from "../ResourceEntityMapper";
+import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 
 let lightTimeout

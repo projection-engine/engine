@@ -3,7 +3,7 @@ import DECAL_PROPS from "../../static/component-props/DECAL_PROPS";
 import Texture from "../Texture";
 import GPU from "../../GPU";
 import FileSystemAPI from "../../lib/utils/FileSystemAPI";
-import TextureParams from "../../templates/TextureParams";
+import TextureParams from "../../static/TextureParams";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 

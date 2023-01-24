@@ -2,7 +2,7 @@ import GPU from "../GPU";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
 import StaticUBOs from "../lib/StaticUBOs";
-import ResourceEntityMapper from "../lib/ResourceEntityMapper";
+import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";

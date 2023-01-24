@@ -1,4 +1,4 @@
-import DynamicMap from "./utils/DynamicMap";
+import DynamicMap from "./DynamicMap";
 import Entity from "../instances/Entity";
 
 export default class ResourceEntityMapper {

@@ -4,7 +4,7 @@ import TEXTURE_FILTERING from "../static/texture/TEXTURE_FILTERING";
 import TEXTURE_FORMATS from "../static/texture/TEXTURE_FORMATS";
 import ImageProcessor from "../lib/math/ImageProcessor";
 import GPU from "../GPU";
-import TextureParams from "../templates/TextureParams";
+import TextureParams from "../static/TextureParams";
 
 
 export default class Texture {

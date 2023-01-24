@@ -4,7 +4,7 @@ import ShadowProbe from "../instances/ShadowProbe";
 import LightComponent from "../instances/components/LightComponent";
 import GPU from "../GPU";
 import StaticShaders from "../lib/StaticShaders";
-import ResourceEntityMapper from "../lib/ResourceEntityMapper";
+import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";

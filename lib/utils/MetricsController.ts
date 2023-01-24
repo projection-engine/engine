@@ -38,7 +38,6 @@ export default class MetricsController {
         started = false
         const data = MetricsController.#elapsed
         const totalElapsed = MetricsController.#totalElapsed
-        console.log(totalElapsed, data)
         const response = []
 
         for (let i = 0; i < data.length; i++) {

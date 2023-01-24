@@ -18,7 +18,7 @@ export default class Bloom {
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, blurredSampler)
         context.uniform1i(upSamplingShaderUniforms.blurred, 1)
-        context.uniform1f(upSamplingShaderUniforms.sampleScale, CameraAPI.metadata.bloomOffset)
+        context.uniform1f(upSamplingShaderUniforms.sampleScale, CameraAPI.bloomOffset)
         StaticMeshes.drawQuad()
         fbo.stopMapping()
     }
@@ -26,14 +26,14 @@ export default class Bloom {
     static execute() {
 
         const context = GPU.context
-        if (!CameraAPI.metadata.bloom)
+        if (!CameraAPI.bloom)
             return
         StaticFBO.lens.startMapping()
         StaticShaders.bloom.bind()
         context.activeTexture(context.TEXTURE0)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.postProcessing1Sampler)
         context.uniform1i(StaticShaders.bloomUniforms.sceneColor, 0)
-        context.uniform1f(StaticShaders.bloomUniforms.threshold, CameraAPI.metadata.bloomThreshold)
+        context.uniform1f(StaticShaders.bloomUniforms.threshold, CameraAPI.bloomThreshold)
         StaticMeshes.drawQuad()
         StaticFBO.lens.stopMapping()
 
@@ -49,7 +49,7 @@ export default class Bloom {
             context.uniform1i(StaticShaders.gaussianUniforms.sceneColor, 0)
 
             context.uniform1f(StaticShaders.gaussianUniforms.blurRadius, 10)
-            context.uniform1i(StaticShaders.gaussianUniforms.samples, CameraAPI.metadata.bloomQuality)
+            context.uniform1i(StaticShaders.gaussianUniforms.samples, CameraAPI.bloomQuality)
             context.uniform2fv(StaticShaders.gaussianUniforms.bufferResolution, fbo.resolution)
 
             StaticMeshes.drawQuad()

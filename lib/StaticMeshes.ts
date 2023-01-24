@@ -3,7 +3,7 @@ import VertexBuffer from "../instances/VertexBuffer";
 
 import Mesh from "../instances/Mesh";
 import GPUAPI from "./rendering/GPUAPI";
-import EmbeddedMeshes from "../templates/EmbeddedMeshes";
+import EmbeddedMeshes from "../static/EmbeddedMeshes";
 
 export default class StaticMeshes {
     static #initialized = false

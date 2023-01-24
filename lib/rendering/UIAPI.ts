@@ -3,7 +3,7 @@ import InputEventsAPI from "../utils/InputEventsAPI";
 import QueryAPI from "../utils/QueryAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
 import UIComponent from "../../instances/components/UIComponent";
-import ResourceEntityMapper from "../ResourceEntityMapper";
+import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 const STYLES = {
     all: "unset",
@@ -39,8 +39,8 @@ export default class UIAPI {
     }
 
     static deleteUIEntity(entity) {
-        const UI = entity.uiComponent
-        if (!UI.__element || !UIAPI.document?.parentElement)
+        const UI = entity?.uiComponent
+        if (!UI?.__element || !UIAPI.document?.parentElement)
             return
         const children = UI.__element.querySelectorAll("[data-enginewrapper='-']")
         children.forEach(c => {
@@ -63,7 +63,9 @@ export default class UIAPI {
         if (!UIAPI.document?.parentElement || !entity.active)
             return
 
-        const UI = entity.uiComponent
+        const UI = entity?.uiComponent
+        if(!UI)
+            return
         const el = document.createElement("div")
         UIAPI.mapToObject(el, UI)
         el.id = entity.queryKey
@@ -107,7 +109,8 @@ export default class UIAPI {
         if (!UIAPI.document?.parentElement)
             return
 
-        const UI = entity.uiComponent
+        const UI = entity?.uiComponent
+
         if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
             return
         const el = UI.__element

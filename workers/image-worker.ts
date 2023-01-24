@@ -33,7 +33,6 @@ self.onmessage = async ({data: {type, data, id}}) => {
                 const compressionRatio = data.compressionRatio || 1
                 const base64 = data.base64
                 const resolutionScale = data.resolutionScale || 1
-                console.trace(resolutionScale, compressionRatio)
                 const content = base64.split(";base64,")[1]
 
                 const buffer = Buffer.from(content, "base64")

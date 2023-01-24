@@ -18,7 +18,7 @@ import LightProbe from "./instances/LightProbe";
 
 import Entity from "./instances/Entity";
 import StaticUBOs from "./lib/StaticUBOs";
-import DynamicMap from "./lib/utils/DynamicMap";
+import DynamicMap from "./resource-libs/DynamicMap";
 
 const boolBuffer = new Uint8Array(1)
 const singleFloatBuffer = new Float32Array(1)

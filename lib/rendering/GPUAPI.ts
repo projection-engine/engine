@@ -9,9 +9,9 @@ import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import UberShader from "../../utils/UberShader";
 import StaticMeshes from "../StaticMeshes";
-import TextureParams from "../../templates/TextureParams";
-import MaterialInformation from "../../templates/MaterialInformation";
-import ResourceEntityMapper from "../ResourceEntityMapper";
+import TextureParams from "../../static/TextureParams";
+import MaterialInformation from "../../static/MaterialInformation";
+import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {

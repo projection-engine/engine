@@ -2,7 +2,7 @@ import GPU from "../GPU";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticShaders from "../lib/StaticShaders";
 import type Entity from "../instances/Entity";
-import ResourceEntityMapper from "../lib/ResourceEntityMapper";
+import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
 import Shader from "../instances/Shader";
 import Engine from "../Engine";
 import CameraAPI from "../lib/utils/CameraAPI";
@@ -10,7 +10,7 @@ import StaticFBO from "../lib/StaticFBO";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import SceneComposition from "./SceneComposition";
 import VisibilityRenderer from "./VisibilityRenderer";
-import UberMaterialAttributeGroup from "../lib/UberMaterialAttributeGroup";
+import UberMaterialAttributeGroup from "../resource-libs/UberMaterialAttributeGroup";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import Material from "../instances/Material";
 

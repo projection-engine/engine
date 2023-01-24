@@ -10,7 +10,7 @@ import METRICS_FLAGS from "../static/METRICS_FLAGS";
 export default class Bokeh {
     static execute() {
 
-        if(!CameraAPI.metadata.DOF)
+        if(!CameraAPI.DOF)
             return
 
         StaticShaders.bokeh.bind()

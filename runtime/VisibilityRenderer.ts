@@ -7,7 +7,7 @@ import {mat4} from "gl-matrix";
 import StaticShaders from "../lib/StaticShaders";
 import StaticFBO from "../lib/StaticFBO";
 import type Entity from "../instances/Entity";
-import ResourceEntityMapper from "../lib/ResourceEntityMapper";
+import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
 import StaticMeshes from "../lib/StaticMeshes";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MetricsController from "../lib/utils/MetricsController";
@@ -28,7 +28,7 @@ export default class VisibilityRenderer {
         toRender = ResourceEntityMapper.meshesToDraw.array
         size = toRender.length
         uniforms = StaticShaders.visibilityUniforms
-        VP = CameraAPI.metadata.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
+        VP = CameraAPI.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
 
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         context.uniformMatrix4fv(uniforms.previousViewProjection, false, VP)

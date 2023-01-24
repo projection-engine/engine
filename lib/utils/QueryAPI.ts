@@ -30,7 +30,6 @@ export default class QueryAPI {
             const current = entities[i]
             if(!current.active)
                 continue
-            console.log(current.pickIndex)
             if(current.pickIndex === id)
                 return current
         }

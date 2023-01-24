@@ -2,7 +2,7 @@ import ScriptsAPI from "./ScriptsAPI";
 import GPU from "../../GPU";
 import GPUAPI from "../rendering/GPUAPI";
 import FILE_TYPES from "../../../static/objects/FILE_TYPES";
-import MaterialInformation from "../../templates/MaterialInformation";
+import MaterialInformation from "../../static/MaterialInformation";
 
 
 export default class FileSystemAPI {

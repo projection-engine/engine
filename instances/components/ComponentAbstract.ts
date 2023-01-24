@@ -6,7 +6,7 @@ import MeshComponent from "./MeshComponent";
 import SpriteComponent from "./SpriteComponent";
 import Material from "../Material";
 import Mesh from "../Mesh";
-import COMPONENTS from "../../templates/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS";
 import Component from "./Component";
 import SkyLightComponent from "./SkyLightComponent";
 import PhysicsColliderComponent from "./PhysicsColliderComponent";

@@ -1,4 +1,4 @@
-import COMPONENTS from "../../templates/COMPONENTS"
+import COMPONENTS from "../../static/COMPONENTS"
 import Engine from "../../Engine";
 import QueryAPI from "./QueryAPI";
 
@@ -13,7 +13,7 @@ import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import GPU from "../../GPU";
 import MutableObject from "../../MutableObject";
-import ResourceEntityMapper from "../ResourceEntityMapper";
+import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -115,11 +115,8 @@ export default class EntityAPI {
         ResourceEntityMapper.sprites.delete(id)
         ResourceEntityMapper.ui.delete(id)
         ResourceEntityMapper.decals.delete(id)
-        console.trace(ResourceEntityMapper.meshesToDraw.has(id))
         ResourceEntityMapper.meshesToDraw.delete(id)
-        console.trace(ResourceEntityMapper.meshesToDraw.has(id))
 
-        setTimeout(() => console.trace(ResourceEntityMapper.meshesToDraw.has(id)), 250)
         PhysicsAPI.removeRigidBody(entity)
         EntityWorkerAPI.removeEntity(entity)
         UIAPI.deleteUIEntity(entity)

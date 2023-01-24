@@ -1,4 +1,4 @@
-import COMPONENTS from "../templates/COMPONENTS";
+import COMPONENTS from "../static/COMPONENTS";
 import MeshComponent from "../instances/components/MeshComponent";
 import SkyLightComponent from "../instances/components/SkyLightComponent";
 import CameraComponent from "../instances/components/CameraComponent";

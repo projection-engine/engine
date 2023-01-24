@@ -61,8 +61,10 @@ export default class Loop {
         try {
             Engine.elapsed = current - previous
             previous = current
-            GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
 
+            CameraAPI.updateUBOs()
+
+            GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
             const transformationChanged = EntityWorkerAPI.hasChangeBuffer[0]
             if (transformationChanged === 1)
                 LightsAPI.packageLights(false, true)
@@ -70,11 +72,9 @@ export default class Loop {
             if (transformationChanged === 1)
                 EntityWorkerAPI.hasChangeBuffer[0] = 0
 
+
             CameraAPI.syncThreads()
-            CameraAPI.updateUBOs()
-
             EntityWorkerAPI.syncThreads()
-
             Engine.frameID = requestAnimationFrame(Loop.loop)
         } catch (err) {
             console.error(err)

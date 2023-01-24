@@ -6,7 +6,7 @@ import TransformationAPI from "../math/TransformationAPI";
 import InputEventsAPI from "./InputEventsAPI";
 import ConsoleAPI from "./ConsoleAPI";
 import Component from "../../instances/components/Component";
-import COMPONENTS from "../../templates/COMPONENTS";
+import COMPONENTS from "../../static/COMPONENTS";
 import CameraAPI from "./CameraAPI";
 import QueryAPI from "./QueryAPI";
 import FileSystemAPI from "./FileSystemAPI";

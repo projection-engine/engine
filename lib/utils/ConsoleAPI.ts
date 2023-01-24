@@ -1,5 +1,5 @@
 import parseMessage from "./parse-console-message";
-import MessageInterface from "./MessageInterface";
+import MessageInterface from "../../static/MessageInterface";
 
 export enum Types {
     ERROR = "ERROR",
