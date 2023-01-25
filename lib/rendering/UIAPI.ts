@@ -69,13 +69,21 @@ export default class UIAPI {
         if(!UI)
             return
         const el = document.createElement("div")
-        mapToObject(el, UI)
-        el.id = entity.queryKey
-        const html = Engine.UILayouts.get(UI.uiLayoutID)
-        el.innerHTML = html ? html : ""
-
+        el.setAttribute("data-engineelement", "-")
         el.setAttribute("data-enginewrapper", "-")
-        el.setAttribute("data-engineentityid", entity.id)
+        el.setAttribute("data-entityid", entity.id)
+
+        mapToObject(el, UI)
+
+        el.id = entity.queryKey
+        el.innerHTML =Engine.UILayouts.get(UI.uiLayoutID)||""
+
+        const children = el.children;
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if(child.tagName !== "STYLE")
+            child.setAttribute("data-engineelement", "-")
+        }
 
         UIAPI.document.appendChild(el)
         UI.__element = el
@@ -101,7 +109,6 @@ export default class UIAPI {
             const parentElement = document.getElementById(parent)
             if (!parentElement)
                 continue
-            element
             UIAPI.document.removeChild(element)
             parentElement.appendChild(element)
         }

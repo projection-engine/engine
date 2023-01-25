@@ -1,1 +1,1 @@
-export default "data-internalelementid"
+export default "data-svelteinternalelementid"

@@ -52,7 +52,7 @@ export default class CameraAPI extends CameraResources{
     }
 
     static syncThreads() {
-        CameraAPI.notificationBuffers[6] = Engine.elapsed
+        CameraAPI.notificationBuffers[5] = Engine.elapsed
         CameraAPI.#worker.postMessage(0)
     }
 
@@ -93,7 +93,6 @@ export default class CameraAPI extends CameraResources{
     static serializeState(): CameraSerialization {
 
         return {
-            rotationSmoothing: CameraAPI.rotationSmoothing,
             translationSmoothing: CameraAPI.translationSmoothing,
             metadata: {...CameraAPI.dumpEffects()},
             rotation: [...CameraAPI.rotationBuffer],
@@ -102,12 +101,10 @@ export default class CameraAPI extends CameraResources{
     }
 
     static restoreState(state: CameraSerialization) {
-        const {rotation, translation, rotationSmoothing, translationSmoothing, metadata} = state
+        const {rotation, translation,  translationSmoothing, metadata} = state
         CameraAPI.restoreMetadata(metadata)
         CameraAPI.updateTranslation(translation)
         CameraAPI.updateRotation(rotation)
-
-        CameraAPI.rotationSmoothing = rotationSmoothing
         CameraAPI.translationSmoothing = translationSmoothing
 
         CameraAPI.updateView()

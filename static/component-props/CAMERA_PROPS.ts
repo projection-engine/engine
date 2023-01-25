@@ -1,7 +1,7 @@
 import Component from "../../instances/components/Component";
 
 export default  [
-    Component.group("CAMERA", [
+    Component.group("PROJECTION", [
         Component.number("FOV", "fov", 150, 10),
         Component.number("FAR", "zFar", undefined,0, .01),
         Component.number("NEAR", "zNear", undefined,0, .01),

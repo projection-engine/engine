@@ -120,29 +120,21 @@ class CameraWorker {
 
     static execute() {
         const nBuffer = CameraWorker.notificationBuffers
-        const elapsed = nBuffer[6]
+        const elapsed = nBuffer[5]
 
         if (needsUpdate) {
             const incrementTranslation = nBuffer[4] === 0 ? 1 : 1 - Math.pow(.001, elapsed * nBuffer[4])
-            const incrementRotation = nBuffer[5] === 0 ? 1 : 1 - Math.pow(.001, elapsed * nBuffer[5])
 
             const lengthTranslationPrev = vec3.length(CameraWorker.currentTranslation)
             vec3.lerp(CameraWorker.currentTranslation, CameraWorker.currentTranslation, CameraWorker.translationBuffer, incrementTranslation)
             const lengthTranslationAfter = vec3.length(CameraWorker.currentTranslation)
             const lengthRotationPrev = quat.length(CameraWorker.currentRotation)
-            quat.slerp(CameraWorker.currentRotation, CameraWorker.currentRotation, CameraWorker.rotationBuffer, incrementRotation)
+            quat.copy(CameraWorker.currentRotation, CameraWorker.rotationBuffer)
             const lengthRotationAfter = quat.length(CameraWorker.currentRotation)
-
-
-
-
 
             const offsetRotation = Math.abs(lengthRotationPrev - lengthRotationAfter)
             const offsetTranslation = Math.abs(lengthTranslationPrev - lengthTranslationAfter)
-
-
-            if (offsetRotation > 1e-8 || offsetTranslation  > 1e-6 ) {
-
+            if (offsetRotation > 0 || offsetTranslation  > 1e-6 ) {
                 CameraWorker.updateView()
                 nBuffer[3] = 1
             } else {

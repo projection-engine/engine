@@ -6,19 +6,19 @@ import CameraEffects from "./CameraEffects";
 const ORTHOGRAPHIC = 1, PERSPECTIVE = 0
 
 function getNotificationBuffer(): Float32Array {
-    const b = <Float32Array>ArrayBufferAPI.allocateVector(7, 0)
+    const b = <Float32Array>ArrayBufferAPI.allocateVector(6, 0)
     b[0] = 1
     b[1] = 1
     b[2] = PERSPECTIVE
     b[3] = 0
     b[4] = .001
-    b[5] = .1
-    b[6] = 0
+
+    b[5] = 0
     return b
 }
 
 /**
- * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, translationSmoothing, rotationSmoothing, elapsed]}
+ * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, translationSmoothing,  elapsed]}
  * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.worker]}
  * @field projectionBuffer {float32array [zFar, zNear, fov, aR, orthographicSize]}
  */
@@ -45,14 +45,6 @@ export default class CameraResources extends CameraEffects {
         T[2] =  T[2] + data[2] || 0
     }
 
-    static addRotation(data: number[] | Float32Array) {
-        const R = CameraResources.rotationBuffer
-
-        R[0] = R[0] + data[0] || 0
-        R[1] = R[1] + data[1] || 0
-        R[2] = R[2] + data[2] || 0
-        R[3] = R[3] + data[3] || 0
-    }
 
     static updateTranslation(data: number[] | Float32Array) {
         const T = CameraResources.translationBuffer
@@ -131,13 +123,6 @@ export default class CameraResources extends CameraEffects {
         return CameraResources.notificationBuffers[4]
     }
 
-    static set rotationSmoothing(data) {
-        CameraResources.notificationBuffers[5] = data
-    }
-
-    static get rotationSmoothing() {
-        return CameraResources.notificationBuffers[5]
-    }
 
     static updateProjection() {
         CameraResources.notificationBuffers[1] = 1
