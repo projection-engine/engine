@@ -4,10 +4,12 @@ import QueryAPI from "../utils/QueryAPI";
 import FileSystemAPI from "../utils/FileSystemAPI";
 import UIComponent from "../../instances/components/UIComponent";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
+import Entity from "../../instances/Entity";
 
 const STYLES = {
-    all: "unset",
     position: "absolute",
+    top: "0",
+    zIndex: 1,
     boxSizing: "border-box",
     display: "block",
     width: "100%",
@@ -16,6 +18,12 @@ const STYLES = {
     outline: "none",
     background: "none",
 }
+function mapToObject(el: HTMLElement, component: UIComponent) {
+    const obj: { [key: string]: string } = {}
+    component.wrapperStyles.forEach(([k, v]) => obj[k] = v)
+    Object.assign(el.style, obj)
+}
+
 export default class UIAPI {
     static document?: HTMLElement
 
@@ -53,13 +61,7 @@ export default class UIAPI {
             p.removeChild(UI.__element)
     }
 
-    static mapToObject(el: HTMLElement, component: UIComponent): void {
-        const obj: { [key: string]: string } = {}
-        component.wrapperStyles.forEach(([k, v]) => obj[k] = v)
-        Object.assign(el.style, obj)
-    }
-
-    static createUIEntity(entity) {
+    static createUIEntity(entity:Entity) {
         if (!UIAPI.document?.parentElement || !entity.active)
             return
 
@@ -67,7 +69,7 @@ export default class UIAPI {
         if(!UI)
             return
         const el = document.createElement("div")
-        UIAPI.mapToObject(el, UI)
+        mapToObject(el, UI)
         el.id = entity.queryKey
         const html = Engine.UILayouts.get(UI.uiLayoutID)
         el.innerHTML = html ? html : ""
@@ -84,7 +86,6 @@ export default class UIAPI {
     static buildUI(mounting: HTMLElement) {
         const target = mounting || InputEventsAPI.targetElement
         UIAPI.destroyUI()
-
         UIAPI.document = document.createElement("div")
         Object.assign(UIAPI.document.style, STYLES)
         target.appendChild(UIAPI.document)
@@ -100,29 +101,11 @@ export default class UIAPI {
             const parentElement = document.getElementById(parent)
             if (!parentElement)
                 continue
+            element
             UIAPI.document.removeChild(element)
             parentElement.appendChild(element)
         }
     }
-
-    static updateUIEntity(entity) {
-        if (!UIAPI.document?.parentElement)
-            return
-
-        const UI = entity?.uiComponent
-
-        if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
-            return
-        const el = UI.__element
-        if (!el)
-            return;
-        el.removeAttribute("style")
-        UIAPI.mapToObject(el, UI)
-        el.id = entity.queryKey
-        const html = Engine.UILayouts.get(UI.uiLayoutID)
-        el.innerHTML = html ? html : ""
-    }
-
     static destroyUI() {
         if (!UIAPI.document?.parentElement)
             return
@@ -137,6 +120,25 @@ export default class UIAPI {
             UI.__element = undefined
         }
     }
+    static updateUIEntity(entity) {
+        if (!UIAPI.document?.parentElement)
+            return
+
+        const UI = entity?.uiComponent
+
+        if (!entity.active || !UI || QueryAPI.getEntityByQueryID(entity.queryKey) !== entity || !UI.__element)
+            return
+        const el = UI.__element
+        if (!el)
+            return;
+        el.removeAttribute("style")
+        mapToObject(el, UI)
+        el.id = entity.queryKey
+        const html = Engine.UILayouts.get(UI.uiLayoutID)
+        el.innerHTML = html ? html : ""
+    }
+
+
 
     static hideUI() {
         if (!UIAPI.document?.parentElement)
