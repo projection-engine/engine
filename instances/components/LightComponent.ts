@@ -38,7 +38,7 @@ export default class LightComponent extends Component {
     smoothing = .5
 
     // -------------- SPOTLIGHT --------------
-    radius = 90
+    radius = 45
 
     // -------------- DIRECTIONAL --------------
     size = 35

@@ -1,6 +1,6 @@
 import ArrayBufferAPI from "./ArrayBufferAPI";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
-import {mat4, vec3} from "gl-matrix";
+import {mat4, quat, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
@@ -13,12 +13,12 @@ let lightTimeout
 const toRad = Math.PI / 180
 const transformedNormalCache = vec3.create(),
     lightViewProjection = mat4.create()
-
-const cacheVec3 = vec3.create()
 const quantity = new Uint8Array(1)
 /**
  * @property primaryBuffer: indexes 0-3 are reserved for [type - color - color - color]
  */
+const cache1Mat4 = mat4.create()
+const cache2Mat4 = mat4.create()
 export default class LightsAPI {
 
 
@@ -130,13 +130,15 @@ export default class LightsAPI {
                 break
             }
             case LIGHT_TYPES.SPOT: {
+                mat4.lookAt(cache1Mat4, position, position, [0, 1, 0]);
+                mat4.fromQuat(cache2Mat4, entity._rotationQuat)
+                mat4.multiply(cache1Mat4, cache1Mat4, cache2Mat4)
 
-                vec3.transformQuat(cacheVec3, position, entity._rotationQuat)
                 const radius = Math.cos(component.radius * toRad)
 
-                primaryBuffer[8 + offset] = cacheVec3[0]
-                primaryBuffer[9 + offset] = cacheVec3[1]
-                primaryBuffer[10 + offset] = cacheVec3[2]
+                primaryBuffer[8 + offset] = cache1Mat4[8]
+                primaryBuffer[9 + offset] = cache1Mat4[9]
+                primaryBuffer[10 + offset] = cache1Mat4[10]
 
                 primaryBuffer[11 + offset] = component.cutoff
 
@@ -166,7 +168,6 @@ export default class LightsAPI {
                 primaryBuffer[8 + offset] = component.areaRadius
                 primaryBuffer[9 + offset] = attenuation[0]
                 primaryBuffer[10 + offset] = attenuation[1]
-
                 /**
                  * Light normal
                  */

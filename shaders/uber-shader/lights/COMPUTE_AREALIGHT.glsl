@@ -1,6 +1,6 @@
 vec3 computeSphereLight(inout mat4 primaryBuffer, inout mat4 secondaryBuffer){
     vec3 lightPosition = vec3(primaryBuffer[1][0], primaryBuffer[1][1], primaryBuffer[1][2]);
-    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][1], primaryBuffer[0][3]);
+    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][2], primaryBuffer[0][3]);
 
     float lightCutoff       = primaryBuffer[2][3];
     float lightRadius      = primaryBuffer[2][0];
@@ -26,7 +26,7 @@ vec3 computeSphereLight(inout mat4 primaryBuffer, inout mat4 secondaryBuffer){
 
 vec3 computeDiskLight(inout mat4 primaryBuffer,inout mat4 secondaryBuffer){
     vec3 lightPosition = vec3(primaryBuffer[1][0], primaryBuffer[1][1], primaryBuffer[1][2]);
-    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][1], primaryBuffer[0][3]);
+    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][2], primaryBuffer[0][3]);
 
     //    vec3 lightNormal = vec3(primaryBuffer[2][3], primaryBuffer[3][0], primaryBuffer[3][1]);
 //    float lightCutoff = primaryBuffer[3][2];

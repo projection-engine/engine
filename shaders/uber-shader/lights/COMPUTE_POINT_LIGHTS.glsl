@@ -36,7 +36,7 @@ float pointLightShadow(float distanceFromCamera, float shadowFalloffDistance, ve
 
 vec3 computePointLights(inout mat4 primaryBuffer, inout mat4 secondaryBuffer) {
     vec3 lightPosition = vec3(primaryBuffer[1][0], primaryBuffer[1][1], primaryBuffer[1][2]);
-    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][1], primaryBuffer[0][3]);
+    vec3 lightColor = vec3(primaryBuffer[0][1], primaryBuffer[0][2], primaryBuffer[0][3]);
 
     vec4 baseContribution = precomputeContribution(lightPosition);
     if (baseContribution.a == 0.) return vec3(0.);
