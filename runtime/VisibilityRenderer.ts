@@ -18,6 +18,7 @@ let  context:WebGL2RenderingContext, toRender:Entity[], size, uniforms, VP
 export default class VisibilityRenderer {
     static needsUpdate = true
 
+
     static execute() {
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
@@ -110,5 +111,6 @@ export default class VisibilityRenderer {
         MetricsController.currentState = METRICS_FLAGS.VISIBILITY
         SSAO.execute()
         context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA)
+        VisibilityRenderer.needsUpdate = false
     }
 }

@@ -1,6 +1,5 @@
 import COMPONENTS from "../../static/COMPONENTS"
 import Engine from "../../Engine";
-import QueryAPI from "./QueryAPI";
 
 import ENVIRONMENT from "../../static/ENVIRONMENT";
 import EntityWorkerAPI from "./EntityWorkerAPI";

@@ -1,4 +1,4 @@
-import {quat, vec3, vec4} from "gl-matrix";
+import {quat, vec3} from "gl-matrix";
 import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
 import CameraEffects from "./CameraEffects";
 
@@ -44,7 +44,6 @@ export default class CameraResources extends CameraEffects {
         T[1] =  T[1] + data[1] || 0
         T[2] =  T[2] + data[2] || 0
     }
-
 
     static updateTranslation(data: number[] | Float32Array) {
         const T = CameraResources.translationBuffer

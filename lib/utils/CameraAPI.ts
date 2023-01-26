@@ -1,8 +1,7 @@
 import CameraEffects from "../../resource-libs/CameraEffects";
 import Engine from "../../Engine";
 import ENVIRONMENT from "../../static/ENVIRONMENT";
-import ArrayBufferAPI from "./ArrayBufferAPI";
-import {quat, vec3, vec4} from "gl-matrix";
+import {vec3, vec4} from "gl-matrix";
 import ConversionAPI from "../math/ConversionAPI";
 import MotionBlur from "../../runtime/MotionBlur";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
@@ -13,7 +12,6 @@ import Entity from "../../instances/Entity";
 import CameraComponent from "../../instances/components/CameraComponent";
 import CameraResources from "../../resource-libs/CameraResources";
 import CameraSerialization from "../../static/CameraSerialization";
-
 
 
 const TEMPLATE_CAMERA = new CameraComponent()
@@ -48,7 +46,7 @@ export default class CameraAPI extends CameraResources{
         ])
         new ResizeObserver(CameraAPI.updateAspectRatio)
             .observe(GPU.canvas)
-        CameraAPI.notificationBuffers[3] = 1
+
     }
 
     static syncThreads() {
@@ -62,15 +60,16 @@ export default class CameraAPI extends CameraResources{
             CameraAPI.update(entity._translation, entity._rotationQuat)
 
         if (CameraAPI.notificationBuffers[3]) {
+            console.log(Engine.elapsed)
             const UBO = StaticUBOs.cameraUBO
-            CameraAPI.notificationBuffers[3] = 0
+
             UBO.bind()
             UBO.updateBuffer(CameraAPI.UBOBuffer)
             UBO.unbind()
 
             VisibilityRenderer.needsUpdate = true
-        } else
-            VisibilityRenderer.needsUpdate = false
+        }
+
     }
 
     static updateAspectRatio() {

@@ -121,7 +121,7 @@ class CameraWorker {
     static execute() {
         const nBuffer = CameraWorker.notificationBuffers
         const elapsed = nBuffer[5]
-
+        nBuffer[3] = 0
         if (needsUpdate) {
             const incrementTranslation = nBuffer[4] === 0 ? 1 : 1 - Math.pow(.001, elapsed * nBuffer[4])
 
@@ -134,13 +134,12 @@ class CameraWorker {
 
             const offsetRotation = Math.abs(lengthRotationPrev - lengthRotationAfter)
             const offsetTranslation = Math.abs(lengthTranslationPrev - lengthTranslationAfter)
-            if (offsetRotation > 0 || offsetTranslation  > 1e-6 ) {
+            if (offsetRotation > 0 || offsetTranslation > 1e-6) {
                 CameraWorker.updateView()
                 nBuffer[3] = 1
-            } else {
+            } else
                 needsUpdate = false
-                nBuffer[0] = 0
-            }
+
         }
 
         if (nBuffer[0] === 1) {

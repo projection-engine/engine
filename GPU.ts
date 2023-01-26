@@ -11,7 +11,6 @@ import Framebuffer from "./instances/Framebuffer";
 import Material from "./instances/Material";
 import {mat4, vec3} from "gl-matrix";
 import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
-import SceneComposition from "./runtime/SceneComposition";
 import Mesh from "./instances/Mesh";
 import Texture from "./instances/Texture";
 import Entity from "./instances/Entity";

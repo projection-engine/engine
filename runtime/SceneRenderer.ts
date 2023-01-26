@@ -9,7 +9,6 @@ import CameraAPI from "../lib/utils/CameraAPI";
 import StaticFBO from "../lib/StaticFBO";
 import OmnidirectionalShadows from "./OmnidirectionalShadows";
 import SceneComposition from "./SceneComposition";
-import VisibilityRenderer from "./VisibilityRenderer";
 import UberMaterialAttributeGroup from "../resource-libs/UberMaterialAttributeGroup";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import Material from "../instances/Material";

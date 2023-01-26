@@ -67,7 +67,6 @@ export default class GPUAPI {
         }
         GPU.materials.set(id, material)
 
-
         UberShader.compile()
         VisibilityRenderer.needsUpdate = true
         return material
