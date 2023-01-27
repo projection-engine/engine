@@ -63,7 +63,7 @@ export default class UberShader {
         let fragment = Engine.developmentMode ? DEBUG_FRAG : BASIS_FRAG
         fragment = fragment.replace("//--UNIFORMS--", uniformsToLoad.join("\n"))
         fragment = fragment.replace("//--MATERIAL_SELECTION--", methodsToLoad.join("\n"))
-        // console.log(fragment)
+
         const shader = new Shader(VERTEX_SHADER, fragment)
         if (shader.messages.hasError) {
 

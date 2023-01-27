@@ -17,7 +17,7 @@ import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
     static addEntity(entity?: Entity): Entity {
-        if(entity && Engine.entities.has(entity.id))
+        if (entity && Engine.entities.has(entity.id))
             return Engine.entities.map.get(entity.id)
         let target = entity || new Entity()
 
@@ -97,6 +97,10 @@ export default class EntityAPI {
         const entity = Engine.entities.map.get(id)
         if (!entity)
             return
+        if (entity.parent)
+            entity.parent.children = entity.parent.children.filter(e => e.id !== id)
+        for (let c = 0; c < entity.children.length; c++)
+            EntityAPI.removeEntity(entity.children[c].id)
 
         if (GPU.activeSkylightEntity === entity)
             GPU.activeSkylightEntity = undefined
@@ -131,6 +135,7 @@ export default class EntityAPI {
             LightsAPI.packageLights(false, true)
             VisibilityRenderer.needsUpdate = true
         }
+
     }
 
 
@@ -199,7 +204,6 @@ export default class EntityAPI {
             }
         }
         parsedEntity.changed = true
-        VisibilityRenderer.needsUpdate = true
         if (asNew)
             parsedEntity.id = crypto.randomUUID()
         parsedEntity.name = entity.name

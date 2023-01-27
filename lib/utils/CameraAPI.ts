@@ -60,7 +60,6 @@ export default class CameraAPI extends CameraResources{
             CameraAPI.update(entity._translation, entity._rotationQuat)
 
         if (CameraAPI.notificationBuffers[3]) {
-            console.log(Engine.elapsed)
             const UBO = StaticUBOs.cameraUBO
 
             UBO.bind()
