@@ -18,6 +18,7 @@ import SceneComposition from "./runtime/SceneComposition";
 import GPU from "./GPU";
 import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
+import AtmosphereRenderer from "./runtime/renderers/AtmosphereRenderer";
 
 let previous = 0
 
@@ -47,13 +48,15 @@ export default class Loop {
         VisibilityRenderer.execute()
 
         SceneComposition.execute()
-        Loop.#afterDrawing()
         Loop.copyToCurrentFrame()
 
         SSGI.execute()
         LensPostProcessing.execute()
         FrameComposition.execute()
+
         MetricsController.end()
+
+        Loop.#afterDrawing()
     }
 
 

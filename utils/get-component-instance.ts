@@ -1,6 +1,6 @@
 import COMPONENTS from "../static/COMPONENTS";
 import MeshComponent from "../instances/components/MeshComponent";
-import SkyLightComponent from "../instances/components/SkyLightComponent";
+import AtmosphereComponent from "../instances/components/AtmosphereComponent";
 import CameraComponent from "../instances/components/CameraComponent";
 import SpriteComponent from "../instances/components/SpriteComponent";
 import PhysicsColliderComponent from "../instances/components/PhysicsColliderComponent";
@@ -11,6 +11,7 @@ import TerrainComponent from "../instances/components/TerrainComponent";
 import LightComponent from "../instances/components/LightComponent";
 import Component from "../instances/components/Component";
 import DecalComponent from "../instances/components/DecalComponent";
+import LightProbeComponent from "../instances/components/LightProbeComponent";
 
 
 export default function getComponentInstance(key:string):Component|undefined{
@@ -19,8 +20,10 @@ export default function getComponentInstance(key:string):Component|undefined{
             return new LightComponent();
         case  COMPONENTS.MESH:
             return new MeshComponent();
-        case  COMPONENTS.SKYLIGHT:
-            return new SkyLightComponent();
+        case  COMPONENTS.ATMOSPHERE:
+            return new AtmosphereComponent();
+        case  COMPONENTS.LIGHT_PROBE:
+            return new LightProbeComponent();
         case  COMPONENTS.CAMERA:
             return new CameraComponent();
         case  COMPONENTS.SPRITE:

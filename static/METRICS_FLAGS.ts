@@ -15,7 +15,8 @@ export default {
     VISIBILITY: 13,
     SSAO: 14,
     BLOOM: 15,
-    BOKEH: 16
+    BOKEH: 16,
+    ATMOSPHERE: 17
 }
 
 export const REVERSED_METRICS_FLAGS = {
@@ -35,5 +36,6 @@ export const REVERSED_METRICS_FLAGS = {
     "13": "VISIBILITY",
     "14": "SSAO",
     "15": "BLOOM",
-    "16": "BOKEH"
+    "16": "BOKEH",
+    "17": "ATMOSPHERE"
 }

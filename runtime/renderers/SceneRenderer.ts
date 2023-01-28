@@ -1,17 +1,18 @@
-import GPU from "../GPU";
-import StaticMeshes from "../lib/StaticMeshes";
-import StaticShaders from "../lib/StaticShaders";
-import type Entity from "../instances/Entity";
-import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
-import Shader from "../instances/Shader";
-import Engine from "../Engine";
-import CameraAPI from "../lib/utils/CameraAPI";
-import StaticFBO from "../lib/StaticFBO";
-import OmnidirectionalShadows from "./OmnidirectionalShadows";
-import SceneComposition from "./SceneComposition";
-import UberMaterialAttributeGroup from "../resource-libs/UberMaterialAttributeGroup";
-import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
-import Material from "../instances/Material";
+import GPU from "../../GPU";
+import StaticMeshes from "../../lib/StaticMeshes";
+import StaticShaders from "../../lib/StaticShaders";
+import type Entity from "../../instances/Entity";
+import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
+import Shader from "../../instances/Shader";
+import Engine from "../../Engine";
+import CameraAPI from "../../lib/utils/CameraAPI";
+import StaticFBO from "../../lib/StaticFBO";
+import OmnidirectionalShadows from "../OmnidirectionalShadows";
+import SceneComposition from "../SceneComposition";
+import UberMaterialAttributeGroup from "../../resource-libs/UberMaterialAttributeGroup";
+import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
+import Material from "../../instances/Material";
+import UberShader from "../../utils/UberShader";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 
@@ -22,38 +23,12 @@ export default class SceneRenderer {
         context.uniform1i(location, index)
     }
 
-    static drawSprites() {
+
+    static bindGlobalResources( viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
+        const uniforms = UberShader.uberUniforms
         const context = GPU.context
-        const sprites = ResourceEntityMapper.sprites.array
-        const size = sprites.length
-        if (size === 0)
-            return
 
-        const textures = GPU.textures
-
-        StaticShaders.sprite.bind()
-        const uniforms = StaticShaders.spriteUniforms
-
-        context.activeTexture(context.TEXTURE0)
-        for (let i = 0; i < size; i++) {
-            const current = sprites[i], component = current.spriteComponent
-            if (!current.active || current.isCulled)
-                continue
-            const texture = textures.get(component.imageID)
-            if (!texture)
-                continue
-
-            context.uniformMatrix4fv(uniforms.transformationMatrix, false, current.matrix)
-            context.uniform3fv(uniforms.scale, current._scaling)
-            context.uniform2fv(uniforms.attributes, component.attributes)
-            context.bindTexture(context.TEXTURE_2D, texture.texture)
-            context.uniform1i(uniforms.iconSampler, 0)
-            StaticMeshes.drawQuad()
-        }
-
-    }
-
-    static bindGlobalResources(context: WebGL2RenderingContext, uniforms: { [key: string]: WebGLUniformLocation }, viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
+        UberShader.uber.bind()
         if (Engine.developmentMode)
             context.uniform1i(uniforms.shadingModel, SceneComposition.debugShadingModel)
 
@@ -80,10 +55,10 @@ export default class SceneRenderer {
         SceneRenderer.#bindTexture(context, uniforms.shadow_atlas, 5, StaticFBO.shadowsSampler, false)
         SceneRenderer.#bindTexture(context, uniforms.shadow_cube, 6, OmnidirectionalShadows.sampler, true)
 
-        if (!!GPU.activeSkylightEntity) {
-            texOffset++
-            SceneRenderer.#bindTexture(context, uniforms.skylight_specular, 7, GPU.skylightProbe.texture, true)
-        }
+        // if (!!GPU.activeSkylightEntity) {
+        //     texOffset++
+        //     SceneRenderer.#bindTexture(context, uniforms.skylight_specular, 7, GPU.skylightProbe.texture, true)
+        // }
 
         // uniform samplerCube skylight_diffuse;
         // uniform samplerCube skylight_specular;

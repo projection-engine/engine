@@ -11,7 +11,7 @@ import CUBEMAP from "../shaders/forward-rendering/CUBEMAP.vert"
 import PREFILTERED_MAP from "../shaders/post-processing/PREFILTERED_MAP.frag"
 import IRRADIANCE_MAP from "../shaders/post-processing/IRRADIANCE_MAP.frag"
 import MOTION_BLUR_FRAG from "../shaders/post-processing/MOTION_BLUR.frag";
-import SceneRenderer from "../runtime/SceneRenderer";
+import SceneRenderer from "../runtime/renderers/SceneRenderer";
 import GAUSSIAN_FRAG from "../shaders/post-processing/GAUSSIAN.frag"
 import UPSAMPLING_TEND_FRAG from "../shaders/post-processing/UPSAMPLE_TENT.glsl"
 import BOKEH_FRAG from "../shaders/post-processing/BOKEH.frag"
@@ -23,6 +23,7 @@ import V_BUFFER_FRAG from "../shaders/forward-rendering/V_BUFFER.frag"
 import OMNIDIRECTIONAL_SHADOWS from "../shaders/forward-rendering/OMNIDIRECTIONAL_SHADOWS.frag"
 import SHADOWS_VERTEX from "../shaders/forward-rendering/SHADOWS.vert"
 import DIRECTIONAL_SHADOWS from "../shaders/forward-rendering/DIRECTIONAL_SHADOWS.frag"
+import ATMOSPHERE_FRAG from "../shaders/forward-rendering/ATMOSPHERE.frag"
 
 export default {
     SPRITE_FRAG,
@@ -49,5 +50,6 @@ export default {
     V_BUFFER_FRAG,
     OMNIDIRECTIONAL_SHADOWS,
     SHADOWS_VERTEX,
-    DIRECTIONAL_SHADOWS
+    DIRECTIONAL_SHADOWS,
+    ATMOSPHERE_FRAG
 }

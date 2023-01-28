@@ -8,12 +8,13 @@ import Material from "../Material";
 import Mesh from "../Mesh";
 import COMPONENTS from "../../static/COMPONENTS";
 import Component from "./Component";
-import SkyLightComponent from "./SkyLightComponent";
+import AtmosphereComponent from "./AtmosphereComponent";
 import PhysicsColliderComponent from "./PhysicsColliderComponent";
 import TerrainComponent from "./TerrainComponent";
 import UIComponent from "./UIComponent";
 import CameraComponent from "./CameraComponent";
 import DecalComponent from "./DecalComponent";
+import LightProbeComponent from "./LightProbeComponent";
 
 export default class ComponentAbstract extends MovableAbstract {
     components = new Map<string, Component>()
@@ -25,11 +26,13 @@ export default class ComponentAbstract extends MovableAbstract {
     #decalComponent?: DecalComponent
     #uiComponent?: UIComponent
     #cameraComponent?: CameraComponent
-    #skylightComponent?: SkyLightComponent
     #physicsColliderComponent?: PhysicsColliderComponent
-    #terrainComponent?: TerrainComponent
+    #lightProbeComponent?: LightProbeComponent
+    #atmosphereComponent?: AtmosphereComponent
     #materialRef?: Material
     #meshRef?: Mesh
+
+
 
     get meshRef(): Mesh | undefined {
         return this.#meshRef
@@ -78,17 +81,18 @@ export default class ComponentAbstract extends MovableAbstract {
         return this.#cameraComponent
     }
 
-    get skylightComponent(): SkyLightComponent | undefined {
-        return this.#skylightComponent
-    }
+
 
     get physicsColliderComponent(): PhysicsColliderComponent | undefined {
         return this.#physicsColliderComponent
     }
 
-    // get terrainComponent(): TerrainComponent | undefined {
-    //     return this.#terrainComponent
-    // }
+    get lightProbeComponent(): LightProbeComponent | undefined {
+        return this.#lightProbeComponent
+    }
+    get atmosphereComponent(): AtmosphereComponent {
+        return this.#atmosphereComponent
+    }
 
     protected updateInternalComponentRef(KEY: string, instance?: Component) {
         switch (KEY) {
@@ -104,9 +108,10 @@ export default class ComponentAbstract extends MovableAbstract {
             case COMPONENTS.CAMERA:
                 this.#cameraComponent = !instance ? undefined : <CameraComponent>instance
                 break
-            case COMPONENTS.SKYLIGHT:
-                this.#skylightComponent = !instance ? undefined : <SkyLightComponent>instance
+            case COMPONENTS.LIGHT_PROBE:
+                this.#lightProbeComponent = !instance ? undefined : <LightProbeComponent>instance
                 break
+
             case COMPONENTS.SPRITE:
                 this.#spriteComponent = !instance ? undefined : <SpriteComponent>instance
                 break
@@ -122,9 +127,9 @@ export default class ComponentAbstract extends MovableAbstract {
             case COMPONENTS.UI:
                 this.#uiComponent = !instance ? undefined : <UIComponent>instance
                 break
-            // case COMPONENTS.TERRAIN:
-            //     this.#terrainComponent = !instance ? undefined : <TerrainComponent>instance
-            //     break
+            case COMPONENTS.ATMOSPHERE:
+                this.#atmosphereComponent = !instance ? undefined : <AtmosphereComponent>instance
+                break
         }
     }
 

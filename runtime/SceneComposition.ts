@@ -1,12 +1,11 @@
-import GPU from "../GPU";
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
 import UberShader from "../utils/UberShader";
-import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
-import SceneRenderer from "./SceneRenderer";
-import Loop from "../Loop";
-import MetricsController from "../lib/utils/MetricsController";
-import METRICS_FLAGS from "../static/METRICS_FLAGS";
+import SceneRenderer from "./renderers/SceneRenderer";
+import SpriteRenderer from "./renderers/SpriteRenderer";
+import DecalRenderer from "./renderers/DecalRenderer";
+import MeshRenderer from "./renderers/MeshRenderer";
+import AtmosphereRenderer from "./renderers/AtmosphereRenderer";
 
 
 export default class SceneComposition {
@@ -16,42 +15,20 @@ export default class SceneComposition {
     static transparenciesToLoopThrough = 0
 
     static execute() {
-
-        const shader = UberShader.uber
-        if (!shader)
+        if (!UberShader.uber)
             return
 
-        shader.bind()
-        const uniforms = UberShader.uberUniforms
-        const context = GPU.context
-        const meshes = ResourceEntityMapper.meshesToDraw.array
-
-        SceneRenderer.bindGlobalResources(context, uniforms)
-        SceneComposition.transparenciesToLoopThrough = 0
         StaticFBO.postProcessing2.startMapping()
 
-        SceneRenderer.drawMeshes(true, false, context, meshes, uniforms)
-        MetricsController.currentState = METRICS_FLAGS.OPAQUE
-        context.disable(context.CULL_FACE)
-        context.disable(context.DEPTH_TEST)
-        SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, uniforms)
-        MetricsController.currentState = METRICS_FLAGS.DECAL
-        context.enable(context.DEPTH_TEST)
-        SceneRenderer.drawSprites()
-        MetricsController.currentState = METRICS_FLAGS.SPRITE
-        context.enable(context.CULL_FACE)
+        AtmosphereRenderer.execute()
+        SceneRenderer.bindGlobalResources()
+        MeshRenderer.execute(false)
+        DecalRenderer.execute()
+        SpriteRenderer.execute()
+
         StaticFBO.postProcessing2.stopMapping()
 
-        if (SceneComposition.transparenciesToLoopThrough > 0) {
-            Loop.copyToCurrentFrame()
-
-            StaticFBO.postProcessing2.use()
-            SceneRenderer.drawMeshes(false, false, context, meshes, uniforms)
-            StaticFBO.postProcessing2.stopMapping()
-
-            MetricsController.currentState = METRICS_FLAGS.TRANSPARENCY
-        }
-
+        MeshRenderer.execute(true)
     }
 
 }

@@ -33,47 +33,8 @@ export default class GPU {
     static textures = new Map<string, Texture>()
     static BRDF: WebGLTexture
     static internalResolution = {w: 0, h: 0}
-    static #activeSkylightEntity?: Entity
     static skylightProbe: LightProbe
     static bufferResolution = new Float32Array([0,0])
-    static set activeSkylightEntity(entity: Entity | undefined) {
-        GPU.#activeSkylightEntity = entity
-        GPU.updateSkylight()
-    }
-
-    static get activeSkylightEntity(): Entity | undefined {
-        return GPU.#activeSkylightEntity
-    }
-
-
-    static updateSkylight(): void {
-        const entity = GPU.#activeSkylightEntity
-        if (!GPU.skylightProbe) {
-            StaticUBOs.uberUBO.bind()
-            StaticUBOs.uberUBO.updateData("hasSkylight", new Uint8Array([0]))
-            StaticUBOs.uberUBO.unbind()
-            return
-        }
-        if (entity) {
-
-            const skylight = entity.skylightComponent
-
-            StaticUBOs.uberUBO.bind()
-            StaticUBOs.uberUBO.updateData("hasSkylight", new Uint8Array([1]))
-            StaticUBOs.uberUBO.updateData("skylightSamples", skylight.mipmaps)
-            StaticUBOs.uberUBO.unbind()
-
-            GPU.skylightProbe.resolution = skylight.resolution
-            const tempView = mat4.create(), tempPosition = vec3.create(), tempViewProjection = mat4.create()
-            GPU.skylightProbe.draw((yaw, pitch, projection, index): void => {
-                vec3.add(tempPosition, entity._translation, <vec3>CUBE_MAP_VIEWS.target[index])
-                mat4.lookAt(tempView, entity._translation, tempPosition, <vec3>CUBE_MAP_VIEWS.up[index])
-                mat4.multiply(tempViewProjection, projection, tempView)
-                // TODO - IMPLEMENT NEW PIPELINE
-                // SceneComposition.execute(true, <Float32Array>tempViewProjection, <Float32Array>tempView, <Float32Array>tempPosition)
-            })
-        }
-    }
 
     static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined) {
         if (GPU.context != null)
@@ -87,7 +48,7 @@ export default class GPU {
         GPU.context = canvas.getContext("webgl2", {
             antialias: false,
 
-            preserveDrawingBuffer: false,
+            // preserveDrawingBuffer: false,
             premultipliedAlpha: false,
             powerPreference: "high-performance"
         })

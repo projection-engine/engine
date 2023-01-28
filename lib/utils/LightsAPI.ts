@@ -56,11 +56,25 @@ export default class LightsAPI {
                 break
             if (!current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
                 continue
-            LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, offset)
+            LightsAPI.#updateBuffer(current, primaryBuffer, secondaryBuffer, offset)
 
             offset += 16
             size++
         }
+
+        const atmospheres = ResourceEntityMapper.atmosphere.array
+        for (let i = 0; i < atmospheres.length; i++) {
+            const current = atmospheres[i]
+            if (offset + 16 > UberShader.MAX_LIGHTS * 16)
+                break
+            if (!current.active || !current.changesApplied && !current.needsLightUpdate && keepOld)
+                continue
+            LightsAPI.#updateAtmosphereLight(current, primaryBuffer, offset)
+
+            offset += 16
+            size++
+        }
+
         LightsAPI.lightsQuantity = size
         if (LightsAPI.lightsQuantity > 0 || !keepOld) {
             StaticUBOs.lightsUBO.bind()
@@ -75,7 +89,26 @@ export default class LightsAPI {
         }
     }
 
-    static updateBuffer(entity: Entity, primaryBuffer: Float32Array, secondaryBuffer: Float32Array, offset: number) {
+    static #updateAtmosphereLight(entity: Entity, primaryBuffer: Float32Array, offset: number) {
+        const component = entity.atmosphereComponent
+        const position = component.sunDirection
+        primaryBuffer[offset + 1] = component.intensity / 10
+        primaryBuffer[offset + 2] = component.intensity / 10
+        primaryBuffer[offset + 3] = component.intensity / 10
+
+        primaryBuffer[offset + 4] = position[0] * 6420e3 * component.atmosphereRadius
+        primaryBuffer[offset + 5] = position[1] * 6420e3 * component.atmosphereRadius
+        primaryBuffer[offset + 6] = position[2] * 6420e3 * component.atmosphereRadius
+
+        primaryBuffer[offset + 8] = 0
+        primaryBuffer[offset + 9] = 0
+        primaryBuffer[offset + 10] = -1
+        primaryBuffer[offset + 12] = 0
+        primaryBuffer[offset + 13] = 0
+        primaryBuffer[offset + 14] = 0
+    }
+
+    static #updateBuffer(entity: Entity, primaryBuffer: Float32Array, secondaryBuffer: Float32Array, offset: number) {
         const component = entity.lightComponent
         const color = component.fixedColor
         const position = entity.absoluteTranslation

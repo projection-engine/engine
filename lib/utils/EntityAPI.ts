@@ -81,6 +81,14 @@ export default class EntityAPI {
             ResourceEntityMapper.decals.add(entity.id, entity)
         if (entity.uiComponent !== undefined)
             ResourceEntityMapper.ui.add(entity.id, entity)
+
+        if (entity.atmosphereComponent !== undefined)
+            ResourceEntityMapper.atmosphere.add(entity.id, entity)
+        if (entity.lightProbeComponent !== undefined)
+            ResourceEntityMapper.lightProbe.add(entity.id, entity)
+
+        if (entity.uiComponent !== undefined)
+            ResourceEntityMapper.ui.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
             ResourceEntityMapper.meshesToDraw.add(entity.id, entity)
             MaterialAPI.updateMap(entity.meshComponent)
@@ -102,9 +110,6 @@ export default class EntityAPI {
         for (let c = 0; c < entity.children.length; c++)
             EntityAPI.removeEntity(entity.children[c].id)
 
-        if (GPU.activeSkylightEntity === entity)
-            GPU.activeSkylightEntity = undefined
-
         if (!Engine.isDev)
             for (let i = 0; i < entity.scripts.length; i++) {
                 const scr = entity.scripts[i]
@@ -119,6 +124,8 @@ export default class EntityAPI {
         ResourceEntityMapper.ui.delete(id)
         ResourceEntityMapper.decals.delete(id)
         ResourceEntityMapper.meshesToDraw.delete(id)
+        ResourceEntityMapper.atmosphere.delete(id)
+        ResourceEntityMapper.lightProbe.delete(id)
 
         PhysicsAPI.removeRigidBody(entity)
         EntityWorkerAPI.removeEntity(entity)
@@ -186,6 +193,7 @@ export default class EntityAPI {
                                 component[componentValue] = entity.components[k][componentValue]
                             break
                         }
+                        case COMPONENTS.ATMOSPHERE:
                         case COMPONENTS.DECAL: {
                             if (componentValue.charAt(0) === "_")
                                 component[componentValue.substring(1, componentValue.length)] = entity.components[k][componentValue]

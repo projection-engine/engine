@@ -149,6 +149,7 @@ export default class Framebuffer {
     clear() {
         this.use()
         GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
+        GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, null)
     }
 
     stop() {

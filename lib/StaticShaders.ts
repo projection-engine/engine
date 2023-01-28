@@ -31,6 +31,10 @@ export default class StaticShaders {
     static ssgi?: Shader
     static ssgiUniforms?: { [key: string]: WebGLUniformLocation }
 
+    static atmosphere?: Shader
+    static atmosphereUniforms?: { [key: string]: WebGLUniformLocation }
+
+
     static mb?: Shader
     static mbUniforms?: { [key: string]: WebGLUniformLocation }
 
@@ -89,9 +93,11 @@ export default class StaticShaders {
         StaticShaders.lens = new Shader(SHADERS.QUAD_VERTEX, SHADERS.LENS_POST_PROCESSING_FRAG)
         StaticShaders.gaussian = new Shader(SHADERS.QUAD_VERTEX, SHADERS.GAUSSIAN_FRAG)
         StaticShaders.upSampling = new Shader(SHADERS.QUAD_VERTEX, SHADERS.UPSAMPLING_TEND_FRAG)
+        StaticShaders.atmosphere = new Shader(SHADERS.QUAD_VERTEX, SHADERS.ATMOSPHERE_FRAG)
 
         UberShader.compile()
         
+        StaticShaders.atmosphereUniforms = StaticShaders.atmosphere.uniformMap
         StaticShaders.spriteUniforms = StaticShaders.sprite.uniformMap
         StaticShaders.visibilityUniforms = StaticShaders.visibility.uniformMap
         StaticShaders.toScreenUniforms = StaticShaders.toScreen.uniformMap
