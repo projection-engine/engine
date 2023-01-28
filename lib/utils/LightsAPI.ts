@@ -1,6 +1,6 @@
 import ArrayBufferAPI from "./ArrayBufferAPI";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
-import {mat4, quat, vec3} from "gl-matrix";
+import {mat4, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
