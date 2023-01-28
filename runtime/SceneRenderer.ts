@@ -74,9 +74,10 @@ export default class SceneRenderer {
         SceneRenderer.#bindTexture(context, uniforms.brdf_sampler, 0, GPU.BRDF, false)
         SceneRenderer.#bindTexture(context, uniforms.SSAO, 1, StaticFBO.ssaoBlurredSampler, false)
         SceneRenderer.#bindTexture(context, uniforms.SSGI, 2, StaticFBO.ssgiSampler, false)
-        SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.lensSampler, false)
-        SceneRenderer.#bindTexture(context, uniforms.shadow_atlas, 4, StaticFBO.shadowsSampler, false)
-        SceneRenderer.#bindTexture(context, uniforms.scene_depth, 5, StaticFBO.sceneDepth, false)
+        SceneRenderer.#bindTexture(context, uniforms.scene_depth, 3, StaticFBO.sceneDepth, false)
+
+        SceneRenderer.#bindTexture(context, uniforms.previousFrame, 4, StaticFBO.lensSampler, false)
+        SceneRenderer.#bindTexture(context, uniforms.shadow_atlas, 5, StaticFBO.shadowsSampler, false)
         SceneRenderer.#bindTexture(context, uniforms.shadow_cube, 6, OmnidirectionalShadows.sampler, true)
 
         if (!!GPU.activeSkylightEntity) {

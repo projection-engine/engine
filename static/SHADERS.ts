@@ -4,7 +4,7 @@ import QUAD_VERTEX from "../shaders/post-processing/QUAD.vert";
 import LENS_POST_PROCESSING_FRAG from "../shaders/post-processing/LENS_POST_PROCESSING.frag"
 import SSAO from "../shaders/post-processing/SSAO.frag";
 import BOX_BLUR_FRAG from "../shaders/post-processing/BOX-BLUR.frag";
-import FXAA_FRAG from "../shaders/post-processing/COMPOSITION.frag";
+import FXAA_FRAG from "../shaders/post-processing/FRAME_COMPOSITION.frag";
 import BRIGHTNESS_FILTER_FRAG from "../shaders/post-processing/BRIGHTNESS_FILTER.frag";
 import SSGI from "../shaders/post-processing/SSGI.frag"
 import CUBEMAP from "../shaders/forward-rendering/CUBEMAP.vert"

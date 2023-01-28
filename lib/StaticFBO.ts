@@ -92,6 +92,7 @@ export default class StaticFBO {
         StaticFBO.ssgiFallback = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
 
         const SSAO_SETTINGS = {
+            linear: true,
             precision: context.R8,
             format: context.RED,
             type: context.UNSIGNED_BYTE

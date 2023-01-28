@@ -40,15 +40,14 @@ export default class LightsAPI {
         const lights = ResourceEntityMapper.lights.array
         const primaryBuffer = LightsAPI.primaryBuffer,
             secondaryBuffer = LightsAPI.secondaryBuffer
-        let size = [0, 0, 0], offset = 0, sizeIndex = 0
+        let size = 0, offset = 0
 
 
-        if (!keepOld) {
+        if (!keepOld)
             for (let i = 0; i < primaryBuffer.length; i++) {
                 primaryBuffer[i] = 0
                 secondaryBuffer[i] = 0
             }
-        }
 
         const toLoopSize = lights.length
         for (let i = 0; i < toLoopSize; i++) {
@@ -60,9 +59,9 @@ export default class LightsAPI {
             LightsAPI.updateBuffer(current, primaryBuffer, secondaryBuffer, offset)
 
             offset += 16
-            size[sizeIndex] += 1
+            size++
         }
-        LightsAPI.lightsQuantity = size[0]
+        LightsAPI.lightsQuantity = size
         if (LightsAPI.lightsQuantity > 0 || !keepOld) {
             StaticUBOs.lightsUBO.bind()
             StaticUBOs.lightsUBO.updateData("lightPrimaryBuffer", LightsAPI.primaryBuffer)
@@ -104,8 +103,8 @@ export default class LightsAPI {
                 if (component.shadowMap) {
                     mat4.lookAt(component.__lightView, component.entity.absoluteTranslation, [0, 0, 0], [0, 1, 0])
                     mat4.ortho(component.__lightProjection, -component.size, component.size, -component.size, component.size, component.zNear, component.zFar)
-
                     mat4.multiply(lightViewProjection, component.__lightProjection, component.__lightView)
+
                     for (let i = 0; i < 16; i++)
                         secondaryBuffer[offset + i] = lightViewProjection[i]
 
@@ -134,7 +133,6 @@ export default class LightsAPI {
                 mat4.fromQuat(cache2Mat4, entity._rotationQuat)
                 mat4.multiply(cache1Mat4, cache1Mat4, cache2Mat4)
 
-                const radius = Math.cos(component.radius * toRad)
 
                 primaryBuffer[8 + offset] = cache1Mat4[8]
                 primaryBuffer[9 + offset] = cache1Mat4[9]
@@ -145,7 +143,7 @@ export default class LightsAPI {
                 primaryBuffer[12 + offset] = attenuation[0]
                 primaryBuffer[13 + offset] = attenuation[1]
 
-                primaryBuffer[14 + offset] = radius
+                primaryBuffer[14 + offset] = Math.cos(component.radius * toRad)
                 primaryBuffer[15 + offset] = component.hasSSS ? 1 : 0
 
                 break
