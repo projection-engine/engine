@@ -4,10 +4,10 @@ self.onmessage = async ({data: {type, data, id}}) => {
     try {
         switch (type) {
             case IMAGE_WORKER_ACTIONS.RESIZE_IMAGE: {
-                const {image, width, height, sizePercent, quality} = data
+                const {image, width, height} = data
                 const imageToLoad = await createImageBitmap(await (await fetch(image)).blob())
-                const widthF = width ? width : sizePercent ? imageToLoad.width * sizePercent : imageToLoad.width
-                const heightF = height ? height : sizePercent ? imageToLoad.height * sizePercent : imageToLoad.height
+                const widthF = width ? width : imageToLoad.width
+                const heightF = height ? height : imageToLoad.height
                 if (widthF === 0 || heightF === 0)
                     self.postMessage(undefined)
                 if (imageToLoad.width === widthF && imageToLoad.height === heightF)
@@ -19,8 +19,7 @@ self.onmessage = async ({data: {type, data, id}}) => {
 
                     ctx.drawImage(imageToLoad, 0, 0, widthF, heightF)
                     const canvasBlob = await canvas.convertToBlob({
-                        type: "image/png",
-                        quality: quality
+                        type: "image/png"
                     })
                     const reader = new FileReader()
                     reader.readAsDataURL(canvasBlob)
