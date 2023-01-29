@@ -32,11 +32,8 @@ in vec3 worldPosition;
 in mat4 invModelMatrix;
 
 // GLOBAL
-uniform vec2 bufferResolution;
 uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
 uniform mat4 invViewMatrix;
-uniform mat4 invProjectionMatrix;
 uniform vec3 cameraPosition;
 uniform float elapsedTime;
 uniform bool isDecalPass;
@@ -64,8 +61,8 @@ uniform Lights {
     mat4 lightPrimaryBuffer[MAX_LIGHTS];
     mat4 lightSecondaryBuffer[MAX_LIGHTS];
 };
+//import(sceneDepthUtils)
 
-uniform sampler2D scene_depth;
 uniform sampler2D brdf_sampler;
 uniform sampler2D SSAO;
 uniform sampler2D SSGI;
@@ -82,10 +79,6 @@ uniform sampler2D sampler5;
 uniform sampler2D sampler6;
 uniform sampler2D sampler7;
 
-
-out vec4 fragColor;
-
-//import(blur)
 
 float naturalAO = 1.;
 float roughness = .5;
@@ -139,11 +132,10 @@ bool useRoughnessDecal;
 bool useNormalDecal;
 bool useOcclusionDecal;
 
-
 void extractData() {
     texelSize = 1. / bufferResolution;
-    quadUV = gl_FragCoord.xy / bufferResolution;
-    depthData = texture(scene_depth, quadUV).r;
+    quadUV = gl_FragCoord.xy * texelSize;
+    depthData = getLogDepth(quadUV);
 
     screenDoorEffect = matAttr[1][0] == 1.;
     ssrEnabled = matAttr[1][1] == 1.;
@@ -235,3 +227,23 @@ vec2 parallaxOcclusionMapping(sampler2D heightMap, float heightScale, int layers
 
     return finalTexCoords;
 }
+
+//import(blur)
+
+//import(rayMarcher)
+
+//import(SSS)
+
+//import(brdf)
+
+//import(computeLights)
+
+//import(computePointLights)
+
+//import(computeSpotLights)
+
+//import(computeAreaLights)
+
+//import(pbLightComputation)
+
+out vec4 fragColor;

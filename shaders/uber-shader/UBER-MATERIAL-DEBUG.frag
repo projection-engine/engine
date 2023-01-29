@@ -1,12 +1,10 @@
 precision highp float;
+uniform int shadingModel;
 
 //import(uberAttributes)
 
-uniform int shadingModel;
-
 //--UNIFORMS--
 
-//import(pbLightComputation)
 
 const int ALBEDO = 0;
 const int NORMAL = 1;
@@ -26,11 +24,6 @@ const int OVERDRAW = 14;
 const int LIGHT_COMPLEXITY = 15;
 const int LIGHT_QUANTITY = 16;
 
-float linearize(float depth) {
-    float near = .1;
-    float far = 1000.;
-    return (2. * near) / (far + near - depth * (far - near));
-}
 
 float rand(vec2 co) {
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -77,7 +70,7 @@ void main() {
         if (depthData == 0.) discard;
 
         viewSpacePosition = viewSpacePositionFromDepth(depthData, quadUV);
-        normalVec = normalize(vec3(invViewMatrix * vec4(normalFromDepth(depthData, quadUV, scene_depth), 0.)));
+        normalVec = normalize(vec3(invViewMatrix * vec4(normalFromDepth(depthData, quadUV), 0.)));
         worldSpacePosition = vec3(invViewMatrix * vec4(viewSpacePosition, 1.));
         vec3 objectSpacePosition = vec3(invModelMatrix * vec4(worldSpacePosition, 1.));
         texCoords = objectSpacePosition.xz * .5 + .5;
@@ -121,7 +114,7 @@ void main() {
                 fragColor = vec4(N, 1.);
                 break;
             case DEPTH:
-                fragColor = vec4(vec3(linearize(depthData)), 1.);
+                fragColor = vec4(vec3(depthData), 1.);
                 break;
             case G_AO:
                 fragColor = vec4(vec3(naturalAO), 1.);

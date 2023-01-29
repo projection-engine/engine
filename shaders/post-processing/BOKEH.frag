@@ -7,12 +7,11 @@ precision highp float;
 #define APERTURE 7.8
 
 //import(ppUBO)
-//import(cameraUBO)
-//import(depthReconstructionUtils)
+//import(cameraViewInfo)
+//import(sceneDepthUtils)
 
 in vec2 texCoords;
 uniform sampler2D sceneColor;
-uniform sampler2D depthSampler;
 
 out vec4 fragColor;
 
@@ -21,7 +20,7 @@ out vec4 fragColor;
 void main() {
 
     float iterations = float(BLUR_NUMBER);
-    float DEPTH = texture(depthSampler, texCoords).r;
+    float DEPTH = getLogDepth(texCoords);
     float distanceFromCamera = length(viewSpacePositionFromDepth(DEPTH, texCoords) - placement.xyz);
     float percentage = min(distanceFromCamera, focusDistanceDOF) / focusDistanceDOF;
     float interpolation = DEPTH == 0. ? 1. : mix(0., 1., percentage);

@@ -1,8 +1,8 @@
 precision highp float;
 
-//--UNIFORMS--
-
 //import(uberAttributes)
+
+//--UNIFORMS--
 
 //import(pbLightComputation)
 bool checkDither(){
@@ -18,7 +18,7 @@ void main(){
     if(checkDither()) discard;
     quadUV = gl_FragCoord.xy/bufferResolution;
     if(!alphaTested){
-        vec4 depthData = texture(scene_depth, quadUV);
+        vec4 depthData = texture(sceneDepth, quadUV);
         if ((!isSky && !screenDoorEffect &&  abs(depthData.r - gl_FragCoord.z) > FRAG_DEPTH_THRESHOLD) || (isSky && depthData.r > 0.)) discard;
     }
 

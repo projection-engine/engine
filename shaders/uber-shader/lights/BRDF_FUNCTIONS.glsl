@@ -6,7 +6,7 @@ vec3 gaussian(sampler2D samplerData, vec2 texCoords, float blurRadius, int sampl
 
 vec3 computeSSR() {
     if (metallic < 0.05) return vec3(0.);
-    vec3 worldNormal = normalFromDepth(depthData, quadUV, scene_depth);
+    vec3 worldNormal = normalFromDepth(depthData, quadUV);
     vec3 reflected = normalize(reflect(normalize(viewSpacePosition), normalize(worldNormal)));
     vec3 hitPos = viewSpacePosition;
     float step = max(stepSizeSSR, .1);

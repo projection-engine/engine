@@ -5,7 +5,7 @@ import StaticMeshes from "../../lib/StaticMeshes";
 import MetricsController from "../../lib/utils/MetricsController";
 import METRICS_FLAGS from "../../static/METRICS_FLAGS";
 import SceneRenderer from "./SceneRenderer";
-import UberShader from "../../utils/UberShader";
+import UberShader from "../../resource-libs/UberShader";
 import Loop from "../../Loop";
 import StaticFBO from "../../lib/StaticFBO";
 import SceneComposition from "../SceneComposition";

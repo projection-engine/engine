@@ -1,40 +1,50 @@
 import UBO from "../instances/UBO";
-import UberShader from "../utils/UberShader";
+import UberShader from "../resource-libs/UberShader";
 import GPU from "../GPU";
 
 export enum StaticUBONames {
-    CAMERA = "CameraMetadata",
+    CAMERA_VIEW = "CameraViewInfo",
     FRAME_COMPOSITION = "CompositionSettings",
     LENS_PP = "LensEffects",
     SSAO = "Settings",
     UBER = "UberShaderSettings",
-    LIGHTS = "Lights"
+    LIGHTS = "Lights",
+    CAMERA_PROJECTION = "CameraProjectionInfo"
 }
 
 export default class StaticUBOs {
     static #initialized = false
 
-    static cameraUBO?: UBO
+    static cameraViewUBO?: UBO
     static frameCompositionUBO?: UBO
     static lensPostProcessingUBO?: UBO
     static ssaoUBO?: UBO
     static uberUBO?: UBO
     static lightsUBO?: UBO
+    static cameraProjectionUBO?: UBO
 
     static initialize() {
         if (StaticUBOs.#initialized)
             return
         StaticUBOs.#initialized = true
 
-        StaticUBOs.cameraUBO = new UBO(
-            StaticUBONames.CAMERA,
+        StaticUBOs.cameraViewUBO = new UBO(
+            StaticUBONames.CAMERA_VIEW,
             [
                 {name: "viewProjection", type: "mat4"},
                 {name: "viewMatrix", type: "mat4"},
-                {name: "projectionMatrix", type: "mat4"},
                 {name: "invViewMatrix", type: "mat4"},
-                {name: "invProjectionMatrix", type: "mat4"},
                 {name: "placement", type: "vec4"},
+            ])
+
+        StaticUBOs.cameraProjectionUBO = new UBO(
+            StaticUBONames.CAMERA_PROJECTION,
+            [
+                {name: "projectionMatrix", type: "mat4"},
+                {name: "invProjectionMatrix", type: "mat4"},
+                {name: "bufferResolution", type: "vec2"},
+                {name: "logDepthFC", type: "float"},
+                {name: "logC", type: "float"},
             ])
 
         StaticUBOs.frameCompositionUBO = new UBO(

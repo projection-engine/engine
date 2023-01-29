@@ -38,7 +38,7 @@ export default class SSAO {
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.sceneDepth)
-        GPU.context.uniform1i(StaticShaders.ssaoUniforms.gDepth, 0)
+        GPU.context.uniform1i(StaticShaders.ssaoUniforms.sceneDepth, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.noiseSampler)

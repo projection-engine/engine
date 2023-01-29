@@ -1,5 +1,6 @@
 layout (location = 0) in vec3 position;
 
+//import(cameraProjectionInfo)
 
 uniform mat4 viewProjection;
 uniform mat4 previousViewProjection;
@@ -8,12 +9,15 @@ uniform mat4 modelMatrix;
 uniform mat4 metadata;
 
 uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-uniform vec4 cameraPlacement;
+uniform vec3 cameraPlacement;
 
 out vec4 previousScreenPosition;
 out vec4 currentScreenPosition;
 out mat4 entityMetadata;
+
+out float depthFunc;
+out float funcC;
+
 
 void main() {
     entityMetadata = metadata;
@@ -44,7 +48,7 @@ void main() {
 
         if(keepSameSize){
             vec3 translation = vec3(modelMatrix[3]);
-            float len = length(cameraPlacement.xyz - translation);
+            float len = length(cameraPlacement - translation);
             mat4 sc;
             for ( int x = 0; x < 4; x++ )
             for ( int y = 0; y < 4; y++ )
@@ -68,4 +72,6 @@ void main() {
 
         gl_Position = viewProjection * wPosition;
     }
+    funcC = logC;
+    depthFunc = logDepthFC;
 }

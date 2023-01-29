@@ -2,7 +2,7 @@
 float raymarcherDepth;
 
 vec3 getViewPosition(vec2 coords, vec2 quadUV){
-    float depth = textureLod(scene_depth, coords, 2.).r;
+    float depth = getLogDepth(coords);
     return viewSpacePositionFromDepth(depth, quadUV);
 }
 

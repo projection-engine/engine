@@ -4,7 +4,7 @@ import {mat4, vec3} from "gl-matrix";
 import DirectionalShadows from "../../runtime/DirectionalShadows";
 import OmnidirectionalShadows from "../../runtime/OmnidirectionalShadows";
 import type Entity from "../../instances/Entity";
-import UberShader from "../../utils/UberShader";
+import UberShader from "../../resource-libs/UberShader";
 import StaticUBOs from "../StaticUBOs";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 

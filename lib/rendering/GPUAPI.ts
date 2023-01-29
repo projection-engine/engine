@@ -7,7 +7,7 @@ import Shader from "../../instances/Shader";
 import GPU from "../../GPU";
 import MaterialAPI from "./MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
-import UberShader from "../../utils/UberShader";
+import UberShader from "../../resource-libs/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../static/TextureParams";
 import MaterialInformation from "../../static/MaterialInformation";

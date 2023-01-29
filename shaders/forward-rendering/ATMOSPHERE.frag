@@ -6,10 +6,12 @@ precision highp float;
 #define ONLY_RAYLEIGH 1
 #define COMBINED  2
 
-//import(cameraUBO)
+//import(cameraViewInfo)
+
 
 in vec2 texCoords;
 uniform mat4 information;
+uniform mat4 invSkyProjectionMatrix;
 uniform int type;
 out vec4 fragColor;
 
@@ -126,7 +128,7 @@ vec3 createRay() {
     vec2 pxNDS = texCoords * 2. - 1.;
     vec3 pointNDS = vec3(pxNDS, -1.);
     vec4 pointNDSH = vec4(pointNDS, 1.0);
-    vec4 dirEye = invProjectionMatrix * pointNDSH;
+    vec4 dirEye = invSkyProjectionMatrix * pointNDSH;
     dirEye.w = 0.;
     vec3 dirWorld = (invViewMatrix * dirEye).xyz;
     return normalize(dirWorld);

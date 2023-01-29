@@ -79,9 +79,6 @@ export default class StaticFBO {
         StaticFBO.postProcessing1 = new Framebuffer().texture().depthTest()
         StaticFBO.postProcessing2 = new Framebuffer().texture().depthTest()
 
-        // StaticFBO.TAACache = (new Framebuffer()).texture()
-        // StaticFBO.TAACacheSampler = StaticFBO.TAACache.colors[0]
-
         const SSGI_SETTINGS = {
             linear: true,
             precision: context.RGB,

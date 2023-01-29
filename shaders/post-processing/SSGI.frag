@@ -6,19 +6,15 @@ precision mediump float;
 #define DEPTH_THRESHOLD 1.2
 #define PI2 6.2831853
 
-
-//import(cameraUBO)
+//import(cameraViewInfo)
 
 in vec2 texCoords;
 
 uniform sampler2D previousFrame;
-uniform sampler2D scene_depth;
-uniform vec2 ssgiColorGrading;
 uniform vec3 rayMarchSettings;
 out vec4 fragColor;
 
-
-//import(depthReconstructionUtils)
+//import(sceneDepthUtils)
 
 //import(rayMarcher)
 
@@ -43,8 +39,8 @@ vec3 cosHemisphereSample(vec3 hitNorm)
 
 void main(){
 
-    vec4 pixelDepth = texture(scene_depth, texCoords);
-    if (pixelDepth.x == 0.) discard;
+    float pixelDepth = getLogDepth(texCoords);
+    if (pixelDepth == 0.) discard;
 
 
     float stepSize = rayMarchSettings.x;
@@ -53,7 +49,7 @@ void main(){
 
     vec3 viewPos = getViewPosition(texCoords, texCoords);
     vec3 jitt =vec3(hash(viewPos));
-    vec3 worldNormal = normalFromDepth(pixelDepth.r, texCoords, scene_depth);
+    vec3 worldNormal = normalFromDepth(pixelDepth, texCoords);
 
 
     vec3 normal = cosHemisphereSample(worldNormal);

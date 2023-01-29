@@ -12,7 +12,7 @@ import SceneComposition from "../SceneComposition";
 import UberMaterialAttributeGroup from "../../resource-libs/UberMaterialAttributeGroup";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import Material from "../../instances/Material";
-import UberShader from "../../utils/UberShader";
+import UberShader from "../../resource-libs/UberShader";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 
@@ -36,12 +36,8 @@ export default class SceneRenderer {
         texOffset = 7
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
-        context.uniform2fv(uniforms.bufferResolution, GPU.bufferResolution)
         context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
-
         context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
-        context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
-        context.uniformMatrix4fv(uniforms.invProjectionMatrix, false, CameraAPI.invProjectionMatrix)
         context.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         context.uniform3fv(uniforms.cameraPosition, CameraAPI.position)
@@ -49,7 +45,7 @@ export default class SceneRenderer {
         SceneRenderer.#bindTexture(context, uniforms.brdf_sampler, 0, GPU.BRDF, false)
         SceneRenderer.#bindTexture(context, uniforms.SSAO, 1, StaticFBO.ssaoBlurredSampler, false)
         SceneRenderer.#bindTexture(context, uniforms.SSGI, 2, StaticFBO.ssgiSampler, false)
-        SceneRenderer.#bindTexture(context, uniforms.scene_depth, 3, StaticFBO.sceneDepth, false)
+        SceneRenderer.#bindTexture(context, uniforms.sceneDepth, 3, StaticFBO.sceneDepth, false)
 
         SceneRenderer.#bindTexture(context, uniforms.previousFrame, 4, StaticFBO.lensSampler, false)
         SceneRenderer.#bindTexture(context, uniforms.shadow_atlas, 5, StaticFBO.shadowsSampler, false)

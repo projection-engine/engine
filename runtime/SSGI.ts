@@ -43,7 +43,7 @@ export default class SSGI {
 
         context.activeTexture(context.TEXTURE0)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.sceneDepth)
-        context.uniform1i(uniforms.scene_depth, 0)
+        context.uniform1i(uniforms.sceneDepth, 0)
 
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.postProcessing2Sampler)
@@ -64,7 +64,7 @@ export default class SSGI {
 
         if (first) {
             StaticShaders.bilateralBlur.bind()
-            // @ts-ignore
+
             context.uniform1f(uniforms.blurRadius, SSGI.blurRadius)
             context.uniform1i(uniforms.samples, SSGI.blurSamples)
             context.uniform2fv(uniforms.bufferResolution, StaticFBO.ssgiFallback.resolution)

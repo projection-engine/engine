@@ -66,8 +66,10 @@ export default class Shader {
 
         this.length = this.uniforms.length
 
-        if (fragmentBuilt.includes(StaticUBONames.CAMERA) || vertexBuilt.includes(StaticUBONames.CAMERA))
-            StaticUBOs.cameraUBO.bindWithShader(this.program)
+        if (fragmentBuilt.includes(StaticUBONames.CAMERA_VIEW) || vertexBuilt.includes(StaticUBONames.CAMERA_VIEW))
+            StaticUBOs.cameraViewUBO.bindWithShader(this.program)
+        if (fragmentBuilt.includes(StaticUBONames.CAMERA_PROJECTION) || vertexBuilt.includes(StaticUBONames.CAMERA_PROJECTION))
+            StaticUBOs.cameraProjectionUBO.bindWithShader(this.program)
 
         if (fragmentBuilt.includes(StaticUBONames.FRAME_COMPOSITION) || vertexBuilt.includes(StaticUBONames.FRAME_COMPOSITION))
             StaticUBOs.frameCompositionUBO.bindWithShader(this.program)

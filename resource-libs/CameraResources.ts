@@ -1,25 +1,14 @@
 import {quat, vec3} from "gl-matrix";
 import ArrayBufferAPI from "../lib/utils/ArrayBufferAPI";
 import CameraEffects from "./CameraEffects";
+import CameraNotificationDecoder from "../lib/CameraNotificationDecoder";
 
 
-const ORTHOGRAPHIC = 1, PERSPECTIVE = 0
 
-function getNotificationBuffer(): Float32Array {
-    const b = <Float32Array>ArrayBufferAPI.allocateVector(6, 0)
-    b[0] = 1
-    b[1] = 1
-    b[2] = PERSPECTIVE
-    b[3] = 0
-    b[4] = .001
-
-    b[5] = 0
-    return b
-}
 
 /**
  * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, translationSmoothing,  elapsed]}
- * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.worker]}
+ * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}
  * @field projectionBuffer {float32array [zFar, zNear, fov, aR, orthographicSize]}
  */
 export default class CameraResources extends CameraEffects {
@@ -32,11 +21,14 @@ export default class CameraResources extends CameraEffects {
     static previousViewProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static staticViewMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
-    static UBOBuffer = ArrayBufferAPI.allocateVector(84)
+    static invSkyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
+    static viewUBOBuffer = ArrayBufferAPI.allocateVector(52)
+    static projectionUBOBuffer = ArrayBufferAPI.allocateVector(36)
     static projectionBuffer = ArrayBufferAPI.allocateVector(5)
     static translationBuffer = <vec3>ArrayBufferAPI.allocateVector(3)
     static rotationBuffer = <quat>ArrayBufferAPI.allocateVector(4, 0, true)
-    static notificationBuffers = getNotificationBuffer()
+    static notificationBuffers = CameraNotificationDecoder.generateBuffer()
+
 
     static addTranslation(data: number[] | Float32Array) {
         const T = CameraResources.translationBuffer
@@ -61,18 +53,7 @@ export default class CameraResources extends CameraEffects {
         R[3] = data[3] || 0
     }
 
-    static get didChange() {
-        return CameraResources.notificationBuffers[3]
-    }
 
-    static get isOrthographic(): boolean {
-        return CameraResources.notificationBuffers[2] === ORTHOGRAPHIC
-    }
-
-    static set isOrthographic(data) {
-        CameraResources.notificationBuffers[2] = data ? ORTHOGRAPHIC : PERSPECTIVE
-        CameraResources.notificationBuffers[1] = 1
-    }
 
     static get zFar() {
         return CameraResources.projectionBuffer[0]
@@ -114,21 +95,5 @@ export default class CameraResources extends CameraEffects {
         CameraResources.projectionBuffer[4] = data
     }
 
-    static set translationSmoothing(data) {
-        CameraResources.notificationBuffers[4] = data
-    }
-
-    static get translationSmoothing() {
-        return CameraResources.notificationBuffers[4]
-    }
-
-
-    static updateProjection() {
-        CameraResources.notificationBuffers[1] = 1
-    }
-
-    static updateView() {
-        CameraResources.notificationBuffers[0] = 1
-    }
 }
 

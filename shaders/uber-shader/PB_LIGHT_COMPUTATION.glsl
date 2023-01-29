@@ -1,19 +1,3 @@
-//import(depthReconstructionUtils)
-
-//import(rayMarcher)
-
-//import(SSS)
-
-//import(brdf)
-
-//import(computeLights)
-
-//import(computePointLights)
-
-//import(computeSpotLights)
-
-//import(computeAreaLights)
-
 vec3 processLight(mat4 primaryBuffer, mat4 secondaryBuffer ) {
     int type = int(primaryBuffer[0][0]);
     vec3 directIllumination = vec3(0.);

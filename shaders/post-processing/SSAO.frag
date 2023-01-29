@@ -1,7 +1,7 @@
 precision highp float;
 #define KERNELS 64
 
-//import(cameraUBO)
+//import(cameraViewInfo)
 
 uniform Settings{
     vec4 settings;
@@ -10,17 +10,14 @@ uniform Settings{
 };
 in vec2 texCoords;
 uniform int maxSamples;
-uniform sampler2D gDepth;
 uniform sampler2D noiseSampler;
 out vec4 fragColor;
 
-//import(depthReconstructionUtils)
+//import(sceneDepthUtils)
 
 void main() {
-    vec4 depthData = texture(gDepth, texCoords);
-    if (depthData.a < 1.) discard;
-
-    vec3 viewSpacePosition = viewSpacePositionFromDepth(depthData.r, texCoords);
+    float depthData = getLogDepth(texCoords);
+    vec3 viewSpacePosition = viewSpacePositionFromDepth(depthData, texCoords);
     vec3 worldSpacePosition = vec3(invViewMatrix * vec4(viewSpacePosition, 1.));
     float distanceFromCamera = length(placement.xyz - worldSpacePosition);
 
@@ -32,7 +29,7 @@ void main() {
     float attenuation = clamp(mix(1., 0., distanceFalloff - distanceFromCamera), 0., 1.);
 
     if (attenuation < 1.){
-        vec3 normal = normalFromDepth(depthData.r, texCoords, gDepth);
+        vec3 normal = normalFromDepth(depthData, texCoords);
         vec3 randomVec = texture(noiseSampler, texCoords * noiseScale).xyx;
         vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
         vec3 bitangent = cross(normal, tangent);
@@ -46,7 +43,7 @@ void main() {
             offset = projectionMatrix * offset;
             offset.xyz /= offset.w;
             offset.xyz = offset.xyz * 0.5 + 0.5;
-            float sampleDepth = viewSpacePositionFromDepth(texture(gDepth, offset.xy).r, texCoords).z;
+            float sampleDepth = viewSpacePositionFromDepth(getLogDepth(offset.xy), texCoords).z;
             float rangeCheck = smoothstep(0.0, 1.0, radius / abs(viewSpacePosition.z - sampleDepth));
             occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
         }

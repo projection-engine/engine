@@ -1,7 +1,8 @@
 
 layout (location = 0) in vec3 position;
 
-//import(cameraUBO)
+//import(cameraViewInfo)
+//import(cameraProjectionInfo)
 
 uniform mat4 transformationMatrix;
 

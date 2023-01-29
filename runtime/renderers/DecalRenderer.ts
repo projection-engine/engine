@@ -5,7 +5,7 @@ import StaticMeshes from "../../lib/StaticMeshes";
 import MetricsController from "../../lib/utils/MetricsController";
 import METRICS_FLAGS from "../../static/METRICS_FLAGS";
 import SceneRenderer from "./SceneRenderer";
-import UberShader from "../../utils/UberShader";
+import UberShader from "../../resource-libs/UberShader";
 
 export default class DecalRenderer{
     static execute() {

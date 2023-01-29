@@ -26,6 +26,7 @@ export default class VisibilityRenderer {
         StaticShaders.visibility.bind()
         context = GPU.context
         context.blendFunc(context.ONE, context.ZERO)
+
         toRender = ResourceEntityMapper.meshesToDraw.array
         size = toRender.length
         uniforms = StaticShaders.visibilityUniforms
@@ -34,14 +35,11 @@ export default class VisibilityRenderer {
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         context.uniformMatrix4fv(uniforms.previousViewProjection, false, VP)
 
-        context.uniformMatrix4fv(uniforms.viewMatrix, false, VP)
-        context.uniformMatrix4fv(uniforms.projectionMatrix, false, VP)
-
         context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
-        context.uniformMatrix4fv(uniforms.projectionMatrix, false, CameraAPI.projectionMatrix)
         context.uniform3fv(uniforms.cameraPlacement, CameraAPI.position)
 
         mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
+
         StaticFBO.visibility.startMapping()
         Mesh.finishIfUsed()
 

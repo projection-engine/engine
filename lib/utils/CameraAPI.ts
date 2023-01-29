@@ -12,16 +12,19 @@ import Entity from "../../instances/Entity";
 import CameraComponent from "../../instances/components/CameraComponent";
 import CameraResources from "../../resource-libs/CameraResources";
 import CameraSerialization from "../../static/CameraSerialization";
+import CameraNotificationDecoder from "../CameraNotificationDecoder";
+import StaticFBO from "../StaticFBO";
 
 
 const TEMPLATE_CAMERA = new CameraComponent()
 const toRad = Math.PI / 180
-export default class CameraAPI extends CameraResources{
+export default class CameraAPI extends CameraResources {
     static #dynamicAspectRatio = false
     static metadata = new CameraEffects()
     static #worker: Worker
     static trackingEntity
     static #initialized = false
+    static depthFuncC = 1
 
     static initialize() {
         if (CameraAPI.#initialized)
@@ -29,6 +32,7 @@ export default class CameraAPI extends CameraResources{
         CameraAPI.#initialized = true
         CameraAPI.#worker = new Worker("./camera-worker.js")
         CameraAPI.projectionBuffer[4] = 10
+        CameraNotificationDecoder.initialize(CameraAPI.notificationBuffers)
         CameraAPI.#worker.postMessage([
             CameraAPI.notificationBuffers,
             CameraAPI.position,
@@ -40,9 +44,11 @@ export default class CameraAPI extends CameraResources{
             CameraAPI.translationBuffer,
             CameraAPI.rotationBuffer,
             CameraAPI.skyboxProjectionMatrix,
+            CameraAPI.invSkyboxProjectionMatrix,
             CameraAPI.projectionBuffer,
             CameraAPI.viewProjectionMatrix,
-            CameraAPI.UBOBuffer
+            CameraAPI.viewUBOBuffer,
+            CameraAPI.projectionUBOBuffer
         ])
         new ResizeObserver(CameraAPI.updateAspectRatio)
             .observe(GPU.canvas)
@@ -50,7 +56,7 @@ export default class CameraAPI extends CameraResources{
     }
 
     static syncThreads() {
-        CameraAPI.notificationBuffers[5] = Engine.elapsed
+        CameraNotificationDecoder.elapsed = Engine.elapsed
         CameraAPI.#worker.postMessage(0)
     }
 
@@ -59,16 +65,28 @@ export default class CameraAPI extends CameraResources{
         if (entity && entity.__changedBuffer[1])
             CameraAPI.update(entity._translation, entity._rotationQuat)
 
-        if (CameraAPI.notificationBuffers[3]) {
-            const UBO = StaticUBOs.cameraUBO
+        if (CameraNotificationDecoder.hasChangedProjection === 1) {
+            const UBO = StaticUBOs.cameraProjectionUBO
 
             UBO.bind()
-            UBO.updateBuffer(CameraAPI.UBOBuffer)
+            CameraAPI.projectionUBOBuffer[32] = GPU.bufferResolution[0]
+            CameraAPI.projectionUBOBuffer[33] = GPU.bufferResolution[1]
+            CameraAPI.projectionUBOBuffer[34] = Math.log(CameraAPI.depthFuncC * CameraAPI.projectionBuffer[0] + 1)
+            CameraAPI.projectionUBOBuffer[35] = CameraAPI.depthFuncC
+            UBO.updateBuffer(CameraAPI.projectionUBOBuffer)
             UBO.unbind()
 
             VisibilityRenderer.needsUpdate = true
         }
 
+        if (CameraNotificationDecoder.hasChangedView === 1) {
+            const UBO = StaticUBOs.cameraViewUBO
+            UBO.bind()
+            UBO.updateBuffer(CameraAPI.viewUBOBuffer)
+            UBO.unbind()
+
+            VisibilityRenderer.needsUpdate = true
+        }
     }
 
     static updateAspectRatio() {
@@ -85,7 +103,7 @@ export default class CameraAPI extends CameraResources{
             vec3.copy(CameraAPI.translationBuffer, translation)
         if (rotation != null)
             vec4.copy(CameraAPI.rotationBuffer, rotation)
-        CameraAPI.notificationBuffers[0] = 1
+        CameraNotificationDecoder.viewNeedsUpdate = 1
     }
 
     static serializeState(): CameraSerialization {
@@ -98,8 +116,38 @@ export default class CameraAPI extends CameraResources{
         }
     }
 
+    static get hasChangedView() {
+        return CameraNotificationDecoder.hasChangedView === 1
+    }
+
+    static get isOrthographic(): boolean {
+        return CameraNotificationDecoder.projectionType === CameraNotificationDecoder.ORTHOGRAPHIC
+    }
+
+    static set isOrthographic(data) {
+        CameraNotificationDecoder.projectionType = data ? CameraNotificationDecoder.ORTHOGRAPHIC : CameraNotificationDecoder.PERSPECTIVE
+        CameraNotificationDecoder.projectionNeedsUpdate = 1
+    }
+
+    static set translationSmoothing(data) {
+        CameraNotificationDecoder.translationSmoothing = data
+    }
+
+    static get translationSmoothing() {
+        return CameraNotificationDecoder.translationSmoothing
+    }
+
+
+    static updateProjection() {
+        CameraNotificationDecoder.projectionNeedsUpdate = 1
+    }
+
+    static updateView() {
+        CameraNotificationDecoder.viewNeedsUpdate = 1
+    }
+
     static restoreState(state: CameraSerialization) {
-        const {rotation, translation,  translationSmoothing, metadata} = state
+        const {rotation, translation, translationSmoothing, metadata} = state
         CameraAPI.restoreMetadata(metadata)
         CameraAPI.updateTranslation(translation)
         CameraAPI.updateRotation(rotation)

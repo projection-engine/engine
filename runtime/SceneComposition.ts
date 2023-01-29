@@ -1,6 +1,6 @@
 import SHADING_MODELS from "../static/SHADING_MODELS";
 import StaticFBO from "../lib/StaticFBO";
-import UberShader from "../utils/UberShader";
+import UberShader from "../resource-libs/UberShader";
 import SceneRenderer from "./renderers/SceneRenderer";
 import SpriteRenderer from "./renderers/SpriteRenderer";
 import DecalRenderer from "./renderers/DecalRenderer";

@@ -5,10 +5,11 @@ import StaticMeshes from "../../lib/StaticMeshes";
 import MetricsController from "../../lib/utils/MetricsController";
 import METRICS_FLAGS from "../../static/METRICS_FLAGS";
 import SceneRenderer from "./SceneRenderer";
-import UberShader from "../../utils/UberShader";
+import UberShader from "../../resource-libs/UberShader";
 import StaticFBO from "../../lib/StaticFBO";
 import AtmosphereComponent from "../../instances/components/AtmosphereComponent";
 import {mat4} from "gl-matrix";
+import CameraAPI from "../../lib/utils/CameraAPI";
 
 const resources = mat4.create().fill(0)
 export default class AtmosphereRenderer {
@@ -24,6 +25,7 @@ export default class AtmosphereRenderer {
             if (i === 0) {
                 shader.bind()
                 context.disable(context.DEPTH_TEST)
+                context.uniformMatrix4fv(uniforms.invSkyProjectionMatrix, false, CameraAPI.invSkyboxProjectionMatrix)
             }
             const entity = entities[i]
             const component = entity.atmosphereComponent

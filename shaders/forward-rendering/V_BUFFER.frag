@@ -3,6 +3,8 @@ precision highp float;
 in vec4 previousScreenPosition;
 in vec4 currentScreenPosition;
 in mat4 entityMetadata;
+in float depthFunc;
+in float funcC;
 
 layout (location = 0) out vec4 v_depth;
 layout (location = 1) out vec4 v_entity;
@@ -13,7 +15,7 @@ void main() {
     vec2 c = abs(a - b);
 
     if (entityMetadata[1][0] != 1.)
-    v_depth = vec4(gl_FragCoord.z, 0., 0., 0.);
+    v_depth =  vec4(log(funcC * gl_FragCoord.z  + 1.) / depthFunc, 0., 0., 0.);
     v_velocity = vec4(pow(c.x, 1.), pow(c.y, 1.), 0., 1.);
     v_entity = vec4(entityMetadata[0][0], entityMetadata[0][1], 0., 1.);
 }

@@ -25,7 +25,7 @@ export default class MotionBlur {
         GPU.context.activeTexture(GPU.context.TEXTURE1)
         GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.velocitySampler)
         GPU.context.uniform1i(uniforms.gVelocity, 1)
-        GPU.context.uniform2fv(uniforms.bufferResolution,  StaticFBO.visibility.resolution)
+        GPU.context.uniform2fv(uniforms.bufferResolution, GPU.bufferResolution)
 
         GPU.context.uniform1f(uniforms.velocityScale, MotionBlur.velocityScale)
         GPU.context.uniform1i(uniforms.maxSamples, MotionBlur.maxSamples)
