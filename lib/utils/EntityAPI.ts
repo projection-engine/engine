@@ -10,7 +10,6 @@ import ENTITY_TYPED_ATTRIBUTES from "../../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
 import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
-import GPU from "../../GPU";
 import MutableObject from "../../MutableObject";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 

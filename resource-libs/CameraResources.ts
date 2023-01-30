@@ -4,8 +4,6 @@ import CameraEffects from "./CameraEffects";
 import CameraNotificationDecoder from "../lib/CameraNotificationDecoder";
 
 
-
-
 /**
  * @field notificationBuffers {float32array [viewNeedsUpdate, projectionNeedsUpdate, isOrthographic, hasChanged, translationSmoothing,  elapsed]}
  * @field transformationBuffer {float32array [translation.x, translation.y, translation.z, rotation.x, rotation.y, rotation.z, rotation.w]}

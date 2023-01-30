@@ -10,7 +10,6 @@ import COMPONENTS from "../../static/COMPONENTS";
 import Component from "./Component";
 import AtmosphereComponent from "./AtmosphereComponent";
 import PhysicsColliderComponent from "./PhysicsColliderComponent";
-import TerrainComponent from "./TerrainComponent";
 import UIComponent from "./UIComponent";
 import CameraComponent from "./CameraComponent";
 import DecalComponent from "./DecalComponent";

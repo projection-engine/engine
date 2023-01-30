@@ -2,7 +2,6 @@ import {mat4, quat, vec3} from "gl-matrix";
 import TransformationAPI from "../lib/math/TransformationAPI";
 import copyWithOffset from "../utils/copy-with-offset";
 import CameraNotificationDecoder from "../lib/CameraNotificationDecoder";
-import CameraAPI from "../lib/utils/CameraAPI";
 
 
 class CameraWorker {

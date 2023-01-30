@@ -13,7 +13,6 @@ import CameraComponent from "../../instances/components/CameraComponent";
 import CameraResources from "../../resource-libs/CameraResources";
 import CameraSerialization from "../../static/CameraSerialization";
 import CameraNotificationDecoder from "../CameraNotificationDecoder";
-import StaticFBO from "../StaticFBO";
 
 
 const TEMPLATE_CAMERA = new CameraComponent()

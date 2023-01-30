@@ -1,7 +1,5 @@
 import GPU from "../../GPU";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
-import StaticShaders from "../../lib/StaticShaders";
-import StaticMeshes from "../../lib/StaticMeshes";
 import MetricsController from "../../lib/utils/MetricsController";
 import METRICS_FLAGS from "../../static/METRICS_FLAGS";
 import SceneRenderer from "./SceneRenderer";

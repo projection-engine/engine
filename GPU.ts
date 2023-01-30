@@ -9,11 +9,8 @@ import BRDF_FRAG from "./shaders/post-processing/BRDF_GEN.frag"
 import Shader from "./instances/Shader";
 import Framebuffer from "./instances/Framebuffer";
 import Material from "./instances/Material";
-import {mat4, vec3} from "gl-matrix";
-import CUBE_MAP_VIEWS from "./static/CUBE_MAP_VIEWS";
 import Mesh from "./instances/Mesh";
 import Texture from "./instances/Texture";
-import Entity from "./instances/Entity";
 import LightProbe from "./instances/LightProbe";
 import StaticShaders from "./lib/StaticShaders";
 import StaticMeshes from "./lib/StaticMeshes";

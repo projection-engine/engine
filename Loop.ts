@@ -18,7 +18,6 @@ import SceneComposition from "./runtime/SceneComposition";
 import GPU from "./GPU";
 import GPUAPI from "./lib/rendering/GPUAPI";
 import StaticFBO from "./lib/StaticFBO";
-import AtmosphereRenderer from "./runtime/renderers/AtmosphereRenderer";
 
 let previous = 0
 

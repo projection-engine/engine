@@ -1,8 +1,6 @@
 import GPU from "../../GPU";
 import StaticMeshes from "../../lib/StaticMeshes";
-import StaticShaders from "../../lib/StaticShaders";
 import type Entity from "../../instances/Entity";
-import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import Shader from "../../instances/Shader";
 import Engine from "../../Engine";
 import CameraAPI from "../../lib/utils/CameraAPI";

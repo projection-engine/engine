@@ -1,5 +1,5 @@
 import PB_LIGHT_COMPUTATION from "../shaders/uber-shader/PB_LIGHT_COMPUTATION.glsl";
- 
+
 import POST_PROCESSING_UNIFORMS from "../shaders/functions/POST_PROCESSING_UNIFORMS.glsl";
 import COMPUTE_AREA_LIGHT from "../shaders/uber-shader/lights/COMPUTE_AREALIGHT.glsl"
 import RAY_MARCHER from "../shaders/functions/RAY_MARCHER.glsl";
