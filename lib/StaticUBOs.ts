@@ -52,7 +52,7 @@ export default class StaticUBOs {
             [
                 {type: "vec2", name: "inverseFilterTextureSize"},
 
-                {type: "int", name: "AAMethod"},
+                {type: "bool", name: "useFXAA"},
                 {type: "bool", name: "filmGrainEnabled"},
 
                 {type: "float", name: "FXAASpanMax"},

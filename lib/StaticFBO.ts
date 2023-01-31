@@ -81,10 +81,11 @@ export default class StaticFBO {
 
         const SSGI_SETTINGS = {
             linear: true,
-            precision: context.RGB,
-            format: context.RGB,
+            precision: context.RGBA,
+            format: context.RGBA,
             type: context.UNSIGNED_BYTE
         }
+
         StaticFBO.ssgi = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
         StaticFBO.ssgiFallback = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
 

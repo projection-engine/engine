@@ -1,5 +1,4 @@
 import GPU from "../GPU";
-import AA_METHODS from "../static/AA_METHODS";
 import StaticMeshes from "../lib/StaticMeshes";
 import StaticFBO from "../lib/StaticFBO";
 import StaticShaders from "../lib/StaticShaders";
@@ -12,7 +11,6 @@ export default class FrameComposition {
     static lookUpRandom = new Float32Array(2e+3)
     static lookUpIndex = 0
     static currentNoise = 0
-    static AAMethodInUse = AA_METHODS.DISABLED
 
     static initialize() {
         StaticUBOs.frameCompositionUBO.bind()

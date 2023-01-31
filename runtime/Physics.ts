@@ -4,10 +4,29 @@ import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
 
 export default class Physics {
-    static simulationStep = 0.01666666
+    static #sStep = 0.01666666
+    static #interval = null
+
+    static set simulationStep(data: number) {
+        Physics.#sStep = data / 1000
+    }
+
+    static get simulationStep(): number {
+        return Physics.#sStep * 1000
+    }
+
     static subSteps = 10
 
-    static execute() {
+    static start() {
+        Physics.#interval = setInterval(Physics.#execute, Physics.#sStep * 1000)
+    }
+
+    static stop() {
+        clearInterval(Physics.#interval)
+        Physics.#interval = null
+    }
+
+    static #execute() {
         if (Engine.isDev || !PhysicsAPI.ammo)
             return
 

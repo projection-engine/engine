@@ -1,8 +1,7 @@
 precision highp float;
 uniform CompositionSettings{
     vec2 inverseFilterTextureSize;
-
-    int AAMethod;
+    bool useFXAA;
     bool filmGrainEnabled;
     float FXAASpanMax;
     float FXAAReduceMin;
@@ -62,16 +61,11 @@ vec3 filmGrain(vec3 fragCurrentColor){
 }
 
 void main() {
-
-    switch (AAMethod){
-        case 0:
-        finalColor = texture(currentFrame, texCoords);
-        break;
-        case 1:
+    if(useFXAA)
         finalColor = FXAA();
-        break;
-    }
-    if (filmGrainEnabled) finalColor.rgb = filmGrain(finalColor.rgb);
+    else
+        finalColor = texture(currentFrame, texCoords);
 
+    if (filmGrainEnabled) finalColor.rgb = filmGrain(finalColor.rgb);
 }
 

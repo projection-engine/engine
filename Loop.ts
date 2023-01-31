@@ -41,7 +41,6 @@ export default class Loop {
         MetricsController.init()
         if (!Engine.isDev)
             executeScripts()
-        Physics.execute()
         DirectionalShadows.execute()
         OmnidirectionalShadows.execute()
         VisibilityRenderer.execute()

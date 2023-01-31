@@ -40,15 +40,18 @@ export default class Engine {
     static get developmentMode() {
         return Engine.#development
     }
+
     static get environment(): number {
         return Engine.#environment
     }
+
     static set environment(data: number) {
         Engine.isDev = data === ENVIRONMENT.DEV
         Engine.#environment = data
         if (Engine.isDev)
             CameraAPI.updateAspectRatio()
     }
+
     static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata: Function, devAmbient: boolean) {
         if (Engine.#initialized)
             return
@@ -96,10 +99,13 @@ export default class Engine {
     static updateParams(data, SSGISettings, SSRSettings, SSSSettings, SSAOSettings, physicsSteps, physicsSubSteps) {
         Engine.params = data
 
-        if (typeof physicsSteps === "number")
-            Physics.subSteps = physicsSubSteps
-        if (typeof physicsSteps === "number")
+        if (typeof physicsSteps === "number") {
+            Physics.stop()
             Physics.simulationStep = physicsSteps
+            Physics.start()
+        }
+        if (typeof physicsSubSteps === "number")
+            Physics.subSteps = physicsSubSteps
 
         SSGI.blurSamples = SSGISettings.blurSamples || 5
         SSGI.blurRadius = SSGISettings.blurRadius || 5
@@ -144,12 +150,18 @@ export default class Engine {
 
 
         StaticUBOs.frameCompositionUBO.bind()
-        boolBuffer[0] = data.AAMethod || 0
-        FrameComposition.AAMethodInUse = boolBuffer[0]
-        StaticUBOs.frameCompositionUBO.updateData("AAMethod", boolBuffer)
-        StaticUBOs.frameCompositionUBO.updateData("FXAASpanMax", new Float32Array([data.FXAASpanMax || 8]))
-        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMin", new Float32Array([data.FXAAReduceMin || 1.0 / 128.0]))
-        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMul", new Float32Array([data.FXAAReduceMul || 1.0 / 8.0]))
+
+        singleFloatBuffer[0] = data.FXAASpanMax || 8
+        StaticUBOs.frameCompositionUBO.updateData("FXAASpanMax", singleFloatBuffer)
+
+        boolBuffer[0] = data.FXAA ? 1 : 0
+        StaticUBOs.frameCompositionUBO.updateData("useFXAA", boolBuffer)
+
+        singleFloatBuffer[0] = data.FXAAReduceMin || 1.0 / 128.0
+        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMin", singleFloatBuffer)
+
+        singleFloatBuffer[0] = data.FXAAReduceMul || 1.0 / 8.0
+        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMul", singleFloatBuffer)
 
         StaticUBOs.frameCompositionUBO.unbind()
         VisibilityRenderer.needsUpdate = true
@@ -157,12 +169,15 @@ export default class Engine {
 
 
     static start() {
-        if (!Engine.frameID && Engine.isReady)
+        if (!Engine.frameID && Engine.isReady) {
+            Physics.start()
             Engine.frameID = requestAnimationFrame(Loop.loop)
+        }
     }
 
     static stop() {
         cancelAnimationFrame(Engine.frameID)
+        Physics.stop()
         Engine.frameID = undefined
     }
 }
