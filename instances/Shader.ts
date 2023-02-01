@@ -35,7 +35,7 @@ export default class Shader {
         messages: undefined,
         hasError: false
     }
-
+    txt
     constructor(vertex, fragment) {
         const alert = []
         this.program = GPU.context.createProgram()
@@ -43,6 +43,7 @@ export default class Shader {
         const vertexBuilt = "#version 300 es\n" + applyShaderMethods(vertex)
         const fragmentBuilt = "#version 300 es\n" + applyShaderMethods(fragment)
 
+        this.txt = fragmentBuilt
         const vertexShader = this.#compileShader(vertexBuilt, GPU.context.VERTEX_SHADER, m => alert.push(m))
         const fragmentShader = this.#compileShader(fragmentBuilt, GPU.context.FRAGMENT_SHADER, m => alert.push(m))
 

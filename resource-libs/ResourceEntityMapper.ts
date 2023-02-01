@@ -9,6 +9,7 @@ export default class ResourceEntityMapper {
     static ui = new DynamicMap<Entity>()
     static lightProbe = new DynamicMap<Entity>()
     static atmosphere = new DynamicMap<Entity>()
+    static cameras = new DynamicMap<Entity>()
 
     static entityMaterial = new Map<string, { [key: string]: Entity }>()
 }

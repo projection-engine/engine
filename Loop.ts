@@ -6,7 +6,6 @@ import LensPostProcessing from "./runtime/LensPostProcessing";
 import FrameComposition from "./runtime/FrameComposition";
 
 import Engine from "./Engine";
-import Physics from "./runtime/Physics";
 import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 import OmnidirectionalShadows from "./runtime/OmnidirectionalShadows";
 import CameraAPI from "./lib/utils/CameraAPI";

@@ -79,15 +79,15 @@ export default class StaticFBO {
         StaticFBO.postProcessing1 = new Framebuffer().texture().depthTest()
         StaticFBO.postProcessing2 = new Framebuffer().texture().depthTest()
 
-        const SSGI_SETTINGS = {
+        const linearTexture = {
             linear: true,
             precision: context.RGBA,
             format: context.RGBA,
             type: context.UNSIGNED_BYTE
         }
 
-        StaticFBO.ssgi = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
-        StaticFBO.ssgiFallback = new Framebuffer(halfResW, halfResH).texture(SSGI_SETTINGS)
+        StaticFBO.ssgi = new Framebuffer(halfResW, halfResH).texture(linearTexture)
+        StaticFBO.ssgiFallback = new Framebuffer(halfResW, halfResH).texture(linearTexture)
 
         const SSAO_SETTINGS = {
             linear: true,
@@ -105,12 +105,12 @@ export default class StaticFBO {
         for (let i = 0; i < Q; i++) {
             w /= 2
             h /= 2
-            StaticFBO.downscaleBloom.push((new Framebuffer(w, h)).texture({linear: true}))
+            StaticFBO.downscaleBloom.push((new Framebuffer(w, h)).texture(linearTexture))
         }
         for (let i = 0; i < (Q / 2 - 1); i++) {
             w *= 4
             h *= 4
-            StaticFBO.upscaleBloom.push((new Framebuffer(w, h)).texture({linear: true}))
+            StaticFBO.upscaleBloom.push((new Framebuffer(w, h)).texture(linearTexture))
         }
 
         StaticFBO.ssaoBlurredSampler = StaticFBO.ssaoBlurred.colors[0]

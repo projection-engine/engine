@@ -85,6 +85,8 @@ export default class EntityAPI {
             ResourceEntityMapper.atmosphere.add(entity.id, entity)
         if (entity.lightProbeComponent !== undefined)
             ResourceEntityMapper.lightProbe.add(entity.id, entity)
+        if (entity.cameraComponent !== undefined)
+            ResourceEntityMapper.cameras.add(entity.id, entity)
 
         if (entity.uiComponent !== undefined)
             ResourceEntityMapper.ui.add(entity.id, entity)
@@ -120,6 +122,7 @@ export default class EntityAPI {
 
         ResourceEntityMapper.lights.delete(id)
         ResourceEntityMapper.sprites.delete(id)
+        ResourceEntityMapper.cameras.delete(id)
         ResourceEntityMapper.ui.delete(id)
         ResourceEntityMapper.decals.delete(id)
         ResourceEntityMapper.meshesToDraw.delete(id)

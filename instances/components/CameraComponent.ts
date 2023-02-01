@@ -4,11 +4,11 @@ import CAMERA_PROPS from "../../static/component-props/CAMERA_PROPS";
 export default class CameraComponent extends Component {
     _props = CAMERA_PROPS
 
-    fov = 90
+    fov = 45
 
     dynamicAspectRatio = true
     aspectRatio = 1
-    zFar = 10000
+    zFar = 100
     zNear = .1
 
     distortion = false
@@ -31,7 +31,7 @@ export default class CameraComponent extends Component {
     motionBlurEnabled = true
     cameraMotionBlur = false
     ortho = false
-    size = 100
+    size = 10
 
     apertureDOF = 1.2
     focalLengthDOF = 10
