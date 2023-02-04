@@ -20,6 +20,8 @@ export default class Entity extends ComponentAbstract {
     #pickID = new Float32Array(3)
     #pickIndex: number = -1
 
+
+
     constructor(id = crypto.randomUUID(), name = "Empty entity", active = true) {
         super()
         this.id = id
@@ -28,12 +30,19 @@ export default class Entity extends ComponentAbstract {
         this.queryKey = id.slice(0, id.length / 2);
     }
 
-     setPickID(data:number[]) {
-        data.forEach((v, i) => this.#pickID[i] = v)
-        this.#pickIndex = (data[0]  + data[1] + data[2]) * 255
+    get allComponents(){
+        return Array.from(this.components.entries())
     }
-    set pickID(_) {}
-    get pickID():Float32Array {
+    set allComponents(_){}
+    setPickID(data: number[]) {
+        data.forEach((v, i) => this.#pickID[i] = v)
+        this.#pickIndex = (data[0] + data[1] + data[2]) * 255
+    }
+
+    set pickID(_) {
+    }
+
+    get pickID(): Float32Array {
         return this.#pickID
     }
 

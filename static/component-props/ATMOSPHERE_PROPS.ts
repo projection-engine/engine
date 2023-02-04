@@ -11,12 +11,12 @@ export default [
     Component.number("THRESHOLD", "threshold", 0, undefined),
     ]),
     Component.group("RAYLEIGH_BETA_VALUES", [
-        Component.array(["R", "G", "B"], "betaRayleigh", 1, undefined, 1),
+        Component.array(["R", "G", "B"], "betaRayleigh", .01, undefined, .01),
     ]),
     Component.group("MIE_BETA_VALUES", [
-        Component.array(["R", "G", "B"], "betaMie", 1, undefined, 1),
+        Component.array(["R", "G", "B"], "betaMie", .01, undefined, .01),
     ]),
-    Component.group("MIE_BETA_VALUES", [
+    Component.group("RADII", [
         Component.number("ATMOSPHERE", "atmosphereRadius", undefined, 0),
         Component.number("PLANET", "planetRadius", undefined, 0),
     ]),

@@ -1,12 +1,12 @@
 import Component from "./Component"
-import PROBE_PROPS from "../../static/component-props/ATMOSPHERE_PROPS";
+import ATMOSPHERE_PROPS from "../../static/component-props/ATMOSPHERE_PROPS";
 import ATMOSPHERE_TYPES from "../../static/ATMOSPHERE_TYPES";
 import {mat4, vec3} from "gl-matrix";
 import LightsAPI from "../../lib/utils/LightsAPI";
 
 
 export default class AtmosphereComponent extends Component {
-    _props = PROBE_PROPS
+    _props = ATMOSPHERE_PROPS
 
     _elapsedTime = 0
     #sunDirection = <vec3>[0, 1, 1]
@@ -17,8 +17,8 @@ export default class AtmosphereComponent extends Component {
     planetRadius = 1
     intensity = 20
     renderingType = ATMOSPHERE_TYPES.RAYLEIGH
-    betaRayleigh = [263157., 74074., 30211.]
-    betaMie = [476., 476., 476.]
+    betaRayleigh = [1.,1,1]
+    betaMie = [1,1,1]
     threshold = 0
 
     get sunDirection() {
@@ -49,12 +49,12 @@ export default class AtmosphereComponent extends Component {
         matrix[0] = component.#sunDirection[0]
         matrix[1]=  component.#sunDirection[1]
         matrix[2]= component.#sunDirection[2]
-        matrix[3]= component.betaRayleigh[0]
-        matrix[4]= component.betaRayleigh[1]
-        matrix[5]= component.betaRayleigh[2]
-        matrix[6]= component.betaMie[0]
-        matrix[7]= component.betaMie[1]
-        matrix[8]= component.betaMie[2]
+        matrix[3]= component.betaRayleigh[0] * 263157
+        matrix[4]= component.betaRayleigh[1] * 74074
+        matrix[5]= component.betaRayleigh[2] * 30211
+        matrix[6]= component.betaMie[0] * 476
+        matrix[7]= component.betaMie[1]* 476
+        matrix[8]= component.betaMie[2]* 476
         matrix[9]= component.intensity
         matrix[10]= component.atmosphereRadius
         matrix[11]= component.planetRadius
