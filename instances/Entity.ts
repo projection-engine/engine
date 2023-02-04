@@ -3,13 +3,13 @@ import getComponentInstance from "../utils/get-component-instance";
 import serializeStructure from "../utils/serialize-structure";
 import Engine from "../Engine";
 import Component from "./components/Component";
-import ComponentAbstract from "./components/ComponentAbstract";
+import ComponentResources from "./components/ComponentResources";
 
 
-export default class Entity extends ComponentAbstract {
+export default class Entity extends ComponentResources {
     [key: string]: any;
 
-    id
+    id = crypto.randomUUID()
     queryKey: string
     name: string
     active = true

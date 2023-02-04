@@ -1,4 +1,4 @@
-import MovableAbstract from "./MovableAbstract";
+import Movable from "./Movable";
 import LightComponent from "./LightComponent";
 import CullingComponent from "./CullingComponent";
 import RigidBodyComponent from "./RigidBodyComponent";
@@ -15,7 +15,7 @@ import CameraComponent from "./CameraComponent";
 import DecalComponent from "./DecalComponent";
 import LightProbeComponent from "./LightProbeComponent";
 
-export default class ComponentAbstract extends MovableAbstract {
+export default class ComponentResources extends Movable {
     components = new Map<string, Component>()
     #lightComponent?: LightComponent
     #cullingComponent?: CullingComponent

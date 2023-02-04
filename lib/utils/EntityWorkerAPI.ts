@@ -1,5 +1,6 @@
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES"
 import CameraAPI from "./CameraAPI";
+import Entity from "../../instances/Entity";
 
 
 let maxWorkers
@@ -47,25 +48,28 @@ export default class EntityWorkerAPI {
         entity.hasWorkerBound = false
     }
 
-    static registerEntity(entity) {
+    static registerEntity(entity:Entity) {
         if (!EntityWorkerAPI.#initialized || (entity.hasWorkerBound && EntityWorkerAPI.linkedEntities.get(entity.id)))
             return
         EntityWorkerAPI.linkedEntities.set(entity.id, entity)
 
         const newEntity = <WorkerEntity> {
             id: entity.id,
-            __changedBuffer: entity.__changedBuffer,
+            changedBuffer: entity.__changedBuffer,
             previousModelMatrix: entity.previousModelMatrix,
-            matrix: entity.matrix,
-            parentChangedBuffer: entity.parent?.__changedBuffer,
-            _rotationQuat: entity._rotationQuat,
-            _translation: entity._translation,
-            _scaling: entity._scaling,
-            pivotPoint: entity.pivotPoint,
-            baseTransformationMatrix: entity.baseTransformationMatrix,
-            absoluteTranslation: entity.absoluteTranslation,
-            parentMatrix: entity.parent?.matrix,
-            cullingMetadata: entity.__cullingMetadata
+            matrix: <Float32Array>entity.matrix,
+            parentChangedBuffer: <Uint8Array|undefined>entity.parent?.__changedBuffer,
+            rotationQuaternion: <Float32Array>entity.rotationQuaternion,
+            translation:<Float32Array> entity.translation,
+            scaling: <Float32Array>entity.scaling,
+            pivotPoint: <Float32Array>entity.pivotPoint,
+            baseTransformationMatrix: <Float32Array>entity.baseTransformationMatrix,
+            absoluteTranslation: <Float32Array>entity.absoluteTranslation,
+            parentMatrix: <Float32Array|undefined>entity.parent?.matrix,
+            cullingMetadata: <Float32Array>entity.__cullingMetadata,
+            rotationType: <Float32Array>entity.rotationType,
+            rotationEuler: <Float32Array>entity.rotationEuler,
+            rotationQuaternionFinal: <Float32Array>entity.rotationQuaternionFinal,
         }
 
         EntityWorkerAPI.#workers.forEach(worker => {

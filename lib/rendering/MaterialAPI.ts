@@ -9,7 +9,7 @@ import MeshComponent from "../../instances/components/MeshComponent";
 import MaterialUniform from "../../static/MaterialUniform";
 import TextureParams from "../../static/TextureParams";
 import TextureInUse from "../../static/TextureInUse";
-import MutableObject from "../../MutableObject";
+import MutableObject from "../../static/MutableObject";
 
 export default class MaterialAPI {
     static #generator?: Generator<number>

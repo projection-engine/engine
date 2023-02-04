@@ -1,12 +1,13 @@
 import {mat4, quat, vec3} from "gl-matrix";
 import DynamicMap from "../resource-libs/DynamicMap";
+import Movable from "../instances/components/Movable";
 
 /**
  * @field controlBuffer {Uint8Array [hasUpdatedItem]} - Transferred array from MovementWorker, will be written to in case of changes to linked entities.
  */
 
 const MIN_SCALE = 5e-10
-const cache = quat.create()
+const EMPTY_QUATERNION = quat.create()
 const cacheDistance = vec3.create()
 export default class TransformationPass {
     static targets = new DynamicMap<WorkerEntity>()
@@ -48,10 +49,10 @@ export default class TransformationPass {
             /**
              * Skip if is under change from other thread
              */
-            if (entity.__changedBuffer[2])
+            if (entity.changedBuffer[2])
                 continue
-            if (!entity.__changedBuffer[0] && (!entity.parentChangedBuffer || !entity.parentChangedBuffer[1])) {
-                entity.__changedBuffer[1] = 0
+            if (!entity.changedBuffer[0] && (!entity.parentChangedBuffer || !entity.parentChangedBuffer[1])) {
+                entity.changedBuffer[1] = 0
                 if (entity.needsCacheUpdate) {
                     entity.needsCacheUpdate = false
                     mat4.copy(entity.previousModelMatrix, entity.matrix)
@@ -60,14 +61,14 @@ export default class TransformationPass {
             }
 
             TransformationPass.controlBuffer[0] = 1
-            entity.__changedBuffer[1] = 1
+            entity.changedBuffer[1] = 1
             TransformationPass.transform(entity)
         }
         for (let i = 0; i < TransformationPass.threadMaxEntities; i++) {
             const entity = entities[i + TransformationPass.threadEntityOffset]
             if (!entity)
                 continue
-            if (entity.__changedBuffer[1] || TransformationPass.cameraBuffer[3]) {
+            if (entity.changedBuffer[1] || TransformationPass.cameraBuffer[3]) {
                 const cullingBuffer = entity.cullingMetadata
 
                 cullingBuffer[0] = vec3.length(vec3.sub(cacheDistance, entity.absoluteTranslation, TransformationPass.cameraPosition))
@@ -85,9 +86,9 @@ export default class TransformationPass {
     }
 
     static transform(entity: WorkerEntity) {
-        entity.__changedBuffer[2] = 1
-        entity.__changedBuffer[0] = 0
-        const scaling = entity._scaling
+        entity.changedBuffer[2] = 1
+        entity.changedBuffer[0] = 0
+        const scaling = entity.scaling
         if (scaling[0] === 0)
             scaling[0] = MIN_SCALE
         if (scaling[1] === 0)
@@ -97,8 +98,47 @@ export default class TransformationPass {
 
         mat4.copy(entity.previousModelMatrix, entity.matrix)
         entity.needsCacheUpdate = true
-        quat.normalize(cache, entity._rotationQuat)
-        mat4.fromRotationTranslationScaleOrigin(entity.matrix, cache, entity._translation, scaling, entity.pivotPoint)
+        if (entity.rotationType[0] === Movable.ROTATION_QUATERNION)
+            quat.normalize(entity.rotationQuaternionFinal, entity.rotationQuaternion)
+
+        else {
+            quat.copy(entity.rotationQuaternionFinal, EMPTY_QUATERNION)
+            switch (entity.rotationType[0]) {
+                case Movable.ROTATION_EULER_XZY:
+                    quat.rotateX(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[0])
+                    quat.rotateY(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[1])
+                    quat.rotateZ(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[2])
+                    break
+                case Movable.ROTATION_EULER_XYZ:
+                    quat.rotateX(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[0])
+                    quat.rotateZ(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[2])
+                    quat.rotateY(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[1])
+                    break
+                case Movable.ROTATION_EULER_YZX:
+                    quat.rotateY(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[1])
+                    quat.rotateZ(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[2])
+                    quat.rotateX(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[0])
+                    break
+                case Movable.ROTATION_EULER_YXZ:
+                    quat.rotateY(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[1])
+                    quat.rotateX(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[0])
+                    quat.rotateZ(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[2])
+                    break
+                case Movable.ROTATION_EULER_ZXY:
+                    quat.rotateZ(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[2])
+                    quat.rotateX(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[0])
+                    quat.rotateY(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[1])
+
+                    break
+                case Movable.ROTATION_EULER_ZYX:
+                    quat.rotateZ(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[2])
+                    quat.rotateY(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[1])
+                    quat.rotateX(entity.rotationQuaternionFinal, entity.rotationQuaternionFinal, entity.rotationEuler[0])
+                    break
+            }
+        }
+        mat4.fromRotationTranslationScaleOrigin(entity.matrix, entity.rotationQuaternionFinal, entity.translation, scaling, entity.pivotPoint)
+        // mat4.multiply(entity.matrix, entity.matrix, )
 
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
 
@@ -111,6 +151,6 @@ export default class TransformationPass {
         entity.absoluteTranslation[0] = entity.matrix[12]
         entity.absoluteTranslation[1] = entity.matrix[13]
         entity.absoluteTranslation[2] = entity.matrix[14]
-        entity.__changedBuffer[2] = 0
+        entity.changedBuffer[2] = 0
     }
 }

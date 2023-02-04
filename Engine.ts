@@ -64,8 +64,6 @@ export default class Engine {
         await SSAO.initialize()
         OmnidirectionalShadows.initialize()
         DirectionalShadows.initialize()
-
-
         await PhysicsAPI.initialize()
 
         ConversionAPI.canvasBBox = GPU.canvas.getBoundingClientRect()

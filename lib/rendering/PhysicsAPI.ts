@@ -88,7 +88,7 @@ export default class PhysicsAPI {
         }
 
         const t = entity.absoluteTranslation
-        const q = entity._rotationQuat
+        const q = entity.rotationQuaternionFinal
 
         comp.transform = <btTransform>new ammo.btTransform();
         comp.transform.setIdentity();

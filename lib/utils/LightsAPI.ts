@@ -163,7 +163,7 @@ export default class LightsAPI {
             }
             case LIGHT_TYPES.SPOT: {
                 mat4.lookAt(cache1Mat4, position, position, [0, 1, 0]);
-                mat4.fromQuat(cache2Mat4, entity._rotationQuat)
+                mat4.fromQuat(cache2Mat4, entity.rotationQuaternionFinal)
                 mat4.multiply(cache1Mat4, cache1Mat4, cache2Mat4)
 
 

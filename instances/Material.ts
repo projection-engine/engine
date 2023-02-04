@@ -1,7 +1,7 @@
 import MaterialAPI from "../lib/rendering/MaterialAPI";
 import MaterialUniform from "../static/MaterialUniform";
 import TextureInUse from "../static/TextureInUse";
-import MutableObject from "../MutableObject";
+import MutableObject from "../static/MutableObject";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 
 

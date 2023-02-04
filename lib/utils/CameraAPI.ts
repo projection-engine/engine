@@ -62,7 +62,7 @@ export default class CameraAPI extends CameraResources {
     static updateUBOs() {
         const entity = CameraAPI.trackingEntity
         if (entity && entity.__changedBuffer[1])
-            CameraAPI.update(entity._translation, entity._rotationQuat)
+            CameraAPI.update(entity.translation, entity.rotationQuaternionFinal)
 
         if (CameraNotificationDecoder.hasChangedProjection === 1) {
             const UBO = StaticUBOs.cameraProjectionUBO
@@ -206,7 +206,7 @@ export default class CameraAPI extends CameraResources {
             CameraAPI.updateAspectRatio()
 
         if (data instanceof Entity)
-            CameraAPI.update(data._translation, data._rotationQuat)
+            CameraAPI.update(data.translation, data.rotationQuaternionFinal)
         CameraAPI.updateProjection()
     }
 }

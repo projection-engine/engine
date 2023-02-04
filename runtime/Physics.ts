@@ -48,8 +48,8 @@ export default class Physics {
             const position = tempTransformation.getOrigin()
             const quaternion = tempTransformation.getRotation()
 
-            const t = current._translation
-            const q = current._rotationQuat
+            const t = current.translation
+            const q = current.rotationQuaternionFinal
 
             t[0] = position.x()
             t[1] = position.y()

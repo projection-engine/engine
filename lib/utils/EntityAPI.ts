@@ -10,7 +10,7 @@ import ENTITY_TYPED_ATTRIBUTES from "../../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
 import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
-import MutableObject from "../../MutableObject";
+import MutableObject from "../../static/MutableObject";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
@@ -80,14 +80,12 @@ export default class EntityAPI {
             ResourceEntityMapper.decals.add(entity.id, entity)
         if (entity.uiComponent !== undefined)
             ResourceEntityMapper.ui.add(entity.id, entity)
-
         if (entity.atmosphereComponent !== undefined)
             ResourceEntityMapper.atmosphere.add(entity.id, entity)
         if (entity.lightProbeComponent !== undefined)
             ResourceEntityMapper.lightProbe.add(entity.id, entity)
         if (entity.cameraComponent !== undefined)
             ResourceEntityMapper.cameras.add(entity.id, entity)
-
         if (entity.uiComponent !== undefined)
             ResourceEntityMapper.ui.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
