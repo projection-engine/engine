@@ -20,7 +20,7 @@ import StaticUBOs from "./lib/StaticUBOs";
 export default class GPU {
     static context?: WebGL2RenderingContext
     static canvas?: HTMLCanvasElement
-    static activeShader?: WebGLProgram
+    static activeShader?: Shader
     static activeFramebuffer?: Framebuffer
     static activeMesh?: Mesh
     static materials = new Map<string, Material>()

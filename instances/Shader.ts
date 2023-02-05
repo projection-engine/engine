@@ -191,9 +191,9 @@ export default class Shader {
     }
 
     bind() {
-        if (GPU.activeShader !== this.program)
+        if (GPU.activeShader !== this)
             GPU.context.useProgram(this.program)
-        GPU.activeShader = this.program
+        GPU.activeShader = this
     }
 
     bindForUse(data: MutableObject) {

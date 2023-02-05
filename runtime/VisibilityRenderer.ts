@@ -15,14 +15,13 @@ import METRICS_FLAGS from "../static/METRICS_FLAGS";
 import MeshResourceMapper from "../lib/MeshResourceMapper";
 
 const entityMetadata = new Float32Array(16)
-let context: WebGL2RenderingContext, toRender: Entity[], size, uniforms, VP
+let context: WebGL2RenderingContext, uniforms, VP
 export default class VisibilityRenderer {
     static needsUpdate = true
     static #isSecondPass = false
+
     static #bindUniforms() {
-        StaticShaders.visibility.bind()
         context = GPU.context
-        context.blendFunc(context.ONE, context.ZERO)
         uniforms = StaticShaders.visibilityUniforms
         VP = CameraAPI.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
@@ -30,12 +29,13 @@ export default class VisibilityRenderer {
         context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
         context.uniform3fv(uniforms.cameraPlacement, CameraAPI.position)
         mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
-        Mesh.finishIfUsed()
     }
 
     static #drawSprites() {
-        toRender = ResourceEntityMapper.sprites.array
-        size = toRender.length
+        const toRender = ResourceEntityMapper.sprites.array
+        const size = toRender.length
+        if(size === 0)
+            return
         entityMetadata[5] = 1 // IS SPRITE
 
         context.disable(context.CULL_FACE)
@@ -69,18 +69,11 @@ export default class VisibilityRenderer {
         context.enable(context.CULL_FACE)
     }
 
-    static execute() {
-        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
-            return
+    static #drawMeshes(){
 
-        VisibilityRenderer.#bindUniforms()
-        entityMetadata[5] = 0 // IS NOT SPRITE
-        StaticFBO.visibility.startMapping()
-        // DEV
-        context.disable(context.CULL_FACE)
-
+        entityMetadata[5] = 0
         const meshes = MeshResourceMapper.meshesArray
-        size = meshes.length
+        const size = meshes.length
         for (let meshIndex = 0; meshIndex < size; meshIndex++) {
             const meshGroup = meshes[meshIndex]
             const entities = meshGroup.entities
@@ -89,37 +82,42 @@ export default class VisibilityRenderer {
                 const entity = entities[entityIndex]
                 if (!entity.active || entity.isCulled)
                     continue
-                const mesh = entity.meshRef
-                const material = entity.materialRef
                 const culling = entity.cullingComponent
                 const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
 
                 entityMetadata[0] = entity.pickID[0]
                 entityMetadata[1] = entity.pickID[1]
                 entityMetadata[2] = entity.pickID[2]
-
-                entityMetadata[4] = hasScreenDoor || material?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
+                entityMetadata[4] = hasScreenDoor || entity.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
 
                 context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
                 context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
                 context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
 
-                mesh.simplifiedDraw()
+                meshGroup.mesh.simplifiedDraw()
             }
         }
+    }
+    static execute() {
+        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
+            return
 
-        VisibilityRenderer.#drawSprites()
-        StaticFBO.visibility.stopMapping()
-        MetricsController.currentState = METRICS_FLAGS.VISIBILITY
-
-        SSAO.execute()
-        context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA)
-        if(!VisibilityRenderer.#isSecondPass){
+        if (!VisibilityRenderer.#isSecondPass) {
             VisibilityRenderer.#isSecondPass = true
             VisibilityRenderer.needsUpdate = true
-        }else {
+        } else {
             VisibilityRenderer.needsUpdate = false
             VisibilityRenderer.#isSecondPass = false
         }
+
+
+        StaticShaders.visibility.bind()
+        StaticFBO.visibility.startMapping()
+        VisibilityRenderer.#bindUniforms()
+        VisibilityRenderer.#drawMeshes()
+        VisibilityRenderer.#drawSprites()
+        StaticFBO.visibility.stopMapping()
+        MetricsController.currentState = METRICS_FLAGS.VISIBILITY
+        SSAO.execute()
     }
 }

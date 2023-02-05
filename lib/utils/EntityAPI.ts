@@ -15,8 +15,17 @@ import MeshResourceMapper from "../MeshResourceMapper";
 import MaterialResourceMapper from "../MaterialResourceMapper";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
+const excludedKeys = [
+    ...ENTITY_TYPED_ATTRIBUTES,
+    "components",
+    "parent",
+    "matrix",
+    "_props",
+    "isCollection",
+    "id"
+]
 export default class EntityAPI {
-    static getNewEntityInstance(id?:string, isCollection?:boolean): Entity {
+    static getNewEntityInstance(id?: string, isCollection?: boolean): Entity {
         return new Entity(id, isCollection)
     }
 
@@ -149,7 +158,7 @@ export default class EntityAPI {
         for (let i = 0; i < keys.length; i++) {
             try {
                 const k = keys[i]
-                if (k !== "components" && k !== "parent" && k !== "matrix" && !ENTITY_TYPED_ATTRIBUTES.includes(k) && k !== "_props")
+                if (!excludedKeys.includes(k))
                     parsedEntity[k] = entity[k]
             } catch (err) {
                 console.warn(err)

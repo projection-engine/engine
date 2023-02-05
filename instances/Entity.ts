@@ -6,6 +6,7 @@ import ComponentResources from "./components/ComponentResources";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import VisibilityRenderer from "../runtime/VisibilityRenderer";
 import QueryAPI from "../lib/utils/QueryAPI";
+import MutableObject from "../static/MutableObject";
 
 
 export default class Entity extends ComponentResources {
@@ -79,7 +80,7 @@ export default class Entity extends ComponentResources {
     }
 
     serializable() {
-        const temp: any = {...this}
+        const temp: MutableObject = {...this}
         const parsedComponents: { components: Component[] } = {components: []}
 
         temp.id = this.#id

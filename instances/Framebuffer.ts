@@ -53,6 +53,7 @@ export default class Framebuffer {
     startMapping(noClearing?: boolean) {
         // if(GPU.activeFramebuffer === this)
         //     return
+
         this.use()
         const last = Framebuffer.lastBoundResolution
         const w = this.width
@@ -69,13 +70,12 @@ export default class Framebuffer {
 
 
     stopMapping() {
-        // if(GPU.activeFramebuffer !== this)
-        //     return
+        if(GPU.activeFramebuffer !== this)
+            return
 
         const context = GPU.context
         GPU.activeFramebuffer = undefined
         context.bindFramebuffer(context.FRAMEBUFFER, null)
-
         const last = Framebuffer.lastBoundResolution
         const w = context.drawingBufferWidth
         const h = context.drawingBufferHeight

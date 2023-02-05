@@ -71,8 +71,8 @@ export default class Mesh {
         const last = GPU.activeMesh
         if (last === this)
             return
-        else if (last != null)
-            last.finish()
+        // else if (last != null)
+        //     last.finish()
 
         GPU.activeMesh = this
         GPU.context.bindVertexArray(this.VAO)
@@ -84,8 +84,8 @@ export default class Mesh {
         const last = GPU.activeMesh
         if (last === this)
             return
-        else if (last != null)
-            last.finish()
+        // else if (last != null)
+        //     last.finish()
         GPU.activeMesh = this
         GPU.context.bindVertexArray(this.VAO)
         GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, this.indexVBO)

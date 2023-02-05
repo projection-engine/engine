@@ -195,10 +195,6 @@ export default class SceneRenderer {
         const size = toRender.length
         if (size === 0)
             return
-
-        // DEV
-        context.disable(context.CULL_FACE)
-        SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.postProcessing1Sampler, false)
         for (let meshIndex = 0; meshIndex < size; meshIndex++) {
             const meshGroup = toRender[meshIndex]
             const entities = meshGroup.entities
@@ -208,10 +204,13 @@ export default class SceneRenderer {
                 if (!entity.active || entity.isCulled)
                     continue
                 const material = entity.materialRef
+                const culling = entity?.cullingComponent
+                UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
+                UberMaterialAttributeGroup.entityID = entity.pickID
 
                 if (isSky) {
                     isSky = false
-                    // context.enable(context.CULL_FACE)
+                    context.enable(context.CULL_FACE)
                     context.enable(context.DEPTH_TEST)
                 }
 
@@ -241,7 +240,7 @@ export default class SceneRenderer {
                 } else if (!stateWasCleared) {
                     stateWasCleared = true
                     if (isDoubleSided) {
-                        // context.enable(context.CULL_FACE)
+                        context.enable(context.CULL_FACE)
                         isDoubleSided = false
                     }
 

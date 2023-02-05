@@ -34,8 +34,6 @@ export default class Loop {
         GPUAPI.copyTexture(StaticFBO.postProcessing1, StaticFBO.postProcessing2, GPU.context.COLOR_BUFFER_BIT)
     }
 
-
-
     static #callback() {
         MetricsController.init()
         if (!Engine.isDev)
