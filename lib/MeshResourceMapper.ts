@@ -1,4 +1,3 @@
-import DynamicMap from "../resource-libs/DynamicMap";
 import Mesh from "../instances/Mesh";
 import Entity from "../instances/Entity";
 import GPU from "../GPU";

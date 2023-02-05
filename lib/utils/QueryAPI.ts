@@ -19,33 +19,54 @@ export default class QueryAPI {
         }
         return newArr
     }
-static getEntityDepth(entity:Entity){
-    let depth = 0
-    let currentEntity = entity
-    while (currentEntity?.parent) {
-        depth++
-        currentEntity = currentEntity.parent
-    }
-    return depth
-}
-    static isChildOf(entity:Entity, toFind: string):boolean{
+
+    static getClosestEntityParent(entity: Entity): Entity | undefined {
         let currentEntity = entity
-        while(currentEntity?.parent){
-            if(currentEntity.parent.id === toFind)
+        while (currentEntity?.parent) {
+            currentEntity = currentEntity.parent
+            if (!currentEntity.isCollection)
+                return currentEntity
+        }
+    }
+
+    static getClosestCollectionParent(entity: Entity): Entity | undefined {
+        let currentEntity = entity
+        while (currentEntity?.parent) {
+            currentEntity = currentEntity.parent
+            if (currentEntity.isCollection)
+                return currentEntity
+        }
+    }
+
+    static getEntityDepth(entity: Entity) {
+        let depth = 0
+        let currentEntity = entity
+        while (currentEntity?.parent) {
+            depth++
+            currentEntity = currentEntity.parent
+        }
+        return depth
+    }
+
+    static isChildOf(entity: Entity, toFind: string): boolean {
+        let currentEntity = entity
+        while (currentEntity?.parent) {
+            if (currentEntity.parent.id === toFind)
                 return true
             currentEntity = currentEntity.parent
         }
         return false
     }
 
-    static loopHierarchy(entity:Entity, callback: Function){
+    static loopHierarchy(entity: Entity, callback: Function) {
         const children = entity.children
         callback(entity)
-        for(let i = 0; i < children.length; i++){
+        for (let i = 0; i < children.length; i++) {
             const current = children[i]
             QueryAPI.loopHierarchy(current, callback)
         }
     }
+
     static getEntityByPickerID(id: number): Entity | undefined {
         if (id === 0)
             return

@@ -1,9 +1,9 @@
 import Component from "./Component"
 import LIGHT_PROPS from "../../static/component-props/LIGHT_PROPS";
 import LIGHT_TYPES from "../../static/LIGHT_TYPES";
-import Entity from "../Entity";
 import LightsAPI from "../../lib/utils/LightsAPI";
 import {mat4} from "gl-matrix";
+import EntityAPI from "../../lib/utils/EntityAPI";
 
 const toRad = Math.PI / 180
 
@@ -21,7 +21,7 @@ export default class LightComponent extends Component {
     set type(data) {
         const isDifferent = data !== this._type
         this._type = data
-        if (isDifferent && Entity.isRegistered(this.entity))
+        if (isDifferent && EntityAPI.isRegistered(this.entity))
             LightsAPI.packageLights(false, true)
     }
 

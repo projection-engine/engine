@@ -11,7 +11,6 @@ import UberMaterialAttributeGroup from "../../resource-libs/UberMaterialAttribut
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import Material from "../../instances/Material";
 import UberShader from "../../resource-libs/UberShader";
-import Mesh from "../../instances/Mesh";
 import MeshResourceMapper from "../../lib/MeshResourceMapper";
 import MaterialResourceMapper from "../../lib/MaterialResourceMapper";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";

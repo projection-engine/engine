@@ -1,4 +1,3 @@
-import DynamicMap from "../resource-libs/DynamicMap";
 import Material from "../instances/Material";
 import Entity from "../instances/Entity";
 import GPU from "../GPU";

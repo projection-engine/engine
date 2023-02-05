@@ -2,13 +2,12 @@ import Component from "./Component"
 
 import MESH_PROPS from "../../static/component-props/MESH_PROPS";
 import MaterialAPI from "../../lib/rendering/MaterialAPI";
-import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import GPU from "../../GPU";
 import FileSystemAPI from "../../lib/utils/FileSystemAPI";
 import MeshResourceMapper from "../../lib/MeshResourceMapper";
-import Entity from "../Entity";
 import MaterialResourceMapper from "../../lib/MaterialResourceMapper";
 import MaterialUniform from "../../static/MaterialUniform";
+import EntityAPI from "../../lib/utils/EntityAPI";
 
 export default class MeshComponent extends Component {
 
@@ -19,15 +18,15 @@ export default class MeshComponent extends Component {
     _materialID?: string
 
     #texturesInUse = {}
-    #mappedUniforms = {}
+    _mappedUniforms = {}
     #materialUniforms: MaterialUniform[] = []
 
     updateMaterialUniformValue(key: string, value: any) {
-        this.#mappedUniforms[key] = value
+        this._mappedUniforms[key] = value
     }
 
     get mappedUniforms() {
-        return this.#mappedUniforms
+        return this._mappedUniforms
     }
 
     contributeToProbes = true
@@ -41,7 +40,7 @@ export default class MeshComponent extends Component {
     }
 
     #bindMesh(meshID: string) {
-        if (!Entity.isRegistered(this.entity) || !meshID) return;
+        if (!EntityAPI.isRegistered(this.entity) || !meshID) return;
         const found = GPU.meshes.get(meshID)
         if (!found)
             FileSystemAPI.loadMesh(meshID).then(_ => {
@@ -64,7 +63,7 @@ export default class MeshComponent extends Component {
         this._meshID = meshID
 
         const entity = this.entity
-        if (!Entity.isRegistered(entity)) return;
+        if (!EntityAPI.isRegistered(entity)) return;
 
         if (meshID)
             this.#bindMesh(meshID)
@@ -79,7 +78,7 @@ export default class MeshComponent extends Component {
     }
 
     #bindMaterial(materialID: string) {
-        if (!Entity.isRegistered(this.entity) || !materialID) return;
+        if (!EntityAPI.isRegistered(this.entity) || !materialID) return;
         const found = GPU.materials.get(materialID)
         if (!found)
             FileSystemAPI.loadMaterial(materialID).then(_ => {
@@ -90,16 +89,16 @@ export default class MeshComponent extends Component {
                 }
                 this.entity.materialRef = found
                 this.#materialUniforms = this.entity.materialRef.uniforms
-                this.#mappedUniforms = {}
-                MaterialAPI.mapUniforms(this.#materialUniforms, this.#texturesInUse, this.#mappedUniforms).catch()
+                this._mappedUniforms = {}
+                MaterialAPI.mapUniforms(this.#materialUniforms, this.#texturesInUse, this._mappedUniforms).catch()
                 MaterialResourceMapper.linkEntityMaterial(this.entity, materialID)
 
             })
         else {
             this.entity.materialRef = found
             this.#materialUniforms = this.entity.materialRef.uniforms
-            this.#mappedUniforms = {}
-            MaterialAPI.mapUniforms(this.#materialUniforms, this.#texturesInUse, this.#mappedUniforms).catch()
+            this._mappedUniforms = {}
+            MaterialAPI.mapUniforms(this.#materialUniforms, this.#texturesInUse, this._mappedUniforms).catch()
             MaterialResourceMapper.linkEntityMaterial(this.entity, materialID)
         }
     }
@@ -107,7 +106,7 @@ export default class MeshComponent extends Component {
     set materialID(materialID) {
         this._materialID = materialID
         const entity = this.entity
-        if (!Entity.isRegistered(entity)) return;
+        if (!EntityAPI.isRegistered(entity)) return;
 
         if (materialID)
             this.#bindMaterial(materialID)

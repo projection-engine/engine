@@ -3,14 +3,11 @@ import DATA_TYPES from "../../static/DATA_TYPES";
 import GPUAPI from "./GPUAPI";
 
 import FileSystemAPI from "../utils/FileSystemAPI";
-import Entity from "../../instances/Entity";
 import Material from "../../instances/Material";
-import MeshComponent from "../../instances/components/MeshComponent";
 import MaterialUniform from "../../static/MaterialUniform";
 import TextureParams from "../../static/TextureParams";
 import TextureInUse from "../../static/TextureInUse";
 import MutableObject from "../../static/MutableObject";
-import MeshResourceMapper from "../MeshResourceMapper";
 
 export default class MaterialAPI {
     static #generator?: Generator<number>

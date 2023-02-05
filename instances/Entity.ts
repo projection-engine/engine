@@ -1,7 +1,6 @@
 import EntityAPI from "../lib/utils/EntityAPI";
 import getComponentInstance from "../utils/get-component-instance";
 import serializeStructure from "../utils/serialize-structure";
-import Engine from "../Engine";
 import Component from "./components/Component";
 import ComponentResources from "./components/ComponentResources";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
@@ -12,9 +11,18 @@ import QueryAPI from "../lib/utils/QueryAPI";
 export default class Entity extends ComponentResources {
     [key: string]: any;
 
-    id = crypto.randomUUID()
-    queryKey: string
-    name: string
+    #id = crypto.randomUUID()
+    get id() {
+        return this.#id
+    }
+
+    #isCollection = false
+    get isCollection() {
+        return this.#isCollection
+    }
+
+    queryKey = this.#id.slice(0, this.#id.length / 2)
+    name = ""
     active = true
     scripts = []
     #parent?: Entity
@@ -23,27 +31,21 @@ export default class Entity extends ComponentResources {
     #pickIndex: number = -1
     #children = []
 
-    constructor(id = crypto.randomUUID(), name = "Empty entity", active = true) {
-        super()
-        this.id = id
-        this.name = name
-        this.active = active
-        this.queryKey = id.slice(0, id.length / 2);
+
+    constructor(id?: string, isCollection?: boolean) {
+        super();
+        this.#id = id ?? this.#id
+        this.#isCollection = isCollection ?? false
     }
 
     get allComponents() {
         return Array.from(this.components.entries())
     }
 
-    set allComponents(_) {
-    }
 
     setPickID(data: number[]) {
         data.forEach((v, i) => this.#pickID[i] = v)
         this.#pickIndex = (data[0] + data[1] + data[2]) * 255
-    }
-
-    set pickID(_) {
     }
 
     get pickID(): Float32Array {
@@ -80,6 +82,8 @@ export default class Entity extends ComponentResources {
         const temp: any = {...this}
         const parsedComponents: { components: Component[] } = {components: []}
 
+        temp.id = this.#id
+        temp.isCollection = this.#isCollection
         temp.parent = this.parent?.id
         temp.parentID = this.parent?.id
 
@@ -96,9 +100,6 @@ export default class Entity extends ComponentResources {
         return EntityAPI.parseEntityObject(JSON.parse(str), true)
     }
 
-    static isRegistered(entity) {
-        return !!Engine.entities.map.get(entity.id)
-    }
 
     removeParent() {
         if (!this.#parent)
@@ -106,12 +107,12 @@ export default class Entity extends ComponentResources {
         const prev = this.#parent
         this.#parent = undefined
         prev.removeChild(this)
-        if (Entity.isRegistered(this))
+        if (EntityAPI.isRegistered(this))
             EntityWorkerAPI.updateEntityReference(this)
     }
 
     addChild(entity: Entity) {
-        if(entity === this || entity.parent !== this || this.#children.includes(entity))
+        if (entity === this || entity.parent !== this || this.#children.includes(entity))
             return
         this.#children.push(entity)
     }
@@ -128,7 +129,7 @@ export default class Entity extends ComponentResources {
         this.removeParent()
         this.#parent = parent
         parent.addChild(this)
-        if (Entity.isRegistered(this))
+        if (EntityAPI.isRegistered(this))
             EntityWorkerAPI.updateEntityReference(this)
         VisibilityRenderer.needsUpdate = true
     }
@@ -136,6 +137,7 @@ export default class Entity extends ComponentResources {
     get parent() {
         return this.#parent
     }
+
     get children() {
         return this.#children
     }

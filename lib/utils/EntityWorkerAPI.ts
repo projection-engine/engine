@@ -1,6 +1,7 @@
 import WORKER_MESSAGES from "../../static/WORKER_MESSAGES"
 import CameraAPI from "./CameraAPI";
 import Entity from "../../instances/Entity";
+import QueryAPI from "./QueryAPI";
 
 
 let maxWorkers
@@ -48,19 +49,24 @@ export default class EntityWorkerAPI {
             return
         EntityWorkerAPI.linkedEntities.set(entity.id, entity)
 
+        const parent = QueryAPI.getClosestEntityParent(entity)
+        // const parent = QueryAPI.getClosestCollectionParent()
         const newEntity = <WorkerEntity> {
             id: entity.id,
             changedBuffer: entity.__changedBuffer,
             previousModelMatrix: entity.previousModelMatrix,
             matrix: <Float32Array>entity.matrix,
-            parentChangedBuffer: <Uint8Array|undefined>entity.parent?.__changedBuffer,
+
+            parentMatrix: <Float32Array|undefined>parent?.matrix,
+            parentChangedBuffer: <Uint8Array|undefined>parent?.__changedBuffer,
+
+
             rotationQuaternion: <Float32Array>entity.rotationQuaternion,
             translation:<Float32Array> entity.translation,
             scaling: <Float32Array>entity.scaling,
             pivotPoint: <Float32Array>entity.pivotPoint,
             baseTransformationMatrix: <Float32Array>entity.baseTransformationMatrix,
             absoluteTranslation: <Float32Array>entity.absoluteTranslation,
-            parentMatrix: <Float32Array|undefined>entity.parent?.matrix,
             cullingMetadata: <Float32Array>entity.__cullingMetadata,
             rotationType: <Float32Array>entity.rotationType,
             rotationEuler: <Float32Array>entity.rotationEuler,

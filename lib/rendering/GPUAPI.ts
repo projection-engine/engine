@@ -11,7 +11,6 @@ import UberShader from "../../resource-libs/UberShader";
 import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../static/TextureParams";
 import MaterialInformation from "../../static/MaterialInformation";
-import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import MeshResourceMapper from "../MeshResourceMapper";
 import MaterialResourceMapper from "../MaterialResourceMapper";
 

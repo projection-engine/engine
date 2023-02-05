@@ -8,20 +8,26 @@ import PhysicsAPI from "../rendering/PhysicsAPI";
 import Entity from "../../instances/Entity";
 import ENTITY_TYPED_ATTRIBUTES from "../../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
-import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import MutableObject from "../../static/MutableObject";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
-import QueryAPI from "./QueryAPI";
 import MeshResourceMapper from "../MeshResourceMapper";
 import MaterialResourceMapper from "../MaterialResourceMapper";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
+    static getNewEntityInstance(id?:string, isCollection?:boolean): Entity {
+        return new Entity(id, isCollection)
+    }
+
+    static isRegistered(entity) {
+        return Engine.entities.has(entity.id)
+    }
+
     static addEntity(entity?: Entity): Entity {
         if (entity && Engine.entities.has(entity.id))
             return Engine.entities.map.get(entity.id)
-        let target = entity || new Entity()
+        let target = entity ?? EntityAPI.getNewEntityInstance()
 
         Engine.entities.add(target.id, target)
         EntityWorkerAPI.removeEntity(target)
@@ -51,7 +57,7 @@ export default class EntityAPI {
 
     static registerEntityComponents(entity: Entity, previouslyRemoved?: string): void {
 
-        if (!Entity.isRegistered(entity))
+        if (!EntityAPI.isRegistered(entity))
             return
         if (Engine.environment !== ENVIRONMENT.DEV)
             PhysicsAPI.registerRigidBody(entity)
@@ -108,7 +114,7 @@ export default class EntityAPI {
         ResourceEntityMapper.cameras.delete(id)
         ResourceEntityMapper.ui.delete(id)
         ResourceEntityMapper.decals.delete(id)
-        if(ResourceEntityMapper.meshes.has(id)){
+        if (ResourceEntityMapper.meshes.has(id)) {
             ResourceEntityMapper.meshes.delete(id)
             MeshResourceMapper.unlinkEntityMesh(id)
             MaterialResourceMapper.unlinkEntityMaterial(id)
@@ -137,7 +143,7 @@ export default class EntityAPI {
 
 
     static parseEntityObject(entity: MutableObject, asNew?: boolean): Entity {
-        const parsedEntity = new Entity()
+        const parsedEntity = EntityAPI.getNewEntityInstance(asNew ? crypto.randomUUID() : entity.id, entity.isCollection)
         const keys = Object.keys(entity)
 
         for (let i = 0; i < keys.length; i++) {
@@ -201,8 +207,6 @@ export default class EntityAPI {
             }
         }
         parsedEntity.changed = true
-        if (asNew)
-            parsedEntity.id = crypto.randomUUID()
         parsedEntity.name = entity.name
         parsedEntity.active = entity.active
         return parsedEntity
