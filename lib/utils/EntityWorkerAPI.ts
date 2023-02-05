@@ -13,14 +13,9 @@ export default class EntityWorkerAPI {
     static #workers = []
 
 
-    static updateEntityLinks(child, parent) {
-        if (parent) {
-            EntityWorkerAPI.removeEntity(parent)
-            EntityWorkerAPI.registerEntity(parent)
-        }
-
-        EntityWorkerAPI.removeEntity(child)
-        EntityWorkerAPI.registerEntity(child)
+    static updateEntityReference(entity:Entity) {
+        EntityWorkerAPI.removeEntity(entity)
+        EntityWorkerAPI.registerEntity(entity)
     }
 
 

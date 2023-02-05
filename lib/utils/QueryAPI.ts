@@ -2,15 +2,15 @@ import Engine from "../../Engine";
 import Entity from "../../instances/Entity";
 
 export default class QueryAPI {
-    static getEntityByQueryID(id:string):Entity|undefined {
+    static getEntityByQueryID(id: string): Entity | undefined {
         return Engine.queryMap.get(id)
     }
 
-    static getEntityByID(id:string):Entity|undefined {
+    static getEntityByID(id: string): Entity | undefined {
         return Engine.entities.map.get(id)
     }
 
-    static getEntitiesWithNativeComponent(componentKey:string):Entity[]{
+    static getEntitiesWithNativeComponent(componentKey: string): Entity[] {
         const newArr = []
         for (let i = 0; i < Engine.entities.array.length; i++) {
             const entity = Engine.entities.array[i]
@@ -19,20 +19,44 @@ export default class QueryAPI {
         }
         return newArr
     }
+static getEntityDepth(entity:Entity){
+    let depth = 0
+    let currentEntity = entity
+    while (currentEntity?.parent) {
+        depth++
+        currentEntity = currentEntity.parent
+    }
+    return depth
+}
+    static isChildOf(entity:Entity, toFind: string):boolean{
+        let currentEntity = entity
+        while(currentEntity?.parent){
+            if(currentEntity.parent.id === toFind)
+                return true
+            currentEntity = currentEntity.parent
+        }
+        return false
+    }
 
-
-    static getEntityByPickerID(id:number):Entity|undefined {
+    static loopHierarchy(entity:Entity, callback: Function){
+        const children = entity.children
+        callback(entity)
+        for(let i = 0; i < children.length; i++){
+            const current = children[i]
+            QueryAPI.loopHierarchy(current, callback)
+        }
+    }
+    static getEntityByPickerID(id: number): Entity | undefined {
         if (id === 0)
             return
         const entities = Engine.entities.array
         const size = entities.length
-        for(let i = 0; i < size; i++){
+        for (let i = 0; i < size; i++) {
             const current = entities[i]
-            if(!current.active)
+            if (!current.active)
                 continue
-            if(current.pickIndex === id)
+            if (current.pickIndex === id)
                 return current
         }
     }
-
 }

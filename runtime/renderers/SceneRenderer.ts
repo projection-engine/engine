@@ -11,6 +11,7 @@ import UberMaterialAttributeGroup from "../../resource-libs/UberMaterialAttribut
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import Material from "../../instances/Material";
 import UberShader from "../../resource-libs/UberShader";
+import Mesh from "../../instances/Mesh";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 
@@ -22,7 +23,7 @@ export default class SceneRenderer {
     }
 
 
-    static bindGlobalResources( viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
+    static bindGlobalResources(viewProjection?: Float32Array, viewMatrix?: Float32Array, cameraPosition?: Float32Array) {
         const uniforms = UberShader.uberUniforms
         const context = GPU.context
 
@@ -70,7 +71,7 @@ export default class SceneRenderer {
             for (let j = 0; j < toBind.length; j++) {
                 const current = toBind[j]
                 const dataAttribute = data[current.key]
-                if(!dataAttribute)
+                if (!dataAttribute)
                     continue
                 if (current.type === "sampler2D")
                     Shader.bind(uniforms[current.key], dataAttribute.texture, current.type, texOffset, () => texOffset++)
@@ -84,7 +85,7 @@ export default class SceneRenderer {
 
         if (isSky) {
             isSky = false
-            context.enable(context.CULL_FACE)
+            // context.enable(context.CULL_FACE)
             context.enable(context.DEPTH_TEST)
         }
 
@@ -113,7 +114,7 @@ export default class SceneRenderer {
         } else if (!stateWasCleared) {
             stateWasCleared = true
             if (isDoubleSided) {
-                context.enable(context.CULL_FACE)
+                // context.enable(context.CULL_FACE)
                 isDoubleSided = false
             }
 
@@ -159,6 +160,36 @@ export default class SceneRenderer {
 
     }
 
+    static #doLoop(index, isTransparencyPass, isDecalPass, context: WebGL2RenderingContext, uniforms, mesh: Mesh, entity: Entity) {
+        const culling = entity.cullingComponent
+        UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
+        UberMaterialAttributeGroup.entityID = entity.pickID
+
+        if (isTransparencyPass) {
+            const material = entity.materialRef
+
+            UberMaterialAttributeGroup.materialID = material.bindID
+            UberMaterialAttributeGroup.renderingMode = material.renderingMode
+            UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
+
+            SceneRenderer.#bindComponentUniforms(entity, material, uniforms)
+        } else if (isDecalPass)
+            SceneRenderer.#drawDecal(uniforms, context, entity)
+        else {
+            if (entity.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY) {
+                SceneComposition.transparencyIndexes[SceneComposition.transparenciesToLoopThrough] = index
+                SceneComposition.transparenciesToLoopThrough++
+                return
+            }
+            SceneRenderer.#drawOpaque(uniforms, context, entity)
+        }
+
+
+        context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
+        context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+
+        mesh.draw()
+    }
 
     static drawMeshes(onlyOpaque: boolean, isDecalPass: boolean, context: WebGL2RenderingContext, toRender: Entity[], uniforms: { [key: string]: WebGLUniformLocation }) {
         UberMaterialAttributeGroup.clear()
@@ -170,6 +201,7 @@ export default class SceneRenderer {
 
         if (isTransparencyPass)
             SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.postProcessing1Sampler, false)
+        context.disable(context.CULL_FACE)
 
         for (let i = 0; i < size; i++) {
             const entity = isTransparencyPass ? toRender[SceneComposition.transparencyIndexes[i]] : toRender[i]
@@ -177,35 +209,7 @@ export default class SceneRenderer {
 
             if (!entity.active || !mesh || entity.isCulled)
                 continue
-
-            const culling = entity?.cullingComponent
-            UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
-            UberMaterialAttributeGroup.entityID = entity.pickID
-
-            if (isTransparencyPass) {
-                const material = entity.materialRef
-
-                UberMaterialAttributeGroup.materialID = material.bindID
-                UberMaterialAttributeGroup.renderingMode = material.renderingMode
-                UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
-
-                SceneRenderer.#bindComponentUniforms(entity, material, uniforms)
-            } else if (isDecalPass)
-                SceneRenderer.#drawDecal(uniforms, context, entity)
-            else {
-                if (entity.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY) {
-                    SceneComposition.transparencyIndexes[SceneComposition.transparenciesToLoopThrough] = i
-                    SceneComposition.transparenciesToLoopThrough++
-                    continue
-                }
-                SceneRenderer.#drawOpaque(uniforms, context, entity)
-            }
-
-
-            context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
-            context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
-
-            mesh.draw()
+            SceneRenderer.#doLoop(i, isTransparencyPass, isDecalPass, context, uniforms, mesh, entity)
         }
     }
 }

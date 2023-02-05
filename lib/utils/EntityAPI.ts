@@ -12,6 +12,7 @@ import MaterialAPI from "../rendering/MaterialAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import MutableObject from "../../static/MutableObject";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
+import QueryAPI from "./QueryAPI";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -46,22 +47,7 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = needsVisibilityUpdate
     }
 
-    static linkEntities(child: Entity, parent?: Entity | undefined): void {
 
-        if (child.parent != null) {
-            EntityWorkerAPI.updateEntityLinks(child, child.parent)
-            child.parent.children = child.parent.children.filter(c => c !== child)
-            child.parent = undefined
-        }
-
-        if (parent != null) {
-            child.parent = parent
-            parent.children.push(child)
-            EntityWorkerAPI.updateEntityLinks(child, parent)
-        }
-
-        VisibilityRenderer.needsUpdate = true
-    }
 
     static registerEntityComponents(entity: Entity, previouslyRemoved?: string): void {
 
@@ -100,14 +86,13 @@ export default class EntityAPI {
     }
 
     static removeEntity(id: string) {
-
         const entity = Engine.entities.map.get(id)
         if (!entity)
             return
-        if (entity.parent)
-            entity.parent.children = entity.parent.children.filter(e => e.id !== id)
-        for (let c = 0; c < entity.children.length; c++)
-            EntityAPI.removeEntity(entity.children[c].id)
+
+        const children = entity.children
+        for (let c = 0; c < children.length; c++)
+            EntityAPI.removeEntity(children[c].id)
 
         if (!Engine.isDev)
             for (let i = 0; i < entity.scripts.length; i++) {
@@ -172,8 +157,7 @@ export default class EntityAPI {
             }
         }
 
-        parsedEntity.parent = undefined
-        parsedEntity.parentCache = entity.parent
+        parsedEntity.parentID = entity.parent
         for (const k in entity.components) {
 
             const component = parsedEntity.addComponent(k)

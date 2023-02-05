@@ -19,6 +19,7 @@ export default class TransformationPass {
     static maxWorkers = -1
     static threadEntityOffset = 0
     static threadMaxEntities = 0
+    static cache = 0
 
     static initialize([controlBuffer, cameraBuffer, cameraPosition, index, maxWorkers]) {
         if (TransformationPass.#initialized)
@@ -43,7 +44,7 @@ export default class TransformationPass {
             return
         const entities = TransformationPass.targets.array
         const size = entities.length
-
+        const hasToUpdate = TransformationPass.cache === 4
         for (let i = 0; i < size; i++) {
             const entity = entities[i]
             /**
@@ -64,23 +65,27 @@ export default class TransformationPass {
             entity.changedBuffer[1] = 1
             TransformationPass.transform(entity)
         }
-        for (let i = 0; i < TransformationPass.threadMaxEntities; i++) {
-            const entity = entities[i + TransformationPass.threadEntityOffset]
-            if (!entity)
-                continue
-            if (entity.changedBuffer[1] || TransformationPass.cameraBuffer[3]) {
-                const cullingBuffer = entity.cullingMetadata
+        TransformationPass.cache++
+        if (hasToUpdate) {
+            TransformationPass.cache = 0
+            for (let i = 0; i < TransformationPass.threadMaxEntities; i++) {
+                const entity = entities[i + TransformationPass.threadEntityOffset]
+                if (!entity)
+                    continue
+                if (entity.changedBuffer[1] || TransformationPass.cameraBuffer[3]) {
+                    const cullingBuffer = entity.cullingMetadata
 
-                cullingBuffer[0] = vec3.length(vec3.sub(cacheDistance, entity.absoluteTranslation, TransformationPass.cameraPosition))
+                    cullingBuffer[0] = vec3.length(vec3.sub(cacheDistance, entity.absoluteTranslation, TransformationPass.cameraPosition))
 
-                const distanceFromCamera = cullingBuffer[0]
-                const cullingDistance = cullingBuffer[1]
-                const hasDistanceCullingEnabled = cullingBuffer[2]
-                const screenDoorDistance = cullingBuffer[4]
+                    const distanceFromCamera = cullingBuffer[0]
+                    const cullingDistance = cullingBuffer[1]
+                    const hasDistanceCullingEnabled = cullingBuffer[2]
+                    const screenDoorDistance = cullingBuffer[4]
 
-                cullingBuffer[3] = hasDistanceCullingEnabled && distanceFromCamera > cullingDistance ? 1 : 0
+                    cullingBuffer[3] = hasDistanceCullingEnabled && distanceFromCamera > cullingDistance ? 1 : 0
 
-                cullingBuffer[5] = screenDoorDistance < distanceFromCamera ? 1 : 0
+                    cullingBuffer[5] = screenDoorDistance < distanceFromCamera ? 1 : 0
+                }
             }
         }
     }

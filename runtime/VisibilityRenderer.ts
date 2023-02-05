@@ -45,6 +45,8 @@ export default class VisibilityRenderer {
 
 
         entityMetadata[5] = 0 // IS NOT SPRITE
+        // context.enable(context.CULL_FACE)
+        context.disable(context.CULL_FACE)
 
         for (let i = 0; i < size; i++) {
 

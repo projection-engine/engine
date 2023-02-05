@@ -80,20 +80,25 @@ export default class Mesh {
             last.finish()
 
         GPU.activeMesh = this
-        this.prepareForUse()
         GPU.context.bindVertexArray(this.VAO)
         GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, this.indexVBO)
         this.vertexVBO.enable()
     }
 
     use() {
-        this.prepareForUse()
+        const last = GPU.activeMesh
+        if (last === this)
+            return
+        else if (last != null)
+            last.finish()
+        GPU.activeMesh = this
+        GPU.context.bindVertexArray(this.VAO)
+        GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, this.indexVBO)
+        this.vertexVBO.enable()
         if (this.normalVBO)
             this.normalVBO.enable()
         if (this.uvVBO)
             this.uvVBO.enable()
-        // if (this.tangentVBO)
-        //     this.tangentVBO.enable()
     }
 
     finish() {

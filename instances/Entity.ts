@@ -4,6 +4,9 @@ import serializeStructure from "../utils/serialize-structure";
 import Engine from "../Engine";
 import Component from "./components/Component";
 import ComponentResources from "./components/ComponentResources";
+import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
+import VisibilityRenderer from "../runtime/VisibilityRenderer";
+import QueryAPI from "../lib/utils/QueryAPI";
 
 
 export default class Entity extends ComponentResources {
@@ -14,13 +17,11 @@ export default class Entity extends ComponentResources {
     name: string
     active = true
     scripts = []
-    children: Entity[] = []
-    parent?: Entity
-    parentCache?: string
+    #parent?: Entity
+    parentID?: string
     #pickID = new Float32Array(3)
     #pickIndex: number = -1
-
-
+    #children = []
 
     constructor(id = crypto.randomUUID(), name = "Empty entity", active = true) {
         super()
@@ -30,10 +31,13 @@ export default class Entity extends ComponentResources {
         this.queryKey = id.slice(0, id.length / 2);
     }
 
-    get allComponents(){
+    get allComponents() {
         return Array.from(this.components.entries())
     }
-    set allComponents(_){}
+
+    set allComponents(_) {
+    }
+
     setPickID(data: number[]) {
         data.forEach((v, i) => this.#pickID[i] = v)
         this.#pickIndex = (data[0] + data[1] + data[2]) * 255
@@ -76,8 +80,8 @@ export default class Entity extends ComponentResources {
         const temp: any = {...this}
         const parsedComponents: { components: Component[] } = {components: []}
 
-        delete temp.children
         temp.parent = this.parent?.id
+        temp.parentID = this.parent?.id
 
         Array.from(this.components.entries())
             .forEach(([k, v]) => {
@@ -96,5 +100,43 @@ export default class Entity extends ComponentResources {
         return !!Engine.entities.map.get(entity.id)
     }
 
+    removeParent() {
+        if (!this.#parent)
+            return;
+        const prev = this.#parent
+        this.#parent = undefined
+        prev.removeChild(this)
+        if (Entity.isRegistered(this))
+            EntityWorkerAPI.updateEntityReference(this)
+    }
 
+    addChild(entity: Entity) {
+        if(entity === this || entity.parent !== this || this.#children.includes(entity))
+            return
+        this.#children.push(entity)
+    }
+
+    removeChild(entity: Entity) {
+        if (entity.parent || !this.#children.includes(entity))
+            return
+        this.#children.splice(this.#children.indexOf(entity), 1)
+    }
+
+    addParent(parent: Entity) {
+        if (!parent || parent === this || parent === this.#parent || QueryAPI.isChildOf(this, parent.id) || QueryAPI.isChildOf(parent, this.id))
+            return;
+        this.removeParent()
+        this.#parent = parent
+        parent.addChild(this)
+        if (Entity.isRegistered(this))
+            EntityWorkerAPI.updateEntityReference(this)
+        VisibilityRenderer.needsUpdate = true
+    }
+
+    get parent() {
+        return this.#parent
+    }
+    get children() {
+        return this.#children
+    }
 }
