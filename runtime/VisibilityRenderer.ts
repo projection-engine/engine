@@ -12,68 +12,30 @@ import StaticMeshes from "../lib/StaticMeshes";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
+import MeshResourceMapper from "../lib/MeshResourceMapper";
 
 const entityMetadata = new Float32Array(16)
-let  context:WebGL2RenderingContext, toRender:Entity[], size, uniforms, VP
+let context: WebGL2RenderingContext, toRender: Entity[], size, uniforms, VP
 export default class VisibilityRenderer {
     static needsUpdate = true
-
-
-    static execute() {
-        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
-            return
-
+    static #isSecondPass = false
+    static #bindUniforms() {
         StaticShaders.visibility.bind()
         context = GPU.context
         context.blendFunc(context.ONE, context.ZERO)
-
-        toRender = ResourceEntityMapper.meshesToDraw.array
-        size = toRender.length
         uniforms = StaticShaders.visibilityUniforms
         VP = CameraAPI.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
-
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
         context.uniformMatrix4fv(uniforms.previousViewProjection, false, VP)
-
         context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
         context.uniform3fv(uniforms.cameraPlacement, CameraAPI.position)
-
         mat4.copy(CameraAPI.previousViewProjectionMatrix, CameraAPI.viewProjectionMatrix)
-
-        StaticFBO.visibility.startMapping()
         Mesh.finishIfUsed()
+    }
 
-
-        entityMetadata[5] = 0 // IS NOT SPRITE
-        // context.enable(context.CULL_FACE)
-        context.disable(context.CULL_FACE)
-
-        for (let i = 0; i < size; i++) {
-
-            const entity = toRender[i]
-            const mesh = entity.meshRef
-            const material = entity.materialRef
-            const culling = entity.cullingComponent
-            const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
-            if (entity.isCulled || !entity.active || !mesh || material?.renderingMode === MATERIAL_RENDERING_TYPES.SKY)
-                continue
-
-            entityMetadata[0] = entity.pickID[0]
-            entityMetadata[1] = entity.pickID[1]
-            entityMetadata[2] = entity.pickID[2]
-
-            entityMetadata[4] = hasScreenDoor || material?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
-
-            context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
-            context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
-            context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
-
-            mesh.simplifiedDraw()
-        }
-
+    static #drawSprites() {
         toRender = ResourceEntityMapper.sprites.array
         size = toRender.length
-
         entityMetadata[5] = 1 // IS SPRITE
 
         context.disable(context.CULL_FACE)
@@ -104,13 +66,60 @@ export default class VisibilityRenderer {
 
             StaticMeshes.drawQuad()
         }
-
-        StaticFBO.visibility.stopMapping()
         context.enable(context.CULL_FACE)
+    }
 
+    static execute() {
+        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
+            return
+
+        VisibilityRenderer.#bindUniforms()
+        entityMetadata[5] = 0 // IS NOT SPRITE
+        StaticFBO.visibility.startMapping()
+        // DEV
+        context.disable(context.CULL_FACE)
+
+        const meshes = MeshResourceMapper.meshesArray
+        size = meshes.length
+        for (let meshIndex = 0; meshIndex < size; meshIndex++) {
+            const meshGroup = meshes[meshIndex]
+            const entities = meshGroup.entities
+            const entitiesSize = entities.length
+            for (let entityIndex = 0; entityIndex < entitiesSize; entityIndex++) {
+                const entity = entities[entityIndex]
+                if (!entity.active || entity.isCulled)
+                    continue
+                const mesh = entity.meshRef
+                const material = entity.materialRef
+                const culling = entity.cullingComponent
+                const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
+
+                entityMetadata[0] = entity.pickID[0]
+                entityMetadata[1] = entity.pickID[1]
+                entityMetadata[2] = entity.pickID[2]
+
+                entityMetadata[4] = hasScreenDoor || material?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
+
+                context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
+                context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+                context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
+
+                mesh.simplifiedDraw()
+            }
+        }
+
+        VisibilityRenderer.#drawSprites()
+        StaticFBO.visibility.stopMapping()
         MetricsController.currentState = METRICS_FLAGS.VISIBILITY
+
         SSAO.execute()
         context.blendFunc(context.SRC_ALPHA, context.ONE_MINUS_SRC_ALPHA)
-        VisibilityRenderer.needsUpdate = false
+        if(!VisibilityRenderer.#isSecondPass){
+            VisibilityRenderer.#isSecondPass = true
+            VisibilityRenderer.needsUpdate = true
+        }else {
+            VisibilityRenderer.needsUpdate = false
+            VisibilityRenderer.#isSecondPass = false
+        }
     }
 }

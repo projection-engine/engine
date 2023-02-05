@@ -2,7 +2,8 @@ import GPU from "../GPU";
 import Texture from "./Texture";
 
 interface FBOTexture {
-    [key:string]:any,
+    [key: string]: any,
+
     w?: number,
     h?: number,
     attachment?: number,
@@ -15,16 +16,17 @@ interface FBOTexture {
 }
 
 export default class Framebuffer {
-    private readonly fallback:FBOTexture
+    static lastBoundResolution = new Float32Array([0, 0])
+    private readonly fallback: FBOTexture
 
-    readonly width:number
-    readonly height:number
-    readonly FBO:WebGLFramebuffer
-    RBO:WebGLRenderbuffer
-    depthSampler:WebGLTexture
-    readonly colors:WebGLTexture[] = []
-    readonly attachments:number[] = []
-    readonly colorsMetadata:FBOTexture[] = []
+    readonly width: number
+    readonly height: number
+    readonly FBO: WebGLFramebuffer
+    RBO: WebGLRenderbuffer
+    depthSampler: WebGLTexture
+    readonly colors: WebGLTexture[] = []
+    readonly attachments: number[] = []
+    readonly colorsMetadata: FBOTexture[] = []
     resolution = new Float32Array(2)
 
     constructor(width = GPU.internalResolution.w, height = GPU.internalResolution.h) {
@@ -48,19 +50,40 @@ export default class Framebuffer {
     }
 
 
-    startMapping(noClearing?:boolean): void {
+    startMapping(noClearing?: boolean) {
+        // if(GPU.activeFramebuffer === this)
+        //     return
         this.use()
-        GPU.context.viewport(0, 0, this.width, this.height)
+        const last = Framebuffer.lastBoundResolution
+        const w = this.width
+        const h = this.height
+        if (last[0] !== w || last[1] !== h) {
+            GPU.context.viewport(0, 0, w, h)
+            last[0] = w
+            last[1] = h
+        }
         if (!noClearing)
             GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
 
     }
 
 
-    stopMapping(): void {
+    stopMapping() {
+        // if(GPU.activeFramebuffer !== this)
+        //     return
+
+        const context = GPU.context
         GPU.activeFramebuffer = undefined
-        GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, null)
-        GPU.context.viewport(0, 0, GPU.context.drawingBufferWidth, GPU.context.drawingBufferHeight)
+        context.bindFramebuffer(context.FRAMEBUFFER, null)
+
+        const last = Framebuffer.lastBoundResolution
+        const w = context.drawingBufferWidth
+        const h = context.drawingBufferHeight
+        if (last[0] !== w || last[1] !== h) {
+            context.viewport(0, 0, w, h)
+            last[0] = w
+            last[1] = h
+        }
     }
 
     depthTexture(): Framebuffer {
@@ -140,10 +163,10 @@ export default class Framebuffer {
     }
 
     use() {
-        if (GPU.activeFramebuffer !== this.FBO) {
-            GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, this.FBO)
-            GPU.activeFramebuffer = this.FBO
-        }
+        if (GPU.activeFramebuffer === this)
+            return
+        GPU.context.bindFramebuffer(GPU.context.FRAMEBUFFER, this.FBO)
+        GPU.activeFramebuffer = this
     }
 
     clear() {

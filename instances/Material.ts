@@ -8,7 +8,7 @@ import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 export default class Material {
     readonly #id = crypto.randomUUID()
     #uniformValues: MutableObject = {}
-    #uniforms = []
+    #uniforms: MaterialUniform[] = []
     #functionDeclaration?: string
     #uniformsDeclaration?: string
     renderingMode = MATERIAL_RENDERING_TYPES.UNLIT
@@ -16,9 +16,9 @@ export default class Material {
     ssrEnabled = false
     doubleSided = false
     bindID = -1
-    signature?:string
+    signature?: string
 
-    constructor(id?: string, signature?:string) {
+    constructor(id?: string, signature?: string) {
         if (!id)
             return
         this.#id = id

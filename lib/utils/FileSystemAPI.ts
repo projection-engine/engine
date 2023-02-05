@@ -8,6 +8,8 @@ import MaterialInformation from "../../static/MaterialInformation";
 export default class FileSystemAPI {
     static #callback
     static #callbackMetadata
+    static #fetchingMaterials: { [key: string]: Function[] } = {}
+    static #fetchingMeshes: { [key: string]: Function[] } = {}
 
     static get isReady() {
         return FileSystemAPI.#callback != null
@@ -19,38 +21,80 @@ export default class FileSystemAPI {
         return null
     }
 
-    static async loadMesh(ID:string):Promise<boolean> {
-        try {
-            const file = JSON.parse(await FileSystemAPI.readAsset(ID))
-            GPUAPI.allocateMesh(ID, file)
-            return true
-        } catch (err) {
-            console.error(err)
-            return false
+    static async loadMesh(ID: string): Promise<boolean> {
+        if (!ID || GPU.meshes.get(ID) != null) {
+            FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMeshes, ID)
+            return
+        }
+        if (FileSystemAPI.#fetchingMeshes[ID])
+            return await new Promise(resolve => {
+                FileSystemAPI.#fetchingMeshes[ID].push(resolve)
+            })
+        else {
+            FileSystemAPI.#fetchingMeshes[ID] = []
+
+            try {
+                if (!GPU.meshes.get(ID)) {
+                    const data = await FileSystemAPI.readAsset(ID)
+                    if (!data) {
+                        FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMeshes, ID)
+                        return
+                    }
+                    const file = JSON.parse(data)
+                    GPUAPI.allocateMesh(ID, file)
+                    FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMeshes, ID)
+                    return
+                }
+            } catch (err) {
+                console.error(err)
+            }
+            FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMeshes, ID)
         }
     }
 
-    static async loadMaterial(ID) {
-        if (!ID || GPU.materials.get(ID) != null)
-            return GPU.materials.get(ID) != null
-        try {
-            if (!GPU.materials.get(ID)) {
-                const data = await FileSystemAPI.readAsset(ID)
-                if (!data)
-                    return false
-                const file = JSON.parse(data)
-                if (!file?.response)
-                    return
-                const materialInformation = file.response
-                if(materialInformation) {
-                    await GPUAPI.allocateMaterial(<MaterialInformation>materialInformation, ID)
-                    return true
-                }
-            }
-        } catch (err) {
-            console.error(err)
+    static #doCallback(data: { [key: string]: Function[] }, id: string) {
+        if (FileSystemAPI.#fetchingMaterials[id])
+            data[id].forEach(cb => cb())
+        console.log("RESOLVING")
+        delete FileSystemAPI.#fetchingMaterials[id]
+    }
+
+    static async loadMaterial(ID: string) {
+        if (!ID || GPU.materials.get(ID) != null) {
+            FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMaterials, ID)
+            return
         }
-        return false
+        if (FileSystemAPI.#fetchingMaterials[ID])
+            return await new Promise(resolve => {
+
+                FileSystemAPI.#fetchingMaterials[ID].push(resolve)
+            })
+        else {
+            FileSystemAPI.#fetchingMaterials[ID] = []
+            try {
+                if (!GPU.materials.get(ID)) {
+                    const data = await FileSystemAPI.readAsset(ID)
+                    if (!data) {
+                        FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMaterials, ID)
+                        return
+                    }
+                    const file = JSON.parse(data)
+                    if (!file?.response) {
+                        FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMaterials, ID)
+                        return
+                    }
+                    const materialInformation = file.response
+                    if (materialInformation) {
+                        await GPUAPI.allocateMaterial(<MaterialInformation>materialInformation, ID)
+                        FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMaterials, ID)
+                        return
+                    }
+                }
+            } catch (err) {
+                console.error(err)
+            }
+            FileSystemAPI.#doCallback(FileSystemAPI.#fetchingMaterials, ID)
+        }
     }
 
     static async importAsset(ID) {

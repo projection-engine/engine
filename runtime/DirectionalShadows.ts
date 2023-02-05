@@ -88,7 +88,7 @@ export default class DirectionalShadows {
     static loopMeshes(light) {
         if (!light.entity)
             return
-        const toRender = ResourceEntityMapper.meshesToDraw.array
+        const toRender = ResourceEntityMapper.meshes.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
             const current = toRender[m], meshComponent = current.meshComponent

@@ -18,17 +18,14 @@ export interface MeshProps {
 export default class Mesh {
     readonly verticesQuantity:number
     readonly trianglesQuantity:number
-
     readonly id: string
     readonly maxBoundingBox: number[]
     readonly minBoundingBox: number[]
     readonly VAO: WebGLVertexArrayObject
     readonly indexVBO?:WebGLBuffer
-
     readonly vertexVBO?:VertexBuffer
     readonly normalVBO?:VertexBuffer
     readonly uvVBO?:VertexBuffer
-    readonly tangentVBO?:VertexBuffer
 
     constructor(attributes:MeshProps) {
         const {
@@ -58,8 +55,6 @@ export default class Mesh {
             this.normalVBO = new VertexBuffer(1, new Float32Array(normals), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
         if (uvs && uvs.length > 0)
             this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), GPU.context.ARRAY_BUFFER, 2, GPU.context.FLOAT, false, undefined, 0)
-        // if (tangents && tangents.length > 0)
-        //     this.tangentVBO = new VertexBuffer(3, new Float32Array(tangents), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT)
 
         GPU.context.bindVertexArray(null)
         GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, null)

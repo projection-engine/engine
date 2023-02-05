@@ -10,21 +10,15 @@ import SceneComposition from "../SceneComposition";
 
 export default class MeshRenderer {
     static execute(transparencyOnly: boolean) {
-        const uniforms = UberShader.uberUniforms
-        const context = GPU.context
-        const meshes = ResourceEntityMapper.meshesToDraw.array
         if (!transparencyOnly) {
-            SceneComposition.transparenciesToLoopThrough = 0
-            SceneRenderer.drawMeshes(true, false, context, meshes, uniforms)
+            SceneRenderer.drawOpaque()
             MetricsController.currentState = METRICS_FLAGS.OPAQUE
-        } else if (SceneComposition.transparenciesToLoopThrough > 0) {
-            Loop.copyToCurrentFrame()
-
-            StaticFBO.postProcessing2.use()
-            SceneRenderer.drawMeshes(false, false, context, meshes, uniforms)
-            StaticFBO.postProcessing2.stopMapping()
-
-            MetricsController.currentState = METRICS_FLAGS.TRANSPARENCY
+            return
         }
+        Loop.copyToCurrentFrame()
+        StaticFBO.postProcessing2.use()
+        SceneRenderer.drawTransparency()
+        StaticFBO.postProcessing2.stopMapping()
+        MetricsController.currentState = METRICS_FLAGS.TRANSPARENCY
     }
 }

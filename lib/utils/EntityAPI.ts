@@ -13,6 +13,8 @@ import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import MutableObject from "../../static/MutableObject";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import QueryAPI from "./QueryAPI";
+import MeshResourceMapper from "../MeshResourceMapper";
+import MaterialResourceMapper from "../MaterialResourceMapper";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 export default class EntityAPI {
@@ -47,8 +49,6 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = needsVisibilityUpdate
     }
 
-
-
     static registerEntityComponents(entity: Entity, previouslyRemoved?: string): void {
 
         if (!Entity.isRegistered(entity))
@@ -75,8 +75,8 @@ export default class EntityAPI {
         if (entity.uiComponent !== undefined)
             ResourceEntityMapper.ui.add(entity.id, entity)
         if (entity.meshComponent !== undefined) {
-            ResourceEntityMapper.meshesToDraw.add(entity.id, entity)
-            MaterialAPI.updateMap(entity.meshComponent)
+            ResourceEntityMapper.meshes.add(entity.id, entity)
+            entity.meshComponent.updateComponentReferences()
         }
 
 
@@ -108,7 +108,12 @@ export default class EntityAPI {
         ResourceEntityMapper.cameras.delete(id)
         ResourceEntityMapper.ui.delete(id)
         ResourceEntityMapper.decals.delete(id)
-        ResourceEntityMapper.meshesToDraw.delete(id)
+        if(ResourceEntityMapper.meshes.has(id)){
+            ResourceEntityMapper.meshes.delete(id)
+            MeshResourceMapper.unlinkEntityMesh(id)
+            MaterialResourceMapper.unlinkEntityMaterial(id)
+        }
+
         ResourceEntityMapper.atmosphere.delete(id)
         ResourceEntityMapper.lightProbe.delete(id)
 

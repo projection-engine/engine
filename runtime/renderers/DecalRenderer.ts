@@ -10,7 +10,7 @@ export default class DecalRenderer{
         const context = GPU.context
         context.disable(context.CULL_FACE)
         context.disable(context.DEPTH_TEST)
-        SceneRenderer.drawMeshes(false, true, context, ResourceEntityMapper.decals.array, UberShader.uberUniforms)
+        SceneRenderer.drawDecals()
         MetricsController.currentState = METRICS_FLAGS.DECAL
         context.enable(context.DEPTH_TEST)
     }

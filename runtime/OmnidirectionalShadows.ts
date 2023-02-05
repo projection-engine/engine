@@ -57,7 +57,7 @@ export default class OmnidirectionalShadows {
     }
 
     static loopMeshes(view, projection, component) {
-        const toRender = ResourceEntityMapper.meshesToDraw.array
+        const toRender = ResourceEntityMapper.meshes.array
         const size = toRender.length
         for (let m = 0; m < size; m++) {
 

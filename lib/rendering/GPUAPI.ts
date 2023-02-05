@@ -12,6 +12,8 @@ import StaticMeshes from "../StaticMeshes";
 import TextureParams from "../../static/TextureParams";
 import MaterialInformation from "../../static/MaterialInformation";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
+import MeshResourceMapper from "../MeshResourceMapper";
+import MaterialResourceMapper from "../MaterialResourceMapper";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
@@ -33,10 +35,11 @@ export default class GPUAPI {
         GPU.textures.delete(imageID)
     }
 
-    static asyncDestroyMaterial(id: string) {
+    static destroyMaterial(id: string) {
         const mat = GPU.materials.get(id)
         if (!mat)
             return
+        MaterialResourceMapper.deleteMaterial(id)
         delete UberShader.uberSignature[mat.signature]
         GPU.materials.delete(id)
     }
@@ -58,13 +61,6 @@ export default class GPUAPI {
         material.doubleSided = settings.doubleSided
         material.ssrEnabled = settings.ssrEnabled
 
-        const inUse = ResourceEntityMapper.entityMaterial.get(id)
-        try {
-            if (inUse)
-                Object.values(inUse).forEach(entity => MaterialAPI.updateMap(entity.meshComponent))
-        } catch (err) {
-            console.error(err)
-        }
         GPU.materials.set(id, material)
 
         UberShader.compile()
@@ -153,6 +149,7 @@ export default class GPUAPI {
         if ([StaticMeshes.cube, StaticMeshes.plane, StaticMeshes.cylinder, StaticMeshes.sphere].includes(mesh))
             return
 
+        MeshResourceMapper.deleteMesh(mesh.id)
         if (mesh instanceof Mesh) {
             GPU.context.deleteVertexArray(mesh.VAO)
             GPU.context.deleteBuffer(mesh.indexVBO)
@@ -161,8 +158,6 @@ export default class GPUAPI {
                 mesh.uvVBO.delete()
             if (mesh.normalVBO)
                 mesh.normalVBO.delete()
-            if (mesh.tangentVBO)
-                mesh.tangentVBO.delete()
             GPU.meshes.delete(mesh.id)
 
         }

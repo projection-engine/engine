@@ -10,10 +10,6 @@ import AtmosphereRenderer from "./renderers/AtmosphereRenderer";
 
 export default class SceneComposition {
     static debugShadingModel = SHADING_MODELS.DETAIL
-    static MAX_TRANSLUCENCY = 1000
-    static transparencyIndexes = new Uint8Array(SceneComposition.MAX_TRANSLUCENCY)
-    static transparenciesToLoopThrough = 0
-
     static execute() {
         if (!UberShader.uber)
             return

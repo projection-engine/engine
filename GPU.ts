@@ -21,7 +21,7 @@ export default class GPU {
     static context?: WebGL2RenderingContext
     static canvas?: HTMLCanvasElement
     static activeShader?: WebGLProgram
-    static activeFramebuffer?: WebGLFramebuffer
+    static activeFramebuffer?: Framebuffer
     static activeMesh?: Mesh
     static materials = new Map<string, Material>()
     static shaders = new Map<string, Shader>()
