@@ -21,7 +21,6 @@ export default class VisibilityRenderer {
     static #isSecondPass = false
 
     static #bindUniforms() {
-        context = GPU.context
         uniforms = StaticShaders.visibilityUniforms
         VP = CameraAPI.cameraMotionBlur ? CameraAPI.previousViewProjectionMatrix : CameraAPI.viewProjectionMatrix
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
@@ -102,6 +101,7 @@ export default class VisibilityRenderer {
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
 
+        context = GPU.context
         if (!VisibilityRenderer.#isSecondPass) {
             VisibilityRenderer.#isSecondPass = true
             VisibilityRenderer.needsUpdate = true
@@ -109,7 +109,6 @@ export default class VisibilityRenderer {
             VisibilityRenderer.needsUpdate = false
             VisibilityRenderer.#isSecondPass = false
         }
-
 
         StaticShaders.visibility.bind()
         StaticFBO.visibility.startMapping()

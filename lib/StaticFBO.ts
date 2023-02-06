@@ -22,7 +22,6 @@ export default class StaticFBO {
     static postProcessing2?: Framebuffer
     static postProcessing2Sampler?: WebGLTexture
 
-
     static ssgi?: Framebuffer
     static ssgiSampler?: WebGLTexture
 
@@ -63,20 +62,19 @@ export default class StaticFBO {
             .texture({
                 attachment: 1,
                 label: "ENTITY_ID",
-                precision: context.RGB,
-                format: context.RGB,
+                precision: context.RGBA,
+                format: context.RGBA,
                 type: context.UNSIGNED_BYTE
             })
             .texture({
                 attachment: 2,
-                label: "VELOCITY",
                 precision: context.RG16F,
                 format: context.RG,
             })
             .depthTest()
 
 
-        StaticFBO.postProcessing1 = new Framebuffer().texture().depthTest()
+        StaticFBO.postProcessing1 = new Framebuffer().texture()
         StaticFBO.postProcessing2 = new Framebuffer().texture().depthTest()
 
         const linearTexture = {
@@ -117,7 +115,6 @@ export default class StaticFBO {
         StaticFBO.ssaoSampler = StaticFBO.ssao.colors[0]
         StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]
         StaticFBO.ssgiFallbackSampler = StaticFBO.ssgiFallback.colors[0]
-
         StaticFBO.sceneDepth = StaticFBO.visibility.colors[0]
         StaticFBO.entityIDSampler = StaticFBO.visibility.colors[1]
         StaticFBO.velocitySampler = StaticFBO.visibility.colors[2]

@@ -1,8 +1,8 @@
-precision mediump float;
+precision highp float;
 
 #define CLAMP_MIN .1
 #define CLAMP_MAX .9
-#define SEARCH_STEPS 5
+#define SEARCH_STEPS 7
 #define DEPTH_THRESHOLD 1.2
 #define PI2 6.2831853
 

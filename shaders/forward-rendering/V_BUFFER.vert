@@ -16,8 +16,6 @@ out vec4 currentScreenPosition;
 out mat4 entityMetadata;
 
 out float depthFunc;
-out float funcC;
-
 
 void main() {
     entityMetadata = metadata;
@@ -72,6 +70,5 @@ void main() {
 
         gl_Position = viewProjection * wPosition;
     }
-    funcC = logC;
     depthFunc = logDepthFC;
 }

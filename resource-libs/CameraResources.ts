@@ -21,7 +21,7 @@ export default class CameraResources extends CameraEffects {
     static skyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static invSkyboxProjectionMatrix = ArrayBufferAPI.allocateMatrix(4, true)
     static viewUBOBuffer = ArrayBufferAPI.allocateVector(52)
-    static projectionUBOBuffer = ArrayBufferAPI.allocateVector(36)
+    static projectionUBOBuffer = ArrayBufferAPI.allocateVector(35)
     static projectionBuffer = ArrayBufferAPI.allocateVector(5)
     static translationBuffer = <vec3>ArrayBufferAPI.allocateVector(3)
     static rotationBuffer = <quat>ArrayBufferAPI.allocateVector(4, 0, true)

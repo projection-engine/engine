@@ -127,8 +127,8 @@ export default class SceneRenderer {
         const size = toRender.length
         if (size === 0)
             return
+        context.uniform1i(uniforms.isDecalPass, 1)
         StaticMeshes.cube.use()
-
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
             if (!entity.active || entity.isCulled)
@@ -155,7 +155,7 @@ export default class SceneRenderer {
         const size = toRender.length
         if (size === 0)
             return
-
+        context.uniform1i(uniforms.isDecalPass, 0)
         SceneRenderer.#bindTexture(context, uniforms.previousFrame, 3, StaticFBO.postProcessing1Sampler, false)
         for (let matIndex = 0; matIndex < size; matIndex++) {
             const materialGroup = toRender[matIndex]
@@ -195,6 +195,7 @@ export default class SceneRenderer {
         const size = toRender.length
         if (size === 0)
             return
+        context.uniform1i(uniforms.isDecalPass, 0)
         for (let meshIndex = 0; meshIndex < size; meshIndex++) {
             const meshGroup = toRender[meshIndex]
             const entities = meshGroup.entities

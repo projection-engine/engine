@@ -48,7 +48,6 @@ uniform ${StaticUBONames.CAMERA_PROJECTION}{
     mat4 invProjectionMatrix;
     vec2 bufferResolution;
     float logDepthFC;
-    float logC;
 };
 `
 

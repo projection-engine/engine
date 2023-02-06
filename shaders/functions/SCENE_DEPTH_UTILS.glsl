@@ -2,7 +2,9 @@
 uniform sampler2D sceneDepth;
 
 float getLogDepth(vec2 uv) {
-    return (exp(textureLod(sceneDepth, uv, 2.).r*logDepthFC) - 1.)/logC;
+    float half_co = logDepthFC * .5;
+    float exponent = textureLod(sceneDepth, uv, 2.).r / half_co;
+    return pow(2.0, exponent);
 }
 
 vec3 viewSpacePositionFromDepth(float logarithimicDepth, vec2 texCoords) {

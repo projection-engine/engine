@@ -51,10 +51,11 @@ export default class Mesh {
         this.indexVBO = GPUAPI.createBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices))
         this.vertexVBO = new VertexBuffer(0, new Float32Array(vertices), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
 
-        if (normals && normals.length > 0)
-            this.normalVBO = new VertexBuffer(1, new Float32Array(normals), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
         if (uvs && uvs.length > 0)
-            this.uvVBO = new VertexBuffer(2, new Float32Array(uvs), GPU.context.ARRAY_BUFFER, 2, GPU.context.FLOAT, false, undefined, 0)
+            this.uvVBO = new VertexBuffer(1, new Float32Array(uvs), GPU.context.ARRAY_BUFFER, 2, GPU.context.FLOAT, false, undefined, 0)
+
+        if (normals && normals.length > 0)
+            this.normalVBO = new VertexBuffer(2, new Float32Array(normals), GPU.context.ARRAY_BUFFER, 3, GPU.context.FLOAT, false, undefined, 0)
 
         GPU.context.bindVertexArray(null)
         GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, null)
@@ -110,6 +111,7 @@ export default class Mesh {
     }
 
     simplifiedDraw() {
+
         this.prepareForUse()
         GPU.context.drawElements(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
     }

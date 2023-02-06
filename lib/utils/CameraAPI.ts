@@ -23,8 +23,6 @@ export default class CameraAPI extends CameraResources {
     static #worker: Worker
     static trackingEntity
     static #initialized = false
-    static depthFuncC = 1
-
     static initialize() {
         if (CameraAPI.#initialized)
             return
@@ -70,8 +68,8 @@ export default class CameraAPI extends CameraResources {
             UBO.bind()
             CameraAPI.projectionUBOBuffer[32] = GPU.bufferResolution[0]
             CameraAPI.projectionUBOBuffer[33] = GPU.bufferResolution[1]
-            CameraAPI.projectionUBOBuffer[34] = Math.log(CameraAPI.depthFuncC * CameraAPI.projectionBuffer[0] + 1)
-            CameraAPI.projectionUBOBuffer[35] = CameraAPI.depthFuncC
+            CameraAPI.projectionUBOBuffer[34] = 2.0 / Math.log2 (CameraAPI.projectionBuffer[0] + 1)
+
             UBO.updateBuffer(CameraAPI.projectionUBOBuffer)
             UBO.unbind()
 

@@ -76,14 +76,14 @@ void main() {
         texCoords = objectSpacePosition.xz * .5 + .5;
 
         bool inRange =
-        objectSpacePosition.x >= -1.0 &&
-        objectSpacePosition.x <= 1.0 &&
+        objectSpacePosition.x >= -DECAL_DEPTH_THRESHOLD &&
+        objectSpacePosition.x <= DECAL_DEPTH_THRESHOLD &&
 
-        objectSpacePosition.y >= -1.0 &&
-        objectSpacePosition.y <= 1.0 &&
+        objectSpacePosition.y >= -DECAL_DEPTH_THRESHOLD &&
+        objectSpacePosition.y <= DECAL_DEPTH_THRESHOLD &&
 
-        objectSpacePosition.z >= -1.0 &&
-        objectSpacePosition.z <= 1.0;
+        objectSpacePosition.z >= -DECAL_DEPTH_THRESHOLD &&
+        objectSpacePosition.z <= DECAL_DEPTH_THRESHOLD;
 
         if (!inRange) discard;
     } else {
