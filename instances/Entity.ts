@@ -6,7 +6,6 @@ import ComponentResources from "./components/ComponentResources";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import VisibilityRenderer from "../runtime/VisibilityRenderer";
 import QueryAPI from "../lib/utils/QueryAPI";
-import MutableObject from "../static/MutableObject";
 
 
 export default class Entity extends ComponentResources {
@@ -113,8 +112,10 @@ export default class Entity extends ComponentResources {
     }
 
     addChild(entity: Entity) {
-        if (entity === this || entity.parent !== this || this.#children.includes(entity))
+        if (entity === this || entity.parent !== this || this.#children.includes(entity)) {
+            console.log("NOT ADDING CHILD")
             return
+        }
         this.#children.push(entity)
     }
 
@@ -130,9 +131,10 @@ export default class Entity extends ComponentResources {
         this.removeParent()
         this.#parent = parent
         parent.addChild(this)
-        if (EntityAPI.isRegistered(this))
+        if (EntityAPI.isRegistered(this)) {
             EntityWorkerAPI.updateEntityReference(this)
-        VisibilityRenderer.needsUpdate = true
+            this.changed = true
+        }
     }
 
     get parent() {

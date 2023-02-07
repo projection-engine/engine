@@ -23,7 +23,7 @@ let previous = 0
 export default class Loop {
     static #afterDrawing?: Function = () => null
     static #frameID:number = undefined
-
+    static elapsed = 0
 
     static get isExecuting(){
         return Loop.#frameID !== undefined
@@ -34,9 +34,7 @@ export default class Loop {
         } else
             Loop.#afterDrawing = () => null
     }
-    static get frameID() {
-        return Loop.#frameID
-    }
+
     static copyToCurrentFrame() {
         GPUAPI.copyTexture(StaticFBO.postProcessing1, StaticFBO.postProcessing2, GPU.context.COLOR_BUFFER_BIT)
     }
@@ -64,20 +62,15 @@ export default class Loop {
 
     static #loop(current) {
         try {
-            Engine.elapsed = current - previous
+            Loop.elapsed = current - previous
             previous = current
-
             CameraAPI.updateUBOs()
-
             GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
-            const transformationChanged = EntityWorkerAPI.hasChangeBuffer[0]
-            if (transformationChanged === 1)
+            if (EntityWorkerAPI.hasChangeBuffer[0])
                 LightsAPI.packageLights(false, true)
             Loop.#callback()
-            if (transformationChanged === 1)
-                EntityWorkerAPI.hasChangeBuffer[0] = 0
 
-
+            EntityWorkerAPI.hasChangeBuffer[0] = 0
             CameraAPI.syncThreads()
             EntityWorkerAPI.syncThreads()
             Loop.#frameID = requestAnimationFrame(Loop.#loop)

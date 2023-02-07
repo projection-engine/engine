@@ -9,7 +9,6 @@ import Entity from "../../instances/Entity";
 import ENTITY_TYPED_ATTRIBUTES from "../../static/ENTITY_TYPED_ATTRIBUTES";
 import LightsAPI from "./LightsAPI";
 import VisibilityRenderer from "../../runtime/VisibilityRenderer";
-import MutableObject from "../../static/MutableObject";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import MeshResourceMapper from "../MeshResourceMapper";
 import MaterialResourceMapper from "../MaterialResourceMapper";
@@ -137,11 +136,6 @@ export default class EntityAPI {
         UIAPI.deleteUIEntity(entity)
         Engine.queryMap.delete(entity.queryKey)
 
-        if (entity.materialRef) {
-            const old = ResourceEntityMapper.entityMaterial.get(entity.materialRef.id)
-            delete old[id]
-            entity.materialRef = undefined
-        }
 
         if (entity.lightComponent !== undefined || entity.meshComponent !== undefined) {
             LightsAPI.packageLights(false, true)

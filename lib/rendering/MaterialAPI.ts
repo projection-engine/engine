@@ -7,7 +7,6 @@ import Material from "../../instances/Material";
 import MaterialUniform from "../../static/MaterialUniform";
 import TextureParams from "../../static/TextureParams";
 import TextureInUse from "../../static/TextureInUse";
-import MutableObject from "../../static/MutableObject";
 
 export default class MaterialAPI {
     static #generator?: Generator<number>

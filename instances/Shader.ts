@@ -1,7 +1,6 @@
 import GPU from "../GPU";
 import applyShaderMethods from "../utils/apply-shader-methods";
 import GLSL_TYPES from "../static/GLSL_TYPES"
-import MutableObject from "../static/MutableObject";
 import StaticUBOs, {StaticUBONames} from "../lib/StaticUBOs";
 
 const regex = /uniform(\s+)(highp|mediump|lowp)?(\s*)((\w|_)+)((\s|\w|_)*);/gm

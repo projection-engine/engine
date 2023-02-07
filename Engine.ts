@@ -13,48 +13,40 @@ import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/utils/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
 import LightProbe from "./instances/LightProbe";
-
 import Entity from "./instances/Entity";
 import DynamicMap from "./resource-libs/DynamicMap";
-import RegistryAPI from "../frontend/window-editor/lib/fs/RegistryAPI";
-import FS from "../frontend/shared/lib/FS/FS";
-import EngineStore from "../frontend/shared/stores/EngineStore";
 import GPUAPI from "./lib/rendering/GPUAPI";
 import EntityAPI from "./lib/utils/EntityAPI";
 import componentConstructor from "../frontend/window-editor/utils/component-constructor";
-import FilesAPI from "../frontend/window-editor/lib/fs/FilesAPI";
-import UberShader from "./resource-libs/UberShader";
+import ResourceEntityMapper from "./resource-libs/ResourceEntityMapper";
+import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 
 
 export default class Engine {
     static #development = false
-    static #queryMap = new Map<string, Entity>()
+
     static UILayouts = new Map()
     static isDev = true
-    static #entities = new DynamicMap<Entity>()
     static #environment: number = ENVIRONMENT.DEV
-    static elapsed = 0
     static #isReady = false
     static #initializationWasTried = false
     static #initialized = false
-    static #loadedLevel = undefined
+    static #loadedLevels = new DynamicMap<Entity>()
 
     static get entities(): DynamicMap<Entity> {
-        return Engine.#entities
+        return ResourceEntityMapper.entities
     }
 
     static get queryMap(): Map<string, Entity> {
-        return Engine.#queryMap
+        return ResourceEntityMapper.queryMap
     }
-
-
 
     static get isReady() {
         return Engine.#isReady
     }
 
-    static get loadedLevel() {
-        return Engine.#loadedLevel
+    static get loadedLevels(): DynamicMap<Entity> {
+        return Engine.#loadedLevels
     }
 
     static get developmentMode() {
@@ -72,14 +64,14 @@ export default class Engine {
             CameraAPI.updateAspectRatio()
     }
 
-    static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, readMetadata: Function, devAmbient: boolean) {
+    static async initializeContext(canvas: HTMLCanvasElement, mainResolution: { w: number, h: number } | undefined, readAsset: Function, devAmbient: boolean) {
         if (Engine.#initialized)
             return
         Engine.#initialized = true
 
         Engine.#development = devAmbient
         await GPU.initializeContext(canvas, mainResolution)
-        FileSystemAPI.initialize(readAsset, readMetadata)
+        FileSystemAPI.initialize(readAsset)
         FrameComposition.initialize()
         await SSAO.initialize()
         OmnidirectionalShadows.initialize()
@@ -127,45 +119,63 @@ export default class Engine {
     }
 
     static async loadLevel(levelPath: string, cleanEngine?: boolean): Promise<Entity[]> {
-        if (Engine.#loadedLevel === levelPath || !levelPath)
-            return
+        if (Engine.#loadedLevels.has(levelPath) && !cleanEngine || !levelPath)
+            return []
         try {
 
-            const asset = await FileSystemAPI.readAsset(levelPath)
-            const {entities} = JSON.parse(asset)
-
-            Engine.#loadedLevel = levelPath
             if (cleanEngine) {
+
                 GPU.meshes.forEach(m => GPUAPI.destroyMesh(m))
                 GPU.textures.forEach(m => GPUAPI.destroyTexture(m.id))
                 GPU.materials.clear()
-                UberShader.compile(true)
+                Engine.entities.array.forEach(EntityWorkerAPI.removeEntity)
+                Engine.entities.clear()
+                Engine.queryMap.clear()
+                Engine.#loadedLevels.clear()
+                ResourceEntityMapper.clear()
             }
+
+            const asset = await FileSystemAPI.readAsset(levelPath)
+            const {entities, entity} = JSON.parse(asset)
+            let levelEntity
+            if (!entity)
+                levelEntity = EntityAPI.getNewEntityInstance(levelPath, true)
+            else
+                levelEntity = EntityAPI.parseEntityObject(entity, true)
+            if(!levelEntity.name)
+                levelEntity.name = "New level"
+            levelEntity.parentID = undefined
+            Engine.#loadedLevels.add(levelPath, levelEntity)
 
             const mapped = []
             for (let i = 0; i < entities.length; i++) {
-                const entity = EntityAPI.parseEntityObject(entities[i])
-                for (let i = 0; i < entity.scripts.length; i++)
-                    await componentConstructor(entity, entity.scripts[i].id, false)
-                const imgID = entity.spriteComponent?.imageID
-                if (imgID) {
-                    const textures = GPU.textures
-                    if (!textures.get(imgID))
-                        await EngineStore.loadTextureFromImageID(imgID)
-                }
+                try {
+                    const entity = EntityAPI.parseEntityObject(entities[i])
+                    if (!entity.parentID)
+                        entity.addParent(levelEntity)
+                    for (let i = 0; i < entity.scripts.length; i++)
+                        await componentConstructor(entity, entity.scripts[i].id, false)
+                    const imgID = entity.spriteComponent?.imageID
+                    if (imgID) {
+                        const textures = GPU.textures
+                        if (!textures.get(imgID))
+                            await FileSystemAPI.loadTexture(imgID)
+                    }
 
-                const uiID = entity.uiComponent?.uiLayoutID
-                if (uiID) {
-                    const rs = RegistryAPI.getRegistryEntry(uiID)
-                    if (rs)
-                        Engine.UILayouts.set(uiID, await FilesAPI.readFile(FS.ASSETS_PATH + FS.sep + rs.path))
+                    const uiID = entity.uiComponent?.uiLayoutID
+                    const file = FileSystemAPI.readAsset(uiID)
+                    if (file)
+                        Engine.UILayouts.set(uiID, file)
+                    mapped.push(entity)
+                } catch (err) {
+                    console.error(err)
                 }
-                mapped.push(entity)
             }
 
             return mapped
         } catch (err) {
             console.error(err)
         }
+        return []
     }
 }

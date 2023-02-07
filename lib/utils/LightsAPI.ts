@@ -11,8 +11,8 @@ import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 
 let lightTimeout
 const toRad = Math.PI / 180
-const transformedNormalCache = vec3.create(),
-    lightViewProjection = mat4.create()
+const transformedNormalCache = vec3.create()
+const lightViewProjection = mat4.create()
 const quantity = new Uint8Array(1)
 /**
  * @property primaryBuffer: indexes 0-3 are reserved for [type - color - color - color]

@@ -1,24 +1,41 @@
-import ScriptsAPI from "./ScriptsAPI";
 import GPU from "../../GPU";
 import GPUAPI from "../rendering/GPUAPI";
-import FILE_TYPES from "../../../static/objects/FILE_TYPES";
 import MaterialInformation from "../../static/MaterialInformation";
 
 
 export default class FileSystemAPI {
     static #callback
-    static #callbackMetadata
     static #fetchingMaterials: { [key: string]: Function[] } = {}
     static #fetchingMeshes: { [key: string]: Function[] } = {}
+    static ASSETS_PATH
 
     static get isReady() {
         return FileSystemAPI.#callback != null
     }
 
-    static async readAsset(assetID) {
+    /*
+    Param can be either a registryID or an absolute path to the asset itself
+     */
+    static async readAsset(assetID: string) {
         if (FileSystemAPI.#callback)
             return FileSystemAPI.#callback(assetID)
         return null
+    }
+
+    static async loadTexture(registryID: string) {
+        if (GPU.textures.get(registryID) != null)
+            return
+        try {
+            const textureData = await FileSystemAPI.readAsset(registryID)
+            if (textureData)
+                await GPUAPI.allocateTexture({
+                    ...textureData,
+                    img: textureData.base64,
+                    yFlip: textureData.flipY
+                }, registryID)
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     static async loadMesh(ID: string): Promise<boolean> {
@@ -97,38 +114,10 @@ export default class FileSystemAPI {
         }
     }
 
-    static async importAsset(ID) {
-        const data = await FileSystemAPI.readAsset(ID)
-        const metadata = FileSystemAPI.#callbackMetadata(ID)
-        if (!metadata || !data)
-            return null
-        try {
-            switch (metadata.type) {
-                case FILE_TYPES.COLLECTION:
 
-                case FILE_TYPES.MATERIAL:
-                case FILE_TYPES.TERRAIN:
-
-                case FILE_TYPES.PRIMITIVE:
-                case FILE_TYPES.TEXTURE:
-                case FILE_TYPES.LEVEL:
-                case "json":
-                    return JSON.parse(data)
-                case FILE_TYPES.COMPONENT:
-                case "js":
-                    return ScriptsAPI.parseScript(data)
-                default:
-                    return data
-            }
-        } catch (err) {
-            return null
-        }
-    }
-
-    static initialize(cb, cbMetadata) {
-        if (FileSystemAPI.#callback)
+    static initialize(cb: Function) {
+        if (FileSystemAPI.isReady)
             return
-        FileSystemAPI.#callbackMetadata = cbMetadata
         FileSystemAPI.#callback = cb
     }
 }

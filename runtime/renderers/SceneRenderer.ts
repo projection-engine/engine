@@ -14,6 +14,7 @@ import UberShader from "../../resource-libs/UberShader";
 import MeshResourceMapper from "../../lib/MeshResourceMapper";
 import MaterialResourceMapper from "../../lib/MaterialResourceMapper";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
+import Loop from "../../Loop";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 
@@ -37,7 +38,7 @@ export default class SceneRenderer {
         texOffset = 7
 
         context.uniformMatrix4fv(uniforms.skyProjectionMatrix, false, CameraAPI.skyboxProjectionMatrix)
-        context.uniform1f(uniforms.elapsedTime, Engine.elapsed)
+        context.uniform1f(uniforms.elapsedTime, Loop.elapsed)
         context.uniformMatrix4fv(uniforms.viewMatrix, false, CameraAPI.viewMatrix)
         context.uniformMatrix4fv(uniforms.invViewMatrix, false, CameraAPI.invViewMatrix)
         context.uniformMatrix4fv(uniforms.viewProjection, false, CameraAPI.viewProjectionMatrix)
