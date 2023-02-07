@@ -9,8 +9,7 @@ const RESOLUTION = 4
 
 export default class StaticFBO {
     static visibility?: Framebuffer
-    static sceneDepth?: WebGLTexture
-    static velocitySampler?: WebGLTexture
+    static sceneDepthVelocity?: WebGLTexture
     static entityIDSampler?: WebGLTexture
 
     static lens?: Framebuffer
@@ -55,8 +54,8 @@ export default class StaticFBO {
         StaticFBO.visibility = (new Framebuffer())
             .texture({
                 attachment: 0,
-                precision: context.R32F,
-                format: context.RED,
+                precision: context.RGBA32F,
+                format: context.RGBA,
                 label: "DEPTH"
             })
             .texture({
@@ -65,11 +64,6 @@ export default class StaticFBO {
                 precision: context.RGBA,
                 format: context.RGBA,
                 type: context.UNSIGNED_BYTE
-            })
-            .texture({
-                attachment: 2,
-                precision: context.RG16F,
-                format: context.RG,
             })
             .depthTest()
 
@@ -115,9 +109,8 @@ export default class StaticFBO {
         StaticFBO.ssaoSampler = StaticFBO.ssao.colors[0]
         StaticFBO.ssgiSampler = StaticFBO.ssgi.colors[0]
         StaticFBO.ssgiFallbackSampler = StaticFBO.ssgiFallback.colors[0]
-        StaticFBO.sceneDepth = StaticFBO.visibility.colors[0]
-        StaticFBO.entityIDSampler = StaticFBO.visibility.colors[1]
-        StaticFBO.velocitySampler = StaticFBO.visibility.colors[2]
+        StaticFBO.sceneDepthVelocity = StaticFBO.visibility.colors[0]
+        StaticFBO.entityIDSampler = StaticFBO.visibility.colors[1] 
         StaticFBO.postProcessing1Sampler = StaticFBO.postProcessing1.colors[0]
         StaticFBO.postProcessing2Sampler = StaticFBO.postProcessing2.colors[0]
         StaticFBO.lensSampler = StaticFBO.lens.colors[0]

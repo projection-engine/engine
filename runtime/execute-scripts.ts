@@ -1,4 +1,3 @@
-import Engine from "../Engine";
 import ScriptsAPI from "../lib/utils/ScriptsAPI";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
@@ -13,7 +12,7 @@ export default function executeScripts() {
         try {
             const script = scripts[i]
             if (script.onUpdate)
-                script.onUpdate(Engine.params)
+                script.onUpdate()
         } catch (err) {
             console.warn(err)
         }

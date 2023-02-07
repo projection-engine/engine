@@ -12,6 +12,13 @@ export default class Texture {
     texture?: WebGLTexture
     attributes: TextureParams = {}
     #image?: ImageBitmap | HTMLImageElement
+    readonly #id:string
+    get id(){
+        return this.#id
+    }
+    constructor(id:string) {
+        this.#id = id
+    }
 
     async initialize(attributes: TextureParams) {
         this.loaded = false
@@ -78,6 +85,7 @@ export default class Texture {
         if (this.loaded)
             GPU.context.deleteTexture(this.texture)
         this.initialize(attributes).catch()
+
     }
 
     static createTexture(

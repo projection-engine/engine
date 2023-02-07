@@ -5,6 +5,7 @@ import StaticShaders from "../lib/StaticShaders";
 import Framebuffer from "../instances/Framebuffer";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
+import EngineResources from "../lib/EngineResources";
 
 /**
  * rayMarchSettings definition:
@@ -25,7 +26,6 @@ export default class SSGI {
     static blurSamples = 5
     static blurRadius = 5
     static enabled = true
-    static rayMarchSettings = new Float32Array(3)
 
     static execute() {
         if (!SSGI.enabled) {
@@ -42,14 +42,14 @@ export default class SSGI {
         StaticShaders.ssgi.bind()
 
         context.activeTexture(context.TEXTURE0)
-        context.bindTexture(context.TEXTURE_2D, StaticFBO.sceneDepth)
+        context.bindTexture(context.TEXTURE_2D, StaticFBO.sceneDepthVelocity)
         context.uniform1i(uniforms.sceneDepth, 0)
 
         context.activeTexture(context.TEXTURE1)
         context.bindTexture(context.TEXTURE_2D, StaticFBO.postProcessing2Sampler)
         context.uniform1i(uniforms.previousFrame, 1)
 
-        context.uniform3fv(uniforms.rayMarchSettings, SSGI.rayMarchSettings)
+        context.uniform3fv(uniforms.rayMarchSettings, EngineResources.SSGISettings)
 
         StaticMeshes.drawQuad()
         SSGI.#applyBlur(context, StaticFBO.ssgiFallback, StaticFBO.ssgiSampler, true)

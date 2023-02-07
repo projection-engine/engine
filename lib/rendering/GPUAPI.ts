@@ -18,7 +18,7 @@ export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
         if (GPU.textures.get(id) != null)
             return GPU.textures.get(id)
-        const texture = new Texture()
+        const texture = new Texture(id)
         GPU.textures.set(id, texture)
         await texture.initialize(typeof imageData === "string" ? {img: imageData} : imageData)
 

@@ -22,14 +22,21 @@ let previous = 0
 
 export default class Loop {
     static #afterDrawing?: Function = () => null
+    static #frameID:number = undefined
 
+
+    static get isExecuting(){
+        return Loop.#frameID !== undefined
+    }
     static linkToExecutionPipeline(after?: Function) {
         if (typeof after === "function") {
             Loop.#afterDrawing = after
         } else
             Loop.#afterDrawing = () => null
     }
-
+    static get frameID() {
+        return Loop.#frameID
+    }
     static copyToCurrentFrame() {
         GPUAPI.copyTexture(StaticFBO.postProcessing1, StaticFBO.postProcessing2, GPU.context.COLOR_BUFFER_BIT)
     }
@@ -55,7 +62,7 @@ export default class Loop {
     }
 
 
-    static loop(current) {
+    static #loop(current) {
         try {
             Engine.elapsed = current - previous
             previous = current
@@ -73,9 +80,16 @@ export default class Loop {
 
             CameraAPI.syncThreads()
             EntityWorkerAPI.syncThreads()
-            Engine.frameID = requestAnimationFrame(Loop.loop)
+            Loop.#frameID = requestAnimationFrame(Loop.#loop)
         } catch (err) {
             console.error(err)
         }
+    }
+    static start(){
+        Loop.#frameID = requestAnimationFrame(Loop.#loop)
+    }
+    static stop(){
+        cancelAnimationFrame(Loop.#frameID)
+        Loop.#frameID = undefined
     }
 }

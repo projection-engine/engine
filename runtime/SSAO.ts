@@ -14,18 +14,12 @@ export default class SSAO {
     static maxSamples = 64
     static enabled = true
 
-    static set settings(data) {
-        StaticUBOs.ssaoUBO.bind()
-        StaticUBOs.ssaoUBO.updateData("settings", new Float32Array(data))
-        StaticUBOs.ssaoUBO.unbind()
-    }
-
     static async initialize() {
         SSAO.noiseScale[0] = GPU.internalResolution.w / RESOLUTION
         SSAO.noiseScale[1] = GPU.internalResolution.h / RESOLUTION
-        SSAO.settings = [.5, .7, -.1, 1000]
 
         StaticUBOs.ssaoUBO.bind()
+        StaticUBOs.ssaoUBO.updateData("settings", new Float32Array([.5, .7, -.1, 1000]))
         StaticUBOs.ssaoUBO.updateData("noiseScale", SSAO.noiseScale)
         StaticUBOs.ssaoUBO.unbind()
 
@@ -37,7 +31,7 @@ export default class SSAO {
         StaticShaders.ssao.bind()
 
         GPU.context.activeTexture(GPU.context.TEXTURE0)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.sceneDepth)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.sceneDepthVelocity)
         GPU.context.uniform1i(StaticShaders.ssaoUniforms.sceneDepth, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)

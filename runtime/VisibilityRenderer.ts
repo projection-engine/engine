@@ -1,12 +1,10 @@
 import GPU from "../GPU";
-import Mesh from "../instances/Mesh";
 import CameraAPI from "../lib/utils/CameraAPI";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import SSAO from "./SSAO";
 import {mat4} from "gl-matrix";
 import StaticShaders from "../lib/StaticShaders";
 import StaticFBO from "../lib/StaticFBO";
-import type Entity from "../instances/Entity";
 import ResourceEntityMapper from "../resource-libs/ResourceEntityMapper";
 import StaticMeshes from "../lib/StaticMeshes";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";

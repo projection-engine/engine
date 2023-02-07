@@ -6,6 +6,7 @@ import METRICS_FLAGS from "../static/METRICS_FLAGS";
 export default class Physics {
     static #sStep = 0.01666666
     static #interval = null
+    static subSteps = 10
 
     static set simulationStep(data: number) {
         Physics.#sStep = data / 1000
@@ -15,9 +16,9 @@ export default class Physics {
         return Physics.#sStep * 1000
     }
 
-    static subSteps = 10
 
     static start() {
+        clearInterval(Physics.#interval)
         Physics.#interval = setInterval(Physics.#execute, Physics.#sStep * 1000)
     }
 

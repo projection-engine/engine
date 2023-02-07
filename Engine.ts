@@ -1,7 +1,6 @@
 import CameraAPI from "./lib/utils/CameraAPI"
 import ENVIRONMENT from "./static/ENVIRONMENT"
 import Loop from "./Loop";
-import SSGI from "./runtime/SSGI";
 import SSAO from "./runtime/SSAO";
 import DirectionalShadows from "./runtime/DirectionalShadows";
 import ConversionAPI from "./lib/math/ConversionAPI";
@@ -13,29 +12,50 @@ import PhysicsAPI from "./lib/rendering/PhysicsAPI";
 import FileSystemAPI from "./lib/utils/FileSystemAPI";
 import ScriptsAPI from "./lib/utils/ScriptsAPI";
 import UIAPI from "./lib/rendering/UIAPI";
-import VisibilityRenderer from "./runtime/VisibilityRenderer";
 import LightProbe from "./instances/LightProbe";
 
 import Entity from "./instances/Entity";
-import StaticUBOs from "./lib/StaticUBOs";
 import DynamicMap from "./resource-libs/DynamicMap";
-
-const boolBuffer = new Uint8Array(1)
-const singleFloatBuffer = new Float32Array(1)
+import RegistryAPI from "../frontend/window-editor/lib/fs/RegistryAPI";
+import FS from "../frontend/shared/lib/FS/FS";
+import EngineStore from "../frontend/shared/stores/EngineStore";
+import GPUAPI from "./lib/rendering/GPUAPI";
+import EntityAPI from "./lib/utils/EntityAPI";
+import componentConstructor from "../frontend/window-editor/utils/component-constructor";
+import FilesAPI from "../frontend/window-editor/lib/fs/FilesAPI";
+import UberShader from "./resource-libs/UberShader";
 
 
 export default class Engine {
     static #development = false
-    static queryMap = new Map<string, Entity>()
+    static #queryMap = new Map<string, Entity>()
     static UILayouts = new Map()
     static isDev = true
-    static entities = new DynamicMap<Entity>()
+    static #entities = new DynamicMap<Entity>()
     static #environment: number = ENVIRONMENT.DEV
-    static params = {}
     static elapsed = 0
-    static frameID
-    static isReady = false
+    static #isReady = false
+    static #initializationWasTried = false
     static #initialized = false
+    static #loadedLevel = undefined
+
+    static get entities(): DynamicMap<Entity> {
+        return Engine.#entities
+    }
+
+    static get queryMap(): Map<string, Entity> {
+        return Engine.#queryMap
+    }
+
+
+
+    static get isReady() {
+        return Engine.#isReady
+    }
+
+    static get loadedLevel() {
+        return Engine.#loadedLevel
+    }
 
     static get developmentMode() {
         return Engine.#development
@@ -75,11 +95,10 @@ export default class Engine {
         })
         OBS.observe(GPU.canvas.parentElement)
         OBS.observe(GPU.canvas)
-        Engine.isReady = true
-
+        Engine.#isReady = true
         GPU.skylightProbe = new LightProbe(128)
-        Engine.start()
-
+        if (Engine.#initializationWasTried)
+            Engine.start()
     }
 
     static async startSimulation() {
@@ -94,88 +113,59 @@ export default class Engine {
     }
 
 
-    static updateParams(data, SSGISettings, SSRSettings, SSSSettings, SSAOSettings, physicsSteps, physicsSubSteps) {
-        Engine.params = data
-
-        if (typeof physicsSteps === "number") {
-            Physics.stop()
-            Physics.simulationStep = physicsSteps
-            Physics.start()
-        }
-        if (typeof physicsSubSteps === "number")
-            Physics.subSteps = physicsSubSteps
-
-        SSGI.blurSamples = SSGISettings.blurSamples || 5
-        SSGI.blurRadius = SSGISettings.blurRadius || 5
-
-        SSGI.rayMarchSettings[0] = SSGISettings.stepSize || 1
-        SSGI.rayMarchSettings[1] = SSGISettings.maxSteps || 4
-        SSGI.rayMarchSettings[2] = SSGISettings.strength || 1
-
-        const sceneUBO = StaticUBOs.uberUBO
-
-
-        sceneUBO.bind()
-        singleFloatBuffer[0] = SSRSettings.falloff || 3
-        sceneUBO.updateData("SSRFalloff", singleFloatBuffer)
-        singleFloatBuffer[0] = SSRSettings.stepSize || 1
-        sceneUBO.updateData("stepSizeSSR", singleFloatBuffer)
-        singleFloatBuffer[0] = SSSSettings.maxDistance || .05
-        sceneUBO.updateData("maxSSSDistance", singleFloatBuffer)
-        singleFloatBuffer[0] = SSSSettings.depthThickness || .05
-        sceneUBO.updateData("SSSDepthThickness", singleFloatBuffer)
-        singleFloatBuffer[0] = SSSSettings.edgeFalloff || 12
-        sceneUBO.updateData("SSSEdgeAttenuation", singleFloatBuffer)
-        singleFloatBuffer[0] = SSSSettings.depthDelta || 0
-        sceneUBO.updateData("SSSDepthDelta", singleFloatBuffer)
-        boolBuffer[0] = SSRSettings.maxSteps || 4
-        sceneUBO.updateData("maxStepsSSR", boolBuffer)
-        boolBuffer[0] = SSSSettings.maxSteps || 24
-        sceneUBO.updateData("maxStepsSSS", boolBuffer)
-        boolBuffer[0] = SSAOSettings.enabled ? 1 : 0
-        sceneUBO.updateData("hasAmbientOcclusion", boolBuffer)
-        singleFloatBuffer[0] = SSAOSettings.falloffDistance || 1000
-        sceneUBO.updateData("SSAOFalloff", singleFloatBuffer)
-
-        sceneUBO.unbind()
-
-        SSGI.enabled = SSGISettings.enabled
-
-        SSAO.settings = [SSAOSettings.radius || .25, SSAOSettings.power || 1, SSAOSettings.bias || .1, SSAOSettings.falloffDistance || 1000]
-        SSAO.blurSamples = SSAOSettings.blurSamples || 2
-        SSAO.maxSamples = SSAOSettings.maxSamples || 64
-        SSAO.enabled = SSAOSettings.enabled
-
-
-        StaticUBOs.frameCompositionUBO.bind()
-
-        singleFloatBuffer[0] = data.FXAASpanMax || 8
-        StaticUBOs.frameCompositionUBO.updateData("FXAASpanMax", singleFloatBuffer)
-
-        boolBuffer[0] = data.FXAA ? 1 : 0
-        StaticUBOs.frameCompositionUBO.updateData("useFXAA", boolBuffer)
-
-        singleFloatBuffer[0] = data.FXAAReduceMin || 1.0 / 128.0
-        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMin", singleFloatBuffer)
-
-        singleFloatBuffer[0] = data.FXAAReduceMul || 1.0 / 8.0
-        StaticUBOs.frameCompositionUBO.updateData("FXAAReduceMul", singleFloatBuffer)
-
-        StaticUBOs.frameCompositionUBO.unbind()
-        VisibilityRenderer.needsUpdate = true
-    }
-
-
     static start() {
-        if (!Engine.frameID && Engine.isReady) {
+        if (!Loop.isExecuting && Engine.#isReady) {
             Physics.start()
-            Engine.frameID = requestAnimationFrame(Loop.loop)
-        }
+            Loop.start()
+        } else
+            Engine.#initializationWasTried = true
     }
 
     static stop() {
-        cancelAnimationFrame(Engine.frameID)
+        Loop.stop()
         Physics.stop()
-        Engine.frameID = undefined
+    }
+
+    static async loadLevel(levelPath: string, cleanEngine?: boolean): Promise<Entity[]> {
+        if (Engine.#loadedLevel === levelPath || !levelPath)
+            return
+        try {
+
+            const asset = await FileSystemAPI.readAsset(levelPath)
+            const {entities} = JSON.parse(asset)
+
+            Engine.#loadedLevel = levelPath
+            if (cleanEngine) {
+                GPU.meshes.forEach(m => GPUAPI.destroyMesh(m))
+                GPU.textures.forEach(m => GPUAPI.destroyTexture(m.id))
+                GPU.materials.clear()
+                UberShader.compile(true)
+            }
+
+            const mapped = []
+            for (let i = 0; i < entities.length; i++) {
+                const entity = EntityAPI.parseEntityObject(entities[i])
+                for (let i = 0; i < entity.scripts.length; i++)
+                    await componentConstructor(entity, entity.scripts[i].id, false)
+                const imgID = entity.spriteComponent?.imageID
+                if (imgID) {
+                    const textures = GPU.textures
+                    if (!textures.get(imgID))
+                        await EngineStore.loadTextureFromImageID(imgID)
+                }
+
+                const uiID = entity.uiComponent?.uiLayoutID
+                if (uiID) {
+                    const rs = RegistryAPI.getRegistryEntry(uiID)
+                    if (rs)
+                        Engine.UILayouts.set(uiID, await FilesAPI.readFile(FS.ASSETS_PATH + FS.sep + rs.path))
+                }
+                mapped.push(entity)
+            }
+
+            return mapped
+        } catch (err) {
+            console.error(err)
+        }
     }
 }

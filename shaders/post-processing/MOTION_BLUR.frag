@@ -13,7 +13,7 @@ out vec4 fragColor;
 
 
 void main(){
-    vec2 velocity = texture(gVelocity, texCoords).rg * velocityScale;
+    vec2 velocity = texture(gVelocity, texCoords).gb * velocityScale;
 
     float speed = length(velocity * bufferResolution);
     int nSamples = max(clamp(int(speed), 1, maxSamples), 1);

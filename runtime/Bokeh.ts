@@ -21,7 +21,7 @@ export default class Bokeh {
         GPU.context.uniform1i(StaticShaders.bokehUniforms.sceneColor, 0)
 
         GPU.context.activeTexture(GPU.context.TEXTURE1)
-        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.sceneDepth)
+        GPU.context.bindTexture(GPU.context.TEXTURE_2D, StaticFBO.sceneDepthVelocity)
         GPU.context.uniform1i(StaticShaders.bokehUniforms.sceneDepth, 1)
 
         StaticMeshes.drawQuad()
