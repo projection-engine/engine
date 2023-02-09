@@ -24,14 +24,22 @@ import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 
 export default class Engine {
     static #development = false
-
+    static #onLevelLoadListeners = new DynamicMap<Function>()
     static UILayouts = new Map()
     static isDev = true
     static #environment: number = ENVIRONMENT.DEV
     static #isReady = false
     static #initializationWasTried = false
     static #initialized = false
-    static #loadedLevels = new DynamicMap<Entity>()
+    static #loadedLevel: Entity
+
+    static removeLevelLoaderListener(id: string) {
+        Engine.#onLevelLoadListeners.delete(id)
+    }
+
+    static addLevelLoaderListener(id: string, callback: Function) {
+        Engine.#onLevelLoadListeners.add(id, callback)
+    }
 
     static get entities(): DynamicMap<Entity> {
         return ResourceEntityMapper.entities
@@ -45,8 +53,8 @@ export default class Engine {
         return Engine.#isReady
     }
 
-    static get loadedLevels(): DynamicMap<Entity> {
-        return Engine.#loadedLevels
+    static get loadedLevel(): Entity {
+        return Engine.#loadedLevel
     }
 
     static get developmentMode() {
@@ -118,35 +126,29 @@ export default class Engine {
         Physics.stop()
     }
 
-    static async loadLevel(levelPath: string, cleanEngine?: boolean): Promise<Entity[]> {
-        if (Engine.#loadedLevels.has(levelPath) && !cleanEngine || !levelPath)
+
+    static async loadLevel(levelID: string, cleanEngine?: boolean): Promise<Entity[]> {
+        if (!levelID || Engine.#loadedLevel?.id === levelID && !cleanEngine)
             return []
         try {
 
             if (cleanEngine) {
-
                 GPU.meshes.forEach(m => GPUAPI.destroyMesh(m))
                 GPU.textures.forEach(m => GPUAPI.destroyTexture(m.id))
                 GPU.materials.clear()
-                Engine.entities.array.forEach(EntityWorkerAPI.removeEntity)
-                Engine.entities.clear()
-                Engine.queryMap.clear()
-                Engine.#loadedLevels.clear()
-                ResourceEntityMapper.clear()
             }
 
-            const asset = await FileSystemAPI.readAsset(levelPath)
+            const asset = await FileSystemAPI.readAsset(levelID)
             const {entities, entity} = JSON.parse(asset)
             let levelEntity
             if (!entity)
-                levelEntity = EntityAPI.getNewEntityInstance(levelPath, true)
+                levelEntity = EntityAPI.getNewEntityInstance(levelID, true)
             else
-                levelEntity = EntityAPI.parseEntityObject(entity, true)
-            if(!levelEntity.name)
+                levelEntity = EntityAPI.parseEntityObject(entity)
+            if (!levelEntity.name)
                 levelEntity.name = "New level"
             levelEntity.parentID = undefined
-            Engine.#loadedLevels.add(levelPath, levelEntity)
-
+            Engine.unloadLevel(levelEntity)
             const mapped = []
             for (let i = 0; i < entities.length; i++) {
                 try {
@@ -172,10 +174,19 @@ export default class Engine {
                 }
             }
 
+            Engine.#onLevelLoadListeners.array.forEach(callback => callback())
             return mapped
         } catch (err) {
             console.error(err)
         }
         return []
+    }
+    static unloadLevel(newLevel?:Entity){
+        const oldLevel = Engine.#loadedLevel
+        Engine.#loadedLevel = newLevel
+        if (oldLevel)
+            EntityAPI.removeEntity(oldLevel)
+        if(newLevel)
+        EntityAPI.addEntity()
     }
 }

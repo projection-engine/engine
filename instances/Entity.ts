@@ -21,6 +21,7 @@ export default class Entity extends ComponentResources {
         return this.#isCollection
     }
 
+    #colorIdentifier = [255,255,255]
     queryKey = this.#id.slice(0, this.#id.length / 2)
     name = ""
     active = true
@@ -31,11 +32,22 @@ export default class Entity extends ComponentResources {
     #pickIndex: number = -1
     #children = []
 
+    get colorIdentifier() {
+        return this.#colorIdentifier
+    }
+
+    set colorIdentifier(data) {
+        console.log(data)
+        if (data && Array.isArray(data))
+            this.#colorIdentifier = data
+    }
+
 
     constructor(id?: string, isCollection?: boolean) {
         super();
         this.#id = id ?? this.#id
         this.#isCollection = isCollection ?? false
+
     }
 
     get allComponents() {
@@ -86,6 +98,7 @@ export default class Entity extends ComponentResources {
         temp.isCollection = this.#isCollection
         temp.parent = this.parent?.id
         temp.parentID = this.parent?.id
+        temp.colorIdentifier = this.#colorIdentifier
 
         Array.from(this.components.entries())
             .forEach(([k, v]) => {

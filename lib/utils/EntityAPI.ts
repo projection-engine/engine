@@ -12,6 +12,7 @@ import VisibilityRenderer from "../../runtime/VisibilityRenderer";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import MeshResourceMapper from "../MeshResourceMapper";
 import MaterialResourceMapper from "../MaterialResourceMapper";
+import QueryAPI from "./QueryAPI";
 
 const COMPONENT_TRIGGER_UPDATE = [COMPONENTS.LIGHT, COMPONENTS.MESH]
 const excludedKeys = [
@@ -24,6 +25,8 @@ const excludedKeys = [
     "id"
 ]
 export default class EntityAPI {
+    static #timeout
+
     static getNewEntityInstance(id?: string, isCollection?: boolean): Entity {
         return new Entity(id, isCollection)
     }
@@ -33,31 +36,30 @@ export default class EntityAPI {
     }
 
     static addEntity(entity?: Entity): Entity {
+        if(!entity)
+            return
         if (entity && Engine.entities.has(entity.id))
             return Engine.entities.map.get(entity.id)
-        let target = entity ?? EntityAPI.getNewEntityInstance()
-
+        const target = entity ?? EntityAPI.getNewEntityInstance()
+        if (!entity.parent && !entity.parentID)
+            entity.addParent(Engine.loadedLevel)
         Engine.entities.add(target.id, target)
         EntityWorkerAPI.removeEntity(target)
         EntityWorkerAPI.registerEntity(target)
         EntityAPI.registerEntityComponents(target)
-
-        VisibilityRenderer.needsUpdate = true
-
         return entity
     }
 
     static toggleVisibility(entity: Entity): void {
         const newValue = !entity.active
         let needsLightUpdate = false, needsVisibilityUpdate = false
-        const loopHierarchy = (entity) => {
-            for (let i = 0; i < entity.children.length; i++)
-                loopHierarchy(entity.children[i])
+        const hierarchy = QueryAPI.getHierarchy(entity)
+        hierarchy.forEach(entity => {
             entity.active = newValue
             needsVisibilityUpdate = needsVisibilityUpdate || entity.meshComponent !== undefined
             needsLightUpdate = needsLightUpdate || entity.meshComponent !== undefined || entity.lightComponent !== undefined
-        }
-        loopHierarchy(entity)
+        })
+
         if (needsLightUpdate)
             LightsAPI.packageLights(false, true)
         VisibilityRenderer.needsUpdate = needsVisibilityUpdate
@@ -99,14 +101,16 @@ export default class EntityAPI {
         VisibilityRenderer.needsUpdate = true
     }
 
-    static removeEntity(id: string) {
-        const entity = Engine.entities.map.get(id)
-        if (!entity)
+    static removeEntity(entityToRemove: string | Entity) {
+        const id = entityToRemove instanceof Entity ? entityToRemove.id : entityToRemove
+        const entity = entityToRemove instanceof Entity ? entityToRemove : Engine.entities.map.get(entityToRemove)
+
+        if (!entity || entity === Engine.loadedLevel)
             return
 
         const children = entity.children
         for (let c = 0; c < children.length; c++)
-            EntityAPI.removeEntity(children[c].id)
+            EntityAPI.removeEntity(children[c])
 
         if (!Engine.isDev)
             for (let i = 0; i < entity.scripts.length; i++) {
@@ -137,11 +141,13 @@ export default class EntityAPI {
         Engine.queryMap.delete(entity.queryKey)
 
 
-        if (entity.lightComponent !== undefined || entity.meshComponent !== undefined) {
-            LightsAPI.packageLights(false, true)
-            VisibilityRenderer.needsUpdate = true
-        }
-
+        clearTimeout(EntityAPI.#timeout)
+        EntityAPI.#timeout = setTimeout(() => {
+            if (entity.lightComponent !== undefined || entity.meshComponent !== undefined) {
+                LightsAPI.packageLights(false, true)
+                VisibilityRenderer.needsUpdate = true
+            }
+        }, 25)
     }
 
 
