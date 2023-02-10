@@ -8,6 +8,10 @@ import LightsAPI from "../../lib/utils/LightsAPI";
 export default class AtmosphereComponent extends Component {
     _props = ATMOSPHERE_PROPS
 
+    constructor() {
+        super();
+        this.elapsedTime = 0
+    }
     _elapsedTime = 0
     #sunDirection = <vec3>[0, 1, 1]
     maxSamples = 10
@@ -16,7 +20,7 @@ export default class AtmosphereComponent extends Component {
     atmosphereRadius = 1
     planetRadius = 1
     intensity = 20
-    renderingType = ATMOSPHERE_TYPES.RAYLEIGH
+    renderingType = ATMOSPHERE_TYPES.COMBINED
     betaRayleigh = [1.,1,1]
     betaMie = [1,1,1]
     threshold = 0
@@ -26,10 +30,9 @@ export default class AtmosphereComponent extends Component {
     }
 
     set elapsedTime(data) {
-        vec3.normalize(this.#sunDirection, [Math.sin(this._elapsedTime), Math.cos(this._elapsedTime), 1.0])
         this._elapsedTime = data
-
-        if(this.entity.active){
+        vec3.normalize(this.#sunDirection, [Math.sin(this._elapsedTime), Math.cos(this._elapsedTime), 1.0])
+        if(this.entity?.active){
             this.entity.needsLightUpdate = true
             LightsAPI.packageLights(true, true)
         }

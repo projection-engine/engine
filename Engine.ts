@@ -144,11 +144,11 @@ export default class Engine {
             if (!entity)
                 levelEntity = EntityAPI.getNewEntityInstance(levelID, true)
             else
-                levelEntity = EntityAPI.parseEntityObject(entity)
+                levelEntity = EntityAPI.parseEntityObject({...entity, isCollection: true})
             if (!levelEntity.name)
                 levelEntity.name = "New level"
             levelEntity.parentID = undefined
-            Engine.unloadLevel(levelEntity)
+            Engine.#replaceLevel(levelEntity)
             const mapped = []
             for (let i = 0; i < entities.length; i++) {
                 try {
@@ -181,12 +181,12 @@ export default class Engine {
         }
         return []
     }
-    static unloadLevel(newLevel?:Entity){
+    static #replaceLevel(newLevel?:Entity){
         const oldLevel = Engine.#loadedLevel
         Engine.#loadedLevel = newLevel
         if (oldLevel)
             EntityAPI.removeEntity(oldLevel)
         if(newLevel)
-        EntityAPI.addEntity()
+        EntityAPI.addEntity(newLevel)
     }
 }
