@@ -27,12 +27,14 @@ export default class FileSystemAPI {
             return
         try {
             const textureData = await FileSystemAPI.readAsset(registryID)
-            if (textureData)
+            if (textureData) {
+                const data = JSON.parse(textureData)
                 await GPUAPI.allocateTexture({
-                    ...textureData,
-                    img: textureData.base64,
-                    yFlip: textureData.flipY
+                    ...data,
+                    img: data.base64,
+                    yFlip: data.flipY
                 }, registryID)
+            }
         } catch (err) {
             console.error(err)
         }

@@ -23,7 +23,6 @@ export default class Texture {
     async initialize(attributes: TextureParams) {
         this.loaded = false
         const img = attributes.img
-
         this.attributes = attributes
         if (typeof img === "string") {
             if (img.includes("data:image/")) {

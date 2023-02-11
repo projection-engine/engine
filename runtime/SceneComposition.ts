@@ -6,6 +6,7 @@ import SpriteRenderer from "./renderers/SpriteRenderer";
 import DecalRenderer from "./renderers/DecalRenderer";
 import MeshRenderer from "./renderers/MeshRenderer";
 import AtmosphereRenderer from "./renderers/AtmosphereRenderer";
+import Mesh from "../instances/Mesh";
 
 
 export default class SceneComposition {
@@ -13,7 +14,7 @@ export default class SceneComposition {
     static execute() {
         if (!UberShader.uber)
             return
-
+        Mesh.finishIfUsed()
         StaticFBO.postProcessing2.startMapping()
 
         AtmosphereRenderer.execute()

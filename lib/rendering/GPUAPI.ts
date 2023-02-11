@@ -16,13 +16,19 @@ import MaterialResourceMapper from "../MaterialResourceMapper";
 
 export default class GPUAPI {
     static async allocateTexture(imageData: string | TextureParams, id: string) {
-        if (GPU.textures.get(id) != null)
-            return GPU.textures.get(id)
-        const texture = new Texture(id)
-        GPU.textures.set(id, texture)
-        await texture.initialize(typeof imageData === "string" ? {img: imageData} : imageData)
+        try {
+            if (GPU.textures.get(id) != null)
+                return GPU.textures.get(id)
+            const texture = new Texture(id)
+            await texture.initialize(typeof imageData === "string" ? {img: imageData} : imageData)
+            console.trace(imageData)
 
-        return texture
+            GPU.textures.set(id, texture)
+            return texture
+        } catch (err) {
+            console.error(err)
+            return null
+        }
     }
 
     static destroyTexture(imageID) {

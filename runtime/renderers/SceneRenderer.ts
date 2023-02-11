@@ -15,6 +15,7 @@ import MeshResourceMapper from "../../lib/MeshResourceMapper";
 import MaterialResourceMapper from "../../lib/MaterialResourceMapper";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import Loop from "../../Loop";
+import Mesh from "../../instances/Mesh";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 
