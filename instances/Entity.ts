@@ -21,7 +21,7 @@ export default class Entity extends ComponentResources {
         return this.#isCollection
     }
 
-    #colorIdentifier = [255,255,255]
+    #colorIdentifier = [255, 255, 255]
     queryKey = this.#id.slice(0, this.#id.length / 2)
     name = ""
     active = true
@@ -51,7 +51,7 @@ export default class Entity extends ComponentResources {
     }
 
     get allComponents() {
-        return Array.from(this.components.entries())
+        return this.components.array
     }
 
 
@@ -72,7 +72,7 @@ export default class Entity extends ComponentResources {
         const instance = getComponentInstance(KEY)
         if (instance != null) {
             instance.entity = this
-            this.components.set(KEY, instance)
+            this.components.add(KEY, instance)
             this.updateInternalComponentRef(KEY, instance)
             EntityAPI.registerEntityComponents(this)
 
@@ -100,11 +100,11 @@ export default class Entity extends ComponentResources {
         temp.parentID = this.parent?.id
         temp.colorIdentifier = this.#colorIdentifier
 
-        Array.from(this.components.entries())
-            .forEach(([k, v]) => {
-                parsedComponents[k] = v
-            })
+        this.components.array.forEach(component => {
+            parsedComponents[component.componentKey] = component
+        })
         temp.components = parsedComponents
+
         return temp
     }
 
@@ -125,10 +125,8 @@ export default class Entity extends ComponentResources {
     }
 
     addChild(entity: Entity) {
-        if (entity === this || entity.parent !== this || this.#children.includes(entity)) {
-            console.log("NOT ADDING CHILD")
+        if (entity === this || entity.parent !== this || this.#children.includes(entity))
             return
-        }
         this.#children.push(entity)
     }
 

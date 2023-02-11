@@ -1,4 +1,5 @@
 import Entity from "../Entity";
+import COMPONENTS from "../../static/COMPONENTS";
 
 interface ComponentValueGeneric {
     [key: string]: any
@@ -11,6 +12,30 @@ interface ComponentValueGeneric {
 
 
 export default class Component {
+    static get componentKey(): string {
+        return ""
+    }
+    get componentKey(): string {
+        return Component.componentKey
+    }
+
+    _props: ComponentValueGeneric[] = []
+    _name = ""
+
+    #entity: Entity
+    get entity() {
+        return this.#entity
+    }
+
+    set entity(ref) {
+        if (!this.#entity)
+            this.#entity = ref
+    }
+
+
+    onUpdate() {
+    }
+
     static propTypes = Object.freeze({
         NUMBER: "number",
         GROUP: "group",
@@ -25,22 +50,6 @@ export default class Component {
         TERRAIN: "terrain",
         QUAT_EULER: "quatEuler"
     })
-    _props: ComponentValueGeneric[] = []
-    _name = ""
-
-    #entity: Entity
-    get entity() {
-        return this.#entity
-    }
-
-    set entity(ref) {
-        if (!this.#entity)
-            this.#entity = ref
-    }
-
-    onUpdate() {
-    }
-
     static group(label, children, disabledIf?: Function | string): ComponentValueGeneric {
         return {
             type: Component.propTypes.GROUP,

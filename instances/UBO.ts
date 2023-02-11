@@ -50,6 +50,7 @@ export default class UBO {
         GPU.context.useProgram(shaderProgram)
         const index = GPU.context.getUniformBlockIndex(shaderProgram, this.blockName)
         GPU.context.uniformBlockBinding(shaderProgram, index, this.blockPoint)
+        GPU.context.bindBuffer(GPU.context.UNIFORM_BUFFER, null)
     }
 
     bind() {

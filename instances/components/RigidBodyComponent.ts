@@ -1,7 +1,15 @@
 import Component from "./Component";
 import RIGID_BODY_PROPS from "../../static/component-props/RIGID_BODY_PROPS";
+import COMPONENTS from "../../static/COMPONENTS";
 
 export default class RigidBodyComponent extends Component {
+    static get componentKey(): string {
+        return COMPONENTS.RIGID_BODY
+    }
+    get componentKey(): string {
+        return RigidBodyComponent.componentKey
+    }
+
     _props = RIGID_BODY_PROPS
 
     mass = 1

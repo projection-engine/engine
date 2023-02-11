@@ -8,9 +8,15 @@ import MeshResourceMapper from "../../lib/MeshResourceMapper";
 import MaterialResourceMapper from "../../lib/MaterialResourceMapper";
 import MaterialUniform from "../../static/MaterialUniform";
 import EntityAPI from "../../lib/utils/EntityAPI";
+import COMPONENTS from "../../static/COMPONENTS";
 
 export default class MeshComponent extends Component {
-
+    static get componentKey(): string {
+        return COMPONENTS.MESH
+    }
+    get componentKey(): string {
+        return MeshComponent.componentKey
+    }
     _props = MESH_PROPS
 
     castsShadows = true

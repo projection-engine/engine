@@ -1,8 +1,16 @@
 import Component from "./Component";
 import COLLISION_TYPES from "../../static/COLLISION_TYPES";
 import PHYSICS_COLLIDER_PROPS from "../../static/component-props/PHYSICS_COLLIDER_PROPS";
+import COMPONENTS from "../../static/COMPONENTS";
 
 export default class PhysicsColliderComponent extends Component {
+    static get componentKey(): string {
+        return COMPONENTS.PHYSICS_COLLIDER
+    }
+    get componentKey(): string {
+        return PhysicsColliderComponent.componentKey
+    }
+
     _props = PHYSICS_COLLIDER_PROPS
     collisionType = COLLISION_TYPES.BOX
     direction = "Y"

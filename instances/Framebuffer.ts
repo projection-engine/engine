@@ -16,7 +16,6 @@ interface FBOTexture {
 }
 
 export default class Framebuffer {
-    static lastBoundResolution = new Float32Array([0, 0])
     private readonly fallback: FBOTexture
 
     readonly width: number
@@ -51,39 +50,22 @@ export default class Framebuffer {
 
 
     startMapping(noClearing?: boolean) {
-        // if(GPU.activeFramebuffer === this)
-        //     return
-
+        if (GPU.activeFramebuffer === this)
+            return
         this.use()
-        const last = Framebuffer.lastBoundResolution
-        const w = this.width
-        const h = this.height
-        if (last[0] !== w || last[1] !== h) {
-            GPU.context.viewport(0, 0, w, h)
-            last[0] = w
-            last[1] = h
-        }
+        GPU.context.viewport(0, 0, this.width, this.height)
         if (!noClearing)
             GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
-
     }
 
 
     stopMapping() {
-        if(GPU.activeFramebuffer !== this)
+        if (GPU.activeFramebuffer !== this)
             return
 
         const context = GPU.context
         GPU.activeFramebuffer = undefined
         context.bindFramebuffer(context.FRAMEBUFFER, null)
-        const last = Framebuffer.lastBoundResolution
-        const w = context.drawingBufferWidth
-        const h = context.drawingBufferHeight
-        if (last[0] !== w || last[1] !== h) {
-            context.viewport(0, 0, w, h)
-            last[0] = w
-            last[1] = h
-        }
     }
 
     depthTexture(): Framebuffer {

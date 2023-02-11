@@ -14,9 +14,11 @@ import UIComponent from "./UIComponent";
 import CameraComponent from "./CameraComponent";
 import DecalComponent from "./DecalComponent";
 import LightProbeComponent from "./LightProbeComponent";
+import DynamicMap from "../../resource-libs/DynamicMap";
 
 export default class ComponentResources extends Movable {
-    components = new Map<string, Component>()
+    #components = new DynamicMap<Component>()
+
     #lightComponent?: LightComponent
     #cullingComponent?: CullingComponent
     #rigidBodyComponent?: RigidBodyComponent
@@ -32,7 +34,9 @@ export default class ComponentResources extends Movable {
     #meshRef?: Mesh
 
 
-
+    get components(){
+        return this.#components
+    }
     get meshRef(): Mesh | undefined {
         return this.#meshRef
     }
@@ -110,7 +114,6 @@ export default class ComponentResources extends Movable {
             case COMPONENTS.LIGHT_PROBE:
                 this.#lightProbeComponent = !instance ? undefined : <LightProbeComponent>instance
                 break
-
             case COMPONENTS.SPRITE:
                 this.#spriteComponent = !instance ? undefined : <SpriteComponent>instance
                 break

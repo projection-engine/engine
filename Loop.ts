@@ -66,7 +66,7 @@ export default class Loop {
             previous = current
             CameraAPI.updateUBOs()
             GPU.context.clear(GPU.context.COLOR_BUFFER_BIT | GPU.context.DEPTH_BUFFER_BIT)
-            if (EntityWorkerAPI.hasChangeBuffer[0])
+            if (EntityWorkerAPI.hasChangeBuffer[0] === 1)
                 LightsAPI.packageLights(false, true)
             Loop.#callback()
 

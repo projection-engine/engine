@@ -52,12 +52,14 @@ export default class EntityAPI {
 
     static toggleVisibility(entity: Entity): void {
         const newValue = !entity.active
-        let needsLightUpdate = false, needsVisibilityUpdate = false
+        entity.active = newValue
+        let needsLightUpdate = entity.meshComponent !== undefined || entity.lightComponent !== undefined
+        let needsVisibilityUpdate = entity.meshComponent !== undefined
         const hierarchy = QueryAPI.getHierarchy(entity)
-        hierarchy.forEach(entity => {
-            entity.active = newValue
-            needsVisibilityUpdate = needsVisibilityUpdate || entity.meshComponent !== undefined
-            needsLightUpdate = needsLightUpdate || entity.meshComponent !== undefined || entity.lightComponent !== undefined
+        hierarchy.forEach(child => {
+            child.active = newValue
+            needsVisibilityUpdate = needsVisibilityUpdate || child.meshComponent !== undefined
+            needsLightUpdate = needsLightUpdate || child.meshComponent !== undefined || child.lightComponent !== undefined
         })
 
         if (needsLightUpdate)
@@ -104,10 +106,9 @@ export default class EntityAPI {
     static removeEntity(entityToRemove: string | Entity) {
         const id = entityToRemove instanceof Entity ? entityToRemove.id : entityToRemove
         const entity = entityToRemove instanceof Entity ? entityToRemove : Engine.entities.map.get(entityToRemove)
-
         if (!entity || entity === Engine.loadedLevel)
             return
-
+        entity.removeParent()
         const children = entity.children
         for (let c = 0; c < children.length; c++)
             EntityAPI.removeEntity(children[c])

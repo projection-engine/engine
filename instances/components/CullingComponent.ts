@@ -1,7 +1,14 @@
 import Component from "./Component";
 import CULLING_COMPONENT_PROPS from "../../static/component-props/CULLING_COMPONENT_PROPS";
+import COMPONENTS from "../../static/COMPONENTS";
 
 export default class CullingComponent extends Component{
+    static get componentKey(): string {
+        return COMPONENTS.CULLING
+    }
+    get componentKey(): string {
+        return CullingComponent.componentKey
+    }
     _props = CULLING_COMPONENT_PROPS
     screenDoorEffect = false
     _screenDoorEffectDistanceMultiplier = .5

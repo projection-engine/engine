@@ -42,18 +42,18 @@ export default class PhysicsAPI {
 
     static initializeCollider(entity) {
         const ammo = PhysicsAPI.ammo
-        const colliderComp = entity.physicsColliderComponent
+        const pColliderComponent = entity.physicsColliderComponent
 
-        switch (colliderComp.collisionType) {
+        switch (pColliderComponent.collisionType) {
             case COLLISION_TYPES.BOX: {
-                const boxSize = <btVector3>new ammo.btVector3(colliderComp.size[0], colliderComp.size[1], colliderComp.size[2]);
-                colliderComp.shape = <btBoxShape>new ammo.btBoxShape(boxSize);
-                colliderComp.shape.setMargin(0.05);
+                const boxSize = <btVector3>new ammo.btVector3(pColliderComponent.size[0], pColliderComponent.size[1], pColliderComponent.size[2]);
+                pColliderComponent.shape = <btBoxShape>new ammo.btBoxShape(boxSize);
+                pColliderComponent.shape.setMargin(0.05);
                 break
             }
             case COLLISION_TYPES.SPHERE:
-                colliderComp.shape = <btSphereShape>new ammo.btSphereShape(colliderComp.radius);
-                colliderComp.shape.setMargin(0.05);
+                pColliderComponent.shape = <btSphereShape>new ammo.btSphereShape(pColliderComponent.radius);
+                pColliderComponent.shape.setMargin(0.05);
                 break
             case COLLISION_TYPES.CAPSULE:
                 // TODO
@@ -61,7 +61,7 @@ export default class PhysicsAPI {
             default:
                 break
         }
-        colliderComp.initialized = true
+        pColliderComponent.initialized = true
     }
 
     static get gravity(): [number, number, number] {
@@ -77,11 +77,10 @@ export default class PhysicsAPI {
 
     static registerRigidBody(entity: Entity) {
         const ammo = PhysicsAPI.ammo
-        const comps = entity.components
-        const comp = <RigidBodyComponent>comps.get(COMPONENTS.RIGID_BODY)
-        const colliderComp = <PhysicsColliderComponent>comps.get(COMPONENTS.PHYSICS_COLLIDER)
+        const rigidBodyComponent = entity.rigidBodyComponent
+        const pColliderComponent = entity.physicsColliderComponent
 
-        if (!ammo || !comp || comp.motionState || !colliderComp) {
+        if (!ammo || !rigidBodyComponent || rigidBodyComponent.motionState || !pColliderComponent) {
             if (PhysicsAPI.rigidBodiesMap.get(entity.id))
                 PhysicsAPI.removeRigidBody(entity)
             return
@@ -90,46 +89,46 @@ export default class PhysicsAPI {
         const t = entity.absoluteTranslation
         const q = entity.rotationQuaternionFinal
 
-        comp.transform = <btTransform>new ammo.btTransform();
-        comp.transform.setIdentity();
-        comp.transform.setOrigin(<btVector3>new ammo.btVector3(t[0], t[1], t[2]));
-        comp.transform.setRotation(<btQuaternion>new ammo.btQuaternion(q[0], q[1], q[2], q[3]));
-        comp.motionState = <btDefaultMotionState>new ammo.btDefaultMotionState(comp.transform);
+        rigidBodyComponent.transform = <btTransform>new ammo.btTransform();
+        rigidBodyComponent.transform.setIdentity();
+        rigidBodyComponent.transform.setOrigin(<btVector3>new ammo.btVector3(t[0], t[1], t[2]));
+        rigidBodyComponent.transform.setRotation(<btQuaternion>new ammo.btQuaternion(q[0], q[1], q[2], q[3]));
+        rigidBodyComponent.motionState = <btDefaultMotionState>new ammo.btDefaultMotionState(rigidBodyComponent.transform);
 
-        if (!colliderComp.initialized)
+        if (!pColliderComponent.initialized)
             PhysicsAPI.initializeCollider(entity)
 
-        const shape = colliderComp.shape
-        comp.inertiaBody = <btVector3>new ammo.btVector3(...comp.inertia)
-        if (comp.mass > 0)
-            shape.calculateLocalInertia(comp.mass, comp.inertiaBody)
+        const shape = pColliderComponent.shape
+        rigidBodyComponent.inertiaBody = <btVector3>new ammo.btVector3(...rigidBodyComponent.inertia)
+        if (rigidBodyComponent.mass > 0)
+            shape.calculateLocalInertia(rigidBodyComponent.mass, rigidBodyComponent.inertiaBody)
 
         const info = <btRigidBodyConstructionInfo>new ammo.btRigidBodyConstructionInfo(
-            comp.mass,
-            comp.motionState,
+            rigidBodyComponent.mass,
+            rigidBodyComponent.motionState,
             shape,
-            comp.inertiaBody
+            rigidBodyComponent.inertiaBody
         )
-        comp.body = <btRigidBody>new ammo.btRigidBody(info)
-        PhysicsAPI.world.addRigidBody(comp.body)
-        comp.initialized = true
+        rigidBodyComponent.body = <btRigidBody>new ammo.btRigidBody(info)
+        PhysicsAPI.world.addRigidBody(rigidBodyComponent.body)
+        rigidBodyComponent.initialized = true
         PhysicsAPI.rigidBodies.push(entity)
         PhysicsAPI.rigidBodiesMap.set(entity.id, entity)
     }
 
     static removeRigidBody(entity: Entity) {
         const ammo = PhysicsAPI.ammo
-        const comp = entity.rigidBodyComponent
-        if (!ammo || !comp?.motionState)
+        const rigidBodyComponent = entity.rigidBodyComponent
+        if (!ammo || !rigidBodyComponent?.motionState)
             return
-        comp.initialized = false
-        PhysicsAPI.world.removeRigidBody(comp.body)
+        rigidBodyComponent.initialized = false
+        PhysicsAPI.world.removeRigidBody(rigidBodyComponent.body)
         PhysicsAPI.rigidBodiesMap.delete(entity.id)
         PhysicsAPI.rigidBodies = PhysicsAPI.rigidBodies.filter(r => r !== entity)
     }
 
     static initializeTerrainCollision(entity, heightMap, heightScale, dimensions) {
-        // const colliderComp = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
+        // const pColliderComponent = entity.components.get(COMPONENTS.PHYSICS_COLLIDER)
         //
         // const {imageData, imageToLoad, canvas} = getImageData(heightMap)
         // const vertexCount = imageToLoad.width
@@ -163,7 +162,7 @@ export default class PhysicsAPI {
         // shape.setLocalScaling( new ammo.btVector3( scaleX, 1, scaleZ ) );
         // shape.setMargin( 0.05 );
         //
-        // colliderComp.shape = shape
+        // pColliderComponent.shape = shape
         // PhysicsAPI.initializeCollider(entity)
     }
 }

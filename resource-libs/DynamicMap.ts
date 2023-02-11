@@ -12,10 +12,16 @@ export default class DynamicMap<T> {
     has(key: string): boolean {
         return this.map.has(key)
     }
-    clear(){
+
+    get(key: string): T | undefined {
+        return this.map.get(key)
+    }
+
+    clear() {
         this.array.length = 0
         this.map.clear()
     }
+
     delete(key: string) {
         const found = this.map.get(key)
         if (!found)

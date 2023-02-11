@@ -6,8 +6,16 @@ import FileSystemAPI from "../../lib/utils/FileSystemAPI";
 import TextureParams from "../../static/TextureParams";
 import GPUAPI from "../../lib/rendering/GPUAPI";
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
+import COMPONENTS from "../../static/COMPONENTS";
 
 export default class DecalComponent extends Component {
+    static get componentKey(): string {
+        return COMPONENTS.DECAL
+    }
+    get componentKey(): string {
+        return DecalComponent.componentKey
+    }
+
     _albedoID?: string
     _roughnessID?: string
     _metallicID?: string

@@ -96,8 +96,8 @@ export default class VisibilityRenderer {
         }
     }
     static execute() {
-        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
-            return
+        // if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
+        //     return
 
         context = GPU.context
         if (!VisibilityRenderer.#isSecondPass) {

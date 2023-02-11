@@ -33,7 +33,7 @@ export default class EntityWorkerAPI {
     }
 
 
-    static removeEntity(entity) {
+    static removeEntity(entity:Entity) {
         if (!entity.hasWorkerBound)
             return
         EntityWorkerAPI.#workers.forEach(worker => {

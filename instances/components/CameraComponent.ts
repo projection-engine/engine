@@ -1,7 +1,15 @@
 import Component from "./Component"
 import CAMERA_PROPS from "../../static/component-props/CAMERA_PROPS";
+import COMPONENTS from "../../static/COMPONENTS";
 
 export default class CameraComponent extends Component {
+    static get componentKey(): string {
+        return COMPONENTS.CAMERA
+    }
+    get componentKey(): string {
+        return CameraComponent.componentKey
+    }
+
     _props = CAMERA_PROPS
 
     fov = 45

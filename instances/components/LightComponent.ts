@@ -4,10 +4,17 @@ import LIGHT_TYPES from "../../static/LIGHT_TYPES";
 import LightsAPI from "../../lib/utils/LightsAPI";
 import {mat4} from "gl-matrix";
 import EntityAPI from "../../lib/utils/EntityAPI";
+import COMPONENTS from "../../static/COMPONENTS";
 
-const toRad = Math.PI / 180
 
 export default class LightComponent extends Component {
+    static get componentKey(): string {
+        return COMPONENTS.LIGHT
+    }
+    get componentKey(): string {
+        return LightComponent.componentKey
+    }
+
     _props = LIGHT_PROPS
 
     // -------------- GLOBAL --------------

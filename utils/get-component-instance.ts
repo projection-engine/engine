@@ -7,7 +7,6 @@ import PhysicsColliderComponent from "../instances/components/PhysicsColliderCom
 import RigidBodyComponent from "../instances/components/RigidBodyComponent";
 import CullingComponent from "../instances/components/CullingComponent";
 import UIComponent from "../instances/components/UIComponent";
-import TerrainComponent from "../instances/components/TerrainComponent";
 import LightComponent from "../instances/components/LightComponent";
 import Component from "../instances/components/Component";
 import DecalComponent from "../instances/components/DecalComponent";
@@ -38,8 +37,7 @@ export default function getComponentInstance(key:string):Component|undefined{
             return new CullingComponent();
         case  COMPONENTS.UI:
             return new UIComponent();
-        case  COMPONENTS.TERRAIN:
-            return new TerrainComponent();
+
     }
     return undefined
 }

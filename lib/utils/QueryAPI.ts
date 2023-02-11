@@ -62,9 +62,9 @@ export default class QueryAPI {
         const hierarchy = []
         const children = root.children
         for (let i = 0; i < children.length; i++) {
-            const current = children[i]
-            hierarchy.push(...QueryAPI.getHierarchy(current))
+            hierarchy.push(children[i], ...QueryAPI.getHierarchy(children[i]))
         }
+        console.trace(hierarchy)
         return hierarchy.flat(Number.POSITIVE_INFINITY)
     }
     static loopHierarchy(entity: Entity, callback: Function) {
