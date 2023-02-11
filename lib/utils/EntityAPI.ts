@@ -36,7 +36,7 @@ export default class EntityAPI {
     }
 
     static addEntity(entity?: Entity): Entity {
-        if(!entity)
+        if (!entity)
             return
         if (entity && Engine.entities.has(entity.id))
             return Engine.entities.map.get(entity.id)
@@ -44,8 +44,10 @@ export default class EntityAPI {
         if (!entity.parent && !entity.parentID)
             entity.addParent(Engine.loadedLevel)
         Engine.entities.add(target.id, target)
+
         EntityWorkerAPI.removeEntity(target)
         EntityWorkerAPI.registerEntity(target)
+
         EntityAPI.registerEntityComponents(target)
         return entity
     }
@@ -106,13 +108,11 @@ export default class EntityAPI {
     static removeEntity(entityToRemove: string | Entity) {
         const id = entityToRemove instanceof Entity ? entityToRemove.id : entityToRemove
         const entity = entityToRemove instanceof Entity ? entityToRemove : Engine.entities.map.get(entityToRemove)
-        if (!entity || entity === Engine.loadedLevel)
+        if (!entity || entity === Engine.loadedLevel) {
             return
+        }
         entity.removeParent()
-        const children = entity.children
-        for (let c = 0; c < children.length; c++)
-            EntityAPI.removeEntity(children[c])
-
+        EntityAPI.removeGroup(entity.children.array)
         if (!Engine.isDev)
             for (let i = 0; i < entity.scripts.length; i++) {
                 const scr = entity.scripts[i]
@@ -136,14 +136,15 @@ export default class EntityAPI {
         ResourceEntityMapper.atmosphere.delete(id)
         ResourceEntityMapper.lightProbe.delete(id)
 
-        PhysicsAPI.removeRigidBody(entity)
-        EntityWorkerAPI.removeEntity(entity)
-        UIAPI.deleteUIEntity(entity)
+
         Engine.queryMap.delete(entity.queryKey)
 
 
         clearTimeout(EntityAPI.#timeout)
         EntityAPI.#timeout = setTimeout(() => {
+            PhysicsAPI.removeRigidBody(entity)
+            EntityWorkerAPI.removeEntity(entity)
+            UIAPI.deleteUIEntity(entity)
             if (entity.lightComponent !== undefined || entity.meshComponent !== undefined) {
                 LightsAPI.packageLights(false, true)
                 VisibilityRenderer.needsUpdate = true
@@ -151,9 +152,59 @@ export default class EntityAPI {
         }, 25)
     }
 
+    static removeGroup(entities: Entity[]) {
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i]
+            const id = entity.id
+            if (entity === Engine.loadedLevel)
+                return
+
+            if (entity.parent && !entities.includes(entity.parent))
+                entity.removeParent()
+            EntityAPI.removeGroup(entity.children.array)
+            if (!Engine.isDev)
+                for (let i = 0; i < entity.scripts.length; i++) {
+                    const scr = entity.scripts[i]
+                    if (scr && scr.onDestruction)
+                        scr.onDestruction()
+                }
+
+            Engine.entities.delete(id)
+
+            ResourceEntityMapper.lights.delete(id)
+            ResourceEntityMapper.sprites.delete(id)
+            ResourceEntityMapper.cameras.delete(id)
+            ResourceEntityMapper.ui.delete(id)
+            ResourceEntityMapper.decals.delete(id)
+            if (ResourceEntityMapper.meshes.has(id)) {
+                ResourceEntityMapper.meshes.delete(id)
+                MeshResourceMapper.unlinkEntityMesh(id)
+                MaterialResourceMapper.unlinkEntityMaterial(id)
+            }
+
+            ResourceEntityMapper.atmosphere.delete(id)
+            ResourceEntityMapper.lightProbe.delete(id)
+
+
+            Engine.queryMap.delete(entity.queryKey)
+
+        }
+        let didLightsChange
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i]
+            PhysicsAPI.removeRigidBody(entity)
+            EntityWorkerAPI.removeEntity(entity)
+            UIAPI.deleteUIEntity(entity)
+            if (entity.lightComponent !== undefined || entity.meshComponent !== undefined)
+                didLightsChange = true
+        }
+        if (didLightsChange)
+            LightsAPI.packageLights(false, true)
+    }
 
     static parseEntityObject(entity: MutableObject, asNew?: boolean): Entity {
         const parsedEntity = EntityAPI.getNewEntityInstance(asNew ? crypto.randomUUID() : entity.id, entity.isCollection)
+
         const keys = Object.keys(entity)
 
         for (let i = 0; i < keys.length; i++) {
@@ -179,8 +230,8 @@ export default class EntityAPI {
         }
 
         parsedEntity.parentID = entity.parent
-        for (const k in entity.components) {
 
+        for (const k in entity.components) {
             const component = parsedEntity.addComponent(k)
             if (!component)
                 continue

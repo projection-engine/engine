@@ -12,5 +12,5 @@ export default [
     "pivotPoint",
     "previousModelMatrix",
     "distanceFromCamera",
-    "__cullingMetadata"
+    "__cullingMetadata",
 ]

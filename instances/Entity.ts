@@ -6,6 +6,7 @@ import ComponentResources from "./components/ComponentResources";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import VisibilityRenderer from "../runtime/VisibilityRenderer";
 import QueryAPI from "../lib/utils/QueryAPI";
+import DynamicMap from "../resource-libs/DynamicMap";
 
 
 export default class Entity extends ComponentResources {
@@ -30,14 +31,13 @@ export default class Entity extends ComponentResources {
     parentID?: string
     #pickID = new Float32Array(3)
     #pickIndex: number = -1
-    #children = []
+    #children = new DynamicMap<Entity>()
 
     get colorIdentifier() {
         return this.#colorIdentifier
     }
 
     set colorIdentifier(data) {
-        console.log(data)
         if (data && Array.isArray(data))
             this.#colorIdentifier = data
     }
@@ -120,26 +120,27 @@ export default class Entity extends ComponentResources {
         const prev = this.#parent
         this.#parent = undefined
         prev.removeChild(this)
-        if (EntityAPI.isRegistered(this))
-            EntityWorkerAPI.updateEntityReference(this)
     }
 
     addChild(entity: Entity) {
-        if (entity === this || entity.parent !== this || this.#children.includes(entity))
+        if (!entity || entity === this || entity.parent !== this || this.#children.has(entity.id)) {
             return
-        this.#children.push(entity)
+        }
+        this.#children.add(entity.id, entity)
     }
 
     removeChild(entity: Entity) {
-        if (entity.parent || !this.#children.includes(entity))
+        if (!entity || entity.parent || !this.#children.has(entity.id))
             return
-        this.#children.splice(this.#children.indexOf(entity), 1)
+        this.#children.delete(entity.id)
     }
 
     addParent(parent: Entity) {
-        if (!parent || parent === this || parent === this.#parent || QueryAPI.isChildOf(this, parent.id) || QueryAPI.isChildOf(parent, this.id))
+        if (!parent || parent === this || parent === this.#parent || QueryAPI.isChildOf(this, parent.id) || QueryAPI.isChildOf(parent, this.id)) {
             return;
-        this.removeParent()
+        }
+        if (this.#parent)
+            this.removeParent()
         this.#parent = parent
         parent.addChild(this)
         if (EntityAPI.isRegistered(this)) {

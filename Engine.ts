@@ -127,7 +127,7 @@ export default class Engine {
     }
 
 
-    static async loadLevel(levelID: string, cleanEngine?: boolean): Promise<Entity[]> {
+    static async loadLevel(levelID: string, cleanEngine?: boolean){
         if (!levelID || Engine.#loadedLevel?.id === levelID && !cleanEngine)
             return []
         try {
@@ -149,12 +149,10 @@ export default class Engine {
                 levelEntity.name = "New level"
             levelEntity.parentID = undefined
             Engine.#replaceLevel(levelEntity)
-            const mapped = []
             for (let i = 0; i < entities.length; i++) {
                 try {
                     const entity = EntityAPI.parseEntityObject(entities[i])
-                    if (!entity.parentID)
-                        entity.addParent(levelEntity)
+
                     for (let i = 0; i < entity.scripts.length; i++)
                         await componentConstructor(entity, entity.scripts[i].id, false)
                     const imgID = entity.spriteComponent?.imageID
@@ -168,24 +166,33 @@ export default class Engine {
                     const file = FileSystemAPI.readAsset(uiID)
                     if (file)
                         Engine.UILayouts.set(uiID, file)
-                    mapped.push(entity)
+              EntityAPI.addEntity(entity)
                 } catch (err) {
                     console.error(err)
                 }
             }
 
-            Engine.#onLevelLoadListeners.array.forEach(callback => callback())
-            return mapped
+
+            Engine.entities.map.forEach(entity => {
+                if(entity === levelEntity)
+                    return
+                if (!entity.parentID)
+                    entity.addParent(levelEntity)
+                else if(!entity.parent)
+                    entity.addParent(Engine.entities.get(entity.parentID))
+                entity.parentID = undefined
+            })
         } catch (err) {
             console.error(err)
         }
-        return []
+        Engine.#onLevelLoadListeners.array.forEach(callback => callback())
     }
     static #replaceLevel(newLevel?:Entity){
         const oldLevel = Engine.#loadedLevel
         Engine.#loadedLevel = newLevel
-        if (oldLevel)
-            EntityAPI.removeEntity(oldLevel)
+        if (oldLevel) {
+            EntityAPI.removeGroup([...Engine.entities.array])
+        }
         if(newLevel)
         EntityAPI.addEntity(newLevel)
     }

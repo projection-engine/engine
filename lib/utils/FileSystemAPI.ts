@@ -74,7 +74,6 @@ export default class FileSystemAPI {
     static #doCallback(data: { [key: string]: Function[] }, id: string) {
         if (FileSystemAPI.#fetchingMaterials[id])
             data[id].forEach(cb => cb())
-        console.log("RESOLVING")
         delete FileSystemAPI.#fetchingMaterials[id]
     }
 

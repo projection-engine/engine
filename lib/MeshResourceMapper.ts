@@ -28,7 +28,6 @@ export default class MeshResourceMapper {
             return;
         instance.entities.push(entity)
         instance.entitiesMap.set(entity.id, entity)
-        console.trace(MeshResourceMapper.meshesArray)
     }
 
     static deleteMesh(meshID:string){

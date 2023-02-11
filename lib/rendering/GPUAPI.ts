@@ -21,7 +21,6 @@ export default class GPUAPI {
                 return GPU.textures.get(id)
             const texture = new Texture(id)
             await texture.initialize(typeof imageData === "string" ? {img: imageData} : imageData)
-            console.trace(imageData)
 
             GPU.textures.set(id, texture)
             return texture

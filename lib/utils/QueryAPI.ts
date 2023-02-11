@@ -58,17 +58,17 @@ export default class QueryAPI {
         return false
     }
 
-    static getHierarchy(root: Entity): Entity[] {
-        const hierarchy = []
-        const children = root.children
+    static getHierarchy(root: Entity, array?: Entity[]): Entity[] {
+        const hierarchy =array ?? []
+        const children = root.children.array
         for (let i = 0; i < children.length; i++) {
-            hierarchy.push(children[i], ...QueryAPI.getHierarchy(children[i]))
+            QueryAPI.getHierarchy(children[i], hierarchy)
+            hierarchy.push(children[i])
         }
-        console.trace(hierarchy)
-        return hierarchy.flat(Number.POSITIVE_INFINITY)
+        return hierarchy
     }
     static loopHierarchy(entity: Entity, callback: Function) {
-        const children = entity.children
+        const children = entity.children.array
         callback(entity)
         for (let i = 0; i < children.length; i++) {
             const current = children[i]
