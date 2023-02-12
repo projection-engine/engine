@@ -44,7 +44,6 @@ export default class GPU {
         GPU.bufferResolution[1] = GPU.internalResolution.h
         GPU.context = canvas.getContext("webgl2", {
             antialias: false,
-
             // preserveDrawingBuffer: false,
             premultipliedAlpha: false,
             powerPreference: "high-performance"

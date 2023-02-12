@@ -11,6 +11,7 @@ import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
 import MeshResourceMapper from "../lib/MeshResourceMapper";
+import MotionBlur from "./MotionBlur";
 
 const entityMetadata = new Float32Array(16)
 let context: WebGL2RenderingContext, uniforms, VP
@@ -67,7 +68,7 @@ export default class VisibilityRenderer {
     }
 
     static #drawMeshes(){
-
+        // let incremented = 0
         entityMetadata[5] = 0
         const meshes = MeshResourceMapper.meshesArray
         const size = meshes.length
@@ -89,15 +90,20 @@ export default class VisibilityRenderer {
 
                 context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
                 context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+                if(MotionBlur.enabled)
                 context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
-
+                // incremented++
+                // if(incremented >= 1000){
+                //     incremented = 0
+                //     context.flush()
+                // }
                 meshGroup.mesh.simplifiedDraw()
             }
         }
     }
     static execute() {
-        // if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
-        //     return
+        if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
+            return
 
         context = GPU.context
         if (!VisibilityRenderer.#isSecondPass) {
@@ -115,6 +121,8 @@ export default class VisibilityRenderer {
         VisibilityRenderer.#drawSprites()
         StaticFBO.visibility.stopMapping()
         MetricsController.currentState = METRICS_FLAGS.VISIBILITY
+
+
         SSAO.execute()
     }
 }

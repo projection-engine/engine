@@ -52,6 +52,7 @@ export default class Shader {
         GPU.context.linkProgram(this.program)
 
 
+        GPU.context.flush()
         this.#extractUniforms(vertexBuilt)
         this.#extractUniforms(fragmentBuilt)
         this.uniforms = this.uniforms.filter(u => u !== undefined && typeof u.uLocation === "object" || typeof u.uLocations === "object")

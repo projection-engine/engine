@@ -22,12 +22,13 @@ let previous = 0
 
 export default class Loop {
     static #afterDrawing?: Function = () => null
-    static #frameID:number = undefined
+    static #frameID: number = undefined
     static elapsed = 0
 
-    static get isExecuting(){
+    static get isExecuting() {
         return Loop.#frameID !== undefined
     }
+
     static linkToExecutionPipeline(after?: Function) {
         if (typeof after === "function") {
             Loop.#afterDrawing = after
@@ -78,10 +79,12 @@ export default class Loop {
             console.error(err)
         }
     }
-    static start(){
+
+    static start() {
         Loop.#frameID = requestAnimationFrame(Loop.#loop)
     }
-    static stop(){
+
+    static stop() {
         cancelAnimationFrame(Loop.#frameID)
         Loop.#frameID = undefined
     }
