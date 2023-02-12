@@ -58,6 +58,13 @@ export default class QueryAPI {
         return false
     }
 
+    static getHierarchyToObject(root: Entity, obj:MutableObject){
+        const children = root.children.array
+        for (let i = 0; i < children.length; i++) {
+            QueryAPI.getHierarchyToObject(children[i], obj)
+            obj[children[i].id] = children[i]
+        }
+    }
     static getHierarchy(root: Entity, array?: Entity[]): Entity[] {
         const hierarchy =array ?? []
         const children = root.children.array

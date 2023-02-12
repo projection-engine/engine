@@ -72,9 +72,9 @@ export default class FileSystemAPI {
     }
 
     static #doCallback(data: { [key: string]: Function[] }, id: string) {
-        if (FileSystemAPI.#fetchingMaterials[id])
+        if (data[id])
             data[id].forEach(cb => cb())
-        delete FileSystemAPI.#fetchingMaterials[id]
+        delete data[id]
     }
 
     static async loadMaterial(ID: string) {

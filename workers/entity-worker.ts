@@ -10,11 +10,24 @@ self.onmessage = (event) => {
                 TransformationPass.initialize(payload)
                 break
             case WORKER_MESSAGES.REGISTER_ENTITY:
+                if(TransformationPass.targets.has(payload.id))
+                    TransformationPass.targets.delete(payload.id)
                 TransformationPass.targets.add(payload.id, payload)
                 TransformationPass.updateThreadInfo()
                 break
             case WORKER_MESSAGES.REMOVE_ENTITY:
                 TransformationPass.targets.delete(payload)
+                TransformationPass.updateThreadInfo()
+                break
+            case WORKER_MESSAGES.REMOVE_ENTITY_BLOCK:
+
+                TransformationPass.targets.removeBlock(payload, data => data)
+                TransformationPass.updateThreadInfo()
+                break
+
+            case WORKER_MESSAGES.ADD_BLOCK:
+
+                TransformationPass.targets.addBlock(payload, data => data.id)
                 TransformationPass.updateThreadInfo()
                 break
             default:

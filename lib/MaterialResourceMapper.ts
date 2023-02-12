@@ -1,15 +1,30 @@
 import Material from "../instances/Material";
 import Entity from "../instances/Entity";
 import GPU from "../GPU";
+import Mesh from "../instances/Mesh";
+import ResourceMapper from "./ResourceMapper";
 
+
+type Resource = { material: Material, entities: Entity[], entitiesMap: Map<string, Entity> }[]
 export default class MaterialResourceMapper {
-    static materialsArray: { material: Material, entities: Entity[], entitiesMap: Map<string, Entity> }[] = []
+    static #mapper = new ResourceMapper("material")
+
+    static get materialsArray(): Resource {
+        return <Resource>MaterialResourceMapper.#mapper.dataMap
+    }
+
+    static removeBlock(entities: Entity[]) {
+        MaterialResourceMapper.#mapper.removeBlock(entities)
+    }
 
     static unlinkEntityMaterial(entityID: string) {
-        const found = MaterialResourceMapper.materialsArray.filter(m => m.entitiesMap.has(entityID))
-        found.forEach(f => {
-            f.entities.splice(f.entities.findIndex(entity => entity.id === entityID), 1)
-            f.entitiesMap.delete(entityID)
+        MaterialResourceMapper.#mapper.unlink(entityID)
+    }
+
+    static deleteMaterial(meshID: string) {
+        const oldRef = this.#mapper.delete(meshID)
+        oldRef.forEach(e => {
+            e.meshComponent.materialID = undefined
         })
     }
 
@@ -32,14 +47,5 @@ export default class MaterialResourceMapper {
         instance.entitiesMap.set(entity.id, entity)
     }
 
-    static deleteMaterial(materialID: string) {
-        const index = MaterialResourceMapper.materialsArray.findIndex(m => m.material.id === materialID)
-        if (index < 0)
-            return;
-        const oldRef = MaterialResourceMapper.materialsArray[index].entities
-        MaterialResourceMapper.materialsArray.splice(index, 1)
-        oldRef.forEach(e => {
-            e.meshComponent.materialID = undefined
-        })
-    }
+
 }

@@ -1,21 +1,25 @@
 import Mesh from "../instances/Mesh";
 import Entity from "../instances/Entity";
 import GPU from "../GPU";
+import ResourceMapper from "./ResourceMapper";
+import Material from "../instances/Material";
 
+type Resource = { mesh: Mesh, entities: Entity[], entitiesMap: Map<string, Entity> }[]
 export default class MeshResourceMapper {
-    static meshesArray: {mesh: Mesh, entities: Entity[], entitiesMap: Map<string, Entity>}[] = []
+    static #mapper = new ResourceMapper("mesh")
 
+    static get meshesArray(): Resource{
+        return <Resource> MeshResourceMapper.#mapper.dataMap
+    }
+
+    static removeBlock(entities:Entity[]){
+       MeshResourceMapper.#mapper.removeBlock(entities)
+    }
     static unlinkEntityMesh(entityID:string){
-        const found = MeshResourceMapper.meshesArray.filter(m => m.entitiesMap.has(entityID))
-        found.forEach(f => {
-            f.entities.splice(f.entities.findIndex(entity => entity.id === entityID), 1)
-            f.entitiesMap.delete(entityID)
-        })
+        MeshResourceMapper.#mapper.unlink(entityID)
     }
 
     static linkEntityMesh(entity:Entity, meshID:string){
-        // console.log(meshID)
-
         let index = MeshResourceMapper.meshesArray.findIndex(m => m.mesh.id === meshID)
         if(index < 0 && !GPU.meshes.has(meshID))
             return;
@@ -31,11 +35,7 @@ export default class MeshResourceMapper {
     }
 
     static deleteMesh(meshID:string){
-        const index = MeshResourceMapper.meshesArray.findIndex(m => m.mesh.id === meshID)
-        if(index < 0)
-            return;
-        const oldRef = MeshResourceMapper.meshesArray[index].entities
-        MeshResourceMapper.meshesArray.splice(index, 1)
+        const oldRef = this.#mapper.delete(meshID)
         oldRef.forEach(e => {
             e.meshComponent.meshID = undefined
         })

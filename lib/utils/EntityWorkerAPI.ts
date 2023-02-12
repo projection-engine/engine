@@ -44,13 +44,24 @@ export default class EntityWorkerAPI {
         entity.hasWorkerBound = false
     }
 
-    static registerEntity(entity:Entity) {
-        if (!EntityWorkerAPI.#initialized || (entity.hasWorkerBound && EntityWorkerAPI.linkedEntities.get(entity.id)))
-            return
-        EntityWorkerAPI.linkedEntities.set(entity.id, entity)
 
+    static removeBlock(entities:Entity[]) {
+        const toRemove = []
+        for(let i = 0; i < entities.length; i++){
+            const entity = entities[i]
+            if(entity.hasWorkerBound) {
+                toRemove.push(entity.id)
+                EntityWorkerAPI.linkedEntities.delete(entity.id)
+                entity.hasWorkerBound = false
+            }
+        }
+
+        EntityWorkerAPI.#workers.forEach(worker => {
+            worker.postMessage({type: WORKER_MESSAGES.REMOVE_ENTITY_BLOCK, payload: toRemove})
+        })
+    }
+    static #getEntityInfo(entity:Entity): WorkerEntity{
         const parent = QueryAPI.getClosestEntityParent(entity)
-        // const parent = QueryAPI.getClosestCollectionParent()
         const newEntity = <WorkerEntity> {
             id: entity.id,
             changedBuffer: entity.__changedBuffer,
@@ -59,8 +70,6 @@ export default class EntityWorkerAPI {
 
             parentMatrix: <Float32Array|undefined>parent?.matrix,
             parentChangedBuffer: <Uint8Array|undefined>parent?.__changedBuffer,
-
-
             rotationQuaternion: <Float32Array>entity.rotationQuaternion,
             translation:<Float32Array> entity.translation,
             scaling: <Float32Array>entity.scaling,
@@ -72,16 +81,39 @@ export default class EntityWorkerAPI {
             rotationEuler: <Float32Array>entity.rotationEuler,
             rotationQuaternionFinal: <Float32Array>entity.rotationQuaternionFinal,
         }
-
+        entity.changed = true
+        entity.hasWorkerBound = true
+        return newEntity
+    }
+    static registerEntity(entity:Entity) {
+        if (entity.isCollection || !EntityWorkerAPI.#initialized || (entity.hasWorkerBound && EntityWorkerAPI.linkedEntities.get(entity.id)))
+            return
+        EntityWorkerAPI.linkedEntities.set(entity.id, entity)
         EntityWorkerAPI.#workers.forEach(worker => {
             worker.postMessage({
                 type: WORKER_MESSAGES.REGISTER_ENTITY,
-                payload: newEntity
+                payload: EntityWorkerAPI.#getEntityInfo(entity)
             })
         })
+    }
 
-        entity.changed = true
-        entity.hasWorkerBound = true
+    static registerBlock(entities:Entity[]) {
+        if (!EntityWorkerAPI.#initialized)
+            return
+        console.time("BUILDING")
+        for (let i = 0; i < entities.length; i++){
+            const e = entities[i];
+            if(e.hasWorkerBound || e.isCollection)
+                continue
+            EntityWorkerAPI.linkedEntities.set(e.id, e)
+            EntityWorkerAPI.#workers.forEach(worker => {
+                worker.postMessage({
+                    type: WORKER_MESSAGES.REGISTER_ENTITY,
+                    payload: EntityWorkerAPI.#getEntityInfo(e)
+                })
+            })
+        }
+        console.timeEnd("BUILDING")
     }
 
     static syncThreads() {

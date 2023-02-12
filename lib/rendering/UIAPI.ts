@@ -62,7 +62,7 @@ export default class UIAPI {
     }
 
     static createUIEntity(entity:Entity) {
-        if (!UIAPI.document?.parentElement || !entity.active)
+        if (!UIAPI.document?.parentElement || !entity.active || entity.uiComponent?.__element)
             return
 
         const UI = entity?.uiComponent

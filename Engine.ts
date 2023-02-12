@@ -127,7 +127,7 @@ export default class Engine {
     }
 
 
-    static async loadLevel(levelID: string, cleanEngine?: boolean){
+    static async loadLevel(levelID: string, cleanEngine?: boolean) {
         if (!levelID || Engine.#loadedLevel?.id === levelID && !cleanEngine)
             return []
         try {
@@ -149,6 +149,7 @@ export default class Engine {
                 levelEntity.name = "New level"
             levelEntity.parentID = undefined
             Engine.#replaceLevel(levelEntity)
+            const entitiesToPush: {[key:string]: Entity} = {}
             for (let i = 0; i < entities.length; i++) {
                 try {
                     const entity = EntityAPI.parseEntityObject(entities[i])
@@ -161,39 +162,41 @@ export default class Engine {
                         if (!textures.get(imgID))
                             await FileSystemAPI.loadTexture(imgID)
                     }
-
                     const uiID = entity.uiComponent?.uiLayoutID
                     const file = FileSystemAPI.readAsset(uiID)
                     if (file)
                         Engine.UILayouts.set(uiID, file)
-              EntityAPI.addEntity(entity)
+                    entitiesToPush[entity.id]= entity
                 } catch (err) {
                     console.error(err)
                 }
             }
 
+            const entitiesParsed = Object.values(entitiesToPush)
 
-            Engine.entities.map.forEach(entity => {
-                if(entity === levelEntity)
+            entitiesParsed.forEach(entity => {
+                if (entity === levelEntity)
                     return
-                if (!entity.parentID)
+                if (!entity.parentID || entity.parentID === levelEntity.id)
                     entity.addParent(levelEntity)
-                else if(!entity.parent)
-                    entity.addParent(Engine.entities.get(entity.parentID))
+                else if (!entity.parent)
+                    entity.addParent(entitiesToPush[entity.parentID])
                 entity.parentID = undefined
             })
+            EntityAPI.addGroup(entitiesParsed)
         } catch (err) {
             console.error(err)
         }
         Engine.#onLevelLoadListeners.array.forEach(callback => callback())
     }
-    static #replaceLevel(newLevel?:Entity){
+
+    static #replaceLevel(newLevel?: Entity) {
         const oldLevel = Engine.#loadedLevel
         Engine.#loadedLevel = newLevel
         if (oldLevel) {
-            EntityAPI.removeGroup([...Engine.entities.array])
+            EntityAPI.removeEntity(oldLevel)
         }
-        if(newLevel)
-        EntityAPI.addEntity(newLevel)
+        if (newLevel)
+            EntityAPI.addEntity(newLevel)
     }
 }

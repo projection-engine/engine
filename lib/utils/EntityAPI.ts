@@ -35,6 +35,12 @@ export default class EntityAPI {
         return Engine.entities.has(entity.id)
     }
 
+    static addGroup(entities: Entity[]) {
+        Engine.entities.addBlock(entities, e => e.id)
+        EntityWorkerAPI.registerBlock(entities)
+        ResourceEntityMapper.addBlock(entities)
+    }
+
     static addEntity(entity?: Entity): Entity {
         if (!entity)
             return
@@ -44,10 +50,7 @@ export default class EntityAPI {
         if (!entity.parent && !entity.parentID)
             entity.addParent(Engine.loadedLevel)
         Engine.entities.add(target.id, target)
-
-        EntityWorkerAPI.removeEntity(target)
         EntityWorkerAPI.registerEntity(target)
-
         EntityAPI.registerEntityComponents(target)
         return entity
     }
@@ -70,134 +73,61 @@ export default class EntityAPI {
     }
 
     static registerEntityComponents(entity: Entity, previouslyRemoved?: string): void {
-
         if (!EntityAPI.isRegistered(entity))
             return
-        if (Engine.environment !== ENVIRONMENT.DEV)
-            PhysicsAPI.registerRigidBody(entity)
+
         Engine.queryMap.set(entity.queryKey, entity)
-        UIAPI.createUIEntity(entity)
-
-        if (entity.lightComponent !== undefined)
-            ResourceEntityMapper.lights.add(entity.id, entity)
-        if (entity.spriteComponent !== undefined)
-            ResourceEntityMapper.sprites.add(entity.id, entity)
-        if (entity.decalComponent !== undefined)
-            ResourceEntityMapper.decals.add(entity.id, entity)
-        if (entity.uiComponent !== undefined)
-            ResourceEntityMapper.ui.add(entity.id, entity)
-        if (entity.atmosphereComponent !== undefined)
-            ResourceEntityMapper.atmosphere.add(entity.id, entity)
-        if (entity.lightProbeComponent !== undefined)
-            ResourceEntityMapper.lightProbe.add(entity.id, entity)
-        if (entity.cameraComponent !== undefined)
-            ResourceEntityMapper.cameras.add(entity.id, entity)
-        if (entity.uiComponent !== undefined)
-            ResourceEntityMapper.ui.add(entity.id, entity)
-        if (entity.meshComponent !== undefined) {
-            ResourceEntityMapper.meshes.add(entity.id, entity)
-            entity.meshComponent.updateComponentReferences()
-        }
-
-
+        ResourceEntityMapper.addEntity(entity)
         if (COMPONENT_TRIGGER_UPDATE.indexOf(<COMPONENTS | undefined>previouslyRemoved) || !!COMPONENT_TRIGGER_UPDATE.find(v => entity.components.get(v) != null))
             LightsAPI.packageLights(false, true)
         VisibilityRenderer.needsUpdate = true
     }
 
     static removeEntity(entityToRemove: string | Entity) {
-        const id = entityToRemove instanceof Entity ? entityToRemove.id : entityToRemove
         const entity = entityToRemove instanceof Entity ? entityToRemove : Engine.entities.map.get(entityToRemove)
-        if (!entity || entity === Engine.loadedLevel) {
+        if (!entity || entity === Engine.loadedLevel)
             return
-        }
         entity.removeParent()
-        EntityAPI.removeGroup(entity.children.array)
-        if (!Engine.isDev)
-            for (let i = 0; i < entity.scripts.length; i++) {
-                const scr = entity.scripts[i]
-                if (scr && scr.onDestruction)
-                    scr.onDestruction()
-            }
-
-        Engine.entities.delete(id)
-
-        ResourceEntityMapper.lights.delete(id)
-        ResourceEntityMapper.sprites.delete(id)
-        ResourceEntityMapper.cameras.delete(id)
-        ResourceEntityMapper.ui.delete(id)
-        ResourceEntityMapper.decals.delete(id)
-        if (ResourceEntityMapper.meshes.has(id)) {
-            ResourceEntityMapper.meshes.delete(id)
-            MeshResourceMapper.unlinkEntityMesh(id)
-            MaterialResourceMapper.unlinkEntityMaterial(id)
-        }
-
-        ResourceEntityMapper.atmosphere.delete(id)
-        ResourceEntityMapper.lightProbe.delete(id)
-
-
-        Engine.queryMap.delete(entity.queryKey)
-
-
-        clearTimeout(EntityAPI.#timeout)
-        EntityAPI.#timeout = setTimeout(() => {
-            PhysicsAPI.removeRigidBody(entity)
-            EntityWorkerAPI.removeEntity(entity)
-            UIAPI.deleteUIEntity(entity)
-            if (entity.lightComponent !== undefined || entity.meshComponent !== undefined) {
-                LightsAPI.packageLights(false, true)
-                VisibilityRenderer.needsUpdate = true
-            }
-        }, 25)
+        EntityAPI.removeGroup([entity], true)
     }
 
-    static removeGroup(entities: Entity[]) {
+    static removeGroup(toRemove: Entity[], searchHierarchy: boolean) {
+        const hierarchy: { [key: string]: Entity } = {}
+        for (let i = 0; i < toRemove.length; i++) {
+            const entity = toRemove[i]
+            if (entity !== Engine.loadedLevel)
+                hierarchy[entity.id] = entity
+            if (searchHierarchy)
+                QueryAPI.getHierarchyToObject(entity, hierarchy)
+        }
+        const entities = Object.values(hierarchy)
+        Engine.entities.removeBlock(entities, entity => entity.id)
+        MeshResourceMapper.removeBlock(entities)
+        MaterialResourceMapper.removeBlock(entities)
+        ResourceEntityMapper.removeBlock(entities)
+        EntityWorkerAPI.removeBlock(entities)
+
+        let didLightsChange
         for (let i = 0; i < entities.length; i++) {
             const entity = entities[i]
-            const id = entity.id
             if (entity === Engine.loadedLevel)
-                return
+                continue
 
-            if (entity.parent && !entities.includes(entity.parent))
+            if (entity.parent && !hierarchy[entity.parent.id])
                 entity.removeParent()
-            EntityAPI.removeGroup(entity.children.array)
             if (!Engine.isDev)
                 for (let i = 0; i < entity.scripts.length; i++) {
                     const scr = entity.scripts[i]
                     if (scr && scr.onDestruction)
                         scr.onDestruction()
                 }
-
-            Engine.entities.delete(id)
-
-            ResourceEntityMapper.lights.delete(id)
-            ResourceEntityMapper.sprites.delete(id)
-            ResourceEntityMapper.cameras.delete(id)
-            ResourceEntityMapper.ui.delete(id)
-            ResourceEntityMapper.decals.delete(id)
-            if (ResourceEntityMapper.meshes.has(id)) {
-                ResourceEntityMapper.meshes.delete(id)
-                MeshResourceMapper.unlinkEntityMesh(id)
-                MaterialResourceMapper.unlinkEntityMaterial(id)
-            }
-
-            ResourceEntityMapper.atmosphere.delete(id)
-            ResourceEntityMapper.lightProbe.delete(id)
-
-
             Engine.queryMap.delete(entity.queryKey)
-
-        }
-        let didLightsChange
-        for (let i = 0; i < entities.length; i++) {
-            const entity = entities[i]
             PhysicsAPI.removeRigidBody(entity)
-            EntityWorkerAPI.removeEntity(entity)
             UIAPI.deleteUIEntity(entity)
             if (entity.lightComponent !== undefined || entity.meshComponent !== undefined)
                 didLightsChange = true
         }
+
         if (didLightsChange)
             LightsAPI.packageLights(false, true)
     }
@@ -229,7 +159,7 @@ export default class EntityAPI {
             }
         }
 
-        parsedEntity.parentID = entity.parent
+        parsedEntity.parentID = entity.parent ?? Engine.loadedLevel?.id
 
         for (const k in entity.components) {
             const component = parsedEntity.addComponent(k)

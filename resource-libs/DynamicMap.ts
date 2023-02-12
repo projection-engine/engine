@@ -30,4 +30,27 @@ export default class DynamicMap<T> {
         this.map.delete(key)
     }
 
+    removeBlock(resources: T[], getIDCallback: Function) {
+        const toRemoveMap = {}
+        for (let i = 0; i < resources.length; i++) {
+            toRemoveMap[getIDCallback(resources[i])] = 1
+        }
+
+        for (let i = 0; i < this.array.length; i++) {
+            const ID = getIDCallback(this.array[i])
+            if (toRemoveMap[ID] === 1) {
+                this.map.delete(ID)
+                this.array[i] = undefined
+            }
+        }
+        this.array = this.array.filter(e => e !== undefined)
+    }
+    addBlock(resources: T[], getIDCallback: Function) {
+        this.array.push(...resources)
+        for(let i =0; i < resources.length; i++){
+            const current = resources[i]
+            this.map.set(getIDCallback(current), current)
+        }
+
+    }
 }
