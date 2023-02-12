@@ -4,7 +4,6 @@ import serializeStructure from "../utils/serialize-structure";
 import Component from "./components/Component";
 import ComponentResources from "./components/ComponentResources";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
-import VisibilityRenderer from "../runtime/VisibilityRenderer";
 import QueryAPI from "../lib/utils/QueryAPI";
 import DynamicMap from "../resource-libs/DynamicMap";
 

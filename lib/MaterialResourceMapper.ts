@@ -1,7 +1,6 @@
 import Material from "../instances/Material";
 import Entity from "../instances/Entity";
 import GPU from "../GPU";
-import Mesh from "../instances/Mesh";
 import ResourceMapper from "./ResourceMapper";
 
 

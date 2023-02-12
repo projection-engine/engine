@@ -19,7 +19,6 @@ import GPUAPI from "./lib/rendering/GPUAPI";
 import EntityAPI from "./lib/utils/EntityAPI";
 import componentConstructor from "../frontend/window-editor/utils/component-constructor";
 import ResourceEntityMapper from "./resource-libs/ResourceEntityMapper";
-import EntityWorkerAPI from "./lib/utils/EntityWorkerAPI";
 
 
 export default class Engine {

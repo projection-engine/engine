@@ -1,5 +1,4 @@
 import Entity from "../Entity";
-import COMPONENTS from "../../static/COMPONENTS";
 
 interface ComponentValueGeneric {
     [key: string]: any

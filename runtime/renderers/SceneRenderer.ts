@@ -11,14 +11,15 @@ import UberMaterialAttributeGroup from "../../resource-libs/UberMaterialAttribut
 import MATERIAL_RENDERING_TYPES from "../../static/MATERIAL_RENDERING_TYPES";
 import Material from "../../instances/Material";
 import UberShader from "../../resource-libs/UberShader";
-import MeshResourceMapper from "../../lib/MeshResourceMapper";
 import MaterialResourceMapper from "../../lib/MaterialResourceMapper";
 import ResourceEntityMapper from "../../resource-libs/ResourceEntityMapper";
 import Loop from "../../Loop";
 import Mesh from "../../instances/Mesh";
+import loopMeshes from "../loop-meshes";
 
 let stateWasCleared = false, isDoubleSided = false, isSky = false, texOffset = 0
 
+let context, uniforms
 export default class SceneRenderer {
     static #bindTexture(context: WebGL2RenderingContext, location: WebGLUniformLocation, index: number, sampler: WebGLTexture, cubeMap: boolean) {
         context.activeTexture(context.TEXTURE0 + index)
@@ -189,74 +190,67 @@ export default class SceneRenderer {
         }
     }
 
+    static #opaqueCallback(entity: Entity, mesh: Mesh) {
+        const material = entity.materialRef
+        const culling = entity?.cullingComponent
+        UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
+        UberMaterialAttributeGroup.entityID = entity.pickID
+
+        if (isSky) {
+            isSky = false
+            context.enable(context.CULL_FACE)
+            context.enable(context.DEPTH_TEST)
+        }
+
+        if (material !== undefined) {
+            if (material.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY)
+                return
+            if (material.doubleSided) {
+                context.disable(context.CULL_FACE)
+                isDoubleSided = true
+            } else if (isDoubleSided) {
+                context.enable(context.CULL_FACE)
+                isDoubleSided = false
+            }
+            isSky = material.renderingMode === MATERIAL_RENDERING_TYPES.SKY
+
+            if (isSky) {
+                context.disable(context.CULL_FACE)
+                context.disable(context.DEPTH_TEST)
+            }
+            UberMaterialAttributeGroup.materialID = material.bindID
+            UberMaterialAttributeGroup.renderingMode = material.renderingMode
+            UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
+
+            SceneRenderer.#bindComponentUniforms(entity, material, uniforms)
+
+            stateWasCleared = false
+        } else if (!stateWasCleared) {
+            stateWasCleared = true
+            if (isDoubleSided) {
+                context.enable(context.CULL_FACE)
+                isDoubleSided = false
+            }
+
+            UberMaterialAttributeGroup.ssrEnabled = 0
+            UberMaterialAttributeGroup.renderingMode = MATERIAL_RENDERING_TYPES.ISOTROPIC
+            UberMaterialAttributeGroup.materialID = -1
+        }
+
+        context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
+        context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+
+        mesh.draw()
+    }
+
     static drawOpaque() {
         UberMaterialAttributeGroup.clear()
-        const uniforms = UberShader.uberUniforms
-        const context = GPU.context
-        const toRender = MeshResourceMapper.meshesArray
-        const size = toRender.length
-        if (size === 0)
-            return
+        uniforms = UberShader.uberUniforms
+        context = GPU.context
+
         context.uniform1i(uniforms.isDecalPass, 0)
-        for (let meshIndex = 0; meshIndex < size; meshIndex++) {
-            const meshGroup = toRender[meshIndex]
-            const entities = meshGroup.entities
-            const entitiesSize = entities.length
-            for (let entityIndex = 0; entityIndex < entitiesSize; entityIndex++) {
-                const entity = entities[entityIndex]
-                if (!entity.active || entity.isCulled)
-                    continue
-                const material = entity.materialRef
-                const culling = entity?.cullingComponent
-                UberMaterialAttributeGroup.screenDoorEffect = culling && culling.screenDoorEffect ? entity.__cullingMetadata[5] : 0
-                UberMaterialAttributeGroup.entityID = entity.pickID
 
-                if (isSky) {
-                    isSky = false
-                    context.enable(context.CULL_FACE)
-                    context.enable(context.DEPTH_TEST)
-                }
+        loopMeshes(SceneRenderer.#opaqueCallback)
 
-                if (material !== undefined) {
-                    if (material.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY)
-                        continue
-                    if (material.doubleSided) {
-                        context.disable(context.CULL_FACE)
-                        isDoubleSided = true
-                    } else if (isDoubleSided) {
-                        context.enable(context.CULL_FACE)
-                        isDoubleSided = false
-                    }
-                    isSky = material.renderingMode === MATERIAL_RENDERING_TYPES.SKY
-
-                    if (isSky) {
-                        context.disable(context.CULL_FACE)
-                        context.disable(context.DEPTH_TEST)
-                    }
-                    UberMaterialAttributeGroup.materialID = material.bindID
-                    UberMaterialAttributeGroup.renderingMode = material.renderingMode
-                    UberMaterialAttributeGroup.ssrEnabled = material.ssrEnabled ? 1 : 0
-
-                    SceneRenderer.#bindComponentUniforms(entity, material, uniforms)
-
-                    stateWasCleared = false
-                } else if (!stateWasCleared) {
-                    stateWasCleared = true
-                    if (isDoubleSided) {
-                        context.enable(context.CULL_FACE)
-                        isDoubleSided = false
-                    }
-
-                    UberMaterialAttributeGroup.ssrEnabled = 0
-                    UberMaterialAttributeGroup.renderingMode = MATERIAL_RENDERING_TYPES.ISOTROPIC
-                    UberMaterialAttributeGroup.materialID = -1
-                }
-
-                context.uniformMatrix4fv(uniforms.materialAttributes, false, UberMaterialAttributeGroup.data)
-                context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
-
-                meshGroup.mesh.draw()
-            }
-        }
     }
 }

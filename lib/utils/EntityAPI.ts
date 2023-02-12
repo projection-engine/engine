@@ -1,7 +1,5 @@
 import COMPONENTS from "../../static/COMPONENTS"
 import Engine from "../../Engine";
-
-import ENVIRONMENT from "../../static/ENVIRONMENT";
 import EntityWorkerAPI from "./EntityWorkerAPI";
 import UIAPI from "../rendering/UIAPI";
 import PhysicsAPI from "../rendering/PhysicsAPI";

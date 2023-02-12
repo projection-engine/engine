@@ -10,8 +10,10 @@ import StaticMeshes from "../lib/StaticMeshes";
 import MATERIAL_RENDERING_TYPES from "../static/MATERIAL_RENDERING_TYPES";
 import MetricsController from "../lib/utils/MetricsController";
 import METRICS_FLAGS from "../static/METRICS_FLAGS";
-import MeshResourceMapper from "../lib/MeshResourceMapper";
 import MotionBlur from "./MotionBlur";
+import loopMeshes from "./loop-meshes";
+import Entity from "../instances/Entity";
+import Mesh from "../instances/Mesh";
 
 const entityMetadata = new Float32Array(16)
 let context: WebGL2RenderingContext, uniforms, VP
@@ -32,7 +34,7 @@ export default class VisibilityRenderer {
     static #drawSprites() {
         const toRender = ResourceEntityMapper.sprites.array
         const size = toRender.length
-        if(size === 0)
+        if (size === 0)
             return
         entityMetadata[5] = 1 // IS SPRITE
 
@@ -67,40 +69,24 @@ export default class VisibilityRenderer {
         context.enable(context.CULL_FACE)
     }
 
-    static #drawMeshes(){
-        // let incremented = 0
-        entityMetadata[5] = 0
-        const meshes = MeshResourceMapper.meshesArray
-        const size = meshes.length
-        for (let meshIndex = 0; meshIndex < size; meshIndex++) {
-            const meshGroup = meshes[meshIndex]
-            const entities = meshGroup.entities
-            const entitiesSize = entities.length
-            for (let entityIndex = 0; entityIndex < entitiesSize; entityIndex++) {
-                const entity = entities[entityIndex]
-                if (!entity.active || entity.isCulled)
-                    continue
-                const culling = entity.cullingComponent
-                const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
+    static #drawMesh(entity: Entity, mesh: Mesh) {
 
-                entityMetadata[0] = entity.pickID[0]
-                entityMetadata[1] = entity.pickID[1]
-                entityMetadata[2] = entity.pickID[2]
-                entityMetadata[4] = hasScreenDoor || entity.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
+        const culling = entity.cullingComponent
+        const hasScreenDoor = culling && culling.screenDoorEnabled && culling.screenDoorEffect
 
-                context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
-                context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
-                if(MotionBlur.enabled)
-                context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
-                // incremented++
-                // if(incremented >= 1000){
-                //     incremented = 0
-                //     context.flush()
-                // }
-                meshGroup.mesh.simplifiedDraw()
-            }
-        }
+        entityMetadata[0] = entity.pickID[0]
+        entityMetadata[1] = entity.pickID[1]
+        entityMetadata[2] = entity.pickID[2]
+        entityMetadata[4] = hasScreenDoor || entity.materialRef?.renderingMode === MATERIAL_RENDERING_TYPES.TRANSPARENCY ? 1 : 0
+
+        context.uniformMatrix4fv(uniforms.metadata, false, entityMetadata)
+        context.uniformMatrix4fv(uniforms.modelMatrix, false, entity.matrix)
+        if (MotionBlur.enabled)
+            context.uniformMatrix4fv(uniforms.previousModelMatrix, false, entity.previousModelMatrix)
+
+        mesh.simplifiedDraw()
     }
+
     static execute() {
         if (!VisibilityRenderer.needsUpdate && !EntityWorkerAPI.hasChangeBuffer[0])
             return
@@ -117,7 +103,9 @@ export default class VisibilityRenderer {
         StaticShaders.visibility.bind()
         StaticFBO.visibility.startMapping()
         VisibilityRenderer.#bindUniforms()
-        VisibilityRenderer.#drawMeshes()
+        entityMetadata[5] = 0
+        loopMeshes(VisibilityRenderer.#drawMesh)
+
         VisibilityRenderer.#drawSprites()
         StaticFBO.visibility.stopMapping()
         MetricsController.currentState = METRICS_FLAGS.VISIBILITY
