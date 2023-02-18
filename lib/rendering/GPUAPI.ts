@@ -157,13 +157,11 @@ export default class GPUAPI {
         if (mesh instanceof Mesh) {
             GPU.context.deleteVertexArray(mesh.VAO)
             GPU.context.deleteBuffer(mesh.indexVBO)
-
             if (mesh.uvVBO)
                 mesh.uvVBO.delete()
             if (mesh.normalVBO)
                 mesh.normalVBO.delete()
             GPU.meshes.delete(mesh.id)
-
         }
         VisibilityRenderer.needsUpdate = true
     }

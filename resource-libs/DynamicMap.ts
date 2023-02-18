@@ -1,33 +1,29 @@
-export default class DynamicMap<T> {
+export default class DynamicMap<K, T> extends Map {
     array: T[] = []
-    map = new Map<string, T>()
 
-    add(key: string, value: T) {
-        if (this.map.has(key))
+    get map(): Map<K, T> {
+        return <Map<K, T>><unknown>this
+    }
+
+    set(key: K, value: T): this {
+        if (this.has(key))
             return
-        this.map.set(key, value)
+        super.set(key, value)
         this.array.push(value)
-    }
-
-    has(key: string): boolean {
-        return this.map.has(key)
-    }
-
-    get(key: string): T | undefined {
-        return this.map.get(key)
+        return this
     }
 
     clear() {
+        super.clear()
         this.array.length = 0
-        this.map.clear()
     }
 
-    delete(key: string) {
-        const found = this.map.get(key)
+    delete(key: K): boolean {
+        const found = this.get(key)
         if (!found)
-            return
-        this.array.splice(this.array.findIndex(v => v === found), 1)
-        this.map.delete(key)
+            return false
+        this.array.splice(this.array.indexOf(found), 1)
+        return super.delete(key)
     }
 
     removeBlock(resources: T[], getIDCallback: Function) {
@@ -39,18 +35,18 @@ export default class DynamicMap<T> {
         for (let i = 0; i < this.array.length; i++) {
             const ID = getIDCallback(this.array[i])
             if (toRemoveMap[ID] === 1) {
-                this.map.delete(ID)
+                super.delete(ID)
                 this.array[i] = undefined
             }
         }
         this.array = this.array.filter(e => e !== undefined)
     }
+
     addBlock(resources: T[], getIDCallback: Function) {
         this.array.push(...resources)
-        for(let i =0; i < resources.length; i++){
+        for (let i = 0; i < resources.length; i++) {
             const current = resources[i]
-            this.map.set(getIDCallback(current), current)
+            super.set(getIDCallback(current), current)
         }
-
     }
 }

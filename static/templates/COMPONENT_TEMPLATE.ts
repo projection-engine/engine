@@ -4,7 +4,6 @@ export default `
  * @global GPUAPI - Create/destroy meshes/textures/framebuffers/cubemaps
  * @global PhysicsAPI - Access to Ammo.JS instance;
  * @global UIAPI - Destry/create/update UI elements; Access to document
- * @global TransformationAPI - Transform/interpolate matrices 
  * @global EntityAPI - Add/remove/update entities
  * @global InputEventsAPI - Bind events to document
  * @global ConsoleAPI - log/warn/error messages to built-in console

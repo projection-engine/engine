@@ -2,7 +2,6 @@ import GPU from "../../GPU";
 import GPUAPI from "../rendering/GPUAPI";
 import PhysicsAPI from "../rendering/PhysicsAPI";
 import UIAPI from "../rendering/UIAPI";
-import TransformationAPI from "../math/TransformationAPI";
 import InputEventsAPI from "./InputEventsAPI";
 import ConsoleAPI from "./ConsoleAPI";
 import Component from "../../instances/components/Component";
@@ -49,26 +48,15 @@ export default class ScriptsAPI {
         ScriptsAPI.#updateEntityScript(scriptID, entity, found)
     }
 
-    static parseScript(data){
-        try {
-            const generator = new Function("GPU, GPUAPI, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity, FileSystemAPI", data)
-            try {
-                return generator(GPU, GPUAPI, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, null, FileSystemAPI)
-            } catch (runtimeError) {
-                console.error(runtimeError)
-            }
-        } catch (syntaxError) {
-            console.error(syntaxError)
-        }
-    }
+
     static #updateEntityScript(scriptID, entity, index) {
         const scriptData = ScriptsAPI.scriptInstances.get(scriptID)
         if (!scriptData)
             return
         try {
-            const generator = new Function("GPU, GPUAPI, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity, FileSystemAPI", scriptData)
+            const generator = new Function("GPU, GPUAPI, PhysicsAPI, UIAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity, FileSystemAPI", scriptData)
             try {
-                const script = generator(GPU, GPUAPI, PhysicsAPI, UIAPI, TransformationAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity, FileSystemAPI)
+                const script = generator(GPU, GPUAPI, PhysicsAPI, UIAPI, EntityAPI, InputEventsAPI, ConsoleAPI, Component, COMPONENTS, CameraAPI, QueryAPI, entity, FileSystemAPI)
                 if (index > -1) {
                     const ref = entity.scripts[index]
                     Object.entries(ref).forEach(([key, value]) => {
@@ -98,3 +86,5 @@ export default class ScriptsAPI {
         }
     }
 }
+
+//

@@ -23,8 +23,6 @@ const excludedKeys = [
     "id"
 ]
 export default class EntityAPI {
-    static #timeout
-
     static getNewEntityInstance(id?: string, isCollection?: boolean): Entity {
         return new Entity(id, isCollection)
     }
@@ -34,6 +32,29 @@ export default class EntityAPI {
     }
 
     static addGroup(entities: Entity[]) {
+        const levelEntity = Engine.loadedLevel
+        if(!levelEntity)
+            return
+        const map = {}
+        const size = entities.length
+        for (let i = 0; i < size; i++){
+            const entity = entities[i];
+            map[entity.id] = entity
+        }
+        for (let i = 0; i < size; i++){
+            const entity = entities[i];
+            if (entity === levelEntity)
+                continue;
+            if (!entity.parentID || entity.parentID === levelEntity.id)
+                entity.addParent(levelEntity)
+            else if (!entity.parent && entity.parentID) {
+                if(Engine.entities.has(entity.parentID))
+                    entity.addParent(Engine.entities.get(entity.parentID))
+                else
+                    entity.addParent(map[entity.parentID])
+            }
+            entity.parentID = undefined
+        }
         Engine.entities.addBlock(entities, e => e.id)
         EntityWorkerAPI.registerBlock(entities)
         ResourceEntityMapper.addBlock(entities)
@@ -43,11 +64,11 @@ export default class EntityAPI {
         if (!entity)
             return
         if (entity && Engine.entities.has(entity.id))
-            return Engine.entities.map.get(entity.id)
+            return Engine.entities.get(entity.id)
         const target = entity ?? EntityAPI.getNewEntityInstance()
         if (!entity.parent && !entity.parentID)
             entity.addParent(Engine.loadedLevel)
-        Engine.entities.add(target.id, target)
+        Engine.entities.set(target.id, target)
         EntityWorkerAPI.registerEntity(target)
         EntityAPI.registerEntityComponents(target)
         return entity
@@ -82,7 +103,7 @@ export default class EntityAPI {
     }
 
     static removeEntity(entityToRemove: string | Entity) {
-        const entity = entityToRemove instanceof Entity ? entityToRemove : Engine.entities.map.get(entityToRemove)
+        const entity = entityToRemove instanceof Entity ? entityToRemove : Engine.entities.get(entityToRemove)
         if (!entity || entity === Engine.loadedLevel)
             return
         entity.removeParent()

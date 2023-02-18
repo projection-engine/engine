@@ -2,6 +2,7 @@ import VertexBuffer from "./VertexBuffer"
 
 import GPU from "../GPU";
 import GPUAPI from "../lib/rendering/GPUAPI";
+import Loop from "../Loop";
 
 export interface MeshProps {
     id?: string,
@@ -26,6 +27,10 @@ export default class Mesh {
     readonly vertexVBO?:VertexBuffer
     readonly normalVBO?:VertexBuffer
     readonly uvVBO?:VertexBuffer
+    #lastUsedElapsed = 0
+    get lastUsedElapsed(){
+        return this.#lastUsedElapsed
+    }
 
     constructor(attributes:MeshProps) {
         const {
@@ -68,7 +73,7 @@ export default class Mesh {
             lastUsed.finish()
     }
 
-    prepareForUse() {
+    bindEssentialResources() {
         const last = GPU.activeMesh
         if (last === this)
             return
@@ -79,9 +84,10 @@ export default class Mesh {
         GPU.context.bindVertexArray(this.VAO)
         GPU.context.bindBuffer(GPU.context.ELEMENT_ARRAY_BUFFER, this.indexVBO)
         this.vertexVBO.enable()
+
     }
 
-    use() {
+    bindAllResources() {
         const last = GPU.activeMesh
         if (last === this)
             return
@@ -95,6 +101,8 @@ export default class Mesh {
             this.normalVBO.enable()
         if (this.uvVBO)
             this.uvVBO.enable()
+
+
     }
 
     finish() {
@@ -112,38 +120,46 @@ export default class Mesh {
 
     simplifiedDraw() {
 
-        this.prepareForUse()
+        this.bindEssentialResources()
         GPU.context.drawElements(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
     draw() {
-        this.use()
+        this.bindAllResources()
         GPU.context.drawElements(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
     drawInstanced(quantity) {
-        this.use()
+        this.bindAllResources()
         GPU.context.drawElementsInstanced(GPU.context.TRIANGLES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0, quantity)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
     drawLineLoop() {
-        this.prepareForUse()
+        this.bindEssentialResources()
         GPU.context.drawElements(GPU.context.LINE_LOOP, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
     drawTriangleStrip() {
-        this.prepareForUse()
+        this.bindEssentialResources()
         GPU.context.drawElements(GPU.context.TRIANGLE_STRIP, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
     drawTriangleFan() {
-        this.prepareForUse()
+        this.bindEssentialResources()
         GPU.context.drawElements(GPU.context.TRIANGLE_FAN, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
     drawLines() {
-        this.prepareForUse()
+        this.bindEssentialResources()
         GPU.context.drawElements(GPU.context.LINES, this.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
+        this.#lastUsedElapsed = Loop.elapsed
     }
 
 }
+//

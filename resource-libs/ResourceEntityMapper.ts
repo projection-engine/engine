@@ -6,17 +6,16 @@ import PhysicsAPI from "../lib/rendering/PhysicsAPI";
 import UIAPI from "../lib/rendering/UIAPI";
 
 export default class ResourceEntityMapper {
-    static queryMap = new Map<string, Entity>()
-    static entities = new DynamicMap<Entity>()
-
-    static meshes = new DynamicMap<Entity>()
-    static sprites = new DynamicMap<Entity>()
-    static lights = new DynamicMap<Entity>()
-    static decals = new DynamicMap<Entity>()
-    static ui = new DynamicMap<Entity>()
-    static lightProbe = new DynamicMap<Entity>()
-    static atmosphere = new DynamicMap<Entity>()
-    static cameras = new DynamicMap<Entity>()
+    static queryMap = new DynamicMap<string, Entity>()
+    static entities = new DynamicMap<string, Entity>()
+    static meshes = new DynamicMap<string, Entity>()
+    static sprites = new DynamicMap<string, Entity>()
+    static lights = new DynamicMap<string, Entity>()
+    static decals = new DynamicMap<string, Entity>()
+    static ui = new DynamicMap<string, Entity>()
+    static lightProbe = new DynamicMap<string, Entity>()
+    static atmosphere = new DynamicMap<string, Entity>()
+    static cameras = new DynamicMap<string, Entity>()
 
     static clear() {
         ResourceEntityMapper.meshes.clear()
@@ -82,25 +81,25 @@ export default class ResourceEntityMapper {
             PhysicsAPI.registerRigidBody(entity)
         }
         if (entity.lightComponent !== undefined)
-            ResourceEntityMapper.lights.add(entity.id, entity)
+            ResourceEntityMapper.lights.set(entity.id, entity)
         if (entity.spriteComponent !== undefined)
-            ResourceEntityMapper.sprites.add(entity.id, entity)
+            ResourceEntityMapper.sprites.set(entity.id, entity)
         if (entity.decalComponent !== undefined)
-            ResourceEntityMapper.decals.add(entity.id, entity)
+            ResourceEntityMapper.decals.set(entity.id, entity)
         if (entity.uiComponent !== undefined)
-            ResourceEntityMapper.ui.add(entity.id, entity)
+            ResourceEntityMapper.ui.set(entity.id, entity)
         if (entity.atmosphereComponent !== undefined)
-            ResourceEntityMapper.atmosphere.add(entity.id, entity)
+            ResourceEntityMapper.atmosphere.set(entity.id, entity)
         if (entity.lightProbeComponent !== undefined)
-            ResourceEntityMapper.lightProbe.add(entity.id, entity)
+            ResourceEntityMapper.lightProbe.set(entity.id, entity)
         if (entity.cameraComponent !== undefined)
-            ResourceEntityMapper.cameras.add(entity.id, entity)
+            ResourceEntityMapper.cameras.set(entity.id, entity)
         if (entity.uiComponent !== undefined) {
-            ResourceEntityMapper.ui.add(entity.id, entity)
+            ResourceEntityMapper.ui.set(entity.id, entity)
             UIAPI.createUIEntity(entity)
         }
         if (entity.meshComponent !== undefined) {
-            ResourceEntityMapper.meshes.add(entity.id, entity)
+            ResourceEntityMapper.meshes.set(entity.id, entity)
             entity.meshComponent.updateComponentReferences()
         }
     }

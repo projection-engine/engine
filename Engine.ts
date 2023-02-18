@@ -19,11 +19,12 @@ import GPUAPI from "./lib/rendering/GPUAPI";
 import EntityAPI from "./lib/utils/EntityAPI";
 import componentConstructor from "../frontend/window-editor/utils/component-constructor";
 import ResourceEntityMapper from "./resource-libs/ResourceEntityMapper";
+import ResourceManager from "./runtime/ResourceManager";
 
 
 export default class Engine {
     static #development = false
-    static #onLevelLoadListeners = new DynamicMap<Function>()
+    static #onLevelLoadListeners = new DynamicMap<string, Function>()
     static UILayouts = new Map()
     static isDev = true
     static #environment: number = ENVIRONMENT.DEV
@@ -37,10 +38,10 @@ export default class Engine {
     }
 
     static addLevelLoaderListener(id: string, callback: Function) {
-        Engine.#onLevelLoadListeners.add(id, callback)
+        Engine.#onLevelLoadListeners.set(id, callback)
     }
 
-    static get entities(): DynamicMap<Entity> {
+    static get entities(): DynamicMap<string, Entity> {
         return ResourceEntityMapper.entities
     }
 
@@ -115,6 +116,7 @@ export default class Engine {
     static start() {
         if (!Loop.isExecuting && Engine.#isReady) {
             Physics.start()
+            ResourceManager.start()
             Loop.start()
         } else
             Engine.#initializationWasTried = true
@@ -122,6 +124,7 @@ export default class Engine {
 
     static stop() {
         Loop.stop()
+        ResourceManager.stop()
         Physics.stop()
     }
 
@@ -148,7 +151,7 @@ export default class Engine {
                 levelEntity.name = "New level"
             levelEntity.parentID = undefined
             Engine.#replaceLevel(levelEntity)
-            const entitiesToPush: {[key:string]: Entity} = {}
+            const allEntities = []
             for (let i = 0; i < entities.length; i++) {
                 try {
                     const entity = EntityAPI.parseEntityObject(entities[i])
@@ -165,24 +168,13 @@ export default class Engine {
                     const file = FileSystemAPI.readAsset(uiID)
                     if (file)
                         Engine.UILayouts.set(uiID, file)
-                    entitiesToPush[entity.id]= entity
+                    allEntities.push(entity)
                 } catch (err) {
                     console.error(err)
                 }
             }
 
-            const entitiesParsed = Object.values(entitiesToPush)
-
-            entitiesParsed.forEach(entity => {
-                if (entity === levelEntity)
-                    return
-                if (!entity.parentID || entity.parentID === levelEntity.id)
-                    entity.addParent(levelEntity)
-                else if (!entity.parent)
-                    entity.addParent(entitiesToPush[entity.parentID])
-                entity.parentID = undefined
-            })
-            EntityAPI.addGroup(entitiesParsed)
+            EntityAPI.addGroup(allEntities)
         } catch (err) {
             console.error(err)
         }

@@ -12,7 +12,7 @@ self.onmessage = (event) => {
             case WORKER_MESSAGES.REGISTER_ENTITY:
                 if(TransformationPass.targets.has(payload.id))
                     TransformationPass.targets.delete(payload.id)
-                TransformationPass.targets.add(payload.id, payload)
+                TransformationPass.targets.set(payload.id, payload)
                 TransformationPass.updateThreadInfo()
                 break
             case WORKER_MESSAGES.REMOVE_ENTITY:

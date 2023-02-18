@@ -131,7 +131,7 @@ export default class SceneRenderer {
         if (size === 0)
             return
         context.uniform1i(uniforms.isDecalPass, 1)
-        StaticMeshes.cube.use()
+        StaticMeshes.cube.bindAllResources()
         for (let i = 0; i < size; i++) {
             const entity = toRender[i]
             if (!entity.active || entity.isCulled)

@@ -2,15 +2,16 @@ import Mesh from "../instances/Mesh";
 import Entity from "../instances/Entity";
 import Material from "../instances/Material";
 
+interface Data { mesh?: Mesh, material?: Material, entities: Entity[], entitiesMap: Map<string, Entity> }
 export default class ResourceMapper {
     key: string
-    dataMap: { mesh?: Mesh, material?: Material, entities: Entity[], entitiesMap: Map<string, Entity> }[] = []
+    dataMap: Data[] = []
 
     constructor(key: string) {
         this.key = key
     }
 
-    removeBlock(entities: Entity[]) {
+    removeBlock(entities: Entity[]):Data[] {
         const mapToRemove = {}
         for (let i = 0; i < entities.length; i++) {
             const meshID = entities[i].meshRef?.id
@@ -20,6 +21,7 @@ export default class ResourceMapper {
                 mapToRemove[meshID] = {}
             mapToRemove[meshID][entities[i].id] = 1
         }
+        const changed = []
         for (let i = 0; i < this.dataMap.length; i++) {
             const current = this.dataMap[i]
             if (!mapToRemove[current[this.key].id])
@@ -35,15 +37,18 @@ export default class ResourceMapper {
                 newArr.push(entity)
             }
             current.entities = newArr
+            changed.push(current)
         }
+        return  changed
     }
 
-    unlink(entityID: string) {
+    unlink(entityID: string):Data[] {
         const found = this.dataMap.filter(m => m.entitiesMap.has(entityID))
         found.forEach(f => {
             f.entities.splice(f.entities.findIndex(entity => entity.id === entityID), 1)
             f.entitiesMap.delete(entityID)
         })
+        return found
     }
 
     delete(resource: string) {
@@ -55,4 +60,5 @@ export default class ResourceMapper {
 
         return oldRef
     }
+
 }

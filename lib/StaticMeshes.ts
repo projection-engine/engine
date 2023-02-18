@@ -37,7 +37,7 @@ export default class StaticMeshes {
         const last = GPU.activeMesh
         if (last && last !== q)
             last.finish()
-        q.prepareForUse()
+        q.bindEssentialResources()
         GPU.context.drawElements(GPU.context.TRIANGLES, q.verticesQuantity, GPU.context.UNSIGNED_INT, 0)
         GPU.activeMesh = q
     }

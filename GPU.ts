@@ -16,6 +16,7 @@ import StaticShaders from "./lib/StaticShaders";
 import StaticMeshes from "./lib/StaticMeshes";
 import StaticFBO from "./lib/StaticFBO";
 import StaticUBOs from "./lib/StaticUBOs";
+import DynamicMap from "./resource-libs/DynamicMap";
 
 export default class GPU {
     static context?: WebGL2RenderingContext
@@ -23,11 +24,11 @@ export default class GPU {
     static activeShader?: Shader
     static activeFramebuffer?: Framebuffer
     static activeMesh?: Mesh
-    static materials = new Map<string, Material>()
-    static shaders = new Map<string, Shader>()
-    static frameBuffers = new Map<string, Framebuffer>()
-    static meshes = new Map<string, Mesh>()
-    static textures = new Map<string, Texture>()
+    static materials = new DynamicMap<string, Material>()
+    static shaders =  new DynamicMap<string, Shader>()
+    static frameBuffers =  new DynamicMap<string, Framebuffer>()
+    static meshes =  new DynamicMap<string, Mesh>()
+    static textures =  new DynamicMap<string, Texture>()
     static BRDF: WebGLTexture
     static internalResolution = {w: 0, h: 0}
     static skylightProbe: LightProbe

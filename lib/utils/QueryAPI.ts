@@ -7,7 +7,7 @@ export default class QueryAPI {
     }
 
     static getEntityByID(id: string): Entity | undefined {
-        return Engine.entities.map.get(id)
+        return Engine.entities.get(id)
     }
 
     static getEntitiesWithNativeComponent(componentKey: string): Entity[] {

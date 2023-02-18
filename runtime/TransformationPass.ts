@@ -10,7 +10,7 @@ const MIN_SCALE = 5e-10
 const EMPTY_QUATERNION = quat.create()
 const cacheDistance = vec3.create()
 export default class TransformationPass {
-    static targets = new DynamicMap<WorkerEntity>()
+    static targets = new DynamicMap<string, WorkerEntity>()
     static controlBuffer?: Float32Array
     static cameraPosition?: Float32Array
     static cameraBuffer?: Float32Array

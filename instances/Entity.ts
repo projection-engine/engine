@@ -30,7 +30,7 @@ export default class Entity extends ComponentResources {
     parentID?: string
     #pickID = new Float32Array(3)
     #pickIndex: number = -1
-    #children = new DynamicMap<Entity>()
+    #children = new DynamicMap<string, Entity>()
 
     get colorIdentifier() {
         return this.#colorIdentifier
@@ -71,7 +71,7 @@ export default class Entity extends ComponentResources {
         const instance = getComponentInstance(KEY)
         if (instance != null) {
             instance.entity = this
-            this.components.add(KEY, instance)
+            this.components.set(KEY, instance)
             this.updateInternalComponentRef(KEY, instance)
             EntityAPI.registerEntityComponents(this)
 
@@ -125,7 +125,7 @@ export default class Entity extends ComponentResources {
         if (!entity || entity === this || entity.parent !== this || this.#children.has(entity.id)) {
             return
         }
-        this.#children.add(entity.id, entity)
+        this.#children.set(entity.id, entity)
     }
 
     removeChild(entity: Entity) {

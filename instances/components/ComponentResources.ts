@@ -17,8 +17,7 @@ import LightProbeComponent from "./LightProbeComponent";
 import DynamicMap from "../../resource-libs/DynamicMap";
 
 export default class ComponentResources extends Movable {
-    #components = new DynamicMap<Component>()
-
+    #components = new DynamicMap<string, Component>()
     #lightComponent?: LightComponent
     #cullingComponent?: CullingComponent
     #rigidBodyComponent?: RigidBodyComponent

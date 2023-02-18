@@ -1,5 +1,4 @@
 import {mat4, quat, vec3} from "gl-matrix";
-import TransformationAPI from "../lib/math/TransformationAPI";
 import copyWithOffset from "../utils/copy-with-offset";
 import CameraNotificationDecoder from "../lib/CameraNotificationDecoder";
 
@@ -20,8 +19,8 @@ class CameraWorker {
     static projectionBuffer: Float32Array
     static skyboxProjectionMatrix: Float32Array
     static invSkyboxProjectionMatrix: Float32Array
-    static currentTranslation = TransformationAPI.vec3.create()
-    static currentRotation = TransformationAPI.quat.create()
+    static currentTranslation = vec3.create()
+    static currentRotation = quat.create()
     static projectionUBOBuffer: Float32Array
     static viewUBOBuffer: Float32Array
 
@@ -60,8 +59,8 @@ class CameraWorker {
         CameraWorker.notificationBuffers = notificationBuffers
         CameraWorker.skyboxProjectionMatrix = skyboxProjectionMatrix
         CameraWorker.invSkyboxProjectionMatrix = invSkyboxProjectionMatrix
-        TransformationAPI.vec3.copy(CameraWorker.currentTranslation, CameraWorker.translationBuffer)
-        TransformationAPI.quat.copy(CameraWorker.currentRotation, CameraWorker.rotationBuffer)
+        vec3.copy(CameraWorker.currentTranslation, CameraWorker.translationBuffer)
+        quat.copy(CameraWorker.currentRotation, CameraWorker.rotationBuffer)
         CameraWorker.viewUBOBuffer = viewUBOBuffer
         CameraWorker.projectionUBOBuffer = projectionUBOBuffer
         CameraNotificationDecoder.initialize(notificationBuffers)
