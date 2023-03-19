@@ -23,6 +23,7 @@ export default class Movable {
     _rotationEuler = <Float32Array>ArrayBufferAPI.allocateVector(3, Movable.ROTATION_QUATERNION, false, true, false)
     _rotationType = <Float32Array>ArrayBufferAPI.allocateVector(1, 0, false, true, false)
 
+
     pivotPoint = <Float32Array>ArrayBufferAPI.allocateVector(3, 0, false, true, false)
     matrix = <Float32Array>ArrayBufferAPI.allocateMatrix(4, true)
     baseTransformationMatrix = <Float32Array>ArrayBufferAPI.allocateMatrix(4, true)

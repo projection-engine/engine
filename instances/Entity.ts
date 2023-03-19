@@ -6,6 +6,7 @@ import ComponentResources from "./components/ComponentResources";
 import EntityWorkerAPI from "../lib/utils/EntityWorkerAPI";
 import QueryAPI from "../lib/utils/QueryAPI";
 import DynamicMap from "../resource-libs/DynamicMap";
+import Movable from "./components/Movable";
 
 
 export default class Entity extends ComponentResources {
@@ -46,7 +47,7 @@ export default class Entity extends ComponentResources {
         super();
         this.#id = id ?? this.#id
         this.#isCollection = isCollection ?? false
-
+        this.rotationType[0] = Movable.ROTATION_QUATERNION
     }
 
     get allComponents() {

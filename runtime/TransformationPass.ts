@@ -143,8 +143,6 @@ export default class TransformationPass {
             }
         }
         mat4.fromRotationTranslationScaleOrigin(entity.matrix, entity.rotationQuaternionFinal, entity.translation, scaling, entity.pivotPoint)
-        // mat4.multiply(entity.matrix, entity.matrix, )
-
         mat4.multiply(entity.matrix, entity.matrix, entity.baseTransformationMatrix)
 
         if (entity.parentMatrix)
